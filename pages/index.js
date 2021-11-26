@@ -22,6 +22,7 @@ export default function Index() {
 
   return (
     <>
+      <div className="dark:bg-black" />
     </>
   )
 }

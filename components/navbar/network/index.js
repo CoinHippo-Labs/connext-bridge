@@ -56,7 +56,7 @@ export default function DropdownNetwork({ chain_id }) {
           chains_data ?
             <BsPatchExclamationFill size={20} />
             :
-            <Loader type="ThreeDots" color={theme === 'dark' ? '#60A5FA' : '#3B82F6'} width="16" height="16" />
+            <Loader type="Puff" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
         }
       </button>
       <div
