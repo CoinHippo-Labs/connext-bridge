@@ -1,0 +1,52 @@
+{
+  "name": "connext-network-xpollinate",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "start": "next start",
+    "build": "next build && next export",
+    "deploy": "aws s3 sync out/ s3://xpollinate.connext.network --acl public-read",
+    "dev-testnet": "NODE_ENV=test next dev",
+    "build-testnet": "NODE_ENV=test next build && next export",
+    "deploy-testnet": "aws s3 sync out/ s3://testnet.xpollinate.connext.network --acl public-read"
+  },
+  "dependencies": {
+    "@connext/nxtp-sdk": "^0.0.90",
+    "ethers": "^5.5.1",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.1",
+    "next": "^11.0.0",
+    "nprogress": "^0.2.0",
+    "numeral": "^2.0.6",
+    "postcss-flexbugs-fixes": "^5.0.2",
+    "postcss-import": "^14.0.2",
+    "postcss-preset-env": "^6.7.0",
+    "prop-types": "^15.7.2",
+    "react": "17.0.2",
+    "react-copy-to-clipboard": "^5.0.3",
+    "react-dom": "17.0.2",
+    "react-hook-form": "^7.12.2",
+    "react-icons": "^4.2.0",
+    "react-image": "^4.0.3",
+    "react-json-view": "^1.21.3",
+    "react-loader-spinner": "^4.0.0",
+    "react-popper": "^2.2.5",
+    "react-redux": "^7.2.4",
+    "react-reveal": "^1.2.2",
+    "react-stack-grid": "^0.7.1",
+    "react-switch": "^6.0.0",
+    "react-table": "^7.7.0",
+    "redux": "^4.1.0",
+    "redux-devtools-extension": "^2.13.9",
+    "web3modal": "^1.9.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.3.3",
+    "@tailwindcss/typography": "^0.4.1",
+    "autoprefixer": "^10.3.1",
+    "postcss": "^8.3.6",
+    "postcss-color-function": "^4.1.0",
+    "tailwindcss": "^2.2.7"
+  }
+}

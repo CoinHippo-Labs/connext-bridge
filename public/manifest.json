@@ -1,0 +1,33 @@
+{
+  "short_name": "xPollinate",
+  "name": "xPollinate",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#050707",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/icons/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/favicon-32x32.png",
+      "sizes": "32x32 24x24",
+      "type": "image/png",
+      "density": "0.75"
+    },
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 48x48",
+      "type": "image/x-icon",
+      "density": "1.0"
+    },
+    {
+      "src": "/icons/android-chrome-72x72.png",
+      "type": "image/png",
+      "sizes": "72x72",
+      "density": "4.0"
+    }
+  ] 
+}

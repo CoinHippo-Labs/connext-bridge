@@ -1,0 +1,122 @@
+[data-popper-placement] {
+  @apply z-50;
+}
+.dropdown {
+  @apply hidden z-50;
+  .dropdown-title {
+    @apply py-2 px-3 text-sm font-semibold font-sans uppercase;
+  }
+  .dropdown-title-trending {
+    @apply py-1 px-2.5;
+  }
+  .dropdown-content {
+    @apply rounded-md shadow-lg;
+  }
+  &.open {
+    @apply block;
+    .dropdown-content {
+      animation-iteration-count: 1;
+      animation-timing-function: cubic-bezier(0.4, 0, 1, 1);
+      animation-duration: 0.2s;
+      &.bottom,
+      &.bottom-start,
+      &.bottom-center,
+      &.bottom-end {
+        @apply mt-1;
+        animation-name: fromBottom;
+      }
+      &.left,
+      &.left-start,
+      &.left-center,
+      &.left-end {
+        @apply mr-1;
+        animation-name: fromLeft;
+      }
+      &.right,
+      &.right-start,
+      &.right-center,
+      &.right-end {
+        @apply ml-1;
+        animation-name: fromRight;
+      }
+    }
+  }
+}
+
+@keyframes fromBottom {
+  0% {
+    pointer-events: none;
+    visibility: hidden;
+    opacity: 0;
+    transform: translate(0, 10px);
+  }
+  100% {
+    pointer-events: auto;
+    visibility: visible;
+    opacity: 1;
+    transform: translate(0px, 0px);
+  }
+}
+
+@keyframes fromRight {
+  0% {
+    pointer-events: none;
+    visibility: hidden;
+    opacity: 0;
+    transform: translate(-10px, 0px);
+  }
+  100% {
+    pointer-events: auto;
+    visibility: visible;
+    opacity: 1;
+    transform: translate(0px, 0px);
+  }
+}
+@keyframes fromLeft {
+  0% {
+    pointer-events: none;
+    visibility: hidden;
+    opacity: 0;
+    transform: translate(10px, 0px);
+  }
+  100% {
+    pointer-events: auto;
+    visibility: visible;
+    opacity: 1;
+    transform: translate(0px, 0px);
+  }
+}
+
+[data-background="light"] {
+  .dropdown {
+      .dropdown-title {
+        @apply bg-white text-gray-900;
+      }
+    .dropdown-content {
+      @apply bg-white;
+      .dropdown-item {
+        @apply bg-white text-gray-900;
+        &:hover {
+          @apply bg-gray-50;
+        }
+      }
+    }
+  }
+}
+
+[data-background="dark"] {
+  .dropdown {
+    .dropdown-title {
+      @apply bg-gray-900 text-white;
+    }
+    .dropdown-content {
+      @apply bg-gray-900 text-white;
+      .dropdown-item {
+        @apply bg-gray-900 text-white;
+        &:hover {
+          @apply bg-gray-800 text-white;
+        }
+      }
+    }
+  }
+}

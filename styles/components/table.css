@@ -1,0 +1,102 @@
+.table {
+  @apply block lg:inline-table overflow-x-scroll;
+  &.inline-table {
+    display: inline-table;
+  }
+  @apply w-full table-auto;
+  &.no-border thead tr th,
+  &.no-border tbody tr td {
+    @apply border-0 border-none;
+  }
+  thead tr th {
+    @apply px-3 py-2 border-b text-xs leading-4 font-medium uppercase tracking-wider;
+  }
+  tbody tr td {
+    @apply px-3 py-2 border-b whitespace-nowrap align-top;
+  }
+  &.table-sm {
+    thead tr th {
+      @apply px-1 py-0;
+    }
+    tbody tr td {
+      @apply px-1 py-0;
+    }
+  }
+  &.table-lg {
+    thead tr th {
+      @apply px-6 py-3;
+    }
+    tbody tr td {
+      @apply px-6 py-3;
+    }
+  }
+  .nopadding-column {
+    @apply px-0;
+  }
+  .nopadding-right-column {
+    @apply pr-0;
+  }
+}
+
+.table {
+  @apply text-left;
+  thead tr th,
+  tbody tr td {
+    @apply text-left;
+  }
+  thead tr th {
+    position: sticky;
+    position: -webkit-sticky;
+    top: 0;
+  }
+}
+
+[data-background="light"] {
+  .table {
+    thead tr th {
+      @apply border-gray-200;
+      @apply text-gray-500;
+      background: color(theme('colors.gray.50') tint(3%));
+      border-color: color(theme('colors.gray.50') tint(3%));
+    }
+    tbody tr td {
+      border-color: color(#fff shade(6%));
+    }
+    &.striped {
+      tbody tr:nth-child(odd) td {
+        @apply bg-white;
+      }
+      tbody tr:nth-child(even) td {
+        background: color(#fff shade(3%));
+      }
+    }
+  }
+}
+
+[data-background="dark"] {
+  .table {
+    thead tr th {
+      border-color: color(theme('colors.gray.900') tint(10%));
+      @apply text-gray-500;
+    }
+    tbody tr td {
+      border-color: color(theme('colors.gray.900') tint(10%));
+    }
+    &.striped {
+      thead tr th {
+        /*background: color(theme('colors.gray.900') tint(6%));*/
+        /*border-color: color(theme('colors.gray.900') tint(6%));*/
+        background: color(theme('colors.gray.900') tint(3%));
+        border-color: color(theme('colors.gray.900') tint(3%));
+      }
+      tbody tr:nth-child(odd) td {
+        background: color(theme('colors.gray.900') tint(6%));
+        border-color: color(theme('colors.gray.900') tint(6%));
+      }
+      tbody tr:nth-child(even) td {
+        background: color(theme('colors.gray.900') tint(3%));
+        border-color: color(theme('colors.gray.900') tint(3%));
+      }
+    }
+  }
+}

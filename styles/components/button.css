@@ -1,0 +1,68 @@
+a,
+input[type="submit"],
+button {
+  @apply outline-none cursor-pointer;
+}
+a:hover,
+a:active,
+a:focus,
+input[type="submit"]:hover,
+input[type="submit"]:active,
+input[type="submit"]:focus,
+button:hover,
+button:active,
+button:focus {
+  @apply outline-none;
+}
+
+.btn {
+  @apply font-semibold uppercase;
+  &:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+  &.btn-sm {
+    @apply text-xs px-2 py-1;
+  }
+  &.btn-default {
+    @apply text-xs px-4 py-2;
+  }
+  &.btn-lg {
+    @apply text-base px-6 py-3;
+  }
+  &.btn-rounded {
+    @apply rounded-lg;
+  }
+  &.btn-outlined {
+    @apply border;
+  }
+  &.btn-raised {
+    @apply shadow;
+  }
+  &.btn-icon {
+    @apply flex flex-row items-center justify-center;
+  }
+  &.btn-block {
+    @apply w-full;
+  }
+  &.btn-circle {
+    @apply text-xs h-8 w-8 rounded-full inline-flex items-center justify-center;
+    @apply p-0 !important;
+    &.btn-circle-sm {
+      @apply text-xs h-6 w-6 inline-flex items-center justify-center;
+    }
+    &.btn-circle-lg {
+      @apply text-base h-12 w-12 inline-flex items-center justify-center;
+    }
+  }
+}
+
+.btn-group {
+  > .btn {
+    &:first-child {
+      @apply rounded-l border-r-0;
+    }
+    &:last-child {
+      @apply rounded-r border-l-0;
+    }
+  }
+}

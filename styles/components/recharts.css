@@ -1,0 +1,13 @@
+/*recharts*/
+
+[data-background="light"] {
+  .recharts-responsive-container {
+    @apply text-gray-900;
+  }
+}
+
+[data-background="dark"] {
+  .recharts-responsive-container {
+    @apply text-white;
+  }
+}

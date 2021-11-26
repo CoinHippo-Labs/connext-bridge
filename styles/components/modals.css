@@ -1,0 +1,86 @@
+.modal-backdrop {
+  @apply transform ease-in-out duration-150 opacity-0 fixed inset-0 h-full w-full overflow-hidden bg-black pointer-events-none invisible cursor-none z-10;
+  &.fade-in {
+    @apply pointer-events-auto visible cursor-pointer opacity-25 z-10;
+    animation-name: fadeInModalBackdrop;
+    animation-fill-mode: forwards;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+    animation-duration: 0.15s;
+  }
+}
+
+.modal {
+  @apply transform flex justify-center items-center overflow-hidden fixed inset-0 outline-none z-20;
+  &.show {
+    animation-name: modalShow;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+    animation-duration: 0.3s;
+  }
+  .modal-header {
+    @apply flex items-center justify-between p-4 border-b border-solid rounded-t;
+    .modal-close {
+      @apply ml-auto;
+    }
+  }
+  .modal-content {
+    @apply border-0 rounded-lg shadow-lg relative flex flex-col w-full outline-none;
+  }
+  .modal-footer {
+    @apply flex items-center justify-end p-4 border-t border-solid rounded-b;
+  }
+}
+
+@keyframes fadeInModalBackdrop {
+  0% {
+    visibility: hidden;
+    opacity: 0;
+    transform: translate(0px, 0px);
+  }
+  100% {
+    visibility: visible;
+    opacity: 0.5;
+    transform: translate(0px, 0px);
+  }
+}
+@keyframes modalShow {
+  0% {
+    visibility: hidden;
+    opacity: 0;
+    transform: translate(0, -10px);
+  }
+  100% {
+    visibility: visible;
+    opacity: 1;
+    transform: translate(0px, 0px);
+  }
+}
+
+[data-background="light"] {
+  &.modal {
+    .modal-header {
+      @apply bg-white text-gray-900 border-gray-200;
+    }
+    .modal-footer {
+      @apply bg-white text-gray-900 border-gray-200;
+    }
+    .modal-content {
+      @apply bg-white text-gray-900;
+    }
+  }
+}
+
+[data-background="dark"] {
+  &.modal {
+    .modal-header {
+      @apply bg-gray-800 text-white border-gray-700;
+    }
+    .modal-footer {
+      @apply bg-gray-800 text-white border-gray-700;
+    }
+    .modal-content {
+      @apply bg-gray-800 text-white;
+    }
+  }
+}
