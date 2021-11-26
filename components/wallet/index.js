@@ -11,7 +11,8 @@ const providerOptions = {}
 
 export default function Wallet({ chainIdToConnect, hidden, buttonConnectTitle, buttonConnectClassName, buttonDisconnectTitle, buttonDisconnectClassName, onChangeNetwork }) {
   const dispatch = useDispatch()
-  const { wallet } = useSelector(state => ({ wallet: state.wallet }), shallowEqual)
+  const { chains, wallet } = useSelector(state => ({ chains: state.chains, wallet: state.wallet }), shallowEqual)
+  const { chains_data } = { ...chains }
   const { wallet_data } = { ...wallet }
   const { provider, web3_provider, chain_id } = { ...wallet_data }
 
@@ -74,7 +75,7 @@ export default function Wallet({ chainIdToConnect, hidden, buttonConnectTitle, b
           try {
             await provider.request({
               method: 'wallet_addEthereumChain',
-              params: networks.find(_network => _network.network_id === chainIdToConnect)?.provider_params,
+              params: chains_data?.find(_chain => _chain.chain_id === chainIdToConnect)?.provider_params,
             })
           } catch (error) {
             console.log(error)
