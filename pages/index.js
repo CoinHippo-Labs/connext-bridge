@@ -2,6 +2,7 @@ import { useRouter } from 'next/router'
 
 import SectionTitle from '../components/section-title'
 import Widget from '../components/widget'
+import CrossChainBridge from '../components/crosschain-bridge'
 
 import { isMatchRoute } from '../lib/routes'
 
@@ -22,6 +23,7 @@ export default function Index() {
 
   return (
     <>
+      <CrossChainBridge />
       <div className="dark:bg-black mr-2" />
     </>
   )

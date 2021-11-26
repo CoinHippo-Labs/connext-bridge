@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
@@ -18,13 +18,7 @@ export default function ChainsStatus() {
   const { wallet_data } = { ...wallet }
   const { address } = { ...wallet_data }
 
-  const [pageVisible, setPageVisible] = useState(true)
-
-  const handleVisibilityChange = visible => setPageVisible(visible)
-
   useEffect(() => {
-    const controller = new AbortController()
-
     const getDataSync = async _chains => {
       if (_chains) {
         let chainsData
@@ -55,7 +49,6 @@ export default function ChainsStatus() {
 
     const interval = setInterval(() => getData(), 0.5 * 60 * 1000)
     return () => {
-      controller?.abort()
       clearInterval(interval)
     }
   }, [chains_data])

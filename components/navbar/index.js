@@ -11,10 +11,10 @@ import Network from './network'
 import Wallet from '../wallet'
 import Copy from '../copy'
 
-import { chains } from '../../lib/api/bridge_config'
+import { chains, assets } from '../../lib/api/bridge_config'
 import { ellipseAddress } from '../../lib/utils'
 
-import { THEME, CHAINS_DATA } from '../../reducers/types'
+import { THEME, CHAINS_DATA, ASSETS_DATA } from '../../reducers/types'
 
 export default function Navbar() {
   const dispatch = useDispatch()
@@ -29,6 +29,19 @@ export default function Navbar() {
 
       dispatch({
         type: CHAINS_DATA,
+        value: response || [],
+      })
+    }
+
+    getData()
+  }, [])
+
+  useEffect(() => {
+    const getData = async () => {
+      const response = await assets()
+
+      dispatch({
+        type: ASSETS_DATA,
         value: response || [],
       })
     }
