@@ -22,7 +22,7 @@ export default function Index() {
 
   return (
     <>
-      <div className="dark:bg-black" />
+      <div className="dark:bg-black mr-2" />
     </>
   )
 }

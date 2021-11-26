@@ -3,6 +3,7 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import Web3Modal from 'web3modal'
 import { providers, utils } from 'ethers'
+import { Img } from 'react-image'
 
 import { networks } from '../../lib/menus'
 import { WALLET_DATA, WALLET_RESET } from '../../reducers/types'
@@ -176,7 +177,7 @@ export default function Wallet({ chainIdToConnect, hidden, buttonConnectTitle, b
           {buttonConnectTitle || (
             <div className="flex items-center space-x-2">
               <span>Connect</span>
-              <img
+              <Img
                 src="/logos/wallets/metamask.png"
                 alt=""
                 className="w-4 h-4 -mr-1 mb-0.5"

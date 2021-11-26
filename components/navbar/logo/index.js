@@ -1,11 +1,13 @@
 import Link from 'next/link'
 
+import { Img } from 'react-image'
+
 export default function Logo() {
   return (
     <div className="block logo ml-2.5 mr-1 sm:mx-3">
       <Link href="/">
         <a className="w-full flex items-center sm:space-x-2.5 lg:space-x-2">
-          <img
+          <Img
             src="/logos/logo.png"
             alt=""
             className="w-8 xl:w-10 h-8 xl:h-10 rounded-full"

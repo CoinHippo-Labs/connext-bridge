@@ -1,5 +1,7 @@
 import { useSelector, shallowEqual } from 'react-redux'
 
+import { Img } from 'react-image'
+
 import Wallet from '../../wallet'
 
 export default function Networks({ handleDropdownClick }) {
@@ -17,7 +19,7 @@ export default function Networks({ handleDropdownClick }) {
               title="Not available yet"
               className="dropdown-item w-1/2 cursor-not-allowed flex items-center justify-start space-x-1.5 p-2"
             >
-              <img
+              <Img
                 src={item.image}
                 alt=""
                 className="w-6 h-6 rounded-full"
@@ -30,7 +32,7 @@ export default function Networks({ handleDropdownClick }) {
               chainIdToConnect={item.chain_id}
               onChangeNetwork={handleDropdownClick}
               buttonDisconnectTitle={<>
-                <img
+                <Img
                   src={item.image}
                   alt=""
                   className="w-6 h-6 rounded-full"
