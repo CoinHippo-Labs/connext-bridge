@@ -57,7 +57,7 @@ export default function DropdownAsset({ assetId, onSelect, fromChainId, toChainI
               size="small"
               type="number"
               placeholder="0.00"
-              value={amount || ''}
+              value={typeof amount === 'number' && amount >= 0 ? amount : ''}
               onChange={e => {
                 if (amountOnChange) {
                   amountOnChange(e.target.value)
