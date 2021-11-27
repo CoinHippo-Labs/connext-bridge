@@ -106,15 +106,28 @@ export default function CrosschainBridge() {
   }, [chains_data, signer])
 
   useEffect(() => {
-    const interval = setInterval(() => setRefreshEstimatedFeesSecond(refreshEstimatedFeesSecond - 1 || refresh_estimated_fees_sec), 1000)
+    const interval = setInterval(() => {
+      if (refreshEstimatedFeesSecond - 1 > -1) {
+        setRefreshEstimatedFeesSecond(refreshEstimatedFeesSecond - 1)
+      }
+    }, 1000)
     return () => clearInterval(interval)
   }, [refreshEstimatedFeesSecond])
 
   useEffect(() => {
-    if (refreshEstimatedFeesSecond === refresh_estimated_fees_sec) {
+    if (refreshEstimatedFeesSecond === 0) {
       estimateFees()
     }
   }, [refreshEstimatedFeesSecond])
+
+  useEffect(() => {
+    if (typeof gasFeeEstimating === 'boolean' && !gasFeeEstimating &&
+      typeof relayerFeeEstimating === 'boolean' && !relayerFeeEstimating &&
+      typeof routerFeeEstimating === 'boolean' && !routerFeeEstimating
+    ) {
+      setRefreshEstimatedFeesSecond(refresh_estimated_fees_sec)
+    }
+  }, [gasFeeEstimating, relayerFeeEstimating, routerFeeEstimating])
 
   useEffect(() => {
     estimateFees()
