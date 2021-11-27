@@ -10,7 +10,7 @@ export default function data(
     case CHAINS_DATA:
       return {
         ...state,
-        [`${CHAINS_DATA}`]: action.value
+        [`${CHAINS_DATA}`]: action.value,
       }
     default:
       return state

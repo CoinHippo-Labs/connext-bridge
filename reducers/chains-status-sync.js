@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 import { CHAINS_STATUS_SYNC_DATA } from './types'
 
 export default function data(
@@ -10,7 +12,7 @@ export default function data(
     case CHAINS_STATUS_SYNC_DATA:
       return {
         ...state,
-        [`${CHAINS_STATUS_SYNC_DATA}`]: _.uniqBy(_.concat(action.value || [], state[`${CHAINS_STATUS_SYNC_DATA}`] || []), 'id')
+        [`${CHAINS_STATUS_SYNC_DATA}`]: _.uniqBy(_.concat(action.value || [], state[`${CHAINS_STATUS_SYNC_DATA}`] || []), 'id'),
       }
     default:
       return state

@@ -51,7 +51,7 @@ export default function DropdownNetwork({ chain_id, onSelect }) {
         className="h-12 flex items-center justify-center"
       >
         {chain ?
-          <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center space-x-1.5 py-1.5 px-3">
+          <div className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-2xl flex items-center space-x-1.5 py-1.5 px-3">
             <Img
               src={chain.image}
               alt=""
@@ -62,7 +62,7 @@ export default function DropdownNetwork({ chain_id, onSelect }) {
           </div>
           :
           chains_data ?
-            <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl uppercase text-gray-500 dark:text-gray-200 py-1.5 px-3">Select chain</div>
+            <div className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-2xl uppercase text-gray-500 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-200 font-medium py-1.5 px-3">Select chain</div>
             :
             <Loader type="Puff" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="24" height="24" />
         }
