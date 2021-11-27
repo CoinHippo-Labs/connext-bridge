@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 
+import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
 import { BsPatchExclamationFill } from 'react-icons/bs'
 
 import Networks from './networks'
 
-export default function DropdownNetwork({ chain_id }) {
+export default function DropdownNetwork({ chain_id, onSelect }) {
   const { chains, preferences } = useSelector(state => ({ chains: state.chains, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
   const { theme } = { ...preferences }
@@ -34,37 +35,44 @@ export default function DropdownNetwork({ chain_id }) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [hidden, buttonRef, dropdownRef])
 
-  const handleDropdownClick = () => setHidden(!hidden)
+  const handleDropdownClick = _chain_id => {
+    if (onSelect && typeof _chain_id === 'number') {
+      onSelect(_chain_id)
+    }
+
+    setHidden(!hidden)
+  }
 
   return (
     <div className="relative">
       <button
         ref={buttonRef}
         onClick={handleDropdownClick}
-        className="w-10 sm:w-12 h-16 flex items-center justify-center"
+        className="h-12 flex items-center justify-center"
       >
         {chain ?
-          chain.image ?
-            <img
+          <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center space-x-1.5 py-1.5 px-3">
+            <Img
               src={chain.image}
               alt=""
-              className="w-6 h-6 rounded-full"
+              className="w-5 h-5 rounded-full"
             />
-            :
-            <span className="font-bold">{chain.short_name}</span>
+            <span className="sm:hidden font-semibold">{chain.title}</span>
+            <span className="hidden sm:block font-semibold">{chain.short_name}</span>
+          </div>
           :
           chains_data ?
-            <BsPatchExclamationFill size={20} />
+            <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl uppercase text-gray-500 dark:text-gray-200 py-1.5 px-3">Select chain</div>
             :
             <Loader type="Puff" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="24" height="24" />
         }
       </button>
       <div
         ref={dropdownRef} 
-        className={`dropdown ${hidden ? '' : 'open'} absolute top-0 right-3 mt-12`}
+        className={`dropdown ${hidden ? '' : 'open'} absolute top-0 left-0 mt-10`}
       >
-        <div className="dropdown-content w-64 bottom-start">
-          <Networks handleDropdownClick={handleDropdownClick} />
+        <div className="dropdown-content inside w-64 bottom-start">
+          <Networks handleDropdownClick={_chain_id => handleDropdownClick(_chain_id)} />
         </div>
       </div>
     </div>

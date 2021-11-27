@@ -10,9 +10,9 @@ export default function Networks({ handleDropdownClick }) {
 
   return (
     <>
-      <div className="dropdown-title">Select Network</div>
-      <div className="flex flex-wrap pb-1">
-        {chains_data?.filter(item => !item.menu_hidden).map((item, i) => (
+      {/*<div className="dropdown-title">Select Chain</div>*/}
+      <div className="flex flex-wrap py-1">
+        {chains_data?.filter(item => !item.menu_hidden && !item.disabled).map((item, i) => (
           item.disabled ?
             <div
               key={i}
@@ -27,20 +27,18 @@ export default function Networks({ handleDropdownClick }) {
               <span className="text-xs">{item.title}</span>
             </div>
             :
-            <Wallet
+            <div
               key={i}
-              chainIdToConnect={item.chain_id}
-              onChangeNetwork={handleDropdownClick}
-              buttonDisconnectTitle={<>
-                <Img
-                  src={item.image}
-                  alt=""
-                  className="w-6 h-6 rounded-full"
-                />
-                <span className="text-xs text-left">{item.title}</span>
-              </>}
-              buttonDisconnectClassName="dropdown-item w-1/2 flex items-center justify-start space-x-1.5 p-2"
-            />
+              onClick={() => handleDropdownClick(item.chain_id)}
+              className="dropdown-item w-1/2 cursor-pointer flex items-center justify-start space-x-1.5 p-2"
+            >
+              <Img
+                src={item.image}
+                alt=""
+                className="w-6 h-6 rounded-full"
+              />
+              <span className="text-xs">{item.title}</span>
+            </div>
         ))}
       </div>
     </>
