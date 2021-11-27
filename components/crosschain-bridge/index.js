@@ -20,6 +20,8 @@ import { smallNumber, numberFormat } from '../../lib/utils'
 
 import { CHAINS_STATUS_DATA, CHAINS_STATUS_SYNC_DATA, BALANCES_DATA } from '../../reducers/types'
 
+const refresh_estimated_fees_sec = Number(process.env.NEXT_PUBLIC_REFRESH_ESTIMATED_FEES_SEC)
+
 export default function CrosschainBridge() {
   const dispatch = useDispatch()
   const { chains, assets, chains_status, balances, wallet, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, balances: state.balances, wallet: state.wallet, preferences: state.preferences }), shallowEqual)
@@ -43,6 +45,7 @@ export default function CrosschainBridge() {
   const [gasFeeEstimating, setGasFeeEstimating] = useState(null)
   const [relayerFeeEstimating, setRelayerFeeEstimating] = useState(null)
   const [routerFeeEstimating, setRouterFeeEstimating] = useState(null)
+  const [refreshEstimatedFeesSecond, setRefreshEstimatedFeesSecond] = useState(refresh_estimated_fees_sec)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -103,16 +106,18 @@ export default function CrosschainBridge() {
   }, [chains_data, signer])
 
   useEffect(() => {
-    if (fromChainId && toChainId && assetId) {
-      estimateGasFee()
-      estimateRelayerFee()
-      estimateRouterFee()
+    const interval = setInterval(() => setRefreshEstimatedFeesSecond(refreshEstimatedFeesSecond - 1 || refresh_estimated_fees_sec), 1000)
+    return () => clearInterval(interval)
+  }, [refreshEstimatedFeesSecond])
+
+  useEffect(() => {
+    if (refreshEstimatedFeesSecond === refresh_estimated_fees_sec) {
+      estimateFees()
     }
-    else {
-      setGasFee(null)
-      setRelayerFee(null)
-      setRouterFee(null)
-    }
+  }, [refreshEstimatedFeesSecond])
+
+  useEffect(() => {
+    estimateFees()
   }, [fromChainId, toChainId, assetId])
 
   const getChainBalances = async _chain_id => {
@@ -131,6 +136,19 @@ export default function CrosschainBridge() {
           value: { [`${_chain_id}`]: [] },
         })
       }
+    }
+  }
+
+  const estimateFees = () => {
+    if (fromChainId && toChainId && assetId) {
+      estimateGasFee()
+      estimateRelayerFee()
+      estimateRouterFee()
+    }
+    else {
+      setGasFee(null)
+      setRelayerFee(null)
+      setRouterFee(null)
     }
   }
 
@@ -223,8 +241,10 @@ export default function CrosschainBridge() {
   let toBalance = balances_data?.[toChainId]?.find(_contract => _contract?.contract_address === asset?.contracts?.find(__contract => __contract?.chain_id === toChainId)?.contract_address)
   toBalance = toBalance || balances_data?.[toChainId]?.find(_contract => asset?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase() && toChain?.provider_params?.[0]?.nativeCurrency?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase())
 
-  const showInput = asset && !((fromChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(fromChainId)) ||
+  const support = asset && !((fromChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(fromChainId)) ||
     (toChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(toChainId)))
+  const feesEstimated = (typeof gasFee === 'number' || typeof gasFee === 'boolean') && (typeof relayerFee === 'number' || typeof relayerFee === 'boolean') && (typeof routerFee === 'number' || typeof routerFee === 'boolean')
+  const estimatedFees = feesEstimated && ((gasFee || 0) + (relayerFee || 0) + (routerFee || 0))
 
   return (
     <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4 mt-12">
@@ -342,7 +362,7 @@ export default function CrosschainBridge() {
               amountOnChange={_amount => setAmount(_amount && !isNaN(_amount) ? Number(_amount) : _amount)}
             />
           </div>
-          {address && showInput && (
+          {address && support && (
             <>
               <div className="order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-4">
                 {(gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ||
@@ -357,14 +377,14 @@ export default function CrosschainBridge() {
                         <Loader type="BallTriangle" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="14" height="14" />
                       </>
                       :
-                      (typeof gasFee === 'number' || typeof gasFee === 'boolean') && (typeof relayerFee === 'number' || typeof relayerFee === 'boolean') && (typeof routerFee === 'number' || typeof routerFee === 'boolean') ?
+                      feesEstimated ?
                         <Popover
                           placement="bottom"
                           title={<div className="flex items-center space-x-2">
                             <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-2xs font-semibold">Estimated Fees:</span>
                             <span className="text-gray-800 dark:text-gray-200 text-2xs space-x-1">
                               ~
-                              <span className="font-mono">{typeof gasFee === 'boolean' && typeof relayerFee === 'boolean' && typeof routerFee === 'boolean' ? 'N/A' : numberFormat((gasFee || 0) + (relayerFee || 0) + (routerFee || 0), '0,0.00000000')}</span>
+                              <span className="font-mono">{typeof estimatedFees === 'number' ? numberFormat(estimatedFees, '0,0.00000000') : 'N/A'}</span>
                               <span className="font-semibold">{asset?.symbol}</span>
                             </span>
                           </div>}
@@ -397,8 +417,9 @@ export default function CrosschainBridge() {
                         >
                           <span className="text-gray-600 dark:text-gray-400 text-2xs space-x-1">
                             ~
-                            <span className="font-mono">{typeof gasFee === 'boolean' && typeof relayerFee === 'boolean' && typeof routerFee === 'boolean' ? 'N/A' : numberFormat((gasFee || 0) + (relayerFee || 0) + (routerFee || 0), '0,0.00000000')}</span>
+                            <span className="font-mono">{typeof estimatedFees === 'number' ? numberFormat(estimatedFees, '0,0.00000000') : 'N/A'}</span>
                             <span className="font-semibold">{asset?.symbol}</span>
+                            <span className="font-mono lowercase text-gray-400 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
                           </span>
                         </Popover>
                         :
@@ -425,6 +446,9 @@ export default function CrosschainBridge() {
             </>
           )}
         </div>
+        {balances_data?.[fromChainId] && feesEstimated && typeof estimatedFees === 'number' && (
+          <></>
+        )}
       </div>
     </div>
   )
