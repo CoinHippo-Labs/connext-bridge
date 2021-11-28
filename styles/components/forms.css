@@ -1,0 +1,85 @@
+.form-element {
+  &:not(.form-element-inline) {
+    @apply flex flex-col mb-4;
+    .form-label {
+      @apply mb-2;
+    }
+    .form-hint,
+    .form-error,
+    .form-success {
+      @apply mt-2;
+    }
+  }
+  &.form-element-inline {
+    @apply flex flex-row items-center justify-start;
+    .form-label {
+      @apply whitespace-nowrap;
+    }
+    > * {
+      @apply mr-2;
+    }
+  }
+  .form-input,
+  .form-textarea {
+    @apply text-xs block w-full;
+    &.form-input-valid {
+      @apply border border-green-500;
+    }
+    &.form-input-invalid {
+      @apply border border-red-500;
+    }
+    @apply bg-gray-50 border-gray-50;
+    [data-background="dark"] & {
+      @apply bg-gray-800 border-gray-800 text-white;
+      &::placeholder {
+        color: #6B7280;/*theme('colors.white');*/
+      }
+    }
+  }
+  .form-select {
+    @apply text-sm block w-full;
+    &.form-select-valid {
+      @apply border border-green-500;
+    }
+    &.form-select-invalid {
+      @apply border border-red-500;
+    }
+    [data-background="dark"] & {
+      @apply bg-gray-800 border-gray-700 text-white;
+    }
+  }
+  .form-radio {
+    &.form-radio-valid {
+      @apply text-green-500;
+      + span {
+      @apply text-green-500;
+      }
+    }
+    &.form-radio-invalid {
+      @apply text-red-500;
+      + span {
+      @apply text-red-500;
+      }
+    }
+  }
+  .form-hint {
+    @apply text-xs text-gray-500 whitespace-nowrap;
+  }
+  .form-error {
+    @apply text-xs text-red-500 whitespace-nowrap;
+  }
+  .form-success {
+    @apply text-xs text-green-500 whitespace-nowrap;
+  }
+}
+.form-icon {
+  @apply h-4 w-4 stroke-current absolute bottom-0;
+  margin-bottom: 10px;
+  &.form-success {
+    @apply text-red-500;
+  }
+  &.form-error {
+    @apply text-green-500;
+  }
+  @apply right-0 mr-2;
+}

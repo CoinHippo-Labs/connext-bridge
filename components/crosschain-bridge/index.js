@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
@@ -12,6 +12,7 @@ import { BiMessageError } from 'react-icons/bi'
 
 import Network from './network'
 import Asset from './asset'
+import AdvancedOptions from './advanced-options'
 import Wallet from '../wallet'
 import Popover from '../popover'
 import Alert from '../alerts'
@@ -39,6 +40,13 @@ export default function CrosschainBridge() {
   const [toChainId, setToChainId] = useState(null)
   const [assetId, setAssetId] = useState(null)
   const [amount, setAmount] = useState(null)
+  const [advancedOptions, setAdvancedOptions] = useState({
+    infinite_approval: true,
+    receiving_address: null,
+    contract_address: null,
+    call_data: null,
+    preferred_router: null,
+  })
 
   const [gasFee, setGasFee] = useState(null)
   const [relayerFee, setRelayerFee] = useState(null)
@@ -88,6 +96,12 @@ export default function CrosschainBridge() {
         }
       }
     }
+    else {
+      dispatch({
+        type: BALANCES_DATA,
+        value: null,
+      })
+    }
   }, [address])
 
   useEffect(() => {
@@ -115,6 +129,10 @@ export default function CrosschainBridge() {
   }, [gasFeeEstimating, relayerFeeEstimating, routerFeeEstimating])
 
   useEffect(() => {
+    setGasFee(null)
+    setRelayerFee(null)
+    setRouterFee(null)
+
     estimateFees()
   }, [fromChainId, toChainId, assetId])
 
@@ -249,15 +267,23 @@ export default function CrosschainBridge() {
   const feesEstimated = (typeof gasFee === 'number' || typeof gasFee === 'boolean') && (typeof relayerFee === 'number' || typeof relayerFee === 'boolean') && (typeof routerFee === 'number' || typeof routerFee === 'boolean')
   const estimatedFees = feesEstimated && ((gasFee || 0) + (relayerFee || 0) + (routerFee || 0))
 
+  const mustChangeChain = fromChainId && chain_id !== fromChainId
+
   return (
     <div className="flex flex-col items-center justify-center space-y-2 sm:space-y-3 mt-4 sm:mt-12">
-      <div className="w-full max-w-md flex items-center justify-center sm:justify-start space-x-2">
-        <Img
-          src="/logos/connext/logo.png"
-          alt=""
-          className="w-7 sm:w-8 h-7 sm:h-8 rounded-full"
+      <div className="w-full max-w-md flex items-center justify-center sm:justify-between space-x-2">
+        <div className="flex items-center space-x-2">
+          <Img
+            src="/logos/connext/logo.png"
+            alt=""
+            className="w-7 sm:w-8 h-7 sm:h-8 rounded-full"
+          />
+          <h1 className="uppercase text-base sm:text-lg font-semibold">Cross-Chain Swap</h1>
+        </div>
+        <AdvancedOptions
+          initialOptions={advancedOptions}
+          updateOptions={_options => setAdvancedOptions(_options)}
         />
-        <h1 className="uppercase text-md sm:text-lg font-semibold">Cross-Chain Swap</h1>
       </div>
       <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-lg space-y-12 sm:space-y-4 py-6 px-6 sm:px-7">
         <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-4 sm:gap-6">
@@ -465,7 +491,7 @@ export default function CrosschainBridge() {
                 closeDisabled={true}
                 rounded={true}
               >
-                <span className="font-mono text-xs sm:text-md">Invalid Amount ({`<`} Estimated Fees)</span>
+                <span className="font-mono text-xs">Invalid Amount ({`<`} Estimated Fees)</span>
               </Alert>
               :
               fromBalanceAmount < amount ?
@@ -475,7 +501,7 @@ export default function CrosschainBridge() {
                   closeDisabled={true}
                   rounded={true}
                 >
-                  <span className="font-mono text-xs sm:text-md">Insufficient Funds</span>
+                  <span className="font-mono text-xs">Insufficient Funds</span>
                 </Alert>
                 :
                 !(fromChainSynced && toChainSynced) ?
@@ -485,7 +511,7 @@ export default function CrosschainBridge() {
                     closeDisabled={true}
                     rounded={true}
                   >
-                    <span className="font-mono text-xs sm:text-md">
+                    <span className="font-mono text-xs">
                       {unsyncedChains.map((_chain, i) => (
                         <span key={i} className="inline-flex items-baseline mr-2">
                           {_chain.image && (
@@ -505,7 +531,22 @@ export default function CrosschainBridge() {
                     </span>
                   </Alert>
                   :
-                  null
+                  mustChangeChain ?
+                    <Wallet
+                      chainIdToConnect={fromChainId}
+                      buttonDisconnectTitle={<>
+                        <span>Switch to</span>
+                        <Img
+                          src={fromChain?.image}
+                          alt=""
+                          className="w-8 h-8 rounded-full"
+                        />
+                        <span className="font-semibold">{fromChain?.title}</span>
+                      </>}
+                      buttonDisconnectClassName="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-xs sm:text-base space-x-2 py-4 px-3"
+                    />
+                    :
+                    null
             }
           </div>
         )}

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import Web3Modal from 'web3modal'

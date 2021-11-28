@@ -2,8 +2,6 @@ import { useSelector, shallowEqual } from 'react-redux'
 
 import { Img } from 'react-image'
 
-import Wallet from '../../wallet'
-
 export default function Networks({ handleDropdownClick }) {
   const { chains } = useSelector(state => ({ chains: state.chains }), shallowEqual)
   const { chains_data } = { ...chains }

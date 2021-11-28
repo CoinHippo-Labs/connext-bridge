@@ -18,6 +18,7 @@ import '../styles/components/button.css'
 import '../styles/components/dropdown.css'
 import '../styles/components/table.css'
 import '../styles/components/modals.css'
+import '../styles/components/forms.css'
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css'
 
 Router.events.on('routeChangeStart', () => NProgress.start())
