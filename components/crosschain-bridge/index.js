@@ -2,13 +2,12 @@ import { useEffect, useState } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
-import { NxtpSdk } from '@connext/nxtp-sdk'
-import { providers } from 'ethers'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
 import { MdSwapVerticalCircle, MdSwapHorizontalCircle } from 'react-icons/md'
 import { IoWallet } from 'react-icons/io5'
+import { IoMdInformationCircle } from 'react-icons/io'
 
 import Network from './network'
 import Asset from './asset'
@@ -24,13 +23,14 @@ const refresh_estimated_fees_sec = Number(process.env.NEXT_PUBLIC_REFRESH_ESTIMA
 
 export default function CrosschainBridge() {
   const dispatch = useDispatch()
-  const { chains, assets, chains_status, balances, wallet, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, balances: state.balances, wallet: state.wallet, preferences: state.preferences }), shallowEqual)
+  const { chains, assets, chains_status, balances, wallet, sdk, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, balances: state.balances, wallet: state.wallet, sdk: state.sdk, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { chains_status_data } = { ...chains_status }
   const { balances_data } = { ...balances }
   const { wallet_data } = { ...wallet }
-  const { web3_provider, signer, chain_id, address } = { ...wallet_data }
+  const { web3_provider, chain_id, address } = { ...wallet_data }
+  const { sdk_data } = { ...sdk }
   const { theme } = { ...preferences }
 
   const [fromChainId, setFromChainId] = useState(null)
@@ -38,7 +38,6 @@ export default function CrosschainBridge() {
   const [assetId, setAssetId] = useState(null)
   const [amount, setAmount] = useState(null)
 
-  const [sdk, setSdk] = useState(null)
   const [gasFee, setGasFee] = useState(null)
   const [relayerFee, setRelayerFee] = useState(null)
   const [routerFee, setRouterFee] = useState(null)
@@ -88,22 +87,6 @@ export default function CrosschainBridge() {
       }
     }
   }, [address])
-
-  useEffect(() => {
-    if (!sdk && chains_data && signer) {
-      const chainConfig = {}
-
-      for (let i = 0; i < chains_data.length; i++) {
-        const _chain = chains_data[i]
-
-        chainConfig[_chain?.chain_id] = {
-          provider: new providers.FallbackProvider(_chain?.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')).map(rpc => new providers.JsonRpcProvider(rpc)) || [])
-        }
-      }
-
-      setSdk(new NxtpSdk({ chainConfig, signer }))
-    }
-  }, [chains_data, signer])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -166,7 +149,7 @@ export default function CrosschainBridge() {
   }
 
   const estimateGasFee = async () => {
-    if (sdk) {
+    if (sdk_data) {
       const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
 
       const support = asset && !((fromChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(fromChainId)) ||
@@ -178,7 +161,7 @@ export default function CrosschainBridge() {
         const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
         const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
 
-        const response = await sdk.estimateFeeForRouterTransferInReceivingToken(
+        const response = await sdk_data.estimateFeeForRouterTransferInReceivingToken(
           fromChainId,
           fromContract?.contract_address,
           toChainId,
@@ -196,7 +179,7 @@ export default function CrosschainBridge() {
   }
 
   const estimateRelayerFee = async () => {
-    if (sdk) {
+    if (sdk_data) {
       const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
 
       const support = asset && !((fromChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(fromChainId)) ||
@@ -208,7 +191,7 @@ export default function CrosschainBridge() {
         const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
         const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
 
-        const response = await sdk.estimateMetaTxFeeInReceivingToken(
+        const response = await sdk_data.estimateMetaTxFeeInReceivingToken(
           fromChainId,
           fromContract?.contract_address,
           toChainId,
@@ -226,7 +209,7 @@ export default function CrosschainBridge() {
   }
 
   const estimateRouterFee = async () => {
-    if (sdk) {
+    if (sdk_data) {
       const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
 
       const support = asset && !((fromChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(fromChainId)) ||
@@ -387,7 +370,7 @@ export default function CrosschainBridge() {
                     {gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ?
                       <>
                         <span className="text-gray-600 dark:text-gray-400 text-2xs">Estimating</span>
-                        <Loader type="BallTriangle" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="14" height="14" />
+                        <Loader type="BallTriangle" color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="14" height="14" />
                       </>
                       :
                       feesEstimated ?
@@ -403,7 +386,7 @@ export default function CrosschainBridge() {
                           </div>}
                           content={<div className="flex flex-col space-y-2">
                             <div className="flex items-center justify-between space-x-2">
-                              <span className="text-gray-600 dark:text-gray-400 text-3xs font-medium">Gas Fee:</span>
+                              <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-3xs font-medium">Dest. Tx Cost:</span>
                               <span className="text-gray-800 dark:text-gray-200 text-3xs space-x-1">
                                 ~
                                 <span className="font-mono">{typeof gasFee === 'boolean' ? 'N/A' : numberFormat((gasFee || 0), '0,0.00000000')}</span>
@@ -411,7 +394,7 @@ export default function CrosschainBridge() {
                               </span>
                             </div>
                             <div className="flex items-center justify-between space-x-2">
-                              <span className="text-gray-600 dark:text-gray-400 text-3xs font-medium">Relayer Fee:</span>
+                              <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-3xs font-medium">Relayer Fee:</span>
                               <span className="text-gray-800 dark:text-gray-200 text-3xs space-x-1">
                                 ~
                                 <span className="font-mono">{typeof relayerFee === 'boolean' ? 'N/A' : numberFormat((relayerFee || 0), '0,0.00000000')}</span>
@@ -419,7 +402,7 @@ export default function CrosschainBridge() {
                               </span>
                             </div>
                             <div className="flex items-center justify-between space-x-2">
-                              <span className="text-gray-600 dark:text-gray-400 text-3xs font-medium">Router Fee:</span>
+                              <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-3xs font-medium">Router Fee:</span>
                               <span className="text-gray-800 dark:text-gray-200 text-3xs space-x-1">
                                 ~
                                 <span className="font-mono">{typeof routerFee === 'boolean' ? 'N/A' : numberFormat((routerFee || 0), '0,0.00000000')}</span>
@@ -428,10 +411,11 @@ export default function CrosschainBridge() {
                             </div>
                           </div>}
                         >
-                          <span className="text-gray-600 dark:text-gray-400 text-2xs space-x-1">
+                          <span className="flex items-center text-gray-600 dark:text-gray-400 text-2xs space-x-1">
                             ~
                             <span className="font-mono">{typeof estimatedFees === 'number' ? numberFormat(estimatedFees, '0,0.00000000') : 'N/A'}</span>
                             <span className="font-semibold">{asset?.symbol}</span>
+                            <IoMdInformationCircle size={14} />
                             <span className="font-mono lowercase text-gray-400 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
                           </span>
                         </Popover>

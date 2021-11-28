@@ -17,3 +17,6 @@ export const BALANCES_DATA = 'balances_data'
 // wallet
 export const WALLET_DATA = 'wallet_data'
 export const WALLET_RESET = 'wallet_reset'
+
+//sdk
+export const SDK_DATA = 'sdk_data'

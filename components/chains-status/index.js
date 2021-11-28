@@ -2,33 +2,58 @@ import { useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
+import { NxtpSdk } from '@connext/nxtp-sdk'
+import { providers } from 'ethers'
 import { Img } from 'react-image'
+import Loader from 'react-loader-spinner'
 import { FaRegHandPointRight } from 'react-icons/fa'
 
-import { graphql } from '../../lib/api/subgraph'
-
-import { CHAINS_STATUS_DATA, CHAINS_STATUS_SYNC_DATA } from '../../reducers/types'
+import { CHAINS_STATUS_DATA, CHAINS_STATUS_SYNC_DATA, SDK_DATA } from '../../reducers/types'
 
 export default function ChainsStatus() {
   const dispatch = useDispatch()
-  const { chains, chains_status, chains_status_sync, wallet } = useSelector(state => ({ chains: state.chains, chains_status: state.chains_status, chains_status_sync: state.chains_status_sync, wallet: state.wallet }), shallowEqual)
+  const { chains, chains_status, chains_status_sync, wallet, sdk, preferences } = useSelector(state => ({ chains: state.chains, chains_status: state.chains_status, chains_status_sync: state.chains_status_sync, wallet: state.wallet, sdk: state.sdk, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
   const { chains_status_data } = { ...chains_status }
   const { chains_status_sync_data } = { ...chains_status_sync }
   const { wallet_data } = { ...wallet }
-  const { address } = { ...wallet_data }
+  const { signer, address } = { ...wallet_data }
+  const { sdk_data } = { ...sdk }
+  const { theme } = { ...preferences }
+
+  useEffect(() => {
+    if (chains_data && signer) {
+      const chainConfig = {}
+
+      for (let i = 0; i < chains_data.length; i++) {
+        const _chain = chains_data[i]
+
+        chainConfig[_chain?.chain_id] = {
+          provider: new providers.FallbackProvider(_chain?.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')).map(rpc => new providers.JsonRpcProvider(rpc)) || []),
+          subgraph: _chain?.subgraph,
+        }
+      }
+
+      dispatch({
+        type: SDK_DATA,
+        value: new NxtpSdk({ chainConfig, signer }),
+      })
+    }
+  }, [chains_data, address])
 
   useEffect(() => {
     const getDataSync = async _chains => {
-      if (_chains) {
+      if (_chains && sdk_data) {
         let chainsData
 
         for (let i = 0; i < _chains.length; i++) {
-          const chain = _chains[i]
+          const _chain = _chains[i]
 
-          const response = !chain.disabled && await graphql({ chain_id: chain.id, query: '{ _meta { block { hash, number } } }' })
+          const response = !_chain.disabled && await sdk_data.getSubgraphSyncStatus(_chain.chain_id)
 
-          chainsData = _.concat(chainsData || [], { ...chain, ...response?.data?._meta, synced: response?.data?._meta.block })
+          chainsData = _.concat(chainsData || [], { ..._chain, ...response })
+            .map(_chain => { return { ..._chain, ...(_chain.latestBlock < 0 && chains_status_data?.find(__chain => __chain?.id === _chain.id)) } })
+            .filter(_chain => !chains_status_data || _chain.latestBlock > -1)
         }
 
         dispatch({
@@ -39,19 +64,21 @@ export default function ChainsStatus() {
     }
 
     const getData = async () => {
-      if (chains_data) {
+      if (chains_data && sdk_data) {
         const chunkSize = _.head([...Array(chains_data.length).keys()].map(i => i + 1).filter(i => Math.ceil(chains_data.length / i) <= Number(process.env.NEXT_PUBLIC_MAX_CHUNK))) || chains_data.length
         _.chunk([...Array(chains_data.length).keys()], chunkSize).forEach(chunk => getDataSync(chains_data.map((_chain, i) => { return { ..._chain, i } }).filter((_chain, i) => chunk.includes(i))))
       }
     }
 
-    getData()
+    setTimeout(() => {
+      getData()
+    }, (chains_data && sdk_data ? 1 : 0) * 15 * 1000)
 
     const interval = setInterval(() => getData(), 0.5 * 60 * 1000)
     return () => {
       clearInterval(interval)
     }
-  }, [chains_data])
+  }, [chains_data, sdk_data])
 
   useEffect(() => {
     if (chains_status_sync_data) {
@@ -67,6 +94,15 @@ export default function ChainsStatus() {
   return (
     <>
       <div className="w-full h-8 bg-gray-100 dark:bg-gray-900 overflow-x-auto flex items-center py-2 px-2 sm:px-4">
+        {!chains_status_data && (
+          address ?
+            <span className="flex flex-wrap items-center font-mono text-blue-600 dark:text-blue-400 text-2xs space-x-1.5">
+              <Loader type="Grid" color={theme === 'dark' ? '#60A5FA' : '#2563EB'} width="16" height="16" />
+              <span>Checking Subgraph Status</span>
+            </span>
+            :
+            <span className="font-mono text-blue-600 dark:text-blue-400 text-2xs ml-auto">Please connect your wallet.</span>
+        )}
         {chains_status_data?.map((chain, i) => (
           <div key={i} className="min-w-max flex items-center text-2xs space-x-1 mr-4">
             {chain.image && (
@@ -79,7 +115,7 @@ export default function ChainsStatus() {
             {chain.short_name && (
               <span className="text-gray-700 dark:text-gray-300 font-semibold">{chain.short_name}</span>
             )}
-            <span className={`capitalize ${chain.disabled ? 'text-gray-400 dark:text-gray-600' : !chain.synced ? 'text-red-500 dark:text-red-700' : 'text-green-600 dark:text-green-500'}`}>
+            <span className={`capitalize ${chain.disabled ? 'text-gray-400 dark:text-gray-600' : !chain.synced ? 'text-red-500 dark:text-red-600' : 'text-green-600 dark:text-green-500'}`}>
               {chain.disabled ? 'disabled' : !chain.synced ? 'unsynced' : 'synced'}
             </span>
           </div>
