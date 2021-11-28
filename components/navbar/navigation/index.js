@@ -12,7 +12,7 @@ export default function Navigation() {
   return (
     <div className="hidden lg:flex items-center space-x-0 lg:space-x-2 mx-auto xl:ml-20">
       {navigations.map((item, i) => {
-        const className = `bg-transparent hover:bg-gray-100 dark:hover:bg-gray-900 rounded flex items-center uppercase text-xs xl:text-sm p-2 ${pathname === item.path ? 'text-gray-900 hover:text-gray-800 dark:text-gray-50 dark:hover:text-gray-100 font-bold' : 'text-gray-600 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-200 font-medium'}`
+        const className = `bg-transparent hover:bg-gray-100 dark:hover:bg-gray-900 rounded flex items-center uppercase text-xs xl:text-sm p-2 ${pathname === item.path ? 'text-gray-900 hover:text-gray-800 dark:text-gray-50 dark:hover:text-gray-100 font-bold' : 'text-gray-400 hover:text-gray-500 dark:text-gray-200 dark:hover:text-gray-100 font-medium'}`
 
         return item.external ?
           <a key={i} href={item.path} target="_blank" rel="noopener noreferrer" className={className}>

@@ -12,7 +12,7 @@ export default function Navigations({ handleDropdownClick }) {
   return (
     <div className="flex flex-wrap">
       {navigations.map((item, i) => {
-        const className = `dropdown-item w-full bg-transparent flex items-center uppercase space-x-1 p-3 ${pathname === item.path ? 'text-gray-900 hover:text-gray-800 dark:text-gray-100 dark:hover:text-gray-200 font-bold' : 'text-gray-600 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-200 font-medium'}`
+        const className = `dropdown-item w-full bg-transparent flex items-center uppercase space-x-1 p-3 ${pathname === item.path ? 'text-gray-900 hover:text-gray-800 dark:text-gray-100 dark:hover:text-gray-200 font-bold' : 'text-gray-400 hover:text-gray-500 dark:text-gray-200 dark:hover:text-gray-100 font-medium'}`
 
         return item.external ?
           <a key={i} onClick={handleDropdownClick} href={item.path} target="_blank" rel="noopener noreferrer" className={className}>

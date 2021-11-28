@@ -243,8 +243,13 @@ export default function CrosschainBridge() {
   const estimatedFees = feesEstimated && ((gasFee || 0) + (relayerFee || 0) + (routerFee || 0))
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4 mt-12">
-      <div className="w-full max-w-md">
+    <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4 mt-4 sm:mt-12">
+      <div className="w-full max-w-md flex items-center space-x-2">
+        <Img
+          src="/logos/connext/logo.png"
+          alt=""
+          className="w-8 h-8 rounded-full"
+        />
         <h1 className="uppercase text-lg font-semibold">Cross-Chain Swap</h1>
       </div>
       <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-lg space-y-12 sm:space-y-4 py-6 px-6 sm:px-7">
@@ -278,7 +283,10 @@ export default function CrosschainBridge() {
                   null
                   :
                   balances_data?.[fromChainId] ?
-                    <div className="text-gray-600 dark:text-gray-400 text-2xs pt-1">-</div>
+                    toBalance ?
+                      <div className="text-gray-600 dark:text-gray-400 text-2xs pt-1">-</div>
+                      :
+                      null
                     :
                     <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
             }
@@ -323,7 +331,10 @@ export default function CrosschainBridge() {
                   null
                   :
                   balances_data?.[toChainId] ?
-                    <div className="text-gray-600 dark:text-gray-400 text-2xs pt-1">-</div>
+                    fromBalance ?
+                      <div className="text-gray-600 dark:text-gray-400 text-2xs pt-1">-</div>
+                      :
+                      null
                     :
                     <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
             }
@@ -379,8 +390,7 @@ export default function CrosschainBridge() {
                           title={<div className="flex items-center space-x-2">
                             <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-2xs font-semibold">Estimated Fees:</span>
                             <span className="text-gray-800 dark:text-gray-200 text-2xs space-x-1">
-                              ~
-                              <span className="font-mono">{typeof estimatedFees === 'number' ? numberFormat(estimatedFees, '0,0.00000000') : 'N/A'}</span>
+                              <span className="font-mono">{typeof estimatedFees === 'number' ? `~${numberFormat(estimatedFees, '0,0.00000000')}` : 'N/A'}</span>
                               <span className="font-semibold">{asset?.symbol}</span>
                             </span>
                           </div>}
@@ -388,35 +398,31 @@ export default function CrosschainBridge() {
                             <div className="flex items-center justify-between space-x-2">
                               <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-3xs font-medium">Dest. Tx Cost:</span>
                               <span className="text-gray-800 dark:text-gray-200 text-3xs space-x-1">
-                                ~
-                                <span className="font-mono">{typeof gasFee === 'boolean' ? 'N/A' : numberFormat((gasFee || 0), '0,0.00000000')}</span>
+                                <span className="font-mono">{typeof gasFee === 'boolean' ? 'N/A' : `~${numberFormat((gasFee || 0), '0,0.00000000')}`}</span>
                                 <span className="font-semibold">{asset?.symbol}</span>
                               </span>
                             </div>
                             <div className="flex items-center justify-between space-x-2">
                               <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-3xs font-medium">Relayer Fee:</span>
                               <span className="text-gray-800 dark:text-gray-200 text-3xs space-x-1">
-                                ~
-                                <span className="font-mono">{typeof relayerFee === 'boolean' ? 'N/A' : numberFormat((relayerFee || 0), '0,0.00000000')}</span>
+                                <span className="font-mono">{typeof relayerFee === 'boolean' ? 'N/A' : `~${numberFormat((relayerFee || 0), '0,0.00000000')}`}</span>
                                 <span className="font-semibold">{asset?.symbol}</span>
                               </span>
                             </div>
                             <div className="flex items-center justify-between space-x-2">
                               <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-3xs font-medium">Router Fee:</span>
                               <span className="text-gray-800 dark:text-gray-200 text-3xs space-x-1">
-                                ~
-                                <span className="font-mono">{typeof routerFee === 'boolean' ? 'N/A' : numberFormat((routerFee || 0), '0,0.00000000')}</span>
+                                <span className="font-mono">{typeof routerFee === 'boolean' ? 'N/A' : `~${numberFormat((routerFee || 0), '0,0.00000000')}`}</span>
                                 <span className="font-semibold">{asset?.symbol}</span>
                               </span>
                             </div>
                           </div>}
                         >
-                          <span className="flex items-center text-gray-600 dark:text-gray-400 text-2xs space-x-1">
-                            ~
-                            <span className="font-mono">{typeof estimatedFees === 'number' ? numberFormat(estimatedFees, '0,0.00000000') : 'N/A'}</span>
+                          <span className="flex items-center text-gray-400 dark:text-gray-400 text-2xs space-x-1">
+                            <span className="font-mono">{typeof estimatedFees === 'number' ? `~${numberFormat(estimatedFees, '0,0.000000')}` : 'N/A'}</span>
                             <span className="font-semibold">{asset?.symbol}</span>
                             <IoMdInformationCircle size={14} />
-                            <span className="font-mono lowercase text-gray-400 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
+                            <span className="font-mono lowercase text-gray-300 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
                           </span>
                         </Popover>
                         :
