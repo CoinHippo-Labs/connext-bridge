@@ -8,11 +8,13 @@ import Loader from 'react-loader-spinner'
 import { MdSwapVerticalCircle, MdSwapHorizontalCircle } from 'react-icons/md'
 import { IoWallet } from 'react-icons/io5'
 import { IoMdInformationCircle } from 'react-icons/io'
+import { BiMessageError } from 'react-icons/bi'
 
 import Network from './network'
 import Asset from './asset'
 import Wallet from '../wallet'
 import Popover from '../popover'
+import Alert from '../alerts'
 
 import { balances as getBalances } from '../../lib/api/covalent'
 import { smallNumber, numberFormat } from '../../lib/utils'
@@ -231,9 +233,14 @@ export default function CrosschainBridge() {
   const fromChain = chains_data?.find(_chain => _chain?.chain_id === fromChainId)
   const toChain = chains_data?.find(_chain => _chain?.chain_id === toChainId)
 
+  const fromChainSynced = !chains_status_data || chains_status_data.find(_chain => _chain.chain_id === fromChainId)?.synced
+  const toChainSynced = !chains_status_data || chains_status_data.find(_chain => _chain.chain_id === toChainId)?.synced
+  const unsyncedChains = [!fromChainSynced && fromChain, !toChainSynced && toChain].filter(_chain => _chain)
+
   const asset = assets_data?.find(_asset => _asset?.id === assetId)
   let fromBalance = balances_data?.[fromChainId]?.find(_contract => _contract?.contract_address === asset?.contracts?.find(__contract => __contract?.chain_id === fromChainId)?.contract_address)
   fromBalance = fromBalance || balances_data?.[fromChainId]?.find(_contract => asset?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase() && fromChain?.provider_params?.[0]?.nativeCurrency?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase())
+  const fromBalanceAmount = (fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals || 0)
   let toBalance = balances_data?.[toChainId]?.find(_contract => _contract?.contract_address === asset?.contracts?.find(__contract => __contract?.chain_id === toChainId)?.contract_address)
   toBalance = toBalance || balances_data?.[toChainId]?.find(_contract => asset?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase() && toChain?.provider_params?.[0]?.nativeCurrency?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase())
 
@@ -243,14 +250,14 @@ export default function CrosschainBridge() {
   const estimatedFees = feesEstimated && ((gasFee || 0) + (relayerFee || 0) + (routerFee || 0))
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4 mt-4 sm:mt-12">
-      <div className="w-full max-w-md flex items-center space-x-2">
+    <div className="flex flex-col items-center justify-center space-y-2 sm:space-y-3 mt-4 sm:mt-12">
+      <div className="w-full max-w-md flex items-center justify-center sm:justify-start space-x-2">
         <Img
           src="/logos/connext/logo.png"
           alt=""
-          className="w-8 h-8 rounded-full"
+          className="w-7 sm:w-8 h-7 sm:h-8 rounded-full"
         />
-        <h1 className="uppercase text-lg font-semibold">Cross-Chain Swap</h1>
+        <h1 className="uppercase text-md sm:text-lg font-semibold">Cross-Chain Swap</h1>
       </div>
       <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-lg space-y-12 sm:space-y-4 py-6 px-6 sm:px-7">
         <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-4 sm:gap-6">
@@ -421,7 +428,7 @@ export default function CrosschainBridge() {
                           <span className="flex items-center text-gray-400 dark:text-gray-400 text-2xs space-x-1">
                             <span className="font-mono">{typeof estimatedFees === 'number' ? `~${numberFormat(estimatedFees, '0,0.000000')}` : 'N/A'}</span>
                             <span className="font-semibold">{asset?.symbol}</span>
-                            <IoMdInformationCircle size={14} />
+                            <IoMdInformationCircle size={14} className="mb-0.5" />
                             <span className="font-mono lowercase text-gray-300 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
                           </span>
                         </Popover>
@@ -449,8 +456,58 @@ export default function CrosschainBridge() {
             </>
           )}
         </div>
-        {balances_data?.[fromChainId] && feesEstimated && typeof estimatedFees === 'number' && (
-          <></>
+        {balances_data?.[fromChainId] && feesEstimated && typeof estimatedFees === 'number' && typeof amount === 'number' && (
+          <div className="sm:pt-4 pb-1">
+            {amount < estimatedFees ?
+              <Alert
+                color="bg-red-400 dark:bg-red-500 text-left text-white"
+                icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" />}
+                closeDisabled={true}
+                rounded={true}
+              >
+                <span className="font-mono text-xs sm:text-md">Invalid Amount ({`<`} Estimated Fees)</span>
+              </Alert>
+              :
+              fromBalanceAmount < amount ?
+                <Alert
+                  color="bg-red-400 dark:bg-red-500 text-left text-white"
+                  icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" />}
+                  closeDisabled={true}
+                  rounded={true}
+                >
+                  <span className="font-mono text-xs sm:text-md">Insufficient Funds</span>
+                </Alert>
+                :
+                !(fromChainSynced && toChainSynced) ?
+                  <Alert
+                    color="bg-red-400 dark:bg-red-500 text-left text-white"
+                    icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" />}
+                    closeDisabled={true}
+                    rounded={true}
+                  >
+                    <span className="font-mono text-xs sm:text-md">
+                      {unsyncedChains.map((_chain, i) => (
+                        <span key={i} className="inline-flex items-baseline mr-2">
+                          {_chain.image && (
+                            <Img
+                              src={_chain.image}
+                              alt=""
+                              className="w-4 h-4 rounded-full self-center mr-1"
+                            />
+                          )}
+                          <span className="font-bold">{_chain.title}</span>
+                          {i < unsyncedChains.length - 1 && (
+                            <span className="ml-1.5">&</span>
+                          )}
+                        </span>
+                      ))}
+                      <span>subgraph is out of sync. Please try again later.</span>
+                    </span>
+                  </Alert>
+                  :
+                  null
+            }
+          </div>
         )}
       </div>
     </div>
