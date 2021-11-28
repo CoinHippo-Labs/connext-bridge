@@ -7,7 +7,7 @@ import { BsPatchExclamationFill } from 'react-icons/bs'
 
 import Assets from './assets'
 
-export default function DropdownAsset({ assetId, onSelect, fromChainId, toChainId, amount, amountOnChange }) {
+export default function DropdownAsset({ disabled, assetId, onSelect, fromChainId, toChainId, amount, amountOnChange }) {
   const { assets, preferences } = useSelector(state => ({ assets: state.assets, preferences: state.preferences }), shallowEqual)
   const { assets_data } = { ...assets }
   const { theme } = { ...preferences }
@@ -57,21 +57,23 @@ export default function DropdownAsset({ assetId, onSelect, fromChainId, toChainI
               size="small"
               type="number"
               placeholder="0.00"
+              disabled={disabled}
               value={typeof amount === 'number' && amount >= 0 ? amount : ''}
               onChange={e => {
                 if (amountOnChange) {
                   amountOnChange(e.target.value)
                 }
               }}
-              className="w-40 bg-gray-100 dark:bg-gray-800 border-0 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-xl font-mono text-sm font-semibold text-right px-3"
+              className={`w-40 bg-gray-100 dark:bg-gray-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-xl font-mono text-sm font-semibold text-right px-3`}
             />
           }
         </>
       )}
       <button
         ref={buttonRef}
+        disabled={disabled}
         onClick={handleDropdownClick}
-        className="h-12 flex items-center justify-center"
+        className={`h-12 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
       >
         {asset ?
           <div className={`bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-${showInput ? 'full w-10 h-10 justify-center' : '2xl py-1.5 px-3'} flex items-center space-x-1.5`}>
@@ -92,7 +94,7 @@ export default function DropdownAsset({ assetId, onSelect, fromChainId, toChainI
         }
       </button>
       <div
-        ref={dropdownRef} 
+        ref={dropdownRef}
         className={`dropdown ${hidden ? '' : 'open'} absolute top-0 left-0 mt-10`}
       >
         <div className="dropdown-content inside w-64 bottom-start">

@@ -11,6 +11,8 @@ import { MdSwapVerticalCircle, MdSwapHorizontalCircle } from 'react-icons/md'
 import { IoWallet } from 'react-icons/io5'
 import { IoMdInformationCircle } from 'react-icons/io'
 import { BiMessageError } from 'react-icons/bi'
+import { FaCheckCircle, FaClock, FaTimesCircle } from 'react-icons/fa'
+import { TiArrowRight } from 'react-icons/ti'
 
 import Network from './network'
 import Asset from './asset'
@@ -18,6 +20,7 @@ import AdvancedOptions from './advanced-options'
 import Wallet from '../wallet'
 import Popover from '../popover'
 import Alert from '../alerts'
+import Notification from '../notifications'
 
 import { balances as getBalances } from '../../lib/api/covalent'
 import { getApproved, approve } from '../../lib/object/contract'
@@ -44,6 +47,8 @@ export default function CrosschainBridge() {
   const [assetId, setAssetId] = useState(null)
   const [amount, setAmount] = useState(null)
   const [tokenApproved, setTokenApproved] = useState(true)
+  const [tokenApprovingTx, setTokenApprovingTx] = useState(null)
+  const [tokenApproveResponse, setTokenApproveResponse] = useState(null)
   const [advancedOptions, setAdvancedOptions] = useState({
     infinite_approval: true,
     receiving_address: null,
@@ -152,7 +157,12 @@ export default function CrosschainBridge() {
     }
 
     getData()
-  }, [address, fromChainId, assetId, amount, gasFeeEstimating, relayerFeeEstimating, routerFeeEstimating])
+  }, [address, chain_id, fromChainId, assetId, amount, gasFeeEstimating, relayerFeeEstimating, routerFeeEstimating])
+
+  useEffect(() => {
+    setTokenApprovingTx(null)
+    setTokenApproveResponse(null)
+  }, [address, fromChainId, assetId])
 
   const isSupport = () => {
     const asset = assets_data?.find(_asset => _asset?.id === assetId)
@@ -168,7 +178,7 @@ export default function CrosschainBridge() {
   const isTokenApproved = async () => {
     let approved = true
 
-    if (address && chain_id && chain_id === fromChainId && assetId) {
+    if (address && chain_id && chain_id === fromChainId && assetId && !tokenApprovingTx) {
       const fromChainSynced = getChainSynced(fromChainId)
       const toChainSynced = getChainSynced(toChainId)
 
@@ -191,6 +201,34 @@ export default function CrosschainBridge() {
     }
 
     return approved
+  }
+
+  const approveToken = async () => {
+    const asset = assets_data?.find(_asset => _asset?.id === assetId)
+    const contract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
+
+    setTokenApproveResponse(null)
+
+    try {
+      const tx_approve = await approve(signer, contract.contract_address, address, new BigNumber(amount).shiftedBy(contract?.contract_decimals).toString())
+
+      setTokenApprovingTx(tx_approve?.hash)
+      setTokenApproveResponse({ status: 'pending', message: `Wait for ${asset?.symbol} Approval Confirmation` })
+
+      await tx_approve.wait()
+
+      const _approved = await isTokenApproved()
+
+      if (_approved !== tokenApproved) {
+        setTokenApproved(_approved)
+      }
+
+      setTokenApproveResponse({ status: 'success', message: `${asset?.symbol} Approval Transaction Confirmed.` })
+    } catch (error) {
+      setTokenApproveResponse({ status: 'failed', message: error?.message })
+    }
+
+    setTokenApprovingTx(null)
   }
 
   const getChainBalances = async _chain_id => {
@@ -322,6 +360,8 @@ export default function CrosschainBridge() {
   const mustChangeChain = fromChainId && chain_id !== fromChainId
   const mustApproveToken = !tokenApproved
 
+  const actionDisabled = tokenApprovingTx
+
   return (
     <div className="flex flex-col items-center justify-center space-y-2 sm:space-y-3 mt-4 sm:mt-12">
       <div className="w-full max-w-md flex items-center justify-center sm:justify-between space-x-2">
@@ -343,6 +383,7 @@ export default function CrosschainBridge() {
           <div className="sm:col-span-2 flex flex-col items-center space-y-0">
             <span className="text-gray-400 dark:text-gray-500 text-lg font-medium">From Chain</span>
             <Network
+              disabled={actionDisabled}
               chain_id={fromChainId}
               onSelect={_chain_id => {
                 if (_chain_id === toChainId) {
@@ -379,10 +420,12 @@ export default function CrosschainBridge() {
           </div>
           <div className="flex items-center justify-center">
             <button
+              disabled={actionDisabled}
               onClick={() => {
                 setFromChainId(toChainId)
                 setToChainId(fromChainId)
               }}
+              className={`${actionDisabled ? 'cursor-not-allowed' : ''}`}
             >
               <MdSwapVerticalCircle size={36} className="sm:hidden rounded-full shadow-lg text-indigo-400 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-white" />
               <MdSwapHorizontalCircle size={36} className="hidden sm:block rounded-full shadow-lg text-indigo-400 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-white" />
@@ -391,6 +434,7 @@ export default function CrosschainBridge() {
           <div className="sm:col-span-2 flex flex-col items-center space-y-0">
             <span className="text-gray-400 dark:text-gray-500 text-lg font-medium">To Chain</span>
             <Network
+              disabled={actionDisabled}
               chain_id={toChainId}
               onSelect={_chain_id => {
                 if (_chain_id === fromChainId) {
@@ -432,6 +476,7 @@ export default function CrosschainBridge() {
           </div>
           <div className="order-2 sm:col-span-3 flex flex-col items-center space-y-0">
             <Asset
+              disabled={actionDisabled}
               assetId={assetId}
               onSelect={_asset_id => {
                 if (_asset_id !== assetId) {
@@ -601,16 +646,59 @@ export default function CrosschainBridge() {
                     :
                     mustApproveToken ?
                       <button
-                        onClick={() => {}}
-                        className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-sm sm:text-lg space-x-2 py-4 px-3"
+                        disabled={actionDisabled}
+                        onClick={() => approveToken()}
+                        className={`w-full ${actionDisabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${actionDisabled ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-sm sm:text-lg space-x-2 py-4 px-3`}
                       >
-                        <span>Approve</span>
+                        {tokenApprovingTx ?
+                          <>
+                            <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
+                            <span>Approving</span>
+                          </>
+                          :
+                          <span>Approve</span>
+                        }
                         <span className="font-semibold">{asset?.symbol}</span>
                       </button>
                       :
                       null
             }
           </div>
+        )}
+        {tokenApproveResponse && (
+          <Notification
+            hideButton={true}
+            outerClassNames="w-full h-auto z-50 transform fixed top-0 left-0 p-0"
+            innerClassNames={`${tokenApproveResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-600' : tokenApproveResponse.status === 'success' ? 'bg-green-500 dark:bg-green-600' : 'bg-blue-500 dark:bg-blue-600'} text-white`}
+            animation="animate__animated animate__fadeInDown"
+            icon={tokenApproveResponse.status === 'failed' ?
+              <FaTimesCircle className="w-4 h-4 stroke-current mr-2" />
+              :
+              tokenApproveResponse.status === 'success' ?
+                <FaCheckCircle className="w-4 h-4 stroke-current mr-2" />
+                :
+                <FaClock className="w-4 h-4 stroke-current mr-2" />
+            }
+            content={tokenApproveResponse.status === 'pending' ?
+              <span className="flex flex-wrap items-center">
+                <span className="mr-1">{tokenApproveResponse.message}</span>
+                <Loader type="ThreeDots" color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="16" height="16" className="mt-1 mr-2" />
+                {fromChain?.explorer?.url && (
+                  <a
+                    href={`${fromChain.explorer.url}${fromChain.explorer.transaction_path?.replace('{tx}', tokenApprovingTx)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center font-semibold"
+                  >
+                    <span>View on {fromChain.explorer.name}</span>
+                    <TiArrowRight size={20} className="transform -rotate-45" />
+                  </a>
+                )}
+              </span>
+              :
+              <span>{tokenApproveResponse.message}</span>
+            }
+          />
         )}
       </div>
     </div>

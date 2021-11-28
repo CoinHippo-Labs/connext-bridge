@@ -7,7 +7,7 @@ import { BsPatchExclamationFill } from 'react-icons/bs'
 
 import Networks from './networks'
 
-export default function DropdownNetwork({ chain_id, onSelect }) {
+export default function DropdownNetwork({ disabled, chain_id, onSelect }) {
   const { chains, preferences } = useSelector(state => ({ chains: state.chains, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
   const { theme } = { ...preferences }
@@ -47,8 +47,9 @@ export default function DropdownNetwork({ chain_id, onSelect }) {
     <div className="relative">
       <button
         ref={buttonRef}
+        disabled={disabled}
         onClick={handleDropdownClick}
-        className="h-12 flex items-center justify-center"
+        className={`h-12 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
       >
         {chain ?
           <div className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-2xl flex items-center space-x-1.5 py-1.5 px-3">

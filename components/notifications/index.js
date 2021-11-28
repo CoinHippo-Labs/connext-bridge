@@ -14,6 +14,7 @@ const Notifications = ({
   btnClassNames,
   icon,
   content,
+  hideButton,
 }) => {
   const [open, setOpen] = useState(visible)
 
@@ -23,9 +24,11 @@ const Notifications = ({
 
   return (
     <>
-      <button type="button" onClick={show} className={`${btnClassNames}`}>
-        {btnTitle}
-      </button>
+      {!hideButton && (
+        <button type="button" onClick={show} className={`${btnClassNames}`}>
+          {btnTitle}
+        </button>
+      )}
       {open && (
         <Portal selector="#portal">
           <div className={`${visible ? animation : ''} ${outerClassNames}`}>
