@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
+import { getDeployedTransactionManagerContract } from '@connext/nxtp-sdk'
+import { constants } from 'ethers'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
@@ -18,6 +20,7 @@ import Popover from '../popover'
 import Alert from '../alerts'
 
 import { balances as getBalances } from '../../lib/api/covalent'
+import { getApproved, approve } from '../../lib/object/contract'
 import { smallNumber, numberFormat } from '../../lib/utils'
 
 import { CHAINS_STATUS_DATA, CHAINS_STATUS_SYNC_DATA, BALANCES_DATA } from '../../reducers/types'
@@ -32,7 +35,7 @@ export default function CrosschainBridge() {
   const { chains_status_data } = { ...chains_status }
   const { balances_data } = { ...balances }
   const { wallet_data } = { ...wallet }
-  const { web3_provider, chain_id, address } = { ...wallet_data }
+  const { web3_provider, signer, chain_id, address } = { ...wallet_data }
   const { sdk_data } = { ...sdk }
   const { theme } = { ...preferences }
 
@@ -40,6 +43,7 @@ export default function CrosschainBridge() {
   const [toChainId, setToChainId] = useState(null)
   const [assetId, setAssetId] = useState(null)
   const [amount, setAmount] = useState(null)
+  const [tokenApproved, setTokenApproved] = useState(true)
   const [advancedOptions, setAdvancedOptions] = useState({
     infinite_approval: true,
     receiving_address: null,
@@ -136,6 +140,59 @@ export default function CrosschainBridge() {
     estimateFees()
   }, [fromChainId, toChainId, assetId])
 
+  useEffect(() => {
+    const getData = async () => {
+      if (!gasFeeEstimating && !relayerFeeEstimating && !routerFeeEstimating) {
+        const _approved = await isTokenApproved()
+
+        if (_approved !== tokenApproved) {
+          setTokenApproved(_approved)
+        }
+      }
+    }
+
+    getData()
+  }, [address, fromChainId, assetId, amount, gasFeeEstimating, relayerFeeEstimating, routerFeeEstimating])
+
+  const isSupport = () => {
+    const asset = assets_data?.find(_asset => _asset?.id === assetId)
+
+    const support = asset && !((fromChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(fromChainId)) ||
+    (toChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(toChainId)))
+
+    return support
+  }
+
+  const getChainSynced = _chain_id => !chains_status_data || chains_status_data.find(_chain => _chain.chain_id === _chain_id)?.synced
+
+  const isTokenApproved = async () => {
+    let approved = true
+
+    if (address && chain_id && chain_id === fromChainId && assetId) {
+      const fromChainSynced = getChainSynced(fromChainId)
+      const toChainSynced = getChainSynced(toChainId)
+
+      const fromBalance = getChainBalance(fromChainId)
+      const fromBalanceAmount = (fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals || 0)
+
+      const feesEstimated = (typeof gasFee === 'number' || typeof gasFee === 'boolean') && (typeof relayerFee === 'number' || typeof relayerFee === 'boolean') && (typeof routerFee === 'number' || typeof routerFee === 'boolean')
+      const estimatedFees = feesEstimated && ((gasFee || 0) + (relayerFee || 0) + (routerFee || 0))
+
+      if (isSupport() && amount >= estimatedFees && fromBalanceAmount >= amount && fromChainSynced && toChainSynced) {
+        const asset = assets_data?.find(_asset => _asset?.id === assetId)
+        const contract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
+
+        if (contract?.contract_address && contract.contract_address !== constants.AddressZero) {
+          approved = await getApproved(signer, contract.contract_address, getDeployedTransactionManagerContract(fromChainId)?.address)
+
+          approved = approved.gte(new BigNumber(amount).shiftedBy(contract?.contract_decimals))
+        }
+      }
+    }
+
+    return approved
+  }
+
   const getChainBalances = async _chain_id => {
     if (_chain_id && address) {
       const response = await getBalances(_chain_id, address)
@@ -155,6 +212,16 @@ export default function CrosschainBridge() {
     }
   }
 
+  const getChainBalance = _chain_id => {
+    const chain = chains_data?.find(_chain => _chain?.chain_id === _chain_id)
+    const asset = assets_data?.find(_asset => _asset?.id === assetId)
+
+    let balance = balances_data?.[_chain_id]?.find(_contract => _contract?.contract_address === asset?.contracts?.find(__contract => __contract?.chain_id === _chain_id)?.contract_address)
+    balance = balance || balances_data?.[_chain_id]?.find(_contract => asset?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase() && chain?.provider_params?.[0]?.nativeCurrency?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase())
+
+    return balance
+  }
+
   const estimateFees = () => {
     if (fromChainId && toChainId && assetId) {
       estimateGasFee()
@@ -172,10 +239,7 @@ export default function CrosschainBridge() {
     if (sdk_data) {
       const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
 
-      const support = asset && !((fromChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(fromChainId)) ||
-        (toChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(toChainId)))
-
-      if (support) {
+      if (isSupport()) {
         setGasFeeEstimating(true)
 
         const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
@@ -202,10 +266,7 @@ export default function CrosschainBridge() {
     if (sdk_data) {
       const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
 
-      const support = asset && !((fromChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(fromChainId)) ||
-        (toChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(toChainId)))
-
-      if (support) {
+      if (isSupport()) {
         setRelayerFeeEstimating(true)
 
         const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
@@ -230,12 +291,7 @@ export default function CrosschainBridge() {
 
   const estimateRouterFee = async () => {
     if (sdk_data) {
-      const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
-
-      const support = asset && !((fromChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(fromChainId)) ||
-        (toChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(toChainId)))
-
-      if (support) {
+      if (isSupport()) {
         setRouterFeeEstimating(true)
 
         setRouterFee(false)
@@ -251,23 +307,20 @@ export default function CrosschainBridge() {
   const fromChain = chains_data?.find(_chain => _chain?.chain_id === fromChainId)
   const toChain = chains_data?.find(_chain => _chain?.chain_id === toChainId)
 
-  const fromChainSynced = !chains_status_data || chains_status_data.find(_chain => _chain.chain_id === fromChainId)?.synced
-  const toChainSynced = !chains_status_data || chains_status_data.find(_chain => _chain.chain_id === toChainId)?.synced
+  const fromChainSynced = getChainSynced(fromChainId)
+  const toChainSynced = getChainSynced(toChainId)
   const unsyncedChains = [!fromChainSynced && fromChain, !toChainSynced && toChain].filter(_chain => _chain)
 
   const asset = assets_data?.find(_asset => _asset?.id === assetId)
-  let fromBalance = balances_data?.[fromChainId]?.find(_contract => _contract?.contract_address === asset?.contracts?.find(__contract => __contract?.chain_id === fromChainId)?.contract_address)
-  fromBalance = fromBalance || balances_data?.[fromChainId]?.find(_contract => asset?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase() && fromChain?.provider_params?.[0]?.nativeCurrency?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase())
+  const fromBalance = getChainBalance(fromChainId)
   const fromBalanceAmount = (fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals || 0)
-  let toBalance = balances_data?.[toChainId]?.find(_contract => _contract?.contract_address === asset?.contracts?.find(__contract => __contract?.chain_id === toChainId)?.contract_address)
-  toBalance = toBalance || balances_data?.[toChainId]?.find(_contract => asset?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase() && toChain?.provider_params?.[0]?.nativeCurrency?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase())
+  const toBalance = getChainBalance(toChainId)
 
-  const support = asset && !((fromChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(fromChainId)) ||
-    (toChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(toChainId)))
   const feesEstimated = (typeof gasFee === 'number' || typeof gasFee === 'boolean') && (typeof relayerFee === 'number' || typeof relayerFee === 'boolean') && (typeof routerFee === 'number' || typeof routerFee === 'boolean')
   const estimatedFees = feesEstimated && ((gasFee || 0) + (relayerFee || 0) + (routerFee || 0))
 
   const mustChangeChain = fromChainId && chain_id !== fromChainId
+  const mustApproveToken = !tokenApproved
 
   return (
     <div className="flex flex-col items-center justify-center space-y-2 sm:space-y-3 mt-4 sm:mt-12">
@@ -402,7 +455,7 @@ export default function CrosschainBridge() {
               amountOnChange={_amount => setAmount(_amount && !isNaN(_amount) ? Number(_amount) : _amount)}
             />
           </div>
-          {address && support && (
+          {address && isSupport() && (
             <>
               <div className="order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-4">
                 {(gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ||
@@ -483,7 +536,7 @@ export default function CrosschainBridge() {
           )}
         </div>
         {balances_data?.[fromChainId] && feesEstimated && typeof estimatedFees === 'number' && typeof amount === 'number' && (
-          <div className="sm:pt-4 pb-1">
+          <div className="sm:pt-3 pb-1">
             {amount < estimatedFees ?
               <Alert
                 color="bg-red-400 dark:bg-red-500 text-left text-white"
@@ -546,7 +599,16 @@ export default function CrosschainBridge() {
                       buttonDisconnectClassName="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-xs sm:text-base space-x-2 py-4 px-3"
                     />
                     :
-                    null
+                    mustApproveToken ?
+                      <button
+                        onClick={() => {}}
+                        className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-sm sm:text-lg space-x-2 py-4 px-3"
+                      >
+                        <span>Approve</span>
+                        <span className="font-semibold">{asset?.symbol}</span>
+                      </button>
+                      :
+                      null
             }
           </div>
         )}
