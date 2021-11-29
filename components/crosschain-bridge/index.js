@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
+import moment from 'moment'
 import { getDeployedTransactionManagerContract } from '@connext/nxtp-sdk'
+import { getRandomBytes32 } from '@connext/nxtp-utils'
 import { constants } from 'ethers'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
@@ -10,7 +12,7 @@ import Loader from 'react-loader-spinner'
 import { MdSwapVerticalCircle, MdSwapHorizontalCircle } from 'react-icons/md'
 import { IoWallet } from 'react-icons/io5'
 import { IoMdInformationCircle } from 'react-icons/io'
-import { BiMessageError } from 'react-icons/bi'
+import { BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
 import { FaCheckCircle, FaClock, FaTimesCircle } from 'react-icons/fa'
 import { TiArrowRight } from 'react-icons/ti'
 
@@ -152,17 +154,15 @@ export default function CrosschainBridge() {
 
   useEffect(() => {
     const getData = async () => {
-      if (!gasFeeEstimating && !relayerFeeEstimating && !routerFeeEstimating) {
-        const _approved = await isTokenApproved()
+      const _approved = await isTokenApproved()
 
-        if (_approved !== tokenApproved) {
-          setTokenApproved(_approved)
-        }
+      if (_approved !== tokenApproved) {
+        setTokenApproved(_approved)
       }
     }
 
     getData()
-  }, [address, chain_id, fromChainId, assetId, amount, gasFeeEstimating, relayerFeeEstimating, routerFeeEstimating])
+  }, [address, chain_id, fromChainId, assetId, amount])
 
   useEffect(() => {
     setTokenApprovingTx(null)
@@ -174,19 +174,22 @@ export default function CrosschainBridge() {
       setEstimatingAmount(true)
 
       if (address && chain_id && chain_id === fromChainId && toChainId && assetId && typeof amount === 'number') {
-        setEstimatedAmount(amount)
+        findingRoutes()
       }
       else {
         setEstimatedAmount(null)
+        setEstimatingAmount(false)
       }
-
-      setEstimatingAmount(false)
     }
     else {
       setEstimatedAmount(null)
       setEstimatingAmount(false)
     }
   }, [address, chain_id, fromChainId, toChainId, assetId, amount, tokenApproved, advancedOptions])
+
+  useEffect(() => {
+    estimateFees()
+  }, [estimatedAmount])
 
   const isSupport = () => {
     const asset = assets_data?.find(_asset => _asset?.id === assetId)
@@ -219,7 +222,7 @@ export default function CrosschainBridge() {
         if (contract?.contract_address) {
           if (contract.contract_address !== constants.AddressZero) {
             approved = await getApproved(signer, contract.contract_address, getDeployedTransactionManagerContract(fromChainId)?.address)
-            approved = approved.gte(new BigNumber(amount).shiftedBy(contract?.contract_decimals))
+            approved = approved.gte(BigNumber(amount).shiftedBy(contract?.contract_decimals))
           }
           else {
             approved = true
@@ -238,7 +241,7 @@ export default function CrosschainBridge() {
     setTokenApproveResponse(null)
 
     try {
-      const tx_approve = await approve(signer, contract?.contract_address, getDeployedTransactionManagerContract(fromChainId)?.address, new BigNumber(amount).shiftedBy(contract?.contract_decimals).toString())
+      const tx_approve = await approve(signer, contract?.contract_address, getDeployedTransactionManagerContract(fromChainId)?.address, BigNumber(amount).shiftedBy(contract?.contract_decimals).toString())
 
       const tx_hash = tx_approve?.hash
 
@@ -313,14 +316,19 @@ export default function CrosschainBridge() {
         const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
         const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
 
-        const response = await sdk_data.estimateFeeForRouterTransferInReceivingToken(
-          fromChainId,
-          fromContract?.contract_address,
-          toChainId,
-          toContract?.contract_address,
-        )
+        if (estimatedAmount?.gasFeeInReceivingToken) {
+          setGasFee(BigNumber(estimatedAmount.gasFeeInReceivingToken).shiftedBy(-toContract?.contract_decimals).toNumber())
+        }
+        else {
+          const response = await sdk_data.estimateFeeForRouterTransferInReceivingToken(
+            fromChainId,
+            fromContract?.contract_address,
+            toChainId,
+            toContract?.contract_address,
+          )
 
-        setGasFee(response ? new BigNumber(response.toString()).shiftedBy(-toContract?.contract_decimals).toNumber() : false)
+          setGasFee(response ? BigNumber(response.toString()).shiftedBy(-toContract?.contract_decimals).toNumber() : false)
+        }
 
         setGasFeeEstimating(false)
       }
@@ -340,14 +348,19 @@ export default function CrosschainBridge() {
         const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
         const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
 
-        const response = await sdk_data.estimateMetaTxFeeInReceivingToken(
-          fromChainId,
-          fromContract?.contract_address,
-          toChainId,
-          toContract?.contract_address,
-        )
+        if (estimatedAmount) {
+          setRelayerFee(BigNumber(estimatedAmount.metaTxRelayerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber())
+        }
+        else {
+          const response = await sdk_data.estimateMetaTxFeeInReceivingToken(
+            fromChainId,
+            fromContract?.contract_address,
+            toChainId,
+            toContract?.contract_address,
+          )
 
-        setRelayerFee(response ? new BigNumber(response.toString()).shiftedBy(-toContract?.contract_decimals).toNumber() : false)
+          setRelayerFee(response ? BigNumber(response.toString()).shiftedBy(-toContract?.contract_decimals).toNumber() : false)
+        }
 
         setRelayerFeeEstimating(false)
       }
@@ -362,7 +375,15 @@ export default function CrosschainBridge() {
       if (isSupport()) {
         setRouterFeeEstimating(true)
 
-        setRouterFee(false)
+        if (estimatedAmount?.bid?.amountReceived) {
+          const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
+          const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
+
+          setRouterFee(amount - BigNumber(estimatedAmount.bid.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber())
+        }
+        else {
+          setRouterFee(false)
+        }
 
         setRouterFeeEstimating(false)
       }
@@ -370,6 +391,48 @@ export default function CrosschainBridge() {
         setRouterFee(null)
       }
     }
+  }
+
+  const findingRoutes = async () => {
+    setTokenApprovingTx(null)
+    setTokenApproveResponse(null)
+    setEstimatedAmountResponse(null)
+
+    if (sdk_data) {
+      const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
+
+      if (isSupport()) {
+        setGasFeeEstimating(true)
+
+        const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
+        const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
+
+        try {
+          const response = await sdk_data.getTransferQuote({
+            sendingChainId: fromChainId,
+            sendingAssetId: fromContract?.contract_address,
+            receivingChainId: toChainId,
+            receivingAssetId: toContract?.contract_address,
+            receivingAddress: advancedOptions?.receiving_address || address,
+            amount: BigNumber(amount).shiftedBy(fromContract?.contract_decimals).toString(),
+            transactionId: getRandomBytes32(),
+            expiry: moment().add(Number(process.env.NEXT_PUBLIC_EXPIRY_HOURS), 'hours').unix(),
+            callTo: advancedOptions?.contract_address || undefined,
+            callData: advancedOptions?.call_data || undefined,
+            initiator: undefined,
+            preferredRouters: advancedOptions?.preferredRouters?.split(',') || undefined,
+            dryRun: false,
+          })
+
+          setEstimatedAmount(response)
+        } catch (error) {
+          setEstimatedAmount(null)
+          setEstimatedAmountResponse({ status: 'failed', message: error?.message })
+        }
+      }
+    }
+
+    setEstimatingAmount(false)
   }
 
   const fromChain = chains_data?.find(_chain => _chain?.chain_id === fromChainId)
@@ -380,6 +443,8 @@ export default function CrosschainBridge() {
   const unsyncedChains = [!fromChainSynced && fromChain, !toChainSynced && toChain].filter(_chain => _chain)
 
   const asset = assets_data?.find(_asset => _asset?.id === assetId)
+  const toContract = asset?.contracts?.find(_contract => _contract?.chain_id === toChainId)
+
   const fromBalance = getChainBalance(fromChainId)
   const fromBalanceAmount = (fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals || 0)
   const toBalance = getChainBalance(toChainId)
@@ -500,9 +565,9 @@ export default function CrosschainBridge() {
             }
           </div>
         </div>
-        <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4">
+        <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 pb-0.5">
           <div className="order-1 sm:col-span-2 flex items-center justify-center">
-            <span className="text-gray-400 dark:text-gray-500 text-lg font-medium">Cryptocurrency</span>
+            <span className="text-gray-400 dark:text-gray-500 text-lg font-medium">Amount</span>
           </div>
           <div className="order-2 sm:col-span-3 flex flex-col items-center space-y-0">
             <Asset
@@ -537,7 +602,7 @@ export default function CrosschainBridge() {
                   typeof gasFee === 'number' || typeof relayerFee === 'number' || typeof routerFee === 'number' ||
                   typeof gasFee === 'boolean' || typeof relayerFee === 'boolean' || typeof routerFee === 'boolean'
                 ) && (
-                  <div className="h-4 flex items-center justify-center space-x-1.5">
+                  <div className="min-w-max h-4 flex items-center justify-center space-x-1.5">
                     <span className="text-gray-700 dark:text-gray-300 text-2xs font-bold">Fees:</span>
                     {gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ?
                       <>
@@ -583,7 +648,9 @@ export default function CrosschainBridge() {
                             <span className="font-mono">{typeof estimatedFees === 'number' ? `~${numberFormat(estimatedFees, '0,0.000000')}` : 'N/A'}</span>
                             <span className="font-semibold">{asset?.symbol}</span>
                             <IoMdInformationCircle size={14} className="mb-0.5" />
-                            <span className="font-mono lowercase text-gray-300 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
+                            {!estimatedAmount && (
+                              <span className="font-mono lowercase text-gray-300 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
+                            )}
                           </span>
                         </Popover>
                         :
@@ -611,112 +678,145 @@ export default function CrosschainBridge() {
           )}
         </div>
         {balances_data?.[fromChainId] && feesEstimated && typeof estimatedFees === 'number' && typeof amount === 'number' && (
-          <div className="sm:pt-3 pb-1">
+          <div>
             {amount < estimatedFees ?
-              <Alert
-                color="bg-red-400 dark:bg-red-500 text-left text-white"
-                icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" />}
-                closeDisabled={true}
-                rounded={true}
-              >
-                <span className="font-mono text-xs">Invalid Amount ({`<`} Estimated Fees)</span>
-              </Alert>
-              :
-              fromBalanceAmount < amount ?
+              <div className="sm:pt-2.5 pb-1">
                 <Alert
                   color="bg-red-400 dark:bg-red-500 text-left text-white"
                   icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" />}
                   closeDisabled={true}
                   rounded={true}
                 >
-                  <span className="font-mono text-xs">Insufficient Funds</span>
+                  <span className="font-mono text-xs">Invalid Amount ({`<`} Estimated Fees)</span>
                 </Alert>
-                :
-                !(fromChainSynced && toChainSynced) ?
+              </div>
+              :
+              fromBalanceAmount < amount ?
+                <div className="sm:pt-2.5 pb-1">
                   <Alert
                     color="bg-red-400 dark:bg-red-500 text-left text-white"
                     icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" />}
                     closeDisabled={true}
                     rounded={true}
                   >
-                    <span className="font-mono text-xs">
-                      {unsyncedChains.map((_chain, i) => (
-                        <span key={i} className="inline-flex items-baseline mr-2">
-                          {_chain.image && (
-                            <Img
-                              src={_chain.image}
-                              alt=""
-                              className="w-4 h-4 rounded-full self-center mr-1"
-                            />
-                          )}
-                          <span className="font-bold">{_chain.title}</span>
-                          {i < unsyncedChains.length - 1 && (
-                            <span className="ml-1.5">&</span>
-                          )}
-                        </span>
-                      ))}
-                      <span>subgraph is out of sync. Please try again later.</span>
-                    </span>
+                    <span className="font-mono text-xs">Insufficient Funds</span>
                   </Alert>
+                </div>
+                :
+                !(fromChainSynced && toChainSynced) ?
+                  <div className="sm:pt-2.5 pb-1">
+                    <Alert
+                      color="bg-red-400 dark:bg-red-500 text-left text-white"
+                      icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" />}
+                      closeDisabled={true}
+                      rounded={true}
+                    >
+                      <span className="font-mono text-xs">
+                        {unsyncedChains.map((_chain, i) => (
+                          <span key={i} className="inline-flex items-baseline mr-2">
+                            {_chain.image && (
+                              <Img
+                                src={_chain.image}
+                                alt=""
+                                className="w-4 h-4 rounded-full self-center mr-1"
+                              />
+                            )}
+                            <span className="font-bold">{_chain.title}</span>
+                            {i < unsyncedChains.length - 1 && (
+                              <span className="ml-1.5">&</span>
+                            )}
+                          </span>
+                        ))}
+                        <span>subgraph is out of sync. Please try again later.</span>
+                      </span>
+                    </Alert>
+                  </div>
                   :
                   mustChangeChain ?
-                    <Wallet
-                      chainIdToConnect={fromChainId}
-                      buttonDisconnectTitle={<>
-                        <span>Switch to</span>
-                        <Img
-                          src={fromChain?.image}
-                          alt=""
-                          className="w-8 h-8 rounded-full"
-                        />
-                        <span className="font-semibold">{fromChain?.title}</span>
-                      </>}
-                      buttonDisconnectClassName="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-xs sm:text-base space-x-2 py-4 px-3"
-                    />
+                    <div className="sm:pt-2.5 pb-1">
+                      <Wallet
+                        chainIdToConnect={fromChainId}
+                        buttonDisconnectTitle={<>
+                          <span>Switch to</span>
+                          <Img
+                            src={fromChain?.image}
+                            alt=""
+                            className="w-8 h-8 rounded-full"
+                          />
+                          <span className="font-semibold">{fromChain?.title}</span>
+                        </>}
+                        buttonDisconnectClassName="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-xs sm:text-base space-x-2 py-4 px-3"
+                      />
+                    </div>
                     :
                     mustApproveToken ?
-                      <button
-                        disabled={actionDisabled}
-                        onClick={() => approveToken()}
-                        className={`w-full ${actionDisabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${actionDisabled ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-sm sm:text-lg space-x-2 py-4 px-3`}
-                      >
-                        {tokenApprovingTx ?
-                          <>
-                            <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
-                            <span>Approving</span>
-                          </>
-                          :
-                          <span>Approve</span>
-                        }
-                        <span className="font-semibold">{asset?.symbol}</span>
-                      </button>
+                      typeof tokenApproved === 'boolean' && (
+                        <div className="sm:pt-2.5 pb-1">
+                          <button
+                            disabled={actionDisabled}
+                            onClick={() => approveToken()}
+                            className={`w-full ${actionDisabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${actionDisabled ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-sm sm:text-lg space-x-2 py-4 px-3`}
+                          >
+                            {tokenApprovingTx ?
+                              <>
+                                <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
+                                <span>Approving</span>
+                              </>
+                              :
+                              <span>Approve</span>
+                            }
+                            <span className="font-semibold">{asset?.symbol}</span>
+                          </button>
+                        </div>
+                      )
                       :
-                      typeof estimatedAmount === 'number' || estimatingAmount ?
-                        <button
-                          disabled={estimatingAmount}
-                          onClick={() => {}}
-                          className={`w-full ${estimatingAmount ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${estimatingAmount ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-sm sm:text-lg space-x-2 py-4 px-3`}
-                        >
-                          {estimatingAmount ?
-                            <>
-                              <Loader type="Rings" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
-                              <span>Searching Routes</span>
-                            </>
-                            :
-                            <span>Swap</span>
-                          }
-                          <span className="font-semibold">{asset?.symbol}</span>
-                        </button>
+                      estimatedAmount || estimatingAmount ?
+                        <>
+                          {estimatedAmount && (
+                            <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 -mt-8 sm:mt-0 pb-6 sm:pb-1.5">
+                              <div className="order-1 sm:col-span-2 flex justify-center">
+                                <span className="min-w-max text-gray-400 dark:text-gray-500 text-lg font-medium">~ Received</span>
+                              </div>
+                              <div className="order-2 sm:col-span-3 flex flex-col items-center space-y-0">
+                                <div className="h-7 flex items-center justify-center sm:justify-start space-x-2">
+                                  <div className="sm:w-40 font-mono text-sm font-semibold text-right sm:px-3">
+                                    {numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')}
+                                  </div>
+                                  <span className="text-sm font-semibold">{asset.symbol}</span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          <div className="sm:pt-2.5 pb-1">
+                            <button
+                              disabled={estimatingAmount}
+                              onClick={() => {}}
+                              className={`w-full ${estimatingAmount ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${estimatingAmount ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-sm sm:text-lg space-x-2 py-4 px-3`}
+                            >
+                              {estimatingAmount ?
+                                <>
+                                  <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" className="w-6 h-6" />
+                                  <span>Searching Routes</span>
+                                </>
+                                :
+                                <span>Swap</span>
+                              }
+                              <span className="font-semibold">{asset?.symbol}</span>
+                            </button>
+                          </div>
+                        </>
                         :
                         estimatedAmountResponse ?
-                          <Alert
-                            color="bg-red-400 dark:bg-red-500 text-left text-white"
-                            icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" />}
-                            closeDisabled={true}
-                            rounded={true}
-                          >
-                            <span className="font-mono text-xs">x</span>
-                          </Alert>
+                          <div className="sm:pt-2.5 pb-1">
+                            <Alert
+                              color={`${estimatedAmountResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : estimatedAmountResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
+                              icon={estimatedAmountResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" /> : estimatedAmountResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" />}
+                              closeDisabled={true}
+                              rounded={true}
+                            >
+                              <span className="font-mono text-xs">{estimatedAmountResponse.message}</span>
+                            </Alert>
+                          </div>
                           :
                           null
             }
