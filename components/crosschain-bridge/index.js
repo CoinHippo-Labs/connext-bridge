@@ -729,7 +729,7 @@ export default function CrosschainBridge() {
                             )}
                           </span>
                         ))}
-                        <span>subgraph is out of sync. Please try again later.</span>
+                        <span>subgraph{unsyncedChains.length > 1 ? 's' : ''} is out of sync. Please try again later.</span>
                       </span>
                     </Alert>
                   </div>

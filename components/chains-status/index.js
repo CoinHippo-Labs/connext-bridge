@@ -125,7 +125,7 @@ export default function ChainsStatus() {
         <div className="flex flex-wrap items-center font-mono leading-4 text-blue-600 dark:text-blue-400 text-2xs space-y-1 py-2 px-2 sm:px-4">
           <FaRegHandPointRight size={18} className="mr-1.5" />
           <span className="mr-1.5">
-            You may face some delay transfers due to <span className="font-semibold">{chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).map(_chain => _chain?.short_name).join(', ')}</span> subgraph{chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).length > 1 ? 's' : ''} is not synced. However, no worry at all - your funds are SAFE. Simply check your transaction status at
+            You may face some delay transfers due to the <span className="font-semibold">{chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).map(_chain => _chain?.short_name).join(', ')}</span> subgraph{chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).length > 1 ? 's' : ''} is not synced. However, no worry at all - your funds are SAFE. Simply check your transaction status at
           </span>
           <a
             href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}${address ? `/address/${address}` : ''}`}
