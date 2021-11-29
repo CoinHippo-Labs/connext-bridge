@@ -30,6 +30,8 @@ import { CHAINS_STATUS_DATA, CHAINS_STATUS_SYNC_DATA, BALANCES_DATA } from '../.
 
 const refresh_estimated_fees_sec = Number(process.env.NEXT_PUBLIC_REFRESH_ESTIMATED_FEES_SEC)
 
+BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
+
 export default function CrosschainBridge() {
   const dispatch = useDispatch()
   const { chains, assets, chains_status, balances, wallet, sdk, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, balances: state.balances, wallet: state.wallet, sdk: state.sdk, preferences: state.preferences }), shallowEqual)
@@ -46,7 +48,10 @@ export default function CrosschainBridge() {
   const [toChainId, setToChainId] = useState(null)
   const [assetId, setAssetId] = useState(null)
   const [amount, setAmount] = useState(null)
-  const [tokenApproved, setTokenApproved] = useState(true)
+  const [estimatedAmount, setEstimatedAmount] = useState(null)
+  const [estimatingAmount, setEstimatingAmount] = useState(null)
+  const [estimatedAmountResponse, setEstimatedAmountResponse] = useState(null)
+  const [tokenApproved, setTokenApproved] = useState(null)
   const [tokenApprovingTx, setTokenApprovingTx] = useState(null)
   const [tokenApproveResponse, setTokenApproveResponse] = useState(null)
   const [advancedOptions, setAdvancedOptions] = useState({
@@ -164,6 +169,25 @@ export default function CrosschainBridge() {
     setTokenApproveResponse(null)
   }, [address, fromChainId, assetId])
 
+  useEffect(() => {
+    if (tokenApproved) {
+      setEstimatingAmount(true)
+
+      if (address && chain_id && chain_id === fromChainId && toChainId && assetId && typeof amount === 'number') {
+        setEstimatedAmount(amount)
+      }
+      else {
+        setEstimatedAmount(null)
+      }
+
+      setEstimatingAmount(false)
+    }
+    else {
+      setEstimatedAmount(null)
+      setEstimatingAmount(false)
+    }
+  }, [address, chain_id, fromChainId, toChainId, assetId, amount, tokenApproved, advancedOptions])
+
   const isSupport = () => {
     const asset = assets_data?.find(_asset => _asset?.id === assetId)
 
@@ -175,10 +199,10 @@ export default function CrosschainBridge() {
 
   const getChainSynced = _chain_id => !chains_status_data || chains_status_data.find(_chain => _chain.chain_id === _chain_id)?.synced
 
-  const isTokenApproved = async () => {
-    let approved = true
+  const isTokenApproved = async isAfterApprove => {
+    let approved = tokenApproved
 
-    if (address && chain_id && chain_id === fromChainId && assetId && !tokenApprovingTx) {
+    if (address && chain_id && chain_id === fromChainId && assetId && (isAfterApprove || !tokenApprovingTx)) {
       const fromChainSynced = getChainSynced(fromChainId)
       const toChainSynced = getChainSynced(toChainId)
 
@@ -192,10 +216,14 @@ export default function CrosschainBridge() {
         const asset = assets_data?.find(_asset => _asset?.id === assetId)
         const contract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
 
-        if (contract?.contract_address && contract.contract_address !== constants.AddressZero) {
-          approved = await getApproved(signer, contract.contract_address, getDeployedTransactionManagerContract(fromChainId)?.address)
-
-          approved = approved.gte(new BigNumber(amount).shiftedBy(contract?.contract_decimals))
+        if (contract?.contract_address) {
+          if (contract.contract_address !== constants.AddressZero) {
+            approved = await getApproved(signer, contract.contract_address, getDeployedTransactionManagerContract(fromChainId)?.address)
+            approved = approved.gte(new BigNumber(amount).shiftedBy(contract?.contract_decimals))
+          }
+          else {
+            approved = true
+          }
         }
       }
     }
@@ -210,20 +238,22 @@ export default function CrosschainBridge() {
     setTokenApproveResponse(null)
 
     try {
-      const tx_approve = await approve(signer, contract.contract_address, address, new BigNumber(amount).shiftedBy(contract?.contract_decimals).toString())
+      const tx_approve = await approve(signer, contract?.contract_address, getDeployedTransactionManagerContract(fromChainId)?.address, new BigNumber(amount).shiftedBy(contract?.contract_decimals).toString())
 
-      setTokenApprovingTx(tx_approve?.hash)
+      const tx_hash = tx_approve?.hash
+
+      setTokenApprovingTx(tx_hash)
       setTokenApproveResponse({ status: 'pending', message: `Wait for ${asset?.symbol} Approval Confirmation` })
 
       await tx_approve.wait()
 
-      const _approved = await isTokenApproved()
+      const _approved = await isTokenApproved(true)
 
       if (_approved !== tokenApproved) {
         setTokenApproved(_approved)
       }
 
-      setTokenApproveResponse({ status: 'success', message: `${asset?.symbol} Approval Transaction Confirmed.` })
+      setTokenApproveResponse({ status: 'success', message: `${asset?.symbol} Approval Transaction Confirmed.`, tx_hash })
     } catch (error) {
       setTokenApproveResponse({ status: 'failed', message: error?.message })
     }
@@ -241,7 +271,7 @@ export default function CrosschainBridge() {
           value: { [`${_chain_id}`]: response.data.items },
         })
       }
-      else if (!balances_data?.[_chain_id]) {
+      else if (!(balances_data?.[_chain_id]?.length > 0)) {
         dispatch({
           type: BALANCES_DATA,
           value: { [`${_chain_id}`]: [] },
@@ -661,7 +691,34 @@ export default function CrosschainBridge() {
                         <span className="font-semibold">{asset?.symbol}</span>
                       </button>
                       :
-                      null
+                      typeof estimatedAmount === 'number' || estimatingAmount ?
+                        <button
+                          disabled={estimatingAmount}
+                          onClick={() => {}}
+                          className={`w-full ${estimatingAmount ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${estimatingAmount ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-sm sm:text-lg space-x-2 py-4 px-3`}
+                        >
+                          {estimatingAmount ?
+                            <>
+                              <Loader type="Rings" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
+                              <span>Searching Routes</span>
+                            </>
+                            :
+                            <span>Swap</span>
+                          }
+                          <span className="font-semibold">{asset?.symbol}</span>
+                        </button>
+                        :
+                        estimatedAmountResponse ?
+                          <Alert
+                            color="bg-red-400 dark:bg-red-500 text-left text-white"
+                            icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" />}
+                            closeDisabled={true}
+                            rounded={true}
+                          >
+                            <span className="font-mono text-xs">x</span>
+                          </Alert>
+                          :
+                          null
             }
           </div>
         )}
@@ -679,25 +736,23 @@ export default function CrosschainBridge() {
                 :
                 <FaClock className="w-4 h-4 stroke-current mr-2" />
             }
-            content={tokenApproveResponse.status === 'pending' ?
-              <span className="flex flex-wrap items-center">
-                <span className="mr-1">{tokenApproveResponse.message}</span>
-                <Loader type="ThreeDots" color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="16" height="16" className="mt-1 mr-2" />
-                {fromChain?.explorer?.url && (
-                  <a
-                    href={`${fromChain.explorer.url}${fromChain.explorer.transaction_path?.replace('{tx}', tokenApprovingTx)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center font-semibold"
-                  >
-                    <span>View on {fromChain.explorer.name}</span>
-                    <TiArrowRight size={20} className="transform -rotate-45" />
-                  </a>
-                )}
-              </span>
-              :
-              <span>{tokenApproveResponse.message}</span>
-            }
+            content={<span className="flex flex-wrap items-center">
+              <span className="mr-1.5">{tokenApproveResponse.message}</span>
+              {tokenApproveResponse.status === 'pending' && (
+                <Loader type="ThreeDots" color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="16" height="16" className="mt-1 mr-1.5" />
+              )}
+              {fromChain?.explorer?.url && (tokenApprovingTx || tokenApproveResponse.tx_hash) && (
+                <a
+                  href={`${fromChain.explorer.url}${fromChain.explorer.transaction_path?.replace('{tx}', tokenApprovingTx || tokenApproveResponse.tx_hash)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center font-semibold"
+                >
+                  <span>View on {fromChain.explorer.name}</span>
+                  <TiArrowRight size={20} className="transform -rotate-45" />
+                </a>
+              )}
+            </span>}
           />
         )}
       </div>
