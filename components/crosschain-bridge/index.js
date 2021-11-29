@@ -470,10 +470,23 @@ export default function CrosschainBridge() {
           />
           <h1 className="uppercase text-base sm:text-lg font-semibold">Cross-Chain Swap</h1>
         </div>
-        <AdvancedOptions
-          initialOptions={advancedOptions}
-          updateOptions={_options => setAdvancedOptions(_options)}
-        />
+        <div className="flex items-center space-x-2">
+          {toChain && (
+            <a
+              href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${toChain.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 cursor-pointer rounded-lg capitalize flex items-center text-gray-700 dark:text-gray-300 text-xs font-semibold py-1.5 px-2.5"
+            >
+              <span>Liquidity</span>
+              <TiArrowRight size={16} className="transform -rotate-45 -mr-1" />
+            </a>
+          )}
+          <AdvancedOptions
+            initialOptions={advancedOptions}
+            updateOptions={_options => setAdvancedOptions(_options)}
+          />
+        </div>
       </div>
       <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-lg space-y-12 sm:space-y-4 py-6 px-6 sm:px-7">
         <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-4 sm:gap-6">
