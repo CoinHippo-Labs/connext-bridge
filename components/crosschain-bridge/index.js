@@ -14,7 +14,7 @@ import { IoWallet } from 'react-icons/io5'
 import { IoMdInformationCircle } from 'react-icons/io'
 import { BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
 import { FaCheckCircle, FaClock, FaTimesCircle } from 'react-icons/fa'
-import { TiArrowRight } from 'react-icons/ti'
+import { TiArrowRight, TiWarning } from 'react-icons/ti'
 
 import Network from './network'
 import Asset from './asset'
@@ -30,7 +30,9 @@ import { smallNumber, numberFormat } from '../../lib/utils'
 
 import { CHAINS_STATUS_DATA, CHAINS_STATUS_SYNC_DATA, BALANCES_DATA } from '../../reducers/types'
 
-const refresh_estimated_fees_sec = Number(process.env.NEXT_PUBLIC_REFRESH_ESTIMATED_FEES_SEC)
+const refresh_estimated_fees_second = Number(process.env.NEXT_PUBLIC_REFRESH_ESTIMATED_FEES_SECOND)
+const expiry_hours = Number(process.env.NEXT_PUBLIC_EXPIRY_HOURS)
+const bid_expires_second = Number(process.env.NEXT_PUBLIC_BID_EXPIRES_SECOND)
 
 BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
 
@@ -70,25 +72,8 @@ export default function CrosschainBridge() {
   const [gasFeeEstimating, setGasFeeEstimating] = useState(null)
   const [relayerFeeEstimating, setRelayerFeeEstimating] = useState(null)
   const [routerFeeEstimating, setRouterFeeEstimating] = useState(null)
-  const [refreshEstimatedFeesSecond, setRefreshEstimatedFeesSecond] = useState(refresh_estimated_fees_sec)
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    const getData = async () => {
-      if (chains_data) {
-        if (!controller.signal.aborted) {
-          
-        }
-      }
-    }
-
-    getData()
-
-    return () => {
-      controller?.abort()
-    }
-  }, [])
+  const [refreshEstimatedFeesSecond, setRefreshEstimatedFeesSecond] = useState(refresh_estimated_fees_second)
+  const [bidExpiresSecond, setBidExpiresSecond] = useState(bid_expires_second)
 
   useEffect(() => {
     if (chain_id && !fromChainId && toChainId !== chain_id) {
@@ -140,7 +125,7 @@ export default function CrosschainBridge() {
       typeof relayerFeeEstimating === 'boolean' && !relayerFeeEstimating &&
       typeof routerFeeEstimating === 'boolean' && !routerFeeEstimating
     ) {
-      setRefreshEstimatedFeesSecond(refresh_estimated_fees_sec)
+      setRefreshEstimatedFeesSecond(refresh_estimated_fees_second)
     }
   }, [gasFeeEstimating, relayerFeeEstimating, routerFeeEstimating])
 
@@ -171,17 +156,17 @@ export default function CrosschainBridge() {
 
   useEffect(() => {
     if (tokenApproved) {
-      setEstimatingAmount(true)
-
       if (address && chain_id && chain_id === fromChainId && toChainId && assetId && typeof amount === 'number') {
         findingRoutes()
       }
       else {
+        setEstimatingAmount(true)
         setEstimatedAmount(null)
         setEstimatingAmount(false)
       }
     }
     else {
+      setEstimatingAmount(true)
       setEstimatedAmount(null)
       setEstimatingAmount(false)
     }
@@ -190,6 +175,21 @@ export default function CrosschainBridge() {
   useEffect(() => {
     estimateFees()
   }, [estimatedAmount])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (bidExpiresSecond - 1 > -1) {
+        setBidExpiresSecond(bidExpiresSecond - 1)
+      }
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [bidExpiresSecond])
+
+  useEffect(() => {
+    if (bidExpiresSecond === 0) {
+      findingRoutes()
+    }
+  }, [bidExpiresSecond])
 
   const isSupport = () => {
     const asset = assets_data?.find(_asset => _asset?.id === assetId)
@@ -397,6 +397,7 @@ export default function CrosschainBridge() {
     setTokenApprovingTx(null)
     setTokenApproveResponse(null)
     setEstimatedAmountResponse(null)
+    setEstimatingAmount(true)
 
     if (sdk_data) {
       const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
@@ -416,7 +417,7 @@ export default function CrosschainBridge() {
             receivingAddress: advancedOptions?.receiving_address || address,
             amount: BigNumber(amount).shiftedBy(fromContract?.contract_decimals).toString(),
             transactionId: getRandomBytes32(),
-            expiry: moment().add(Number(process.env.NEXT_PUBLIC_EXPIRY_HOURS), 'hours').unix(),
+            expiry: moment().add(expiry_hours, 'hours').unix(),
             callTo: advancedOptions?.contract_address || undefined,
             callData: advancedOptions?.call_data || undefined,
             initiator: undefined,
@@ -425,6 +426,7 @@ export default function CrosschainBridge() {
           })
 
           setEstimatedAmount(response)
+          setBidExpiresSecond(bid_expires_second)
         } catch (error) {
           setEstimatedAmount(null)
           setEstimatedAmountResponse({ status: 'failed', message: error?.message })
@@ -495,7 +497,7 @@ export default function CrosschainBridge() {
               null
               :
               fromBalance ?
-                <div className="flex items-center text-gray-600 dark:text-gray-400 text-2xs space-x-1 pt-1">
+                <div className="flex items-center text-gray-400 dark:text-gray-600 text-2xs space-x-1 pt-1">
                   <IoWallet size={12} />
                   <span className="font-mono">{numberFormat((fromBalance.balance || 0) / Math.pow(10, fromBalance.contract_decimals), '0,0.00000000')}</span>
                   <span className="font-semibold">{fromBalance.contract_ticker_symbol}</span>
@@ -506,7 +508,7 @@ export default function CrosschainBridge() {
                   :
                   balances_data?.[fromChainId] ?
                     toBalance ?
-                      <div className="text-gray-600 dark:text-gray-400 text-2xs pt-1">-</div>
+                      <div className="text-gray-400 dark:text-gray-600 text-2xs pt-1">-</div>
                       :
                       null
                     :
@@ -546,7 +548,7 @@ export default function CrosschainBridge() {
               null
               :
               toBalance ?
-                <div className="flex items-center text-gray-600 dark:text-gray-400 text-2xs space-x-1 pt-1">
+                <div className="flex items-center text-gray-400 dark:text-gray-600 text-2xs space-x-1 pt-1">
                   <IoWallet size={12} />
                   <span className="font-mono">{numberFormat((toBalance.balance || 0) / Math.pow(10, toBalance.contract_decimals), '0,0.00000000')}</span>
                   <span className="font-semibold">{toBalance.contract_ticker_symbol}</span>
@@ -557,7 +559,7 @@ export default function CrosschainBridge() {
                   :
                   balances_data?.[toChainId] ?
                     fromBalance ?
-                      <div className="text-gray-600 dark:text-gray-400 text-2xs pt-1">-</div>
+                      <div className="text-gray-400 dark:text-gray-600 text-2xs pt-1">-</div>
                       :
                       null
                     :
@@ -567,7 +569,7 @@ export default function CrosschainBridge() {
         </div>
         <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 pb-0.5">
           <div className="order-1 sm:col-span-2 flex items-center justify-center">
-            <span className="text-gray-400 dark:text-gray-500 text-lg font-medium">Amount</span>
+            <span className="text-gray-400 dark:text-gray-600 text-lg font-medium">Amount</span>
           </div>
           <div className="order-2 sm:col-span-3 flex flex-col items-center space-y-0">
             <Asset
@@ -597,13 +599,13 @@ export default function CrosschainBridge() {
           </div>
           {address && isSupport() && (
             <>
-              <div className="order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-4">
+              <div className="order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-5">
                 {(gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ||
                   typeof gasFee === 'number' || typeof relayerFee === 'number' || typeof routerFee === 'number' ||
                   typeof gasFee === 'boolean' || typeof relayerFee === 'boolean' || typeof routerFee === 'boolean'
                 ) && (
                   <div className="min-w-max h-4 flex items-center justify-center space-x-1.5">
-                    <span className="text-gray-700 dark:text-gray-300 text-2xs font-bold">Fees:</span>
+                    <span className="text-gray-600 dark:text-gray-400 text-2xs font-bold">Fees:</span>
                     {gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ?
                       <>
                         <span className="text-gray-600 dark:text-gray-400 text-2xs">Estimating</span>
@@ -614,9 +616,9 @@ export default function CrosschainBridge() {
                         <Popover
                           placement="bottom"
                           title={<div className="flex items-center space-x-2">
-                            <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-2xs font-semibold">Estimated Fees:</span>
+                            <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-2xs font-semibold">{estimatedAmount ? 'Actual' : 'Estimated'} Fees:</span>
                             <span className="text-gray-800 dark:text-gray-200 text-2xs space-x-1">
-                              <span className="font-mono">{typeof estimatedFees === 'number' ? `~${numberFormat(estimatedFees, '0,0.00000000')}` : 'N/A'}</span>
+                              <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.00000000')}` : 'N/A'}</span>
                               <span className="font-semibold">{asset?.symbol}</span>
                             </span>
                           </div>}
@@ -624,28 +626,28 @@ export default function CrosschainBridge() {
                             <div className="flex items-center justify-between space-x-2">
                               <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-3xs font-medium">Dest. Tx Cost:</span>
                               <span className="text-gray-800 dark:text-gray-200 text-3xs space-x-1">
-                                <span className="font-mono">{typeof gasFee === 'boolean' ? 'N/A' : `~${numberFormat((gasFee || 0), '0,0.00000000')}`}</span>
+                                <span className="font-mono">{typeof gasFee === 'boolean' ? 'N/A' : `${estimatedAmount ? '' : '~'}${numberFormat((gasFee || 0), '0,0.00000000')}`}</span>
                                 <span className="font-semibold">{asset?.symbol}</span>
                               </span>
                             </div>
                             <div className="flex items-center justify-between space-x-2">
                               <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-3xs font-medium">Relayer Fee:</span>
                               <span className="text-gray-800 dark:text-gray-200 text-3xs space-x-1">
-                                <span className="font-mono">{typeof relayerFee === 'boolean' ? 'N/A' : `~${numberFormat((relayerFee || 0), '0,0.00000000')}`}</span>
+                                <span className="font-mono">{typeof relayerFee === 'boolean' ? 'N/A' : `${estimatedAmount ? '' : '~'}${numberFormat((relayerFee || 0), '0,0.00000000')}`}</span>
                                 <span className="font-semibold">{asset?.symbol}</span>
                               </span>
                             </div>
                             <div className="flex items-center justify-between space-x-2">
                               <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-3xs font-medium">Router Fee:</span>
                               <span className="text-gray-800 dark:text-gray-200 text-3xs space-x-1">
-                                <span className="font-mono">{typeof routerFee === 'boolean' ? 'N/A' : `~${numberFormat((routerFee || 0), '0,0.00000000')}`}</span>
+                                <span className="font-mono">{typeof routerFee === 'boolean' ? 'N/A' : `${estimatedAmount ? '' : '~'}${numberFormat((routerFee || 0), '0,0.00000000')}`}</span>
                                 <span className="font-semibold">{asset?.symbol}</span>
                               </span>
                             </div>
                           </div>}
                         >
-                          <span className="flex items-center text-gray-400 dark:text-gray-400 text-2xs space-x-1">
-                            <span className="font-mono">{typeof estimatedFees === 'number' ? `~${numberFormat(estimatedFees, '0,0.000000')}` : 'N/A'}</span>
+                          <span className="flex items-center text-gray-400 dark:text-gray-200 text-2xs space-x-1">
+                            <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.000000')}` : 'N/A'}</span>
                             <span className="font-semibold">{asset?.symbol}</span>
                             <IoMdInformationCircle size={14} className="mb-0.5" />
                             {!estimatedAmount && (
@@ -659,12 +661,12 @@ export default function CrosschainBridge() {
                   </div>
                 )}
               </div>
-              <div className="order-3 sm:order-4 sm:col-span-3 sm:-mt-4 mx-auto sm:-ml-0.5">
+              <div className="order-3 sm:order-4 sm:col-span-3 sm:-mt-5 mx-auto sm:-ml-0.5">
                 <div className="w-40 h-4 flex items-center justify-end">
                   {balances_data?.[fromChainId] ?
                     <button
                       onClick={() => setAmount(Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals) > smallNumber ? Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance.contract_decimals) : 0)}
-                      className="text-gray-700 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-400 text-2xs font-bold"
+                      className="text-gray-600 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-500 text-2xs font-bold"
                     >
                       Max
                     </button>
@@ -775,16 +777,26 @@ export default function CrosschainBridge() {
                           {estimatedAmount && (
                             <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 -mt-8 sm:mt-0 pb-6 sm:pb-1.5">
                               <div className="order-1 sm:col-span-2 flex justify-center">
-                                <span className="min-w-max text-gray-400 dark:text-gray-500 text-lg font-medium">~ Received</span>
+                                <span className="min-w-max text-gray-400 dark:text-gray-600 text-lg font-medium">~ Received</span>
                               </div>
                               <div className="order-2 sm:col-span-3 flex flex-col items-center space-y-0">
                                 <div className="h-7 flex items-center justify-center sm:justify-start space-x-2">
-                                  <div className="sm:w-40 font-mono text-sm font-semibold text-right sm:px-3">
-                                    {numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')}
+                                  <div className="sm:w-40 font-mono flex items-center justify-end text-sm font-semibold text-right sm:px-3">
+                                    {estimatingAmount ?
+                                      <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#4B5563'} width="16" height="16" className="mt-1" />
+                                      :
+                                      numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')
+                                    }
                                   </div>
                                   <span className="text-sm font-semibold">{asset.symbol}</span>
                                 </div>
                               </div>
+                              {!estimatingAmount && estimatedFees > BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber() && (
+                                <div className="order-2 sm:col-span-5 flex flex-wrap items-center justify-center text-yellow-500 dark:text-yellow-400 mt-4 sm:mt-0 -mb-4 sm:-mb-2">
+                                  <TiWarning size={16} className="mb-0.5 mr-1.5" />
+                                  <span>Fee is greater than estimated received.</span>
+                                </div>
+                              )}
                             </div>
                           )}
                           <div className="sm:pt-2.5 pb-1">
@@ -802,6 +814,9 @@ export default function CrosschainBridge() {
                                 <span>Swap</span>
                               }
                               <span className="font-semibold">{asset?.symbol}</span>
+                              {!estimatingAmount && typeof bidExpiresSecond === 'number' && (
+                                <span className="text-gray-300 dark:text-gray-200 text-xs font-medium">(expire in {bidExpiresSecond}s)</span>
+                              )}
                             </button>
                           </div>
                         </>
@@ -814,7 +829,7 @@ export default function CrosschainBridge() {
                               closeDisabled={true}
                               rounded={true}
                             >
-                              <span className="font-mono text-xs">{estimatedAmountResponse.message}</span>
+                              <span className="break-all font-mono text-xs">{estimatedAmountResponse.message}</span>
                             </Alert>
                           </div>
                           :

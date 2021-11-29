@@ -125,7 +125,7 @@
         .dropdown-item {
           @apply bg-black;
           &:hover {
-            @apply bg-gray-800;
+            @apply bg-gray-900;
           }
         }
       }
