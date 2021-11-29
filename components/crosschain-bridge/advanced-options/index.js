@@ -46,8 +46,8 @@ export default function AdvancedOptions({ initialOptions, updateOptions }) {
 
   return (
     <ModalConfirm
-      buttonTitle={<HiCode size={16} />}
-      buttonClassName="bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 rounded-full p-2"
+      buttonTitle={<HiCode size={20} />}
+      buttonClassName="bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 rounded-full p-2.5"
       title="Advanced Options"
       body={<div className="form">
         {items.map((item, i) => (

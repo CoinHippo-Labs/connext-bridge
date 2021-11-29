@@ -49,28 +49,28 @@ export default function DropdownNetwork({ disabled, chain_id, onSelect }) {
         ref={buttonRef}
         disabled={disabled}
         onClick={handleDropdownClick}
-        className={`h-12 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
+        className={`h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
       >
         {chain ?
-          <div className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-2xl flex items-center space-x-1.5 py-1.5 px-3">
+          <div className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-3xl flex items-center text-lg space-x-1.5 py-1.5 px-4">
             <Img
               src={chain.image}
               alt=""
-              className="w-5 h-5 rounded-full"
+              className="w-6 h-6 rounded-full"
             />
             <span className="sm:hidden font-semibold">{chain.title}</span>
             <span className="hidden sm:block font-semibold">{chain.short_name}</span>
           </div>
           :
           chains_data ?
-            <div className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-2xl uppercase text-gray-500 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-200 font-medium py-1.5 px-3">Select chain</div>
+            <div className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-3xl uppercase text-gray-500 hover:text-gray-600 dark:text-gray-200 dark:hover:text-gray-100 text-lg font-medium py-1.5 px-4">Select chain</div>
             :
             <Loader type="Puff" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="24" height="24" />
         }
       </button>
       <div
         ref={dropdownRef} 
-        className={`dropdown ${hidden ? '' : 'open'} absolute top-0 left-0 mt-10`}
+        className={`dropdown ${hidden ? '' : 'open'} absolute top-0 left-0 mt-14`}
       >
         <div className="dropdown-content inside w-64 bottom-start">
           <Networks handleDropdownClick={_chain_id => handleDropdownClick(_chain_id)} />

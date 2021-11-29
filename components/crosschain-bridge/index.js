@@ -231,7 +231,7 @@ export default function CrosschainBridge() {
       }
     }
 
-    return approved || true
+    return approved
   }
 
   const approveToken = async () => {
@@ -465,26 +465,26 @@ export default function CrosschainBridge() {
   const actionDisabled = tokenApprovingTx
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-2 sm:space-y-3 mt-4 sm:mt-12">
-      <div className="w-full max-w-md flex items-center justify-center sm:justify-between space-x-2">
+    <div className="flex flex-col items-center justify-center space-y-2 sm:space-y-3 mt-4 sm:mt-8">
+      <div className="w-full max-w-lg flex items-center justify-center sm:justify-between space-x-2">
         <div className="flex items-center space-x-2">
           <Img
             src="/logos/connext/logo.png"
             alt=""
             className="w-7 sm:w-8 h-7 sm:h-8 rounded-full"
           />
-          <h1 className="uppercase text-base sm:text-lg font-semibold">Cross-Chain Swap</h1>
+          <h1 className="uppercase text-base sm:text-lg font-bold">Cross-Chain Swap</h1>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2.5">
           {toChain && (
             <a
               href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${toChain.id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 cursor-pointer rounded-lg capitalize flex items-center text-gray-700 dark:text-gray-300 text-xs font-semibold py-1.5 px-2.5"
+              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 cursor-pointer rounded-xl capitalize flex items-center text-gray-700 dark:text-gray-300 text-base font-semibold py-2 px-3"
             >
               <span>Liquidity</span>
-              <TiArrowRight size={16} className="transform -rotate-45 -mr-1" />
+              <TiArrowRight size={20} className="transform -rotate-45 -mr-1" />
             </a>
           )}
           <AdvancedOptions
@@ -493,10 +493,10 @@ export default function CrosschainBridge() {
           />
         </div>
       </div>
-      <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-lg space-y-12 sm:space-y-4 py-6 px-6 sm:px-7">
+      <div className="w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-lg space-y-12 sm:space-y-4 py-6 px-6 sm:px-7">
         <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-4 sm:gap-6">
           <div className="sm:col-span-2 flex flex-col items-center space-y-0">
-            <span className="text-gray-400 dark:text-gray-500 text-lg font-medium">From Chain</span>
+            <span className="text-gray-400 dark:text-gray-500 text-xl font-medium">From Chain</span>
             <Network
               disabled={actionDisabled}
               chain_id={fromChainId}
@@ -515,8 +515,8 @@ export default function CrosschainBridge() {
               null
               :
               fromBalance ?
-                <div className="flex items-center text-gray-400 dark:text-gray-600 text-2xs space-x-1 pt-1">
-                  <IoWallet size={12} />
+                <div className="flex items-center text-gray-400 dark:text-gray-600 text-sm space-x-1.5">
+                  <IoWallet size={16} />
                   <span className="font-mono">{numberFormat((fromBalance.balance || 0) / Math.pow(10, fromBalance.contract_decimals), '0,0.00000000')}</span>
                   <span className="font-semibold">{fromBalance.contract_ticker_symbol}</span>
                 </div>
@@ -526,7 +526,7 @@ export default function CrosschainBridge() {
                   :
                   balances_data?.[fromChainId] ?
                     toBalance ?
-                      <div className="text-gray-400 dark:text-gray-600 text-2xs pt-1">-</div>
+                      <div className="text-gray-400 dark:text-gray-600 text-sm">-</div>
                       :
                       null
                     :
@@ -542,12 +542,12 @@ export default function CrosschainBridge() {
               }}
               className={`${actionDisabled ? 'cursor-not-allowed' : ''}`}
             >
-              <MdSwapVerticalCircle size={36} className="sm:hidden rounded-full shadow-lg text-indigo-400 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-white" />
-              <MdSwapHorizontalCircle size={36} className="hidden sm:block rounded-full shadow-lg text-indigo-400 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-white" />
+              <MdSwapVerticalCircle size={40} className="sm:hidden rounded-full shadow-lg text-indigo-500 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-white" />
+              <MdSwapHorizontalCircle size={40} className="hidden sm:block rounded-full shadow-lg text-indigo-500 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-white" />
             </button>
           </div>
           <div className="sm:col-span-2 flex flex-col items-center space-y-0">
-            <span className="text-gray-400 dark:text-gray-500 text-lg font-medium">To Chain</span>
+            <span className="text-gray-400 dark:text-gray-500 text-xl font-medium">To Chain</span>
             <Network
               disabled={actionDisabled}
               chain_id={toChainId}
@@ -566,8 +566,8 @@ export default function CrosschainBridge() {
               null
               :
               toBalance ?
-                <div className="flex items-center text-gray-400 dark:text-gray-600 text-2xs space-x-1 pt-1">
-                  <IoWallet size={12} />
+                <div className="flex items-center text-gray-400 dark:text-gray-600 text-sm space-x-1.5">
+                  <IoWallet size={16} />
                   <span className="font-mono">{numberFormat((toBalance.balance || 0) / Math.pow(10, toBalance.contract_decimals), '0,0.00000000')}</span>
                   <span className="font-semibold">{toBalance.contract_ticker_symbol}</span>
                 </div>
@@ -577,7 +577,7 @@ export default function CrosschainBridge() {
                   :
                   balances_data?.[toChainId] ?
                     fromBalance ?
-                      <div className="text-gray-400 dark:text-gray-600 text-2xs pt-1">-</div>
+                      <div className="text-gray-400 dark:text-gray-600 text-sm">-</div>
                       :
                       null
                     :
@@ -587,7 +587,7 @@ export default function CrosschainBridge() {
         </div>
         <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 pb-0.5">
           <div className="order-1 sm:col-span-2 flex items-center justify-center">
-            <span className="text-gray-400 dark:text-gray-600 text-lg font-medium">Amount</span>
+            <span className="text-gray-400 dark:text-gray-600 text-xl font-medium">Amount</span>
           </div>
           <div className="order-2 sm:col-span-3 flex flex-col items-center space-y-0">
             <Asset
@@ -623,48 +623,48 @@ export default function CrosschainBridge() {
                   typeof gasFee === 'boolean' || typeof relayerFee === 'boolean' || typeof routerFee === 'boolean'
                 ) && (
                   <div className="min-w-max h-4 flex items-center justify-center space-x-1.5">
-                    <span className="text-gray-600 dark:text-gray-400 text-2xs font-bold">Fees:</span>
+                    <span className="text-gray-600 dark:text-gray-400 text-sm font-semibold">Fees:</span>
                     {gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ?
                       <>
-                        <span className="text-gray-600 dark:text-gray-400 text-2xs">Estimating</span>
-                        <Loader type="BallTriangle" color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="14" height="14" />
+                        <span className="text-gray-600 dark:text-gray-400 text-sm">Estimating</span>
+                        <Loader type="BallTriangle" color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="18" height="18" />
                       </>
                       :
                       feesEstimated ?
                         <Popover
                           placement="bottom"
                           title={<div className="flex items-center space-x-2">
-                            <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-2xs font-semibold">{estimatedAmount ? 'Actual' : 'Estimated'} Fees:</span>
-                            <span className="text-gray-800 dark:text-gray-200 text-2xs space-x-1">
+                            <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-sm font-semibold">{estimatedAmount ? 'Actual' : 'Estimated'} Fees:</span>
+                            <span className="text-gray-800 dark:text-gray-200 text-sm space-x-1">
                               <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.00000000')}` : 'N/A'}</span>
                               <span className="font-semibold">{asset?.symbol}</span>
                             </span>
                           </div>}
                           content={<div className="flex flex-col space-y-2">
                             <div className="flex items-center justify-between space-x-2">
-                              <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-3xs font-medium">Dest. Tx Cost:</span>
-                              <span className="text-gray-800 dark:text-gray-200 text-3xs space-x-1">
+                              <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Dest. Tx Cost:</span>
+                              <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
                                 <span className="font-mono">{typeof gasFee === 'boolean' ? 'N/A' : `${estimatedAmount ? '' : '~'}${numberFormat((gasFee || 0), '0,0.00000000')}`}</span>
                                 <span className="font-semibold">{asset?.symbol}</span>
                               </span>
                             </div>
                             <div className="flex items-center justify-between space-x-2">
-                              <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-3xs font-medium">Relayer Fee:</span>
-                              <span className="text-gray-800 dark:text-gray-200 text-3xs space-x-1">
+                              <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Relayer Fee:</span>
+                              <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
                                 <span className="font-mono">{typeof relayerFee === 'boolean' ? 'N/A' : `${estimatedAmount ? '' : '~'}${numberFormat((relayerFee || 0), '0,0.00000000')}`}</span>
                                 <span className="font-semibold">{asset?.symbol}</span>
                               </span>
                             </div>
                             <div className="flex items-center justify-between space-x-2">
-                              <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-3xs font-medium">Router Fee:</span>
-                              <span className="text-gray-800 dark:text-gray-200 text-3xs space-x-1">
+                              <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Router Fee:</span>
+                              <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
                                 <span className="font-mono">{typeof routerFee === 'boolean' ? 'N/A' : `${estimatedAmount ? '' : '~'}${numberFormat((routerFee || 0), '0,0.00000000')}`}</span>
                                 <span className="font-semibold">{asset?.symbol}</span>
                               </span>
                             </div>
                           </div>}
                         >
-                          <span className="flex items-center text-gray-400 dark:text-gray-200 text-2xs space-x-1">
+                          <span className="flex items-center text-gray-400 dark:text-gray-200 text-sm space-x-1">
                             <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.000000')}` : 'N/A'}</span>
                             <span className="font-semibold">{asset?.symbol}</span>
                             <IoMdInformationCircle size={14} className="mb-0.5" />
@@ -679,12 +679,12 @@ export default function CrosschainBridge() {
                   </div>
                 )}
               </div>
-              <div className="order-3 sm:order-4 sm:col-span-3 sm:-mt-5 mx-auto sm:-ml-0.5">
-                <div className="w-40 h-4 flex items-center justify-end">
+              <div className="order-3 sm:order-4 sm:col-span-3 sm:-mt-5 mx-auto sm:-ml-2">
+                <div className="w-48 h-4 flex items-center justify-end">
                   {balances_data?.[fromChainId] ?
                     <button
                       onClick={() => setAmount(Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals) > smallNumber ? Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance.contract_decimals) : 0)}
-                      className="text-gray-600 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-500 text-2xs font-bold"
+                      className="text-gray-600 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-500 text-sm font-bold"
                     >
                       Max
                     </button>
@@ -795,18 +795,18 @@ export default function CrosschainBridge() {
                           {estimatedAmount && (
                             <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 -mt-8 sm:mt-0 pb-6 sm:pb-1.5">
                               <div className="order-1 sm:col-span-2 flex justify-center">
-                                <span className="min-w-max text-gray-400 dark:text-gray-600 text-lg font-medium">~ Received</span>
+                                <span className="min-w-max text-gray-400 dark:text-gray-600 text-xl font-medium">~ Received</span>
                               </div>
                               <div className="order-2 sm:col-span-3 flex flex-col items-center space-y-0">
                                 <div className="h-7 flex items-center justify-center sm:justify-start space-x-2">
-                                  <div className="sm:w-40 font-mono flex items-center justify-end text-sm font-semibold text-right sm:px-3">
+                                  <div className="sm:w-48 font-mono flex items-center justify-end text-lg font-semibold text-right sm:px-3">
                                     {estimatingAmount ?
-                                      <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#4B5563'} width="16" height="16" className="mt-1" />
+                                      <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#4B5563'} width="18" height="18" className="mt-1.5" />
                                       :
                                       numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')
                                     }
                                   </div>
-                                  <span className="text-sm font-semibold">{asset.symbol}</span>
+                                  <span className="text-lg font-semibold">{asset.symbol}</span>
                                 </div>
                               </div>
                               {!estimatingAmount && estimatedFees > BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber() && (

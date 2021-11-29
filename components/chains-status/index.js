@@ -93,23 +93,23 @@ export default function ChainsStatus() {
 
   return (
     <>
-      <div className="w-full h-8 bg-gray-100 dark:bg-gray-900 overflow-x-auto flex items-center py-2 px-2 sm:px-4">
+      <div className="w-full h-8 xl:h-10 bg-gray-100 dark:bg-gray-900 overflow-x-auto flex items-center py-2 px-2 sm:px-4">
         {!chains_status_data && (
           address ?
-            <span className="flex flex-wrap items-center font-mono text-blue-600 dark:text-blue-400 text-2xs space-x-1.5">
+            <span className="flex flex-wrap items-center font-mono text-blue-600 dark:text-blue-400 text-2xs xl:text-sm space-x-1.5">
               <Loader type="Grid" color={theme === 'dark' ? '#60A5FA' : '#2563EB'} width="16" height="16" />
               <span>Checking Subgraph Status</span>
             </span>
             :
-            <span className="font-mono text-blue-600 dark:text-blue-400 text-2xs ml-auto">Please connect your wallet.</span>
+            <span className="font-mono text-blue-600 dark:text-blue-400 text-2xs xl:text-sm ml-auto">Please connect your wallet.</span>
         )}
         {chains_status_data?.map((chain, i) => (
-          <div key={i} className="min-w-max flex items-center text-2xs space-x-1 mr-4">
+          <div key={i} className="min-w-max flex items-center text-2xs xl:text-sm space-x-1.5 xl:space-x-2 mr-4">
             {chain.image && (
               <Img
                 src={chain.image}
                 alt=""
-                className="w-3.5 h-3.5 rounded-full"
+                className="w-4 xl:w-5 h-4 xl:h-5 rounded-full"
               />
             )}
             {chain.short_name && (
@@ -122,16 +122,16 @@ export default function ChainsStatus() {
         ))}
       </div>
       {chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).length > 0 && (
-        <div className="flex flex-wrap items-center font-mono leading-4 text-blue-600 dark:text-blue-400 text-2xs space-y-1 py-2 px-2 sm:px-4">
-          <FaRegHandPointRight size={18} className="mr-1.5" />
-          <span className="mr-1.5">
+        <div className="xl:max-w-xl block font-mono leading-4 text-red-600 dark:text-red-500 text-2xs xl:text-sm space-y-1 xl:mx-auto py-2 xl:py-6 px-2 sm:px-4">
+          <FaRegHandPointRight size={20} className="inline mr-1.5 xl:mr-2" />
+          <span className="mr-1.5 xl:mr-2">
             You may face some delay transfers due to the <span className="font-semibold">{chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).map(_chain => _chain?.short_name).join(', ')}</span> subgraph{chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).length > 1 ? 's' : ''} is not synced. However, no worry at all - your funds are SAFE. Simply check your transaction status at
           </span>
           <a
             href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}${address ? `/address/${address}` : ''}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="underline text-blue-600 dark:text-blue-500 font-bold"
+            className="underline text-red-600 dark:text-red-500 font-bold"
           >
             {address ? 'View Transactions' : 'Explorer'}
           </a>.

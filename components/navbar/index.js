@@ -62,17 +62,17 @@ export default function Navbar() {
                 href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${address}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center uppercase text-indigo-500 dark:text-indigo-300 text-3xs xl:text-2xs font-medium mb-0.5 mx-0 xl:mx-2"
+                className="flex items-center uppercase text-indigo-500 dark:text-indigo-300 text-2xs xl:text-sm font-medium mx-0 xl:mx-2"
               >
                 <span className="block xl:hidden">View Txs</span>
                 <span className="hidden xl:block">View Transactions</span>
-                <TiArrowRight size={16} className="transform -rotate-45 mt-0.5 xl:mt-0" />
+                <TiArrowRight size={18} className="transform -rotate-45 mt-0.5 xl:mt-0" />
               </a>
               <div className="hidden sm:block mx-2">
                 <Copy
                   size={16}
                   text={address}
-                  copyTitle={<span className="text-gray-400 dark:text-white text-xs font-semibold">
+                  copyTitle={<span className="text-gray-400 dark:text-white text-xs xl:text-sm font-semibold">
                     {ellipseAddress(address, 8)}
                   </span>}
                 />

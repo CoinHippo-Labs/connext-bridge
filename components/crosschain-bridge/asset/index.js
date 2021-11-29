@@ -47,11 +47,11 @@ export default function DropdownAsset({ disabled, assetId, onSelect, fromChainId
     (toChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(toChainId)))
 
   return (
-    <div className={`relative flex items-center space-x-2 ${showInput ? 'mt-1 sm:mt-0' : ''}`}>
+    <div className={`relative flex items-center space-x-2.5 ${showInput ? 'mt-1 sm:mt-0' : ''}`}>
       {asset && (
         <>
           {!showInput ?
-            <span className="text-gray-400 dark:text-gray-600 italic">No Route</span>
+            <span className="text-gray-400 dark:text-gray-600 text-base italic">No Route</span>
             :
             <input
               size="small"
@@ -64,7 +64,7 @@ export default function DropdownAsset({ disabled, assetId, onSelect, fromChainId
                   amountOnChange(e.target.value)
                 }
               }}
-              className={`w-40 bg-gray-100 dark:bg-gray-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-xl font-mono text-sm font-semibold text-right px-3`}
+              className={`w-48 bg-gray-100 dark:bg-gray-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-3xl font-mono text-lg font-semibold text-right px-4`}
             />
           }
         </>
@@ -73,10 +73,10 @@ export default function DropdownAsset({ disabled, assetId, onSelect, fromChainId
         ref={buttonRef}
         disabled={disabled}
         onClick={handleDropdownClick}
-        className={`h-12 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
+        className={`h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
       >
         {asset ?
-          <div className={`bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-${showInput ? 'full w-10 h-10 justify-center' : '2xl py-1.5 px-3'} flex items-center space-x-1.5`}>
+          <div className={`bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-${showInput ? 'full w-12 h-12 justify-center' : '3xl py-1.5 px-4'} flex items-center text-lg space-x-1.5`}>
             <Img
               src={asset.image}
               alt=""
@@ -88,14 +88,14 @@ export default function DropdownAsset({ disabled, assetId, onSelect, fromChainId
           </div>
           :
           assets_data ?
-            <div className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-2xl uppercase text-gray-500 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-200 font-medium py-1.5 px-3">Select coin</div>
+            <div className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-3xl uppercase text-gray-500 hover:text-gray-600 dark:text-gray-200 dark:hover:text-gray-100 text-lg font-medium py-1.5 px-4">Select coin</div>
             :
             <Loader type="Puff" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="24" height="24" />
         }
       </button>
       <div
         ref={dropdownRef}
-        className={`dropdown ${hidden ? '' : 'open'} absolute top-0 left-0 mt-10`}
+        className={`dropdown ${hidden ? '' : 'open'} absolute top-0 left-0 mt-14`}
       >
         <div className="dropdown-content inside w-64 bottom-start">
           <Assets handleDropdownClick={_asset_id => handleDropdownClick(_asset_id)} />
