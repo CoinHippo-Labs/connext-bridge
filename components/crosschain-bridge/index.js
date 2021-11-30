@@ -60,10 +60,10 @@ export default function CrosschainBridge() {
   const [tokenApproveResponse, setTokenApproveResponse] = useState(null)
   const [advancedOptions, setAdvancedOptions] = useState({
     infinite_approval: true,
-    receiving_address: null,
-    contract_address: null,
-    call_data: null,
-    preferred_router: null,
+    receiving_address: '',
+    contract_address: '',
+    call_data: '',
+    preferred_router: '',
   })
 
   const [gasFee, setGasFee] = useState(null)
