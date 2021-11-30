@@ -17,7 +17,7 @@ export default function Networks({ handleDropdownClick }) {
             <div
               key={i}
               title="Disabled"
-              className="dropdown-item w-1/2 cursor-not-allowed flex items-center justify-start space-x-1.5 p-2"
+              className="dropdown-item w-1/2 cursor-not-allowed flex items-center justify-start font-medium space-x-1.5 p-2"
             >
               <Img
                 src={item.image}

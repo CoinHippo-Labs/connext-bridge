@@ -162,20 +162,20 @@ export default function CrosschainBridge() {
         findingRoutes()
       }
       else {
-        setEstimatingAmount(true)
         setEstimatedAmount(null)
         setEstimatingAmount(false)
       }
     }
     else {
-      setEstimatingAmount(true)
       setEstimatedAmount(null)
       setEstimatingAmount(false)
     }
   }, [address, chain_id, fromChainId, toChainId, assetId, amount, tokenApproved, advancedOptions])
 
   useEffect(() => {
-    estimateFees()
+    if (estimatedAmount) {
+      estimateFees()
+    }
   }, [estimatedAmount])
 
   useEffect(() => {
@@ -190,7 +190,6 @@ export default function CrosschainBridge() {
   useEffect(() => {
     if (bidExpiresSecond === -1) {
       setBidExpiresSecond(bid_expires_second)
-      // findingRoutes()
     }
   }, [bidExpiresSecond])
 
@@ -296,10 +295,10 @@ export default function CrosschainBridge() {
     return balance
   }
 
-  const estimateFees = () => {
+  const estimateFees = async () => {
     if (fromChainId && toChainId && assetId) {
-      estimateGasFee()
-      estimateRelayerFee()
+      await estimateGasFee()
+      await estimateRelayerFee()
       estimateRouterFee()
     }
     else {

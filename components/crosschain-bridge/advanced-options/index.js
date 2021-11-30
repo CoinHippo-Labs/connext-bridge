@@ -75,7 +75,7 @@ export default function AdvancedOptions({ initialOptions, updateOptions }) {
                         onChange={e => setOptions({ ...options, [`${item.name}`]: e.target.checked })}
                         className="form-checkbox w-4 h-4 dark:border-0 focus:ring-0 dark:focus:ring-gray-700 rounded-lg"
                       />
-                      <span className="text-gray-700 dark:text-gray-300">{option.label}</span>
+                      <span className="text-gray-500 dark:text-gray-500">{option.label}</span>
                     </label>
                   ))}
                 </div>

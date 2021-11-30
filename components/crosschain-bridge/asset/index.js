@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
+import { DebounceInput } from 'react-debounce-input'
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
 import { BsPatchExclamationFill } from 'react-icons/bs'
@@ -16,7 +17,6 @@ export default function DropdownAsset({ disabled, assetId, onSelect, fromChainId
   const asset = assets_data?.find(_asset => _asset?.id === assetId)
 
   const [hidden, setHidden] = useState(true)
-  const [tmpAmount, setTmpAmount] = useState(amount)
 
   const buttonRef = useRef(null)
   const dropdownRef = useRef(null)
@@ -45,16 +45,6 @@ export default function DropdownAsset({ disabled, assetId, onSelect, fromChainId
     setHidden(!hidden)
   }
 
-  const onChange = e => {
-    if (amountOnChange) {
-      amountOnChange(e.target.value)
-    }
-  }
-
-  useEffect(() => {
-    setTmpAmount(amount)
-  }, [amount])
-
   const showInput = asset && !((fromChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(fromChainId)) ||
     (toChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(toChainId)))
 
@@ -65,12 +55,18 @@ export default function DropdownAsset({ disabled, assetId, onSelect, fromChainId
           {!showInput ?
             <span className="text-gray-400 dark:text-gray-600 text-base italic">No Route</span>
             :
-            <input
+            <DebounceInput
+              debounceTimeout={300}
               size="small"
               type="number"
               placeholder="0.00"
               disabled={disabled}
-              onChange={_.debounce(onChange, 0)}
+              value={typeof amount === 'number' && amount >= 0 ? amount : ''}
+              onChange={e => {
+                if (amountOnChange) {
+                  amountOnChange(e.target.value)
+                }
+              }}
               className={`w-48 bg-gray-100 dark:bg-gray-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-3xl font-mono text-lg font-semibold text-right px-4`}
             />
           }
