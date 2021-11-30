@@ -66,7 +66,7 @@ export default function Navbar() {
               >
                 <span className="block xl:hidden">View Txs</span>
                 <span className="hidden xl:block">View Transactions</span>
-                <TiArrowRight size={18} className="transform -rotate-45 mt-0.5 xl:mt-0" />
+                <TiArrowRight size={20} className="transform -rotate-45 mt-0.5 xl:mt-0" />
               </a>
               <div className="hidden sm:block mx-2">
                 <Copy

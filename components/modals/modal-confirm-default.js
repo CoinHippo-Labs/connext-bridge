@@ -53,7 +53,7 @@ export default function Modal({ buttonTitle, buttonClassName, title, body, cance
                     onClick={hide}
                     className="modal-close btn btn-transparent"
                   >
-                    <FiX size={18} className="stroke-current" />
+                    <FiX size={20} className="stroke-current" />
                   </button>
                 </div>
                 <div className="relative flex-auto p-4">{body}</div>

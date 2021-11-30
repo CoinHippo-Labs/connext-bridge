@@ -18,7 +18,7 @@ export default function Navigation() {
           <a key={i} href={item.path} target="_blank" rel="noopener noreferrer" className={className}>
             {item.icon}
             <span>{item.title}</span>
-            <TiArrowRight size={18} className="transform -rotate-45" />
+            <TiArrowRight size={20} className="transform -rotate-45" />
           </a>
           :
           <Link key={i} href={item.path}>

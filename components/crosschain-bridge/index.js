@@ -627,7 +627,7 @@ export default function CrosschainBridge() {
                     {gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ?
                       <>
                         <span className="text-gray-600 dark:text-gray-400 text-sm">Estimating</span>
-                        <Loader type="BallTriangle" color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="18" height="18" />
+                        <Loader type="BallTriangle" color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="20" height="20" />
                       </>
                       :
                       feesEstimated ?
@@ -667,7 +667,7 @@ export default function CrosschainBridge() {
                           <span className="flex items-center text-gray-400 dark:text-gray-200 text-sm space-x-1">
                             <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.000000')}` : 'N/A'}</span>
                             <span className="font-semibold">{asset?.symbol}</span>
-                            <IoMdInformationCircle size={14} className="mb-0.5" />
+                            <IoMdInformationCircle size={16} className="mb-0.5" />
                             {!estimatedAmount && (
                               <span className="font-mono lowercase text-gray-300 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
                             )}
@@ -801,7 +801,7 @@ export default function CrosschainBridge() {
                                 <div className="h-7 flex items-center justify-center sm:justify-start space-x-2">
                                   <div className="sm:w-48 font-mono flex items-center justify-end text-lg font-semibold text-right sm:px-3">
                                     {estimatingAmount ?
-                                      <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#4B5563'} width="18" height="18" className="mt-1.5" />
+                                      <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#4B5563'} width="24" height="24" className="mt-1.5" />
                                       :
                                       numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')
                                     }

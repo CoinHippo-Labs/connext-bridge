@@ -18,7 +18,7 @@ export default function Navigations({ handleDropdownClick }) {
           <a key={i} onClick={handleDropdownClick} href={item.path} target="_blank" rel="noopener noreferrer" className={className}>
             {item.icon}
             <span className="text-xs">{item.title}</span>
-            <TiArrowRight size={18} className="transform -rotate-45" />
+            <TiArrowRight size={20} className="transform -rotate-45" />
           </a>
           :
           <Link key={i} href={item.path}>
