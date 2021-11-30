@@ -81,6 +81,7 @@ export default function CrosschainBridge() {
   const [swapData, setSwapData] = useState(null)
   const [swapResponse, setSwapResponse] = useState(null)
 
+  // wallet
   useEffect(() => {
     if (chain_id && !fromChainId && toChainId !== chain_id) {
       setFromChainId(chain_id)
@@ -110,19 +111,21 @@ export default function CrosschainBridge() {
       })
     }
   }, [address])
+  // wallet
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (refreshEstimatedFeesSecond - 1 > -1) {
-        setRefreshEstimatedFeesSecond(refreshEstimatedFeesSecond - 1)
-      }
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [refreshEstimatedFeesSecond])
-
+  // fees
   useEffect(() => {
     if (refreshEstimatedFeesSecond === 0) {
       estimateFees()
+    }
+    else { 
+      const interval = setInterval(() => {
+        if (refreshEstimatedFeesSecond - 1 > -1) {
+          setRefreshEstimatedFeesSecond(refreshEstimatedFeesSecond - 1)
+        }
+      }, 1000)
+
+      return () => clearInterval(interval)
     }
   }, [refreshEstimatedFeesSecond])
 
@@ -141,8 +144,10 @@ export default function CrosschainBridge() {
     setRouterFee(null)
 
     estimateFees()
-  }, [fromChainId, toChainId, assetId])
+  }, [fromChainId, toChainId, assetId, estimatedAmount])
+  // fees
 
+  // approve
   useEffect(() => {
     const getData = async () => {
       const _approved = await isTokenApproved()
@@ -159,7 +164,9 @@ export default function CrosschainBridge() {
     setTokenApprovingTx(null)
     setTokenApproveResponse(null)
   }, [address, fromChainId, assetId])
+  // approve
 
+  // bid
   useEffect(() => {
     if (tokenApproved) {
       if (address && chain_id && chain_id === fromChainId && toChainId && assetId && typeof amount === 'number') {
@@ -177,25 +184,20 @@ export default function CrosschainBridge() {
   }, [address, chain_id, fromChainId, toChainId, assetId, amount, tokenApproved, advancedOptions])
 
   useEffect(() => {
-    if (estimatedAmount) {
-      estimateFees()
-    }
-  }, [estimatedAmount])
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (bidExpiresSecond - 1 > -2) {
-        setBidExpiresSecond(bidExpiresSecond - 1)
-      }
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [bidExpiresSecond])
-
-  useEffect(() => {
     if (bidExpiresSecond === -1) {
       setBidExpiresSecond(bid_expires_second)
     }
+    else {
+      const interval = setInterval(() => {
+        if (bidExpiresSecond - 1 > -2) {
+          setBidExpiresSecond(bidExpiresSecond - 1)
+        }
+      }, 1000)
+
+      return () => clearInterval(interval)
+    }
   }, [bidExpiresSecond])
+  // bid
 
   const isSupport = () => {
     const asset = assets_data?.find(_asset => _asset?.id === assetId)
@@ -495,7 +497,7 @@ console.log(response)
   const mustChangeChain = fromChainId && chain_id !== fromChainId
   const mustApproveToken = !tokenApproved
 
-  const actionDisabled = tokenApprovingTx
+  const actionDisabled = tokenApprovingTx || startingSwap
 
   return (
     <div className="flex flex-col items-center justify-center space-y-2 sm:space-y-3 my-4 sm:my-6">
