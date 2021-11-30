@@ -835,7 +835,7 @@ export default function CrosschainBridge() {
                           }
                           <span className="font-bold">{asset?.symbol}</span>
                           {estimatingAmount && typeof bidExpiresSecond === 'number' && (
-                            <span className="text-gray-300 dark:text-gray-200 text-sm font-medium">(expire in {bidExpiresSecond}s)</span>
+                            <span className="text-gray-300 dark:text-gray-200 text-sm font-medium">(retry in {bidExpiresSecond}s)</span>
                           )}
                         </button>
                       </div>
