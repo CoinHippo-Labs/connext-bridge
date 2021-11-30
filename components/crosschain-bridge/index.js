@@ -23,10 +23,12 @@ import Wallet from '../wallet'
 import Popover from '../popover'
 import Alert from '../alerts'
 import Notification from '../notifications'
+import ModalConfirm from '../modals/modal-confirm'
+import Copy from '../copy'
 
 import { balances as getBalances } from '../../lib/api/covalent'
 import { getApproved, approve } from '../../lib/object/contract'
-import { smallNumber, numberFormat } from '../../lib/utils'
+import { smallNumber, numberFormat, ellipseAddress } from '../../lib/utils'
 
 import { CHAINS_STATUS_DATA, CHAINS_STATUS_SYNC_DATA, BALANCES_DATA } from '../../reducers/types'
 
@@ -73,7 +75,7 @@ export default function CrosschainBridge() {
   const [relayerFeeEstimating, setRelayerFeeEstimating] = useState(null)
   const [routerFeeEstimating, setRouterFeeEstimating] = useState(null)
   const [refreshEstimatedFeesSecond, setRefreshEstimatedFeesSecond] = useState(refresh_estimated_fees_second)
-  const [bidExpiresSecond, setBidExpiresSecond] = useState(bid_expires_second)
+  const [bidExpiresSecond, setBidExpiresSecond] = useState(null)
 
   useEffect(() => {
     if (chain_id && !fromChainId && toChainId !== chain_id) {
@@ -178,7 +180,7 @@ export default function CrosschainBridge() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (bidExpiresSecond - 1 > -1) {
+      if (bidExpiresSecond - 1 > -2) {
         setBidExpiresSecond(bidExpiresSecond - 1)
       }
     }, 1000)
@@ -186,8 +188,9 @@ export default function CrosschainBridge() {
   }, [bidExpiresSecond])
 
   useEffect(() => {
-    if (bidExpiresSecond === 0) {
-      findingRoutes()
+    if (bidExpiresSecond === -1) {
+      setBidExpiresSecond(bid_expires_second)
+      // findingRoutes()
     }
   }, [bidExpiresSecond])
 
@@ -215,7 +218,7 @@ export default function CrosschainBridge() {
       const feesEstimated = (typeof gasFee === 'number' || typeof gasFee === 'boolean') && (typeof relayerFee === 'number' || typeof relayerFee === 'boolean') && (typeof routerFee === 'number' || typeof routerFee === 'boolean')
       const estimatedFees = feesEstimated && ((gasFee || 0) + (relayerFee || 0) + (routerFee || 0))
 
-      if (isSupport() && amount >= estimatedFees/* && fromBalanceAmount >= amount*/ && fromChainSynced && toChainSynced) {
+      if (isSupport() && amount >= estimatedFees && fromBalanceAmount >= amount && fromChainSynced && toChainSynced) {
         const asset = assets_data?.find(_asset => _asset?.id === assetId)
         const contract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
 
@@ -409,6 +412,8 @@ export default function CrosschainBridge() {
         const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
 
         try {
+          setBidExpiresSecond(bid_expires_second)
+
           const response = await sdk_data.getTransferQuote({
             sendingChainId: fromChainId,
             sendingAssetId: fromContract?.contract_address,
@@ -426,9 +431,10 @@ export default function CrosschainBridge() {
           })
 
           setEstimatedAmount(response)
+          setBidExpiresSecond(null)
         } catch (error) {
-          if (error?.message?.includes('Error validating or retrieving bids')) {
-            setBidExpiresSecond(bid_expires_second)
+          if (error?.message?.includes('Error validating or retrieving bids for')) {
+            findingRoutes()
           }
           else {
             setEstimatedAmount(null)
@@ -447,6 +453,8 @@ export default function CrosschainBridge() {
   const fromChainSynced = getChainSynced(fromChainId)
   const toChainSynced = getChainSynced(toChainId)
   const unsyncedChains = [!fromChainSynced && fromChain, !toChainSynced && toChain].filter(_chain => _chain)
+
+  const receivingAddress = advancedOptions?.receiving_address || address
 
   const asset = assets_data?.find(_asset => _asset?.id === assetId)
   const toContract = asset?.contracts?.find(_contract => _contract?.chain_id === toChainId)
@@ -733,7 +741,7 @@ export default function CrosschainBridge() {
               </Alert>
             </div>
             :
-            false && fromBalanceAmount < amount ?
+            fromBalanceAmount < amount ?
               <div className="sm:pt-1.5 pb-1">
                 <Alert
                   color="bg-red-400 dark:bg-red-500 text-left text-white"
@@ -820,24 +828,123 @@ export default function CrosschainBridge() {
                             <span>Fee is greater than estimated received.</span>
                           </div>
                         )}
-                        <button
-                          disabled={estimatingAmount}
-                          onClick={() => {}}
-                          className={`w-full ${estimatingAmount ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${estimatingAmount ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3`}
-                        >
-                          {estimatingAmount ?
-                            <>
-                              <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" className="w-6 h-6" />
-                              <span>Searching Routes</span>
-                            </>
-                            :
-                            <span>Swap</span>
-                          }
-                          <span className="font-bold">{asset?.symbol}</span>
-                          {estimatingAmount && typeof bidExpiresSecond === 'number' && (
-                            <span className="text-gray-300 dark:text-gray-200 text-sm font-medium">(retry in {bidExpiresSecond}s)</span>
-                          )}
-                        </button>
+                        {estimatingAmount ?
+                          <button
+                            disabled={estimatingAmount}
+                            className={`w-full ${estimatingAmount ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${estimatingAmount ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex flex-wrap items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3`}
+                          >
+                            {estimatingAmount ?
+                              <>
+                                <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" className="w-6 h-6" />
+                                <span>Searching Routes</span>
+                              </>
+                              :
+                              <span>Swap</span>
+                            }
+                            <span className="font-bold">{asset?.symbol}</span>
+                            {estimatingAmount && typeof bidExpiresSecond === 'number' && (
+                              <span className="text-gray-200 dark:text-gray-100 text-sm font-medium">(retry in {bidExpiresSecond}s)</span>
+                            )}
+                          </button>
+                          :
+                          <ModalConfirm
+                            buttonTitle={<>
+                              <span>Swap</span>
+                              <span className="font-bold">{asset?.symbol}</span>
+                            </>}
+                            buttonClassName="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3"
+                            title="Swap Confirmation"
+                            body={<div className="flex flex-col space-y-2 sm:space-y-3 mt-2 -mb-2">
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:space-x-1 xl:space-x-2">
+                                <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
+                                  Receiving Address
+                                  <span className="hidden sm:block">:</span>
+                                </div>
+                                {receivingAddress && (<div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
+                                  <span className="text-gray-700 dark:text-gray-300 text-base sm:text-xs xl:text-base font-semibold">
+                                    {ellipseAddress(receivingAddress, 10)}
+                                  </span>
+                                  <Copy size={18} text={receivingAddress} />
+                                  {toChain?.explorer?.url && (
+                                    <a
+                                      href={`${toChain.explorer.url}${toChain.explorer.address_path?.replace('{address}', receivingAddress)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-gray-900 dark:text-white"
+                                    >
+                                      {toChain.explorer.icon ?
+                                        <Img
+                                          src={toChain.explorer.icon}
+                                          alt=""
+                                          className="w-5 sm:w-4 xl:w-5 h-5 sm:h-4 xl:h-5 rounded-full opacity-60 hover:opacity-100"
+                                        />
+                                        :
+                                        <TiArrowRight size={20} className="transform -rotate-45" />
+                                      }
+                                    </a>
+                                  )}
+                                </div>)}
+                              </div>
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:space-x-1 xl:space-x-2">
+                                <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
+                                  Amount Sent
+                                  <span className="hidden sm:block">:</span>
+                                </div>
+                                <div className="text-base space-x-1.5">
+                                  <span className="font-mono font-semibold">{numberFormat(amount, '0,0.00000000')}</span>
+                                  <span className="font-semibold">{asset?.symbol}</span>
+                                </div>
+                              </div>
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:space-x-1 xl:space-x-2">
+                                <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
+                                  Fees
+                                  <span className="hidden sm:block">:</span>
+                                </div>
+                                <div className="text-base space-x-1.5">
+                                  <span className="font-mono font-semibold">{numberFormat(estimatedFees, '0,0.00000000')}</span>
+                                  <span className="font-semibold">{asset?.symbol}</span>
+                                </div>
+                              </div>
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:space-x-1 xl:space-x-2">
+                                <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg sm:text-sm lg:text-base">
+                                  Estimated Received
+                                  <span className="hidden sm:block">:</span>
+                                </div>
+                                <div className="text-base space-x-1.5">
+                                  <span className="font-mono font-semibold">{numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')}</span>
+                                  <span className="font-semibold">{asset?.symbol}</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2 mx-auto py-2">
+                                {fromChain && (
+                                  <Img
+                                    src={fromChain.image}
+                                    alt=""
+                                    className="w-8 h-8 rounded-full"
+                                  />
+                                )}
+                                <TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500" />
+                                <Img
+                                  src="/logos/connext/logo.png"
+                                  alt=""
+                                  className="w-8 h-8 rounded-full"
+                                />
+                                <TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500" />
+                                {toChain && (
+                                  <img
+                                    src={toChain.image}
+                                    alt=""
+                                    className="w-8 h-8 rounded-full"
+                                  />
+                                )}
+                              </div>
+                              <div className="text-base sm:text-lg font-medium">Are you sure that you want to swap?</div>
+                            </div>}
+                            cancelButtonTitle="Cancel"
+                            confirmButtonTitle="Comfirm"
+                            onConfirm={() => {}}
+                          />
+                        }
                       </div>
                       :
                       estimatedAmountResponse ?
