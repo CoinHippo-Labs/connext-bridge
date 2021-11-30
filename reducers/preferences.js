@@ -2,7 +2,7 @@ import { THEME } from './types'
 
 export default function preferences(
   state = {
-    [`${THEME}`]: 'dark',
+    [`${THEME}`]: 'light',
   },
   action
 ) {
