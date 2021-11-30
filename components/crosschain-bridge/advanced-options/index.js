@@ -83,7 +83,7 @@ export default function AdvancedOptions({ initialOptions, updateOptions }) {
         ))}
       </div>}
       onCancel={() => setOptions(initialOptions)}
-      confirmButtonTitle="Ok"
+      confirmButtonTitle="Apply"
       onConfirm={() => {
         if (updateOptions) {
           updateOptions(options)
