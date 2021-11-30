@@ -73,7 +73,7 @@ export default function CrosschainBridge() {
   const [relayerFeeEstimating, setRelayerFeeEstimating] = useState(null)
   const [routerFeeEstimating, setRouterFeeEstimating] = useState(null)
   const [refreshEstimatedFeesSecond, setRefreshEstimatedFeesSecond] = useState(refresh_estimated_fees_second)
-  // const [bidExpiresSecond, setBidExpiresSecond] = useState(bid_expires_second)
+  const [bidExpiresSecond, setBidExpiresSecond] = useState(bid_expires_second)
 
   useEffect(() => {
     if (chain_id && !fromChainId && toChainId !== chain_id) {
@@ -176,20 +176,20 @@ export default function CrosschainBridge() {
     estimateFees()
   }, [estimatedAmount])
 
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     if (bidExpiresSecond - 1 > -1) {
-  //       setBidExpiresSecond(bidExpiresSecond - 1)
-  //     }
-  //   }, 1000)
-  //   return () => clearInterval(interval)
-  // }, [bidExpiresSecond])
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (bidExpiresSecond - 1 > -1) {
+        setBidExpiresSecond(bidExpiresSecond - 1)
+      }
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [bidExpiresSecond])
 
-  // useEffect(() => {
-  //   if (bidExpiresSecond === 0) {
-  //     findingRoutes()
-  //   }
-  // }, [bidExpiresSecond])
+  useEffect(() => {
+    if (bidExpiresSecond === 0) {
+      findingRoutes()
+    }
+  }, [bidExpiresSecond])
 
   const isSupport = () => {
     const asset = assets_data?.find(_asset => _asset?.id === assetId)
@@ -215,7 +215,7 @@ export default function CrosschainBridge() {
       const feesEstimated = (typeof gasFee === 'number' || typeof gasFee === 'boolean') && (typeof relayerFee === 'number' || typeof relayerFee === 'boolean') && (typeof routerFee === 'number' || typeof routerFee === 'boolean')
       const estimatedFees = feesEstimated && ((gasFee || 0) + (relayerFee || 0) + (routerFee || 0))
 
-      if (isSupport() && amount >= estimatedFees && fromBalanceAmount >= amount && fromChainSynced && toChainSynced) {
+      if (isSupport() && amount >= estimatedFees/* && fromBalanceAmount >= amount*/ && fromChainSynced && toChainSynced) {
         const asset = assets_data?.find(_asset => _asset?.id === assetId)
         const contract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
 
@@ -426,10 +426,9 @@ export default function CrosschainBridge() {
           })
 
           setEstimatedAmount(response)
-          // setBidExpiresSecond(bid_expires_second)
         } catch (error) {
           if (error?.message?.includes('Error validating or retrieving bids')) {
-            findingRoutes()
+            setBidExpiresSecond(bid_expires_second)
           }
           else {
             setEstimatedAmount(null)
@@ -734,7 +733,7 @@ export default function CrosschainBridge() {
               </Alert>
             </div>
             :
-            fromBalanceAmount < amount ?
+            false && fromBalanceAmount < amount ?
               <div className="sm:pt-1.5 pb-1">
                 <Alert
                   color="bg-red-400 dark:bg-red-500 text-left text-white"
@@ -835,9 +834,9 @@ export default function CrosschainBridge() {
                             <span>Swap</span>
                           }
                           <span className="font-bold">{asset?.symbol}</span>
-                          {/*!estimatingAmount && typeof bidExpiresSecond === 'number' && (
+                          {estimatingAmount && typeof bidExpiresSecond === 'number' && (
                             <span className="text-gray-300 dark:text-gray-200 text-sm font-medium">(expire in {bidExpiresSecond}s)</span>
-                          )*/}
+                          )}
                         </button>
                       </div>
                       :
