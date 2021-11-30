@@ -9,7 +9,7 @@ import { constants } from 'ethers'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
-import { MdSwapVerticalCircle, MdSwapHorizontalCircle } from 'react-icons/md'
+import { MdSwapVerticalCircle, MdSwapHorizontalCircle, MdRefresh } from 'react-icons/md'
 import { IoWallet } from 'react-icons/io5'
 import { IoMdInformationCircle } from 'react-icons/io'
 import { BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
@@ -54,9 +54,6 @@ export default function CrosschainBridge() {
   const [toChainId, setToChainId] = useState(null)
   const [assetId, setAssetId] = useState(null)
   const [amount, setAmount] = useState(null)
-  const [estimatedAmount, setEstimatedAmount] = useState(null)
-  const [estimatingAmount, setEstimatingAmount] = useState(null)
-  const [estimatedAmountResponse, setEstimatedAmountResponse] = useState(null)
   const [tokenApproved, setTokenApproved] = useState(null)
   const [tokenApprovingTx, setTokenApprovingTx] = useState(null)
   const [tokenApproveResponse, setTokenApproveResponse] = useState(null)
@@ -75,7 +72,14 @@ export default function CrosschainBridge() {
   const [relayerFeeEstimating, setRelayerFeeEstimating] = useState(null)
   const [routerFeeEstimating, setRouterFeeEstimating] = useState(null)
   const [refreshEstimatedFeesSecond, setRefreshEstimatedFeesSecond] = useState(refresh_estimated_fees_second)
+
+  const [estimatedAmount, setEstimatedAmount] = useState(null)
+  const [estimatingAmount, setEstimatingAmount] = useState(null)
+  const [estimatedAmountResponse, setEstimatedAmountResponse] = useState(null)
   const [bidExpiresSecond, setBidExpiresSecond] = useState(null)
+  const [startingSwap, setStartingSwap] = useState(null)
+  const [swapData, setSwapData] = useState(null)
+  const [swapResponse, setSwapResponse] = useState(null)
 
   useEffect(() => {
     if (chain_id && !fromChainId && toChainId !== chain_id) {
@@ -313,7 +317,7 @@ export default function CrosschainBridge() {
       const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
 
       if (isSupport()) {
-        setGasFeeEstimating(true)
+        setGasFeeEstimating(estimatedAmount ? false : true)
 
         const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
         const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
@@ -345,7 +349,7 @@ export default function CrosschainBridge() {
       const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
 
       if (isSupport()) {
-        setRelayerFeeEstimating(true)
+        setRelayerFeeEstimating(estimatedAmount ? false : true)
 
         const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
         const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
@@ -375,7 +379,7 @@ export default function CrosschainBridge() {
   const estimateRouterFee = async () => {
     if (sdk_data) {
       if (isSupport()) {
-        setRouterFeeEstimating(true)
+        setRouterFeeEstimating(estimatedAmount ? false : true)
 
         if (estimatedAmount?.bid?.amountReceived) {
           const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
@@ -398,6 +402,11 @@ export default function CrosschainBridge() {
   const findingRoutes = async () => {
     setTokenApprovingTx(null)
     setTokenApproveResponse(null)
+
+    setStartingSwap(false)
+    setSwapResponse(null)
+
+    setEstimatedAmount(null)
     setEstimatedAmountResponse(null)
     setEstimatingAmount(true)
 
@@ -446,6 +455,23 @@ export default function CrosschainBridge() {
     setEstimatingAmount(false)
   }
 
+  const swap = async () => {
+    setStartingSwap(true)
+
+    if (sdk_data) {
+      try {
+        const response = await sdk_data.prepareTransfer(estimatedAmount, advancedOptions?.infinite_approval)
+console.log(response)
+        setSwapData(response)
+        setSwapResponse(null)
+      } catch (error) {
+        setSwapResponse({ status: 'failed', message: error?.message })
+      }
+    }
+
+    setStartingSwap(false)
+  }
+
   const fromChain = chains_data?.find(_chain => _chain?.chain_id === fromChainId)
   const toChain = chains_data?.find(_chain => _chain?.chain_id === toChainId)
 
@@ -462,6 +488,7 @@ export default function CrosschainBridge() {
   const fromBalanceAmount = (fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals || 0)
   const toBalance = getChainBalance(toChainId)
 
+  const estimatingFees = gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating
   const feesEstimated = (typeof gasFee === 'number' || typeof gasFee === 'boolean') && (typeof relayerFee === 'number' || typeof relayerFee === 'boolean') && (typeof routerFee === 'number' || typeof routerFee === 'boolean')
   const estimatedFees = feesEstimated && ((gasFee || 0) + (relayerFee || 0) + (routerFee || 0))
 
@@ -728,7 +755,7 @@ export default function CrosschainBridge() {
           />
         </div>
         {balances_data?.[fromChainId] && feesEstimated && typeof estimatedFees === 'number' && typeof amount === 'number' ?
-          amount < estimatedFees ?
+          !estimatingFees && feesEstimated && amount < estimatedFees ?
             <div className="sm:pt-1.5 pb-1">
               <Alert
                 color="bg-red-400 dark:bg-red-500 text-left text-white"
@@ -819,7 +846,7 @@ export default function CrosschainBridge() {
                       </div>
                     )
                     :
-                    estimatedAmount || estimatingAmount ?
+                    !swapData && !swapResponse && (estimatedAmount || estimatingAmount) ?
                       <div className="sm:pt-1.5 pb-1">
                         {!estimatingAmount && estimatedAmount && estimatedFees > BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber() && (
                           <div className="order-2 sm:col-span-5 flex flex-wrap items-center justify-center text-yellow-500 dark:text-yellow-400 mt-4 sm:mt-0 mb-2">
@@ -834,7 +861,7 @@ export default function CrosschainBridge() {
                           >
                             {estimatingAmount ?
                               <>
-                                <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" className="w-6 h-6" />
+                                <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
                                 <span>Searching Routes</span>
                               </>
                               :
@@ -854,6 +881,29 @@ export default function CrosschainBridge() {
                             buttonClassName="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3"
                             title="Swap Confirmation"
                             body={<div className="flex flex-col space-y-2 sm:space-y-3 mt-2 -mb-2">
+                              <div className="flex items-center space-x-2 mx-auto py-2">
+                                {fromChain && (
+                                  <Img
+                                    src={fromChain.image}
+                                    alt=""
+                                    className="w-8 h-8 rounded-full"
+                                  />
+                                )}
+                                <TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500" />
+                                <Img
+                                  src="/logos/connext/logo.png"
+                                  alt=""
+                                  className="w-8 h-8 rounded-full"
+                                />
+                                <TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500" />
+                                {toChain && (
+                                  <img
+                                    src={toChain.image}
+                                    alt=""
+                                    className="w-8 h-8 rounded-full"
+                                  />
+                                )}
+                              </div>
                               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:space-x-1 xl:space-x-2">
                                 <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
                                   Receiving Address
@@ -889,19 +939,39 @@ export default function CrosschainBridge() {
                                   Amount Sent
                                   <span className="hidden sm:block">:</span>
                                 </div>
-                                <div className="text-base space-x-1.5">
+                                <div className="text-lg space-x-1.5">
                                   <span className="font-mono font-semibold">{numberFormat(amount, '0,0.00000000')}</span>
                                   <span className="font-semibold">{asset?.symbol}</span>
                                 </div>
                               </div>
-                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:space-x-1 xl:space-x-2">
+                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:space-x-1 xl:space-x-2">
                                 <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
                                   Fees
                                   <span className="hidden sm:block">:</span>
                                 </div>
-                                <div className="text-base space-x-1.5">
-                                  <span className="font-mono font-semibold">{numberFormat(estimatedFees, '0,0.00000000')}</span>
-                                  <span className="font-semibold">{asset?.symbol}</span>
+                                <div className="flex flex-col items-start sm:items-end my-1">
+                                  <div className="grid grid-flow-row grid-cols-2 gap-1.5">
+                                    <span className="text-gray-400 dark:text-gray-500 text-sm">Dest. Tx Cost:</span>
+                                    <div className="text-gray-500 dark:text-gray-400 text-sm text-right space-x-1.5">
+                                      <span className="font-mono">{numberFormat(gasFee, '0,0.00000000')}</span>
+                                      <span>{asset?.symbol}</span>
+                                    </div>
+                                    <span className="text-gray-400 dark:text-gray-500 text-sm">Relayer Fee:</span>
+                                    <div className="text-gray-500 dark:text-gray-400 text-sm text-right space-x-1.5">
+                                      <span className="font-mono">{numberFormat(relayerFee, '0,0.00000000')}</span>
+                                      <span>{asset?.symbol}</span>
+                                    </div>
+                                    <span className="text-gray-400 dark:text-gray-500 text-sm">Router Fee:</span>
+                                    <div className="text-gray-500 dark:text-gray-400 text-sm text-right space-x-1.5">
+                                      <span className="font-mono">{numberFormat(routerFee, '0,0.00000000')}</span>
+                                      <span>{asset?.symbol}</span>
+                                    </div>
+                                    <span className="text-gray-400 dark:text-gray-500 text-base">Total:</span>
+                                    <div className="text-base text-right space-x-1.5">
+                                      <span className="font-mono font-semibold">{numberFormat(estimatedFees, '0,0.00000000')}</span>
+                                      <span className="font-semibold">{asset?.symbol}</span>
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
                               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:space-x-1 xl:space-x-2">
@@ -909,39 +979,24 @@ export default function CrosschainBridge() {
                                   Estimated Received
                                   <span className="hidden sm:block">:</span>
                                 </div>
-                                <div className="text-base space-x-1.5">
+                                <div className="text-lg space-x-1.5">
                                   <span className="font-mono font-semibold">{numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')}</span>
                                   <span className="font-semibold">{asset?.symbol}</span>
                                 </div>
                               </div>
-                              <div className="flex items-center space-x-2 mx-auto py-2">
-                                {fromChain && (
-                                  <Img
-                                    src={fromChain.image}
-                                    alt=""
-                                    className="w-8 h-8 rounded-full"
-                                  />
-                                )}
-                                <TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500" />
-                                <Img
-                                  src="/logos/connext/logo.png"
-                                  alt=""
-                                  className="w-8 h-8 rounded-full"
-                                />
-                                <TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500" />
-                                {toChain && (
-                                  <img
-                                    src={toChain.image}
-                                    alt=""
-                                    className="w-8 h-8 rounded-full"
-                                  />
-                                )}
-                              </div>
-                              <div className="text-base sm:text-lg font-medium">Are you sure that you want to swap?</div>
+                              <div className="text-base sm:text-lg font-medium pt-4">Are you sure that you want to swap?</div>
                             </div>}
                             cancelButtonTitle="Cancel"
-                            confirmButtonTitle="Comfirm"
-                            onConfirm={() => {}}
+                            cancelDisabled={startingSwap}
+                            confirmButtonTitle={<span className="flex items-center space-x-1.5">
+                              {startingSwap && (
+                                <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="16" height="16" />
+                              )}
+                              <span>Comfirm</span>
+                            </span>}
+                            confirmDisabled={startingSwap}
+                            onComfirmHide={false}
+                            onConfirm={() => swap()}
                           />
                         }
                       </div>
@@ -958,7 +1013,27 @@ export default function CrosschainBridge() {
                           </Alert>
                         </div>
                         :
-                        null
+                        swapResponse ?
+                          <div className="sm:pt-1.5 pb-1">
+                            <Alert
+                              color={`${swapResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : swapResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
+                              icon={swapResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : swapResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                              closeDisabled={true}
+                              rounded={true}
+                            >
+                              <div className="flex items-center justify-between space-x-1">
+                                <span className="break-words font-mono text-sm">{swapResponse.message}</span>
+                                <button
+                                  onClick={() => findingRoutes()}
+                                  className="bg-red-500 dark:bg-red-400 flex items-center justify-center text-white rounded-full p-2"
+                                >
+                                  <MdRefresh size={20} />
+                                </button>
+                              </div>
+                            </Alert>
+                          </div>
+                          :
+                          null
           :
           <button
             disabled={true}

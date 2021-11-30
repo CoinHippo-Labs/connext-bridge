@@ -3,7 +3,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import Portal from '../portal'
 import { FiX } from 'react-icons/fi'
 
-export default function Modal({ buttonTitle, buttonClassName, title, icon, body, cancelButtonTitle, onCancel, confirmButtonTitle, onConfirm, confirmButtonClassName }) {
+export default function Modal({ buttonTitle, buttonClassName, title, icon, body, cancelButtonTitle, cancelDisabled = false, onCancel, confirmButtonTitle, confirmDisabled = false, onConfirm, onComfirmHide = true, confirmButtonClassName }) {
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
   const { theme } = { ...preferences }
 
@@ -20,7 +20,9 @@ export default function Modal({ buttonTitle, buttonClassName, title, icon, body,
       if (!modalRef || !modalRef.current) return false
       if (!open || modalRef.current.contains(event.target)) return false
 
-      setOpen(!open)
+      if (!cancelDisabled) {
+        setOpen(!open)
+      }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
@@ -56,6 +58,7 @@ export default function Modal({ buttonTitle, buttonClassName, title, icon, body,
                 <div className="border-t border-gray-200 dark:border-gray-700 border-solid rounded-b flex items-center justify-end space-x-2 p-4">
                   <button
                     type="button"
+                    disabled={cancelDisabled}
                     onClick={() => {
                       if (onCancel) onCancel()
                       hide()
@@ -66,9 +69,10 @@ export default function Modal({ buttonTitle, buttonClassName, title, icon, body,
                   </button>
                   <button
                     type="button"
+                    disabled={confirmDisabled}
                     onClick={() => {
                       if (onConfirm) onConfirm()
-                      hide()
+                      if (onComfirmHide) hide()
                     }}
                     className={confirmButtonClassName || 'btn btn-default btn-rounded bg-blue-600 hover:bg-blue-500 text-white'}
                   >
