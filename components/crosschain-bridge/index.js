@@ -65,6 +65,9 @@ export default function CrosschainBridge() {
     preferred_router: '',
   })
 
+  const [estimateFeesTrigger, setEstimateFeesTrigger] = useState(null)
+  const [findingRoutesTrigger, setFindingRoutesTrigger] = useState(null)
+
   const [gasFee, setGasFee] = useState(null)
   const [relayerFee, setRelayerFee] = useState(null)
   const [routerFee, setRouterFee] = useState(null)
@@ -115,8 +118,22 @@ export default function CrosschainBridge() {
 
   // fees
   useEffect(() => {
+    const controller = new AbortController()
+
+    if (estimateFeesTrigger) {
+      if (!controller.signal.aborted) {
+        estimateFees(controller)
+      }
+    }
+
+    return () => {
+      controller?.abort()
+    }
+  }, [estimateFeesTrigger])
+
+  useEffect(() => {
     if (refreshEstimatedFeesSecond === 0) {
-      estimateFees()
+      setEstimateFeesTrigger(moment().valueOf())
     }
     else { 
       const interval = setInterval(() => {
@@ -143,7 +160,7 @@ export default function CrosschainBridge() {
     setRelayerFee(null)
     setRouterFee(null)
 
-    estimateFees()
+    setEstimateFeesTrigger(moment().valueOf())
   }, [fromChainId, toChainId, assetId, estimatedAmount])
   // fees
 
@@ -168,9 +185,23 @@ export default function CrosschainBridge() {
 
   // bid
   useEffect(() => {
+    const controller = new AbortController()
+
+    if (findingRoutesTrigger) {
+      if (!controller.signal.aborted) {
+        findingRoutes(controller)
+      }
+    }
+
+    return () => {
+      controller?.abort()
+    }
+  }, [findingRoutesTrigger])
+
+  useEffect(() => {
     if (tokenApproved) {
       if (address && chain_id && chain_id === fromChainId && toChainId && assetId && typeof amount === 'number') {
-        findingRoutes()
+        setFindingRoutesTrigger(moment().valueOf())
       }
       else {
         setEstimatedAmount(null)
@@ -301,11 +332,17 @@ export default function CrosschainBridge() {
     return balance
   }
 
-  const estimateFees = async () => {
+  const estimateFees = async controller => {
     if (fromChainId && toChainId && assetId) {
-      await estimateGasFee()
-      await estimateRelayerFee()
-      estimateRouterFee()
+      if (!controller.signal.aborted) {
+        await estimateGasFee(controller)
+      }
+      if (!controller.signal.aborted) {
+        await estimateRelayerFee(controller)
+      }
+      if (!controller.signal.aborted) {
+        await estimateRouterFee(controller)
+      }
     }
     else {
       setGasFee(null)
@@ -314,7 +351,7 @@ export default function CrosschainBridge() {
     }
   }
 
-  const estimateGasFee = async () => {
+  const estimateGasFee = async controller => {
     if (sdk_data) {
       const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
 
@@ -325,7 +362,9 @@ export default function CrosschainBridge() {
         const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
 
         if (estimatedAmount?.gasFeeInReceivingToken) {
-          setGasFee(BigNumber(estimatedAmount.gasFeeInReceivingToken).shiftedBy(-toContract?.contract_decimals).toNumber())
+          if (!controller.signal.aborted) {
+            setGasFee(BigNumber(estimatedAmount.gasFeeInReceivingToken).shiftedBy(-toContract?.contract_decimals).toNumber())
+          }
         }
         else {
           const response = await sdk_data.estimateFeeForRouterTransferInReceivingToken(
@@ -335,7 +374,9 @@ export default function CrosschainBridge() {
             toContract?.contract_address,
           )
 
-          setGasFee(response ? BigNumber(response.toString()).shiftedBy(-toContract?.contract_decimals).toNumber() : gasFee || false)
+          if (!controller.signal.aborted) {
+            setGasFee(response ? BigNumber(response.toString()).shiftedBy(-toContract?.contract_decimals).toNumber() : gasFee || false)
+          }
         }
 
         setGasFeeEstimating(false)
@@ -346,7 +387,7 @@ export default function CrosschainBridge() {
     }
   }
 
-  const estimateRelayerFee = async () => {
+  const estimateRelayerFee = async controller => {
     if (sdk_data) {
       const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
 
@@ -357,7 +398,9 @@ export default function CrosschainBridge() {
         const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
 
         if (estimatedAmount) {
-          setRelayerFee(BigNumber(estimatedAmount.metaTxRelayerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber())
+          if (!controller.signal.aborted) {
+            setRelayerFee(BigNumber(estimatedAmount.metaTxRelayerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber())
+          }
         }
         else {
           const response = await sdk_data.estimateMetaTxFeeInReceivingToken(
@@ -367,7 +410,9 @@ export default function CrosschainBridge() {
             toContract?.contract_address,
           )
 
-          setRelayerFee(response ? BigNumber(response.toString()).shiftedBy(-toContract?.contract_decimals).toNumber() : relayerFee || false)
+          if (!controller.signal.aborted) {
+            setRelayerFee(response ? BigNumber(response.toString()).shiftedBy(-toContract?.contract_decimals).toNumber() : relayerFee || false)
+          }
         }
 
         setRelayerFeeEstimating(false)
@@ -378,7 +423,7 @@ export default function CrosschainBridge() {
     }
   }
 
-  const estimateRouterFee = async () => {
+  const estimateRouterFee = async controller => {
     if (sdk_data) {
       if (isSupport()) {
         setRouterFeeEstimating(estimatedAmount ? false : true)
@@ -387,10 +432,14 @@ export default function CrosschainBridge() {
           const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
           const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
 
-          setRouterFee(amount - BigNumber(estimatedAmount.bid.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber())
+          if (!controller.signal.aborted) {
+            setRouterFee(amount - BigNumber(estimatedAmount.bid.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber())
+          }
         }
         else {
-          setRouterFee(false)
+          if (!controller.signal.aborted) {
+            setRouterFee(false)
+          }
         }
 
         setRouterFeeEstimating(false)
@@ -401,7 +450,7 @@ export default function CrosschainBridge() {
     }
   }
 
-  const findingRoutes = async () => {
+  const findingRoutes = async controller => {
     setTokenApprovingTx(null)
     setTokenApproveResponse(null)
 
@@ -440,15 +489,19 @@ export default function CrosschainBridge() {
             dryRun: false,
           })
 
-          setEstimatedAmount(response)
-          setBidExpiresSecond(null)
-        } catch (error) {
-          if (error?.message?.includes('Error validating or retrieving bids for')) {
-            findingRoutes()
+          if (!controller.signal.aborted) {
+            setEstimatedAmount(response)
+            setBidExpiresSecond(null)
           }
-          else {
-            setEstimatedAmount(null)
-            setEstimatedAmountResponse({ status: 'failed', message: error?.message })
+        } catch (error) {
+          if (!controller.signal.aborted) {
+            if (error?.message?.includes('Error validating or retrieving bids for')) {
+              setFindingRoutesTrigger(moment().valueOf())
+            }
+            else {
+              setEstimatedAmount(null)
+              setEstimatedAmountResponse({ status: 'failed', message: error?.message })
+            }
           }
         }
       }
@@ -737,7 +790,7 @@ console.log(response)
               <div className="h-10 sm:h-7 flex items-center justify-center sm:justify-start space-x-2">
                 <div className="sm:w-48 font-mono flex items-center justify-end text-lg font-semibold text-right px-2 sm:px-4">
                   {estimatingAmount ?
-                    <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#4B5563'} width="24" height="24" className="mt-1.5" />
+                    <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="24" height="24" className="mt-1.5" />
                     :
                     estimatedAmount ?
                       numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')
@@ -765,7 +818,7 @@ console.log(response)
                 closeDisabled={true}
                 rounded={true}
               >
-                <span className="font-mono text-sm">Invalid Amount ({`<`} Estimated Fees)</span>
+                <span className="font-mono text-sm">You must send at least {numberFormat(estimatedFees, '0,0.000000')} {asset?.symbol} amount to cover fees.</span>
               </Alert>
             </div>
             :
@@ -1024,9 +1077,9 @@ console.log(response)
                               rounded={true}
                             >
                               <div className="flex items-center justify-between space-x-1">
-                                <span className="break-words font-mono text-sm">{swapResponse.message}</span>
+                                <span className={`break-${swapResponse.message?.includes('code=') ? 'all' : 'words'} font-mono text-sm`}>{swapResponse.message}</span>
                                 <button
-                                  onClick={() => findingRoutes()}
+                                  onClick={() => setFindingRoutesTrigger(moment().valueOf())}
                                   className="bg-red-500 dark:bg-red-400 flex items-center justify-center text-white rounded-full p-2"
                                 >
                                   <MdRefresh size={20} />
