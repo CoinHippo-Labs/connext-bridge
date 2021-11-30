@@ -327,7 +327,7 @@ export default function CrosschainBridge() {
             toContract?.contract_address,
           )
 
-          setGasFee(response ? BigNumber(response.toString()).shiftedBy(-toContract?.contract_decimals).toNumber() : false)
+          setGasFee(response ? BigNumber(response.toString()).shiftedBy(-toContract?.contract_decimals).toNumber() : gasFee || false)
         }
 
         setGasFeeEstimating(false)
@@ -359,7 +359,7 @@ export default function CrosschainBridge() {
             toContract?.contract_address,
           )
 
-          setRelayerFee(response ? BigNumber(response.toString()).shiftedBy(-toContract?.contract_decimals).toNumber() : false)
+          setRelayerFee(response ? BigNumber(response.toString()).shiftedBy(-toContract?.contract_decimals).toNumber() : relayerFee || false)
         }
 
         setRelayerFeeEstimating(false)
@@ -466,7 +466,7 @@ export default function CrosschainBridge() {
 
   return (
     <div className="flex flex-col items-center justify-center space-y-2 sm:space-y-3 mt-4 sm:mt-8">
-      <div className="w-full max-w-lg flex items-center justify-center sm:justify-between space-x-2">
+      <div className="w-full max-w-lg flex items-center justify-between space-x-2">
         <div className="flex items-center space-x-2">
           <Img
             src="/logos/connext/logo.png"
@@ -487,13 +487,9 @@ export default function CrosschainBridge() {
               <TiArrowRight size={20} className="transform -rotate-45 -mr-1" />
             </a>
           )}
-          <AdvancedOptions
-            initialOptions={advancedOptions}
-            updateOptions={_options => setAdvancedOptions(_options)}
-          />
         </div>
       </div>
-      <div className="w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-lg space-y-12 sm:space-y-4 py-6 px-6 sm:px-7">
+      <div className="w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-lg space-y-8 sm:space-y-4 py-6 px-6 sm:px-7">
         <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-4 sm:gap-6">
           <div className="sm:col-span-2 flex flex-col items-center space-y-0">
             <span className="text-gray-400 dark:text-gray-500 text-xl font-medium">From Chain</span>
@@ -516,7 +512,7 @@ export default function CrosschainBridge() {
               :
               fromBalance ?
                 <div className="flex items-center text-gray-400 dark:text-gray-600 text-sm space-x-1.5">
-                  <IoWallet size={16} />
+                  <IoWallet size={20} />
                   <span className="font-mono">{numberFormat((fromBalance.balance || 0) / Math.pow(10, fromBalance.contract_decimals), '0,0.00000000')}</span>
                   <span className="font-semibold">{fromBalance.contract_ticker_symbol}</span>
                 </div>
@@ -567,7 +563,7 @@ export default function CrosschainBridge() {
               :
               toBalance ?
                 <div className="flex items-center text-gray-400 dark:text-gray-600 text-sm space-x-1.5">
-                  <IoWallet size={16} />
+                  <IoWallet size={20} />
                   <span className="font-mono">{numberFormat((toBalance.balance || 0) / Math.pow(10, toBalance.contract_decimals), '0,0.00000000')}</span>
                   <span className="font-semibold">{toBalance.contract_ticker_symbol}</span>
                 </div>
@@ -697,164 +693,176 @@ export default function CrosschainBridge() {
             </>
           )}
         </div>
-        {balances_data?.[fromChainId] && feesEstimated && typeof estimatedFees === 'number' && typeof amount === 'number' && (
-          <div>
-            {amount < estimatedFees ?
-              <div className="sm:pt-2.5 pb-1">
+        {fromChainId && toChainId && asset && (
+          <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 -mt-8 sm:mt-0 pb-0.5">
+            <div className="order-1 sm:col-span-2 flex justify-center">
+              <span className="min-w-max text-gray-400 dark:text-gray-600 text-xl font-medium">~ Received</span>
+            </div>
+            <div className="order-2 sm:col-span-3 flex flex-col items-center space-y-0">
+              <div className="h-10 sm:h-7 flex items-center justify-center sm:justify-start space-x-2">
+                <div className="sm:w-48 font-mono flex items-center justify-end text-lg font-semibold text-right sm:px-4">
+                  {estimatingAmount ?
+                    <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#4B5563'} width="24" height="24" className="mt-1.5" />
+                    :
+                    estimatedAmount ?
+                      numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')
+                      :
+                      '-'
+                  }
+                </div>
+                <span className="text-lg font-semibold">{asset.symbol}</span>
+              </div>
+            </div>
+          </div>
+        )}
+        <div className="grid grid-flow-row grid-cols-1 sm:gap-4">
+          <AdvancedOptions
+            initialOptions={advancedOptions}
+            updateOptions={_options => setAdvancedOptions(_options)}
+          />
+        </div>
+        {balances_data?.[fromChainId] && feesEstimated && typeof estimatedFees === 'number' && typeof amount === 'number' ?
+          amount < estimatedFees ?
+            <div className="sm:pt-1.5 pb-1">
+              <Alert
+                color="bg-red-400 dark:bg-red-500 text-left text-white"
+                icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                closeDisabled={true}
+                rounded={true}
+              >
+                <span className="font-mono text-sm">Invalid Amount ({`<`} Estimated Fees)</span>
+              </Alert>
+            </div>
+            :
+            fromBalanceAmount < amount ?
+              <div className="sm:pt-1.5 pb-1">
                 <Alert
                   color="bg-red-400 dark:bg-red-500 text-left text-white"
-                  icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" />}
+                  icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
                   closeDisabled={true}
                   rounded={true}
                 >
-                  <span className="font-mono text-xs">Invalid Amount ({`<`} Estimated Fees)</span>
+                  <span className="font-mono text-sm">Insufficient Funds</span>
                 </Alert>
               </div>
               :
-              fromBalanceAmount < amount ?
-                <div className="sm:pt-2.5 pb-1">
+              !(fromChainSynced && toChainSynced) ?
+                <div className="sm:pt-1.5 pb-1">
                   <Alert
                     color="bg-red-400 dark:bg-red-500 text-left text-white"
-                    icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" />}
+                    icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
                     closeDisabled={true}
                     rounded={true}
                   >
-                    <span className="font-mono text-xs">Insufficient Funds</span>
+                    <span className="font-mono text-sm">
+                      {unsyncedChains.map((_chain, i) => (
+                        <span key={i} className="inline-flex items-baseline mr-2">
+                          {_chain.image && (
+                            <Img
+                              src={_chain.image}
+                              alt=""
+                              className="w-4 h-4 rounded-full self-center mr-1"
+                            />
+                          )}
+                          <span className="font-bold">{_chain.title}</span>
+                          {i < unsyncedChains.length - 1 && (
+                            <span className="ml-1.5">&</span>
+                          )}
+                        </span>
+                      ))}
+                      <span>subgraph{unsyncedChains.length > 1 ? 's' : ''} is out of sync. Please try again later.</span>
+                    </span>
                   </Alert>
                 </div>
                 :
-                !(fromChainSynced && toChainSynced) ?
-                  <div className="sm:pt-2.5 pb-1">
-                    <Alert
-                      color="bg-red-400 dark:bg-red-500 text-left text-white"
-                      icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" />}
-                      closeDisabled={true}
-                      rounded={true}
-                    >
-                      <span className="font-mono text-xs">
-                        {unsyncedChains.map((_chain, i) => (
-                          <span key={i} className="inline-flex items-baseline mr-2">
-                            {_chain.image && (
-                              <Img
-                                src={_chain.image}
-                                alt=""
-                                className="w-4 h-4 rounded-full self-center mr-1"
-                              />
-                            )}
-                            <span className="font-bold">{_chain.title}</span>
-                            {i < unsyncedChains.length - 1 && (
-                              <span className="ml-1.5">&</span>
-                            )}
-                          </span>
-                        ))}
-                        <span>subgraph{unsyncedChains.length > 1 ? 's' : ''} is out of sync. Please try again later.</span>
-                      </span>
-                    </Alert>
+                mustChangeChain ?
+                  <div className="sm:pt-1.5 pb-1">
+                    <Wallet
+                      chainIdToConnect={fromChainId}
+                      buttonDisconnectTitle={<>
+                        <span>Switch to</span>
+                        <Img
+                          src={fromChain?.image}
+                          alt=""
+                          className="w-8 h-8 rounded-full"
+                        />
+                        <span className="font-semibold">{fromChain?.title}</span>
+                      </>}
+                      buttonDisconnectClassName="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-sm sm:text-base space-x-2 py-4 px-3"
+                    />
                   </div>
                   :
-                  mustChangeChain ?
-                    <div className="sm:pt-2.5 pb-1">
-                      <Wallet
-                        chainIdToConnect={fromChainId}
-                        buttonDisconnectTitle={<>
-                          <span>Switch to</span>
-                          <Img
-                            src={fromChain?.image}
-                            alt=""
-                            className="w-8 h-8 rounded-full"
-                          />
-                          <span className="font-semibold">{fromChain?.title}</span>
-                        </>}
-                        buttonDisconnectClassName="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-xs sm:text-base space-x-2 py-4 px-3"
-                      />
-                    </div>
+                  mustApproveToken ?
+                    typeof tokenApproved === 'boolean' && (
+                      <div className="sm:pt-1.5 pb-1">
+                        <button
+                          disabled={actionDisabled}
+                          onClick={() => approveToken()}
+                          className={`w-full ${actionDisabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${actionDisabled ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-sm sm:text-lg space-x-2 py-4 px-3`}
+                        >
+                          {tokenApprovingTx ?
+                            <>
+                              <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
+                              <span>Approving</span>
+                            </>
+                            :
+                            <span>Approve</span>
+                          }
+                          <span className="font-semibold">{asset?.symbol}</span>
+                        </button>
+                      </div>
+                    )
                     :
-                    mustApproveToken ?
-                      typeof tokenApproved === 'boolean' && (
-                        <div className="sm:pt-2.5 pb-1">
-                          <button
-                            disabled={actionDisabled}
-                            onClick={() => approveToken()}
-                            className={`w-full ${actionDisabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${actionDisabled ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-sm sm:text-lg space-x-2 py-4 px-3`}
-                          >
-                            {tokenApprovingTx ?
-                              <>
-                                <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
-                                <span>Approving</span>
-                              </>
-                              :
-                              <span>Approve</span>
-                            }
-                            <span className="font-semibold">{asset?.symbol}</span>
-                          </button>
-                        </div>
-                      )
+                    estimatedAmount || estimatingAmount ?
+                      <div className="sm:pt-1.5 pb-1">
+                        {!estimatingAmount && estimatedAmount && estimatedFees > BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber() && (
+                          <div className="order-2 sm:col-span-5 flex flex-wrap items-center justify-center text-yellow-500 dark:text-yellow-400 mt-4 sm:mt-0 mb-2">
+                            <TiWarning size={16} className="mb-0.5 mr-1.5" />
+                            <span>Fee is greater than estimated received.</span>
+                          </div>
+                        )}
+                        <button
+                          disabled={estimatingAmount}
+                          onClick={() => {}}
+                          className={`w-full ${estimatingAmount ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${estimatingAmount ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-sm sm:text-lg space-x-2 py-4 px-3`}
+                        >
+                          {estimatingAmount ?
+                            <>
+                              <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" className="w-6 h-6" />
+                              <span>Searching Routes</span>
+                            </>
+                            :
+                            <span>Swap</span>
+                          }
+                          <span className="font-semibold">{asset?.symbol}</span>
+                          {/*!estimatingAmount && typeof bidExpiresSecond === 'number' && (
+                            <span className="text-gray-300 dark:text-gray-200 text-sm font-medium">(expire in {bidExpiresSecond}s)</span>
+                          )*/}
+                        </button>
+                      </div>
                       :
-                      estimatedAmount || estimatingAmount ?
-                        <>
-                          {estimatedAmount && (
-                            <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 -mt-8 sm:mt-0 pb-6 sm:pb-1.5">
-                              <div className="order-1 sm:col-span-2 flex justify-center">
-                                <span className="min-w-max text-gray-400 dark:text-gray-600 text-xl font-medium">~ Received</span>
-                              </div>
-                              <div className="order-2 sm:col-span-3 flex flex-col items-center space-y-0">
-                                <div className="h-7 flex items-center justify-center sm:justify-start space-x-2">
-                                  <div className="sm:w-48 font-mono flex items-center justify-end text-lg font-semibold text-right sm:px-3">
-                                    {estimatingAmount ?
-                                      <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#4B5563'} width="24" height="24" className="mt-1.5" />
-                                      :
-                                      numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')
-                                    }
-                                  </div>
-                                  <span className="text-lg font-semibold">{asset.symbol}</span>
-                                </div>
-                              </div>
-                              {!estimatingAmount && estimatedFees > BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber() && (
-                                <div className="order-2 sm:col-span-5 flex flex-wrap items-center justify-center text-yellow-500 dark:text-yellow-400 mt-4 sm:mt-0 -mb-4 sm:-mb-2">
-                                  <TiWarning size={16} className="mb-0.5 mr-1.5" />
-                                  <span>Fee is greater than estimated received.</span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          <div className="sm:pt-2.5 pb-1">
-                            <button
-                              disabled={estimatingAmount}
-                              onClick={() => {}}
-                              className={`w-full ${estimatingAmount ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${estimatingAmount ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-sm sm:text-lg space-x-2 py-4 px-3`}
-                            >
-                              {estimatingAmount ?
-                                <>
-                                  <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" className="w-6 h-6" />
-                                  <span>Searching Routes</span>
-                                </>
-                                :
-                                <span>Swap</span>
-                              }
-                              <span className="font-semibold">{asset?.symbol}</span>
-                              {/*!estimatingAmount && typeof bidExpiresSecond === 'number' && (
-                                <span className="text-gray-300 dark:text-gray-200 text-xs font-medium">(expire in {bidExpiresSecond}s)</span>
-                              )*/}
-                            </button>
-                          </div>
-                        </>
+                      estimatedAmountResponse ?
+                        <div className="sm:pt-1.5 pb-1">
+                          <Alert
+                            color={`${estimatedAmountResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : estimatedAmountResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
+                            icon={estimatedAmountResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : estimatedAmountResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                            closeDisabled={true}
+                            rounded={true}
+                          >
+                            <span className="break-all font-mono text-sm">{estimatedAmountResponse.message}</span>
+                          </Alert>
+                        </div>
                         :
-                        estimatedAmountResponse ?
-                          <div className="sm:pt-2.5 pb-1">
-                            <Alert
-                              color={`${estimatedAmountResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : estimatedAmountResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
-                              icon={estimatedAmountResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" /> : estimatedAmountResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-2 sm:mr-3" />}
-                              closeDisabled={true}
-                              rounded={true}
-                            >
-                              <span className="break-all font-mono text-xs">{estimatedAmountResponse.message}</span>
-                            </Alert>
-                          </div>
-                          :
-                          null
-            }
-          </div>
-        )}
+                        null
+          :
+          <button
+            disabled={true}
+            className="w-full bg-gray-200 dark:bg-gray-800 cursor-not-allowed rounded-lg shadow-lg flex items-center justify-center text-gray-400 dark:text-gray-500 text-sm sm:text-lg font-semibold space-x-2 py-4 px-3"
+          >
+            <span>Swap</span>
+            <span className="font-semibold">{asset?.symbol}</span>
+          </button>
+        }
         {tokenApproveResponse && (
           <Notification
             hideButton={true}

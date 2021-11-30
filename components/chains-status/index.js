@@ -122,9 +122,9 @@ export default function ChainsStatus() {
         ))}
       </div>
       {chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).length > 0 && (
-        <div className="xl:max-w-xl block font-mono leading-4 text-red-600 dark:text-red-500 text-2xs xl:text-sm space-y-1 xl:mx-auto py-2 xl:py-6 px-2 sm:px-4">
-          <FaRegHandPointRight size={20} className="inline mr-1.5 xl:mr-2" />
-          <span className="mr-1.5 xl:mr-2">
+        <div className="xl:max-w-xl block font-mono leading-4 text-red-600 dark:text-red-500 text-2xs xl:text-sm space-y-1 xl:mx-auto py-4 xl:py-6 px-4">
+          <FaRegHandPointRight size={20} className="inline mr-2" />
+          <span className="mr-2">
             You may face some delay transfers due to the <span className="font-semibold">{chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).map(_chain => _chain?.short_name).join(', ')}</span> subgraph{chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).length > 1 ? 's' : ''} is not synced. However, no worry at all - your funds are SAFE. Simply check your transaction status at
           </span>
           <a
