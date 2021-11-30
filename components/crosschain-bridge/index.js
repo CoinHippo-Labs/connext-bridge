@@ -465,14 +465,14 @@ export default function CrosschainBridge() {
   const actionDisabled = tokenApprovingTx
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-2 sm:space-y-3 mt-4 sm:mt-8">
+    <div className="flex flex-col items-center justify-center space-y-2 sm:space-y-3 my-4 sm:my-6">
       <div className="w-full max-w-lg flex items-center justify-between space-x-2">
         <div className="flex items-center space-x-2">
-          <Img
+          {/*<Img
             src="/logos/connext/logo.png"
             alt=""
             className="w-7 sm:w-8 h-7 sm:h-8 rounded-full"
-          />
+          />*/}
           <h1 className="uppercase text-base sm:text-lg font-bold">Cross-Chain Swap</h1>
         </div>
         <div className="flex items-center space-x-2.5">
@@ -618,11 +618,11 @@ export default function CrosschainBridge() {
                   typeof gasFee === 'number' || typeof relayerFee === 'number' || typeof routerFee === 'number' ||
                   typeof gasFee === 'boolean' || typeof relayerFee === 'boolean' || typeof routerFee === 'boolean'
                 ) && (
-                  <div className="min-w-max h-4 flex items-center justify-center space-x-1.5">
-                    <span className="text-gray-600 dark:text-gray-400 text-sm font-semibold">Fees:</span>
+                  <div className="min-w-max h-5 flex items-center justify-center space-x-1.5">
+                    <span className="text-gray-800 dark:text-gray-200 text-sm font-semibold">Fees:</span>
                     {gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ?
                       <>
-                        <span className="text-gray-600 dark:text-gray-400 text-sm">Estimating</span>
+                        <span className="text-gray-400 dark:text-gray-600 text-sm">Estimating</span>
                         <Loader type="BallTriangle" color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="20" height="20" />
                       </>
                       :
@@ -675,12 +675,12 @@ export default function CrosschainBridge() {
                   </div>
                 )}
               </div>
-              <div className="order-3 sm:order-4 sm:col-span-3 sm:-mt-5 mx-auto sm:-ml-2">
-                <div className="w-48 h-4 flex items-center justify-end">
+              <div className="order-3 sm:order-4 sm:col-span-3 sm:-mt-5 ml-9 sm:-ml-2 mr-auto">
+                <div className="w-48 h-5 flex items-center justify-end">
                   {balances_data?.[fromChainId] ?
                     <button
                       onClick={() => setAmount(Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals) > smallNumber ? Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance.contract_decimals) : 0)}
-                      className="text-gray-600 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-500 text-sm font-bold"
+                      className="text-gray-800 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100 text-sm font-bold"
                     >
                       Max
                     </button>
@@ -700,7 +700,7 @@ export default function CrosschainBridge() {
             </div>
             <div className="order-2 sm:col-span-3 flex flex-col items-center space-y-0">
               <div className="h-10 sm:h-7 flex items-center justify-center sm:justify-start space-x-2">
-                <div className="sm:w-48 font-mono flex items-center justify-end text-lg font-semibold text-right sm:px-4">
+                <div className="sm:w-48 font-mono flex items-center justify-end text-lg font-semibold text-right px-2 sm:px-4">
                   {estimatingAmount ?
                     <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#4B5563'} width="24" height="24" className="mt-1.5" />
                     :
@@ -798,7 +798,7 @@ export default function CrosschainBridge() {
                         <button
                           disabled={actionDisabled}
                           onClick={() => approveToken()}
-                          className={`w-full ${actionDisabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${actionDisabled ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-sm sm:text-lg space-x-2 py-4 px-3`}
+                          className={`w-full ${actionDisabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${actionDisabled ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3`}
                         >
                           {tokenApprovingTx ?
                             <>
@@ -824,7 +824,7 @@ export default function CrosschainBridge() {
                         <button
                           disabled={estimatingAmount}
                           onClick={() => {}}
-                          className={`w-full ${estimatingAmount ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${estimatingAmount ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-sm sm:text-lg space-x-2 py-4 px-3`}
+                          className={`w-full ${estimatingAmount ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${estimatingAmount ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3`}
                         >
                           {estimatingAmount ?
                             <>
@@ -834,7 +834,7 @@ export default function CrosschainBridge() {
                             :
                             <span>Swap</span>
                           }
-                          <span className="font-semibold">{asset?.symbol}</span>
+                          <span className="font-bold">{asset?.symbol}</span>
                           {/*!estimatingAmount && typeof bidExpiresSecond === 'number' && (
                             <span className="text-gray-300 dark:text-gray-200 text-sm font-medium">(expire in {bidExpiresSecond}s)</span>
                           )*/}
@@ -857,7 +857,7 @@ export default function CrosschainBridge() {
           :
           <button
             disabled={true}
-            className="w-full bg-gray-200 dark:bg-gray-800 cursor-not-allowed rounded-lg shadow-lg flex items-center justify-center text-gray-400 dark:text-gray-500 text-sm sm:text-lg font-semibold space-x-2 py-4 px-3"
+            className="w-full bg-gray-200 dark:bg-gray-800 cursor-not-allowed rounded-lg shadow-lg flex items-center justify-center text-gray-400 dark:text-gray-500 text-base sm:text-lg font-semibold space-x-2 py-4 px-3"
           >
             <span>Swap</span>
             <span className="font-semibold">{asset?.symbol}</span>
