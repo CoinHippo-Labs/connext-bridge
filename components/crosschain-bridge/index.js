@@ -693,7 +693,7 @@ export default function CrosschainBridge() {
             </>
           )}
         </div>
-        {fromChainId && toChainId && asset && (
+        {isSupport() && (
           <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 -mt-8 sm:mt-0 pb-0.5">
             <div className="order-1 sm:col-span-2 flex justify-center">
               <span className="min-w-max text-gray-400 dark:text-gray-600 text-xl font-medium">~ Received</span>
