@@ -286,8 +286,8 @@ export default function CrosschainBridge() {
     if (isSupport()) {
       const asset = swapConfig.fromChainId && swapConfig.toChainId && swapConfig.assetId && assets_data?.find(_asset => _asset?.id === swapConfig.assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === swapConfig.fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === swapConfig.toChainId) > -1)
 
-      const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === swapConfig.fromChainId)
-      const toContract = asset.contracts?.find(_contract => _contract?.chain_id === swapConfig.toChainId)
+      const fromContract = asset?.contracts?.find(_contract => _contract?.chain_id === swapConfig.fromChainId)
+      const toContract = asset?.contracts?.find(_contract => _contract?.chain_id === swapConfig.toChainId)
 
       if (fromContract && toContract) {
         setFees(null)
