@@ -51,7 +51,7 @@ export default function DropdownNetwork({ disabled, chain_id, onSelect }) {
         ref={buttonRef}
         disabled={disabled}
         onClick={handleDropdownClick}
-        className={`h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
+        className={`${!chains_data ? 'w-40' : ''} h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
       >
         {chain ?
           <div className="w-36 min-w-max bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-3xl flex items-center justify-center text-lg space-x-1.5 py-1.5 px-4">
