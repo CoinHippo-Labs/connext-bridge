@@ -781,7 +781,7 @@ console.log(response)
             </>
           )}
         </div>
-        {isSupport() && (
+        {isSupport() && web3_provider && (
           <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 -mt-8 sm:mt-0 pb-0.5">
             <div className="order-1 sm:col-span-2 flex justify-center">
               <span className="min-w-max text-gray-400 dark:text-gray-600 text-xl font-medium">~ Received</span>
@@ -1090,13 +1090,26 @@ console.log(response)
                           :
                           null
           :
-          <button
-            disabled={true}
-            className="w-full bg-gray-200 dark:bg-gray-800 cursor-not-allowed rounded-lg shadow-lg flex items-center justify-center text-gray-400 dark:text-gray-500 text-base sm:text-lg font-semibold space-x-2 py-4 px-3"
-          >
-            <span>Swap</span>
-            <span className="font-semibold">{asset?.symbol}</span>
-          </button>
+          web3_provider ?
+            <button
+              disabled={true}
+              className="w-full bg-gray-200 dark:bg-gray-800 cursor-not-allowed rounded-lg shadow-lg flex items-center justify-center text-gray-400 dark:text-gray-500 text-base sm:text-lg font-semibold space-x-2 py-4 px-3"
+            >
+              <span>Swap</span>
+              <span className="font-semibold">{asset?.symbol}</span>
+            </button>
+            :
+            <Wallet
+              buttonConnectTitle={<>
+                <span>Connect your wallet</span>
+                <Img
+                  src="/logos/wallets/metamask.png"
+                  alt=""
+                  className="w-6 h-6 -mr-0.5 mb-0.5"
+                />
+              </>}
+              buttonConnectClassName="w-full bg-gray-100 hover:bg-gray-200 dark:bg-indigo-600 dark:hover:bg-indigo-700 rounded-lg shadow-lg flex items-center justify-center text-base sm:text-lg font-semibold space-x-2.5 py-4 px-3"
+            />
         }
         {tokenApproveResponse && (
           <Notification

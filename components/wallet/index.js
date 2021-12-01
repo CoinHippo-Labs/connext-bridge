@@ -172,7 +172,7 @@ export default function Wallet({ chainIdToConnect, hidden, buttonConnectTitle, b
         <button
           onClick={connect}
           className={buttonConnectClassName || 'bg-gray-100 hover:bg-gray-200 dark:bg-indigo-600 dark:hover:bg-indigo-700 rounded-2xl font-semibold py-1 sm:py-1.5 px-2 sm:px-3'}
-          style={{ width: 'max-content' }}
+          style={buttonConnectClassName?.includes('w-full') ? null : { width: 'max-content' }}
         >
           {buttonConnectTitle || (
             <div className="flex items-center space-x-2">
