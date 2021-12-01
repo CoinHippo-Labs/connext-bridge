@@ -34,7 +34,7 @@ export default function Wallet({ chainIdToConnect, hidden, buttonConnectTitle, b
   const { theme } = { ...preferences }
 
   useEffect(() => {
-    if (web3Modal?.cachedProvider && !web3_provider) {
+    if (web3Modal?.cachedProvider) {
       connect()
     }
   }, [web3Modal])

@@ -52,13 +52,12 @@ export default function CrosschainBridge() {
   const { sdk_data } = { ...sdk }
   const { theme } = { ...preferences }
 
+  const [controller, setController] = useState(new AbortController())
+
   const [fromChainId, setFromChainId] = useState(null)
   const [toChainId, setToChainId] = useState(null)
   const [assetId, setAssetId] = useState(null)
   const [amount, setAmount] = useState(null)
-  const [tokenApproved, setTokenApproved] = useState(null)
-  const [tokenApprovingTx, setTokenApprovingTx] = useState(null)
-  const [tokenApproveResponse, setTokenApproveResponse] = useState(null)
   const [advancedOptions, setAdvancedOptions] = useState({
     infinite_approval: true,
     receiving_address: '',
@@ -67,12 +66,12 @@ export default function CrosschainBridge() {
     preferred_router: '',
   })
 
-  const [estimateFeesTrigger, setEstimateFeesTrigger] = useState(null)
-  const [findingRoutesTrigger, setFindingRoutesTrigger] = useState(null)
+  const [estimateTrigger, setEstimateTrigger] = useState(null)
 
-  const [gasFee, setGasFee] = useState(null)
-  const [relayerFee, setRelayerFee] = useState(null)
-  const [routerFee, setRouterFee] = useState(null)
+  const [tokenApproved, setTokenApproved] = useState(null)
+  const [tokenApproveResponse, setTokenApproveResponse] = useState(null)
+
+  const [fees, setFees] = useState(null)
   const [estimatingFees, setEstimatingFees] = useState(null)
   const [refreshEstimatedFeesSecond, setRefreshEstimatedFeesSecond] = useState(refresh_estimated_fees_second)
 
@@ -81,6 +80,7 @@ export default function CrosschainBridge() {
   const [estimatedAmountResponse, setEstimatedAmountResponse] = useState(null)
   const [bidExpiresSecond, setBidExpiresSecond] = useState(null)
   const [numReceivedBid, setNumReceivedBid] = useState(null)
+
   const [startingSwap, setStartingSwap] = useState(null)
   const [swapData, setSwapData] = useState(null)
   const [swapResponse, setSwapResponse] = useState(null)
@@ -117,24 +117,35 @@ export default function CrosschainBridge() {
   }, [address])
   // wallet
 
-  // fees
+  // estimate
   useEffect(() => {
-    const controller = new AbortController()
+    let _controller
 
-    if (estimateFeesTrigger && (typeof amount !== 'number' || estimatedAmount)) {
-      if (!controller.signal.aborted) {
-        estimateFees(controller)
-      }
+    if (estimateTrigger) {
+      controller?.abort()
+
+      _controller = new AbortController()
+      setController(_controller)
+
+      estimate(_controller)
     }
 
     return () => {
-      controller?.abort()
+      _controller?.abort()
     }
-  }, [estimateFeesTrigger])
+  }, [estimateTrigger])
 
+  useEffect(async () => {
+    setEstimateTrigger(moment().valueOf())
+  }, [address, fromChainId, toChainId, assetId, amount, advancedOptions])
+  // estimate
+
+  // fees
   useEffect(() => {
     if (refreshEstimatedFeesSecond === 0) {
-      setEstimateFeesTrigger(moment().valueOf())
+      if (typeof amount !== 'number') {
+        setEstimateTrigger(moment().valueOf())
+      }
     }
     else { 
       const interval = setInterval(() => {
@@ -152,60 +163,9 @@ export default function CrosschainBridge() {
       setRefreshEstimatedFeesSecond(refresh_estimated_fees_second)
     }
   }, [estimatingFees])
-
-  useEffect(() => {
-    setGasFee(null)
-    setRelayerFee(null)
-    setRouterFee(null)
-
-    setEstimateFeesTrigger(moment().valueOf())
-  }, [address, fromChainId, toChainId, assetId, amount, estimatedAmount])
   // fees
 
-  // approve
-  useEffect(() => {
-    const getData = async () => {
-      const _approved = await isTokenApproved()
-
-      if (_approved !== tokenApproved) {
-        setTokenApproved(_approved)
-      }
-    }
-
-    getData()
-  }, [address, chain_id, fromChainId, toChainId, assetId, amount, estimateFeesTrigger, findingRoutesTrigger])
-
-  useEffect(() => {
-    setTokenApprovingTx(null)
-    setTokenApproveResponse(null)
-  }, [address, fromChainId, assetId])
-  // approve
-
   // bid
-  useEffect(() => {
-    const controller = new AbortController()
-
-    if (findingRoutesTrigger) {
-      if (!controller.signal.aborted) {
-        findingRoutes(controller)
-      }
-    }
-
-    return () => {
-      controller?.abort()
-    }
-  }, [findingRoutesTrigger])
-
-  useEffect(() => {
-    if (address && chain_id && chain_id === fromChainId && toChainId && assetId && typeof amount === 'number') {
-      setFindingRoutesTrigger(moment().valueOf())
-    }
-    else {
-      setEstimatedAmount(null)
-      setEstimatingAmount(false)
-    }
-  }, [address, chain_id, fromChainId, toChainId, assetId, amount, advancedOptions])
-
   useEffect(() => {
     if (bidExpiresSecond === -1) {
       setBidExpiresSecond(bid_expires_second)
@@ -223,6 +183,17 @@ export default function CrosschainBridge() {
   }, [bidExpiresSecond])
   // bid
 
+  // approve
+  useEffect(async () => {
+    const _approved = await isTokenApproved()
+    setTokenApproved(_approved)
+  }, [address, fromChainId, assetId, amount])
+
+  useEffect(() => {
+    setTokenApproveResponse(null)
+  }, [address, chain_id, fromChainId, assetId])
+  // approve
+
   const isSupport = () => {
     const asset = assets_data?.find(_asset => _asset?.id === assetId)
 
@@ -233,68 +204,6 @@ export default function CrosschainBridge() {
   }
 
   const getChainSynced = _chain_id => !chains_status_data || chains_status_data.find(_chain => _chain.chain_id === _chain_id)?.synced
-
-  const isTokenApproved = async isAfterApprove => {
-    let approved = tokenApproved
-
-    if (address && chain_id && chain_id === fromChainId && assetId && (isAfterApprove || !tokenApprovingTx)) {
-      const fromChainSynced = getChainSynced(fromChainId)
-      const toChainSynced = getChainSynced(toChainId)
-
-      const fromBalance = getChainBalance(fromChainId)
-      const fromBalanceAmount = (fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals || 0)
-
-      // const feesEstimated = (typeof gasFee === 'number' || typeof gasFee === 'boolean') && (typeof relayerFee === 'number' || typeof relayerFee === 'boolean') && (typeof routerFee === 'number' || typeof routerFee === 'boolean')
-      // const estimatedFees = feesEstimated && ((gasFee || 0) + (relayerFee || 0) + (routerFee || 0))
-
-      if (isSupport()/* && amount >= estimatedFees*/ && (!check_balances || fromBalanceAmount >= amount) && fromChainSynced && toChainSynced) {
-        const asset = assets_data?.find(_asset => _asset?.id === assetId)
-        const contract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
-
-        if (contract?.contract_address) {
-          if (contract.contract_address !== constants.AddressZero) {
-            approved = await getApproved(signer, contract.contract_address, getDeployedTransactionManagerContract(fromChainId)?.address)
-            approved = approved.gte(BigNumber(amount).shiftedBy(contract?.contract_decimals))
-          }
-          else {
-            approved = true
-          }
-        }
-      }
-    }
-
-    return approved
-  }
-
-  const approveToken = async () => {
-    const asset = assets_data?.find(_asset => _asset?.id === assetId)
-    const contract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
-
-    setTokenApproveResponse(null)
-
-    try {
-      const tx_approve = await approve(signer, contract?.contract_address, getDeployedTransactionManagerContract(fromChainId)?.address, BigNumber(amount).shiftedBy(contract?.contract_decimals).toString())
-
-      const tx_hash = tx_approve?.hash
-
-      setTokenApprovingTx(tx_hash)
-      setTokenApproveResponse({ status: 'pending', message: `Wait for ${asset?.symbol} Approval Confirmation` })
-
-      await tx_approve.wait()
-
-      const _approved = await isTokenApproved(true)
-
-      if (_approved !== tokenApproved) {
-        setTokenApproved(_approved)
-      }
-
-      setTokenApproveResponse({ status: 'success', message: `${asset?.symbol} Approval Transaction Confirmed.`, tx_hash })
-    } catch (error) {
-      setTokenApproveResponse({ status: 'failed', message: error?.message })
-    }
-
-    setTokenApprovingTx(null)
-  }
 
   const getChainBalances = async _chain_id => {
     if (_chain_id && address) {
@@ -325,187 +234,162 @@ export default function CrosschainBridge() {
     return balance
   }
 
-  const estimateFees = async controller => {
-    if (address && fromChainId && toChainId && assetId) {
-      setEstimatingFees(typeof amount === 'number' && estimatedAmount ? false : true)
+  const isTokenApproved = async isAfterApprove => {
+    let approved = true
 
-      if (typeof amount !== 'number') {
-        if (estimatedAmount) {
-          setEstimatedAmount(null)
+    if (address && chain_id && chain_id === fromChainId && assetId && typeof amount === 'number' && (isAfterApprove || !tokenApproveResponse)) {
+      const fromChainSynced = getChainSynced(fromChainId)
+      const toChainSynced = getChainSynced(toChainId)
+
+      const fromBalance = getChainBalance(fromChainId)
+      const fromBalanceAmount = (fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals || 0)
+
+      if (isSupport() && (!check_balances || fromBalanceAmount >= amount) && fromChainSynced && toChainSynced) {
+        const asset = assets_data?.find(_asset => _asset?.id === assetId)
+        const contract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
+
+        if (contract?.contract_address) {
+          if (contract.contract_address !== constants.AddressZero) {
+            approved = await getApproved(signer, contract.contract_address, getDeployedTransactionManagerContract(fromChainId)?.address)
+            approved = approved.gte(BigNumber(amount).shiftedBy(contract?.contract_decimals))
+          }
+          else {
+            approved = true
+          }
         }
-        if (estimatedAmountResponse) {
-          setEstimatedAmountResponse(null)
-        }
       }
-
-      if (!controller.signal.aborted) {
-        await estimateGasFee(controller)
-      }
-      if (!controller.signal.aborted) {
-        await estimateRelayerFee(controller)
-      }
-      if (!controller.signal.aborted) {
-        await estimateRouterFee(controller)
-      }
-
-      setEstimatingFees(false)
     }
-    else {
-      setGasFee(null)
-      setRelayerFee(null)
-      setRouterFee(null)
-    }
+
+    return approved
   }
 
-  const estimateGasFee = async controller => {
-    if (sdk_data) {
-      const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
+  const approveToken = async () => {
+    const asset = assets_data?.find(_asset => _asset?.id === assetId)
+    const contract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
 
-      if (isSupport()) {
-        const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
-        const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
-
-        if (estimatedAmount?.gasFeeInReceivingToken) {
-          if (!controller.signal.aborted) {
-            setGasFee(BigNumber(estimatedAmount.gasFeeInReceivingToken).shiftedBy(-toContract?.contract_decimals).toNumber())
-          }
-        }
-        else {
-          const response = await sdk_data.estimateFeeForRouterTransferInReceivingToken(
-            fromChainId,
-            fromContract?.contract_address,
-            toChainId,
-            toContract?.contract_address,
-          )
-
-          if (!controller.signal.aborted) {
-            setGasFee(response ? BigNumber(response.toString()).shiftedBy(-toContract?.contract_decimals).toNumber() : gasFee || false)
-          }
-        }
-      }
-      else {
-        setGasFee(null)
-      }
-    }
-  }
-
-  const estimateRelayerFee = async controller => {
-    if (sdk_data) {
-      const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
-
-      if (isSupport()) {
-        const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
-        const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
-
-        if (estimatedAmount) {
-          if (!controller.signal.aborted) {
-            setRelayerFee(BigNumber(estimatedAmount.metaTxRelayerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber())
-          }
-        }
-        else {
-          const response = await sdk_data.estimateMetaTxFeeInReceivingToken(
-            fromChainId,
-            fromContract?.contract_address,
-            toChainId,
-            toContract?.contract_address,
-          )
-
-          if (!controller.signal.aborted) {
-            setRelayerFee(response ? BigNumber(response.toString()).shiftedBy(-toContract?.contract_decimals).toNumber() : relayerFee || false)
-          }
-        }
-      }
-      else {
-        setRelayerFee(null)
-      }
-    }
-  }
-
-  const estimateRouterFee = async controller => {
-    if (sdk_data) {
-      if (isSupport()) {
-        if (estimatedAmount?.bid?.amountReceived) {
-          const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
-          const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
-
-          if (!controller.signal.aborted) {
-            setRouterFee(amount - BigNumber(estimatedAmount.bid.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber())
-          }
-        }
-        else {
-          if (!controller.signal.aborted) {
-            setRouterFee(false)
-          }
-        }
-      }
-      else {
-        setRouterFee(null)
-      }
-    }
-  }
-
-  const findingRoutes = async controller => {
-    setTokenApprovingTx(null)
     setTokenApproveResponse(null)
 
-    setStartingSwap(false)
-    setSwapResponse(null)
+    try {
+      const tx_approve = await approve(signer, contract?.contract_address, getDeployedTransactionManagerContract(fromChainId)?.address, BigNumber(amount).shiftedBy(contract?.contract_decimals).toString())
 
-    setEstimatedAmount(null)
-    setEstimatedAmountResponse(null)
+      const tx_hash = tx_approve?.hash
 
-    if (typeof amount === 'number') {
-      setEstimatingAmount(true)
+      setTokenApproveResponse({ status: 'pending', message: `Wait for ${asset?.symbol} Approval Confirmation`, tx_hash })
+
+      await tx_approve.wait()
+
+      const _approved = await isTokenApproved(true)
+
+      if (_approved !== tokenApproved) {
+        setTokenApproved(_approved)
+      }
+
+      setTokenApproveResponse({ status: 'success', message: `${asset?.symbol} Approval Transaction Confirmed.`, tx_hash })
+    } catch (error) {
+      setTokenApproveResponse({ status: 'failed', message: error?.message })
     }
+  }
 
-    if (sdk_data) {
+  const estimate = async controller => {
+    if (isSupport()) {
       const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
 
-      if (isSupport() && typeof amount === 'number') {
-        const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
-        const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
+      const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
+      const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
 
-        try {
-          setBidExpiresSecond(bid_expires_second)
-          setNumReceivedBid(0)
+      if (fromContract && toContract) {
+        setFees(null)
+        setEstimatedAmount(null)
+        setEstimatedAmountResponse(null)
 
-          const response = await sdk_data.getTransferQuote({
-            sendingChainId: fromChainId,
-            sendingAssetId: fromContract?.contract_address,
-            receivingChainId: toChainId,
-            receivingAssetId: toContract?.contract_address,
-            receivingAddress: advancedOptions?.receiving_address || address,
-            amount: BigNumber(amount).shiftedBy(fromContract?.contract_decimals).toString(),
-            transactionId: getRandomBytes32(),
-            expiry: moment().add(expiry_hours, 'hours').unix(),
-            callTo: advancedOptions?.contract_address || undefined,
-            callData: advancedOptions?.call_data || undefined,
-            initiator: undefined,
-            preferredRouters: advancedOptions?.preferredRouters?.split(',') || undefined,
-            dryRun: false,
-          })
+        if (typeof amount === 'number') {
+          setTokenApproveResponse(null)
 
-          if (!controller.signal.aborted) {
-            setEstimatedAmount(response)
-            setBidExpiresSecond(null)
-            setNumReceivedBid(null)
-          }
-        } catch (error) {
-          if (!controller.signal.aborted) {
-            if (error?.message?.includes('Error validating or retrieving bids for')) {
-              setFindingRoutesTrigger(moment().valueOf())
-            }
-            else {
-              setEstimatedAmount(null)
-              setEstimatedAmountResponse({ status: 'failed', message: error?.message })
+          setStartingSwap(false)
+          setSwapResponse(null)
+
+          if (sdk_data) {
+            if (!controller.signal.aborted) {
+              setEstimatingAmount(true)
+
+              try {
+                setBidExpiresSecond(bid_expires_second)
+                setNumReceivedBid(0)
+
+                const response = await sdk_data.getTransferQuote({
+                  sendingChainId: fromChainId,
+                  sendingAssetId: fromContract?.contract_address,
+                  receivingChainId: toChainId,
+                  receivingAssetId: toContract?.contract_address,
+                  receivingAddress: advancedOptions?.receiving_address || address,
+                  amount: BigNumber(amount).shiftedBy(fromContract?.contract_decimals).toString(),
+                  transactionId: getRandomBytes32(),
+                  expiry: moment().add(expiry_hours, 'hours').unix(),
+                  callTo: advancedOptions?.contract_address || undefined,
+                  callData: advancedOptions?.call_data || undefined,
+                  initiator: undefined,
+                  preferredRouters: advancedOptions?.preferredRouters?.split(',') || undefined,
+                  dryRun: false,
+                })
+
+                if (!controller.signal.aborted) {
+                  if (response?.bid?.sendingChainId === fromChainId && response?.bid?.receivingChainId === toChainId && response?.bid?.sendingAssetId === fromContract?.contract_address) {
+                    setFees({
+                      gas: response?.gasFeeInReceivingToken && BigNumber(response.gasFeeInReceivingToken).shiftedBy(-toContract?.contract_decimals).toNumber(),
+                      relayer: BigNumber(response?.metaTxRelayerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
+                      router: response?.bid && (amount - BigNumber(response.bid.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber()),
+                    })
+                    setEstimatedAmount(response)
+
+                    setBidExpiresSecond(null)
+                    setNumReceivedBid(null)
+                  }
+                }
+              } catch (error) {
+                if (!controller.signal.aborted) {
+                  if (error?.message?.includes('Error validating or retrieving bids for')) {
+                    setEstimateTrigger(moment().valueOf())
+                  }
+                  else {
+                    setEstimatedAmountResponse({ status: 'failed', message: error?.message })
+                  }
+                }
+              }
+
+              setEstimatingAmount(false)
             }
           }
         }
-      }
-    }
+        else {
+          if (!controller.signal.aborted) {
+            setEstimatingFees(true)
 
-    if (typeof amount === 'number') {
-      setEstimatingAmount(false)
+            const gasResponse = await sdk_data.estimateFeeForRouterTransferInReceivingToken(
+              fromChainId,
+              fromContract?.contract_address,
+              toChainId,
+              toContract?.contract_address,
+            )
+
+            const relayerResponse = await sdk_data.estimateMetaTxFeeInReceivingToken(
+              fromChainId,
+              fromContract?.contract_address,
+              toChainId,
+              toContract?.contract_address,
+            )
+
+            if (!controller.signal.aborted) {
+              setFees({
+                gas: gasResponse && BigNumber(gasResponse.toString()).shiftedBy(-toContract?.contract_decimals).toNumber(),
+                relayer: relayerResponse && BigNumber(relayerResponse.toString()).shiftedBy(-toContract?.contract_decimals).toNumber(),
+                router: null,
+              })
+            }
+
+            setEstimatingFees(false)
+          }
+        }
+      }
     }
   }
 
@@ -542,13 +426,12 @@ console.log(response)
   const fromBalanceAmount = (fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals || 0)
   const toBalance = getChainBalance(toChainId)
 
-  const feesEstimated = (typeof gasFee === 'number' || typeof gasFee === 'boolean') && (typeof relayerFee === 'number' || typeof relayerFee === 'boolean') && (typeof routerFee === 'number' || typeof routerFee === 'boolean')
-  const estimatedFees = feesEstimated && ((gasFee || 0) + (relayerFee || 0) + (routerFee || 0))
+  const estimatedFees = fees && ((fees.gas || 0) + (fees.relayer || 0) + (fees.router || 0))
 
   const mustChangeChain = fromChainId && chain_id !== fromChainId
   const mustApproveToken = !tokenApproved
 
-  const actionDisabled = tokenApprovingTx || startingSwap
+  const actionDisabled = tokenApproveResponse?.status === 'pending' || startingSwap
 
   return (
     <div className="flex flex-col items-center justify-center space-y-2 sm:space-y-3 my-8 sm:my-12">
@@ -718,19 +601,19 @@ console.log(response)
             </>
           )}
         </div>
-        {isSupport() && web3_provider && (estimatingAmount || estimatingFees || feesEstimated) && (
+        {isSupport() && web3_provider && (estimatingAmount || estimatingFees || typeof estimatedFees === 'number') && (
           <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 pb-0.5">
             <div className="sm:col-span-2 flex items-center justify-center sm:justify-start">
               <span className="text-gray-400 dark:text-gray-600 text-base font-medium">{estimatedAmount || estimatingAmount ? '' : 'Estimated '}Fees</span>
             </div>
             <div className="sm:col-span-3 flex items-center justify-center sm:justify-end sm:mr-1">
-              {estimatingAmount || estimatingFees || !feesEstimated ?
+              {estimatingAmount || estimatingFees || typeof estimatedFees !== 'number' ?
                 <div className="flex items-center space-x-1.5">
                   <span className="text-gray-400 dark:text-gray-600 text-sm">{estimatedAmount || estimatingAmount ? 'Calculating' : 'Estimating'}</span>
                   <Loader type="BallTriangle" color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="20" height="20" />
                 </div>
                 :
-                feesEstimated ?
+                typeof estimatedFees === 'number' ?
                   <Popover
                     placement="bottom"
                     title={<div className="flex items-center space-x-2">
@@ -744,21 +627,21 @@ console.log(response)
                       <div className="flex items-center justify-between space-x-2">
                         <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Dest. Tx Cost:</span>
                         <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
-                          <span className="font-mono">{typeof gasFee === 'boolean' ? 'N/A' : `${estimatedAmount ? '' : '~'}${numberFormat((gasFee || 0), '0,0.00000000')}`}</span>
+                          <span className="font-mono">{typeof fees?.gas === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.gas, '0,0.00000000')}` : 'N/A'}</span>
                           <span className="font-semibold">{asset?.symbol}</span>
                         </span>
                       </div>
                       <div className="flex items-center justify-between space-x-2">
                         <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Relayer Fee:</span>
                         <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
-                          <span className="font-mono">{typeof relayerFee === 'boolean' ? 'N/A' : `${estimatedAmount ? '' : '~'}${numberFormat((relayerFee || 0), '0,0.00000000')}`}</span>
+                          <span className="font-mono">{typeof fees?.relayer === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.relayer, '0,0.00000000')}` : 'N/A'}</span>
                           <span className="font-semibold">{asset?.symbol}</span>
                         </span>
                       </div>
                       <div className="flex items-center justify-between space-x-2">
                         <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Router Fee:</span>
                         <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
-                          <span className="font-mono">{typeof routerFee === 'boolean' ? 'N/A' : `${estimatedAmount ? '' : '~'}${numberFormat((routerFee || 0), '0,0.00000000')}`}</span>
+                          <span className="font-mono">{typeof fees?.router === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.router, '0,0.00000000')}` : 'N/A'}</span>
                           <span className="font-semibold">{asset?.symbol}</span>
                         </span>
                       </div>
@@ -913,7 +796,7 @@ console.log(response)
                                 onClick={() => approveToken()}
                                 className={`w-full ${actionDisabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${actionDisabled ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3`}
                               >
-                                {tokenApprovingTx ?
+                                {tokenApproveResponse?.status === 'pending' ?
                                   <>
                                     <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
                                     <span>Approving</span>
@@ -1006,17 +889,17 @@ console.log(response)
                                   <div className="grid grid-flow-row grid-cols-2 gap-1.5">
                                     <span className="text-gray-400 dark:text-gray-500 text-sm">Dest. Tx Cost:</span>
                                     <div className="text-gray-500 dark:text-gray-400 text-sm text-right space-x-1.5">
-                                      <span className="font-mono">{numberFormat(gasFee, '0,0.00000000')}</span>
+                                      <span className="font-mono">{numberFormat(fees?.gas, '0,0.00000000')}</span>
                                       <span>{asset?.symbol}</span>
                                     </div>
                                     <span className="text-gray-400 dark:text-gray-500 text-sm">Relayer Fee:</span>
                                     <div className="text-gray-500 dark:text-gray-400 text-sm text-right space-x-1.5">
-                                      <span className="font-mono">{numberFormat(relayerFee, '0,0.00000000')}</span>
+                                      <span className="font-mono">{numberFormat(fees?.relayer, '0,0.00000000')}</span>
                                       <span>{asset?.symbol}</span>
                                     </div>
                                     <span className="text-gray-400 dark:text-gray-500 text-sm">Router Fee:</span>
                                     <div className="text-gray-500 dark:text-gray-400 text-sm text-right space-x-1.5">
-                                      <span className="font-mono">{numberFormat(routerFee, '0,0.00000000')}</span>
+                                      <span className="font-mono">{numberFormat(fees?.router, '0,0.00000000')}</span>
                                       <span>{asset?.symbol}</span>
                                     </div>
                                     <span className="text-gray-400 dark:text-gray-500 text-base">Total:</span>
@@ -1062,7 +945,15 @@ console.log(response)
                           closeDisabled={true}
                           rounded={true}
                         >
-                          <span className="break-all font-mono text-sm">{estimatedAmountResponse.message}</span>
+                          <div className="flex items-center justify-between space-x-1">
+                            <span className={`break-${estimatedAmountResponse.message?.includes('code=') ? 'all' : 'words'} font-mono text-sm`}>{estimatedAmountResponse.message}</span>
+                            <button
+                              onClick={() => setEstimateTrigger(moment().valueOf())}
+                              className="bg-red-500 dark:bg-red-400 flex items-center justify-center text-white rounded-full p-2"
+                            >
+                              <MdRefresh size={20} />
+                            </button>
+                          </div>
                         </Alert>
                       </div>
                       :
@@ -1077,7 +968,7 @@ console.log(response)
                             <div className="flex items-center justify-between space-x-1">
                               <span className={`break-${swapResponse.message?.includes('code=') ? 'all' : 'words'} font-mono text-sm`}>{swapResponse.message}</span>
                               <button
-                                onClick={() => setFindingRoutesTrigger(moment().valueOf())}
+                                onClick={() => setEstimateTrigger(moment().valueOf())}
                                 className="bg-red-500 dark:bg-red-400 flex items-center justify-center text-white rounded-full p-2"
                               >
                                 <MdRefresh size={20} />
@@ -1086,7 +977,7 @@ console.log(response)
                           </Alert>
                         </div>
                         :
-                        null
+                        'x'
           :
           web3_provider ?
             <button
@@ -1128,9 +1019,9 @@ console.log(response)
               {tokenApproveResponse.status === 'pending' && (
                 <Loader type="ThreeDots" color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="16" height="16" className="mt-1 mr-1.5" />
               )}
-              {fromChain?.explorer?.url && (tokenApprovingTx || tokenApproveResponse.tx_hash) && (
+              {fromChain?.explorer?.url && tokenApproveResponse.tx_hash && (
                 <a
-                  href={`${fromChain.explorer.url}${fromChain.explorer.transaction_path?.replace('{tx}', tokenApprovingTx || tokenApproveResponse.tx_hash)}`}
+                  href={`${fromChain.explorer.url}${fromChain.explorer.transaction_path?.replace('{tx}', tokenApproveResponse.tx_hash)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center font-semibold"
