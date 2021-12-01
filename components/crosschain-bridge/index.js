@@ -707,70 +707,9 @@ console.log(response)
           </div>
           {address && isSupport() && (
             <>
-              <div className="order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-5">
-                {(estimatingAmount || gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ||
-                  typeof gasFee === 'number' || typeof relayerFee === 'number' || typeof routerFee === 'number' ||
-                  typeof gasFee === 'boolean' || typeof relayerFee === 'boolean' || typeof routerFee === 'boolean'
-                ) && (
-                  <div className="min-w-max h-5 flex items-center justify-center space-x-1.5">
-                    <span className="text-gray-800 dark:text-gray-200 text-sm font-semibold">{estimatedAmount ? '' : 'Estimated '}Fees:</span>
-                    {estimatingAmount || gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ?
-                      <>
-                        <span className="text-gray-400 dark:text-gray-600 text-sm">{estimatedAmount || estimatingAmount ? 'Calculating' : 'Estimating'}</span>
-                        <Loader type="BallTriangle" color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="20" height="20" />
-                      </>
-                      :
-                      feesEstimated ?
-                        <Popover
-                          placement="bottom"
-                          title={<div className="flex items-center space-x-2">
-                            <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-sm font-semibold">{estimatedAmount ? '' : 'Estimated '}Fees:</span>
-                            <span className="text-gray-800 dark:text-gray-200 text-sm space-x-1">
-                              <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.00000000')}` : 'N/A'}</span>
-                              <span className="font-semibold">{asset?.symbol}</span>
-                            </span>
-                          </div>}
-                          content={<div className="flex flex-col space-y-2">
-                            <div className="flex items-center justify-between space-x-2">
-                              <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Dest. Tx Cost:</span>
-                              <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
-                                <span className="font-mono">{typeof gasFee === 'boolean' ? 'N/A' : `${estimatedAmount ? '' : '~'}${numberFormat((gasFee || 0), '0,0.00000000')}`}</span>
-                                <span className="font-semibold">{asset?.symbol}</span>
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between space-x-2">
-                              <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Relayer Fee:</span>
-                              <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
-                                <span className="font-mono">{typeof relayerFee === 'boolean' ? 'N/A' : `${estimatedAmount ? '' : '~'}${numberFormat((relayerFee || 0), '0,0.00000000')}`}</span>
-                                <span className="font-semibold">{asset?.symbol}</span>
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between space-x-2">
-                              <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Router Fee:</span>
-                              <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
-                                <span className="font-mono">{typeof routerFee === 'boolean' ? 'N/A' : `${estimatedAmount ? '' : '~'}${numberFormat((routerFee || 0), '0,0.00000000')}`}</span>
-                                <span className="font-semibold">{asset?.symbol}</span>
-                              </span>
-                            </div>
-                          </div>}
-                        >
-                          <span className="flex items-center text-gray-400 dark:text-gray-200 text-sm space-x-1">
-                            <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.000000')}` : 'N/A'}</span>
-                            <span className="font-semibold">{asset?.symbol}</span>
-                            <IoMdInformationCircle size={16} className="mb-0.5" />
-                            {!estimatedAmount && (
-                              <span className="font-mono lowercase text-gray-300 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
-                            )}
-                          </span>
-                        </Popover>
-                        :
-                        null
-                    }
-                  </div>
-                )}
-              </div>
-              <div className="order-3 sm:order-4 sm:col-span-3 sm:-mt-5 ml-9 sm:-ml-2 mr-auto">
-                <div className="w-48 h-5 flex items-center justify-end">
+              <div className="hidden sm:block order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-5" />
+              <div className="order-3 sm:order-4 sm:col-span-3 sm:-mt-5 ml-9 ml-auto sm:-ml-2 mr-auto">
+                <div className="w-48 h-5 flex items-center justify-end -ml-7 sm:ml-0">
                   {balances_data?.[fromChainId] ?
                     <button
                       onClick={() => setAmount(Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals) > smallNumber ? Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance.contract_decimals) : 0)}
@@ -787,6 +726,70 @@ console.log(response)
             </>
           )}
         </div>
+        {((isSupport() && web3_provider) || estimatingAmount || gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ||
+          typeof gasFee === 'number' || typeof relayerFee === 'number' || typeof routerFee === 'number' ||
+          typeof gasFee === 'boolean' || typeof relayerFee === 'boolean' || typeof routerFee === 'boolean'
+        ) && (
+          <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 -mt-1 pb-0.5">
+            <div className="sm:col-span-2 flex items-center justify-center">
+              <span className="text-gray-400 dark:text-gray-600 text-base font-medium">{estimatedAmount ? '' : 'Estimated '}Fees</span>
+            </div>
+            <div className="sm:col-span-3 flex items-center justify-center sm:justify-end sm:mr-2">
+              {estimatingAmount || gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ?
+                <div className="flex items-center space-x-1.5">
+                  <span className="text-gray-400 dark:text-gray-600 text-sm">{estimatedAmount || estimatingAmount ? 'Calculating' : 'Estimating'}</span>
+                  <Loader type="BallTriangle" color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="20" height="20" />
+                </div>
+                :
+                feesEstimated ?
+                  <Popover
+                    placement="bottom"
+                    title={<div className="flex items-center space-x-2">
+                      <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-sm font-semibold">{estimatedAmount ? '' : 'Estimated '}Fees:</span>
+                      <span className="text-gray-800 dark:text-gray-200 text-sm space-x-1">
+                        <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.00000000')}` : 'N/A'}</span>
+                        <span className="font-semibold">{asset?.symbol}</span>
+                      </span>
+                    </div>}
+                    content={<div className="flex flex-col space-y-2">
+                      <div className="flex items-center justify-between space-x-2">
+                        <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Dest. Tx Cost:</span>
+                        <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
+                          <span className="font-mono">{typeof gasFee === 'boolean' ? 'N/A' : `${estimatedAmount ? '' : '~'}${numberFormat((gasFee || 0), '0,0.00000000')}`}</span>
+                          <span className="font-semibold">{asset?.symbol}</span>
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between space-x-2">
+                        <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Relayer Fee:</span>
+                        <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
+                          <span className="font-mono">{typeof relayerFee === 'boolean' ? 'N/A' : `${estimatedAmount ? '' : '~'}${numberFormat((relayerFee || 0), '0,0.00000000')}`}</span>
+                          <span className="font-semibold">{asset?.symbol}</span>
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between space-x-2">
+                        <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Router Fee:</span>
+                        <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
+                          <span className="font-mono">{typeof routerFee === 'boolean' ? 'N/A' : `${estimatedAmount ? '' : '~'}${numberFormat((routerFee || 0), '0,0.00000000')}`}</span>
+                          <span className="font-semibold">{asset?.symbol}</span>
+                        </span>
+                      </div>
+                    </div>}
+                  >
+                    <span className="flex items-center text-gray-400 dark:text-gray-200 text-sm space-x-1">
+                      <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.000000')}` : 'N/A'}</span>
+                      <span className="font-semibold">{asset?.symbol}</span>
+                      <IoMdInformationCircle size={16} className="mb-0.5" />
+                      {!estimatedAmount && (
+                        <span className="font-mono lowercase text-gray-300 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
+                      )}
+                    </span>
+                  </Popover>
+                  :
+                  <div className="text-gray-400 dark:text-gray-600 text-sm">-</div>
+              }
+            </div>
+          </div>
+        )}
         {isSupport() && web3_provider && (
           <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 -mt-8 sm:mt-0 pb-0.5">
             <div className="min-w-max order-1 sm:col-span-2 flex justify-center">
