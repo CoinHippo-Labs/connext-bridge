@@ -73,9 +73,7 @@ export default function CrosschainBridge() {
   const [gasFee, setGasFee] = useState(null)
   const [relayerFee, setRelayerFee] = useState(null)
   const [routerFee, setRouterFee] = useState(null)
-  const [gasFeeEstimating, setGasFeeEstimating] = useState(null)
-  const [relayerFeeEstimating, setRelayerFeeEstimating] = useState(null)
-  const [routerFeeEstimating, setRouterFeeEstimating] = useState(null)
+  const [estimatingFees, setEstimatingFees] = useState(null)
   const [refreshEstimatedFeesSecond, setRefreshEstimatedFeesSecond] = useState(refresh_estimated_fees_second)
 
   const [estimatedAmount, setEstimatedAmount] = useState(null)
@@ -123,7 +121,7 @@ export default function CrosschainBridge() {
   useEffect(() => {
     const controller = new AbortController()
 
-    if (estimateFeesTrigger) {
+    if (estimateFeesTrigger && (typeof amount !== 'number' || estimatedAmount)) {
       if (!controller.signal.aborted) {
         estimateFees(controller)
       }
@@ -150,13 +148,10 @@ export default function CrosschainBridge() {
   }, [refreshEstimatedFeesSecond])
 
   useEffect(() => {
-    if (typeof gasFeeEstimating === 'boolean' && !gasFeeEstimating &&
-      typeof relayerFeeEstimating === 'boolean' && !relayerFeeEstimating &&
-      typeof routerFeeEstimating === 'boolean' && !routerFeeEstimating
-    ) {
+    if (typeof estimatingFees === 'boolean' && !estimatingFees) {
       setRefreshEstimatedFeesSecond(refresh_estimated_fees_second)
     }
-  }, [gasFeeEstimating, relayerFeeEstimating, routerFeeEstimating])
+  }, [estimatingFees])
 
   useEffect(() => {
     setGasFee(null)
@@ -164,7 +159,7 @@ export default function CrosschainBridge() {
     setRouterFee(null)
 
     setEstimateFeesTrigger(moment().valueOf())
-  }, [address, fromChainId, toChainId, assetId, estimatedAmount])
+  }, [address, fromChainId, toChainId, assetId, amount, estimatedAmount])
   // fees
 
   // approve
@@ -202,20 +197,14 @@ export default function CrosschainBridge() {
   }, [findingRoutesTrigger])
 
   useEffect(() => {
-    if (tokenApproved) {
-      if (address && chain_id && chain_id === fromChainId && toChainId && assetId && typeof amount === 'number') {
-        setFindingRoutesTrigger(moment().valueOf())
-      }
-      else {
-        setEstimatedAmount(null)
-        setEstimatingAmount(false)
-      }
+    if (address && chain_id && chain_id === fromChainId && toChainId && assetId && typeof amount === 'number') {
+      setFindingRoutesTrigger(moment().valueOf())
     }
     else {
       setEstimatedAmount(null)
       setEstimatingAmount(false)
     }
-  }, [address, chain_id, fromChainId, toChainId, assetId, amount, tokenApproved, advancedOptions])
+  }, [address, chain_id, fromChainId, toChainId, assetId, amount, advancedOptions])
 
   useEffect(() => {
     if (bidExpiresSecond === -1) {
@@ -255,10 +244,10 @@ export default function CrosschainBridge() {
       const fromBalance = getChainBalance(fromChainId)
       const fromBalanceAmount = (fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals || 0)
 
-      const feesEstimated = (typeof gasFee === 'number' || typeof gasFee === 'boolean') && (typeof relayerFee === 'number' || typeof relayerFee === 'boolean') && (typeof routerFee === 'number' || typeof routerFee === 'boolean')
-      const estimatedFees = feesEstimated && ((gasFee || 0) + (relayerFee || 0) + (routerFee || 0))
+      // const feesEstimated = (typeof gasFee === 'number' || typeof gasFee === 'boolean') && (typeof relayerFee === 'number' || typeof relayerFee === 'boolean') && (typeof routerFee === 'number' || typeof routerFee === 'boolean')
+      // const estimatedFees = feesEstimated && ((gasFee || 0) + (relayerFee || 0) + (routerFee || 0))
 
-      if (isSupport() && amount >= estimatedFees && (!check_balances || fromBalanceAmount >= amount) && fromChainSynced && toChainSynced) {
+      if (isSupport()/* && amount >= estimatedFees*/ && (!check_balances || fromBalanceAmount >= amount) && fromChainSynced && toChainSynced) {
         const asset = assets_data?.find(_asset => _asset?.id === assetId)
         const contract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
 
@@ -338,6 +327,17 @@ export default function CrosschainBridge() {
 
   const estimateFees = async controller => {
     if (address && fromChainId && toChainId && assetId) {
+      setEstimatingFees(typeof amount === 'number' && estimatedAmount ? false : true)
+
+      if (typeof amount !== 'number') {
+        if (estimatedAmount) {
+          setEstimatedAmount(null)
+        }
+        if (estimatedAmountResponse) {
+          setEstimatedAmountResponse(null)
+        }
+      }
+
       if (!controller.signal.aborted) {
         await estimateGasFee(controller)
       }
@@ -347,6 +347,8 @@ export default function CrosschainBridge() {
       if (!controller.signal.aborted) {
         await estimateRouterFee(controller)
       }
+
+      setEstimatingFees(false)
     }
     else {
       setGasFee(null)
@@ -360,8 +362,6 @@ export default function CrosschainBridge() {
       const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
 
       if (isSupport()) {
-        setGasFeeEstimating(estimatedAmount ? false : true)
-
         const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
         const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
 
@@ -382,8 +382,6 @@ export default function CrosschainBridge() {
             setGasFee(response ? BigNumber(response.toString()).shiftedBy(-toContract?.contract_decimals).toNumber() : gasFee || false)
           }
         }
-
-        setGasFeeEstimating(false)
       }
       else {
         setGasFee(null)
@@ -396,8 +394,6 @@ export default function CrosschainBridge() {
       const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
 
       if (isSupport()) {
-        setRelayerFeeEstimating(estimatedAmount ? false : true)
-
         const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
         const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
 
@@ -418,8 +414,6 @@ export default function CrosschainBridge() {
             setRelayerFee(response ? BigNumber(response.toString()).shiftedBy(-toContract?.contract_decimals).toNumber() : relayerFee || false)
           }
         }
-
-        setRelayerFeeEstimating(false)
       }
       else {
         setRelayerFee(null)
@@ -430,8 +424,6 @@ export default function CrosschainBridge() {
   const estimateRouterFee = async controller => {
     if (sdk_data) {
       if (isSupport()) {
-        setRouterFeeEstimating(estimatedAmount ? false : true)
-
         if (estimatedAmount?.bid?.amountReceived) {
           const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
           const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
@@ -445,8 +437,6 @@ export default function CrosschainBridge() {
             setRouterFee(false)
           }
         }
-
-        setRouterFeeEstimating(false)
       }
       else {
         setRouterFee(null)
@@ -463,12 +453,15 @@ export default function CrosschainBridge() {
 
     setEstimatedAmount(null)
     setEstimatedAmountResponse(null)
-    setEstimatingAmount(true)
+
+    if (typeof amount === 'number') {
+      setEstimatingAmount(true)
+    }
 
     if (sdk_data) {
       const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
 
-      if (isSupport()) {
+      if (isSupport() && typeof amount === 'number') {
         const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
         const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
 
@@ -511,7 +504,9 @@ export default function CrosschainBridge() {
       }
     }
 
-    setEstimatingAmount(false)
+    if (typeof amount === 'number') {
+      setEstimatingAmount(false)
+    }
   }
 
   const swap = async () => {
@@ -547,7 +542,6 @@ console.log(response)
   const fromBalanceAmount = (fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals || 0)
   const toBalance = getChainBalance(toChainId)
 
-  const estimatingFees = gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating
   const feesEstimated = (typeof gasFee === 'number' || typeof gasFee === 'boolean') && (typeof relayerFee === 'number' || typeof relayerFee === 'boolean') && (typeof routerFee === 'number' || typeof routerFee === 'boolean')
   const estimatedFees = feesEstimated && ((gasFee || 0) + (relayerFee || 0) + (routerFee || 0))
 
@@ -724,16 +718,13 @@ console.log(response)
             </>
           )}
         </div>
-        {isSupport() && web3_provider && (estimatingAmount || gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ||
-          typeof gasFee === 'number' || typeof relayerFee === 'number' || typeof routerFee === 'number' ||
-          typeof gasFee === 'boolean' || typeof relayerFee === 'boolean' || typeof routerFee === 'boolean'
-        ) && (
+        {isSupport() && web3_provider && (estimatingAmount || estimatingFees || feesEstimated) && (
           <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 pb-0.5">
             <div className="sm:col-span-2 flex items-center justify-center sm:justify-start">
               <span className="text-gray-400 dark:text-gray-600 text-base font-medium">{estimatedAmount || estimatingAmount ? '' : 'Estimated '}Fees</span>
             </div>
             <div className="sm:col-span-3 flex items-center justify-center sm:justify-end sm:mr-1">
-              {estimatingAmount || gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating || !feesEstimated ?
+              {estimatingAmount || estimatingFees || !feesEstimated ?
                 <div className="flex items-center space-x-1.5">
                   <span className="text-gray-400 dark:text-gray-600 text-sm">{estimatedAmount || estimatingAmount ? 'Calculating' : 'Estimating'}</span>
                   <Loader type="BallTriangle" color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="20" height="20" />
@@ -788,7 +779,7 @@ console.log(response)
             </div>
           </div>
         )}
-        {isSupport() && web3_provider && (
+        {isSupport() && web3_provider && typeof amount === 'number' && (
           <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 -mt-8 sm:mt-0 pb-0.5">
             <div className="min-w-max order-1 sm:col-span-2 flex justify-center sm:justify-start">
               <span className="text-gray-400 dark:text-gray-600 text-xl font-medium">Estimated Received</span>
@@ -817,7 +808,7 @@ console.log(response)
           />
         </div>
         {balances_data?.[fromChainId]/* && feesEstimated && typeof estimatedFees === 'number'*/ && typeof amount === 'number' ?
-          !estimatingFees && feesEstimated && amount < estimatedFees ?
+          !estimatingFees && amount < estimatedFees ?
             <div className="sm:pt-1.5 pb-1">
               <Alert
                 color="bg-red-400 dark:bg-red-500 text-left text-white"
@@ -887,53 +878,53 @@ console.log(response)
                     />
                   </div>
                   :
-                  mustApproveToken ?
-                    typeof tokenApproved === 'boolean' && (
-                      <div className="sm:pt-1.5 pb-1">
+                  !swapData && !swapResponse && (estimatedAmount || estimatingAmount) ?
+                    <div className="sm:pt-1.5 pb-1">
+                      {!estimatingAmount && estimatedAmount && estimatedFees > BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber() && (
+                        <div className="order-2 sm:col-span-5 flex flex-wrap items-center justify-center text-yellow-500 dark:text-yellow-400 mt-4 sm:mt-0 mb-2">
+                          <TiWarning size={16} className="mb-0.5 mr-1.5" />
+                          <span>Fee is greater than estimated received.</span>
+                        </div>
+                      )}
+                      {estimatingAmount ?
                         <button
-                          disabled={actionDisabled}
-                          onClick={() => approveToken()}
-                          className={`w-full ${actionDisabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${actionDisabled ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3`}
+                          disabled={estimatingAmount}
+                          className={`w-full ${estimatingAmount ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${estimatingAmount ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex flex-wrap items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3`}
                         >
-                          {tokenApprovingTx ?
+                          {estimatingAmount ?
                             <>
                               <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
-                              <span>Approving</span>
+                              <span>Searching Routes</span>
                             </>
                             :
-                            <span>Approve</span>
+                            <span>Swap</span>
                           }
-                          <span className="font-semibold">{asset?.symbol}</span>
+                          <span className="font-bold">{asset?.symbol}</span>
+                          {estimatingAmount && typeof bidExpiresSecond === 'number' && (
+                            <span className="text-gray-200 dark:text-gray-100 text-sm font-medium">{numReceivedBid ? `- Received ${numReceivedBid} Bid${numReceivedBid > 1 ? 's' : ''}` : 'Next bid in'} ({bidExpiresSecond}s)</span>
+                          )}
                         </button>
-                      </div>
-                    )
-                    :
-                    !swapData && !swapResponse && (estimatedAmount || estimatingAmount) ?
-                      <div className="sm:pt-1.5 pb-1">
-                        {!estimatingAmount && estimatedAmount && estimatedFees > BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber() && (
-                          <div className="order-2 sm:col-span-5 flex flex-wrap items-center justify-center text-yellow-500 dark:text-yellow-400 mt-4 sm:mt-0 mb-2">
-                            <TiWarning size={16} className="mb-0.5 mr-1.5" />
-                            <span>Fee is greater than estimated received.</span>
-                          </div>
-                        )}
-                        {estimatingAmount ?
-                          <button
-                            disabled={estimatingAmount}
-                            className={`w-full ${estimatingAmount ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${estimatingAmount ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex flex-wrap items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3`}
-                          >
-                            {estimatingAmount ?
-                              <>
-                                <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
-                                <span>Searching Routes</span>
-                              </>
-                              :
-                              <span>Swap</span>
-                            }
-                            <span className="font-bold">{asset?.symbol}</span>
-                            {estimatingAmount && typeof bidExpiresSecond === 'number' && (
-                              <span className="text-gray-200 dark:text-gray-100 text-sm font-medium">{numReceivedBid ? `- Received ${numReceivedBid} Bid${numReceivedBid > 1 ? 's' : ''}` : 'Next bid in'} ({bidExpiresSecond}s)</span>
-                            )}
-                          </button>
+                        :
+                        mustApproveToken ?
+                          typeof tokenApproved === 'boolean' && (
+                            <div className="sm:pt-1.5 pb-1">
+                              <button
+                                disabled={actionDisabled}
+                                onClick={() => approveToken()}
+                                className={`w-full ${actionDisabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${actionDisabled ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3`}
+                              >
+                                {tokenApprovingTx ?
+                                  <>
+                                    <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
+                                    <span>Approving</span>
+                                  </>
+                                  :
+                                  <span>Approve</span>
+                                }
+                                <span className="font-semibold">{asset?.symbol}</span>
+                              </button>
+                            </div>
+                          )
                           :
                           <ModalConfirm
                             buttonTitle={<>
@@ -1060,42 +1051,42 @@ console.log(response)
                             onComfirmHide={false}
                             onConfirm={() => swap()}
                           />
-                        }
+                      }
+                    </div>
+                    :
+                    estimatedAmountResponse ?
+                      <div className="sm:pt-1.5 pb-1">
+                        <Alert
+                          color={`${estimatedAmountResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : estimatedAmountResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
+                          icon={estimatedAmountResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : estimatedAmountResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                          closeDisabled={true}
+                          rounded={true}
+                        >
+                          <span className="break-all font-mono text-sm">{estimatedAmountResponse.message}</span>
+                        </Alert>
                       </div>
                       :
-                      estimatedAmountResponse ?
+                      swapResponse ?
                         <div className="sm:pt-1.5 pb-1">
                           <Alert
-                            color={`${estimatedAmountResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : estimatedAmountResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
-                            icon={estimatedAmountResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : estimatedAmountResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                            color={`${swapResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : swapResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
+                            icon={swapResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : swapResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
                             closeDisabled={true}
                             rounded={true}
                           >
-                            <span className="break-all font-mono text-sm">{estimatedAmountResponse.message}</span>
+                            <div className="flex items-center justify-between space-x-1">
+                              <span className={`break-${swapResponse.message?.includes('code=') ? 'all' : 'words'} font-mono text-sm`}>{swapResponse.message}</span>
+                              <button
+                                onClick={() => setFindingRoutesTrigger(moment().valueOf())}
+                                className="bg-red-500 dark:bg-red-400 flex items-center justify-center text-white rounded-full p-2"
+                              >
+                                <MdRefresh size={20} />
+                              </button>
+                            </div>
                           </Alert>
                         </div>
                         :
-                        swapResponse ?
-                          <div className="sm:pt-1.5 pb-1">
-                            <Alert
-                              color={`${swapResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : swapResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
-                              icon={swapResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : swapResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
-                              closeDisabled={true}
-                              rounded={true}
-                            >
-                              <div className="flex items-center justify-between space-x-1">
-                                <span className={`break-${swapResponse.message?.includes('code=') ? 'all' : 'words'} font-mono text-sm`}>{swapResponse.message}</span>
-                                <button
-                                  onClick={() => setFindingRoutesTrigger(moment().valueOf())}
-                                  className="bg-red-500 dark:bg-red-400 flex items-center justify-center text-white rounded-full p-2"
-                                >
-                                  <MdRefresh size={20} />
-                                </button>
-                              </div>
-                            </Alert>
-                          </div>
-                          :
-                          null
+                        null
           :
           web3_provider ?
             <button
