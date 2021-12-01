@@ -54,10 +54,7 @@ export default function CrosschainBridge() {
 
   const [controller, setController] = useState(new AbortController())
 
-  const [fromChainId, setFromChainId] = useState(null)
-  const [toChainId, setToChainId] = useState(null)
-  const [assetId, setAssetId] = useState(null)
-  const [amount, setAmount] = useState(null)
+  const [swapConfig, setSwapConfig] = useState({})
   const [advancedOptions, setAdvancedOptions] = useState({
     infinite_approval: true,
     receiving_address: '',
@@ -87,8 +84,8 @@ export default function CrosschainBridge() {
 
   // wallet
   useEffect(() => {
-    if (chain_id && !fromChainId && toChainId !== chain_id) {
-      setFromChainId(chain_id)
+    if (chain_id && !swapConfig.fromChainId && swapConfig.toChainId !== chain_id) {
+      setSwapConfig({ ...swapConfig, fromChainId: chain_id })
     }
   }, [chain_id])
 
@@ -99,12 +96,12 @@ export default function CrosschainBridge() {
         value: null,
       })
 
-      if (assetId) {
-        if (fromChainId) {
-          getChainBalances(fromChainId)
+      if (swapConfig.assetId) {
+        if (swapConfig.fromChainId) {
+          getChainBalances(swapConfig.fromChainId)
         }
-        if (toChainId) {
-          getChainBalances(toChainId)
+        if (swapConfig.toChainId) {
+          getChainBalances(swapConfig.toChainId)
         }
       }
     }
@@ -137,13 +134,13 @@ export default function CrosschainBridge() {
 
   useEffect(async () => {
     setEstimateTrigger(moment().valueOf())
-  }, [address, fromChainId, toChainId, assetId, amount, advancedOptions])
+  }, [address, swapConfig, advancedOptions])
   // estimate
 
   // fees
   useEffect(() => {
     if (refreshEstimatedFeesSecond === 0) {
-      if (typeof amount !== 'number') {
+      if (typeof swapConfig.amount !== 'number') {
         setEstimateTrigger(moment().valueOf())
       }
     }
@@ -185,20 +182,18 @@ export default function CrosschainBridge() {
 
   // approve
   useEffect(async () => {
+    setTokenApproveResponse(null)
+
     const _approved = await isTokenApproved()
     setTokenApproved(_approved)
-  }, [address, fromChainId, assetId, amount])
-
-  useEffect(() => {
-    setTokenApproveResponse(null)
-  }, [address, chain_id, fromChainId, assetId])
+  }, [address, chain_id, swapConfig])
   // approve
 
   const isSupport = () => {
-    const asset = assets_data?.find(_asset => _asset?.id === assetId)
+    const asset = assets_data?.find(_asset => _asset?.id === swapConfig.assetId)
 
-    const support = asset && !((fromChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(fromChainId)) ||
-    (toChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(toChainId)))
+    const support = asset && !((swapConfig.fromChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(swapConfig.fromChainId)) ||
+    (swapConfig.toChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(swapConfig.toChainId)))
 
     return support
   }
@@ -226,7 +221,7 @@ export default function CrosschainBridge() {
 
   const getChainBalance = _chain_id => {
     const chain = chains_data?.find(_chain => _chain?.chain_id === _chain_id)
-    const asset = assets_data?.find(_asset => _asset?.id === assetId)
+    const asset = assets_data?.find(_asset => _asset?.id === swapConfig.assetId)
 
     let balance = balances_data?.[_chain_id]?.find(_contract => _contract?.contract_address === asset?.contracts?.find(__contract => __contract?.chain_id === _chain_id)?.contract_address)
     balance = balance || balances_data?.[_chain_id]?.find(_contract => asset?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase() && chain?.provider_params?.[0]?.nativeCurrency?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase())
@@ -237,18 +232,18 @@ export default function CrosschainBridge() {
   const isTokenApproved = async isAfterApprove => {
     let approved = false
 
-    if (address && chain_id && chain_id === fromChainId && assetId && typeof amount === 'number' && (isAfterApprove || !tokenApproveResponse)) {
-      const fromChainSynced = getChainSynced(fromChainId)
-      const toChainSynced = getChainSynced(toChainId)
+    if (address && chain_id && chain_id === swapConfig.fromChainId && swapConfig.assetId && typeof swapConfig.amount === 'number' && (isAfterApprove || !tokenApproveResponse)) {
+      const fromChainSynced = getChainSynced(swapConfig.fromChainId)
+      const toChainSynced = getChainSynced(swapConfig.toChainId)
 
       if (isSupport() && fromChainSynced && toChainSynced) {
-        const asset = assets_data?.find(_asset => _asset?.id === assetId)
-        const contract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
+        const asset = assets_data?.find(_asset => _asset?.id === swapConfig.assetId)
+        const contract = asset.contracts?.find(_contract => _contract?.chain_id === swapConfig.fromChainId)
 
         if (contract?.contract_address) {
           if (contract.contract_address !== constants.AddressZero) {
-            approved = await getApproved(signer, contract.contract_address, getDeployedTransactionManagerContract(fromChainId)?.address)
-            approved = approved.gte(BigNumber(amount).shiftedBy(contract?.contract_decimals))
+            approved = await getApproved(signer, contract.contract_address, getDeployedTransactionManagerContract(swapConfig.fromChainId)?.address)
+            approved = approved.gte(BigNumber(swapConfig.amount).shiftedBy(contract?.contract_decimals))
           }
           else {
             approved = true
@@ -261,13 +256,13 @@ export default function CrosschainBridge() {
   }
 
   const approveToken = async () => {
-    const asset = assets_data?.find(_asset => _asset?.id === assetId)
-    const contract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
+    const asset = assets_data?.find(_asset => _asset?.id === swapConfig.assetId)
+    const contract = asset.contracts?.find(_contract => _contract?.chain_id === swapConfig.fromChainId)
 
     setTokenApproveResponse(null)
 
     try {
-      const tx_approve = await approve(signer, contract?.contract_address, getDeployedTransactionManagerContract(fromChainId)?.address, BigNumber(amount).shiftedBy(contract?.contract_decimals).toString())
+      const tx_approve = await approve(signer, contract?.contract_address, getDeployedTransactionManagerContract(swapConfig.fromChainId)?.address, BigNumber(swapConfig.amount).shiftedBy(contract?.contract_decimals).toString())
 
       const tx_hash = tx_approve?.hash
 
@@ -289,17 +284,17 @@ export default function CrosschainBridge() {
 
   const estimate = async controller => {
     if (isSupport()) {
-      const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
+      const asset = swapConfig.fromChainId && swapConfig.toChainId && swapConfig.assetId && assets_data?.find(_asset => _asset?.id === swapConfig.assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === swapConfig.fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === swapConfig.toChainId) > -1)
 
-      const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
-      const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
+      const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === swapConfig.fromChainId)
+      const toContract = asset.contracts?.find(_contract => _contract?.chain_id === swapConfig.toChainId)
 
       if (fromContract && toContract) {
         setFees(null)
         setEstimatedAmount(null)
         setEstimatedAmountResponse(null)
 
-        if (typeof amount === 'number') {
+        if (typeof swapConfig.amount === 'number') {
           setTokenApproveResponse(null)
 
           setStartingSwap(false)
@@ -314,12 +309,12 @@ export default function CrosschainBridge() {
                 setNumReceivedBid(0)
 
                 const response = await sdk_data.getTransferQuote({
-                  sendingChainId: fromChainId,
+                  sendingChainId: swapConfig.fromChainId,
                   sendingAssetId: fromContract?.contract_address,
-                  receivingChainId: toChainId,
+                  receivingChainId: swapConfig.toChainId,
                   receivingAssetId: toContract?.contract_address,
                   receivingAddress: advancedOptions?.receiving_address || address,
-                  amount: BigNumber(amount).shiftedBy(fromContract?.contract_decimals).toString(),
+                  amount: BigNumber(swapConfig.amount).shiftedBy(fromContract?.contract_decimals).toString(),
                   transactionId: getRandomBytes32(),
                   expiry: moment().add(expiry_hours, 'hours').unix(),
                   callTo: advancedOptions?.contract_address || undefined,
@@ -330,11 +325,11 @@ export default function CrosschainBridge() {
                 })
 
                 if (!controller.signal.aborted) {
-                  if (response?.bid?.sendingChainId === fromChainId && response?.bid?.receivingChainId === toChainId && response?.bid?.sendingAssetId === fromContract?.contract_address) {
+                  if (response?.bid?.sendingChainId === swapConfig.fromChainId && response?.bid?.receivingChainId === swapConfig.toChainId && response?.bid?.sendingAssetId === fromContract?.contract_address) {
                     setFees({
                       gas: response?.gasFeeInReceivingToken && BigNumber(response.gasFeeInReceivingToken).shiftedBy(-toContract?.contract_decimals).toNumber(),
                       relayer: BigNumber(response?.metaTxRelayerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
-                      router: response?.bid && (amount - BigNumber(response.bid.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber()),
+                      router: response?.bid && (swapConfig.amount - BigNumber(response.bid.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber()),
                     })
                     setEstimatedAmount(response)
 
@@ -362,16 +357,16 @@ export default function CrosschainBridge() {
             setEstimatingFees(true)
 
             const gasResponse = await sdk_data.estimateFeeForRouterTransferInReceivingToken(
-              fromChainId,
+              swapConfig.fromChainId,
               fromContract?.contract_address,
-              toChainId,
+              swapConfig.toChainId,
               toContract?.contract_address,
             )
 
             const relayerResponse = await sdk_data.estimateMetaTxFeeInReceivingToken(
-              fromChainId,
+              swapConfig.fromChainId,
               fromContract?.contract_address,
-              toChainId,
+              swapConfig.toChainId,
               toContract?.contract_address,
             )
 
@@ -407,25 +402,25 @@ console.log(response)
     setStartingSwap(false)
   }
 
-  const fromChain = chains_data?.find(_chain => _chain?.chain_id === fromChainId)
-  const toChain = chains_data?.find(_chain => _chain?.chain_id === toChainId)
+  const fromChain = chains_data?.find(_chain => _chain?.chain_id === swapConfig.fromChainId)
+  const toChain = chains_data?.find(_chain => _chain?.chain_id === swapConfig.toChainId)
 
-  const fromChainSynced = getChainSynced(fromChainId)
-  const toChainSynced = getChainSynced(toChainId)
+  const fromChainSynced = getChainSynced(swapConfig.fromChainId)
+  const toChainSynced = getChainSynced(swapConfig.toChainId)
   const unsyncedChains = [!fromChainSynced && fromChain, !toChainSynced && toChain].filter(_chain => _chain)
 
   const receivingAddress = advancedOptions?.receiving_address || address
 
-  const asset = assets_data?.find(_asset => _asset?.id === assetId)
-  const toContract = asset?.contracts?.find(_contract => _contract?.chain_id === toChainId)
+  const asset = assets_data?.find(_asset => _asset?.id === swapConfig.assetId)
+  const toContract = asset?.contracts?.find(_contract => _contract?.chain_id === swapConfig.toChainId)
 
-  const fromBalance = getChainBalance(fromChainId)
+  const fromBalance = getChainBalance(swapConfig.fromChainId)
   const fromBalanceAmount = (fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals || 0)
-  const toBalance = getChainBalance(toChainId)
+  const toBalance = getChainBalance(swapConfig.toChainId)
 
   const estimatedFees = fees && ((fees.gas || 0) + (fees.relayer || 0) + (fees.router || 0))
 
-  const mustChangeChain = fromChainId && chain_id !== fromChainId
+  const mustChangeChain = swapConfig.fromChainId && chain_id !== swapConfig.fromChainId
   const mustApproveToken = !tokenApproved
 
   const actionDisabled = tokenApproveResponse?.status === 'pending' || startingSwap
@@ -457,38 +452,39 @@ console.log(response)
       </div>
       <div className="w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-lg space-y-8 sm:space-y-4 py-6 px-6 sm:px-7">
         <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-4 sm:gap-6">
-          <div className="sm:col-span-2 flex flex-col items-center space-y-0">
-            <span className="text-gray-400 dark:text-gray-500 text-base font-medium">From</span>
+          <div className="sm:col-span-2 flex flex-col items-center sm:items-start space-y-0">
+            <span className="text-gray-400 dark:text-gray-500 text-base font-medium mx-auto">From</span>
             <Network
               disabled={actionDisabled}
-              chain_id={fromChainId}
+              chain_id={swapConfig.fromChainId}
               onSelect={_chain_id => {
-                if (_chain_id === toChainId) {
-                  setToChainId(fromChainId)
-                }
-                else if (assetId) {
+                setSwapConfig({
+                  ...swapConfig,
+                  fromChainId: _chain_id,
+                  toChainId: _chain_id === swapConfig.toChainId ? swapConfig.fromChainId : swapConfig.toChainId,
+                })
+
+                if (_chain_id !== swapConfig.toChainId && swapConfig.assetId) {
                   getChainBalances(_chain_id)
                 }
-
-                setFromChainId(_chain_id)
               }}
             />
             {!address ?
               null
               :
               fromBalance ?
-                <div className="flex items-center text-gray-400 dark:text-gray-600 text-sm space-x-1.5">
+                <div className="flex items-center text-gray-400 dark:text-gray-600 text-sm space-x-1.5 sm:mr-1">
                   <IoWallet size={20} />
                   <span className="font-mono">{numberFormat((fromBalance.balance || 0) / Math.pow(10, fromBalance.contract_decimals), '0,0.00000000')}</span>
                   <span className="font-semibold">{fromBalance.contract_ticker_symbol}</span>
                 </div>
                 :
-                !address || !asset || !fromChainId ?
+                !address || !asset || !swapConfig.fromChainId ?
                   null
                   :
-                  balances_data?.[fromChainId] ?
+                  balances_data?.[swapConfig.fromChainId] ?
                     toBalance ?
-                      <div className="text-gray-400 dark:text-gray-600 text-sm">-</div>
+                      <div className="text-gray-400 dark:text-gray-600 text-sm sm:mr-1">-</div>
                       :
                       null
                     :
@@ -499,8 +495,11 @@ console.log(response)
             <button
               disabled={actionDisabled}
               onClick={() => {
-                setFromChainId(toChainId)
-                setToChainId(fromChainId)
+                setSwapConfig({
+                  ...swapConfig,
+                  fromChainId: swapConfig.toChainId,
+                  toChainId: swapConfig.fromChainId,
+                })
               }}
               className={`${actionDisabled ? 'cursor-not-allowed' : ''}`}
             >
@@ -508,38 +507,39 @@ console.log(response)
               <MdSwapHorizontalCircle size={40} className="hidden sm:block rounded-full shadow-lg text-indigo-500 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-white" />
             </button>
           </div>
-          <div className="sm:col-span-2 flex flex-col items-center space-y-0">
-            <span className="text-gray-400 dark:text-gray-500 text-base font-medium">To</span>
+          <div className="sm:col-span-2 flex flex-col items-center sm:items-end space-y-0">
+            <span className="text-gray-400 dark:text-gray-500 text-base font-medium mx-auto">To</span>
             <Network
               disabled={actionDisabled}
-              chain_id={toChainId}
+              chain_id={swapConfig.toChainId}
               onSelect={_chain_id => {
-                if (_chain_id === fromChainId) {
-                  setFromChainId(toChainId)
-                }
-                else if (assetId) {
+                setSwapConfig({
+                  ...swapConfig,
+                  fromChainId: _chain_id === swapConfig.fromChainId ? swapConfig.toChainId : swapConfig.fromChainId,
+                  toChainId: _chain_id,
+                })
+
+                if (_chain_id !== swapConfig.fromChainId && swapConfig.assetId) {
                   getChainBalances(_chain_id)
                 }
-
-                setToChainId(_chain_id)
               }}
             />
             {!address ?
               null
               :
               toBalance ?
-                <div className="flex items-center text-gray-400 dark:text-gray-600 text-sm space-x-1.5">
+                <div className="flex items-center text-gray-400 dark:text-gray-600 text-sm space-x-1.5 sm:mr-1">
                   <IoWallet size={20} />
                   <span className="font-mono">{numberFormat((toBalance.balance || 0) / Math.pow(10, toBalance.contract_decimals), '0,0.00000000')}</span>
                   <span className="font-semibold">{toBalance.contract_ticker_symbol}</span>
                 </div>
                 :
-                !asset || !toChainId ?
+                !asset || !swapConfig.toChainId ?
                   null
                   :
-                  balances_data?.[toChainId] ?
+                  balances_data?.[swapConfig.toChainId] ?
                     fromBalance ?
-                      <div className="text-gray-400 dark:text-gray-600 text-sm">-</div>
+                      <div className="text-gray-400 dark:text-gray-600 text-sm sm:mr-1">-</div>
                       :
                       null
                     :
@@ -554,27 +554,32 @@ console.log(response)
           <div className="order-2 sm:col-span-3 flex flex-col items-center sm:items-end space-y-0">
             <Asset
               disabled={actionDisabled}
-              assetId={assetId}
+              assetId={swapConfig.assetId}
               onSelect={_asset_id => {
-                if (_asset_id !== assetId) {
-                  if (fromChainId) {
-                    getChainBalances(fromChainId)
+                if (_asset_id !== swapConfig.assetId) {
+                  if (swapConfig.fromChainId) {
+                    getChainBalances(swapConfig.fromChainId)
                   }
-                  if (toChainId) {
-                    getChainBalances(toChainId)
-                  }
-
-                  if (amount) {
-                    setAmount(null)
+                  if (swapConfig.toChainId) {
+                    getChainBalances(swapConfig.toChainId)
                   }
                 }
 
-                setAssetId(_asset_id)
+                setSwapConfig({
+                  ...swapConfig,
+                  assetId: _asset_id,
+                  amount: _asset_id !== swapConfig.assetId && swapConfig.amount ? null : swapConfig.amount,
+                })
               }}
-              fromChainId={fromChainId}
-              toChainId={toChainId}
-              amount={amount}
-              amountOnChange={_amount => setAmount(_amount && !isNaN(_amount) ? Number(_amount) : _amount)}
+              fromChainId={swapConfig.fromChainId}
+              toChainId={swapConfig.toChainId}
+              amount={swapConfig.amount}
+              amountOnChange={_amount => {
+                setSwapConfig({
+                  ...swapConfig,
+                  amount: _amount && !isNaN(_amount) ? Number(_amount) : _amount,
+                })
+              }}
             />
           </div>
           {address && isSupport() && (
@@ -582,9 +587,14 @@ console.log(response)
               <div className="hidden sm:block order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-6" />
               <div className="order-3 sm:order-4 sm:col-span-3 sm:-mt-6 ml-auto sm:ml-0 mr-auto">
                 <div className="w-48 h-4 flex items-center justify-end -ml-7 sm:ml-0">
-                  {balances_data?.[fromChainId] ?
+                  {balances_data?.[swapConfig.fromChainId] ?
                     <button
-                      onClick={() => setAmount(Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals) > smallNumber ? Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance.contract_decimals) : 0)}
+                      onClick={() => {
+                        setSwapConfig({
+                          ...swapConfig,
+                          amount: Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals) > smallNumber ? Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance.contract_decimals) : 0,
+                        })
+                      }}
                       className="text-gray-800 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100 text-sm font-bold"
                     >
                       Max
@@ -600,8 +610,47 @@ console.log(response)
         </div>
         {isSupport() && web3_provider && (estimatingAmount || estimatingFees || typeof estimatedFees === 'number') && (
           <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 pb-0.5">
-            <div className="sm:col-span-2 flex items-center justify-center sm:justify-start">
+            <div className="sm:col-span-2 flex items-center justify-center sm:justify-start space-x-1">
               <span className="text-gray-400 dark:text-gray-600 text-base font-medium">{estimatedAmount || estimatingAmount ? '' : 'Estimated '}Fees</span>
+              {!(estimatingAmount || estimatingFees || typeof estimatedFees !== 'number') && (
+                <Popover
+                  placement="bottom"
+                  title={<div className="flex items-center space-x-2">
+                    <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-sm font-semibold">{estimatedAmount ? '' : 'Estimated '}Fees:</span>
+                    <span className="text-gray-800 dark:text-gray-200 text-sm space-x-1">
+                      <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.00000000')}` : 'N/A'}</span>
+                      <span className="font-semibold">{asset?.symbol}</span>
+                    </span>
+                  </div>}
+                  content={<div className="flex flex-col space-y-2">
+                    <div className="flex items-center justify-between space-x-2">
+                      <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Dest. Tx Cost:</span>
+                      <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
+                        <span className="font-mono">{typeof fees?.gas === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.gas, '0,0.00000000')}` : 'N/A'}</span>
+                        <span className="font-semibold">{asset?.symbol}</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between space-x-2">
+                      <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Relayer Fee:</span>
+                      <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
+                        <span className="font-mono">{typeof fees?.relayer === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.relayer, '0,0.00000000')}` : 'N/A'}</span>
+                        <span className="font-semibold">{asset?.symbol}</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between space-x-2">
+                      <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Router Fee:</span>
+                      <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
+                        <span className="font-mono">{typeof fees?.router === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.router, '0,0.00000000')}` : 'N/A'}</span>
+                        <span className="font-semibold">{asset?.symbol}</span>
+                      </span>
+                    </div>
+                  </div>}
+                >
+                  <span className="text-gray-400 dark:text-gray-600">
+                    <IoMdInformationCircle size={16} />
+                  </span>
+                </Popover>
+              )}
             </div>
             <div className="sm:col-span-3 flex items-center justify-center sm:justify-end sm:mr-1">
               {estimatingAmount || estimatingFees || typeof estimatedFees !== 'number' ?
@@ -647,7 +696,6 @@ console.log(response)
                     <span className="flex items-center text-gray-400 dark:text-gray-200 text-sm space-x-1">
                       <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.000000')}` : 'N/A'}</span>
                       <span className="font-semibold">{asset?.symbol}</span>
-                      <IoMdInformationCircle size={16} className="mb-0.5" />
                       {!estimatedAmount && (
                         <span className="font-mono lowercase text-gray-300 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
                       )}
@@ -659,12 +707,12 @@ console.log(response)
             </div>
           </div>
         )}
-        {isSupport() && web3_provider && typeof amount === 'number' && (
+        {isSupport() && web3_provider && typeof swapConfig.amount === 'number' && (
           <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 -mt-8 sm:mt-0 pb-0.5">
             <div className="min-w-max order-1 sm:col-span-2 flex justify-center sm:justify-start">
               <span className="text-gray-400 dark:text-gray-600 text-xl font-medium">Estimated Received</span>
             </div>
-            <div className="order-2 sm:col-span-3 flex flex-col items-center space-y-0">
+            <div className="order-2 sm:col-span-3 flex flex-col items-center sm:items-end space-y-0 sm:mr-1">
               <div className="h-10 sm:h-7 flex items-center justify-center sm:justify-start space-x-2">
                 <div className="sm:w-48 font-mono flex items-center justify-end text-lg font-semibold text-right px-2">
                   {estimatingAmount ?
@@ -687,8 +735,8 @@ console.log(response)
             updateOptions={_options => setAdvancedOptions(_options)}
           />
         </div>
-        {balances_data?.[fromChainId]/* && feesEstimated && typeof estimatedFees === 'number'*/ && typeof amount === 'number' ?
-          !estimatingFees && amount < estimatedFees ?
+        {balances_data?.[swapConfig.fromChainId]/* && typeof estimatedFees === 'number'*/ && typeof swapConfig.amount === 'number' ?
+          !estimatingFees && swapConfig.amount < estimatedFees ?
             <div className="sm:pt-1.5 pb-1">
               <Alert
                 color="bg-red-400 dark:bg-red-500 text-left text-white"
@@ -700,7 +748,7 @@ console.log(response)
               </Alert>
             </div>
             :
-            check_balances && fromBalanceAmount < amount ?
+            !estimatedAmountResponse && check_balances && fromBalanceAmount < swapConfig.amount ?
               <div className="sm:pt-1.5 pb-1">
                 <Alert
                   color="bg-red-400 dark:bg-red-500 text-left text-white"
@@ -744,7 +792,7 @@ console.log(response)
                 mustChangeChain ?
                   <div className="sm:pt-1.5 pb-1">
                     <Wallet
-                      chainIdToConnect={fromChainId}
+                      chainIdToConnect={swapConfig.fromChainId}
                       buttonDisconnectTitle={<>
                         <span>Switch to</span>
                         <Img
@@ -873,7 +921,7 @@ console.log(response)
                                   <span className="hidden sm:block">:</span>
                                 </div>
                                 <div className="text-lg space-x-1.5">
-                                  <span className="font-mono font-semibold">{numberFormat(amount, '0,0.00000000')}</span>
+                                  <span className="font-mono font-semibold">{numberFormat(swapConfig.amount, '0,0.00000000')}</span>
                                   <span className="font-semibold">{asset?.symbol}</span>
                                 </div>
                               </div>
