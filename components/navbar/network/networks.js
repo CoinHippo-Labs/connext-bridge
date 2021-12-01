@@ -1,11 +1,13 @@
 import { useSelector, shallowEqual } from 'react-redux'
 
 import { Img } from 'react-image'
+import { IoRadioButtonOn } from 'react-icons/io5'
 
 import Wallet from '../../wallet'
 
 export default function Networks({ handleDropdownClick }) {
-  const { chains } = useSelector(state => ({ chains: state.chains }), shallowEqual)
+  const { chains, chains_status } = useSelector(state => ({ chains: state.chains, chains_status: state.chains_status }), shallowEqual)
+  const { chains_status_data } = { ...chains_status }
   const { chains_data } = { ...chains }
 
   return (
@@ -17,14 +19,15 @@ export default function Networks({ handleDropdownClick }) {
             <div
               key={i}
               title="Disabled"
-              className="dropdown-item w-1/2 cursor-not-allowed flex items-center justify-start font-medium space-x-1.5 p-2"
+              className="dropdown-item w-1/2 cursor-not-allowed flex items-center justify-start font-medium space-x-1 p-2"
             >
+              <IoRadioButtonOn size={12} className={`${!chains_status_data || chains_status_data?.find(_chain => _chain?.id === item.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
               <Img
                 src={item.image}
                 alt=""
-                className="w-6 h-6 rounded-full"
+                className="w-5 h-5 rounded-full"
               />
-              <span className="text-xs">{item.title}</span>
+              <span className="leading-4 text-2xs font-medium">{item.title}</span>
             </div>
             :
             <Wallet
@@ -32,14 +35,15 @@ export default function Networks({ handleDropdownClick }) {
               chainIdToConnect={item.chain_id}
               onChangeNetwork={handleDropdownClick}
               buttonDisconnectTitle={<>
+                <IoRadioButtonOn size={12} className={`min-w-max ${!chains_status_data || chains_status_data?.find(_chain => _chain?.id === item.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
                 <Img
                   src={item.image}
                   alt=""
-                  className="w-6 h-6 rounded-full"
+                  className="w-5 h-5 rounded-full"
                 />
-                <span className="text-xs text-left">{item.title}</span>
+                <span className="leading-4 text-2xs font-medium text-left">{item.title}</span>
               </>}
-              buttonDisconnectClassName="dropdown-item w-1/2 flex items-center justify-start space-x-1.5 p-2"
+              buttonDisconnectClassName="dropdown-item w-1/2 flex items-center justify-start space-x-1 p-2"
             />
         ))}
       </div>

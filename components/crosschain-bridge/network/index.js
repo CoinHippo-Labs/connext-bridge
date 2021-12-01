@@ -4,12 +4,14 @@ import { useSelector, shallowEqual } from 'react-redux'
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
 import { BsPatchExclamationFill } from 'react-icons/bs'
+import { IoRadioButtonOn } from 'react-icons/io5'
 
 import Networks from './networks'
 
 export default function DropdownNetwork({ disabled, chain_id, onSelect }) {
-  const { chains, preferences } = useSelector(state => ({ chains: state.chains, preferences: state.preferences }), shallowEqual)
+  const { chains, chains_status, preferences } = useSelector(state => ({ chains: state.chains, chains_status: state.chains_status, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
+  const { chains_status_data } = { ...chains_status }
   const { theme } = { ...preferences }
 
   const chain = chains_data?.find(_chain => _chain?.chain_id === chain_id)
@@ -52,7 +54,8 @@ export default function DropdownNetwork({ disabled, chain_id, onSelect }) {
         className={`h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
       >
         {chain ?
-          <div className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-3xl flex items-center text-lg space-x-1.5 py-1.5 px-4">
+          <div className="w-36 min-w-max bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-3xl flex items-center justify-center text-lg space-x-1.5 py-1.5 px-4">
+            <IoRadioButtonOn size={16} className={`${!chains_status_data || chains_status_data?.find(_chain => _chain?.id === chain.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
             <Img
               src={chain.image}
               alt=""

@@ -559,7 +559,7 @@ console.log(response)
   const actionDisabled = tokenApprovingTx || startingSwap
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-2 sm:space-y-3 my-4 sm:my-6">
+    <div className="flex flex-col items-center justify-center space-y-2 sm:space-y-3 my-8 sm:my-12">
       <div className="w-full max-w-lg flex items-center justify-between space-x-2">
         <div className="flex items-center space-x-2">
           {/*<Img
@@ -789,8 +789,8 @@ console.log(response)
         </div>
         {isSupport() && web3_provider && (
           <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 -mt-8 sm:mt-0 pb-0.5">
-            <div className="order-1 sm:col-span-2 flex justify-center">
-              <span className="min-w-max text-gray-400 dark:text-gray-600 text-xl font-medium">~ Received</span>
+            <div className="min-w-max order-1 sm:col-span-2 flex justify-center">
+              <span className="text-gray-400 dark:text-gray-600 text-xl font-medium">Estimated Received</span>
             </div>
             <div className="order-2 sm:col-span-3 flex flex-col items-center space-y-0">
               <div className="h-10 sm:h-7 flex items-center justify-center sm:justify-start space-x-2">

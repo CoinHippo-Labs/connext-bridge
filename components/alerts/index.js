@@ -32,7 +32,7 @@ const Alert = ({
   css = css.join(' ')
 
   return (
-    <div className={`w-full flex items-center justify-start p-4 ${css}`}>
+    <div className={`w-full flex items-start justify-start p-4 ${css}`}>
       <div className="flex-shrink">{icon}</div>
       <div className="flex-grow">{children}</div>
       {!closeDisabled && (
