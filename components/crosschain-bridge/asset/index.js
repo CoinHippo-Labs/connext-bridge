@@ -76,7 +76,7 @@ export default function DropdownAsset({ disabled, assetId, onSelect, fromChainId
         ref={buttonRef}
         disabled={disabled}
         onClick={handleDropdownClick}
-        className={`h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
+        className={`${!assets_data ? 'w-40' : ''} h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
       >
         {asset ?
           <div className={`bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-${showInput ? 'full w-12 h-12 justify-center' : '3xl py-1.5 px-4'} flex items-center text-lg space-x-1.5`}>
