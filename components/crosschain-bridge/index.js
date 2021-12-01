@@ -473,7 +473,7 @@ console.log(response)
               null
               :
               fromBalance ?
-                <div className="flex items-center text-gray-400 dark:text-gray-600 text-sm space-x-1.5 sm:mr-1">
+                <div className="flex items-center text-gray-400 dark:text-gray-600 text-sm space-x-1.5 sm:ml-1">
                   <IoWallet size={20} />
                   <span className="font-mono">{numberFormat((fromBalance.balance || 0) / Math.pow(10, fromBalance.contract_decimals), '0,0.00000000')}</span>
                   <span className="font-semibold">{fromBalance.contract_ticker_symbol}</span>
