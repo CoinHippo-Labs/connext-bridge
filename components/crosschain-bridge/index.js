@@ -235,16 +235,13 @@ export default function CrosschainBridge() {
   }
 
   const isTokenApproved = async isAfterApprove => {
-    let approved = true
+    let approved = false
 
     if (address && chain_id && chain_id === fromChainId && assetId && typeof amount === 'number' && (isAfterApprove || !tokenApproveResponse)) {
       const fromChainSynced = getChainSynced(fromChainId)
       const toChainSynced = getChainSynced(toChainId)
 
-      const fromBalance = getChainBalance(fromChainId)
-      const fromBalanceAmount = (fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals || 0)
-
-      if (isSupport() && (!check_balances || fromBalanceAmount >= amount) && fromChainSynced && toChainSynced) {
+      if (isSupport() && fromChainSynced && toChainSynced) {
         const asset = assets_data?.find(_asset => _asset?.id === assetId)
         const contract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
 
