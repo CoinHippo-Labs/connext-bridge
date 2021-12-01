@@ -178,7 +178,7 @@ export default function CrosschainBridge() {
     }
 
     getData()
-  }, [address, chain_id, fromChainId, toChainId, assetId, amount])
+  }, [address, chain_id, fromChainId, toChainId, assetId, amount, estimateFeesTrigger, findingRoutesTrigger])
 
   useEffect(() => {
     setTokenApprovingTx(null)
@@ -673,7 +673,7 @@ console.log(response)
             }
           </div>
         </div>
-        <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 pb-0.5">
+        <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4">
           <div className="order-1 sm:col-span-2 flex items-center justify-center sm:justify-start">
             <span className="text-gray-400 dark:text-gray-600 text-xl font-medium">Amount</span>
           </div>
@@ -705,9 +705,9 @@ console.log(response)
           </div>
           {address && isSupport() && (
             <>
-              <div className="hidden sm:block order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-5" />
-              <div className="order-3 sm:order-4 sm:col-span-3 sm:-mt-5 ml-9 ml-auto sm:-ml-2 mr-auto">
-                <div className="w-48 h-5 flex items-center justify-end -ml-7 sm:ml-0">
+              <div className="hidden sm:block order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-6" />
+              <div className="order-3 sm:order-4 sm:col-span-3 sm:-mt-6 ml-auto sm:ml-0 mr-auto">
+                <div className="w-48 h-4 flex items-center justify-end -ml-7 sm:ml-0">
                   {balances_data?.[fromChainId] ?
                     <button
                       onClick={() => setAmount(Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals) > smallNumber ? Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance.contract_decimals) : 0)}
@@ -724,16 +724,16 @@ console.log(response)
             </>
           )}
         </div>
-        {((isSupport() && web3_provider) || estimatingAmount || gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ||
+        {isSupport() && web3_provider && (estimatingAmount || gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ||
           typeof gasFee === 'number' || typeof relayerFee === 'number' || typeof routerFee === 'number' ||
           typeof gasFee === 'boolean' || typeof relayerFee === 'boolean' || typeof routerFee === 'boolean'
         ) && (
-          <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 -mt-1 pb-0.5">
+          <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 pb-0.5">
             <div className="sm:col-span-2 flex items-center justify-center sm:justify-start">
               <span className="text-gray-400 dark:text-gray-600 text-base font-medium">{estimatedAmount || estimatingAmount ? '' : 'Estimated '}Fees</span>
             </div>
             <div className="sm:col-span-3 flex items-center justify-center sm:justify-end sm:mr-1">
-              {estimatingAmount || gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ?
+              {estimatingAmount || gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating || !feesEstimated ?
                 <div className="flex items-center space-x-1.5">
                   <span className="text-gray-400 dark:text-gray-600 text-sm">{estimatedAmount || estimatingAmount ? 'Calculating' : 'Estimating'}</span>
                   <Loader type="BallTriangle" color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="20" height="20" />

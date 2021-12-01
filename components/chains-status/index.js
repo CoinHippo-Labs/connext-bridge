@@ -127,27 +127,29 @@ export default function ChainsStatus() {
         </div>
       )}
       {chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).length > 0 && (
-        <Alert
-          color="xl:max-w-lg bg-yellow-400 dark:bg-yellow-500 text-left text-white mt-4 sm:mt-6 -mb-6 sm:-mb-10 mx-auto"
-          icon={<TiWarning className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
-          closeDisabled={true}
-          rounded={true}
-        >
-          <div className="block font-mono leading-4 text-xs xl:text-base font-medium">
-            {/*<FaRegHandPointRight size={20} className="inline mr-2" />*/}
-            <span className="mr-2">
-              Transfers to and from <span className="font-semibold">{chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).map(_chain => _chain?.short_name).join(', ')}</span> may be delayed temporarily. Funds are always safe! If you have active transactions, check their status
-            </span>
-            <a
-              href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}${address ? `/address/${address}` : ''}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline font-extrabold"
-            >
-              {address ? 'here' : 'here'}
-            </a>.
-          </div>
-        </Alert>
+        <div className="px-4">
+          <Alert
+            color="xl:max-w-lg bg-yellow-400 dark:bg-yellow-500 text-left text-white mt-4 sm:mt-6 -mb-6 sm:-mb-10 mx-auto"
+            icon={<TiWarning className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+            closeDisabled={true}
+            rounded={true}
+          >
+            <div className="block font-mono leading-4 text-xs xl:text-base font-medium">
+              {/*<FaRegHandPointRight size={20} className="inline mr-2" />*/}
+              <span className="mr-2">
+                Transfers to and from <span className="font-semibold">{chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).map(_chain => _chain?.short_name).join(', ')}</span> may be delayed temporarily. Funds are always safe! If you have active transactions, check their status
+              </span>
+              <a
+                href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}${address ? `/address/${address}` : ''}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline font-extrabold"
+              >
+                {address ? 'here' : 'here'}
+              </a>.
+            </div>
+          </Alert>
+        </div>
       )}
     </>
   )
