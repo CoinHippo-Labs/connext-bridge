@@ -469,8 +469,6 @@ export default function CrosschainBridge() {
       const asset = fromChainId && toChainId && assetId && assets_data?.find(_asset => _asset?.id === assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === toChainId) > -1)
 
       if (isSupport()) {
-        setGasFeeEstimating(true)
-
         const fromContract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
         const toContract = asset.contracts?.find(_contract => _contract?.chain_id === toChainId)
 
@@ -676,10 +674,10 @@ console.log(response)
           </div>
         </div>
         <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 pb-0.5">
-          <div className="order-1 sm:col-span-2 flex items-center justify-center">
+          <div className="order-1 sm:col-span-2 flex items-center justify-center sm:justify-start">
             <span className="text-gray-400 dark:text-gray-600 text-xl font-medium">Amount</span>
           </div>
-          <div className="order-2 sm:col-span-3 flex flex-col items-center space-y-0">
+          <div className="order-2 sm:col-span-3 flex flex-col items-center sm:items-end space-y-0">
             <Asset
               disabled={actionDisabled}
               assetId={assetId}
@@ -731,10 +729,10 @@ console.log(response)
           typeof gasFee === 'boolean' || typeof relayerFee === 'boolean' || typeof routerFee === 'boolean'
         ) && (
           <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 -mt-1 pb-0.5">
-            <div className="sm:col-span-2 flex items-center justify-center">
-              <span className="text-gray-400 dark:text-gray-600 text-base font-medium">{estimatedAmount ? '' : 'Estimated '}Fees</span>
+            <div className="sm:col-span-2 flex items-center justify-center sm:justify-start">
+              <span className="text-gray-400 dark:text-gray-600 text-base font-medium">{estimatedAmount || estimatingAmount ? '' : 'Estimated '}Fees</span>
             </div>
-            <div className="sm:col-span-3 flex items-center justify-center sm:justify-end sm:mr-2">
+            <div className="sm:col-span-3 flex items-center justify-center sm:justify-end sm:mr-1">
               {estimatingAmount || gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ?
                 <div className="flex items-center space-x-1.5">
                   <span className="text-gray-400 dark:text-gray-600 text-sm">{estimatedAmount || estimatingAmount ? 'Calculating' : 'Estimating'}</span>
@@ -792,12 +790,12 @@ console.log(response)
         )}
         {isSupport() && web3_provider && (
           <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 -mt-8 sm:mt-0 pb-0.5">
-            <div className="min-w-max order-1 sm:col-span-2 flex justify-center">
+            <div className="min-w-max order-1 sm:col-span-2 flex justify-center sm:justify-start">
               <span className="text-gray-400 dark:text-gray-600 text-xl font-medium">Estimated Received</span>
             </div>
             <div className="order-2 sm:col-span-3 flex flex-col items-center space-y-0">
               <div className="h-10 sm:h-7 flex items-center justify-center sm:justify-start space-x-2">
-                <div className="sm:w-48 font-mono flex items-center justify-end text-lg font-semibold text-right px-2 sm:px-4">
+                <div className="sm:w-48 font-mono flex items-center justify-end text-lg font-semibold text-right px-2">
                   {estimatingAmount ?
                     <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="24" height="24" className="mt-1.5" />
                     :
@@ -1000,7 +998,7 @@ console.log(response)
                               </div>
                               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:space-x-1 xl:space-x-2">
                                 <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
-                                  Amount Sent
+                                  Amount
                                   <span className="hidden sm:block">:</span>
                                 </div>
                                 <div className="text-lg space-x-1.5">
