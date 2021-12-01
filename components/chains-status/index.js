@@ -133,6 +133,7 @@ export default function ChainsStatus() {
             icon={<TiWarning className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
             closeDisabled={true}
             rounded={true}
+            className="items-start"
           >
             <div className="block font-mono leading-4 text-xs xl:text-base font-medium">
               {/*<FaRegHandPointRight size={20} className="inline mr-2" />*/}
