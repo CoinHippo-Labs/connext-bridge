@@ -38,6 +38,8 @@ const bid_expires_second = Number(process.env.NEXT_PUBLIC_BID_EXPIRES_SECOND)
 
 BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
 
+const check_balances = true
+
 export default function CrosschainBridge() {
   const dispatch = useDispatch()
   const { chains, assets, chains_status, balances, wallet, sdk, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, balances: state.balances, wallet: state.wallet, sdk: state.sdk, preferences: state.preferences }), shallowEqual)
@@ -80,6 +82,7 @@ export default function CrosschainBridge() {
   const [estimatingAmount, setEstimatingAmount] = useState(null)
   const [estimatedAmountResponse, setEstimatedAmountResponse] = useState(null)
   const [bidExpiresSecond, setBidExpiresSecond] = useState(null)
+  const [numReceivedBid, setNumReceivedBid] = useState(null)
   const [startingSwap, setStartingSwap] = useState(null)
   const [swapData, setSwapData] = useState(null)
   const [swapResponse, setSwapResponse] = useState(null)
@@ -161,7 +164,7 @@ export default function CrosschainBridge() {
     setRouterFee(null)
 
     setEstimateFeesTrigger(moment().valueOf())
-  }, [fromChainId, toChainId, assetId, estimatedAmount])
+  }, [address, fromChainId, toChainId, assetId, estimatedAmount])
   // fees
 
   // approve
@@ -175,7 +178,7 @@ export default function CrosschainBridge() {
     }
 
     getData()
-  }, [address, chain_id, fromChainId, assetId, amount])
+  }, [address, chain_id, fromChainId, toChainId, assetId, amount])
 
   useEffect(() => {
     setTokenApprovingTx(null)
@@ -217,6 +220,7 @@ export default function CrosschainBridge() {
   useEffect(() => {
     if (bidExpiresSecond === -1) {
       setBidExpiresSecond(bid_expires_second)
+      setNumReceivedBid((numReceivedBid || 0) + 1)
     }
     else {
       const interval = setInterval(() => {
@@ -254,7 +258,7 @@ export default function CrosschainBridge() {
       const feesEstimated = (typeof gasFee === 'number' || typeof gasFee === 'boolean') && (typeof relayerFee === 'number' || typeof relayerFee === 'boolean') && (typeof routerFee === 'number' || typeof routerFee === 'boolean')
       const estimatedFees = feesEstimated && ((gasFee || 0) + (relayerFee || 0) + (routerFee || 0))
 
-      if (isSupport() && amount >= estimatedFees && fromBalanceAmount >= amount && fromChainSynced && toChainSynced) {
+      if (isSupport() && amount >= estimatedFees && (!check_balances || fromBalanceAmount >= amount) && fromChainSynced && toChainSynced) {
         const asset = assets_data?.find(_asset => _asset?.id === assetId)
         const contract = asset.contracts?.find(_contract => _contract?.chain_id === fromChainId)
 
@@ -333,7 +337,7 @@ export default function CrosschainBridge() {
   }
 
   const estimateFees = async controller => {
-    if (fromChainId && toChainId && assetId) {
+    if (address && fromChainId && toChainId && assetId) {
       if (!controller.signal.aborted) {
         await estimateGasFee(controller)
       }
@@ -472,6 +476,7 @@ export default function CrosschainBridge() {
 
         try {
           setBidExpiresSecond(bid_expires_second)
+          setNumReceivedBid(0)
 
           const response = await sdk_data.getTransferQuote({
             sendingChainId: fromChainId,
@@ -492,6 +497,7 @@ export default function CrosschainBridge() {
           if (!controller.signal.aborted) {
             setEstimatedAmount(response)
             setBidExpiresSecond(null)
+            setNumReceivedBid(null)
           }
         } catch (error) {
           if (!controller.signal.aborted) {
@@ -580,7 +586,7 @@ console.log(response)
       <div className="w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-lg space-y-8 sm:space-y-4 py-6 px-6 sm:px-7">
         <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-4 sm:gap-6">
           <div className="sm:col-span-2 flex flex-col items-center space-y-0">
-            <span className="text-gray-400 dark:text-gray-500 text-xl font-medium">From Chain</span>
+            <span className="text-gray-400 dark:text-gray-500 text-base font-medium">From</span>
             <Network
               disabled={actionDisabled}
               chain_id={fromChainId}
@@ -631,7 +637,7 @@ console.log(response)
             </button>
           </div>
           <div className="sm:col-span-2 flex flex-col items-center space-y-0">
-            <span className="text-gray-400 dark:text-gray-500 text-xl font-medium">To Chain</span>
+            <span className="text-gray-400 dark:text-gray-500 text-base font-medium">To</span>
             <Network
               disabled={actionDisabled}
               chain_id={toChainId}
@@ -702,15 +708,15 @@ console.log(response)
           {address && isSupport() && (
             <>
               <div className="order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-5">
-                {(gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ||
+                {(estimatingAmount || gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ||
                   typeof gasFee === 'number' || typeof relayerFee === 'number' || typeof routerFee === 'number' ||
                   typeof gasFee === 'boolean' || typeof relayerFee === 'boolean' || typeof routerFee === 'boolean'
                 ) && (
                   <div className="min-w-max h-5 flex items-center justify-center space-x-1.5">
-                    <span className="text-gray-800 dark:text-gray-200 text-sm font-semibold">Fees:</span>
-                    {gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ?
+                    <span className="text-gray-800 dark:text-gray-200 text-sm font-semibold">{estimatedAmount ? '' : 'Estimated '}Fees:</span>
+                    {estimatingAmount || gasFeeEstimating || relayerFeeEstimating || routerFeeEstimating ?
                       <>
-                        <span className="text-gray-400 dark:text-gray-600 text-sm">Estimating</span>
+                        <span className="text-gray-400 dark:text-gray-600 text-sm">{estimatedAmount || estimatingAmount ? 'Calculating' : 'Estimating'}</span>
                         <Loader type="BallTriangle" color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="20" height="20" />
                       </>
                       :
@@ -718,7 +724,7 @@ console.log(response)
                         <Popover
                           placement="bottom"
                           title={<div className="flex items-center space-x-2">
-                            <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-sm font-semibold">{estimatedAmount ? 'Actual' : 'Estimated'} Fees:</span>
+                            <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-sm font-semibold">{estimatedAmount ? '' : 'Estimated '}Fees:</span>
                             <span className="text-gray-800 dark:text-gray-200 text-sm space-x-1">
                               <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.00000000')}` : 'N/A'}</span>
                               <span className="font-semibold">{asset?.symbol}</span>
@@ -809,7 +815,7 @@ console.log(response)
             updateOptions={_options => setAdvancedOptions(_options)}
           />
         </div>
-        {balances_data?.[fromChainId] && feesEstimated && typeof estimatedFees === 'number' && typeof amount === 'number' ?
+        {balances_data?.[fromChainId]/* && feesEstimated && typeof estimatedFees === 'number'*/ && typeof amount === 'number' ?
           !estimatingFees && feesEstimated && amount < estimatedFees ?
             <div className="sm:pt-1.5 pb-1">
               <Alert
@@ -822,7 +828,7 @@ console.log(response)
               </Alert>
             </div>
             :
-            fromBalanceAmount < amount ?
+            check_balances && fromBalanceAmount < amount ?
               <div className="sm:pt-1.5 pb-1">
                 <Alert
                   color="bg-red-400 dark:bg-red-500 text-left text-white"
@@ -924,7 +930,7 @@ console.log(response)
                             }
                             <span className="font-bold">{asset?.symbol}</span>
                             {estimatingAmount && typeof bidExpiresSecond === 'number' && (
-                              <span className="text-gray-200 dark:text-gray-100 text-sm font-medium">(retry in {bidExpiresSecond}s)</span>
+                              <span className="text-gray-200 dark:text-gray-100 text-sm font-medium">{numReceivedBid ? `- Received ${numReceivedBid} Bid${numReceivedBid > 1 ? 's' : ''}` : 'Next bid in'} ({bidExpiresSecond}s)</span>
                             )}
                           </button>
                           :
@@ -1101,12 +1107,12 @@ console.log(response)
             :
             <Wallet
               buttonConnectTitle={<>
-                <span>Connect your wallet</span>
-                <Img
+                <span>Connect Wallet</span>
+                {/*<Img
                   src="/logos/wallets/metamask.png"
                   alt=""
                   className="w-6 h-6 -mr-0.5 mb-0.5"
-                />
+                />*/}
               </>}
               buttonConnectClassName="w-full bg-gray-100 hover:bg-gray-200 dark:bg-indigo-600 dark:hover:bg-indigo-700 rounded-lg shadow-lg flex items-center justify-center text-base sm:text-lg font-semibold space-x-2.5 py-4 px-3"
             />

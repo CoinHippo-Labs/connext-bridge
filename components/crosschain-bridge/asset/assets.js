@@ -10,7 +10,7 @@ export default function Networks({ handleDropdownClick }) {
 
   return (
     <>
-      {/*<div className="dropdown-title">Select Coin</div>*/}
+      {/*<div className="dropdown-title">Select Token</div>*/}
       <div className="flex flex-wrap py-1">
         {assets_data?.filter(item => !item.menu_hidden && !item.disabled).map((item, i) => (
           item.disabled ?
