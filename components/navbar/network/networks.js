@@ -21,7 +21,7 @@ export default function Networks({ handleDropdownClick }) {
               title="Disabled"
               className="dropdown-item w-1/2 cursor-not-allowed flex items-center justify-start font-medium space-x-1 p-2"
             >
-              <IoRadioButtonOn size={12} className={`${!chains_status_data || chains_status_data?.find(_chain => _chain?.id === item.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
+              <IoRadioButtonOn size={12} className="text-gray-400 dark:text-gray-600" />
               <Img
                 src={item.image}
                 alt=""

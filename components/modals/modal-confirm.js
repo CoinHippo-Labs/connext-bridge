@@ -3,7 +3,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import Portal from '../portal'
 import { FiX } from 'react-icons/fi'
 
-export default function Modal({ buttonTitle, buttonClassName, title, icon, body, cancelButtonTitle, cancelDisabled = false, onCancel, confirmButtonTitle, confirmDisabled = false, onConfirm, onComfirmHide = true, confirmButtonClassName }) {
+export default function Modal({ hidden, buttonTitle, onClick, buttonClassName, title, icon, body, cancelButtonTitle, cancelDisabled = false, onCancel, confirmButtonTitle, confirmDisabled = false, onConfirm, onComfirmHide = true, confirmButtonClassName, noButtons }) {
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
   const { theme } = { ...preferences }
 
@@ -11,9 +11,19 @@ export default function Modal({ buttonTitle, buttonClassName, title, icon, body,
 
   const [open, setOpen] = useState(false)
 
-  const show = () => setOpen(true)
+  const show = () => {
+    if (onClick) {
+      onClick(true)
+    }
 
-  const hide = () => setOpen(false)
+    setOpen(true)
+  }
+
+  const hide = () => {
+    if (typeof hidden !== 'boolean') {
+      setOpen(false)
+    }
+  }
 
   useEffect(() => {
     const handleClickOutside = event => {
@@ -28,6 +38,12 @@ export default function Modal({ buttonTitle, buttonClassName, title, icon, body,
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [modalRef, open])
+
+  useEffect(() => {
+    if (typeof hidden === 'boolean') {
+      setOpen(!hidden)
+    }
+  }, [hidden])
 
   return (
     <>
@@ -55,30 +71,32 @@ export default function Modal({ buttonTitle, buttonClassName, title, icon, body,
                     </div>
                   </div>
                 </div>
-                <div className="border-t border-gray-200 dark:border-gray-700 border-solid rounded-b flex items-center justify-end space-x-2 p-4">
-                  <button
-                    type="button"
-                    disabled={cancelDisabled}
-                    onClick={() => {
-                      if (onCancel) onCancel()
-                      hide()
-                    }}
-                    className="btn btn-default btn-rounded bg-white hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800 text-gray-900 dark:text-white"
-                  >
-                    {cancelButtonTitle || 'Cancel'}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={confirmDisabled}
-                    onClick={() => {
-                      if (onConfirm) onConfirm()
-                      if (onComfirmHide) hide()
-                    }}
-                    className={confirmButtonClassName || 'btn btn-default btn-rounded bg-blue-600 hover:bg-blue-500 text-white'}
-                  >
-                    {confirmButtonTitle || 'Confirm'}
-                  </button>
-                </div>
+                {!noButtons && (
+                  <div className="border-t border-gray-200 dark:border-gray-700 border-solid rounded-b flex items-center justify-end space-x-2 p-4">
+                    <button
+                      type="button"
+                      disabled={cancelDisabled}
+                      onClick={() => {
+                        if (onCancel) onCancel()
+                        hide()
+                      }}
+                      className="btn btn-default btn-rounded bg-white hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800 text-gray-900 dark:text-white"
+                    >
+                      {cancelButtonTitle || 'Cancel'}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={confirmDisabled}
+                      onClick={() => {
+                        if (onConfirm) onConfirm()
+                        if (onComfirmHide) hide()
+                      }}
+                      className={confirmButtonClassName || 'btn btn-default btn-rounded bg-blue-600 hover:bg-blue-500 text-white'}
+                    >
+                      {confirmButtonTitle || 'Confirm'}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

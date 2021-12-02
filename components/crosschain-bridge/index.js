@@ -419,6 +419,43 @@ console.log(response)
   const toBalance = getChainBalance(swapConfig.toChainId)
 
   const estimatedFees = fees && ((fees.gas || 0) + (fees.relayer || 0) + (fees.router || 0))
+  const feesPopover = children => (
+    <Popover
+      placement="bottom"
+      title={<div className="flex items-center space-x-2">
+        <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-sm font-semibold">{estimatedAmount ? '' : 'Estimated '}Fees:</span>
+        <span className="text-black dark:text-white text-sm space-x-1">
+          <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.00000000')}` : 'N/A'}</span>
+          <span className="font-semibold">{asset?.symbol}</span>
+        </span>
+      </div>}
+      content={<div className="flex flex-col space-y-2">
+        <div className="flex items-center justify-between space-x-2">
+          <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-xs font-medium">Dest. Tx Cost:</span>
+          <span className="text-gray-600 dark:text-gray-400 text-xs space-x-1">
+            <span className="font-mono">{typeof fees?.gas === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.gas, '0,0.00000000')}` : 'N/A'}</span>
+            <span className="font-semibold">{asset?.symbol}</span>
+          </span>
+        </div>
+        <div className="flex items-center justify-between space-x-2">
+          <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-xs font-medium">Relayer Fee:</span>
+          <span className="text-gray-600 dark:text-gray-400 text-xs space-x-1">
+            <span className="font-mono">{typeof fees?.relayer === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.relayer, '0,0.00000000')}` : 'N/A'}</span>
+            <span className="font-semibold">{asset?.symbol}</span>
+          </span>
+        </div>
+        <div className="flex items-center justify-between space-x-2">
+          <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-xs font-medium">Router Fee:</span>
+          <span className="text-gray-600 dark:text-gray-400 text-xs space-x-1">
+            <span className="font-mono">{typeof fees?.router === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.router, '0,0.00000000')}` : 'N/A'}</span>
+            <span className="font-semibold">{asset?.symbol}</span>
+          </span>
+        </div>
+      </div>}
+    >
+      {children}
+    </Popover>
+  )
 
   const mustChangeChain = swapConfig.fromChainId && chain_id !== swapConfig.fromChainId
   const mustApproveToken = !tokenApproved
@@ -455,6 +492,9 @@ console.log(response)
           <div className="sm:col-span-2 flex flex-col items-center sm:items-start space-y-0">
             <span className="text-gray-400 dark:text-gray-500 text-base font-medium mx-auto">From</span>
             <Network
+              isFrom={true}
+              from={swapConfig.fromChainId}
+              to={swapConfig.toChainId}
               disabled={actionDisabled}
               chain_id={swapConfig.fromChainId}
               onSelect={_chain_id => {
@@ -510,6 +550,8 @@ console.log(response)
           <div className="sm:col-span-2 flex flex-col items-center sm:items-end space-y-0">
             <span className="text-gray-400 dark:text-gray-500 text-base font-medium mx-auto">To</span>
             <Network
+              from={swapConfig.fromChainId}
+              to={swapConfig.toChainId}
               disabled={actionDisabled}
               chain_id={swapConfig.toChainId}
               onSelect={_chain_id => {
@@ -613,43 +655,11 @@ console.log(response)
             <div className="sm:col-span-2 flex items-center justify-center sm:justify-start space-x-1">
               <span className="text-gray-400 dark:text-gray-600 text-base font-medium">{estimatedAmount || estimatingAmount ? '' : 'Estimated '}Fees</span>
               {!(estimatingAmount || estimatingFees || typeof estimatedFees !== 'number') && (
-                <Popover
-                  placement="bottom"
-                  title={<div className="flex items-center space-x-2">
-                    <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-sm font-semibold">{estimatedAmount ? '' : 'Estimated '}Fees:</span>
-                    <span className="text-gray-800 dark:text-gray-200 text-sm space-x-1">
-                      <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.00000000')}` : 'N/A'}</span>
-                      <span className="font-semibold">{asset?.symbol}</span>
-                    </span>
-                  </div>}
-                  content={<div className="flex flex-col space-y-2">
-                    <div className="flex items-center justify-between space-x-2">
-                      <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Dest. Tx Cost:</span>
-                      <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
-                        <span className="font-mono">{typeof fees?.gas === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.gas, '0,0.00000000')}` : 'N/A'}</span>
-                        <span className="font-semibold">{asset?.symbol}</span>
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between space-x-2">
-                      <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Relayer Fee:</span>
-                      <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
-                        <span className="font-mono">{typeof fees?.relayer === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.relayer, '0,0.00000000')}` : 'N/A'}</span>
-                        <span className="font-semibold">{asset?.symbol}</span>
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between space-x-2">
-                      <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Router Fee:</span>
-                      <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
-                        <span className="font-mono">{typeof fees?.router === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.router, '0,0.00000000')}` : 'N/A'}</span>
-                        <span className="font-semibold">{asset?.symbol}</span>
-                      </span>
-                    </div>
-                  </div>}
-                >
+                feesPopover(
                   <span className="text-gray-400 dark:text-gray-600">
                     <IoMdInformationCircle size={16} />
                   </span>
-                </Popover>
+                )
               )}
             </div>
             <div className="sm:col-span-3 flex items-center justify-center sm:justify-end sm:mr-1">
@@ -660,39 +670,7 @@ console.log(response)
                 </div>
                 :
                 typeof estimatedFees === 'number' ?
-                  <Popover
-                    placement="bottom"
-                    title={<div className="flex items-center space-x-2">
-                      <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-sm font-semibold">{estimatedAmount ? '' : 'Estimated '}Fees:</span>
-                      <span className="text-gray-800 dark:text-gray-200 text-sm space-x-1">
-                        <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.00000000')}` : 'N/A'}</span>
-                        <span className="font-semibold">{asset?.symbol}</span>
-                      </span>
-                    </div>}
-                    content={<div className="flex flex-col space-y-2">
-                      <div className="flex items-center justify-between space-x-2">
-                        <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Dest. Tx Cost:</span>
-                        <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
-                          <span className="font-mono">{typeof fees?.gas === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.gas, '0,0.00000000')}` : 'N/A'}</span>
-                          <span className="font-semibold">{asset?.symbol}</span>
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between space-x-2">
-                        <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Relayer Fee:</span>
-                        <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
-                          <span className="font-mono">{typeof fees?.relayer === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.relayer, '0,0.00000000')}` : 'N/A'}</span>
-                          <span className="font-semibold">{asset?.symbol}</span>
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between space-x-2">
-                        <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs font-medium">Router Fee:</span>
-                        <span className="text-gray-800 dark:text-gray-200 text-xs space-x-1">
-                          <span className="font-mono">{typeof fees?.router === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.router, '0,0.00000000')}` : 'N/A'}</span>
-                          <span className="font-semibold">{asset?.symbol}</span>
-                        </span>
-                      </div>
-                    </div>}
-                  >
+                  feesPopover(
                     <span className="flex items-center text-gray-400 dark:text-gray-200 text-sm space-x-1">
                       <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.000000')}` : 'N/A'}</span>
                       <span className="font-semibold">{asset?.symbol}</span>
@@ -700,7 +678,7 @@ console.log(response)
                         <span className="font-mono lowercase text-gray-300 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
                       )}
                     </span>
-                  </Popover>
+                  )
                   :
                   <div className="text-gray-400 dark:text-gray-600 text-sm">-</div>
               }
