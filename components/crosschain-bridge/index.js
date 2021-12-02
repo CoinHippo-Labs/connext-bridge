@@ -70,7 +70,7 @@ export default function CrosschainBridge() {
 
   const [fees, setFees] = useState(null)
   const [estimatingFees, setEstimatingFees] = useState(null)
-  const [refreshEstimatedFeesSecond, setRefreshEstimatedFeesSecond] = useState(refresh_estimated_fees_second)
+  const [refreshEstimatedFeesSecond, setRefreshEstimatedFeesSecond] = useState(null)
 
   const [estimatedAmount, setEstimatedAmount] = useState(null)
   const [estimatingAmount, setEstimatingAmount] = useState(null)
@@ -139,19 +139,21 @@ export default function CrosschainBridge() {
 
   // fees
   useEffect(() => {
-    if (refreshEstimatedFeesSecond === 0) {
-      if (typeof swapConfig.amount !== 'number') {
-        setEstimateTrigger(moment().valueOf())
-      }
-    }
-    else { 
-      const interval = setInterval(() => {
-        if (refreshEstimatedFeesSecond - 1 > -1) {
-          setRefreshEstimatedFeesSecond(refreshEstimatedFeesSecond - 1)
+    if (typeof refreshEstimatedFeesSecond === 'number') {
+      if (refreshEstimatedFeesSecond === 0) {
+        if (typeof swapConfig.amount !== 'number') {
+          setEstimateTrigger(moment().valueOf())
         }
-      }, 1000)
+      }
+      else { 
+        const interval = setInterval(() => {
+          if (refreshEstimatedFeesSecond - 1 > -1) {
+            setRefreshEstimatedFeesSecond(refreshEstimatedFeesSecond - 1)
+          }
+        }, 1000)
 
-      return () => clearInterval(interval)
+        return () => clearInterval(interval)
+      }
     }
   }, [refreshEstimatedFeesSecond])
 
@@ -164,18 +166,20 @@ export default function CrosschainBridge() {
 
   // bid
   useEffect(() => {
-    if (bidExpiresSecond === -1) {
-      setBidExpiresSecond(bid_expires_second)
-      setNumReceivedBid((numReceivedBid || 0) + 1)
-    }
-    else {
-      const interval = setInterval(() => {
-        if (bidExpiresSecond - 1 > -2) {
-          setBidExpiresSecond(bidExpiresSecond - 1)
-        }
-      }, 1000)
+    if (typeof bidExpiresSecond === 'number') {
+      if (bidExpiresSecond === -1) {
+        setBidExpiresSecond(bid_expires_second)
+        setNumReceivedBid((numReceivedBid || 0) + 1)
+      }
+      else {
+        const interval = setInterval(() => {
+          if (bidExpiresSecond - 1 > -2) {
+            setBidExpiresSecond(bidExpiresSecond - 1)
+          }
+        }, 1000)
 
-      return () => clearInterval(interval)
+        return () => clearInterval(interval)
+      }
     }
   }, [bidExpiresSecond])
   // bid
