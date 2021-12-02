@@ -52,7 +52,7 @@ export default function Networks({ id, inputSearch, handleDropdownClick, from, t
             <div
               key={i}
               title="Disabled"
-              className="dropdown-item rounded-lg cursor-not-allowed flex items-center justify-start space-x-1.5 p-2"
+              className="dropdown-item rounded-lg cursor-not-allowed flex items-center justify-start space-x-2 p-2"
             >
               <IoRadioButtonOn size={12} className="text-gray-400 dark:text-gray-600" />
               <Img
@@ -66,7 +66,7 @@ export default function Networks({ id, inputSearch, handleDropdownClick, from, t
             <div
               key={i}
               onClick={() => handleDropdownClick(item.chain_id)}
-              className={`dropdown-item ${item.chain_id === id ? 'bg-gray-100 dark:bg-black' : 'hover:bg-gray-50 dark:hover:bg-gray-800'} rounded-lg cursor-pointer flex items-center justify-start space-x-1.5 p-2`}
+              className={`dropdown-item ${item.chain_id === id ? 'bg-gray-100 dark:bg-black' : 'hover:bg-gray-50 dark:hover:bg-gray-800'} rounded-lg cursor-pointer flex items-center justify-start space-x-2 p-2`}
             >
               <IoRadioButtonOn size={12} className={`min-w-max ${!chains_status_data || chains_status_data?.find(_chain => _chain?.id === item.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
               <Img

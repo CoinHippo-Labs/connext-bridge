@@ -694,7 +694,7 @@ console.log(response)
               <div className="h-10 sm:h-7 flex items-center justify-center sm:justify-start space-x-2">
                 <div className="sm:w-48 font-mono flex items-center justify-end text-lg font-semibold text-right px-2">
                   {estimatingAmount ?
-                    <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="24" height="24" className="mt-1.5" />
+                    <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="24" height="24" className="mt-1.5" />
                     :
                     estimatedAmount ?
                       numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')
@@ -839,7 +839,7 @@ console.log(response)
                             </>}
                             buttonClassName="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3"
                             title="Swap Confirmation"
-                            body={<div className="flex flex-col space-y-2 sm:space-y-3 mt-2 -mb-2">
+                            body={<div className="flex flex-col space-y-3 sm:space-y-4 -mb-2">
                               <div className="flex items-center space-x-2 mx-auto py-2">
                                 {fromChain && (
                                   <Img
@@ -863,7 +863,7 @@ console.log(response)
                                   />
                                 )}
                               </div>
-                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:space-x-1 xl:space-x-2">
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
                                 <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
                                   Receiving Address
                                   <span className="hidden sm:block">:</span>
@@ -893,7 +893,7 @@ console.log(response)
                                   )}
                                 </div>)}
                               </div>
-                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:space-x-1 xl:space-x-2">
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
                                 <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
                                   Amount
                                   <span className="hidden sm:block">:</span>
@@ -903,37 +903,57 @@ console.log(response)
                                   <span className="font-semibold">{asset?.symbol}</span>
                                 </div>
                               </div>
-                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:space-x-1 xl:space-x-2">
+                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
                                 <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
                                   Fees
                                   <span className="hidden sm:block">:</span>
                                 </div>
-                                <div className="flex flex-col items-start sm:items-end my-1">
-                                  <div className="grid grid-flow-row grid-cols-2 gap-1.5">
+                                <div className="flex flex-col items-start sm:items-end py-1">
+                                  <div className="w-full grid grid-flow-row grid-cols-2 gap-1.5">
                                     <span className="text-gray-400 dark:text-gray-500 text-sm">Dest. Tx Cost:</span>
-                                    <div className="text-gray-500 dark:text-gray-400 text-sm text-right space-x-1.5">
+                                    <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
                                       <span className="font-mono">{numberFormat(fees?.gas, '0,0.00000000')}</span>
                                       <span>{asset?.symbol}</span>
                                     </div>
                                     <span className="text-gray-400 dark:text-gray-500 text-sm">Relayer Fee:</span>
-                                    <div className="text-gray-500 dark:text-gray-400 text-sm text-right space-x-1.5">
+                                    <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
                                       <span className="font-mono">{numberFormat(fees?.relayer, '0,0.00000000')}</span>
                                       <span>{asset?.symbol}</span>
                                     </div>
                                     <span className="text-gray-400 dark:text-gray-500 text-sm">Router Fee:</span>
-                                    <div className="text-gray-500 dark:text-gray-400 text-sm text-right space-x-1.5">
+                                    <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
                                       <span className="font-mono">{numberFormat(fees?.router, '0,0.00000000')}</span>
                                       <span>{asset?.symbol}</span>
                                     </div>
                                     <span className="text-gray-400 dark:text-gray-500 text-base">Total:</span>
-                                    <div className="text-base text-right space-x-1.5">
-                                      <span className="font-mono font-semibold">{numberFormat(estimatedFees, '0,0.00000000')}</span>
-                                      <span className="font-semibold">{asset?.symbol}</span>
+                                    <div className="text-gray-500 dark:text-gray-400 text-base text-right space-x-1.5">
+                                      <span className="font-mono font-medium">{numberFormat(estimatedFees, '0,0.00000000')}</span>
+                                      <span className="font-medium">{asset?.symbol}</span>
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:space-x-1 xl:space-x-2">
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                                <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
+                                  Slippage
+                                  <span className="hidden sm:block">:</span>
+                                </div>
+                                <div className="text-gray-500 dark:text-gray-400 text-base space-x-1.5">
+                                  <span className="font-mono font-medium">{estimatedAmount.bid?.slippage ? numberFormat(estimatedAmount.bid.slippage, '0,0.00000000') : 'N/A'}</span>
+                                  <span className="font-medium">%</span>
+                                </div>
+                              </div>
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                                <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
+                                  Minimum Received
+                                  <span className="hidden sm:block">:</span>
+                                </div>
+                                <div className="text-gray-500 dark:text-gray-400 text-base space-x-1.5">
+                                  <span className="font-mono font-medium">{estimatedAmount.bid?.minimumReceived ? numberFormat(BigNumber(estimatedAmount.bid?.minimumReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000') : 'N/A'}</span>
+                                  <span className=" font-medium">{asset?.symbol}</span>
+                                </div>
+                              </div>
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
                                 <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg sm:text-sm lg:text-base">
                                   Estimated Received
                                   <span className="hidden sm:block">:</span>
@@ -943,7 +963,7 @@ console.log(response)
                                   <span className="font-semibold">{asset?.symbol}</span>
                                 </div>
                               </div>
-                              <div className="text-base sm:text-lg font-medium pt-4">Are you sure that you want to swap?</div>
+                              <div className="text-base sm:text-lg font-medium pt-2">Are you sure that you want to swap?</div>
                             </div>}
                             cancelButtonTitle="Cancel"
                             cancelDisabled={startingSwap}
