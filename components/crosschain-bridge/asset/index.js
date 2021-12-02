@@ -50,28 +50,6 @@ export default function DropdownAsset({ disabled, assetId, onSelect, fromChainId
 
   return (
     <div className={`relative flex items-center space-x-2.5 ${showInput ? 'mt-1 sm:mt-0' : ''}`}>
-      {asset && (
-        <>
-          {!showInput ?
-            <span className="text-gray-400 dark:text-gray-600 text-base italic">No Route</span>
-            :
-            <DebounceInput
-              debounceTimeout={300}
-              size="small"
-              type="number"
-              placeholder="0.00"
-              disabled={disabled}
-              value={typeof amount === 'number' && amount >= 0 ? amount : ''}
-              onChange={e => {
-                if (amountOnChange) {
-                  amountOnChange(e.target.value)
-                }
-              }}
-              className={`w-48 bg-gray-100 dark:bg-gray-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-3xl font-mono text-lg font-semibold text-right px-4`}
-            />
-          }
-        </>
-      )}
       <button
         ref={buttonRef}
         disabled={disabled}
@@ -96,6 +74,28 @@ export default function DropdownAsset({ disabled, assetId, onSelect, fromChainId
             <Loader type="Puff" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="24" height="24" />
         }
       </button>
+      {asset && (
+        <>
+          {!showInput ?
+            <span className="text-gray-400 dark:text-gray-600 text-base italic">No Route</span>
+            :
+            <DebounceInput
+              debounceTimeout={300}
+              size="small"
+              type="number"
+              placeholder="0.00"
+              disabled={disabled}
+              value={typeof amount === 'number' && amount >= 0 ? amount : ''}
+              onChange={e => {
+                if (amountOnChange) {
+                  amountOnChange(e.target.value)
+                }
+              }}
+              className={`w-48 bg-gray-100 dark:bg-gray-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-3xl font-mono text-lg font-semibold text-right px-4`}
+            />
+          }
+        </>
+      )}
       <div
         ref={dropdownRef}
         className={`dropdown ${hidden ? '' : 'open'} absolute top-0 left-0 mt-14`}

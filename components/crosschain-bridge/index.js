@@ -294,12 +294,11 @@ export default function CrosschainBridge() {
       const toContract = asset?.contracts?.find(_contract => _contract?.chain_id === swapConfig.toChainId)
 
       if (fromContract && toContract) {
-        setFees(null)
-        setEstimatedAmount(null)
-        setEstimatedAmountResponse(null)
-
+        
         if (typeof swapConfig.amount === 'number') {
           setTokenApproveResponse(null)
+
+          setFees(null)
 
           setStartingSwap(false)
           setSwapResponse(null)
@@ -357,6 +356,9 @@ export default function CrosschainBridge() {
           }
         }
         else {
+          setEstimatedAmount(null)
+          setEstimatedAmountResponse(null)
+
           if (!controller.signal.aborted) {
             setEstimatingFees(true)
 
@@ -630,9 +632,9 @@ console.log(response)
           </div>
           {address && isSupport() && (
             <>
-              <div className="hidden sm:block order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-6" />
-              <div className="order-3 sm:order-4 sm:col-span-3 sm:-mt-6 ml-auto sm:ml-0 mr-auto">
-                <div className="w-48 h-4 flex items-center justify-end -ml-7 sm:ml-0">
+              <div className="hidden sm:block order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-7 pt-0 sm:pt-1.5" />
+              <div className="w-full order-3 sm:order-4 sm:col-span-3 -mt-1.5 sm:-mt-7 mx-auto pt-0 sm:pt-1.5">
+                <div className="w-64 h-4 flex items-center justify-end mx-auto pr-5 sm:pr-3">
                   {balances_data?.[swapConfig.fromChainId] ?
                     <button
                       onClick={() => {
@@ -648,7 +650,6 @@ console.log(response)
                     :
                     <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
                   }
-                  <div className="sm:hidden w-8" />
                 </div>
               </div>
             </>
