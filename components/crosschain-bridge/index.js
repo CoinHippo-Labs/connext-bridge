@@ -802,7 +802,7 @@ export default function CrosschainBridge() {
           />
         </div>
         {balances_data?.[swapConfig.fromChainId]/* && typeof estimatedFees === 'number'*/ && typeof swapConfig.amount === 'number' ?
-          !estimatingFees && swapConfig.amount < estimatedFees ?
+          !estimatingFees && swapConfig.fromAssetId === swapConfig.toAssetId && swapConfig.amount < estimatedFees ?
             <div className="sm:pt-1.5 pb-1">
               <Alert
                 color="bg-red-400 dark:bg-red-500 text-left text-white"
