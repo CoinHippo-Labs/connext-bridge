@@ -665,67 +665,69 @@ export default function CrosschainBridge() {
             </div>
           </div>
         </div>
-        <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 mb-8 sm:mb-4">
-          <div className="order-1 sm:col-span-2 flex items-center justify-center sm:justify-start space-x-2">
-            <span className="text-gray-400 dark:text-gray-600 text-xl">Amount</span>
-            {fromAsset && swapConfig.fromAssetId !== swapConfig.toAssetId && (
-              <span className="text-gray-400 dark:text-gray-600 text-xl font-medium">{fromAsset.symbol}</span>
+        {swapConfig.fromAssetId && (
+          <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 mb-8 sm:mb-4">
+            <div className="order-1 sm:col-span-2 flex items-center justify-center sm:justify-start space-x-2">
+              <span className="text-gray-400 dark:text-gray-600 text-xl">Amount</span>
+              {fromAsset && swapConfig.fromAssetId !== swapConfig.toAssetId && (
+                <span className="text-gray-400 dark:text-gray-600 text-xl font-medium">{fromAsset.symbol}</span>
+              )}
+            </div>
+            <div className="order-2 sm:col-span-3 flex flex-col items-center sm:items-end space-y-0">
+              <Asset
+                disabled={actionDisabled}
+                swapConfig={swapConfig}
+                onSelect={_asset_id => {
+                  if (_asset_id !== swapConfig.fromAssetId) {
+                    if (swapConfig.fromChainId) {
+                      getChainBalances(swapConfig.fromChainId)
+                    }
+                    if (swapConfig.toChainId) {
+                      getChainBalances(swapConfig.toChainId)
+                    }
+                  }
+
+                  setSwapConfig({
+                    ...swapConfig,
+                    fromAssetId: _asset_id,
+                    toAssetId: !swapConfig.toAssetId ? _asset_id : swapConfig.toAssetId,
+                    amount: _asset_id !== swapConfig.fromAssetId && swapConfig.amount ? null : swapConfig.amount,
+                  })
+                }}
+                amountOnChange={_amount => {
+                  setSwapConfig({
+                    ...swapConfig,
+                    amount: _amount && !isNaN(_amount) ? Number(_amount) : _amount,
+                  })
+                }}
+              />
+            </div>
+            {address && isSupport() && (
+              <>
+                <div className="hidden sm:block order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-5 pt-0 sm:pt-2" />
+                <div className="w-full order-3 sm:order-4 sm:col-span-3 -mt-1.5 sm:-mt-5 mx-auto pt-3 sm:pt-2">
+                  <div className="w-64 h-4 flex items-center justify-end mx-auto pr-12 sm:pr-3">
+                    {balances_data?.[swapConfig.fromChainId] ?
+                      <button
+                        onClick={() => {
+                          setSwapConfig({
+                            ...swapConfig,
+                            amount: Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals) > smallNumber ? Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance.contract_decimals) : 0,
+                          })
+                        }}
+                        className="text-gray-800 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100 text-sm font-bold"
+                      >
+                        Max
+                      </button>
+                      :
+                      <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
+                    }
+                  </div>
+                </div>
+              </>
             )}
           </div>
-          <div className="order-2 sm:col-span-3 flex flex-col items-center sm:items-end space-y-0">
-            <Asset
-              disabled={actionDisabled}
-              swapConfig={swapConfig}
-              onSelect={_asset_id => {
-                if (_asset_id !== swapConfig.fromAssetId) {
-                  if (swapConfig.fromChainId) {
-                    getChainBalances(swapConfig.fromChainId)
-                  }
-                  if (swapConfig.toChainId) {
-                    getChainBalances(swapConfig.toChainId)
-                  }
-                }
-
-                setSwapConfig({
-                  ...swapConfig,
-                  fromAssetId: _asset_id,
-                  toAssetId: !swapConfig.toAssetId ? _asset_id : swapConfig.toAssetId,
-                  amount: _asset_id !== swapConfig.fromAssetId && swapConfig.amount ? null : swapConfig.amount,
-                })
-              }}
-              amountOnChange={_amount => {
-                setSwapConfig({
-                  ...swapConfig,
-                  amount: _amount && !isNaN(_amount) ? Number(_amount) : _amount,
-                })
-              }}
-            />
-          </div>
-          {address && isSupport() && (
-            <>
-              <div className="hidden sm:block order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-5 pt-0 sm:pt-2" />
-              <div className="w-full order-3 sm:order-4 sm:col-span-3 -mt-1.5 sm:-mt-5 mx-auto pt-3 sm:pt-2">
-                <div className="w-64 h-4 flex items-center justify-end mx-auto pr-12 sm:pr-3">
-                  {balances_data?.[swapConfig.fromChainId] ?
-                    <button
-                      onClick={() => {
-                        setSwapConfig({
-                          ...swapConfig,
-                          amount: Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals) > smallNumber ? Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance.contract_decimals) : 0,
-                        })
-                      }}
-                      className="text-gray-800 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100 text-sm font-bold"
-                    >
-                      Max
-                    </button>
-                    :
-                    <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
-                  }
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+        )}
         {isSupport() && web3_provider && (estimatingAmount || estimatingFees || typeof estimatedFees === 'number') && (
           <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 mb-8 sm:mb-4 pb-0.5">
             <div className="sm:col-span-2 flex items-center justify-center sm:justify-start space-x-1">
