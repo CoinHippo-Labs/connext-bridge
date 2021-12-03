@@ -703,8 +703,8 @@ export default function CrosschainBridge() {
           </div>
           {address && isSupport() && (
             <>
-              <div className="hidden sm:block order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-5 pt-0 sm:pt-1.5" />
-              <div className="w-full order-3 sm:order-4 sm:col-span-3 -mt-1.5 sm:-mt-5 mx-auto pt-3 sm:pt-1.5">
+              <div className="hidden sm:block order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-5 pt-0 sm:pt-2" />
+              <div className="w-full order-3 sm:order-4 sm:col-span-3 -mt-1.5 sm:-mt-5 mx-auto pt-3 sm:pt-2">
                 <div className="w-64 h-4 flex items-center justify-end mx-auto pr-12 sm:pr-3">
                   {balances_data?.[swapConfig.fromChainId] ?
                     <button
