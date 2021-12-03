@@ -667,9 +667,9 @@ export default function CrosschainBridge() {
         </div>
         <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 mb-8 sm:mb-4">
           <div className="order-1 sm:col-span-2 flex items-center justify-center sm:justify-start space-x-2">
-            <span className="text-gray-400 dark:text-gray-600 text-xl font-medium">Amount</span>
+            <span className="text-gray-400 dark:text-gray-600 text-xl">Amount</span>
             {fromAsset && swapConfig.fromAssetId !== swapConfig.toAssetId && (
-              <span className="text-gray-400 dark:text-gray-600 text-xl font-semibold">{fromAsset.symbol}</span>
+              <span className="text-gray-400 dark:text-gray-600 text-xl font-medium">{fromAsset.symbol}</span>
             )}
           </div>
           <div className="order-2 sm:col-span-3 flex flex-col items-center sm:items-end space-y-0">
@@ -729,7 +729,7 @@ export default function CrosschainBridge() {
         {isSupport() && web3_provider && (estimatingAmount || estimatingFees || typeof estimatedFees === 'number') && (
           <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 mb-8 sm:mb-4 pb-0.5">
             <div className="sm:col-span-2 flex items-center justify-center sm:justify-start space-x-1">
-              <span className="text-gray-400 dark:text-gray-600 text-base font-medium">{estimatedAmount || estimatingAmount ? '' : 'Estimated '}Fees</span>
+              <span className="text-gray-400 dark:text-gray-600 text-base">{estimatedAmount || estimatingAmount ? '' : 'Estimated '}Fees</span>
               {!(estimatingAmount || estimatingFees || typeof estimatedFees !== 'number') && (
                 feesPopover(
                   <span className="text-gray-400 dark:text-gray-600">
@@ -764,7 +764,7 @@ export default function CrosschainBridge() {
         {isSupport() && web3_provider && typeof swapConfig.amount === 'number' && (
           <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 mb-8 sm:mb-4 pb-0.5">
             <div className="min-w-max order-1 sm:col-span-2 flex justify-center sm:justify-start">
-              <span className="text-gray-400 dark:text-gray-600 text-xl font-medium mr-2">Estimated Received</span>
+              <span className="text-gray-400 dark:text-gray-600 text-xl mr-2">Estimated Received</span>
               {!swapData && !swapResponse && estimatedAmount && !estimatingAmount && (
                 <button
                   onClick={() => setEstimateTrigger(moment().valueOf())}
