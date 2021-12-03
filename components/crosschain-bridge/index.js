@@ -19,6 +19,7 @@ import { TiArrowRight, TiWarning } from 'react-icons/ti'
 import Network from './network'
 import Asset from './asset'
 import AdvancedOptions from './advanced-options'
+import TransationState from './transaction-state'
 import Wallet from '../wallet'
 import Popover from '../popover'
 import Alert from '../alerts'
@@ -42,11 +43,12 @@ const check_balances = true
 
 export default function CrosschainBridge() {
   const dispatch = useDispatch()
-  const { chains, assets, chains_status, balances, wallet, sdk, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, balances: state.balances, wallet: state.wallet, sdk: state.sdk, preferences: state.preferences }), shallowEqual)
+  const { chains, assets, chains_status, balances, tokens, wallet, sdk, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, balances: state.balances, tokens: state.tokens, wallet: state.wallet, sdk: state.sdk, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { chains_status_data } = { ...chains_status }
   const { balances_data } = { ...balances }
+  const { tokens_data } = { ...tokens }
   const { wallet_data } = { ...wallet }
   const { web3_provider, signer, chain_id, address } = { ...wallet_data }
   const { sdk_data } = { ...sdk }
@@ -96,7 +98,7 @@ export default function CrosschainBridge() {
         value: null,
       })
 
-      if (swapConfig.assetId) {
+      if (swapConfig.fromAssetId || swapConfig.toAssetId) {
         if (swapConfig.fromChainId) {
           getChainBalances(swapConfig.fromChainId)
         }
@@ -194,10 +196,11 @@ export default function CrosschainBridge() {
   // approve
 
   const isSupport = () => {
-    const asset = assets_data?.find(_asset => _asset?.id === swapConfig.assetId)
+    const fromAsset = assets_data?.find(_asset => _asset?.id === swapConfig.fromAssetId)
+    const toAsset = assets_data?.find(_asset => _asset?.id === swapConfig.toAssetId)
 
-    const support = asset && !((swapConfig.fromChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(swapConfig.fromChainId)) ||
-    (swapConfig.toChainId && !asset.contracts?.map(_contract => _contract?.chain_id)?.includes(swapConfig.toChainId)))
+    const support = fromAsset && !(swapConfig.fromChainId && !fromAsset.contracts?.map(_contract => _contract?.chain_id)?.includes(swapConfig.fromChainId)) &&
+      toAsset && !(swapConfig.toChainId && !toAsset.contracts?.map(_contract => _contract?.chain_id)?.includes(swapConfig.toChainId))
 
     return support
   }
@@ -223,9 +226,9 @@ export default function CrosschainBridge() {
     }
   }
 
-  const getChainBalance = _chain_id => {
+  const getChainBalance = (_chain_id, side = 'from') => {
     const chain = chains_data?.find(_chain => _chain?.chain_id === _chain_id)
-    const asset = assets_data?.find(_asset => _asset?.id === swapConfig.assetId)
+    const asset = assets_data?.find(_asset => _asset?.id === swapConfig[`${side}AssetId`])
 
     let balance = balances_data?.[_chain_id]?.find(_contract => _contract?.contract_address === asset?.contracts?.find(__contract => __contract?.chain_id === _chain_id)?.contract_address)
     balance = balance || balances_data?.[_chain_id]?.find(_contract => asset?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase() && chain?.provider_params?.[0]?.nativeCurrency?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase())
@@ -236,12 +239,12 @@ export default function CrosschainBridge() {
   const isTokenApproved = async isAfterApprove => {
     let approved = false
 
-    if (address && chain_id && chain_id === swapConfig.fromChainId && swapConfig.assetId && typeof swapConfig.amount === 'number' && (isAfterApprove || !tokenApproveResponse)) {
+    if (address && chain_id && chain_id === swapConfig.fromChainId && swapConfig.fromAssetId && typeof swapConfig.amount === 'number' && (isAfterApprove || !tokenApproveResponse)) {
       const fromChainSynced = getChainSynced(swapConfig.fromChainId)
       const toChainSynced = getChainSynced(swapConfig.toChainId)
 
       if (isSupport() && fromChainSynced && toChainSynced) {
-        const asset = assets_data?.find(_asset => _asset?.id === swapConfig.assetId)
+        const asset = assets_data?.find(_asset => _asset?.id === swapConfig.fromAssetId)
         const contract = asset.contracts?.find(_contract => _contract?.chain_id === swapConfig.fromChainId)
 
         if (contract?.contract_address) {
@@ -260,7 +263,7 @@ export default function CrosschainBridge() {
   }
 
   const approveToken = async () => {
-    const asset = assets_data?.find(_asset => _asset?.id === swapConfig.assetId)
+    const asset = assets_data?.find(_asset => _asset?.id === swapConfig.fromAssetId)
     const contract = asset.contracts?.find(_contract => _contract?.chain_id === swapConfig.fromChainId)
 
     setTokenApproveResponse(null)
@@ -286,31 +289,39 @@ export default function CrosschainBridge() {
     }
   }
 
+  const isBreakAll = async message => ['code=', ' 0x'].findIndex(pattern => message?.includes(pattern)) > -1
+
   const estimate = async controller => {
     if (isSupport()) {
-      const asset = swapConfig.fromChainId && swapConfig.toChainId && swapConfig.assetId && assets_data?.find(_asset => _asset?.id === swapConfig.assetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === swapConfig.fromChainId) > -1 && _asset.contracts?.findIndex(_contract => _contract?.chain_id === swapConfig.toChainId) > -1)
+      const fromAsset = swapConfig.fromChainId && swapConfig.fromAssetId && assets_data?.find(_asset => _asset?.id === swapConfig.fromAssetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === swapConfig.fromChainId) > -1)
+      const toAsset = swapConfig.toChainId && swapConfig.toAssetId && assets_data?.find(_asset => _asset?.id === swapConfig.toAssetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === swapConfig.toChainId) > -1)
 
-      const fromContract = asset?.contracts?.find(_contract => _contract?.chain_id === swapConfig.fromChainId)
-      const toContract = asset?.contracts?.find(_contract => _contract?.chain_id === swapConfig.toChainId)
+      const fromContract = fromAsset?.contracts?.find(_contract => _contract?.chain_id === swapConfig.fromChainId)
+      const toContract = toAsset?.contracts?.find(_contract => _contract?.chain_id === swapConfig.toChainId)
 
-      if (fromContract && toContract) {
-        
+      if (fromContract && toContract) {      
+        setEstimatedAmountResponse(null)
+
         if (typeof swapConfig.amount === 'number') {
           setTokenApproveResponse(null)
 
           setFees(null)
 
           setStartingSwap(false)
+          setSwapData(null)
           setSwapResponse(null)
 
           if (sdk_data) {
             if (!controller.signal.aborted) {
               setEstimatingAmount(true)
 
-              try {
-                setBidExpiresSecond(bid_expires_second)
-                setNumReceivedBid(0)
+              const _approved = await isTokenApproved()
+              setTokenApproved(_approved)
 
+              setBidExpiresSecond(bid_expires_second)
+              setNumReceivedBid(0)
+
+              try {
                 const response = await sdk_data.getTransferQuote({
                   sendingChainId: swapConfig.fromChainId,
                   sendingAssetId: fromContract?.contract_address,
@@ -342,49 +353,58 @@ export default function CrosschainBridge() {
                 }
               } catch (error) {
                 if (!controller.signal.aborted) {
-                  if (error?.message?.includes('Error validating or retrieving bids for')) {
-                    setEstimateTrigger(moment().valueOf())
-                  }
-                  else {
+                  // if (error?.message?.includes('Error validating or retrieving bids for')) {
+                  //   setEstimateTrigger(moment().valueOf())
+                  // }
+                  // else {
                     setEstimatedAmountResponse({ status: 'failed', message: error?.message })
-                  }
+                  // }
                 }
               }
 
-              setEstimatingAmount(false)
+              if (!controller.signal.aborted) {
+                setEstimatingAmount(false)
+              }
             }
           }
         }
         else {
           setEstimatedAmount(null)
-          setEstimatedAmountResponse(null)
 
           if (!controller.signal.aborted) {
             setEstimatingFees(true)
 
-            const gasResponse = await sdk_data.estimateFeeForRouterTransferInReceivingToken(
-              swapConfig.fromChainId,
-              fromContract?.contract_address,
-              swapConfig.toChainId,
-              toContract?.contract_address,
-            )
+            try {
+              const gasResponse = await sdk_data.estimateFeeForRouterTransferInReceivingToken(
+                swapConfig.fromChainId,
+                fromContract?.contract_address,
+                swapConfig.toChainId,
+                toContract?.contract_address,
+              )
 
-            const relayerResponse = await sdk_data.estimateMetaTxFeeInReceivingToken(
-              swapConfig.fromChainId,
-              fromContract?.contract_address,
-              swapConfig.toChainId,
-              toContract?.contract_address,
-            )
+              const relayerResponse = await sdk_data.estimateMetaTxFeeInReceivingToken(
+                swapConfig.fromChainId,
+                fromContract?.contract_address,
+                swapConfig.toChainId,
+                toContract?.contract_address,
+              )
+
+              if (!controller.signal.aborted) {
+                setFees({
+                  gas: gasResponse && BigNumber(gasResponse.toString()).shiftedBy(-toContract?.contract_decimals).toNumber(),
+                  relayer: relayerResponse && BigNumber(relayerResponse.toString()).shiftedBy(-toContract?.contract_decimals).toNumber(),
+                  router: null,
+                })
+              }
+            } catch (error) {
+                if (!controller.signal.aborted) {
+                  setEstimatedAmountResponse({ status: 'failed', message: error?.message })
+                }
+              }
 
             if (!controller.signal.aborted) {
-              setFees({
-                gas: gasResponse && BigNumber(gasResponse.toString()).shiftedBy(-toContract?.contract_decimals).toNumber(),
-                relayer: relayerResponse && BigNumber(relayerResponse.toString()).shiftedBy(-toContract?.contract_decimals).toNumber(),
-                router: null,
-              })
+              setEstimatingFees(false)
             }
-
-            setEstimatingFees(false)
           }
         }
       }
@@ -397,7 +417,7 @@ export default function CrosschainBridge() {
     if (sdk_data) {
       try {
         const response = await sdk_data.prepareTransfer(estimatedAmount, advancedOptions?.infinite_approval)
-console.log(response)
+
         setSwapData(response)
         setSwapResponse(null)
       } catch (error) {
@@ -417,12 +437,13 @@ console.log(response)
 
   const receivingAddress = advancedOptions?.receiving_address || address
 
-  const asset = assets_data?.find(_asset => _asset?.id === swapConfig.assetId)
-  const toContract = asset?.contracts?.find(_contract => _contract?.chain_id === swapConfig.toChainId)
+  const fromAsset = assets_data?.find(_asset => _asset?.id === swapConfig.fromAssetId)
+  const toAsset = assets_data?.find(_asset => _asset?.id === swapConfig.toAssetId)
+  const toContract = toAsset?.contracts?.find(_contract => _contract?.chain_id === swapConfig.toChainId)
 
-  const fromBalance = getChainBalance(swapConfig.fromChainId)
+  const fromBalance = getChainBalance(swapConfig.fromChainId, 'from')
   const fromBalanceAmount = (fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals || 0)
-  const toBalance = getChainBalance(swapConfig.toChainId)
+  const toBalance = getChainBalance(swapConfig.toChainId, 'to')
 
   const estimatedFees = fees && ((fees.gas || 0) + (fees.relayer || 0) + (fees.router || 0))
   const feesPopover = children => (
@@ -432,7 +453,7 @@ console.log(response)
         <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-sm font-semibold">{estimatedAmount ? '' : 'Estimated '}Fees:</span>
         <span className="text-black dark:text-white text-sm space-x-1">
           <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.00000000')}` : 'N/A'}</span>
-          <span className="font-semibold">{asset?.symbol}</span>
+          <span className="font-semibold">{toAsset?.symbol}</span>
         </span>
       </div>}
       content={<div className="flex flex-col space-y-2">
@@ -440,21 +461,21 @@ console.log(response)
           <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-xs font-medium">Dest. Tx Cost:</span>
           <span className="text-gray-600 dark:text-gray-400 text-xs space-x-1">
             <span className="font-mono">{typeof fees?.gas === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.gas, '0,0.00000000')}` : 'N/A'}</span>
-            <span className="font-semibold">{asset?.symbol}</span>
+            <span className="font-semibold">{toAsset?.symbol}</span>
           </span>
         </div>
         <div className="flex items-center justify-between space-x-2">
           <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-xs font-medium">Relayer Fee:</span>
           <span className="text-gray-600 dark:text-gray-400 text-xs space-x-1">
             <span className="font-mono">{typeof fees?.relayer === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.relayer, '0,0.00000000')}` : 'N/A'}</span>
-            <span className="font-semibold">{asset?.symbol}</span>
+            <span className="font-semibold">{toAsset?.symbol}</span>
           </span>
         </div>
         <div className="flex items-center justify-between space-x-2">
           <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-xs font-medium">Router Fee:</span>
           <span className="text-gray-600 dark:text-gray-400 text-xs space-x-1">
             <span className="font-mono">{typeof fees?.router === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.router, '0,0.00000000')}` : 'N/A'}</span>
-            <span className="font-semibold">{asset?.symbol}</span>
+            <span className="font-semibold">{toAsset?.symbol}</span>
           </span>
         </div>
       </div>}
@@ -493,12 +514,11 @@ console.log(response)
           )}
         </div>
       </div>
-      <div className="w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-lg space-y-8 sm:space-y-4 py-6 px-6 sm:px-7">
-        <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-4 sm:gap-6">
+      <div className="w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-lg py-6 px-6 sm:px-7">
+        <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-4 sm:gap-6 mb-8 sm:mb-4">
           <div className="sm:col-span-2 flex flex-col items-center sm:items-start space-y-0">
-            <span className="text-gray-400 dark:text-gray-500 text-base font-medium mx-auto">From</span>
+            <span className="w-48 text-gray-400 dark:text-gray-500 text-base font-medium text-center sm:ml-0">From</span>
             <Network
-              isFrom={true}
               from={swapConfig.fromChainId}
               to={swapConfig.toChainId}
               disabled={actionDisabled}
@@ -507,104 +527,19 @@ console.log(response)
                 setSwapConfig({
                   ...swapConfig,
                   fromChainId: _chain_id,
-                  toChainId: _chain_id === swapConfig.toChainId ? swapConfig.fromChainId : swapConfig.toChainId,
+                  toChainId: _chain_id === swapConfig.toChainId && swapConfig.fromAssetId === swapConfig.toAssetId ? swapConfig.fromChainId : swapConfig.toChainId,
                 })
 
-                if (_chain_id !== swapConfig.toChainId && swapConfig.assetId) {
+                if (_chain_id !== swapConfig.toChainId && swapConfig.fromAssetId) {
                   getChainBalances(_chain_id)
                 }
               }}
             />
-            {!address ?
-              null
-              :
-              fromBalance ?
-                <div className="flex items-center text-gray-400 dark:text-gray-600 text-sm space-x-1.5 sm:ml-1">
-                  <IoWallet size={20} />
-                  <span className="font-mono">{numberFormat((fromBalance.balance || 0) / Math.pow(10, fromBalance.contract_decimals), '0,0.00000000')}</span>
-                  <span className="font-semibold">{fromBalance.contract_ticker_symbol}</span>
-                </div>
-                :
-                !address || !asset || !swapConfig.fromChainId ?
-                  null
-                  :
-                  balances_data?.[swapConfig.fromChainId] ?
-                    toBalance ?
-                      <div className="text-gray-400 dark:text-gray-600 text-sm sm:mr-1">-</div>
-                      :
-                      null
-                    :
-                    <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
-            }
-          </div>
-          <div className="flex items-center justify-center">
-            <button
-              disabled={actionDisabled}
-              onClick={() => {
-                setSwapConfig({
-                  ...swapConfig,
-                  fromChainId: swapConfig.toChainId,
-                  toChainId: swapConfig.fromChainId,
-                })
-              }}
-              className={`${actionDisabled ? 'cursor-not-allowed' : ''}`}
-            >
-              <MdSwapVerticalCircle size={40} className="sm:hidden rounded-full shadow-lg text-indigo-500 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-white" />
-              <MdSwapHorizontalCircle size={40} className="hidden sm:block rounded-full shadow-lg text-indigo-500 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-white" />
-            </button>
-          </div>
-          <div className="sm:col-span-2 flex flex-col items-center sm:items-end space-y-0">
-            <span className="text-gray-400 dark:text-gray-500 text-base font-medium mx-auto">To</span>
-            <Network
-              from={swapConfig.fromChainId}
-              to={swapConfig.toChainId}
-              disabled={actionDisabled}
-              chain_id={swapConfig.toChainId}
-              onSelect={_chain_id => {
-                setSwapConfig({
-                  ...swapConfig,
-                  fromChainId: _chain_id === swapConfig.fromChainId ? swapConfig.toChainId : swapConfig.fromChainId,
-                  toChainId: _chain_id,
-                })
-
-                if (_chain_id !== swapConfig.fromChainId && swapConfig.assetId) {
-                  getChainBalances(_chain_id)
-                }
-              }}
-            />
-            {!address ?
-              null
-              :
-              toBalance ?
-                <div className="flex items-center text-gray-400 dark:text-gray-600 text-sm space-x-1.5 sm:mr-1">
-                  <IoWallet size={20} />
-                  <span className="font-mono">{numberFormat((toBalance.balance || 0) / Math.pow(10, toBalance.contract_decimals), '0,0.00000000')}</span>
-                  <span className="font-semibold">{toBalance.contract_ticker_symbol}</span>
-                </div>
-                :
-                !asset || !swapConfig.toChainId ?
-                  null
-                  :
-                  balances_data?.[swapConfig.toChainId] ?
-                    fromBalance ?
-                      <div className="text-gray-400 dark:text-gray-600 text-sm sm:mr-1">-</div>
-                      :
-                      null
-                    :
-                    <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
-            }
-          </div>
-        </div>
-        <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4">
-          <div className="order-1 sm:col-span-2 flex items-center justify-center sm:justify-start">
-            <span className="text-gray-400 dark:text-gray-600 text-xl font-medium">Amount</span>
-          </div>
-          <div className="order-2 sm:col-span-3 flex flex-col items-center sm:items-end space-y-0">
             <Asset
               disabled={actionDisabled}
-              assetId={swapConfig.assetId}
+              swapConfig={swapConfig}
               onSelect={_asset_id => {
-                if (_asset_id !== swapConfig.assetId) {
+                if (_asset_id !== swapConfig.fromAssetId) {
                   if (swapConfig.fromChainId) {
                     getChainBalances(swapConfig.fromChainId)
                   }
@@ -615,13 +550,149 @@ console.log(response)
 
                 setSwapConfig({
                   ...swapConfig,
-                  assetId: _asset_id,
-                  amount: _asset_id !== swapConfig.assetId && swapConfig.amount ? null : swapConfig.amount,
+                  fromAssetId: _asset_id,
+                  toAssetId: !swapConfig.toAssetId ? _asset_id : swapConfig.toAssetId,
+                  amount: _asset_id !== swapConfig.fromAssetId && swapConfig.amount ? null : swapConfig.amount,
                 })
               }}
-              fromChainId={swapConfig.fromChainId}
-              toChainId={swapConfig.toChainId}
-              amount={swapConfig.amount}
+            />
+            <div className="w-48 flex items-center justify-center">
+              {!address ?
+                null
+                :
+                fromBalance ?
+                  <div className="flex items-center text-gray-400 dark:text-gray-600 text-sm space-x-1.5">
+                    <IoWallet size={20} />
+                    <span className="font-mono">{numberFormat((fromBalance.balance || 0) / Math.pow(10, fromBalance.contract_decimals), '0,0.00000000')}</span>
+                    <span className="font-semibold">{fromBalance.contract_ticker_symbol}</span>
+                  </div>
+                  :
+                  !address || !fromAsset || !swapConfig.fromChainId ?
+                    null
+                    :
+                    balances_data?.[swapConfig.fromChainId] ?
+                      true || toBalance ?
+                        <div className="text-gray-400 dark:text-gray-600 text-sm">-</div>
+                        :
+                        null
+                      :
+                      <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
+              }
+            </div>
+          </div>
+          <div className="flex items-center justify-center">
+            <button
+              disabled={actionDisabled}
+              onClick={() => {
+                setSwapConfig({
+                  ...swapConfig,
+                  fromChainId: swapConfig.toChainId,
+                  toChainId: swapConfig.fromChainId,
+                  fromAssetId: swapConfig.toAssetId,
+                  toAssetId: swapConfig.fromAssetId,
+                })
+              }}
+              className={`${actionDisabled ? 'cursor-not-allowed' : ''}`}
+            >
+              <MdSwapVerticalCircle size={40} className="sm:hidden rounded-full shadow-lg text-indigo-500 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-white" />
+              <MdSwapHorizontalCircle size={40} className="hidden sm:block rounded-full shadow-lg text-indigo-500 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-white" />
+            </button>
+          </div>
+          <div className="sm:col-span-2 flex flex-col items-center sm:items-end space-y-0">
+            <span className="w-48 text-gray-400 dark:text-gray-500 text-base font-medium text-center sm:mr-0">To</span>
+            <Network
+              side="to"
+              from={swapConfig.fromChainId}
+              to={swapConfig.toChainId}
+              disabled={actionDisabled}
+              chain_id={swapConfig.toChainId}
+              onSelect={_chain_id => {
+                setSwapConfig({
+                  ...swapConfig,
+                  fromChainId: _chain_id === swapConfig.fromChainId && swapConfig.fromAssetId === swapConfig.toAssetId ? swapConfig.toChainId : swapConfig.fromChainId,
+                  toChainId: _chain_id,
+                })
+
+                if (_chain_id !== swapConfig.fromChainId && swapConfig.toAssetId) {
+                  getChainBalances(_chain_id)
+                }
+              }}
+            />
+            <Asset
+              disabled={actionDisabled}
+              swapConfig={swapConfig}
+              onSelect={_asset_id => {
+                if (_asset_id !== swapConfig.toAssetId) {
+                  if (swapConfig.fromChainId) {
+                    getChainBalances(swapConfig.fromChainId)
+                  }
+                  if (swapConfig.toChainId) {
+                    getChainBalances(swapConfig.toChainId)
+                  }
+                }
+
+                setSwapConfig({
+                  ...swapConfig,
+                  fromAssetId: !swapConfig.fromAssetId ? _asset_id : swapConfig.fromAssetId,
+                  toAssetId: _asset_id,
+                  amount: !swapConfig.fromAssetId && _asset_id !== swapConfig.toAssetId && swapConfig.amount ? null : swapConfig.amount,
+                })
+              }}
+              side="to"
+            />
+            <div className="w-48 flex items-center justify-center">
+              {!address ?
+                null
+                :
+                toBalance ?
+                  <div className="flex items-center text-gray-400 dark:text-gray-600 text-sm space-x-1.5">
+                    <IoWallet size={20} />
+                    <span className="font-mono">{numberFormat((toBalance.balance || 0) / Math.pow(10, toBalance.contract_decimals), '0,0.00000000')}</span>
+                    <span className="font-semibold">{toBalance.contract_ticker_symbol}</span>
+                  </div>
+                  :
+                  !toAsset || !swapConfig.toChainId ?
+                    null
+                    :
+                    balances_data?.[swapConfig.toChainId] ?
+                      true || fromBalance ?
+                        <div className="text-gray-400 dark:text-gray-600 text-sm">-</div>
+                        :
+                        null
+                      :
+                      <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
+              }
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 mb-8 sm:mb-4">
+          <div className="order-1 sm:col-span-2 flex items-center justify-center sm:justify-start space-x-2">
+            <span className="text-gray-400 dark:text-gray-600 text-xl font-medium">Amount</span>
+            {fromAsset && swapConfig.fromAssetId !== swapConfig.toAssetId && (
+              <span className="text-gray-400 dark:text-gray-600 text-xl font-semibold">{fromAsset.symbol}</span>
+            )}
+          </div>
+          <div className="order-2 sm:col-span-3 flex flex-col items-center sm:items-end space-y-0">
+            <Asset
+              disabled={actionDisabled}
+              swapConfig={swapConfig}
+              onSelect={_asset_id => {
+                if (_asset_id !== swapConfig.fromAssetId) {
+                  if (swapConfig.fromChainId) {
+                    getChainBalances(swapConfig.fromChainId)
+                  }
+                  if (swapConfig.toChainId) {
+                    getChainBalances(swapConfig.toChainId)
+                  }
+                }
+
+                setSwapConfig({
+                  ...swapConfig,
+                  fromAssetId: _asset_id,
+                  toAssetId: !swapConfig.toAssetId ? _asset_id : swapConfig.toAssetId,
+                  amount: _asset_id !== swapConfig.fromAssetId && swapConfig.amount ? null : swapConfig.amount,
+                })
+              }}
               amountOnChange={_amount => {
                 setSwapConfig({
                   ...swapConfig,
@@ -632,9 +703,9 @@ console.log(response)
           </div>
           {address && isSupport() && (
             <>
-              <div className="hidden sm:block order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-7 pt-0 sm:pt-1.5" />
-              <div className="w-full order-3 sm:order-4 sm:col-span-3 -mt-1.5 sm:-mt-7 mx-auto pt-0 sm:pt-1.5">
-                <div className="w-64 h-4 flex items-center justify-end mx-auto pr-5 sm:pr-3">
+              <div className="hidden sm:block order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-5 pt-0 sm:pt-1.5" />
+              <div className="w-full order-3 sm:order-4 sm:col-span-3 -mt-1.5 sm:-mt-5 mx-auto pt-3 sm:pt-1.5">
+                <div className="w-64 h-4 flex items-center justify-end mx-auto pr-12 sm:pr-3">
                   {balances_data?.[swapConfig.fromChainId] ?
                     <button
                       onClick={() => {
@@ -656,7 +727,7 @@ console.log(response)
           )}
         </div>
         {isSupport() && web3_provider && (estimatingAmount || estimatingFees || typeof estimatedFees === 'number') && (
-          <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 pb-0.5">
+          <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 mb-8 sm:mb-4 pb-0.5">
             <div className="sm:col-span-2 flex items-center justify-center sm:justify-start space-x-1">
               <span className="text-gray-400 dark:text-gray-600 text-base font-medium">{estimatedAmount || estimatingAmount ? '' : 'Estimated '}Fees</span>
               {!(estimatingAmount || estimatingFees || typeof estimatedFees !== 'number') && (
@@ -678,7 +749,7 @@ console.log(response)
                   feesPopover(
                     <span className="flex items-center text-gray-400 dark:text-gray-200 text-sm space-x-1">
                       <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.000000')}` : 'N/A'}</span>
-                      <span className="font-semibold">{asset?.symbol}</span>
+                      <span className="font-semibold">{toAsset?.symbol}</span>
                       {!estimatedAmount && (
                         <span className="font-mono lowercase text-gray-300 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
                       )}
@@ -691,28 +762,38 @@ console.log(response)
           </div>
         )}
         {isSupport() && web3_provider && typeof swapConfig.amount === 'number' && (
-          <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 -mt-8 sm:mt-0 pb-0.5">
+          <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 mb-8 sm:mb-4 pb-0.5">
             <div className="min-w-max order-1 sm:col-span-2 flex justify-center sm:justify-start">
-              <span className="text-gray-400 dark:text-gray-600 text-xl font-medium">Estimated Received</span>
+              <span className="text-gray-400 dark:text-gray-600 text-xl font-medium mr-2">Estimated Received</span>
+              {!swapData && !swapResponse && estimatedAmount && !estimatingAmount && (
+                <button
+                  onClick={() => setEstimateTrigger(moment().valueOf())}
+                  className="bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 flex items-center justify-center text-indigo-400 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-white rounded-full p-1.5 z-10"
+                >
+                  <MdRefresh size={16} />
+                </button>
+              )}
             </div>
             <div className="order-2 sm:col-span-3 flex flex-col items-center sm:items-end space-y-0 sm:mr-1">
               <div className="h-10 sm:h-7 flex items-center justify-center sm:justify-start space-x-2">
-                <div className="sm:w-48 font-mono flex items-center justify-end text-lg font-semibold text-right px-2">
+                <div className="sm:w-48 font-mono flex items-center justify-end text-lg text-right sm:px-1">
                   {estimatingAmount ?
                     <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="24" height="24" className="mt-1.5" />
                     :
                     estimatedAmount ?
-                      numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')
+                      <span className="font-semibold">
+                        {numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')}
+                      </span>
                       :
-                      '-'
+                      <span className="text-gray-400 dark:text-gray-500">-</span>
                   }
                 </div>
-                <span className="text-lg font-semibold">{asset.symbol}</span>
+                <span className="text-lg font-semibold">{toAsset?.symbol}</span>
               </div>
             </div>
           </div>
         )}
-        <div className="grid grid-flow-row grid-cols-1 sm:gap-4">
+        <div className="grid grid-flow-row grid-cols-1 sm:gap-4 mb-8 sm:mb-4">
           <AdvancedOptions
             initialOptions={advancedOptions}
             updateOptions={_options => setAdvancedOptions(_options)}
@@ -727,7 +808,7 @@ console.log(response)
                 closeDisabled={true}
                 rounded={true}
               >
-                <span className="font-mono text-sm">You must send at least {numberFormat(estimatedFees, '0,0.000000')} {asset?.symbol} amount to cover fees.</span>
+                <span className="font-mono text-sm">You must send at least {numberFormat(estimatedFees, '0,0.000000')} {toAsset?.symbol} amount to cover fees.</span>
               </Alert>
             </div>
             :
@@ -810,9 +891,11 @@ console.log(response)
                             :
                             <span>Swap</span>
                           }
-                          <span className="font-bold">{asset?.symbol}</span>
+                          {swapConfig.fromAssetId === swapConfig.toAssetId && (
+                            <span className="font-bold">{fromAsset?.symbol}</span>
+                          )}
                           {estimatingAmount && typeof bidExpiresSecond === 'number' && (
-                            <span className="text-gray-200 dark:text-gray-100 text-sm font-medium">{numReceivedBid ? `- Received ${numReceivedBid} Bid${numReceivedBid > 1 ? 's' : ''}` : 'Next bid in'} ({bidExpiresSecond}s)</span>
+                            <span className="text-gray-200 dark:text-gray-100 text-sm font-medium mt-1">{numReceivedBid ? `- Received ${numReceivedBid} Bid${numReceivedBid > 1 ? 's' : ''}` : '- Next bid in'} ({bidExpiresSecond}s)</span>
                           )}
                         </button>
                         :
@@ -832,7 +915,7 @@ console.log(response)
                                   :
                                   <span>Approve</span>
                                 }
-                                <span className="font-semibold">{asset?.symbol}</span>
+                                <span className="font-semibold">{fromAsset?.symbol}</span>
                               </button>
                             </div>
                           )
@@ -840,8 +923,9 @@ console.log(response)
                           <ModalConfirm
                             buttonTitle={<>
                               <span>Swap</span>
-                              <span className="font-bold">{asset?.symbol}</span>
+                              <span className="font-bold">{fromAsset?.symbol}</span>
                             </>}
+                            onClick={() => setTokenApproveResponse(null)}
                             buttonClassName="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3"
                             title="Swap Confirmation"
                             body={<div className="flex flex-col space-y-3 sm:space-y-4 -mb-2">
@@ -905,7 +989,7 @@ console.log(response)
                                 </div>
                                 <div className="text-lg space-x-1.5">
                                   <span className="font-mono font-semibold">{numberFormat(swapConfig.amount, '0,0.00000000')}</span>
-                                  <span className="font-semibold">{asset?.symbol}</span>
+                                  <span className="font-semibold">{fromAsset?.symbol}</span>
                                 </div>
                               </div>
                               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
@@ -918,22 +1002,22 @@ console.log(response)
                                     <span className="text-gray-400 dark:text-gray-500 text-sm">Dest. Tx Cost:</span>
                                     <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
                                       <span className="font-mono">{numberFormat(fees?.gas, '0,0.00000000')}</span>
-                                      <span>{asset?.symbol}</span>
+                                      <span>{toAsset?.symbol}</span>
                                     </div>
                                     <span className="text-gray-400 dark:text-gray-500 text-sm">Relayer Fee:</span>
                                     <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
                                       <span className="font-mono">{numberFormat(fees?.relayer, '0,0.00000000')}</span>
-                                      <span>{asset?.symbol}</span>
+                                      <span>{toAsset?.symbol}</span>
                                     </div>
                                     <span className="text-gray-400 dark:text-gray-500 text-sm">Router Fee:</span>
                                     <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
                                       <span className="font-mono">{numberFormat(fees?.router, '0,0.00000000')}</span>
-                                      <span>{asset?.symbol}</span>
+                                      <span>{toAsset?.symbol}</span>
                                     </div>
                                     <span className="text-gray-400 dark:text-gray-500 text-base">Total:</span>
                                     <div className="text-gray-500 dark:text-gray-400 text-base text-right space-x-1.5">
                                       <span className="font-mono font-medium">{numberFormat(estimatedFees, '0,0.00000000')}</span>
-                                      <span className="font-medium">{asset?.symbol}</span>
+                                      <span className="font-medium">{toAsset?.symbol}</span>
                                     </div>
                                   </div>
                                 </div>
@@ -955,7 +1039,7 @@ console.log(response)
                                 </div>
                                 <div className="text-gray-500 dark:text-gray-400 text-base space-x-1.5">
                                   <span className="font-mono font-medium">{estimatedAmount.bid?.minimumReceived ? numberFormat(BigNumber(estimatedAmount.bid?.minimumReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000') : 'N/A'}</span>
-                                  <span className=" font-medium">{asset?.symbol}</span>
+                                  <span className=" font-medium">{toAsset?.symbol}</span>
                                 </div>
                               </div>
                               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
@@ -965,7 +1049,7 @@ console.log(response)
                                 </div>
                                 <div className="text-lg space-x-1.5">
                                   <span className="font-mono font-semibold">{numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')}</span>
-                                  <span className="font-semibold">{asset?.symbol}</span>
+                                  <span className="font-semibold">{toAsset?.symbol}</span>
                                 </div>
                               </div>
                               <div className="text-base sm:text-lg font-medium pt-2">Are you sure that you want to swap?</div>
@@ -994,7 +1078,7 @@ console.log(response)
                           rounded={true}
                         >
                           <div className="flex items-center justify-between space-x-1">
-                            <span className={`break-${estimatedAmountResponse.message?.includes('code=') ? 'all' : 'words'} font-mono text-sm`}>{estimatedAmountResponse.message}</span>
+                            <span className={`break-${isBreakAll(estimatedAmountResponse.message) ? 'all' : 'words'} font-mono text-sm`}>{estimatedAmountResponse.message}</span>
                             <button
                               onClick={() => setEstimateTrigger(moment().valueOf())}
                               className="bg-red-500 dark:bg-red-400 flex items-center justify-center text-white rounded-full p-2"
@@ -1014,7 +1098,7 @@ console.log(response)
                             rounded={true}
                           >
                             <div className="flex items-center justify-between space-x-1">
-                              <span className={`break-${swapResponse.message?.includes('code=') ? 'all' : 'words'} font-mono text-sm`}>{swapResponse.message}</span>
+                              <span className={`break-${isBreakAll(swapResponse.message) ? 'all' : 'words'} font-mono text-sm`}>{swapResponse.message}</span>
                               <button
                                 onClick={() => setEstimateTrigger(moment().valueOf())}
                                 className="bg-red-500 dark:bg-red-400 flex items-center justify-center text-white rounded-full p-2"
@@ -1025,7 +1109,10 @@ console.log(response)
                           </Alert>
                         </div>
                         :
-                        'x'
+                        swapData ?
+                          <TransationState data={swapData} />
+                          :
+                          'x'
           :
           web3_provider ?
             <button
@@ -1033,7 +1120,7 @@ console.log(response)
               className="w-full bg-gray-200 dark:bg-gray-800 cursor-not-allowed rounded-lg shadow-lg flex items-center justify-center text-gray-400 dark:text-gray-500 text-base sm:text-lg font-semibold space-x-2 py-4 px-3"
             >
               <span>Swap</span>
-              <span className="font-semibold">{asset?.symbol}</span>
+              <span className="font-semibold">{fromAsset?.symbol}</span>
             </button>
             :
             <Wallet

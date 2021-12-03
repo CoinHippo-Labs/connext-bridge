@@ -14,6 +14,9 @@ export const CHAINS_STATUS_SYNC_DATA = 'chains_status_sync_data'
 // balances
 export const BALANCES_DATA = 'balances_data'
 
+// tokens
+export const TOKENS_DATA = 'tokens_data'
+
 // wallet
 export const WALLET_DATA = 'wallet_data'
 export const WALLET_RESET = 'wallet_reset'

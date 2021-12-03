@@ -10,7 +10,7 @@ import { IoRadioButtonOn } from 'react-icons/io5'
 import Search from './search'
 import Modal from '../../modals/modal-confirm'
 
-export default function DropdownNetwork({ disabled, chain_id, onSelect, isFrom, from, to }) {
+export default function DropdownNetwork({ disabled, chain_id, onSelect, side = 'from', from, to }) {
   const { chains, chains_status, preferences } = useSelector(state => ({ chains: state.chains, chains_status: state.chains_status, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
   const { chains_status_data } = { ...chains_status }
@@ -51,7 +51,7 @@ export default function DropdownNetwork({ disabled, chain_id, onSelect, isFrom, 
     <Modal
       hidden={hidden}
       buttonTitle={chain ?
-        <div className="w-36 min-w-max bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-3xl flex items-center justify-center text-lg space-x-1.5 py-1.5 px-4">
+        <div className="w-48 min-w-max bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-3xl flex items-center justify-center text-lg space-x-1.5 py-2 px-4">
           <IoRadioButtonOn size={16} className={`${chain?.disabled ? 'text-gray-400 dark:text-gray-600' : !chains_status_data || chains_status_data?.find(_chain => _chain?.id === chain.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
           <Img
             src={chain.image}
@@ -59,17 +59,17 @@ export default function DropdownNetwork({ disabled, chain_id, onSelect, isFrom, 
             className="w-6 h-6 rounded-full"
           />
           <span className="sm:hidden font-semibold">{chain.title}</span>
-          <span className="hidden sm:block font-semibold">{chain.short_name}</span>
+          <span className="hidden sm:block font-semibold">{chain.title && chain.title?.split(' ').length < 3 ? chain.title : chain.short_name}</span>
         </div>
         :
         chains_data ?
-          <div className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-3xl uppercase text-gray-500 hover:text-gray-600 dark:text-gray-200 dark:hover:text-gray-100 text-lg font-medium py-1.5 px-4">Select Chain</div>
+          <div className="w-48 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-3xl uppercase text-gray-500 hover:text-gray-600 dark:text-gray-200 dark:hover:text-gray-100 text-lg font-medium py-2 px-4">Select Chain</div>
           :
           <Loader type="Puff" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="24" height="24" />
       }
       onClick={open => setHidden(!open)}
-      buttonClassName={`${!chains_data ? 'w-40' : ''} h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
-      title={isFrom ? 'From' : 'To'}
+      buttonClassName={`${!chains_data ? 'w-48' : ''} h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
+      title={<span className="capitalize">{side}</span>}
       body={<Search
         id={chain_id}
         updateId={_id => handleDropdownClick(_id)}
