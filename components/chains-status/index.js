@@ -129,7 +129,7 @@ export default function ChainsStatus() {
       {chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).length > 0 && (
         <div className="px-4">
           <Alert
-            color="xl:max-w-lg bg-yellow-400 dark:bg-yellow-500 text-left text-white mt-4 sm:mt-6 -mb-6 sm:-mb-10 mx-auto"
+            color="xl:max-w-lg bg-yellow-400 dark:bg-yellow-500 text-left text-white mt-4 sm:mt-6 -mb-6 sm:-mb-2 mx-auto"
             icon={<TiWarning className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
             closeDisabled={true}
             rounded={true}
