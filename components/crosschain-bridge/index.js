@@ -445,6 +445,7 @@ export default function CrosschainBridge() {
           }
         }
 
+        getTokenPrice(swapConfig?.fromChainId, fromContract?.contract_address)
         getTokenPrice(swapConfig?.toChainId, toContract?.contract_address)
       }
     }
@@ -478,6 +479,7 @@ export default function CrosschainBridge() {
 
   const fromAsset = assets_data?.find(_asset => _asset?.id === swapConfig.fromAssetId)
   const toAsset = assets_data?.find(_asset => _asset?.id === swapConfig.toAssetId)
+  const fromContract = fromAsset?.contracts?.find(_contract => _contract?.chain_id === swapConfig.fromChainId)
   const toContract = toAsset?.contracts?.find(_contract => _contract?.chain_id === swapConfig.toChainId)
 
   const fromBalance = getChainBalance(swapConfig.fromChainId, 'from')
@@ -566,7 +568,7 @@ export default function CrosschainBridge() {
                 setSwapConfig({
                   ...swapConfig,
                   fromChainId: _chain_id,
-                  toChainId: _chain_id === swapConfig.toChainId && swapConfig.fromAssetId === swapConfig.toAssetId ? swapConfig.fromChainId : swapConfig.toChainId,
+                  toChainId: _chain_id === swapConfig.toChainId && swapConfig.fromAssetId && swapConfig.fromAssetId === swapConfig.toAssetId ? swapConfig.fromChainId : swapConfig.toChainId,
                 })
 
                 if (_chain_id !== swapConfig.toChainId && swapConfig.fromAssetId) {
@@ -590,7 +592,16 @@ export default function CrosschainBridge() {
                 setSwapConfig({
                   ...swapConfig,
                   fromAssetId: _asset_id,
-                  toAssetId: !swapConfig.toAssetId ? _asset_id : swapConfig.toAssetId,
+                  toAssetId: !swapConfig.toAssetId ?
+                    swapConfig.fromChainId && swapConfig.fromChainId === swapConfig.toChainId ?
+                      null
+                      :
+                      _asset_id
+                    :
+                    swapConfig.fromChainId && swapConfig.fromChainId === swapConfig.toChainId && _asset_id === swapConfig.toAssetId ?
+                      null
+                      :
+                      swapConfig.toAssetId,
                   amount: _asset_id !== swapConfig.fromAssetId && swapConfig.amount ? null : swapConfig.amount,
                 })
               }}
@@ -648,7 +659,7 @@ export default function CrosschainBridge() {
               onSelect={_chain_id => {
                 setSwapConfig({
                   ...swapConfig,
-                  fromChainId: _chain_id === swapConfig.fromChainId && swapConfig.fromAssetId === swapConfig.toAssetId ? swapConfig.toChainId : swapConfig.fromChainId,
+                  fromChainId: _chain_id === swapConfig.fromChainId && swapConfig.fromAssetId && swapConfig.fromAssetId === swapConfig.toAssetId ? swapConfig.toChainId : swapConfig.fromChainId,
                   toChainId: _chain_id,
                 })
 
@@ -672,7 +683,16 @@ export default function CrosschainBridge() {
 
                 setSwapConfig({
                   ...swapConfig,
-                  fromAssetId: !swapConfig.fromAssetId ? _asset_id : swapConfig.fromAssetId,
+                  fromAssetId: !swapConfig.fromAssetId ?
+                    swapConfig.fromChainId && swapConfig.fromChainId === swapConfig.toChainId ?
+                      null
+                      :
+                      _asset_id
+                    :
+                    swapConfig.fromChainId && swapConfig.fromChainId === swapConfig.toChainId && _asset_id === swapConfig.fromAssetId ?
+                      null
+                      :
+                      swapConfig.fromAssetId,
                   toAssetId: _asset_id,
                   amount: !swapConfig.fromAssetId && _asset_id !== swapConfig.toAssetId && swapConfig.amount ? null : swapConfig.amount,
                 })
@@ -1051,14 +1071,21 @@ export default function CrosschainBridge() {
                                   )}
                                 </div>)}
                               </div>
-                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
                                 <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
                                   Send Amount
                                   <span className="hidden sm:block">:</span>
                                 </div>
-                                <div className="text-lg space-x-1.5">
-                                  <span className="font-mono font-semibold">{numberFormat(swapConfig.amount, '0,0.00000000')}</span>
-                                  <span className="font-semibold">{fromAsset?.symbol}</span>
+                                <div>
+                                  <div className="text-lg space-x-1.5">
+                                    <span className="font-mono font-semibold">{numberFormat(swapConfig.amount, '0,0.00000000')}</span>
+                                    <span className="font-semibold">{fromAsset?.symbol}</span>
+                                  </div>
+                                  {swapConfig.amount && typeof tokens_data?.[`${swapConfig.fromChainId}_${fromContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                                    <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
+                                      ({currency_symbol}{numberFormat(swapConfig.amount * tokens_data[`${swapConfig.fromChainId}_${fromContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">

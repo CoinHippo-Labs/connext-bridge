@@ -77,7 +77,7 @@ export default function Networks({ id, inputSearch, handleDropdownClick, from, t
               <span className="whitespace-nowrap text-base font-medium">{item.title}</span>
               {(item.chain_id === from || item.chain_id === to) && (
                 <div className="w-full text-gray-400 dark:text-gray-500 italic text-right">
-                  {item.chain_id === from ? 'From' : 'To'}
+                  {_.uniq([item.chain_id === from ? 'From' : 'To', item.chain_id === to ? 'To' : 'From']).join(' & ')}
                 </div>
               )}
             </div>
