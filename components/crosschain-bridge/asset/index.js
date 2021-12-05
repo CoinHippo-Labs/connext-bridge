@@ -7,9 +7,10 @@ import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
 import { BsPatchExclamationFill } from 'react-icons/bs'
 
-import Assets from './assets'
+import Search from './search'
+import Modal from '../../modals/modal-confirm'
 
-export default function DropdownAsset({ disabled, swapConfig, onSelect, side = 'from', amountOnChange }) {
+export default function DropdownAsset({ disabled, swapConfig, onSelect, side = 'from', from, to, amountOnChange }) {
   const { assets, preferences } = useSelector(state => ({ assets: state.assets, preferences: state.preferences }), shallowEqual)
   const { assets_data } = { ...assets }
   const { theme } = { ...preferences }
@@ -22,25 +23,6 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
   const toAsset = assets_data?.find(_asset => _asset?.id === toAssetId)
 
   const [hidden, setHidden] = useState(true)
-
-  const buttonRef = useRef(null)
-  const dropdownRef = useRef(null)
-
-  useEffect(() => {
-    const handleClickOutside = event => {
-      if (
-        hidden ||
-        buttonRef.current.contains(event.target) ||
-        dropdownRef.current.contains(event.target)
-      ) {
-        return false
-      }
-      setHidden(!hidden)
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [hidden, buttonRef, dropdownRef])
 
   const handleDropdownClick = _asset_id => {
     if (onSelect && typeof _asset_id === 'string') {
@@ -58,13 +40,9 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
   return (
     <div className={`relative flex items-center space-x-2.5 ${showInput ? 'mt-1 sm:mt-0' : ''}`}>   
       {!showInput && (isSupport || !amountOnChange) && (
-        <button
-          ref={buttonRef}
-          disabled={disabled}
-          onClick={handleDropdownClick}
-          className={`${!assets_data ? 'w-48' : 'min-w-max'} h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
-        >
-          {asset ?
+        <Modal
+          hidden={hidden}
+          buttonTitle={asset ?
             <div className={`${!amountOnChange ? 'w-48' : ''} bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-${!showInput ? '3xl justify-center py-2 px-4' : 'full w-12 h-12 justify-center'} flex items-center text-lg space-x-1.5`}>
               <Img
                 src={asset.image}
@@ -81,7 +59,18 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
               :
               <Loader type="Puff" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="24" height="24" />
           }
-        </button>
+          disabled={disabled}
+          onClick={open => setHidden(!open)}
+          buttonClassName={`${!assets_data ? 'w-48' : 'min-w-max'} h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
+          title={<span className="capitalize">{side}</span>}
+          body={<Search
+            id={asset?.id}
+            updateId={_id => handleDropdownClick(_id)}
+            from={from}
+            to={to}
+          />}
+          noButtons={true}
+        />
       )}
       {asset && (
         <>
@@ -108,14 +97,6 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
           }
         </>
       )}
-      <div
-        ref={dropdownRef}
-        className={`dropdown ${hidden ? '' : 'open'} absolute top-0 ${side === 'from' ? 'left' : 'right'}-0 mt-14`}
-      >
-        <div className="dropdown-content inside w-64 bottom-start">
-          <Assets handleDropdownClick={_asset_id => handleDropdownClick(_asset_id)} />
-        </div>
-      </div>
     </div>
   )
 }

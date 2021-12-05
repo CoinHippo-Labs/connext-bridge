@@ -6,7 +6,6 @@ import Loader from 'react-loader-spinner'
 import { BsPatchExclamationFill } from 'react-icons/bs'
 import { IoRadioButtonOn } from 'react-icons/io5'
 
-// import Networks from './networks'
 import Search from './search'
 import Modal from '../../modals/modal-confirm'
 
@@ -19,25 +18,6 @@ export default function DropdownNetwork({ disabled, chain_id, onSelect, side = '
   const chain = chains_data?.find(_chain => _chain?.chain_id === chain_id)
 
   const [hidden, setHidden] = useState(true)
-
-  // const buttonRef = useRef(null)
-  // const dropdownRef = useRef(null)
-
-  // useEffect(() => {
-  //   const handleClickOutside = event => {
-  //     if (
-  //       hidden ||
-  //       buttonRef.current.contains(event.target) ||
-  //       dropdownRef.current.contains(event.target)
-  //     ) {
-  //       return false
-  //     }
-  //     setHidden(!hidden)
-  //   }
-
-  //   document.addEventListener('mousedown', handleClickOutside)
-  //   return () => document.removeEventListener('mousedown', handleClickOutside)
-  // }, [hidden, buttonRef, dropdownRef])
 
   const handleDropdownClick = _chain_id => {
     if (onSelect && typeof _chain_id === 'number') {
@@ -67,6 +47,7 @@ export default function DropdownNetwork({ disabled, chain_id, onSelect, side = '
           :
           <Loader type="Puff" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="24" height="24" />
       }
+      disabled={disabled}
       onClick={open => setHidden(!open)}
       buttonClassName={`${!chains_data ? 'w-48' : ''} h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
       title={<span className="capitalize">{side}</span>}

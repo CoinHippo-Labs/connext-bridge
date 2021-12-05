@@ -577,6 +577,8 @@ export default function CrosschainBridge() {
               }}
             />
             <Asset
+              from={swapConfig.fromAssetId}
+              to={swapConfig.toAssetId}
               disabled={actionDisabled}
               swapConfig={swapConfig}
               onSelect={_asset_id => {
@@ -599,7 +601,10 @@ export default function CrosschainBridge() {
                       _asset_id
                     :
                     swapConfig.fromChainId && swapConfig.fromChainId === swapConfig.toChainId && _asset_id === swapConfig.toAssetId ?
-                      null
+                      swapConfig.fromAssetId === _asset_id ?
+                        null
+                        :
+                        swapConfig.fromAssetId
                       :
                       swapConfig.toAssetId,
                   amount: _asset_id !== swapConfig.fromAssetId && swapConfig.amount ? null : swapConfig.amount,
@@ -670,6 +675,8 @@ export default function CrosschainBridge() {
             />
             <Asset
               disabled={actionDisabled}
+              from={swapConfig.fromAssetId}
+              to={swapConfig.toAssetId}
               swapConfig={swapConfig}
               onSelect={_asset_id => {
                 if (_asset_id !== swapConfig.toAssetId) {
@@ -690,7 +697,10 @@ export default function CrosschainBridge() {
                       _asset_id
                     :
                     swapConfig.fromChainId && swapConfig.fromChainId === swapConfig.toChainId && _asset_id === swapConfig.fromAssetId ?
-                      null
+                      swapConfig.toAssetId === _asset_id ?
+                        null
+                        :
+                        swapConfig.toAssetId
                       :
                       swapConfig.fromAssetId,
                   toAssetId: _asset_id,
