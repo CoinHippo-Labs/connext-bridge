@@ -3,7 +3,6 @@ import { useSelector, shallowEqual } from 'react-redux'
 
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
-import { BsPatchExclamationFill } from 'react-icons/bs'
 import { IoRadioButtonOn } from 'react-icons/io5'
 
 import Search from './search'

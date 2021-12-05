@@ -17,6 +17,9 @@ export const BALANCES_DATA = 'balances_data'
 // tokens
 export const TOKENS_DATA = 'tokens_data'
 
+// max transfers
+export const MAX_TRANSFERS_DATA = 'max_transfers_data'
+
 // ens
 export const ENS_DATA = 'ens_data'
 

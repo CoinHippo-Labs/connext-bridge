@@ -5,14 +5,16 @@ import _ from 'lodash'
 import { DebounceInput } from 'react-debounce-input'
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
-import { BsPatchExclamationFill } from 'react-icons/bs'
+import { IoRadioButtonOn } from 'react-icons/io5'
 
 import Search from './search'
 import Modal from '../../modals/modal-confirm'
 
 export default function DropdownAsset({ disabled, swapConfig, onSelect, side = 'from', from, to, amountOnChange }) {
-  const { assets, preferences } = useSelector(state => ({ assets: state.assets, preferences: state.preferences }), shallowEqual)
+  const { chains, assets, chains_status, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, preferences: state.preferences }), shallowEqual)
+  const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
+  const { chains_status_data } = { ...chains_status }
   const { theme } = { ...preferences }
 
   const { fromChainId, fromAssetId, toChainId, toAssetId, amount } = { ...swapConfig }
@@ -36,6 +38,8 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
     toAsset && !(toChainId && !toAsset.contracts?.map(_contract => _contract?.chain_id)?.includes(toChainId))
 
   const showInput = side === 'from' && amountOnChange && isSupport
+
+  const chain = chains_data?.find(_chain => _chain?.chain_id === (side === 'from' ? fromChainId : toChainId))
 
   return (
     <div className={`relative flex items-center space-x-2.5 ${showInput ? 'mt-1 sm:mt-0' : ''}`}>   
@@ -62,12 +66,32 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
           disabled={disabled}
           onClick={open => setHidden(!open)}
           buttonClassName={`${!assets_data ? 'w-48' : 'min-w-max'} h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
-          title={<span className="capitalize">{side}</span>}
+          title={<div className="flex items-center justify-between">
+            <span className="capitalize">{side} Token</span>
+            <div>
+              {chain && (
+                <div className="flex items-center space-x-1.5">
+                  <IoRadioButtonOn size={16} className={`${chain?.disabled ? 'text-gray-400 dark:text-gray-600' : !chains_status_data || chains_status_data?.find(_chain => _chain?.id === chain.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
+                  <Img
+                    src={chain.image}
+                    alt=""
+                    className="w-6 h-6 rounded-full"
+                  />
+                  <span className="sm:hidden font-semibold">{chain.title}</span>
+                  <span className="hidden sm:block font-semibold">{chain.title && chain.title?.split(' ').length < 3 ? chain.title : chain.short_name}</span>
+                </div>
+              )}
+              {side === 'to' && (
+                <div className="text-gray-400 dark:text-gray-500 text-xs font-normal text-right">Liquidity</div>
+              )}
+            </div>
+          </div>}
           body={<Search
             id={asset?.id}
             updateId={_id => handleDropdownClick(_id)}
             from={from}
             to={to}
+            chain_id={chain?.chain_id}
           />}
           noButtons={true}
         />

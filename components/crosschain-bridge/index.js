@@ -28,12 +28,13 @@ import ModalConfirm from '../modals/modal-confirm'
 import Copy from '../copy'
 
 import { balances as getBalances, contracts as getContracts } from '../../lib/api/covalent'
+import { assetBalances } from '../../lib/api/subgraph'
 import { domains } from '../../lib/api/ens'
 import { getApproved, approve } from '../../lib/object/contract'
 import { currency_symbol } from '../../lib/object/currency'
 import { smallNumber, numberFormat, ellipseAddress } from '../../lib/utils'
 
-import { CHAINS_STATUS_DATA, CHAINS_STATUS_SYNC_DATA, BALANCES_DATA, TOKENS_DATA, ENS_DATA } from '../../reducers/types'
+import { CHAINS_STATUS_DATA, CHAINS_STATUS_SYNC_DATA, BALANCES_DATA, TOKENS_DATA, MAX_TRANSFERS_DATA, ENS_DATA } from '../../reducers/types'
 
 const refresh_estimated_fees_second = Number(process.env.NEXT_PUBLIC_REFRESH_ESTIMATED_FEES_SECOND)
 const expiry_hours = Number(process.env.NEXT_PUBLIC_EXPIRY_HOURS)
@@ -45,12 +46,13 @@ const check_balances = true
 
 export default function CrosschainBridge() {
   const dispatch = useDispatch()
-  const { chains, assets, chains_status, balances, tokens, ens, wallet, sdk, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, balances: state.balances, tokens: state.tokens, ens: state.ens, wallet: state.wallet, sdk: state.sdk, preferences: state.preferences }), shallowEqual)
+  const { chains, assets, chains_status, balances, tokens, max_transfers, ens, wallet, sdk, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, balances: state.balances, tokens: state.tokens, max_transfers: state.max_transfers, ens: state.ens, wallet: state.wallet, sdk: state.sdk, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { chains_status_data } = { ...chains_status }
   const { balances_data } = { ...balances }
-  const { tokens_data } = { ...tokens }
+  const { tokens_data } = { ...tokens }  
+  const { max_transfers_data } = { ...max_transfers }
   const { ens_data } = { ...ens }
   const { wallet_data } = { ...wallet }
   const { web3_provider, signer, chain_id, address } = { ...wallet_data }
@@ -239,17 +241,34 @@ export default function CrosschainBridge() {
     return balance
   }
 
-  const getTokenPrice = async (chain_id, contract_address) => {
-    if (chain_id && contract_address) {
-      const key = `${chain_id}_${contract_address}`
+  const getTokenPrice = async (_chain_id, contract_address) => {
+    if (_chain_id && contract_address) {
+      const key = `${_chain_id}_${contract_address}`
 
       if (!tokens_data?.[key]) {
-        const response = await getContracts(chain_id, contract_address)
+        const response = await getContracts(_chain_id, contract_address)
 
         if (typeof response?.data?.[0]?.prices?.[0]?.price === 'number') {
           dispatch({
             type: TOKENS_DATA,
             value: { [`${key}`]: response.data[0] }, 
+          })
+        }
+      }
+    }
+  }
+
+  const getChainAssets = async _chain_id => {
+    if (_chain_id && chains_data) {
+      const key = _chain_id
+
+      if (!tokens_data?.[key]) {
+        const response = await assetBalances({ chain_id: chains_data?.find(_chain => _chain.chain_id === _chain_id)?.id })
+
+        if (response?.data) {
+          dispatch({
+            type: MAX_TRANSFERS_DATA,
+            value: { [`${key}`]: Object.fromEntries(Object.entries(_.groupBy(response.data.filter(_asset => _asset?.assetId && _asset?.amount && Number(_asset.amount) > 0), 'assetId')).map(([key, value]) => [key, _.maxBy(value?.map(_asset => { return { ..._asset, amount: Number(_asset?.amount) } }) || [], 'amount')])) }, 
           })
         }
       }
@@ -574,6 +593,10 @@ export default function CrosschainBridge() {
                 if (_chain_id !== swapConfig.toChainId && swapConfig.fromAssetId) {
                   getChainBalances(_chain_id)
                 }
+
+                if (_chain_id === swapConfig.toChainId && swapConfig.fromAssetId && swapConfig.fromAssetId === swapConfig.toAssetId) {
+                  getChainAssets(swapConfig.fromChainId)
+                }
               }}
             />
             <Asset
@@ -646,6 +669,10 @@ export default function CrosschainBridge() {
                   fromAssetId: swapConfig.toAssetId,
                   toAssetId: swapConfig.fromAssetId,
                 })
+
+                if (swapConfig.fromChainId !== swapConfig.toChainId) {
+                  getChainAssets(swapConfig.fromChainId)
+                }
               }}
               className={`${actionDisabled ? 'cursor-not-allowed' : ''}`}
             >
@@ -671,6 +698,8 @@ export default function CrosschainBridge() {
                 if (_chain_id !== swapConfig.fromChainId && swapConfig.toAssetId) {
                   getChainBalances(_chain_id)
                 }
+
+                getChainAssets(_chain_id)
               }}
             />
             <Asset
