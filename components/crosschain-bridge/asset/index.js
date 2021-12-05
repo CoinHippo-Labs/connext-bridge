@@ -81,9 +81,9 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
                   <span className="hidden sm:block font-semibold">{chain.title && chain.title?.split(' ').length < 3 ? chain.title : chain.short_name}</span>
                 </div>
               )}
-              {side === 'to' && (
-                <div className="text-gray-400 dark:text-gray-500 text-xs font-normal text-right">Liquidity</div>
-              )}
+              <div className="text-gray-400 dark:text-gray-500 text-xs font-normal text-right">
+                {side === 'from' ? 'Balances' : 'Liquidity'}
+              </div>
             </div>
           </div>}
           body={<Search
@@ -92,6 +92,7 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
             from={from}
             to={to}
             chain_id={chain?.chain_id}
+            side={side}
           />}
           noButtons={true}
         />

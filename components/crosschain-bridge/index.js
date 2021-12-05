@@ -93,6 +93,8 @@ export default function CrosschainBridge() {
   useEffect(() => {
     if (chain_id && !swapConfig.fromChainId && swapConfig.toChainId !== chain_id) {
       setSwapConfig({ ...swapConfig, fromChainId: chain_id })
+
+      getChainBalances(chain_id)
     }
   }, [chain_id])
 
@@ -103,14 +105,14 @@ export default function CrosschainBridge() {
         value: null,
       })
 
-      if (swapConfig.fromAssetId || swapConfig.toAssetId) {
+      // if (swapConfig.fromAssetId || swapConfig.toAssetId) {
         if (swapConfig.fromChainId) {
           getChainBalances(swapConfig.fromChainId)
         }
         if (swapConfig.toChainId) {
           getChainBalances(swapConfig.toChainId)
         }
-      }
+      // }
     }
     else {
       dispatch({
@@ -590,7 +592,7 @@ export default function CrosschainBridge() {
                   toChainId: _chain_id === swapConfig.toChainId && swapConfig.fromAssetId && swapConfig.fromAssetId === swapConfig.toAssetId ? swapConfig.fromChainId : swapConfig.toChainId,
                 })
 
-                if (_chain_id !== swapConfig.toChainId && swapConfig.fromAssetId) {
+                if (_chain_id !== swapConfig.toChainId/* && swapConfig.fromAssetId*/) {
                   getChainBalances(_chain_id)
                 }
 
