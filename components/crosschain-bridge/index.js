@@ -264,15 +264,13 @@ export default function CrosschainBridge() {
     if (_chain_id && chains_data) {
       const key = _chain_id
 
-      if (!tokens_data?.[key]) {
-        const response = await assetBalances({ chain_id: chains_data?.find(_chain => _chain.chain_id === _chain_id)?.id })
+      const response = await assetBalances({ chain_id: chains_data?.find(_chain => _chain.chain_id === _chain_id)?.id })
 
-        if (response?.data) {
-          dispatch({
-            type: MAX_TRANSFERS_DATA,
-            value: { [`${key}`]: Object.fromEntries(Object.entries(_.groupBy(response.data.filter(_asset => _asset?.assetId && _asset?.amount && Number(_asset.amount) > 0), 'assetId')).map(([key, value]) => [key, _.maxBy(value?.map(_asset => { return { ..._asset, amount: Number(_asset?.amount) } }) || [], 'amount')])) }, 
-          })
-        }
+      if (response?.data) {
+        dispatch({
+          type: MAX_TRANSFERS_DATA,
+          value: { [`${key}`]: Object.fromEntries(Object.entries(_.groupBy(response.data.filter(_asset => _asset?.assetId && _asset?.amount && Number(_asset.amount) > 0), 'assetId')).map(([key, value]) => [key, _.maxBy(value?.map(_asset => { return { ..._asset, amount: Number(_asset?.amount) } }) || [], 'amount')])) }, 
+        })
       }
     }
   }
@@ -506,6 +504,33 @@ export default function CrosschainBridge() {
   const fromBalance = getChainBalance(swapConfig.fromChainId, 'from')
   const fromBalanceAmount = (fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals || 0)
   const toBalance = getChainBalance(swapConfig.toChainId, 'to')
+
+  let maxAmount = Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals)
+  if (swapConfig.fromAssetId && swapConfig.toAssetId) {
+    const asset = max_transfers_data?.[swapConfig.toChainId]?.[toContract?.contract_address]
+
+    if (asset) {
+      if (swapConfig.fromAssetId === swapConfig.toAssetId) {
+        if (asset.amount / Math.pow(10, toContract?.contract_decimals) < maxAmount) {
+          maxAmount = asset.amount / Math.pow(10, toContract?.contract_decimals)
+        }
+      }
+      else {
+        if (typeof tokens_data?.[`${swapConfig.fromChainId}_${fromContract?.contract_address}`]?.prices?.[0]?.price === 'number' &&
+          typeof tokens_data?.[`${swapConfig.toChainId}_${toContract?.contract_address}`]?.prices?.[0]?.price === 'number'
+        ) {
+          const maxTransfer = (asset.amount || 0) / Math.pow(10, toContract?.contract_decimals || 0)
+          const toValue = maxTransfer * tokens_data[`${swapConfig.toChainId}_${toContract?.contract_address}`].prices[0].price
+          const fromValue = maxAmount * tokens_data[`${swapConfig.fromChainId}_${fromContract?.contract_address}`].prices[0].price
+
+          if (toValue < fromValue) {
+            maxAmount = toValue / tokens_data[`${swapConfig.fromChainId}_${fromContract?.contract_address}`].prices[0].price
+          }
+        }
+      }
+    }
+  }
+  maxAmount = maxAmount > smallNumber ? maxAmount : 0
 
   const estimatedFees = fees && ((fees.gas || 0) + (fees.relayer || 0) + (fees.router || 0))
   const feesPopover = children => (
@@ -812,7 +837,7 @@ export default function CrosschainBridge() {
                         onClick={() => {
                           setSwapConfig({
                             ...swapConfig,
-                            amount: Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals) > smallNumber ? Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance.contract_decimals) : 0,
+                            amount: maxAmount,
                           })
                         }}
                         className="text-gray-800 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100 text-sm font-bold"
