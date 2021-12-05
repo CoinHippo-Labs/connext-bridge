@@ -17,6 +17,9 @@ export const BALANCES_DATA = 'balances_data'
 // tokens
 export const TOKENS_DATA = 'tokens_data'
 
+// ens
+export const ENS_DATA = 'ens_data'
+
 // wallet
 export const WALLET_DATA = 'wallet_data'
 export const WALLET_RESET = 'wallet_reset'

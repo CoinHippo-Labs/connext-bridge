@@ -27,11 +27,13 @@ import Notification from '../notifications'
 import ModalConfirm from '../modals/modal-confirm'
 import Copy from '../copy'
 
-import { balances as getBalances } from '../../lib/api/covalent'
+import { balances as getBalances, contracts as getContracts } from '../../lib/api/covalent'
+import { domains } from '../../lib/api/ens'
 import { getApproved, approve } from '../../lib/object/contract'
+import { currency_symbol } from '../../lib/object/currency'
 import { smallNumber, numberFormat, ellipseAddress } from '../../lib/utils'
 
-import { CHAINS_STATUS_DATA, CHAINS_STATUS_SYNC_DATA, BALANCES_DATA } from '../../reducers/types'
+import { CHAINS_STATUS_DATA, CHAINS_STATUS_SYNC_DATA, BALANCES_DATA, TOKENS_DATA, ENS_DATA } from '../../reducers/types'
 
 const refresh_estimated_fees_second = Number(process.env.NEXT_PUBLIC_REFRESH_ESTIMATED_FEES_SECOND)
 const expiry_hours = Number(process.env.NEXT_PUBLIC_EXPIRY_HOURS)
@@ -43,12 +45,13 @@ const check_balances = true
 
 export default function CrosschainBridge() {
   const dispatch = useDispatch()
-  const { chains, assets, chains_status, balances, tokens, wallet, sdk, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, balances: state.balances, tokens: state.tokens, wallet: state.wallet, sdk: state.sdk, preferences: state.preferences }), shallowEqual)
+  const { chains, assets, chains_status, balances, tokens, ens, wallet, sdk, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, balances: state.balances, tokens: state.tokens, ens: state.ens, wallet: state.wallet, sdk: state.sdk, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { chains_status_data } = { ...chains_status }
   const { balances_data } = { ...balances }
   const { tokens_data } = { ...tokens }
+  const { ens_data } = { ...ens }
   const { wallet_data } = { ...wallet }
   const { web3_provider, signer, chain_id, address } = { ...wallet_data }
   const { sdk_data } = { ...sdk }
@@ -236,6 +239,36 @@ export default function CrosschainBridge() {
     return balance
   }
 
+  const getTokenPrice = async (chain_id, contract_address) => {
+    if (chain_id && contract_address) {
+      const key = `${chain_id}_${contract_address}`
+
+      if (!tokens_data?.[key]) {
+        const response = await getContracts(chain_id, contract_address)
+
+        if (typeof response?.data?.[0]?.prices?.[0]?.price === 'number') {
+          dispatch({
+            type: TOKENS_DATA,
+            value: { [`${key}`]: response.data[0] }, 
+          })
+        }
+      }
+    }
+  }
+
+  const getDomain = async address => {
+    if (address && !ens_data?.[address.toLowerCase()]) {
+      const response = await domains({ where: `{ resolvedAddress_in: ["${address.toLowerCase()}"] }` })
+
+      if (response?.data) {
+        dispatch({
+          type: ENS_DATA,
+          value: Object.fromEntries(response.data.map(domain => [domain?.resolvedAddress?.id?.toLowerCase(), { ...domain }])),
+        })
+      }
+    }
+  }
+
   const isTokenApproved = async isAfterApprove => {
     let approved = false
 
@@ -306,6 +339,7 @@ export default function CrosschainBridge() {
           setTokenApproveResponse(null)
 
           setFees(null)
+          setEstimatingFees(false)
 
           setStartingSwap(false)
           setSwapData(null)
@@ -340,6 +374,8 @@ export default function CrosschainBridge() {
 
                 if (!controller.signal.aborted) {
                   if (response?.bid?.sendingChainId === swapConfig.fromChainId && response?.bid?.receivingChainId === swapConfig.toChainId && response?.bid?.sendingAssetId === fromContract?.contract_address) {
+                    getDomain(response?.bid?.router)
+
                     setFees({
                       gas: response?.gasFeeInReceivingToken && BigNumber(response.gasFeeInReceivingToken).shiftedBy(-toContract?.contract_decimals).toNumber(),
                       relayer: BigNumber(response?.metaTxRelayerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
@@ -370,6 +406,7 @@ export default function CrosschainBridge() {
         }
         else {
           setEstimatedAmount(null)
+          setEstimatingAmount(false)
 
           if (!controller.signal.aborted) {
             setEstimatingFees(true)
@@ -407,6 +444,8 @@ export default function CrosschainBridge() {
             }
           }
         }
+
+        getTokenPrice(swapConfig?.toChainId, toContract?.contract_address)
       }
     }
   }
@@ -770,13 +809,13 @@ export default function CrosschainBridge() {
               {!swapData && !swapResponse && estimatedAmount && !estimatingAmount && (
                 <button
                   onClick={() => setEstimateTrigger(moment().valueOf())}
-                  className="bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 flex items-center justify-center text-indigo-400 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-white rounded-full p-1.5 z-10"
+                  className="h-7 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 flex items-center justify-center text-indigo-400 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-white rounded-full p-1.5 z-10"
                 >
                   <MdRefresh size={16} />
                 </button>
               )}
             </div>
-            <div className="order-2 sm:col-span-3 flex flex-col items-center sm:items-end space-y-0 sm:mr-1">
+            <div className="order-2 sm:col-span-3 flex flex-col items-center sm:items-end space-y-0 my-0.5 sm:mr-1">
               <div className="h-10 sm:h-7 flex items-center justify-center sm:justify-start space-x-2">
                 <div className="sm:w-48 font-mono flex items-center justify-end text-lg text-right sm:px-1">
                   {estimatingAmount ?
@@ -792,6 +831,11 @@ export default function CrosschainBridge() {
                 </div>
                 <span className="text-lg font-semibold">{toAsset?.symbol}</span>
               </div>
+              {!estimatingAmount && estimatedAmount && typeof tokens_data?.[`${swapConfig.toChainId}_${toContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                <div className="font-mono text-gray-400 dark:text-gray-500 text-xs">
+                  ({currency_symbol}{numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber() * tokens_data[`${swapConfig.toChainId}_${toContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -933,25 +977,48 @@ export default function CrosschainBridge() {
                             body={<div className="flex flex-col space-y-3 sm:space-y-4 -mb-2">
                               <div className="flex items-center space-x-2 mx-auto py-2">
                                 {fromChain && (
-                                  <Img
-                                    src={fromChain.image}
-                                    alt=""
-                                    className="w-8 h-8 rounded-full"
-                                  />
+                                  <div className="flex flex-col items-center space-y-0.5">
+                                    <Img
+                                      src={fromChain.image}
+                                      alt=""
+                                      className="w-8 h-8 rounded-full"
+                                    />
+                                    <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
+                                      {fromChain.title && fromChain.title?.split(' ').length < 3 ? fromChain.title : fromChain.short_name}
+                                    </span>
+                                  </div>
                                 )}
-                                <TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500" />
-                                <Img
-                                  src="/logos/connext/logo.png"
-                                  alt=""
-                                  className="w-8 h-8 rounded-full"
-                                />
-                                <TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500" />
-                                {toChain && (
-                                  <img
-                                    src={toChain.image}
+                                <TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500 -mt-4" />
+                                <div className="flex flex-col items-center space-y-0.5">
+                                  <Img
+                                    src="/logos/connext/logo.png"
                                     alt=""
                                     className="w-8 h-8 rounded-full"
                                   />
+                                  <div className="flex items-center space-x-1">
+                                    <a
+                                      href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${estimatedAmount.bid?.router?.toLowerCase()}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
+                                    >
+                                      {ens_data?.[estimatedAmount.bid?.router?.toLowerCase()]?.name || ellipseAddress(estimatedAmount.bid?.router?.toLowerCase(), 5)}
+                                    </a>
+                                    <Copy size={14} text={estimatedAmount.bid?.router?.toLowerCase()} />
+                                  </div>
+                                </div>
+                                <TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500 -mt-4" />
+                                {toChain && (
+                                  <div className="flex flex-col items-center space-y-0.5">
+                                    <img
+                                      src={toChain.image}
+                                      alt=""
+                                      className="w-8 h-8 rounded-full"
+                                    />
+                                    <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
+                                      {toChain.title && toChain.title?.split(' ').length < 3 ? toChain.title : toChain.short_name}
+                                    </span>
+                                  </div>
                                 )}
                               </div>
                               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
@@ -960,7 +1027,7 @@ export default function CrosschainBridge() {
                                   <span className="hidden sm:block">:</span>
                                 </div>
                                 {receivingAddress && (<div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
-                                  <span className="text-gray-700 dark:text-gray-300 text-base sm:text-xs xl:text-base font-semibold">
+                                  <span className="text-gray-900 dark:text-gray-100 text-base sm:text-xs xl:text-base font-semibold">
                                     {ellipseAddress(receivingAddress, 10)}
                                   </span>
                                   <Copy size={18} text={receivingAddress} />
@@ -986,7 +1053,7 @@ export default function CrosschainBridge() {
                               </div>
                               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
                                 <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
-                                  Amount
+                                  Send Amount
                                   <span className="hidden sm:block">:</span>
                                 </div>
                                 <div className="text-lg space-x-1.5">
@@ -1016,7 +1083,7 @@ export default function CrosschainBridge() {
                                       <span className="font-mono">{numberFormat(fees?.router, '0,0.00000000')}</span>
                                       <span>{toAsset?.symbol}</span>
                                     </div>
-                                    <span className="text-gray-400 dark:text-gray-500 text-base">Total:</span>
+                                    <span className="text-gray-500 dark:text-gray-400 text-base">Total:</span>
                                     <div className="text-gray-500 dark:text-gray-400 text-base text-right space-x-1.5">
                                       <span className="font-mono font-medium">{numberFormat(estimatedFees, '0,0.00000000')}</span>
                                       <span className="font-medium">{toAsset?.symbol}</span>
@@ -1034,24 +1101,38 @@ export default function CrosschainBridge() {
                                   <span className="font-medium">%</span>
                                 </div>
                               </div>
-                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
                                 <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
                                   Minimum Received
                                   <span className="hidden sm:block">:</span>
                                 </div>
-                                <div className="text-gray-500 dark:text-gray-400 text-base space-x-1.5">
-                                  <span className="font-mono font-medium">{estimatedAmount.bid?.minimumReceived ? numberFormat(BigNumber(estimatedAmount.bid?.minimumReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000') : 'N/A'}</span>
-                                  <span className=" font-medium">{toAsset?.symbol}</span>
+                                <div>
+                                  <div className="text-gray-500 dark:text-gray-400 text-base space-x-1.5">
+                                    <span className="font-mono font-medium">{estimatedAmount.bid?.minimumReceived ? numberFormat(BigNumber(estimatedAmount.bid?.minimumReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000') : 'N/A'}</span>
+                                    <span className=" font-medium">{toAsset?.symbol}</span>
+                                  </div>
+                                  {estimatedAmount.bid?.minimumReceived && typeof tokens_data?.[`${swapConfig.toChainId}_${toContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                                    <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
+                                      ({currency_symbol}{numberFormat(BigNumber(estimatedAmount.bid?.minimumReceived).shiftedBy(-toContract?.contract_decimals).toNumber() * tokens_data[`${swapConfig.toChainId}_${toContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                                    </div>
+                                  )}
                                 </div>
                               </div>
-                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
                                 <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg sm:text-sm lg:text-base">
                                   Estimated Received
                                   <span className="hidden sm:block">:</span>
                                 </div>
-                                <div className="text-lg space-x-1.5">
-                                  <span className="font-mono font-semibold">{numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')}</span>
-                                  <span className="font-semibold">{toAsset?.symbol}</span>
+                                <div>
+                                  <div className="text-lg space-x-1.5">
+                                    <span className="font-mono font-semibold">{numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')}</span>
+                                    <span className="font-semibold">{toAsset?.symbol}</span>
+                                  </div>
+                                  {estimatedAmount.bid?.amountReceived && typeof tokens_data?.[`${swapConfig.toChainId}_${toContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                                    <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
+                                      ({currency_symbol}{numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber() * tokens_data[`${swapConfig.toChainId}_${toContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                               <div className="text-base sm:text-lg font-medium pt-2">Are you sure that you want to swap?</div>
