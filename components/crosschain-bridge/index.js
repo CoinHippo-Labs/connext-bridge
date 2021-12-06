@@ -99,12 +99,12 @@ export default function CrosschainBridge() {
   }, [chain_id])
 
   useEffect(() => {
-    if (address) {
-      dispatch({
-        type: BALANCES_DATA,
-        value: null,
-      })
+    dispatch({
+      type: BALANCES_DATA,
+      value: null,
+    })
 
+    if (address) {
       // if (swapConfig.fromAssetId || swapConfig.toAssetId) {
         if (swapConfig.fromChainId) {
           getChainBalances(swapConfig.fromChainId)
@@ -114,13 +114,23 @@ export default function CrosschainBridge() {
         }
       // }
     }
-    else {
-      dispatch({
-        type: BALANCES_DATA,
-        value: null,
-      })
-    }
   }, [address])
+
+  useEffect(() => {
+    const getData = () => {
+      if (address) {
+        if (swapConfig.fromChainId) {
+          getChainBalances(swapConfig.fromChainId)
+        }
+        if (swapConfig.toChainId) {
+          getChainBalances(swapConfig.toChainId)
+        }
+      }
+    }
+
+    const interval = setInterval(() => getData(), 1 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [])
   // wallet
 
   // estimate
@@ -160,7 +170,6 @@ export default function CrosschainBridge() {
             setRefreshEstimatedFeesSecond(refreshEstimatedFeesSecond - 1)
           }
         }, 1000)
-
         return () => clearInterval(interval)
       }
     }
@@ -186,7 +195,6 @@ export default function CrosschainBridge() {
             setBidExpiresSecond(bidExpiresSecond - 1)
           }
         }, 1000)
-
         return () => clearInterval(interval)
       }
     }
@@ -830,23 +838,6 @@ export default function CrosschainBridge() {
               <Asset
                 disabled={actionDisabled}
                 swapConfig={swapConfig}
-                onSelect={_asset_id => {
-                  if (_asset_id !== swapConfig.fromAssetId) {
-                    if (swapConfig.fromChainId) {
-                      getChainBalances(swapConfig.fromChainId)
-                    }
-                    if (swapConfig.toChainId) {
-                      getChainBalances(swapConfig.toChainId)
-                    }
-                  }
-
-                  setSwapConfig({
-                    ...swapConfig,
-                    fromAssetId: _asset_id,
-                    toAssetId: !swapConfig.toAssetId ? _asset_id : swapConfig.toAssetId,
-                    amount: _asset_id !== swapConfig.fromAssetId && swapConfig.amount ? null : swapConfig.amount,
-                  })
-                }}
                 amountOnChange={_amount => {
                   setSwapConfig({
                     ...swapConfig,
