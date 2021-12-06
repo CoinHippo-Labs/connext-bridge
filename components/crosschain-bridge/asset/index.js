@@ -11,10 +11,12 @@ import Search from './search'
 import Modal from '../../modals/modal-confirm'
 
 export default function DropdownAsset({ disabled, swapConfig, onSelect, side = 'from', from, to, amountOnChange }) {
-  const { chains, assets, chains_status, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, preferences: state.preferences }), shallowEqual)
+  const { chains, assets, chains_status, wallet, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, wallet: state.wallet, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { chains_status_data } = { ...chains_status }
+  const { wallet_data } = { ...wallet }
+  const { address } = { ...wallet_data }
   const { theme } = { ...preferences }
 
   const { fromChainId, fromAssetId, toChainId, toAssetId, amount } = { ...swapConfig }
@@ -70,20 +72,24 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
             <span className="capitalize">{side} Token</span>
             <div>
               {chain && (
-                <div className="flex items-center space-x-1.5">
-                  <IoRadioButtonOn size={16} className={`${chain?.disabled ? 'text-gray-400 dark:text-gray-600' : !chains_status_data || chains_status_data?.find(_chain => _chain?.id === chain.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
-                  <Img
-                    src={chain.image}
-                    alt=""
-                    className="w-6 h-6 rounded-full"
-                  />
-                  <span className="sm:hidden font-semibold">{chain.title}</span>
-                  <span className="hidden sm:block font-semibold">{chain.title && chain.title?.split(' ').length < 3 ? chain.title : chain.short_name}</span>
-                </div>
+                <>
+                  <div className="flex items-center space-x-1.5">
+                    <IoRadioButtonOn size={16} className={`${chain?.disabled ? 'text-gray-400 dark:text-gray-600' : !chains_status_data || chains_status_data?.find(_chain => _chain?.id === chain.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
+                    <Img
+                      src={chain.image}
+                      alt=""
+                      className="w-6 h-6 rounded-full"
+                    />
+                    <span className="sm:hidden font-semibold">{chain.title}</span>
+                    <span className="hidden sm:block font-semibold">{chain.title && chain.title?.split(' ').length < 3 ? chain.title : chain.short_name}</span>
+                  </div>
+                  {(side !== 'from' || address) && (
+                    <div className="text-gray-400 dark:text-gray-500 text-xs font-normal text-right">
+                      {side === 'from' ? 'Balances' : 'Liquidity'}
+                    </div>
+                  )}
+                </>
               )}
-              <div className="text-gray-400 dark:text-gray-500 text-xs font-normal text-right">
-                {side === 'from' ? 'Balances' : 'Liquidity'}
-              </div>
             </div>
           </div>}
           body={<Search
