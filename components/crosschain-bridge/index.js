@@ -395,11 +395,35 @@ export default function CrosschainBridge() {
                   if (response?.bid?.sendingChainId === swapConfig.fromChainId && response?.bid?.receivingChainId === swapConfig.toChainId && response?.bid?.sendingAssetId === fromContract?.contract_address) {
                     getDomain(response?.bid?.router)
 
+                    let routerFee
+
+                    if (response?.bid) {
+                      if (swapConfig.fromAssetId === swapConfig.toAssetId) {
+                        routerFee = swapConfig.amount - BigNumber(response.bid.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber()
+                      }
+                      else {
+                        if (typeof tokens_data?.[`${swapConfig.fromChainId}_${fromContract?.contract_address}`]?.prices?.[0]?.price === 'number' &&
+                          typeof tokens_data?.[`${swapConfig.toChainId}_${toContract?.contract_address}`]?.prices?.[0]?.price === 'number'
+                        ) {
+                          const receivedAmount = BigNumber(response.bid.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber()
+
+                          const fromPrice = tokens_data[`${swapConfig.fromChainId}_${fromContract?.contract_address}`].prices[0].price
+                          const toPrice = tokens_data[`${swapConfig.toChainId}_${toContract?.contract_address}`].prices[0].price
+
+                          const fromValue = swapConfig.amount * fromPrice
+                          const toValue = receivedAmount * toPrice
+
+                          routerFee = (fromValue - toValue) / toPrice
+                        }
+                      }
+                    }
+
                     setFees({
                       gas: response?.gasFeeInReceivingToken && BigNumber(response.gasFeeInReceivingToken).shiftedBy(-toContract?.contract_decimals).toNumber(),
                       relayer: BigNumber(response?.metaTxRelayerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
-                      router: response?.bid && (swapConfig.amount - BigNumber(response.bid.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber()),
+                      router: routerFee,
                     })
+
                     setEstimatedAmount(response)
 
                     setBidExpiresSecond(null)
@@ -520,11 +544,15 @@ export default function CrosschainBridge() {
           typeof tokens_data?.[`${swapConfig.toChainId}_${toContract?.contract_address}`]?.prices?.[0]?.price === 'number'
         ) {
           const maxTransfer = (asset.amount || 0) / Math.pow(10, toContract?.contract_decimals || 0)
-          const toValue = maxTransfer * tokens_data[`${swapConfig.toChainId}_${toContract?.contract_address}`].prices[0].price
-          const fromValue = maxAmount * tokens_data[`${swapConfig.fromChainId}_${fromContract?.contract_address}`].prices[0].price
+
+          const fromPrice = tokens_data[`${swapConfig.fromChainId}_${fromContract?.contract_address}`].prices[0].price
+          const toPrice = tokens_data[`${swapConfig.toChainId}_${toContract?.contract_address}`].prices[0].price
+
+          const fromValue = maxAmount * fromPrice
+          const toValue = maxTransfer * toPrice
 
           if (toValue < fromValue) {
-            maxAmount = toValue / tokens_data[`${swapConfig.fromChainId}_${fromContract?.contract_address}`].prices[0].price
+            maxAmount = toValue / fromPrice
           }
         }
       }
