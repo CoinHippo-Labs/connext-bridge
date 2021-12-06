@@ -11,22 +11,24 @@ import { FaRegHandPointRight } from 'react-icons/fa'
 
 import Alert from '../alerts'
 
-import { CHAINS_STATUS_DATA, CHAINS_STATUS_SYNC_DATA, SDK_DATA } from '../../reducers/types'
+import { CHAINS_STATUS_DATA, CHAINS_STATUS_SYNC_DATA, SDK_DATA, RPCS_DATA } from '../../reducers/types'
 
 export default function ChainsStatus() {
   const dispatch = useDispatch()
-  const { chains, chains_status, chains_status_sync, wallet, sdk, preferences } = useSelector(state => ({ chains: state.chains, chains_status: state.chains_status, chains_status_sync: state.chains_status_sync, wallet: state.wallet, sdk: state.sdk, preferences: state.preferences }), shallowEqual)
+  const { chains, chains_status, chains_status_sync, wallet, sdk, rpcs, preferences } = useSelector(state => ({ chains: state.chains, chains_status: state.chains_status, chains_status_sync: state.chains_status_sync, wallet: state.wallet, sdk: state.sdk, rpcs: state.rpcs, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
   const { chains_status_data } = { ...chains_status }
   const { chains_status_sync_data } = { ...chains_status_sync }
   const { wallet_data } = { ...wallet }
   const { signer, address } = { ...wallet_data }
   const { sdk_data } = { ...sdk }
+  const { rpcs_data } = { ...rpcs }
   const { theme } = { ...preferences }
 
   useEffect(() => {
     if (chains_data && signer) {
       const chainConfig = {}
+      const rpcs = {}
 
       for (let i = 0; i < chains_data.length; i++) {
         const _chain = chains_data[i]
@@ -36,11 +38,18 @@ export default function ChainsStatus() {
           providers: _chain?.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')) || [],
           subgraph: _chain?.subgraph,
         }
+
+        rpcs[_chain?.chain_id] = new providers.FallbackProvider(_chain?.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')).map(rpc => new providers.JsonRpcProvider(rpc)) || [])
       }
 
       dispatch({
         type: SDK_DATA,
         value: new NxtpSdk({ chainConfig, signer }),
+      })
+
+      dispatch({
+        type: RPCS_DATA,
+        value: rpcs,
       })
     }
   }, [chains_data, address])

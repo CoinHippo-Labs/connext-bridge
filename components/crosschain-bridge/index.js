@@ -5,7 +5,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import { getDeployedTransactionManagerContract } from '@connext/nxtp-sdk'
 import { getRandomBytes32 } from '@connext/nxtp-utils'
-import { constants } from 'ethers'
+import { constants, Contract } from 'ethers'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
@@ -46,7 +46,7 @@ const check_balances = true
 
 export default function CrosschainBridge() {
   const dispatch = useDispatch()
-  const { chains, assets, chains_status, balances, tokens, max_transfers, ens, wallet, sdk, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, balances: state.balances, tokens: state.tokens, max_transfers: state.max_transfers, ens: state.ens, wallet: state.wallet, sdk: state.sdk, preferences: state.preferences }), shallowEqual)
+  const { chains, assets, chains_status, balances, tokens, max_transfers, ens, wallet, sdk, rpcs, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, balances: state.balances, tokens: state.tokens, max_transfers: state.max_transfers, ens: state.ens, wallet: state.wallet, sdk: state.sdk, rpcs: state.rpcs, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { chains_status_data } = { ...chains_status }
@@ -57,6 +57,7 @@ export default function CrosschainBridge() {
   const { wallet_data } = { ...wallet }
   const { web3_provider, signer, chain_id, address } = { ...wallet_data }
   const { sdk_data } = { ...sdk }
+  const { rpcs_data } = { ...rpcs }
   const { theme } = { ...preferences }
 
   const [controller, setController] = useState(new AbortController())
@@ -128,9 +129,11 @@ export default function CrosschainBridge() {
       }
     }
 
+    getData()
+
     const interval = setInterval(() => getData(), 1 * 60 * 1000)
     return () => clearInterval(interval)
-  }, [])
+  }, [rpcs_data])
   // wallet
 
   // estimate
@@ -222,15 +225,74 @@ export default function CrosschainBridge() {
 
   const getChainSynced = _chain_id => !chains_status_data || chains_status_data.find(_chain => _chain.chain_id === _chain_id)?.synced
 
+  const getChainBalanceRPC = async (_chain_id, contract_address) => {
+    let balance
+
+    if (_chain_id && address && rpcs_data?.[_chain_id]) {
+      const provider = rpcs_data?.[_chain_id]
+
+      if (contract_address === constants.AddressZero) {
+        balance = await provider.getBalance(address)
+      }
+      else {
+        const contract = new Contract(contract_address, ['function balanceOf(address owner) view returns (uint256)'], provider)
+        balance = await contract.balanceOf(address)
+      }
+    }
+
+    return balance
+  }
+
+  const getChainTokenRPC = async (_chain_id, _contract, _asset) => {
+    if (_chain_id && _contract) {
+      let balance = await getChainBalanceRPC(_chain_id, _contract.contracts?.contract_address)
+
+      if (balance) {
+        balance = balance.toString()
+        const _balance = BigNumber(balance).shiftedBy(-_contract.contracts?.contract_decimals).toNumber()
+
+        if (_asset) {
+          _asset = {
+            ..._asset,
+            balance,
+            quote: (_asset.quote_rate || 0) * _balance,
+          }
+        }
+        else {
+          _asset = {
+            ..._contract.contracts,
+            contract_ticker_symbol: _contract.symbol,
+            balance,
+          }
+        }
+
+        dispatch({
+          type: BALANCES_DATA,
+          value: { [`${_chain_id}`]: [_asset] },
+        })
+      }
+    }
+  }
+
   const getChainBalances = async _chain_id => {
     if (_chain_id && address) {
       const response = await getBalances(_chain_id, address)
 
       if (response?.data?.items) {
+        const _assets = response?.data?.items.filter(_item => _item.contract_decimals)
+
         dispatch({
           type: BALANCES_DATA,
-          value: { [`${_chain_id}`]: response.data.items },
+          value: { [`${_chain_id}`]: _assets },
         })
+
+        const _contracts = assets_data?.map(_asset => { return { ..._asset, contracts: _asset?.contracts?.find(_contract => _contract.chain_id === _chain_id) } }).filter(_asset => _asset?.contracts?.contract_address) || []
+
+        for (let i = 0; i < _contracts.length; i++) {
+          const _contract = _contracts[i]
+
+          getChainTokenRPC(_chain_id, _contract, _assets.find(_asset => _asset?.contract_address === _contract.contracts.contract_address || (_contract.contracts.contract_address === constants.AddressZero && _contract.symbol?.toLowerCase() === _asset?.contract_ticker_symbol?.toLowerCase())))
+        }
       }
       else if (!(balances_data?.[_chain_id]?.length > 0)) {
         dispatch({

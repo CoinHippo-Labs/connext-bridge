@@ -11,6 +11,7 @@ import max_transfers from './max-transfers'
 import ens from './ens'
 import wallet from './wallet'
 import sdk from './sdk'
+import rpcs from './rpcs'
 
 export default combineReducers({
   preferences,
@@ -24,4 +25,5 @@ export default combineReducers({
   ens,
   wallet,
   sdk,
+  rpcs,
 })

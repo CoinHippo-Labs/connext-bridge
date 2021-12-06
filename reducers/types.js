@@ -29,3 +29,6 @@ export const WALLET_RESET = 'wallet_reset'
 
 //sdk
 export const SDK_DATA = 'sdk_data'
+
+//rpcs
+export const RPCS_DATA = 'rpcs_data'
