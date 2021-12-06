@@ -80,8 +80,7 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
                       alt=""
                       className="w-6 h-6 rounded-full"
                     />
-                    <span className="sm:hidden font-semibold">{chain.title}</span>
-                    <span className="hidden sm:block font-semibold">{chain.title && chain.title?.split(' ').length < 3 ? chain.title : chain.short_name}</span>
+                    <span className="font-semibold">{chain.title && chain.title?.split(' ').length < 3 ? chain.title : chain.short_name}</span>
                   </div>
                   {(side !== 'from' || address) && (
                     <div className="text-gray-400 dark:text-gray-500 text-xs font-normal text-right">

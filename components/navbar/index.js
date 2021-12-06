@@ -62,11 +62,11 @@ export default function Navbar() {
                 href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${address}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center uppercase text-indigo-500 dark:text-indigo-300 text-2xs xl:text-sm font-medium mx-0 xl:mx-2"
+                className="flex items-center uppercase text-indigo-500 dark:text-indigo-300 text-3xs sm:text-2xs xl:text-sm font-medium mx-0 xl:mx-2"
               >
                 <span className="block xl:hidden">View Txs</span>
                 <span className="hidden xl:block">View Transactions</span>
-                <TiArrowRight size={20} className="transform -rotate-45 mt-0.5 xl:mt-0" />
+                <TiArrowRight size={20} className="transform -rotate-45 mt-0.5 sm:mt-0" />
               </a>
               <div className="hidden sm:block mx-2">
                 <Copy
