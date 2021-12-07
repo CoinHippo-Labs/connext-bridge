@@ -632,7 +632,7 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
                     )}
                   </div>
                   {toChain && (
-                    <div className="flex items-center justify-center sm:justify-start space-x-2 mt-1">
+                    <div className="flex items-center justify-center sm:justify-end space-x-2 mt-1">
                       {toChain.image && (
                         <img
                           src={toChain.image}
