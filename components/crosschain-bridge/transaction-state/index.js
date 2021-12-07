@@ -89,12 +89,39 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
     }
   }
 
-  const fulfill = async () => {
+  const fulfill = async txData => {
+    setFulfilling(true)
+    setFulfillResponse(null)
 
+    if (sdk_data && txData) {
+      try {
+        setFulfillResponse({ status: 'pending', message: 'Wait for Claiming', tx_hash: response?.hash || response?.transactionHash, ...response })
+      
+        const response = await sdk_data.fulfillTransfer({
+          txData: {
+            ...txData,
+            user: txData.user?.id,
+            router: txData.router?.id,
+            preparedBlockNumber: Number(txData.preparedBlockNumber),
+            expiry: txData.expiry / 1000,
+          },
+          encryptedCallData: txData.encryptedCallData,
+          encodedBid: txData.encodedBid,
+          bidSignature: txData.bidSignature,
+        })
+
+        setFulfillResponse({ status: 'pending', message: 'Wait for Claiming Confirmation', tx_hash: response?.hash || response?.transactionHash, ...response })
+      } catch (error) {
+        setFulfillResponse({ status: 'failed', message: error?.message })
+      }
+    }
+
+    setFulfilling(false)
   }
 
   const cancel = async (txData, _chain_id) => {
     setCancelling(true)
+    setCancelResponse(null)
 
     if (sdk_data && txData) {
       try {
@@ -123,8 +150,8 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
   const { sendingTx, receivingTx } = { ...transaction }
   const generalTx = _.last([sendingTx, receivingTx])
 
-  const fromChain = chains_data?.find(_chain => _chain?.chain_id === generalTx?.sendingChainId)
-  const toChain = chains_data?.find(_chain => _chain?.chain_id === generalTx?.receivingChainId)
+  const fromChain = chains_data?.find(_chain => _chain?.chain_id === generalTx?.sendingChainId || _chain?.chain_id === data?.sendingChainId)
+  const toChain = chains_data?.find(_chain => _chain?.chain_id === generalTx?.receivingChainId || _chain?.chain_id === data?.receivingChainId)
 
   const loaded = data?.transactionId && transaction?.transactionId === data.transactionId && generalTx
 
@@ -133,6 +160,23 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
   const canCancelSender = ['Prepared'].includes(sendingTx?.status) && moment().valueOf() >= sendingTx.expiry
 
   const actionDisabled = fulfilling || cancelling || cancelResponse?.status === 'pending' || fulfillResponse?.status === 'pending'
+
+  const fulfillButton = (
+    <button
+      type="button"
+      disabled={actionDisabled}
+      onClick={() => fulfill(receivingTx)}
+      className={`w-full max-w-md bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center ${actionDisabled ? 'cursor-not-allowed text-gray-200' : 'text-gray-100 hover:text-white'} text-base sm:text-lg space-x-1.5 mx-auto py-4 px-3`}
+    >
+      {(fulfilling || fulfillResponse?.status === 'pending') && (
+        <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="20" height="20" />
+      )}
+      {!(fulfilling || fulfillResponse?.status === 'pending') && (
+        <span className="font-light">Sign to</span>
+      )}
+      <span className="font-semibold">Claim{fulfilling || fulfillResponse?.status === 'pending' ? 'ing' : ''} Funds</span>
+    </button>
+  )
 
   return (
     <>
@@ -221,10 +265,56 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
                 :
                 <span className="text-gray-400 dark:text-gray-600 font-light">Unknown</span>
               :
-              <div>
-                <div className="skeleton w-36 h-6 mt-1" />
-                <div className="skeleton w-20 h-6 lg:h-7 mt-2.5 mx-auto sm:mx-0" />
-              </div>
+              data?.sendingChainId && data.prepareResponse?.from ?
+                <div className="min-w-max">
+                  <div className="flex items-center space-x-1.5">
+                    <a
+                      href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${data.prepareResponse.from.toLowerCase()}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <span className="text-gray-700 dark:text-gray-200 text-base sm:text-sm lg:text-base font-medium">
+                        {ellipseAddress(data.prepareResponse.from.toLowerCase(), 6)}
+                      </span>
+                    </a>
+                    <Copy size={18} text={data.prepareResponse.from.toLowerCase()} />
+                    {fromChain?.explorer?.url && (
+                      <a
+                        href={`${fromChain.explorer.url}${fromChain.explorer.address_path?.replace('{address}', data.prepareResponse.from.toLowerCase())}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-indigo-600 dark:text-white"
+                      >
+                        {fromChain.explorer.icon ?
+                          <Img
+                            src={fromChain.explorer.icon}
+                            alt=""
+                            className="w-5 h-5 rounded-full opacity-60 hover:opacity-100"
+                          />
+                          :
+                          <TiArrowRight size={20} className="transform -rotate-45" />
+                        }
+                      </a>
+                    )}
+                  </div>
+                  {fromChain && (
+                    <div className="flex items-center justify-center sm:justify-start space-x-2 mt-1">
+                      {fromChain.image && (
+                        <img
+                          src={fromChain.image}
+                          alt=""
+                          className="w-8 sm:w-6 lg:w-8 h-8 sm:h-6 lg:h-8 rounded-full"
+                        />
+                      )}
+                      <span className="text-gray-700 dark:text-gray-300 text-lg sm:text-base lg:text-lg font-semibold">{chainTitle(fromChain)}</span>
+                    </div>
+                  )}
+                </div>
+                :
+                <div>
+                  <div className="skeleton w-36 h-6 mt-1" />
+                  <div className="skeleton w-20 h-6 lg:h-7 mt-2.5 mx-auto sm:mx-0" />
+                </div>
             }
             <div className="mx-auto">
               <TiArrowRight size={24} className="transform rotate-90 sm:rotate-0 text-gray-400 dark:text-gray-600" />
@@ -306,7 +396,14 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
                     />
                   )
                   :
-                  <div className="skeleton w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6" style={{ borderRadius: '100%' }} />
+                  fromChain ?
+                    <Img
+                      src={fromChain.image}
+                      alt=""
+                      className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
+                    />
+                    :
+                    <div className="skeleton w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6" style={{ borderRadius: '100%' }} />
                 }
                 <Img
                   src="/logos/connext/logo.png"
@@ -322,7 +419,14 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
                     />
                   )
                   :
-                  <div className="skeleton w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6" style={{ borderRadius: '100%' }} />
+                  toChain ?
+                    <Img
+                      src={toChain.image}
+                      alt=""
+                      className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
+                    />
+                    :
+                    <div className="skeleton w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6" style={{ borderRadius: '100%' }} />
                 }
               </div>
               {generalTx?.router?.id && (
@@ -495,13 +599,59 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
                 :
                 <span className="text-gray-400 dark:text-gray-600 font-light sm:text-right">Unknown</span>
               :
-              <div>
-                <div className="skeleton w-36 h-6 mt-1" />
-                <div className="skeleton w-20 h-6 lg:h-7 mt-2.5 mx-auto sm:mr-0" />
-              </div>
+              data?.receivingChainId && data.prepareResponse?.to ?
+                <div className="min-w-max">
+                  <div className="flex items-center space-x-1.5">
+                    <a
+                      href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${data.prepareResponse.to.toLowerCase()}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <span className="text-gray-700 dark:text-gray-200 text-base sm:text-sm lg:text-base font-medium">
+                        {ellipseAddress(data.prepareResponse.to.toLowerCase(), 6)}
+                      </span>
+                    </a>
+                    <Copy size={18} text={data.prepareResponse.to.toLowerCase()} />
+                    {toChain?.explorer?.url && (
+                      <a
+                        href={`${toChain.explorer.url}${toChain.explorer.address_path?.replace('{address}', data.prepareResponse.to.toLowerCase())}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-indigo-600 dark:text-white"
+                      >
+                        {toChain.explorer.icon ?
+                          <Img
+                            src={toChain.explorer.icon}
+                            alt=""
+                            className="w-5 h-5 rounded-full opacity-60 hover:opacity-100"
+                          />
+                          :
+                          <TiArrowRight size={20} className="transform -rotate-45" />
+                        }
+                      </a>
+                    )}
+                  </div>
+                  {toChain && (
+                    <div className="flex items-center justify-center sm:justify-start space-x-2 mt-1">
+                      {toChain.image && (
+                        <img
+                          src={toChain.image}
+                          alt=""
+                          className="w-8 sm:w-6 lg:w-8 h-8 sm:h-6 lg:h-8 rounded-full"
+                        />
+                      )}
+                      <span className="text-gray-700 dark:text-gray-300 text-lg sm:text-base lg:text-lg font-semibold">{chainTitle(toChain)}</span>
+                    </div>
+                  )}
+                </div>
+                :
+                <div>
+                  <div className="skeleton w-36 h-6 mt-1" />
+                  <div className="skeleton w-20 h-6 lg:h-7 mt-2.5 mx-auto sm:mr-0" />
+                </div>
             }
           </div>
-          {web3_provider && !finish && [sendingTx?.status, receivingTx?.status].includes('Prepared') && (
+          {web3_provider && loaded && !finish && [sendingTx?.status, receivingTx?.status].includes('Prepared') && (
             <div className="flex flex-col space-y-3 py-4">
               {address?.toLowerCase() !== (canCancelSender ? sendingTx?.sendingAddress?.toLowerCase() : receivingTx?.sendingAddress?.toLowerCase()) ?
                 <span className="min-w-max flex flex-col text-gray-400 dark:text-gray-500 text-center mx-auto">
@@ -513,22 +663,12 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
                 :
                 <>
                   {['Prepared'].includes(receivingTx?.status) && (
-                    <Pulse duration={1500} forever={!actionDisabled}>
-                      <button
-                        type="button"
-                        disabled={actionDisabled}
-                        onClick={() => {}}
-                        className={`w-full max-w-md bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center ${actionDisabled ? 'cursor-not-allowed text-gray-200' : 'text-gray-100 hover:text-white'} text-base sm:text-lg space-x-1.5 mx-auto py-4 px-3`}
-                      >
-                        {(fulfilling || fulfillResponse?.status === 'pending') && (
-                          <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="16" height="16" />
-                        )}
-                        {!(fulfilling || fulfillResponse?.status === 'pending') && (
-                          <span className="font-light">Sign to</span>
-                        )}
-                        <span className="font-semibold">Claim{fulfilling || fulfillResponse?.status === 'pending' ? 'ing' : ''} Funds</span>
-                      </button>
-                    </Pulse>
+                    actionDisabled ?
+                      fulfillButton
+                      :
+                      <Pulse duration={1500} forever>
+                        {fulfillButton}
+                      </Pulse>
                   )}
                   {(['Prepared'].includes(receivingTx?.status) || canCancelSender) && (
                     chain_id !== (canCancelSender ? generalTx?.sendingChainId : generalTx?.receivingChainId) ?
@@ -624,7 +764,41 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
         noButtons={true}
         modalClassName="sm:max-w-3xl lg:max-w-4xl xl:max-w-5xl max-h-screen lg:max-h-full overflow-y-scroll px-4 sm:px-0"
       />
-      {cancelResponse && (
+      {fulfillResponse && !finish && (
+        <Notification
+          hideButton={true}
+          onClose={() => setFulfillResponse(null)}
+          outerClassNames="w-full h-auto z-50 transform fixed top-0 left-0 p-0"
+          innerClassNames={`${fulfillResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-600' : fulfillResponse.status === 'success' ? 'bg-green-500 dark:bg-green-600' : 'bg-blue-500 dark:bg-blue-600'} text-white`}
+          animation="animate__animated animate__fadeInDown"
+          icon={fulfillResponse.status === 'failed' ?
+            <FaTimesCircle className="w-4 h-4 stroke-current mr-2" />
+            :
+            fulfillResponse.status === 'success' ?
+              <FaCheckCircle className="w-4 h-4 stroke-current mr-2" />
+              :
+              <FaClock className="w-4 h-4 stroke-current mr-2" />
+          }
+          content={<span className="flex flex-wrap items-center">
+            <span className="mr-1.5">{fulfillResponse.message}</span>
+            {fulfillResponse.status === 'pending' && (
+              <Loader type="ThreeDots" color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="16" height="16" className="mt-1 mr-1.5" />
+            )}
+            {toChain?.explorer?.url && fulfillResponse.tx_hash && (
+              <a
+                href={`${toChain.explorer.url}${toChain.explorer.transaction_path?.replace('{tx}', fulfillResponse.tx_hash)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center font-semibold"
+              >
+                <span>View on {toChain.explorer.name}</span>
+                <TiArrowRight size={20} className="transform -rotate-45" />
+              </a>
+            )}
+          </span>}
+        />
+      )}
+      {cancelResponse && !finish && (
         <Notification
           hideButton={true}
           onClose={() => setCancelResponse(null)}

@@ -121,9 +121,10 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
               value={typeof amount === 'number' && amount >= 0 ? amount : ''}
               onChange={e => {
                 if (amountOnChange) {
-                  amountOnChange(e.target.value)
+                  amountOnChange(e.target.value < 0 ? 0 : e.target.value)
                 }
               }}
+              onWheel={e => e.target.blur()}
               className={`w-48 bg-gray-100 dark:bg-gray-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-3xl font-mono text-lg font-semibold text-right px-4`}
             />
           }
