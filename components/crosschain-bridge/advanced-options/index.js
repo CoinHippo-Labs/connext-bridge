@@ -107,7 +107,7 @@ export default function AdvancedOptions({ initialOptions, updateOptions }) {
                   if (updateOptions) {
                     updateOptions(options)
                   }
-                  setCollapse(!collapse)
+                  // setCollapse(!collapse)
                 }}
                 className="btn btn-default btn-rounded bg-indigo-500 hover:bg-indigo-600 text-white"
               >

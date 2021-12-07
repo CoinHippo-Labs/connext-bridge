@@ -25,7 +25,7 @@ const web3Modal = typeof window !== 'undefined' && new Web3Modal({
   providerOptions,
 })
 
-export default function Wallet({ chainIdToConnect, hidden, buttonConnectTitle, buttonConnectClassName, buttonDisconnectTitle, buttonDisconnectClassName, onChangeNetwork }) {
+export default function Wallet({ chainIdToConnect, hidden, disabled = false, buttonConnectTitle, buttonConnectClassName, buttonDisconnectTitle, buttonDisconnectClassName, onChangeNetwork }) {
   const dispatch = useDispatch()
   const { chains, wallet, preferences } = useSelector(state => ({ chains: state.chains, wallet: state.wallet, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
@@ -159,6 +159,7 @@ export default function Wallet({ chainIdToConnect, hidden, buttonConnectTitle, b
       {web3_provider ?
         chainIdToConnect ?
           <button
+            disabled={disabled}
             onClick={() => {
               switchNetwork()
 
@@ -172,6 +173,7 @@ export default function Wallet({ chainIdToConnect, hidden, buttonConnectTitle, b
           </button>
           :
           <button
+            disabled={disabled}
             onClick={disconnect}
             className={buttonDisconnectClassName || 'bg-gray-100 hover:bg-gray-200 dark:bg-red-600 dark:hover:bg-red-700 rounded-3xl font-semibold py-1.5 sm:py-2 px-3 sm:px-3.5'}
           >
@@ -179,6 +181,7 @@ export default function Wallet({ chainIdToConnect, hidden, buttonConnectTitle, b
           </button>
         :
         <button
+          disabled={disabled}
           onClick={connect}
           className={buttonConnectClassName || 'bg-gray-100 hover:bg-gray-200 dark:bg-indigo-600 dark:hover:bg-indigo-700 rounded-3xl font-semibold py-1.5 sm:py-2 px-3 sm:px-3.5'}
           style={buttonConnectClassName?.includes('w-full') ? null : { width: 'max-content' }}

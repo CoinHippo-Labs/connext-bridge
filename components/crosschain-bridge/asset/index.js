@@ -10,6 +10,8 @@ import { IoRadioButtonOn } from 'react-icons/io5'
 import Search from './search'
 import Modal from '../../modals/modal-confirm'
 
+import { chainTitle } from '../../../lib/object/chain'
+
 export default function DropdownAsset({ disabled, swapConfig, onSelect, side = 'from', from, to, amountOnChange }) {
   const { chains, assets, chains_status, wallet, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, wallet: state.wallet, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
@@ -80,7 +82,7 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
                       alt=""
                       className="w-6 h-6 rounded-full"
                     />
-                    <span className="font-semibold">{chain.title && chain.title?.split(' ').length < 3 ? chain.title : chain.short_name}</span>
+                    <span className="font-semibold">{chainTitle(chain)}</span>
                   </div>
                   {(side !== 'from' || address) && (
                     <div className="text-gray-400 dark:text-gray-500 text-xs font-normal text-right">

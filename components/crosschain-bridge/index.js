@@ -30,6 +30,7 @@ import Copy from '../copy'
 import { balances as getBalances, contracts as getContracts } from '../../lib/api/covalent'
 import { assetBalances } from '../../lib/api/subgraph'
 import { domains } from '../../lib/api/ens'
+import { chainTitle } from '../../lib/object/chain'
 import { getApproved, approve } from '../../lib/object/contract'
 import { currency_symbol } from '../../lib/object/currency'
 import { smallNumber, numberFormat, ellipseAddress } from '../../lib/utils'
@@ -42,7 +43,7 @@ const bid_expires_second = Number(process.env.NEXT_PUBLIC_BID_EXPIRES_SECOND)
 
 BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
 
-const check_balances = true
+const check_balances = true && !['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK)
 
 export default function CrosschainBridge() {
   const dispatch = useDispatch()
@@ -51,7 +52,7 @@ export default function CrosschainBridge() {
   const { assets_data } = { ...assets }
   const { chains_status_data } = { ...chains_status }
   const { balances_data } = { ...balances }
-  const { tokens_data } = { ...tokens }  
+  const { tokens_data } = { ...tokens }
   const { max_transfers_data } = { ...max_transfers }
   const { ens_data } = { ...ens }
   const { wallet_data } = { ...wallet }
@@ -400,10 +401,7 @@ export default function CrosschainBridge() {
       await tx_approve.wait()
 
       const _approved = await isTokenApproved(true)
-
-      if (_approved !== tokenApproved) {
-        setTokenApproved(_approved)
-      }
+      setTokenApproved(_approved)
 
       setTokenApproveResponse({ status: 'success', message: `${asset?.symbol} Approval Transaction Confirmed.`, tx_hash })
     } catch (error) {
@@ -571,7 +569,7 @@ export default function CrosschainBridge() {
       try {
         const response = await sdk_data.prepareTransfer(estimatedAmount, advancedOptions?.infinite_approval)
 
-        setSwapData(response)
+        setSwapData({ ...response, sendingChainId: swapConfig.fromChainId, receivingChainId: swapConfig.toChainId })
         setSwapResponse(null)
       } catch (error) {
         setSwapResponse({ status: 'failed', message: error?.message })
@@ -579,6 +577,36 @@ export default function CrosschainBridge() {
     }
 
     setStartingSwap(false)
+  }
+
+  const reset = () => {
+    setSwapConfig({ ...swapConfig, amount: null })
+    setAdvancedOptions({
+      infinite_approval: true,
+      receiving_address: '',
+      contract_address: '',
+      call_data: '',
+      preferred_router: '',
+    })
+
+    setEstimateTrigger(null)
+
+    setTokenApproved(null)
+    setTokenApproveResponse(null)
+
+    setFees(null)
+    setEstimatingFees(null)
+    setRefreshEstimatedFeesSecond(null)
+
+    setEstimatedAmount(null)
+    setEstimatingAmount(null)
+    setEstimatedAmountResponse(null)
+    setBidExpiresSecond(null)
+    setNumReceivedBid(null)
+
+    setStartingSwap(null)
+    setSwapData(null)
+    setSwapResponse(null)
   }
 
   const fromChain = chains_data?.find(_chain => _chain?.chain_id === swapConfig.fromChainId)
@@ -669,7 +697,7 @@ export default function CrosschainBridge() {
     </Popover>
   )
 
-  const mustChangeChain = swapConfig.fromChainId && chain_id !== swapConfig.fromChainId
+  const mustChangeChain = swapConfig.fromChainId && chain_id !== swapConfig.fromChainId && !swapData
   const mustApproveToken = !tokenApproved
 
   const actionDisabled = tokenApproveResponse?.status === 'pending' || startingSwap
@@ -712,7 +740,7 @@ export default function CrosschainBridge() {
                 setSwapConfig({
                   ...swapConfig,
                   fromChainId: _chain_id,
-                  toChainId: _chain_id === swapConfig.toChainId && swapConfig.fromAssetId && swapConfig.fromAssetId === swapConfig.toAssetId ? swapConfig.fromChainId : swapConfig.toChainId,
+                  toChainId: _chain_id === swapConfig.toChainId/* && swapConfig.fromAssetId && swapConfig.fromAssetId === swapConfig.toAssetId*/ ? swapConfig.fromChainId : swapConfig.toChainId,
                 })
 
                 if (_chain_id !== swapConfig.toChainId/* && swapConfig.fromAssetId*/) {
@@ -747,6 +775,7 @@ export default function CrosschainBridge() {
                       null
                       :
                       _asset_id
+                      // null
                     :
                     swapConfig.fromChainId && swapConfig.fromChainId === swapConfig.toChainId && _asset_id === swapConfig.toAssetId ?
                       swapConfig.fromAssetId === _asset_id ?
@@ -817,7 +846,7 @@ export default function CrosschainBridge() {
               onSelect={_chain_id => {
                 setSwapConfig({
                   ...swapConfig,
-                  fromChainId: _chain_id === swapConfig.fromChainId && swapConfig.fromAssetId && swapConfig.fromAssetId === swapConfig.toAssetId ? swapConfig.toChainId : swapConfig.fromChainId,
+                  fromChainId: _chain_id === swapConfig.fromChainId/* && swapConfig.fromAssetId && swapConfig.fromAssetId === swapConfig.toAssetId*/ ? swapConfig.toChainId : swapConfig.fromChainId,
                   toChainId: _chain_id,
                 })
 
@@ -850,6 +879,7 @@ export default function CrosschainBridge() {
                       null
                       :
                       _asset_id
+                      // null
                     :
                     swapConfig.fromChainId && swapConfig.fromChainId === swapConfig.toChainId && _asset_id === swapConfig.fromAssetId ?
                       swapConfig.toAssetId === _asset_id ?
@@ -1110,7 +1140,7 @@ export default function CrosschainBridge() {
                             <span className="font-bold">{fromAsset?.symbol}</span>
                           )}
                           {estimatingAmount && typeof bidExpiresSecond === 'number' && (
-                            <span className="text-gray-200 dark:text-gray-100 text-sm font-medium mt-1">{numReceivedBid ? `- Received ${numReceivedBid} Bid${numReceivedBid > 1 ? 's' : ''}` : '- Next bid in'} ({bidExpiresSecond}s)</span>
+                            <span className="text-gray-200 dark:text-gray-100 text-sm font-medium mt-0.5">{numReceivedBid ? `- Received ${numReceivedBid} Bid${numReceivedBid > 1 ? 's' : ''}` : '- Next bid in'} ({bidExpiresSecond}s)</span>
                           )}
                         </button>
                         :
@@ -1153,7 +1183,7 @@ export default function CrosschainBridge() {
                                       className="w-8 h-8 rounded-full"
                                     />
                                     <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
-                                      {fromChain.title && fromChain.title?.split(' ').length < 3 ? fromChain.title : fromChain.short_name}
+                                      {chainTitle(fromChain)}
                                     </span>
                                   </div>
                                 )}
@@ -1185,7 +1215,7 @@ export default function CrosschainBridge() {
                                       className="w-8 h-8 rounded-full"
                                     />
                                     <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
-                                      {toChain.title && toChain.title?.split(' ').length < 3 ? toChain.title : toChain.short_name}
+                                      {chainTitle(toChain)}
                                     </span>
                                   </div>
                                 )}
@@ -1369,7 +1399,13 @@ export default function CrosschainBridge() {
                         </div>
                         :
                         swapData ?
-                          <TransationState data={swapData} />
+                          <TransationState
+                            data={swapData}
+                            buttonTitle={<span>View Transaction</span>}
+                            buttonClassName="hidden w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3"
+                            onClose={() => reset()}
+                            cancelDisabled={true}
+                          />
                           :
                           'x'
           :

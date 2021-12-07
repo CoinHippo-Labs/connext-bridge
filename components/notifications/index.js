@@ -15,12 +15,19 @@ const Notifications = ({
   icon,
   content,
   hideButton,
+  onClose,
 }) => {
   const [open, setOpen] = useState(visible)
 
   const show = () => setOpen(true)
 
-  const hide = () => setOpen(false)
+  const hide = () => {
+    setOpen(false)
+
+    if (onClose) {
+      onClose()
+    }
+  }
 
   return (
     <>

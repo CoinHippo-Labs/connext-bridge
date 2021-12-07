@@ -20,7 +20,7 @@ export default function ChainsStatus() {
   const { chains_status_data } = { ...chains_status }
   const { chains_status_sync_data } = { ...chains_status_sync }
   const { wallet_data } = { ...wallet }
-  const { signer, address } = { ...wallet_data }
+  const { signer, chain_id, address } = { ...wallet_data }
   const { sdk_data } = { ...sdk }
   const { rpcs_data } = { ...rpcs }
   const { theme } = { ...preferences }
@@ -52,7 +52,7 @@ export default function ChainsStatus() {
         value: rpcs,
       })
     }
-  }, [chains_data, address])
+  }, [chains_data, chain_id, address])
 
   useEffect(() => {
     const getDataSync = async _chains => {

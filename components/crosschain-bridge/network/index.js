@@ -8,6 +8,8 @@ import { IoRadioButtonOn } from 'react-icons/io5'
 import Search from './search'
 import Modal from '../../modals/modal-confirm'
 
+import { chainTitle } from '../../../lib/object/chain'
+
 export default function DropdownNetwork({ disabled, chain_id, onSelect, side = 'from', from, to }) {
   const { chains, chains_status, preferences } = useSelector(state => ({ chains: state.chains, chains_status: state.chains_status, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
@@ -38,7 +40,7 @@ export default function DropdownNetwork({ disabled, chain_id, onSelect, side = '
             className="w-6 h-6 rounded-full"
           />
           <span className="sm:hidden font-semibold">{chain.title}</span>
-          <span className="hidden sm:block font-semibold">{chain.title && chain.title?.split(' ').length < 3 ? chain.title : chain.short_name}</span>
+          <span className="hidden sm:block font-semibold">{chainTitle(chain)}</span>
         </div>
         :
         chains_data ?

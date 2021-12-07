@@ -3,7 +3,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import Portal from '../portal'
 import { FiX } from 'react-icons/fi'
 
-export default function Modal({ hidden, buttonTitle, disabled, onClick, buttonClassName, title, icon, body, cancelButtonTitle, cancelDisabled = false, onCancel, confirmButtonTitle, confirmDisabled = false, onConfirm, onComfirmHide = true, confirmButtonClassName, noButtons }) {
+export default function Modal({ hidden, buttonTitle, disabled, onClick, buttonClassName, title, icon, body, cancelButtonTitle, cancelDisabled = false, onCancel, confirmButtonTitle, confirmDisabled = false, onConfirm, onComfirmHide = true, confirmButtonClassName, onClose, noButtons, modalClassName = '' }) {
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
   const { theme } = { ...preferences }
 
@@ -32,12 +32,16 @@ export default function Modal({ hidden, buttonTitle, disabled, onClick, buttonCl
 
       if (!cancelDisabled) {
         setOpen(!open)
+
+        if (onClose) {
+          onClose()
+        }
       }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [modalRef, open])
+  }, [modalRef, open, cancelDisabled])
 
   useEffect(() => {
     if (typeof hidden === 'boolean') {
@@ -59,7 +63,7 @@ export default function Modal({ hidden, buttonTitle, disabled, onClick, buttonCl
         <Portal selector="#portal">
           <div className="modal-backdrop fade-in" />
           <div data-background={theme} className={`modal show ${theme === 'dark' ? 'dark' : ''}`}>
-            <div ref={modalRef} className="w-full max-w-sm lg:max-w-lg relative lg:my-4 mx-auto">
+            <div ref={modalRef} className={`w-full max-w-sm lg:max-w-lg relative lg:my-4 mx-auto ${modalClassName}`}>
               <div className="w-full bg-white dark:bg-gray-900 relative outline-none rounded-lg shadow-lg border-0 border-gray-200 dark:border-gray-700 flex flex-col text-gray-900 dark:text-white">
                 <div className="relative flex-auto p-4">
                   <div className="flex items-start justify-start space-x-4 p-2">
