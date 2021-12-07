@@ -754,7 +754,8 @@ export default function CrosschainBridge() {
                         :
                         swapConfig.fromAssetId
                       :
-                      swapConfig.toAssetId,
+                      _asset_id,
+                      // swapConfig.toAssetId,
                   amount: _asset_id !== swapConfig.fromAssetId && swapConfig.amount ? null : swapConfig.amount,
                 })
               }}
@@ -856,7 +857,8 @@ export default function CrosschainBridge() {
                         :
                         swapConfig.toAssetId
                       :
-                      swapConfig.fromAssetId,
+                      _asset_id,
+                      // swapConfig.fromAssetId,
                   toAssetId: _asset_id,
                   amount: !swapConfig.fromAssetId && _asset_id !== swapConfig.toAssetId && swapConfig.amount ? null : swapConfig.amount,
                 })
@@ -1265,7 +1267,7 @@ export default function CrosschainBridge() {
                                   </div>
                                 </div>
                               </div>
-                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                              {/*<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
                                 <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
                                   Slippage
                                   <span className="hidden sm:block">:</span>
@@ -1291,7 +1293,7 @@ export default function CrosschainBridge() {
                                     </div>
                                   )}
                                 </div>
-                              </div>
+                              </div>*/}
                               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
                                 <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg sm:text-sm lg:text-base">
                                   Estimated Received
