@@ -3,6 +3,7 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
 import moment from 'moment'
+import { constants } from 'ethers'
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
 import Pulse from 'react-reveal/Pulse'
@@ -756,7 +757,7 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
                   </a>
                 )}
               </div>
-              {toAsset && (
+              {toAsset && ![toAsset.contract_address, toAsset.contracts?.find(_contract => _contract.chain_id === _chain_id)?.contract_address].includes(constants.AddressZero) && (
                 chain_id !== generalTx?.receivingChainId ?
                   <Wallet
                     chainIdToConnect={generalTx?.receivingChainId}
