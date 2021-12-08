@@ -176,7 +176,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
             setGetTrigger(moment().valueOf())
 
             if (setActiveTransactionOpen) {
-              setActiveTransactionOpen(true)
+              setActiveTransactionOpen(false)
             }
           }}
           onFinish={() => {
