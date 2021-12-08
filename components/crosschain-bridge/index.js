@@ -1434,7 +1434,7 @@ export default function CrosschainBridge() {
           <Notification
             hideButton={true}
             outerClassNames="w-full h-auto z-50 transform fixed top-0 left-0 p-0"
-            innerClassNames={`${tokenApproveResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-600' : tokenApproveResponse.status === 'success' ? 'bg-green-500 dark:bg-green-600' : 'bg-blue-500 dark:bg-blue-600'} text-white`}
+            innerClassNames={`${tokenApproveResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-600' : tokenApproveResponse.status === 'success' ? 'bg-green-500 dark:bg-green-600' : 'bg-blue-600 dark:bg-blue-700'} text-white`}
             animation="animate__animated animate__fadeInDown"
             icon={tokenApproveResponse.status === 'failed' ?
               <FaTimesCircle className="w-4 h-4 stroke-current mr-2" />

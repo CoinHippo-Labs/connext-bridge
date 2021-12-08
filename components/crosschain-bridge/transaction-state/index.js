@@ -31,7 +31,7 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
   const { tokens_data } = { ...tokens }
   const { ens_data } = { ...ens }
   const { wallet_data } = { ...wallet }
-  const { web3_provider, chain_id, address } = { ...wallet_data }
+  const { provider, web3_provider, chain_id, address } = { ...wallet_data }
   const { sdk_data } = { ...sdk }
   const { theme } = { ...preferences }
 
@@ -147,11 +147,32 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
     setCancelling(false)
   }
 
+  const addTokenToMetaMask = async (_asset, _chain_id) => {
+    if (_asset) {
+      try {
+        const response = await provider.request({
+          method: 'wallet_watchAsset',
+          params: {
+            type: 'ERC20',
+            options: {
+              address: _asset.contract_address || _asset?.contracts?.find(_contract => _contract.chain_id === _chain_id)?.contract_address,
+              symbol: _asset.contract_ticker_symbol || _asset.symbol,
+              decimals: _asset.contract_decimals || _asset?.contracts?.find(_contract => _contract.chain_id === _chain_id)?.contract_decimals,
+              image: _asset.image || _.last(_asset.logo_url),
+            },
+          },
+        })
+      } catch (error) {}
+    }
+  }
+
   const { sendingTx, receivingTx } = { ...transaction }
   const generalTx = _.last([sendingTx, receivingTx])
 
   const fromChain = chains_data?.find(_chain => _chain?.chain_id === generalTx?.sendingChainId || _chain?.chain_id === data?.sendingChainId)
   const toChain = chains_data?.find(_chain => _chain?.chain_id === generalTx?.receivingChainId || _chain?.chain_id === data?.receivingChainId)
+
+  const toAsset = (assets_data?.find(_asset => _asset?.id === generalTx?.receivingAssetId) || generalTx?.receivingAsset) && { ...assets_data?.find(_asset => _asset?.id === generalTx?.receivingAssetId), ...generalTx?.receivingAsset }
 
   const loaded = data?.transactionId && transaction?.transactionId === data.transactionId && generalTx
 
@@ -166,7 +187,7 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
       type="button"
       disabled={actionDisabled}
       onClick={() => fulfill(receivingTx)}
-      className={`w-full max-w-md bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center ${actionDisabled ? 'cursor-not-allowed text-gray-200' : 'text-gray-100 hover:text-white'} text-base sm:text-lg space-x-1.5 mx-auto py-4 px-3`}
+      className={`w-full max-w-md rounded-lg shadow-lg flex items-center justify-center ${actionDisabled ? 'bg-blue-400 dark:bg-blue-500 cursor-not-allowed text-gray-200' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-gray-100 hover:text-white'} text-base sm:text-lg space-x-1.5 mx-auto py-4 px-3`}
     >
       {(fulfilling || fulfillResponse?.status === 'pending') && (
         <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="20" height="20" />
@@ -704,6 +725,72 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
               }
             </div>
           )}
+          {loaded && finish && (
+            <div className="flex flex-col items-center space-y-5 py-6">
+              {['Fulfilled'].includes(generalTx?.status) ?
+                <FaCheckCircle size={48} className="text-green-500 dark:text-white" />
+                :
+                [sendingTx?.status, receivingTx?.status].includes('Cancelled') ?
+                  <FaTimesCircle size={48} className="text-red-500 dark:text-white" />
+                  :
+                  null
+              }
+              <div className="flex flex-col items-center space-y-1">
+                {['Fulfilled'].includes(generalTx?.status) ?
+                  <span className="text-lg font-medium">Claimed successful</span>
+                  :
+                  [sendingTx?.status, receivingTx?.status].includes('Cancelled') ?
+                    <span className="text-lg font-medium">Cancelled successful</span>
+                    :
+                    null
+                }
+                {transaction?.transactionId && (
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/tx/${transaction.transactionId.toLowerCase()}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center text-indigo-600 dark:text-blue-600 text-base font-semibold space-x-0"
+                  >
+                    <span>View on Explorer</span>
+                    <TiArrowRight size={24} className="transform -rotate-45 mt-0.4" />
+                  </a>
+                )}
+              </div>
+              {toAsset && (
+                chain_id !== generalTx?.receivingChainId ?
+                  <Wallet
+                    chainIdToConnect={generalTx?.receivingChainId}
+                    buttonDisconnectTitle={<>
+                      <span>Add</span>
+                      <span className={`${toAsset?.contract_ticker_symbol || toAsset?.symbol ? 'font-bold' : ''}`}>{toAsset?.contract_ticker_symbol || toAsset?.symbol || 'Token'}</span>
+                      <span>to</span>
+                      <span className="pr-0.5">MetaMask</span>
+                      <Img
+                        src="/logos/wallets/metamask.png"
+                        alt=""
+                        className="w-5 h-5"
+                      />
+                    </>}
+                    buttonDisconnectClassName="w-auto bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg flex items-center justify-center text-sm font-medium space-x-1.5 py-2.5 px-3"
+                  />
+                  :
+                  <button
+                    onClick={() => addTokenToMetaMask(toAsset)}
+                    className="w-auto bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg flex items-center justify-center text-sm font-medium space-x-1.5 py-2.5 px-3"
+                  >
+                    <span>Add</span>
+                    <span className={`${toAsset?.contract_ticker_symbol || toAsset?.symbol ? 'font-bold' : ''}`}>{toAsset?.contract_ticker_symbol || toAsset?.symbol || 'Token'}</span>
+                    <span>to</span>
+                    <span className="pr-0.5">MetaMask</span>
+                    <Img
+                      src="/logos/wallets/metamask.png"
+                      alt=""
+                      className="w-5 h-5"
+                    />
+                  </button>
+              )}
+            </div>
+          )}
           <div className="space-y-2">
             <div className="font-semibold">
               You will need to sign 3 messages:
@@ -769,7 +856,7 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
           hideButton={true}
           onClose={() => setFulfillResponse(null)}
           outerClassNames="w-full h-auto z-50 transform fixed top-0 left-0 p-0"
-          innerClassNames={`${fulfillResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-600' : fulfillResponse.status === 'success' ? 'bg-green-500 dark:bg-green-600' : 'bg-blue-500 dark:bg-blue-600'} text-white`}
+          innerClassNames={`${fulfillResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-600' : fulfillResponse.status === 'success' ? 'bg-green-500 dark:bg-green-600' : 'bg-blue-600 dark:bg-blue-700'} text-white`}
           animation="animate__animated animate__fadeInDown"
           icon={fulfillResponse.status === 'failed' ?
             <FaTimesCircle className="w-4 h-4 stroke-current mr-2" />
@@ -803,7 +890,7 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
           hideButton={true}
           onClose={() => setCancelResponse(null)}
           outerClassNames="w-full h-auto z-50 transform fixed top-0 left-0 p-0"
-          innerClassNames={`${cancelResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-600' : cancelResponse.status === 'success' ? 'bg-green-500 dark:bg-green-600' : 'bg-blue-500 dark:bg-blue-600'} text-white`}
+          innerClassNames={`${cancelResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-600' : cancelResponse.status === 'success' ? 'bg-green-500 dark:bg-green-600' : 'bg-blue-600 dark:bg-blue-700'} text-white`}
           animation="animate__animated animate__fadeInDown"
           icon={cancelResponse.status === 'failed' ?
             <FaTimesCircle className="w-4 h-4 stroke-current mr-2" />
