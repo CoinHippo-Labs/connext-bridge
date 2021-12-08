@@ -20,6 +20,7 @@ import Network from './network'
 import Asset from './asset'
 import AdvancedOptions from './advanced-options'
 import TransationState from './transaction-state'
+import ActiveTransactions from './active-transactions'
 import Wallet from '../wallet'
 import Popover from '../popover'
 import Alert from '../alerts'
@@ -1411,7 +1412,7 @@ export default function CrosschainBridge() {
                               cancelDisabled={true}
                             />
                             :
-                            'x'
+                            null
             :
             web3_provider ?
               <button
@@ -1469,8 +1470,9 @@ export default function CrosschainBridge() {
           )}
         </div>
       </div>
-      <div className="col-span-1 lg:col-span-2 h-screen">
-      </div>
+      {/*<div className="col-span-1 lg:col-span-2 lg:h-screen">
+        <ActiveTransactions />
+      </div>*/}
     </div>
   )
 }

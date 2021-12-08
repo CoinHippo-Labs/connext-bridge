@@ -24,7 +24,7 @@ import { ellipseAddress } from '../../../lib/utils'
 
 import { ENS_DATA } from '../../../reducers/types'
 
-export default function TransactionState({ data, buttonTitle, buttonClassName, onClose, cancelDisabled }) {
+export default function TransactionState({ data, defaultHidden = false, buttonTitle, buttonClassName, onClose, cancelDisabled, onFinish }) {
   const dispatch = useDispatch()
   const { chains, assets, tokens, ens, wallet, sdk, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, tokens: state.tokens, ens: state.ens, wallet: state.wallet, sdk: state.sdk, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
@@ -36,7 +36,7 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
   const { sdk_data } = { ...sdk }
   const { theme } = { ...preferences }
 
-  const [hidden, setHidden] = useState(false)
+  const [hidden, setHidden] = useState(defaultHidden)
   const [transaction, setTransaction] = useState(null)
 
   const [fulfilling, setFulfilling] = useState(false)
@@ -70,6 +70,10 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
         if (finish) {
           setFulfillResponse(null)
           setCancelResponse(null)
+
+          if (onFinish) {
+            onFinish()
+          }
         }
       }
     }
@@ -171,12 +175,12 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
   }
 
   const { sendingTx, receivingTx } = { ...transaction }
-  const generalTx = _.last([sendingTx, receivingTx])
+  const generalTx = _.last([sendingTx, receivingTx].filter(tx => tx))
 
   const fromChain = chains_data?.find(_chain => _chain?.chain_id === generalTx?.sendingChainId || _chain?.chain_id === data?.sendingChainId)
   const toChain = chains_data?.find(_chain => _chain?.chain_id === generalTx?.receivingChainId || _chain?.chain_id === data?.receivingChainId)
 
-  const toAsset = (assets_data?.find(_asset => _asset?.id === generalTx?.receivingAssetId) || generalTx?.receivingAsset) && { ...assets_data?.find(_asset => _asset?.id === generalTx?.receivingAssetId), ...generalTx?.receivingAsset }
+  const toAsset = (assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.receivingChainId && _contract?.contract_address === generalTx?.receivingAssetId)) || generalTx?.receivingAsset) && { ...assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.receivingChainId && _contract?.contract_address === generalTx?.receivingAssetId)), ...generalTx?.receivingAsset }
 
   const loaded = data?.transactionId && transaction?.transactionId === data.transactionId && generalTx
 
@@ -347,7 +351,7 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
             <div className="flex flex-col items-center">
               {loaded ?
                 <>
-                  <div className={`max-w-min h-7 rounded-xl flex items-center bg-${sendingTx?.status ? ['Fulfilled'].includes(sendingTx.status) ? 'green-600' : ['Prepared'].includes(sendingTx.status) ? 'yellow-500' : 'red-700' : chains_data?.findIndex(_chain => !_chain.disabled && _chain.chain_id === sendingTx?.chainId) < 0 ? 'gray-700' : 'indigo-500'} text-white space-x-1 py-1.5 px-2`}>
+                  <div className={`max-w-min h-7 rounded-xl flex items-center bg-${sendingTx?.status ? ['Fulfilled'].includes(sendingTx.status) ? 'green-600' : ['Prepared'].includes(sendingTx.status) ? 'yellow-500' : 'red-700' : sendingTx?.chainId && chains_data?.findIndex(_chain => !_chain.disabled && _chain.chain_id === sendingTx?.chainId) < 0 ? 'gray-700' : 'indigo-500'} text-white space-x-1 py-1.5 px-2`}>
                     {sendingTx?.status ?
                       ['Fulfilled'].includes(sendingTx.status) ?
                         <FaCheckCircle size={14} />
@@ -357,14 +361,14 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
                           :
                           <FaTimesCircle size={14} />
                       :
-                      chains_data?.findIndex(_chain => !_chain.disabled && _chain.chain_id === sendingTx?.chainId) < 0 ?
+                      sendingTx?.chainId && chains_data?.findIndex(_chain => !_chain.disabled && _chain.chain_id === sendingTx?.chainId) < 0 ?
                         <FaQuestion size={14} />
                         :
                         <Loader type="Puff" color={theme === 'dark' ? '#F9FAFB' : '#F9FAFB'} width="16" height="16" />
                     }
                     <div className="uppercase text-white text-xs font-semibold">
                       {sendingTx?.status || (
-                        chains_data?.findIndex(_chain => !_chain.disabled && _chain.chain_id === sendingTx?.chainId) ?
+                        sendingTx?.chainId && chains_data?.findIndex(_chain => !_chain.disabled && _chain.chain_id === sendingTx?.chainId) ?
                           'Unknown'
                           :
                           'Preparing'
@@ -505,7 +509,7 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
             <div className="flex flex-col items-center">
               {loaded ?
                 <>
-                  <div className={`min-w-max max-w-min h-7 rounded-xl flex items-center bg-${receivingTx?.status ? ['Fulfilled'].includes(receivingTx.status) ? 'green-600' : ['Prepared'].includes(receivingTx.status) ? 'yellow-500' : 'red-700' : sendingTx?.status === 'Cancelled' ? 'red-700' : chains_data?.findIndex(_chain => !_chain.disabled && _chain.chain_id === receivingTx?.chainId) < 0 ? 'gray-700' : 'indigo-500'} text-white space-x-1 py-1.5 px-2`}>
+                  <div className={`min-w-max max-w-min h-7 rounded-xl flex items-center bg-${receivingTx?.status ? ['Fulfilled'].includes(receivingTx.status) ? 'green-600' : ['Prepared'].includes(receivingTx.status) ? 'yellow-500' : 'red-700' : sendingTx?.status === 'Cancelled' ? 'red-700' : receivingTx?.chainId && chains_data?.findIndex(_chain => !_chain.disabled && _chain.chain_id === receivingTx?.chainId) < 0 ? 'gray-700' : 'indigo-500'} text-white space-x-1 py-1.5 px-2`}>
                     {receivingTx?.status ?
                       ['Fulfilled'].includes(receivingTx.status) ?
                         <FaCheckCircle size={14} />
@@ -518,7 +522,7 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
                       sendingTx?.status === 'Cancelled' ?
                         <FaTimesCircle size={14} />
                         :
-                        chains_data?.findIndex(_chain => !_chain.disabled && _chain.chain_id === receivingTx?.chainId) < 0 ?
+                        receivingTx?.chainId && chains_data?.findIndex(_chain => !_chain.disabled && _chain.chain_id === receivingTx?.chainId) < 0 ?
                           <FaQuestion size={14} />
                           :
                           <Loader type="Puff" color={theme === 'dark' ? '#F9FAFB' : '#F9FAFB'} width="16" height="16" />
@@ -530,7 +534,7 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
                         sendingTx?.status === 'Cancelled' ?
                           'Ignored'
                           :
-                          chains_data?.findIndex(_chain => !_chain.disabled && _chain.chain_id === receivingTx?.chainId) < 0 ?
+                          receivingTx?.chainId && chains_data?.findIndex(_chain => !_chain.disabled && _chain.chain_id === receivingTx?.chainId) < 0 ?
                             'Unknown'
                             :
                             'Pending'
@@ -676,9 +680,9 @@ export default function TransactionState({ data, buttonTitle, buttonClassName, o
                 </div>
             }
           </div>
-          {web3_provider && loaded && !finish && [sendingTx?.status, receivingTx?.status].includes('Prepared') && (
+          {web3_provider && loaded && !finish && [sendingTx?.status, receivingTx?.status].includes('Prepared') && (['Prepared'].includes(receivingTx?.status) || canCancelSender) && (
             <div className="flex flex-col space-y-3 py-4">
-              {address?.toLowerCase() !== (canCancelSender ? sendingTx?.sendingAddress?.toLowerCase() : receivingTx?.sendingAddress?.toLowerCase()) ?
+              {(canCancelSender ? sendingTx : receivingTx) && address?.toLowerCase() !== (canCancelSender ? sendingTx?.sendingAddress?.toLowerCase() : receivingTx?.sendingAddress?.toLowerCase()) ?
                 <span className="min-w-max flex flex-col text-gray-400 dark:text-gray-500 text-center mx-auto">
                   <span>Address not match.</span>
                   <span className="flex items-center">
