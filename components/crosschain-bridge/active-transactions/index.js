@@ -165,7 +165,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
     )
   })
 
-  return address && (transactionsComponent || loading) && (
+  return address && (transactionsComponent || (loading && !transactions?.data)) && (
     <div className="lg:max-w-xs lg:ml-auto">
       {swapData && (
         <TransationState
