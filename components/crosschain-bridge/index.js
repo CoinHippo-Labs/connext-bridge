@@ -462,6 +462,8 @@ export default function CrosschainBridge() {
                 if (!controller.signal.aborted) {
                   if (response?.bid?.sendingChainId === swapConfig.fromChainId && response?.bid?.receivingChainId === swapConfig.toChainId && response?.bid?.sendingAssetId === fromContract?.contract_address) {
                     getDomain(response?.bid?.router)
+                    getDomain(address)
+                    getDomain(advancedOptions?.receiving_address || address)
 
                     let routerFee
 
@@ -1227,7 +1229,7 @@ export default function CrosschainBridge() {
                                 </div>
                                 {receivingAddress && (<div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
                                   <span className="text-gray-900 dark:text-gray-100 text-base sm:text-xs xl:text-base font-semibold">
-                                    {ellipseAddress(receivingAddress, 10)}
+                                    {ens_data?.[receivingAddress?.toLowerCase()]?.name || ellipseAddress(receivingAddress?.toLowerCase(), 10)}
                                   </span>
                                   <Copy size={18} text={receivingAddress} />
                                   {toChain?.explorer?.url && (

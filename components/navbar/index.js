@@ -18,7 +18,8 @@ import { THEME, CHAINS_DATA, ASSETS_DATA } from '../../reducers/types'
 
 export default function Navbar() {
   const dispatch = useDispatch()
-  const { wallet, preferences } = useSelector(state => ({ wallet: state.wallet, preferences: state.preferences }), shallowEqual)
+  const { ens, wallet, preferences } = useSelector(state => ({ ens: state.ens, wallet: state.wallet, preferences: state.preferences }), shallowEqual)
+  const { ens_data } = { ...ens }
   const { wallet_data } = { ...wallet }
   const { web3_provider, chain_id, address } = { ...wallet_data }
   const { theme } = { ...preferences }
@@ -73,7 +74,7 @@ export default function Navbar() {
                   size={16}
                   text={address}
                   copyTitle={<span className="text-gray-400 dark:text-white text-xs xl:text-sm font-semibold">
-                    {ellipseAddress(address, 8)}
+                    {ens_data?.[address?.toLowerCase()]?.name || ellipseAddress(address?.toLowerCase(), 6)}
                   </span>}
                 />
               </div>
