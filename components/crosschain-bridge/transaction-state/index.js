@@ -764,7 +764,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                   </a>
                 )}
               </div>
-              {toAsset && ![toAsset.contract_address, toAsset.contracts?.find(_contract => _contract.chain_id === _chain_id)?.contract_address].includes(constants.AddressZero) && (
+              {toAsset && ![toAsset.contract_address, toAsset.contracts?.find(_contract => _contract.chain_id === generalTx?.receivingChainId)?.contract_address].includes(constants.AddressZero) && (
                 chain_id !== generalTx?.receivingChainId ?
                   <Wallet
                     chainIdToConnect={generalTx?.receivingChainId}

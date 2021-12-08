@@ -92,6 +92,8 @@ export default function CrosschainBridge() {
   const [swapData, setSwapData] = useState(null)
   const [swapResponse, setSwapResponse] = useState(null)
 
+  const [activeTransactionOpen, setActiveTransactionOpen] = useState(null)
+
   // wallet
   useEffect(() => {
     if (chain_id && !swapConfig.fromChainId && swapConfig.toChainId !== chain_id) {
@@ -610,6 +612,8 @@ export default function CrosschainBridge() {
     setStartingSwap(null)
     setSwapData(null)
     setSwapResponse(null)
+
+    setActiveTransactionOpen(null)
   }
 
   const fromChain = chains_data?.find(_chain => _chain?.chain_id === swapConfig.fromChainId)
@@ -700,7 +704,7 @@ export default function CrosschainBridge() {
     </Popover>
   )
 
-  const mustChangeChain = swapConfig.fromChainId && chain_id !== swapConfig.fromChainId && !swapData
+  const mustChangeChain = swapConfig.fromChainId && chain_id !== swapConfig.fromChainId && !swapData && !activeTransactionOpen
   const mustApproveToken = !tokenApproved
 
   const actionDisabled = tokenApproveResponse?.status === 'pending' || startingSwap
@@ -1470,9 +1474,11 @@ export default function CrosschainBridge() {
           )}
         </div>
       </div>
-      {/*<div className="col-span-1 lg:col-span-2 lg:h-screen">
-        <ActiveTransactions />
-      </div>*/}
+      <div className="col-span-1 lg:col-span-2 lg:h-screen">
+        <ActiveTransactions
+          setActiveTransactionOpen={open => setActiveTransactionOpen(open)}
+        />
+      </div>
     </div>
   )
 }
