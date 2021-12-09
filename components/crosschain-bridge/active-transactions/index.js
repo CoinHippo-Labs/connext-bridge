@@ -72,7 +72,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
 
   const onClick = transaction => setSwapData({ ...transaction?.crosschainTx?.invariant })
 
-  const transactionsComponent = transactions?.address?.toLowerCase() === address?.toLowerCase() && transactions?.data?.length > 0 && transactions?.data?.map((transaction, i) => {
+  const transactionsComponent = transactions?.address?.toLowerCase() === address?.toLowerCase()/* && transactions?.data?.length > 0*/ && transactions?.data?.map((transaction, i) => {
     const fromChain = chains_data?.find(_chain => _chain.chain_id === transaction?.crosschainTx?.invariant?.sendingChainId)
     const toChain = chains_data?.find(_chain => _chain.chain_id === transaction?.crosschainTx?.invariant?.receivingChainId)
     const fromAsset = assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === fromChain?.chain_id && _contract?.contract_address?.toLowerCase() === transaction?.crosschainTx?.invariant?.sendingAssetId))
@@ -186,9 +186,11 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
           }}
         />
       )}
-      <div className="uppercase text-lg font-bold text-center lg:mt-2 mb-2">
-        Active Transactions
-      </div>
+      {(loading || transactions?.data?.length > 0) && (
+        <div className="uppercase text-lg font-bold text-center lg:mt-2 mb-2">
+          Active Transactions
+        </div>
+      )}
       {transactionsComponent ?
         <>
           <StackGrid
@@ -204,10 +206,13 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
           </div>
         </>
         :
-        <div className="flex items-center justify-center space-x-2">
-          <span className="text-indigo-600 dark:text-white font-semibold">Loading</span>
-          <Loader type="ThreeDots" color={theme === 'dark' ? '#FFFFFF' : '#4F46E5'} width="20" height="20" className="mt-0.5" />
-        </div>
+        loading ?
+          <div className="flex items-center justify-center space-x-2">
+            <span className="text-indigo-600 dark:text-white font-semibold">Loading</span>
+            <Loader type="ThreeDots" color={theme === 'dark' ? '#FFFFFF' : '#4F46E5'} width="20" height="20" className="mt-0.5" />
+          </div>
+          :
+          null
       }
     </div>
   )
