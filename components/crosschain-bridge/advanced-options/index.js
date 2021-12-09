@@ -53,11 +53,11 @@ export default function AdvancedOptions({ applied = false, initialOptions, updat
       >
         {applied && (
           <>
-            <BsCheckCircleFill size={16} className="text-green-500 dark:text-white" />
+            <BsCheckCircleFill size={16} className="text-green-500" />
             <span />
           </>
         )}
-        <span>Advanced Options</span>
+        <span className={`${applied ? 'text-gray-600 dark:text-gray-300' : ''}`}>Advanced Options</span>
         {collapse ?
           <BiChevronDown size={20} />
           :

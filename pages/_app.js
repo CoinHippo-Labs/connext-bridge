@@ -42,6 +42,7 @@ export default function App({ Component, pageProps }) {
       <Provider store={store}>
         <Layout>
           <div id="portal" />
+          <div id="modal-network" />
           <Component {...pageProps} />
         </Layout>
       </Provider>

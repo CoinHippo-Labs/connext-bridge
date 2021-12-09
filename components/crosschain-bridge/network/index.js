@@ -59,6 +59,7 @@ export default function DropdownNetwork({ disabled, chain_id, onSelect, side = '
         to={to}
       />}
       noButtons={true}
+      id="modal-network"
     />
   )
 }

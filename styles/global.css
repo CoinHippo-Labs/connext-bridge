@@ -173,3 +173,9 @@ input::-webkit-inner-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 }
+
+#modal-network {
+  .show {
+    animation-duration: 0.1s !important;
+  }
+}
