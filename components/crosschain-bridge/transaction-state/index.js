@@ -198,7 +198,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
       className={`w-full max-w-md rounded-lg shadow-lg flex items-center justify-center ${actionDisabled ? 'bg-blue-400 dark:bg-blue-500 cursor-not-allowed text-gray-200' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-gray-100 hover:text-white'} text-base sm:text-lg space-x-1.5 mx-auto py-4 px-3`}
     >
       {(fulfilling || fulfillResponse?.status === 'pending') && (
-        <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="20" height="20" />
+        <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="24" height="24" />
       )}
       {!(fulfilling || fulfillResponse?.status === 'pending') && (
         <span className="font-light">Sign to</span>

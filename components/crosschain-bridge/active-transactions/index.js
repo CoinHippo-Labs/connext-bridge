@@ -39,7 +39,9 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
       if (sdk_data && address) {
         const response = await sdk_data.getActiveTransactions()
 
-        setTransactions({ address, data: _.orderBy(response || [], ['crosschainTx.sending.expiry'], ['desc']) })
+        if (response) {
+          setTransactions({ address, data: _.orderBy(response || [], ['crosschainTx.sending.expiry'], ['desc']) })
+        }
       }
 
       setLoading(false)
@@ -70,7 +72,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
 
   const onClick = transaction => setSwapData({ ...transaction?.crosschainTx?.invariant })
 
-  const transactionsComponent = transactions?.address === address && transactions?.data?.length > 0 && transactions?.data?.map((transaction, i) => {
+  const transactionsComponent = transactions?.address?.toLowerCase() === address?.toLowerCase() && transactions?.data?.length > 0 && transactions?.data?.map((transaction, i) => {
     const fromChain = chains_data?.find(_chain => _chain.chain_id === transaction?.crosschainTx?.invariant?.sendingChainId)
     const toChain = chains_data?.find(_chain => _chain.chain_id === transaction?.crosschainTx?.invariant?.receivingChainId)
     const fromAsset = assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === fromChain?.chain_id && _contract?.contract_address?.toLowerCase() === transaction?.crosschainTx?.invariant?.sendingAssetId))
