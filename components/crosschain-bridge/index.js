@@ -1074,7 +1074,7 @@ export default function CrosschainBridge() {
                         <span className="text-gray-400 dark:text-gray-500">-</span>
                     }
                   </div>
-                  <span className="text-lg font-semibold">{confirmToAsset?.symbol}</span>
+                  <span className="text-lg font-semibold">{confirmToAsset?.symbol || toAsset?.symbol}</span>
                 </div>
                 {!estimatedAmountResponse && !estimatingAmount && estimatedAmount && typeof tokens_data?.[`${confirmToChain.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
                   <div className="font-mono text-gray-400 dark:text-gray-500 text-xs">
@@ -1144,7 +1144,7 @@ export default function CrosschainBridge() {
                     </Alert>
                   </div>
                   :
-                  mustChangeChain ?
+                  !estimatedAmountResponse && mustChangeChain ?
                     <div className="sm:pt-1.5 pb-1">
                       <Wallet
                         chainIdToConnect={swapConfig.fromChainId}
