@@ -574,7 +574,7 @@ export default function CrosschainBridge() {
       try {
         const response = await sdk_data.prepareTransfer(estimatedAmount, advancedOptions?.infinite_approval)
 
-        setSwapData({ ...response, sendingChainId: swapConfig.fromChainId, receivingChainId: swapConfig.toChainId })
+        setSwapData({ ...response, sendingChainId: estimatedAmount?.bid?.sendingChainId, receivingChainId: estimatedAmount?.bid?.receivingChainId })
         setSwapResponse(null)
       } catch (error) {
         setSwapResponse({ status: 'failed', message: error?.message })
@@ -623,8 +623,6 @@ export default function CrosschainBridge() {
   const toChainSynced = getChainSynced(swapConfig.toChainId)
   const unsyncedChains = [!fromChainSynced && fromChain, !toChainSynced && toChain].filter(_chain => _chain)
 
-  const receivingAddress = advancedOptions?.receiving_address || address
-
   const fromAsset = assets_data?.find(_asset => _asset?.id === swapConfig.fromAssetId)
   const toAsset = assets_data?.find(_asset => _asset?.id === swapConfig.toAssetId)
   const fromContract = fromAsset?.contracts?.find(_contract => _contract?.chain_id === swapConfig.fromChainId)
@@ -633,6 +631,38 @@ export default function CrosschainBridge() {
   const fromBalance = getChainBalance(swapConfig.fromChainId, 'from')
   const fromBalanceAmount = (fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals || 0)
   const toBalance = getChainBalance(swapConfig.toChainId, 'to')
+
+  const confirmFromChain = chains_data?.find(_chain => _chain?.chain_id === estimatedAmount?.bid?.sendingChainId)
+  const confirmToChain = chains_data?.find(_chain => _chain?.chain_id === estimatedAmount?.bid?.receivingChainId) 
+  const confirmFromAsset = assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract.chain_id === estimatedAmount?.bid?.sendingChainId && _contract.contract_address?.toLowerCase() === estimatedAmount?.bid?.sendingAssetId?.toLowerCase()))
+  const confirmToAsset = assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract.chain_id === estimatedAmount?.bid?.receivingChainId && _contract.contract_address?.toLowerCase() === estimatedAmount?.bid?.receivingAssetId?.toLowerCase()))
+  const confirmFromContract = confirmFromAsset?.contracts?.find(_contract => _contract?.chain_id === estimatedAmount?.bid?.sendingChainId)
+  const confirmToContract = confirmToAsset?.contracts?.find(_contract => _contract?.chain_id === estimatedAmount?.bid?.receivingChainId)
+  const receivingAddress = estimatedAmount?.bid?.receivingAddress
+  const confirmAmount = estimatedAmount?.bid?.amount && BigNumber(estimatedAmount.bid.amount).shiftedBy(-confirmFromContract?.contract_decimals).toNumber()
+  const confirmAmountReceived = estimatedAmount?.bid?.amountReceived && BigNumber(estimatedAmount.bid.amountReceived).shiftedBy(-confirmToContract?.contract_decimals).toNumber()
+  const confirmGasFee = estimatedAmount?.gasFeeInReceivingToken && BigNumber(estimatedAmount.gasFeeInReceivingToken).shiftedBy(-confirmToContract?.contract_decimals).toNumber()
+  const confirmRelayerFee = estimatedAmount && BigNumber(estimatedAmount.metaTxRelayerFee || '0').shiftedBy(-confirmToContract?.contract_decimals).toNumber()
+  let confirmRouterFee
+  if (estimatedAmount?.bid) {
+    if (confirmFromAsset.id === confirmToAsset.id) {
+      confirmRouterFee = confirmAmount - confirmAmountReceived
+    }
+    else {
+      if (typeof tokens_data?.[`${confirmFromChain?.chain_id}_${confirmFromContract?.contract_address}`]?.prices?.[0]?.price === 'number' &&
+        typeof tokens_data?.[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number'
+      ) {
+        const fromPrice = tokens_data[`${confirmFromChain?.chain_id}_${confirmFromContract?.contract_address}`].prices[0].price
+        const toPrice = tokens_data[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`].prices[0].price
+
+        const fromValue = confirmAmount * fromPrice
+        const toValue = confirmAmountReceived * toPrice
+
+        confirmRouterFee = (fromValue - toValue) / toPrice
+      }
+    }
+  }
+  const confirmFees = estimatedAmount && ((confirmGasFee || 0) + (confirmRelayerFee || 0) + (confirmRouterFee || 0))
 
   let maxAmount = Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals)
   if (swapConfig.fromAssetId && swapConfig.toAssetId) {
@@ -665,7 +695,7 @@ export default function CrosschainBridge() {
   }
   maxAmount = maxAmount > smallNumber ? maxAmount : 0
 
-  const estimatedFees = fees && ((fees.gas || 0) + (fees.relayer || 0) + (fees.router || 0))
+  const estimatedFees = typeof confirmFees === 'number' ? confirmFees : fees && ((fees.gas || 0) + (fees.relayer || 0) + (fees.router || 0))
   const feesPopover = children => (
     <Popover
       placement="bottom"
@@ -1187,15 +1217,15 @@ export default function CrosschainBridge() {
                                 title="Swap Confirmation"
                                 body={<div className="flex flex-col space-y-3 sm:space-y-4 -mb-2">
                                   <div className="flex items-center space-x-2 mx-auto py-2">
-                                    {fromChain && (
+                                    {confirmFromChain && (
                                       <div className="flex flex-col items-center space-y-0.5">
                                         <Img
-                                          src={fromChain.image}
+                                          src={confirmFromChain.image}
                                           alt=""
                                           className="w-8 h-8 rounded-full"
                                         />
                                         <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
-                                          {chainTitle(fromChain)}
+                                          {chainTitle(confirmFromChain)}
                                         </span>
                                       </div>
                                     )}
@@ -1219,15 +1249,15 @@ export default function CrosschainBridge() {
                                       </div>
                                     </div>
                                     <TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500 -mt-4" />
-                                    {toChain && (
+                                    {confirmToChain && (
                                       <div className="flex flex-col items-center space-y-0.5">
                                         <img
-                                          src={toChain.image}
+                                          src={confirmToChain.image}
                                           alt=""
                                           className="w-8 h-8 rounded-full"
                                         />
                                         <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
-                                          {chainTitle(toChain)}
+                                          {chainTitle(confirmToChain)}
                                         </span>
                                       </div>
                                     )}
@@ -1242,16 +1272,16 @@ export default function CrosschainBridge() {
                                         {ens_data?.[receivingAddress?.toLowerCase()]?.name || ellipseAddress(receivingAddress?.toLowerCase(), 10)}
                                       </span>
                                       <Copy size={18} text={receivingAddress} />
-                                      {toChain?.explorer?.url && (
+                                      {confirmToChain?.explorer?.url && (
                                         <a
-                                          href={`${toChain.explorer.url}${toChain.explorer.address_path?.replace('{address}', receivingAddress)}`}
+                                          href={`${confirmToChain.explorer.url}${confirmToChain.explorer.address_path?.replace('{address}', receivingAddress)}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           className="text-gray-900 dark:text-white"
                                         >
-                                          {toChain.explorer.icon ?
+                                          {confirmToChain.explorer.icon ?
                                             <Img
-                                              src={toChain.explorer.icon}
+                                              src={confirmToChain.explorer.icon}
                                               alt=""
                                               className="w-5 sm:w-4 xl:w-5 h-5 sm:h-4 xl:h-5 rounded-full opacity-60 hover:opacity-100"
                                             />
@@ -1269,12 +1299,12 @@ export default function CrosschainBridge() {
                                     </div>
                                     <div>
                                       <div className="text-lg space-x-1.5">
-                                        <span className="font-mono font-semibold">{numberFormat(swapConfig.amount, '0,0.00000000')}</span>
-                                        <span className="font-semibold">{fromAsset?.symbol}</span>
+                                        <span className="font-mono font-semibold">{numberFormat(confirmAmount, '0,0.00000000')}</span>
+                                        <span className="font-semibold">{confirmFromAsset?.symbol}</span>
                                       </div>
-                                      {swapConfig.amount && typeof tokens_data?.[`${swapConfig.fromChainId}_${fromContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                                      {confirmAmount && typeof tokens_data?.[`${confirmFromChain?.chain_id}_${confirmFromContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
                                         <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
-                                          ({currency_symbol}{numberFormat(swapConfig.amount * tokens_data[`${swapConfig.fromChainId}_${fromContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                                          ({currency_symbol}{numberFormat(confirmAmount * tokens_data[`${confirmFromChain?.chain_id}_${confirmFromContract?.contract_address}`].prices[0].price, '0,0.00000000')})
                                         </div>
                                       )}
                                     </div>
@@ -1288,23 +1318,23 @@ export default function CrosschainBridge() {
                                       <div className="w-full grid grid-flow-row grid-cols-2 gap-1.5">
                                         <span className="text-gray-400 dark:text-gray-500 text-sm">Dest. Tx Cost:</span>
                                         <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
-                                          <span className="font-mono">{numberFormat(fees?.gas, '0,0.00000000')}</span>
-                                          <span>{toAsset?.symbol}</span>
+                                          <span className="font-mono">{numberFormat(confirmGasFee, '0,0.00000000')}</span>
+                                          <span>{confirmToAsset?.symbol}</span>
                                         </div>
                                         <span className="text-gray-400 dark:text-gray-500 text-sm">Relayer Fee:</span>
                                         <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
-                                          <span className="font-mono">{numberFormat(fees?.relayer, '0,0.00000000')}</span>
-                                          <span>{toAsset?.symbol}</span>
+                                          <span className="font-mono">{numberFormat(confirmRelayerFee, '0,0.00000000')}</span>
+                                          <span>{confirmToAsset?.symbol}</span>
                                         </div>
                                         <span className="text-gray-400 dark:text-gray-500 text-sm">Router Fee:</span>
                                         <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
-                                          <span className="font-mono">{numberFormat(fees?.router, '0,0.00000000')}</span>
-                                          <span>{toAsset?.symbol}</span>
+                                          <span className="font-mono">{numberFormat(confirmRouterFee, '0,0.00000000')}</span>
+                                          <span>{confirmToAsset?.symbol}</span>
                                         </div>
                                         <span className="text-gray-500 dark:text-gray-400 text-base">Total:</span>
                                         <div className="text-gray-500 dark:text-gray-400 text-base text-right space-x-1.5">
                                           <span className="font-mono font-medium">{numberFormat(estimatedFees, '0,0.00000000')}</span>
-                                          <span className="font-medium">{toAsset?.symbol}</span>
+                                          <span className="font-medium">{confirmToAsset?.symbol}</span>
                                         </div>
                                       </div>
                                     </div>
@@ -1326,12 +1356,12 @@ export default function CrosschainBridge() {
                                     </div>
                                     <div>
                                       <div className="text-gray-500 dark:text-gray-400 text-base space-x-1.5">
-                                        <span className="font-mono font-medium">{estimatedAmount.bid?.minimumReceived ? numberFormat(BigNumber(estimatedAmount.bid?.minimumReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000') : 'N/A'}</span>
-                                        <span className=" font-medium">{toAsset?.symbol}</span>
+                                        <span className="font-mono font-medium">{estimatedAmount.bid?.minimumReceived ? numberFormat(BigNumber(estimatedAmount.bid?.minimumReceived).shiftedBy(-confirmToContract?.contract_decimals).toNumber(), '0,0.00000000') : 'N/A'}</span>
+                                        <span className=" font-medium">{confirmToAsset?.symbol}</span>
                                       </div>
-                                      {estimatedAmount.bid?.minimumReceived && typeof tokens_data?.[`${swapConfig.toChainId}_${toContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                                      {estimatedAmount.bid?.minimumReceived && typeof tokens_data?.[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
                                         <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
-                                          ({currency_symbol}{numberFormat(BigNumber(estimatedAmount.bid?.minimumReceived).shiftedBy(-toContract?.contract_decimals).toNumber() * tokens_data[`${swapConfig.toChainId}_${toContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                                          ({currency_symbol}{numberFormat(BigNumber(estimatedAmount.bid?.minimumReceived).shiftedBy(-confirmToContract?.contract_decimals).toNumber() * tokens_data[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`].prices[0].price, '0,0.00000000')})
                                         </div>
                                       )}
                                     </div>
@@ -1343,12 +1373,12 @@ export default function CrosschainBridge() {
                                     </div>
                                     <div>
                                       <div className="text-lg space-x-1.5">
-                                        <span className="font-mono font-semibold">{numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')}</span>
-                                        <span className="font-semibold">{toAsset?.symbol}</span>
+                                        <span className="font-mono font-semibold">{numberFormat(confirmAmountReceived, '0,0.00000000')}</span>
+                                        <span className="font-semibold">{confirmToAsset?.symbol}</span>
                                       </div>
-                                      {estimatedAmount.bid?.amountReceived && typeof tokens_data?.[`${swapConfig.toChainId}_${toContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                                      {confirmAmountReceived && typeof tokens_data?.[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
                                         <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
-                                          ({currency_symbol}{numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber() * tokens_data[`${swapConfig.toChainId}_${toContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                                          ({currency_symbol}{numberFormat(confirmAmountReceived * tokens_data[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`].prices[0].price, '0,0.00000000')})
                                         </div>
                                       )}
                                     </div>
