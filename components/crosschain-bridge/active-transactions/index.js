@@ -50,7 +50,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
 
     const interval = setInterval(() => getData(), 0.5 * 60 * 1000)
     return () => clearInterval(interval)
-  }, [sdk_data, address, getTrigger])
+  }, [sdk_data, signer, getTrigger])
 
   useEffect(() => {
     if (swapData && setActiveTransactionOpen) {
