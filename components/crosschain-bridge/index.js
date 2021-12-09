@@ -1541,7 +1541,7 @@ export default function CrosschainBridge() {
           </div>
         </div>
       </div>
-      <div className="col-span-1 lg:col-span-2 lg:h-screen">
+      <div className="col-span-1 lg:col-span-2 lg:min-h-screen">
         <ActiveTransactions
           setActiveTransactionOpen={open => setActiveTransactionOpen(open)}
         />

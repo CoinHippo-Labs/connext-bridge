@@ -39,7 +39,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
       if (sdk_data && address) {
         const response = await sdk_data.getActiveTransactions()
 
-        setTransactions({ address, data: _.orderBy(response || [], ['crosschainTx.sending.expiry'], ['asc']) })
+        setTransactions({ address, data: _.orderBy(response || [], ['crosschainTx.sending.expiry'], ['desc']) })
       }
 
       setLoading(false)
@@ -193,7 +193,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
             columnWidth={240}
             gutterWidth={16}
             gutterHeight={16}
-            className="hidden sm:block"
+            className="hidden sm:block max-w-xl mx-auto"
           >
             {transactionsComponent}
           </StackGrid>
