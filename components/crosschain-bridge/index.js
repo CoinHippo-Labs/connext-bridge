@@ -760,6 +760,13 @@ export default function CrosschainBridge() {
                 rel="noopener noreferrer"
                 className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 cursor-pointer rounded-xl capitalize flex items-center text-gray-700 dark:text-gray-300 text-base font-semibold py-2 px-3"
               >
+                {toChain?.image && (
+                  <Img
+                    src={toChain.image}
+                    alt=""
+                    className="w-5 h-5 rounded-full mr-1.5"
+                  />
+                )}
                 <span>Liquidity</span>
                 <TiArrowRight size={20} className="transform -rotate-45 -mr-1" />
               </a>

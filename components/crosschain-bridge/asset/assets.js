@@ -70,7 +70,7 @@ export default function Assets({ id, inputSearch, handleDropdownClick, from, to,
                 alt=""
                 className="w-8 h-8 rounded-full"
               />
-              <span className="text-base font-medium">{item.symbol}</span>
+              <span className={`${side === 'from' && !Number(balance.balance) ? 'text-gray-400 dark:text-gray-600' : ''} text-base font-medium`}>{item.symbol}</span>
             </div>
             :
             <div
@@ -87,7 +87,7 @@ export default function Assets({ id, inputSearch, handleDropdownClick, from, to,
               <div className="w-full ml-auto">
                 {side === 'from' ?
                   balance ?
-                    <div className="flex items-center justify-end space-x-1">
+                    <div className={`flex items-center justify-end ${side === 'from' && !Number(balance.balance) ? 'text-gray-400 dark:text-gray-600' : ''} space-x-1`}>
                       <span className="font-mono">{numberFormat((balance.balance || 0) / Math.pow(10, balance.contract_decimals || 0), '0,0.00000000')}</span>
                       <span className="font-semibold">{balance.contract_ticker_symbol}</span>
                     </div>
@@ -97,9 +97,13 @@ export default function Assets({ id, inputSearch, handleDropdownClick, from, to,
                       :
                       null
                   :
-                  contract && asset && (
+                  contract && asset ?
                     <div className="font-mono font-semibold text-right">{numberFormat(asset.amount / Math.pow(10, contract.contract_decimals), '0,0.00')}</div>
-                  )
+                    :
+                    chain && _assets.length > 0 ?
+                      <div className="text-right">-</div>
+                      :
+                      null
                 }
                 {(item.id === from || item.id === to) && (
                   <div className="text-gray-400 dark:text-gray-500 italic text-right">

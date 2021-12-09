@@ -85,7 +85,7 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
                     <span className="font-semibold">{chainTitle(chain)}</span>
                   </div>
                   {(side !== 'from' || address) && (
-                    <div className="text-gray-400 dark:text-gray-500 text-xs font-normal text-right">
+                    <div className="text-gray-400 dark:text-gray-500 text-base font-normal text-right">
                       {side === 'from' ? 'Balances' : 'Liquidity'}
                     </div>
                   )}

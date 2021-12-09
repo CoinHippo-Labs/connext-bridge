@@ -407,7 +407,12 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                 :
                 <>
                   <div className="skeleton w-16 h-6 mt-1" />
-                  <div className="skeleton w-24 h-4 mt-2.5" />
+                  {/*<div className="skeleton w-24 h-4 mt-2.5" />*/}
+                  <div className="flex items-center text-gray-400 dark:text-gray-400 text-xs font-medium space-x-1 mt-0.5">
+                    <span>fetching</span>
+                    <span className="sm:hidden lg:block">status</span>
+                    <Loader type="ThreeDots" color={theme === 'dark' ? '#9CA3AF' : '#9CA3AF'} width="16" height="16" className="mt-1" />
+                  </div>
                 </>
               }
             </div>
@@ -572,7 +577,12 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                 :
                 <>
                   <div className="skeleton w-16 h-6 mt-1" />
-                  <div className="skeleton w-24 h-4 mt-2.5" />
+                  {/*<div className="skeleton w-24 h-4 mt-2.5" />*/}
+                  <div className="flex items-center text-gray-400 dark:text-gray-400 text-xs font-medium space-x-1 mt-0.5">
+                    <span>fetching</span>
+                    <span className="sm:hidden lg:block">status</span>
+                    <Loader type="ThreeDots" color={theme === 'dark' ? '#9CA3AF' : '#9CA3AF'} width="16" height="16" className="mt-1" />
+                  </div>
                 </>
               }
             </div>
