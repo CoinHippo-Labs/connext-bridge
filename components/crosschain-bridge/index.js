@@ -97,7 +97,9 @@ export default function CrosschainBridge() {
   // wallet
   useEffect(() => {
     if (chain_id && !swapConfig.fromChainId && swapConfig.toChainId !== chain_id) {
-      setSwapConfig({ ...swapConfig, fromChainId: chain_id })
+      if (chains_data?.findIndex(_chain => !_chain?.disabled && _chain?.chain_id === swapConfig.chain_id) > -1) {
+        setSwapConfig({ ...swapConfig, fromChainId: chain_id })
+      }
 
       getChainBalances(chain_id)
     }
@@ -1141,7 +1143,7 @@ export default function CrosschainBridge() {
                     </Alert>
                   </div>
                   :
-                  !(fromChainSynced && toChainSynced) ?
+                  !swapData && !(fromChainSynced && toChainSynced) ?
                     <div className="sm:pt-1.5 pb-1">
                       <Alert
                         color="bg-red-400 dark:bg-red-500 text-left text-white"

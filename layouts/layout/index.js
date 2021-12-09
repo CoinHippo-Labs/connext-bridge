@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { useSelector, shallowEqual } from 'react-redux'
+import { useEffect } from 'react'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import Navbar from '../../components/navbar'
 import Footer from '../../components/footer'
@@ -8,12 +9,26 @@ import ChainsStatus from '../../components/chains-status'
 
 import meta from '../../lib/meta'
 
+import { THEME } from '../../reducers/types'
+
 export default function Layout({ children }) {
+  const dispatch = useDispatch()
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
   const { theme } = { ...preferences }
 
   const router = useRouter()
   const { asPath } = { ...router }
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (localStorage.getItem(THEME) !== theme) {
+        dispatch({
+          type: THEME,
+          value: localStorage.getItem(THEME),
+        })
+      }
+    }
+  }, [theme])
 
   const headMeta = meta(asPath)
 
