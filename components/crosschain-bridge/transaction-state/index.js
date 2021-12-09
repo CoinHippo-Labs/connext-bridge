@@ -686,7 +686,19 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                 :*/
                 <div>
                   <div className="skeleton w-36 h-6 mt-1" />
-                  <div className="skeleton w-20 h-6 lg:h-7 mt-2.5 mx-auto sm:mr-0" />
+                  {toChain && (
+                    <div className="flex items-center justify-center sm:justify-end space-x-2 mt-1">
+                      {toChain.image && (
+                        <img
+                          src={toChain.image}
+                          alt=""
+                          className="w-8 sm:w-6 lg:w-8 h-8 sm:h-6 lg:h-8 rounded-full"
+                        />
+                      )}
+                      <span className="text-gray-700 dark:text-gray-300 text-lg sm:text-base lg:text-lg font-semibold">{chainTitle(toChain)}</span>
+                    </div>
+                  )}
+                  {/*<div className="skeleton w-20 h-6 lg:h-7 mt-2.5 mx-auto sm:mr-0" />*/}
                 </div>
             }
           </div>
