@@ -717,14 +717,14 @@ export default function CrosschainBridge() {
         <div className="flex items-center justify-between space-x-2">
           <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-xs font-medium">Relayer Fee:</span>
           <span className="text-gray-600 dark:text-gray-400 text-xs space-x-1">
-            <span className="font-mono">{typeof (estimatedAmount ? confirmRelayerFee : fees?.relayer) ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedAmount ? confirmRelayerFee : fees.relayer, '0,0.00000000')}` : 'N/A'}</span>
+            <span className="font-mono">{typeof (estimatedAmount ? confirmRelayerFee : fees?.relayer) === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedAmount ? confirmRelayerFee : fees.relayer, '0,0.00000000')}` : 'N/A'}</span>
             <span className="font-semibold">{(estimatedAmount ? confirmToAsset : toAsset)?.symbol}</span>
           </span>
         </div>
         <div className="flex items-center justify-between space-x-2">
           <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-xs font-medium">Router Fee:</span>
           <span className="text-gray-600 dark:text-gray-400 text-xs space-x-1">
-            <span className="font-mono">{typeof (estimatedAmount ? confirmRouterFee : fees?.router) ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedAmount ? confirmRouterFee : fees.router, '0,0.00000000')}` : 'N/A'}</span>
+            <span className="font-mono">{typeof (estimatedAmount ? confirmRouterFee : fees?.router) === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedAmount ? confirmRouterFee : fees.router, '0,0.00000000')}` : `${process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT}%`}</span>
             <span className="font-semibold">{(estimatedAmount ? confirmToAsset : toAsset)?.symbol}</span>
           </span>
         </div>
