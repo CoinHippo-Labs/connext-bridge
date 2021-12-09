@@ -639,10 +639,10 @@ export default function CrosschainBridge() {
   const confirmFromContract = confirmFromAsset?.contracts?.find(_contract => _contract?.chain_id === estimatedAmount?.bid?.sendingChainId)
   const confirmToContract = confirmToAsset?.contracts?.find(_contract => _contract?.chain_id === estimatedAmount?.bid?.receivingChainId)
   const receivingAddress = estimatedAmount?.bid?.receivingAddress
-  const confirmAmount = estimatedAmount?.bid?.amount && BigNumber(estimatedAmount.bid.amount).shiftedBy(-confirmFromContract?.contract_decimals).toNumber()
-  const confirmAmountReceived = estimatedAmount?.bid?.amountReceived && BigNumber(estimatedAmount.bid.amountReceived).shiftedBy(-confirmToContract?.contract_decimals).toNumber()
-  const confirmGasFee = estimatedAmount?.gasFeeInReceivingToken && BigNumber(estimatedAmount.gasFeeInReceivingToken).shiftedBy(-confirmToContract?.contract_decimals).toNumber()
-  const confirmRelayerFee = estimatedAmount && BigNumber(estimatedAmount.metaTxRelayerFee || '0').shiftedBy(-confirmToContract?.contract_decimals).toNumber()
+  const confirmAmount = confirmFromContract && estimatedAmount?.bid?.amount && BigNumber(estimatedAmount.bid.amount).shiftedBy(-confirmFromContract?.contract_decimals).toNumber()
+  const confirmAmountReceived = confirmToContract && estimatedAmount?.bid?.amountReceived && BigNumber(estimatedAmount.bid.amountReceived).shiftedBy(-confirmToContract?.contract_decimals).toNumber()
+  const confirmGasFee = confirmToContract && estimatedAmount?.gasFeeInReceivingToken && BigNumber(estimatedAmount.gasFeeInReceivingToken).shiftedBy(-confirmToContract?.contract_decimals).toNumber()
+  const confirmRelayerFee = confirmToContract && estimatedAmount && BigNumber(estimatedAmount.metaTxRelayerFee || '0').shiftedBy(-confirmToContract?.contract_decimals).toNumber()
   let confirmRouterFee
   if (estimatedAmount?.bid) {
     if (confirmFromAsset.id === confirmToAsset.id) {
@@ -1159,7 +1159,7 @@ export default function CrosschainBridge() {
                       :
                       !swapData && !swapResponse && !estimatedAmountResponse && (estimatedAmount || estimatingAmount) ?
                         <div className="sm:pt-1.5 pb-1">
-                          {!estimatingAmount && estimatedAmount && estimatedFees > BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber() && (
+                          {!estimatingAmount && estimatedAmount && estimatedFees > confirmAmountReceived && (
                             <div className="order-2 sm:col-span-5 flex flex-wrap items-center justify-center text-yellow-500 dark:text-yellow-400 mt-4 sm:mt-0 mb-2">
                               <TiWarning size={16} className="mb-0.5 mr-1.5" />
                               <span>Fee is greater than estimated received.</span>
