@@ -1083,7 +1083,7 @@ export default function CrosschainBridge() {
               updateOptions={_options => setAdvancedOptions(_options)}
             />
           </div>
-          {balances_data?.[swapConfig.fromChainId]/* && typeof estimatedFees === 'number'*/ && typeof swapConfig.amount === 'number' ?
+          {isSupport() && balances_data?.[swapConfig.fromChainId]/* && typeof estimatedFees === 'number'*/ && typeof swapConfig.amount === 'number' ?
             !estimatingFees && swapConfig.fromAssetId === swapConfig.toAssetId && swapConfig.amount < estimatedFees ?
               <div className="sm:pt-1.5 pb-1">
                 <Alert
