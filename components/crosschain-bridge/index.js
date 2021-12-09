@@ -1476,7 +1476,7 @@ export default function CrosschainBridge() {
                     className="w-6 h-6 -mr-0.5 mb-0.5"
                   />*/}
                 </>}
-                buttonConnectClassName="w-full bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700 rounded-lg shadow-lg flex items-center justify-center text-white text-base sm:text-lg font-semibold space-x-2.5 py-4 px-3"
+                buttonConnectClassName="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg font-semibold space-x-2.5 py-4 px-3"
               />
           }
           {tokenApproveResponse && (
