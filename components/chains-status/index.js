@@ -7,7 +7,6 @@ import { providers } from 'ethers'
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
 import { TiWarning } from 'react-icons/ti'
-import { FaRegHandPointRight } from 'react-icons/fa'
 
 import Alert from '../alerts'
 
@@ -136,7 +135,7 @@ export default function ChainsStatus() {
           ))}
         </div>
       )}
-      {chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).length > 0 && (
+      {/*chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).length > 0 && (
         <div className="px-4">
           <Alert
             color="xl:max-w-lg bg-yellow-400 dark:bg-blue-600 text-left text-white mt-4 sm:mt-6 -mb-6 sm:-mb-2 mx-auto"
@@ -146,7 +145,6 @@ export default function ChainsStatus() {
             className="items-start"
           >
             <div className="block font-mono leading-4 text-xs xl:text-base font-medium">
-              {/*<FaRegHandPointRight size={20} className="inline mr-2" />*/}
               <span className="mr-2">
                 Transfers to and from <span className="font-semibold">{chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).map(_chain => _chain?.short_name).join(', ')}</span> may be delayed temporarily. Funds are always safe! If you have active transactions, check their status
               </span>
@@ -161,7 +159,7 @@ export default function ChainsStatus() {
             </div>
           </Alert>
         </div>
-      )}
+      )*/}
     </>
   )
 }
