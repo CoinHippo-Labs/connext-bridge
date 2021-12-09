@@ -255,7 +255,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                       rel="noopener noreferrer"
                     >
                       <span className="text-gray-700 dark:text-gray-200 text-base sm:text-sm lg:text-base font-medium">
-                        {ens_data?.[generalTx.sendingAddress?.toLowerCase()]?.name || ellipseAddress(generalTx.sendingAddress?.toLowerCase(), 6)}
+                        {ellipseAddress(ens_data?.[generalTx.sendingAddress?.toLowerCase()]?.name, 10) || ellipseAddress(generalTx.sendingAddress?.toLowerCase(), 6)}
                       </span>
                     </a>
                     <Copy size={18} text={generalTx.sendingAddress} />
@@ -303,7 +303,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                       rel="noopener noreferrer"
                     >
                       <span className="text-gray-700 dark:text-gray-200 text-base sm:text-sm lg:text-base font-medium">
-                        {ens_data?.[data.prepareResponse.from?.toLowerCase()]?.name || ellipseAddress(data.prepareResponse.from?.toLowerCase(), 6)}
+                        {ellipseAddress(ens_data?.[data.prepareResponse.from?.toLowerCase()]?.name, 10) || ellipseAddress(data.prepareResponse.from?.toLowerCase(), 6)}
                       </span>
                     </a>
                     <Copy size={18} text={data.prepareResponse.from.toLowerCase()} />
@@ -599,7 +599,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                       rel="noopener noreferrer"
                     >
                       <span className="text-gray-700 dark:text-gray-200 text-base sm:text-sm lg:text-base font-medium">
-                        {ens_data?.[generalTx.receivingAddress?.toLowerCase()]?.name || ellipseAddress(generalTx.receivingAddress?.toLowerCase(), 6)}
+                        {ellipseAddress(ens_data?.[generalTx.receivingAddress?.toLowerCase()]?.name, 10) || ellipseAddress(generalTx.receivingAddress?.toLowerCase(), 6)}
                       </span>
                     </a>
                     <Copy size={18} text={generalTx.receivingAddress} />
@@ -647,7 +647,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                       rel="noopener noreferrer"
                     >
                       <span className="text-gray-700 dark:text-gray-200 text-base sm:text-sm lg:text-base font-medium">
-                        {ens_data?.[data.prepareResponse.to?.toLowerCase()]?.name || ellipseAddress(data.prepareResponse.to?.toLowerCase(), 6)}
+                        {ellipseAddress(ens_data?.[data.prepareResponse.to?.toLowerCase()]?.name, 10) || ellipseAddress(data.prepareResponse.to?.toLowerCase(), 6)}
                       </span>
                     </a>
                     <Copy size={18} text={data.prepareResponse.to.toLowerCase()} />
@@ -696,7 +696,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                 <span className="min-w-max flex flex-col text-gray-400 dark:text-gray-500 text-center mx-auto">
                   <span>Address not match.</span>
                   <span className="flex items-center">
-                    (Your<span className="hidden sm:block ml-1">connected addr</span>: {ens_data?.[address?.toLowerCase()]?.name || ellipseAddress(address?.toLowerCase(), 6)})
+                    (Your<span className="hidden sm:block ml-1">connected addr</span>: {ellipseAddress(ens_data?.[address?.toLowerCase()]?.name, 10) || ellipseAddress(address?.toLowerCase(), 6)})
                   </span>
                 </span>
                 :

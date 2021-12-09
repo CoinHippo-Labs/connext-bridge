@@ -17,10 +17,9 @@ import Widget from '../../widget'
 import { numberFormat, ellipseAddress } from '../../../lib/utils'
 
 export default function ActiveTransactions({ setActiveTransactionOpen }) {
-  const { chains, assets, ens, wallet, sdk, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, ens: state.ens, wallet: state.wallet, sdk: state.sdk, preferences: state.preferences }), shallowEqual)
+  const { chains, assets, wallet, sdk, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, wallet: state.wallet, sdk: state.sdk, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
-  const { ens_data } = { ...ens }
   const { wallet_data } = { ...wallet }
   const { web3_provider, signer, chain_id, address } = { ...wallet_data }
   const { sdk_data } = { ...sdk }

@@ -1276,7 +1276,7 @@ export default function CrosschainBridge() {
                                     </div>
                                     {receivingAddress && (<div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
                                       <span className="text-gray-900 dark:text-gray-100 text-base sm:text-xs xl:text-base font-semibold">
-                                        {ens_data?.[receivingAddress?.toLowerCase()]?.name || ellipseAddress(receivingAddress?.toLowerCase(), 10)}
+                                        {ellipseAddress(ens_data?.[receivingAddress?.toLowerCase()]?.name, 10) || ellipseAddress(receivingAddress?.toLowerCase(), 10)}
                                       </span>
                                       <Copy size={18} text={receivingAddress} />
                                       {confirmToChain?.explorer?.url && (

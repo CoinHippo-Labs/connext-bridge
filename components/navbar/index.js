@@ -74,7 +74,7 @@ export default function Navbar() {
                   size={16}
                   text={address}
                   copyTitle={<span className="text-gray-400 dark:text-white text-xs xl:text-sm font-semibold">
-                    {ens_data?.[address?.toLowerCase()]?.name || ellipseAddress(address?.toLowerCase(), 6)}
+                    {ellipseAddress(ens_data?.[address?.toLowerCase()]?.name, 10) || ellipseAddress(address?.toLowerCase(), 6)}
                   </span>}
                 />
               </div>
