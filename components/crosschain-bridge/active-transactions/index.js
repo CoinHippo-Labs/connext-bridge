@@ -75,6 +75,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
     const fromChain = chains_data?.find(_chain => _chain.chain_id === transaction?.crosschainTx?.invariant?.sendingChainId)
     const toChain = chains_data?.find(_chain => _chain.chain_id === transaction?.crosschainTx?.invariant?.receivingChainId)
     const fromAsset = assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === fromChain?.chain_id && _contract?.contract_address?.toLowerCase() === transaction?.crosschainTx?.invariant?.sendingAssetId))
+    const expired = moment(transaction?.crosschainTx?.sending?.expiry * 1000).diff(moment()) < 0
 
     return (
       <Widget
@@ -155,8 +156,8 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
                   :
                   null
             }
-            <div className="text-gray-400 dark:text-gray-600 text-xs space-x-1">
-              <span>Expire{moment(transaction?.crosschainTx?.sending?.expiry * 1000).diff(moment()) < 0 ? 'd' : ''}</span>
+            <div className={`${expired ? 'text-red-600 dark:text-red-400' : 'text-gray-400 dark:text-gray-600'} text-xs space-x-1`}>
+              <span>Expire{expired ? 'd' : ''}</span>
               <span>{moment(transaction?.crosschainTx?.sending?.expiry * 1000).fromNow()}</span>
             </div>
           </div>

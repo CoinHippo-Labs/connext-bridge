@@ -703,29 +703,29 @@ export default function CrosschainBridge() {
         <span className="whitespace-nowrap text-gray-600 dark:text-gray-400 text-sm font-semibold">{estimatedAmount ? '' : 'Estimated '}Fees:</span>
         <span className="text-black dark:text-white text-sm space-x-1">
           <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.00000000')}` : 'N/A'}</span>
-          <span className="font-semibold">{toAsset?.symbol}</span>
+          <span className="font-semibold">{(estimatedAmount ? confirmToAsset : toAsset)?.symbol}</span>
         </span>
       </div>}
       content={<div className="flex flex-col space-y-2">
         <div className="flex items-center justify-between space-x-2">
           <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-xs font-medium">Dest. Tx Cost:</span>
           <span className="text-gray-600 dark:text-gray-400 text-xs space-x-1">
-            <span className="font-mono">{typeof fees?.gas === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.gas, '0,0.00000000')}` : 'N/A'}</span>
-            <span className="font-semibold">{toAsset?.symbol}</span>
+            <span className="font-mono">{typeof (estimatedAmount ? confirmGasFee : fees?.gas) === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedAmount ? confirmGasFee : fees.gas, '0,0.00000000')}` : 'N/A'}</span>
+            <span className="font-semibold">{(estimatedAmount ? confirmToAsset : toAsset)?.symbol}</span>
           </span>
         </div>
         <div className="flex items-center justify-between space-x-2">
           <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-xs font-medium">Relayer Fee:</span>
           <span className="text-gray-600 dark:text-gray-400 text-xs space-x-1">
-            <span className="font-mono">{typeof fees?.relayer === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.relayer, '0,0.00000000')}` : 'N/A'}</span>
-            <span className="font-semibold">{toAsset?.symbol}</span>
+            <span className="font-mono">{typeof (estimatedAmount ? confirmRelayerFee : fees?.relayer) ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedAmount ? confirmRelayerFee : fees.relayer, '0,0.00000000')}` : 'N/A'}</span>
+            <span className="font-semibold">{(estimatedAmount ? confirmToAsset : toAsset)?.symbol}</span>
           </span>
         </div>
         <div className="flex items-center justify-between space-x-2">
           <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-xs font-medium">Router Fee:</span>
           <span className="text-gray-600 dark:text-gray-400 text-xs space-x-1">
-            <span className="font-mono">{typeof fees?.router === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(fees.router, '0,0.00000000')}` : 'N/A'}</span>
-            <span className="font-semibold">{toAsset?.symbol}</span>
+            <span className="font-mono">{typeof (estimatedAmount ? confirmRouterFee : fees?.router) ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedAmount ? confirmRouterFee : fees.router, '0,0.00000000')}` : 'N/A'}</span>
+            <span className="font-semibold">{(estimatedAmount ? confirmToAsset : toAsset)?.symbol}</span>
           </span>
         </div>
       </div>}
@@ -1009,7 +1009,7 @@ export default function CrosschainBridge() {
             <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 mb-8 sm:mb-4 pb-0.5">
               <div className="sm:col-span-2 flex items-center justify-center sm:justify-start space-x-1">
                 <span className="text-gray-400 dark:text-gray-600 text-base">{estimatedAmount || estimatingAmount ? '' : 'Estimated '}Fees</span>
-                {!(estimatingAmount || estimatingFees || typeof estimatedFees !== 'number') && (
+                {!(estimatedAmountResponse || estimatingAmount || estimatingFees || typeof estimatedFees !== 'number') && (
                   feesPopover(
                     <span className="text-gray-400 dark:text-gray-600">
                       <IoMdInformationCircle size={16} />
@@ -1024,7 +1024,7 @@ export default function CrosschainBridge() {
                     <Loader type="BallTriangle" color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="20" height="20" />
                   </div>
                   :
-                  typeof estimatedFees === 'number' ?
+                  !estimatedAmountResponse && typeof estimatedFees === 'number' ?
                     feesPopover(
                       <span className="flex items-center text-gray-400 dark:text-gray-200 text-sm space-x-1">
                         <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.000000')}` : 'N/A'}</span>
@@ -1059,19 +1059,19 @@ export default function CrosschainBridge() {
                     {estimatingAmount ?
                       <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="24" height="24" className="mt-1.5" />
                       :
-                      estimatedAmount ?
+                      !estimatedAmountResponse && estimatedAmount ?
                         <span className="font-semibold">
-                          {numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber(), '0,0.00000000')}
+                          {numberFormat(confirmAmountReceived, '0,0.00000000')}
                         </span>
                         :
                         <span className="text-gray-400 dark:text-gray-500">-</span>
                     }
                   </div>
-                  <span className="text-lg font-semibold">{toAsset?.symbol}</span>
+                  <span className="text-lg font-semibold">{confirmToAsset?.symbol}</span>
                 </div>
-                {!estimatingAmount && estimatedAmount && typeof tokens_data?.[`${swapConfig.toChainId}_${toContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                {!estimatedAmountResponse && !estimatingAmount && estimatedAmount && typeof tokens_data?.[`${confirmToChain.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
                   <div className="font-mono text-gray-400 dark:text-gray-500 text-xs">
-                    ({currency_symbol}{numberFormat(BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber() * tokens_data[`${swapConfig.toChainId}_${toContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                    ({currency_symbol}{numberFormat(confirmAmountReceived * tokens_data[`${confirmToChain.chain_id}_${confirmToContract?.contract_address}`].prices[0].price, '0,0.00000000')})
                   </div>
                 )}
               </div>
@@ -1157,7 +1157,7 @@ export default function CrosschainBridge() {
                     activeTransactionOpen ?
                       null
                       :
-                      !swapData && !swapResponse && (estimatedAmount || estimatingAmount) ?
+                      !swapData && !swapResponse && !estimatedAmountResponse && (estimatedAmount || estimatingAmount) ?
                         <div className="sm:pt-1.5 pb-1">
                           {!estimatingAmount && estimatedAmount && estimatedFees > BigNumber(estimatedAmount.bid?.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber() && (
                             <div className="order-2 sm:col-span-5 flex flex-wrap items-center justify-center text-yellow-500 dark:text-yellow-400 mt-4 sm:mt-0 mb-2">
