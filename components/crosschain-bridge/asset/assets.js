@@ -70,7 +70,7 @@ export default function Assets({ id, inputSearch, handleDropdownClick, from, to,
                 alt=""
                 className="w-8 h-8 rounded-full"
               />
-              <span className={`${side === 'from' && !Number(balance.balance) ? 'text-gray-400 dark:text-gray-600' : ''} text-base font-medium`}>{item.symbol}</span>
+              <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-base font-medium">{item.symbol}</span>
             </div>
             :
             <div
@@ -83,11 +83,11 @@ export default function Assets({ id, inputSearch, handleDropdownClick, from, to,
                 alt=""
                 className="w-8 h-8 rounded-full"
               />
-              <span className="whitespace-nowrap text-base font-medium">{item.symbol}</span>
+              <span className={`whitespace-nowrap ${side === 'from' && !Number(balance.balance) ? 'text-gray-300 dark:text-gray-600' : ''} text-base font-medium`}>{item.symbol}</span>
               <div className="w-full ml-auto">
                 {side === 'from' ?
                   balance ?
-                    <div className={`flex items-center justify-end ${side === 'from' && !Number(balance.balance) ? 'text-gray-400 dark:text-gray-600' : ''} space-x-1`}>
+                    <div className={`flex items-center justify-end ${side === 'from' && !Number(balance.balance) ? 'text-gray-300 dark:text-gray-600' : ''} space-x-1`}>
                       <span className="font-mono">{numberFormat((balance.balance || 0) / Math.pow(10, balance.contract_decimals || 0), '0,0.00000000')}</span>
                       <span className="font-semibold">{balance.contract_ticker_symbol}</span>
                     </div>
