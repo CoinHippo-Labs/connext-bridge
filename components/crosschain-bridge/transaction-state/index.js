@@ -638,7 +638,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                 :
                 <span className="text-gray-400 dark:text-gray-600 font-light sm:text-right">Unknown</span>
               :
-              data?.receivingChainId && data.prepareResponse?.to ?
+              /*data?.receivingChainId && data.prepareResponse?.to ?
                 <div className="min-w-max">
                   <div className="flex items-center space-x-1.5">
                     <a
@@ -683,7 +683,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                     </div>
                   )}
                 </div>
-                :
+                :*/
                 <div>
                   <div className="skeleton w-36 h-6 mt-1" />
                   <div className="skeleton w-20 h-6 lg:h-7 mt-2.5 mx-auto sm:mr-0" />

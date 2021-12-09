@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
@@ -44,6 +44,10 @@ export default function AdvancedOptions({ applied = false, initialOptions, updat
       placeholder: 'Specify a target router to handle transaction',
     },
   ]
+
+  useEffect(() => {
+    setOptions(initialOptions)
+  }, [initialOptions])
 
   return (
     <>
