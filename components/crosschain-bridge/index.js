@@ -96,14 +96,14 @@ export default function CrosschainBridge() {
 
   // wallet
   useEffect(() => {
-    if (chain_id && !swapConfig.fromChainId && swapConfig.toChainId !== chain_id) {
-      if (chains_data?.findIndex(_chain => !_chain?.disabled && _chain?.chain_id === swapConfig.chain_id) > -1) {
+    if (chain_id && (!swapConfig.fromChainId || !swapConfig.toChainId) && swapConfig.toChainId !== chain_id) {
+      if (chains_data?.findIndex(_chain => !_chain?.disabled && _chain?.chain_id === chain_id) > -1) {
         setSwapConfig({ ...swapConfig, fromChainId: chain_id })
       }
 
       getChainBalances(chain_id)
     }
-  }, [chain_id])
+  }, [chain_id, chains_data])
 
   useEffect(() => {
     dispatch({
@@ -120,6 +120,9 @@ export default function CrosschainBridge() {
           getChainBalances(swapConfig.toChainId)
         }
       // }
+    }
+    else {
+      reset()
     }
   }, [address])
 
