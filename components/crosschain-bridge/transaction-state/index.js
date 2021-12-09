@@ -739,7 +739,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                 <FaCheckCircle size={48} className="text-green-500 dark:text-white" />
                 :
                 [sendingTx?.status, receivingTx?.status].includes('Cancelled') ?
-                  <FaTimesCircle size={48} className="text-red-500 dark:text-white" />
+                  <FaTimesCircle size={48} className="text-gray-300 dark:text-white" />
                   :
                   null
               }
