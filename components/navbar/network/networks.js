@@ -5,6 +5,8 @@ import { IoRadioButtonOn } from 'react-icons/io5'
 
 import Wallet from '../../wallet'
 
+import { chainTitle } from '../../../lib/object/chain'
+
 export default function Networks({ handleDropdownClick }) {
   const { chains, chains_status } = useSelector(state => ({ chains: state.chains, chains_status: state.chains_status }), shallowEqual)
   const { chains_status_data } = { ...chains_status }
@@ -27,7 +29,7 @@ export default function Networks({ handleDropdownClick }) {
                 alt=""
                 className="w-5 h-5 rounded-full"
               />
-              <span className="leading-4 text-2xs font-medium">{item.title}</span>
+              <span className="leading-4 text-2xs font-medium">{chainTitle(item)}</span>
             </div>
             :
             <Wallet
@@ -41,7 +43,7 @@ export default function Networks({ handleDropdownClick }) {
                   alt=""
                   className="w-5 h-5 rounded-full"
                 />
-                <span className="leading-4 text-2xs font-medium text-left">{item.title}</span>
+                <span className="leading-4 text-2xs font-medium text-left">{chainTitle(item)}</span>
               </>}
               buttonDisconnectClassName="dropdown-item w-1/2 flex items-center justify-start space-x-1 p-2"
             />
