@@ -3,8 +3,9 @@ import { useSelector, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
 import { BiChevronDown, BiChevronUp } from 'react-icons/bi'
+import { BsCheckCircleFill } from 'react-icons/bs'
 
-export default function AdvancedOptions({ initialOptions, updateOptions }) {
+export default function AdvancedOptions({ applied = false, initialOptions, updateOptions }) {
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
   const { theme } = { ...preferences }
 
@@ -50,6 +51,12 @@ export default function AdvancedOptions({ initialOptions, updateOptions }) {
         onClick={() => setCollapse(!collapse)}
         className="bg-transparent text-gray-400 dark:text-gray-500 flex items-center text-sm space-x-1 ml-auto"
       >
+        {applied && (
+          <>
+            <BsCheckCircleFill size={16} className="text-green-500 dark:text-white" />
+            <span />
+          </>
+        )}
         <span>Advanced Options</span>
         {collapse ?
           <BiChevronDown size={20} />

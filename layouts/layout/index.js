@@ -21,7 +21,7 @@ export default function Layout({ children }) {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      if (localStorage.getItem(THEME) !== theme) {
+      if (localStorage.getItem(THEME) && localStorage.getItem(THEME) !== theme) {
         dispatch({
           type: THEME,
           value: localStorage.getItem(THEME),

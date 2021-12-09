@@ -62,16 +62,18 @@ export default function CrosschainBridge() {
   const { rpcs_data } = { ...rpcs }
   const { theme } = { ...preferences }
 
-  const [controller, setController] = useState(new AbortController())
-
-  const [swapConfig, setSwapConfig] = useState({})
-  const [advancedOptions, setAdvancedOptions] = useState({
+  const defaultAdvancedOptions = {
     infinite_approval: true,
     receiving_address: '',
     contract_address: '',
     call_data: '',
     preferred_router: '',
-  })
+  }
+
+  const [controller, setController] = useState(new AbortController())
+
+  const [swapConfig, setSwapConfig] = useState({})
+  const [advancedOptions, setAdvancedOptions] = useState(defaultAdvancedOptions)
 
   const [estimateTrigger, setEstimateTrigger] = useState(null)
 
@@ -591,13 +593,7 @@ export default function CrosschainBridge() {
 
   const reset = () => {
     setSwapConfig({ ...swapConfig, amount: null })
-    setAdvancedOptions({
-      infinite_approval: true,
-      receiving_address: '',
-      contract_address: '',
-      call_data: '',
-      preferred_router: '',
-    })
+    setAdvancedOptions(defaultAdvancedOptions)
 
     setEstimateTrigger(null)
 
@@ -1117,6 +1113,7 @@ export default function CrosschainBridge() {
             )}
             <div className="grid grid-flow-row grid-cols-1 sm:gap-4 mb-8 sm:mb-4">
               <AdvancedOptions
+                applied={!_.isEqual(advancedOptions, defaultAdvancedOptions)}
                 initialOptions={advancedOptions}
                 updateOptions={_options => setAdvancedOptions(_options)}
               />
