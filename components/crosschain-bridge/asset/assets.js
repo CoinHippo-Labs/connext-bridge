@@ -87,13 +87,13 @@ export default function Assets({ id, inputSearch, handleDropdownClick, from, to,
               <div className="w-full ml-auto">
                 {side === 'from' ?
                   balance ?
-                    <div className={`flex items-center justify-end ${side === 'from' && !Number(balance?.balance) ? 'text-gray-300 dark:text-gray-600' : ''} space-x-1`}>
+                    <div className={`flex items-center justify-end ${!Number(balance?.balance) ? 'text-gray-300 dark:text-gray-600' : ''} space-x-1`}>
                       <span className="font-mono">{numberFormat((balance.balance || 0) / Math.pow(10, balance.contract_decimals || 0), '0,0.00000000')}</span>
                       <span className="font-semibold">{balance.contract_ticker_symbol}</span>
                     </div>
                     :
                     balances_data?.[chain_id] ?
-                      <div className="text-right">-</div>
+                      <div className="text-gray-300 dark:text-gray-600 text-right">-</div>
                       :
                       null
                   :

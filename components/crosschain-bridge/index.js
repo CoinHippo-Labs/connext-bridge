@@ -1426,10 +1426,10 @@ export default function CrosschainBridge() {
                                     {startingSwap && (
                                       <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="16" height="16" />
                                     )}
-                                    <span>Comfirm</span>
+                                    <span>Confirm</span>
                                   </span>}
                                   confirmDisabled={startingSwap}
-                                  onComfirmHide={false}
+                                  onConfirmHide={false}
                                   onConfirm={() => swap()}
                                 />
                             }

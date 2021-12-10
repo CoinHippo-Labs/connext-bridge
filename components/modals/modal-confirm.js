@@ -3,7 +3,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import Portal from '../portal'
 import { FiX } from 'react-icons/fi'
 
-export default function Modal({ id = 'portal', hidden, buttonTitle, disabled, onClick, buttonClassName, title, icon, body, cancelButtonTitle, cancelDisabled = false, onCancel, confirmButtonTitle, confirmDisabled = false, onConfirm, onComfirmHide = true, confirmButtonClassName, onClose, noButtons, modalClassName = '' }) {
+export default function Modal({ id = 'portal', hidden, buttonTitle, disabled, onClick, buttonClassName, title, icon, body, cancelButtonTitle, cancelDisabled = false, onCancel, confirmButtonTitle, confirmDisabled = false, onConfirm, onConfirmHide = true, confirmButtonClassName, onClose, noButtons, modalClassName = '' }) {
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
   const { theme } = { ...preferences }
 
@@ -94,7 +94,7 @@ export default function Modal({ id = 'portal', hidden, buttonTitle, disabled, on
                       disabled={confirmDisabled}
                       onClick={() => {
                         if (onConfirm) onConfirm()
-                        if (onComfirmHide) hide()
+                        if (onConfirmHide) hide()
                       }}
                       className={confirmButtonClassName || 'btn btn-default btn-rounded bg-blue-600 hover:bg-blue-500 text-white'}
                     >

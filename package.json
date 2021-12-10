@@ -12,7 +12,7 @@
     "deploy-testnet": "aws s3 sync out/ s3://testnet.xpollinate.connext.network --acl public-read"
   },
   "dependencies": {
-    "@connext/nxtp-sdk": "^0.0.99",
+    "@connext/nxtp-sdk": "^0.0.100",
     "@walletconnect/web3-provider": "^1.6.6",
     "bignumber.js": "^9.0.1",
     "ethers": "^5.5.1",

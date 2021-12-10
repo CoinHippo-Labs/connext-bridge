@@ -420,8 +420,8 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
               <TiArrowRight size={24} className="transform rotate-90 sm:rotate-0 text-gray-400 dark:text-gray-600" />
             </div>
             <div className="flex flex-col items-center">
-              <div className="min-w-max grid grid-flow-row grid-cols-3 gap-2 sm:mt-1 xl:mt-0">
-                {loaded ?
+              <div className="min-w-max grid grid-flow-row grid-cols-3 gap-2 sm:mt-0 xl:-mt-1">
+                {/*loaded ?
                   generalTx?.sendingChain && (
                     <Img
                       src={generalTx.sendingChain.image}
@@ -438,13 +438,14 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                     />
                     :
                     <div className="skeleton w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6" style={{ borderRadius: '100%' }} />
-                }
+                */}
+                <span />
                 <Img
                   src="/logos/connext/logo.png"
                   alt=""
-                  className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
+                  className="w-8 sm:w-6 lg:w-8 h-8 sm:h-6 lg:h-8 rounded-full"
                 />
-                {loaded ?
+                {/*loaded ?
                   generalTx?.receivingChain && (
                     <Img
                       src={generalTx.receivingChain.image}
@@ -461,12 +462,12 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                     />
                     :
                     <div className="skeleton w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6" style={{ borderRadius: '100%' }} />
-                }
+                */}
               </div>
               {generalTx?.router?.id && (
                 ens_data?.[generalTx.router.id.toLowerCase()]?.name ?
                   <>
-                    <div className="flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs font-medium space-x-1 mt-1.5">
+                    <div className="flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs font-medium space-x-1 mt-0.5">
                       <MdOutlineRouter size={16} className="mb-0.5" />
                       <a
                         href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${generalTx.router.id}`}
@@ -489,7 +490,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                   </>
                   :
                   <>
-                    <div className="flex items-center font-medium space-x-1 mt-2">
+                    <div className="flex items-center font-medium space-x-1 mt-0">
                       <a
                         href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${generalTx.router.id}`}
                         target="_blank"
@@ -501,7 +502,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                       </a>
                       <Copy size={12} text={generalTx.router.id} />
                     </div>
-                    <div className="flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs font-medium space-x-1 mt-0.5">
+                    <div className="flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs font-medium space-x-1 mt-0">
                       <MdOutlineRouter size={16} className="mb-0.5" />
                       <span>Router</span>
                     </div>
