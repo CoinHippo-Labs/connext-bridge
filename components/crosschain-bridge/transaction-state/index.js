@@ -858,7 +858,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                 Please do not close this tab while the transaction is in progress. If you do, you will need to open up xpollinate again to manually claim your transaction.
               </div>
               <div className="font-mono text-gray-400 dark:text-gray-400">
-                <span className="mr-2">Your transfer will automatically end up at your destination address once it is picked up and propagated by Connext's network. You can track it's progress below or on</span>
+                <span className="mr-2">Your transfer will automatically end up at your destination address once it is picked up and propagated by Connext's network. You can track its progress above or on</span>
                 <a
                   href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/tx/${transaction.transactionId.toLowerCase()}`}
                   target="_blank"

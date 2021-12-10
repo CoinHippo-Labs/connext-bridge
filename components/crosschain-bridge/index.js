@@ -41,6 +41,7 @@ import { CHAINS_STATUS_DATA, CHAINS_STATUS_SYNC_DATA, BALANCES_DATA, TOKENS_DATA
 const refresh_estimated_fees_second = Number(process.env.NEXT_PUBLIC_REFRESH_ESTIMATED_FEES_SECOND)
 const expiry_hours = Number(process.env.NEXT_PUBLIC_EXPIRY_HOURS)
 const bid_expires_second = Number(process.env.NEXT_PUBLIC_BID_EXPIRES_SECOND)
+const approve_response_countdown_second = 10
 
 BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
 
@@ -79,6 +80,7 @@ export default function CrosschainBridge() {
 
   const [tokenApproved, setTokenApproved] = useState(null)
   const [tokenApproveResponse, setTokenApproveResponse] = useState(null)
+  const [tokenApproveResponseCountDown, setTokenApproveResponseCountDown] = useState(null)
 
   const [fees, setFees] = useState(null)
   const [estimatingFees, setEstimatingFees] = useState(null)
@@ -222,6 +224,30 @@ export default function CrosschainBridge() {
     const _approved = await isTokenApproved()
     setTokenApproved(_approved)
   }, [address, chain_id, swapConfig])
+
+  useEffect(() => {
+    if (typeof tokenApproveResponseCountDown === 'number') {
+      if (tokenApproveResponseCountDown === 0) {
+        setTokenApproveResponse(null)
+      }
+      else { 
+        const interval = setInterval(() => {
+          if (tokenApproveResponseCountDown - 1 > -1) {
+            setTokenApproveResponseCountDown(tokenApproveResponseCountDown - 1)
+          }
+        }, 1000)
+        return () => clearInterval(interval)
+      }
+    }
+  }, [tokenApproveResponseCountDown])
+
+  useEffect(() => {
+    if (['success'].includes(tokenApproveResponse?.status)) {
+      if (!tokenApproveResponseCountDown) {
+        setTokenApproveResponseCountDown(approve_response_countdown_second)
+      }
+    }
+  }, [tokenApproveResponse])
   // approve
 
   const isSupport = () => {
@@ -1539,11 +1565,14 @@ export default function CrosschainBridge() {
                       href={`${fromChain.explorer.url}${fromChain.explorer.transaction_path?.replace('{tx}', tokenApproveResponse.tx_hash)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center font-semibold"
+                      className="flex items-center font-semibold mr-1.5"
                     >
                       <span>View on {fromChain.explorer.name}</span>
                       <TiArrowRight size={20} className="transform -rotate-45" />
                     </a>
+                  )}
+                  {['success'].includes(tokenApproveResponse.status) && typeof tokenApproveResponseCountDown === 'number' && (
+                    <span>(close in {tokenApproveResponseCountDown}s)</span>
                   )}
                 </span>}
               />
