@@ -420,7 +420,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
               <TiArrowRight size={24} className="transform rotate-90 sm:rotate-0 text-gray-400 dark:text-gray-600" />
             </div>
             <div className="flex flex-col items-center">
-              <div className="min-w-max grid grid-flow-row grid-cols-3 gap-2 sm:mt-0 xl:-mt-1">
+              <div className="min-w-max grid grid-flow-row grid-cols-3 gap-2 sm:mt-0 lg:-mt-2">
                 {/*loaded ?
                   generalTx?.sendingChain && (
                     <Img
@@ -443,7 +443,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                 <Img
                   src="/logos/connext/logo.png"
                   alt=""
-                  className="w-8 sm:w-6 lg:w-8 h-8 sm:h-6 lg:h-8 rounded-full"
+                  className="w-8 sm:w-6 lg:w-10 h-8 sm:h-6 lg:h-10 rounded-full"
                 />
                 {/*loaded ?
                   generalTx?.receivingChain && (
