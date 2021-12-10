@@ -186,7 +186,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
           }}
         />
       )}
-      {(loading || transactions?.data?.length > 0) && (
+      {((false && loading) || transactions?.data?.length > 0) && (
         <div className="uppercase text-lg font-bold text-center lg:mt-2 mb-2">
           Active Transactions
         </div>
@@ -206,7 +206,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
           </div>
         </>
         :
-        loading ?
+        false && loading ?
           <div className="flex items-center justify-center space-x-2">
             <span className="text-indigo-600 dark:text-white font-semibold">Loading</span>
             <Loader type="ThreeDots" color={theme === 'dark' ? '#FFFFFF' : '#4F46E5'} width="20" height="20" className="mt-0.5" />

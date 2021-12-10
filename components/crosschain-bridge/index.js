@@ -1418,19 +1418,26 @@ export default function CrosschainBridge() {
                                         )}
                                       </div>
                                     </div>
-                                    <div className="text-base sm:text-lg font-medium pt-2">Are you sure that you want to swap?</div>
+                                    {estimatedFees > confirmAmountReceived && (
+                                      <div className="flex items-center text-base sm:text-lg font-medium pt-2">
+                                        <TiWarning size={20} className="text-yellow-500 mr-1.5" />
+                                        <span>Are you sure that you want to swap?</span>
+                                      </div>
+                                    )}
                                   </div>}
                                   cancelButtonTitle="Cancel"
                                   cancelDisabled={startingSwap}
-                                  confirmButtonTitle={<span className="flex items-center space-x-1.5">
+                                  cancelButtonClassName="hidden"
+                                  confirmButtonTitle={<span className="flex items-center justify-center space-x-1.5 py-2">
                                     {startingSwap && (
-                                      <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="16" height="16" />
+                                      <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="20" height="20" />
                                     )}
-                                    <span>Confirm</span>
+                                    <span className="text-base">Confirm</span>
                                   </span>}
                                   confirmDisabled={startingSwap}
                                   onConfirmHide={false}
                                   onConfirm={() => swap()}
+                                  confirmButtonClassName="w-full btn btn-default btn-rounded bg-blue-600 hover:bg-blue-500 justify-center text-white"
                                 />
                             }
                           </div>

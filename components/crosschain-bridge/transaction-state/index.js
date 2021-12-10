@@ -420,8 +420,8 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
               <TiArrowRight size={24} className="transform rotate-90 sm:rotate-0 text-gray-400 dark:text-gray-600" />
             </div>
             <div className="flex flex-col items-center">
-              <div className="min-w-max grid grid-flow-row grid-cols-3 gap-2 sm:mt-0 xl:-mt-1">
-                {/*loaded ?
+              <div className="min-w-max grid grid-flow-row grid-cols-3 gap-2 sm:mt-1 xl:mt-0">
+                {loaded ?
                   generalTx?.sendingChain && (
                     <Img
                       src={generalTx.sendingChain.image}
@@ -438,14 +438,13 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                     />
                     :
                     <div className="skeleton w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6" style={{ borderRadius: '100%' }} />
-                */}
-                <span />
+                }
                 <Img
                   src="/logos/connext/logo.png"
                   alt=""
-                  className="w-8 sm:w-6 lg:w-8 h-8 sm:h-6 lg:h-8 rounded-full"
+                  className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
                 />
-                {/*loaded ?
+                {loaded ?
                   generalTx?.receivingChain && (
                     <Img
                       src={generalTx.receivingChain.image}
@@ -462,12 +461,12 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                     />
                     :
                     <div className="skeleton w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6" style={{ borderRadius: '100%' }} />
-                */}
+                }
               </div>
               {generalTx?.router?.id && (
                 ens_data?.[generalTx.router.id.toLowerCase()]?.name ?
                   <>
-                    <div className="flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs font-medium space-x-1 mt-0.5">
+                    <div className="flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs font-medium space-x-1 mt-1.5">
                       <MdOutlineRouter size={16} className="mb-0.5" />
                       <a
                         href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${generalTx.router.id}`}
@@ -490,7 +489,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                   </>
                   :
                   <>
-                    <div className="flex items-center font-medium space-x-1 mt-0">
+                    <div className="flex items-center font-medium space-x-1 mt-1">
                       <a
                         href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${generalTx.router.id}`}
                         target="_blank"
@@ -823,17 +822,17 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
             </div>
           )}
           <div className="space-y-2">
-            <div className="font-semibold">
+            {/*<div className="font-semibold">
               You will need to sign 3 messages:
-            </div>
+            </div>*/}
             <div className="space-y-1.5">
               <div className="flex items-start space-x-1.5">
                 <BsFillCheckSquareFill size={20} className="text-green-500" />
-                <span className="text-gray-900 dark:text-gray-400">Signature to approve token</span>
+                <span className="text-gray-900 dark:text-gray-400">Approve Token{/*Signature to approve token*/}</span>
               </div>
               <div className="flex items-start space-x-1.5">
                 <BsFillCheckSquareFill size={20} className="text-green-500" />
-                <span className="text-gray-900 dark:text-gray-400">Transaction to send funds across chains</span>
+                <span className="text-gray-900 dark:text-gray-400">Send Transaction{/*Transaction to send funds across chains*/}</span>
               </div>
               <div className="flex items-start space-x-1.5">
                 {['Fulfilled'].includes(generalTx?.status) ?
@@ -844,7 +843,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                     :
                     <Loader type={['Prepared'].includes(receivingTx?.status) ? 'Puff' : 'Rings'} color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="20" height="20" />
                 }
-                <span className="text-gray-900 dark:text-gray-400">Signature to claim your Connext transaction on the destination chain</span>
+                <span className="text-gray-900 dark:text-gray-400">Sign to Claim{/*Signature to claim your Connext transaction on the destination chain*/}</span>
               </div>
             </div>
           </div>
