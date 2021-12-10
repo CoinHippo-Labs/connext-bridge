@@ -5,7 +5,7 @@ import _ from 'lodash'
 import { BiChevronDown, BiChevronUp } from 'react-icons/bi'
 import { BsCheckCircleFill } from 'react-icons/bs'
 
-export default function AdvancedOptions({ applied = false, initialOptions, updateOptions }) {
+export default function AdvancedOptions({ applied = false, disabled = false, initialOptions, updateOptions }) {
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
   const { theme } = { ...preferences }
 
@@ -114,6 +114,7 @@ export default function AdvancedOptions({ applied = false, initialOptions, updat
                 Cancel
               </button>
               <button
+                disabled={disabled}
                 onClick={() => {
                   if (updateOptions) {
                     updateOptions(options)

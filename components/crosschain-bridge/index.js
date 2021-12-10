@@ -422,7 +422,7 @@ export default function CrosschainBridge() {
   const isBreakAll = async message => ['code=', ' 0x'].findIndex(pattern => message?.includes(pattern)) > -1
 
   const estimate = async controller => {
-    if (isSupport()) {
+    if (isSupport() && !swapData) {
       const fromAsset = swapConfig.fromChainId && swapConfig.fromAssetId && assets_data?.find(_asset => _asset?.id === swapConfig.fromAssetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === swapConfig.fromChainId) > -1)
       const toAsset = swapConfig.toChainId && swapConfig.toAssetId && assets_data?.find(_asset => _asset?.id === swapConfig.toAssetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === swapConfig.toChainId) > -1)
 
@@ -1114,6 +1114,7 @@ export default function CrosschainBridge() {
             <div className="grid grid-flow-row grid-cols-1 sm:gap-4 mb-8 sm:mb-4">
               <AdvancedOptions
                 applied={!_.isEqual(advancedOptions, defaultAdvancedOptions)}
+                disabled={['pending'].includes(tokenApproveResponse?.status)}
                 initialOptions={advancedOptions}
                 updateOptions={_options => setAdvancedOptions(_options)}
               />
