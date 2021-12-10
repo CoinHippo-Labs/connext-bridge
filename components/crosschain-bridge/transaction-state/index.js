@@ -736,7 +736,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                           />
                           <span className="font-light">Transaction</span>
                         </>}
-                        buttonDisconnectClassName="w-auto bg-gray-100 dark:bg-gray-800 rounded-lg shadow flex items-center justify-center text-sm sm:text-base space-x-1.5 mx-auto py-2.5 px-3"
+                        buttonDisconnectClassName={`w-auto bg-gray-100 dark:bg-gray-800 rounded-lg shadow flex items-center justify-center ${actionDisabled ? 'cursor-not-allowed text-gray-600 dark:text-gray-400' : ''} text-sm sm:text-base space-x-1.5 mx-auto py-2.5 px-3`}
                       />
                       :
                       <button
