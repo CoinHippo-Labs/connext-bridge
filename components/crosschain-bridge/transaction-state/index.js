@@ -768,10 +768,10 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
               }
               <div className="flex flex-col items-center space-y-1">
                 {['Fulfilled'].includes(generalTx?.status) ?
-                  <span className="text-lg font-medium">Claimed successful</span>
+                  <span className="text-lg font-medium">Claimed successfully</span>
                   :
                   [sendingTx?.status, receivingTx?.status].includes('Cancelled') ?
-                    <span className="text-lg font-medium">Cancelled successful</span>
+                    <span className="text-lg font-medium">Cancelled successfully</span>
                     :
                     null
                 }
