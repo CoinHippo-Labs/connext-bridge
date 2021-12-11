@@ -322,20 +322,20 @@ export default function CrosschainBridge() {
           type: BALANCES_DATA,
           value: { [`${_chain_id}`]: _assets },
         })
-
-        const _contracts = assets_data?.map(_asset => { return { ..._asset, contracts: _asset?.contracts?.find(_contract => _contract.chain_id === _chain_id) } }).filter(_asset => _asset?.contracts?.contract_address) || []
-
-        for (let i = 0; i < _contracts.length; i++) {
-          const _contract = _contracts[i]
-
-          getChainTokenRPC(_chain_id, _contract, _assets.find(_asset => _asset?.contract_address === _contract.contracts.contract_address || (_contract.contracts.contract_address === constants.AddressZero && _contract.symbol?.toLowerCase() === _asset?.contract_ticker_symbol?.toLowerCase())))
-        }
       }
       else if (!(balances_data?.[_chain_id]?.length > 0)) {
         dispatch({
           type: BALANCES_DATA,
           value: { [`${_chain_id}`]: [] },
         })
+      }
+
+      const _contracts = assets_data?.map(_asset => { return { ..._asset, contracts: _asset?.contracts?.find(_contract => _contract.chain_id === _chain_id) } }).filter(_asset => _asset?.contracts?.contract_address) || []
+
+      for (let i = 0; i < _contracts.length; i++) {
+        const _contract = _contracts[i]
+
+        getChainTokenRPC(_chain_id, _contract, _assets.find(_asset => _asset?.contract_address === _contract.contracts.contract_address || (_contract.contracts.contract_address === constants.AddressZero && _contract.symbol?.toLowerCase() === _asset?.contract_ticker_symbol?.toLowerCase())))
       }
     }
   }
