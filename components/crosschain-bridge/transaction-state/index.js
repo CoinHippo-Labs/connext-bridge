@@ -10,7 +10,7 @@ import Pulse from 'react-reveal/Pulse'
 import { MdOutlineRouter, MdPending } from 'react-icons/md'
 import { TiArrowRight } from 'react-icons/ti'
 import { FaCheckCircle, FaClock, FaTimesCircle, FaQuestion } from 'react-icons/fa'
-import { BsFillCheckSquareFill, BsFillXSquareFill } from 'react-icons/bs'
+import { BsFillCheckCircleFill, BsFillXCircleFill } from 'react-icons/bs'
 
 import Wallet from '../../wallet'
 import Notification from '../../notifications'
@@ -195,7 +195,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
       type="button"
       disabled={actionDisabled}
       onClick={() => fulfill(receivingTx)}
-      className={`w-full max-w-md rounded-lg shadow-lg flex items-center justify-center ${actionDisabled ? 'bg-blue-400 dark:bg-blue-500 cursor-not-allowed text-gray-200' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-gray-100 hover:text-white'} text-base sm:text-lg space-x-1.5 mx-auto py-4 px-3`}
+      className={`w-full max-w-xs rounded-lg shadow-lg flex items-center justify-center ${actionDisabled ? 'bg-blue-400 dark:bg-blue-500 cursor-not-allowed text-gray-200' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-gray-100 hover:text-white'} text-base sm:text-lg space-x-1.5 mx-auto py-3.5 px-2.5`}
     >
       {(fulfilling || fulfillResponse?.status === 'pending') && (
         <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="24" height="24" />
@@ -703,95 +703,113 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                 </div>
             }
           </div>
-          {web3_provider && loaded && !finish && [sendingTx?.status, receivingTx?.status].includes('Prepared') && (['Prepared'].includes(receivingTx?.status) || canCancelSender) && (
-            <div className="flex flex-col space-y-3 py-4">
-              {(canCancelSender ? sendingTx : receivingTx) && address?.toLowerCase() !== (canCancelSender ? sendingTx?.sendingAddress?.toLowerCase() : receivingTx?.sendingAddress?.toLowerCase()) ?
-                <span className="min-w-max flex flex-col text-gray-400 dark:text-gray-500 text-center mx-auto">
-                  <span>Address not match.</span>
-                  <span className="flex items-center">
-                    (Your<span className="hidden sm:block ml-1">connected addr</span>: {ellipseAddress(ens_data?.[address?.toLowerCase()]?.name, 10) || ellipseAddress(address?.toLowerCase(), 6)})
+          <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-2 py-4">
+            {web3_provider && loaded && !finish && [sendingTx?.status, receivingTx?.status].includes('Prepared') && (['Prepared'].includes(receivingTx?.status) || canCancelSender) && (
+              <div className="sm:order-2 flex flex-col items-center justify-center space-y-3">
+                {(canCancelSender ? sendingTx : receivingTx) && address?.toLowerCase() !== (canCancelSender ? sendingTx?.sendingAddress?.toLowerCase() : receivingTx?.sendingAddress?.toLowerCase()) ?
+                  <span className="min-w-max flex flex-col text-gray-400 dark:text-gray-500 text-center mx-auto">
+                    <span>Address not match.</span>
+                    <span className="flex items-center">
+                      (Your<span className="hidden sm:block ml-1">connected addr</span>: {ellipseAddress(ens_data?.[address?.toLowerCase()]?.name, 10) || ellipseAddress(address?.toLowerCase(), 6)})
+                    </span>
                   </span>
-                </span>
-                :
-                <>
-                  {['Prepared'].includes(receivingTx?.status) && (
-                    actionDisabled ?
-                      fulfillButton
-                      :
-                      <Pulse duration={1500} forever>
-                        {fulfillButton}
-                      </Pulse>
-                  )}
-                  {(['Prepared'].includes(receivingTx?.status) || canCancelSender) && (
-                    chain_id !== (canCancelSender ? generalTx?.sendingChainId : generalTx?.receivingChainId) ?
-                      <Wallet
-                        chainIdToConnect={canCancelSender ? generalTx?.sendingChainId : generalTx?.receivingChainId}
-                        disabled={actionDisabled}
-                        buttonDisconnectTitle={<>
-                          <span className="font-medium">Cancel</span>
-                          <Img
-                            src={(canCancelSender ? fromChain : toChain)?.image}
-                            alt=""
-                            className="w-6 h-6 rounded-full"
-                          />
-                          <span className="font-light">Transaction</span>
-                        </>}
-                        buttonDisconnectClassName={`w-auto bg-gray-100 dark:bg-gray-800 rounded-lg shadow flex items-center justify-center ${actionDisabled ? 'cursor-not-allowed text-gray-600 dark:text-gray-400' : ''} text-sm sm:text-base space-x-1.5 mx-auto py-2.5 px-3`}
-                      />
-                      :
-                      <button
-                        type="button"
-                        disabled={actionDisabled}
-                        onClick={() => cancel(canCancelSender ? sendingTx : receivingTx, canCancelSender ? generalTx?.sendingChainId : generalTx?.receivingChainId)}
-                        className={`w-auto bg-gray-100 dark:bg-gray-800 rounded-lg shadow flex items-center justify-center ${actionDisabled ? 'cursor-not-allowed text-gray-600 dark:text-gray-400' : ''} text-sm sm:text-base space-x-1.5 mx-auto py-2.5 px-3`}
-                      >
-                        {(cancelling || cancelResponse?.status === 'pending') && (
-                          <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#6B7280'} width="16" height="16" />
-                        )}
-                        <span className="font-medium">Cancel{cancelling || cancelResponse?.status === 'pending' ? 'ling' : ''}</span>
-                        <span className="font-light">Transaction</span>
-                      </button>
-                  )}
-                </>
-              }
-            </div>
-          )}
-          {loaded && finish && (
-            <div className="flex flex-col items-center space-y-5 py-6">
-              {['Fulfilled'].includes(generalTx?.status) ?
-                <FaCheckCircle size={48} className="text-green-500 dark:text-white" />
-                :
-                [sendingTx?.status, receivingTx?.status].includes('Cancelled') ?
-                  <FaTimesCircle size={48} className="text-gray-300 dark:text-white" />
                   :
-                  null
-              }
-              <div className="flex flex-col items-center space-y-1">
+                  <>
+                    {['Prepared'].includes(receivingTx?.status) && (
+                      actionDisabled ?
+                        fulfillButton
+                        :
+                        <Pulse duration={1500} forever>
+                          {fulfillButton}
+                        </Pulse>
+                    )}
+                    {(['Prepared'].includes(receivingTx?.status) || canCancelSender) && (
+                      chain_id !== (canCancelSender ? generalTx?.sendingChainId : generalTx?.receivingChainId) ?
+                        <Wallet
+                          chainIdToConnect={canCancelSender ? generalTx?.sendingChainId : generalTx?.receivingChainId}
+                          disabled={actionDisabled}
+                          buttonDisconnectTitle={<>
+                            <span className="font-medium">Cancel</span>
+                            <Img
+                              src={(canCancelSender ? fromChain : toChain)?.image}
+                              alt=""
+                              className="w-6 h-6 rounded-full"
+                            />
+                            <span className="font-light">Transaction</span>
+                          </>}
+                          buttonDisconnectClassName={`w-auto bg-gray-100 dark:bg-gray-800 rounded-lg shadow flex items-center justify-center ${actionDisabled ? 'cursor-not-allowed text-gray-600 dark:text-gray-400' : ''} text-sm sm:text-base space-x-1.5 mx-auto py-2.5 px-3`}
+                        />
+                        :
+                        <button
+                          type="button"
+                          disabled={actionDisabled}
+                          onClick={() => cancel(canCancelSender ? sendingTx : receivingTx, canCancelSender ? generalTx?.sendingChainId : generalTx?.receivingChainId)}
+                          className={`w-auto bg-gray-100 dark:bg-gray-800 rounded-lg shadow flex items-center justify-center ${actionDisabled ? 'cursor-not-allowed text-gray-600 dark:text-gray-400' : ''} text-sm sm:text-base space-x-1.5 mx-auto py-2.5 px-3`}
+                        >
+                          {(cancelling || cancelResponse?.status === 'pending') && (
+                            <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#6B7280'} width="16" height="16" />
+                          )}
+                          <span className="font-medium">Cancel{cancelling || cancelResponse?.status === 'pending' ? 'ling' : ''}</span>
+                          <span className="font-light">Transaction</span>
+                        </button>
+                    )}
+                  </>
+                }
+              </div>
+            )}
+            {loaded && finish && (
+              <div className="sm:order-2 flex flex-col items-center justify-center space-y-5">
                 {['Fulfilled'].includes(generalTx?.status) ?
-                  <span className="text-lg font-medium">Claimed successfully</span>
+                  <FaCheckCircle size={48} className="text-green-500 dark:text-white" />
                   :
                   [sendingTx?.status, receivingTx?.status].includes('Cancelled') ?
-                    <span className="text-lg font-medium">Cancelled successfully</span>
+                    <FaTimesCircle size={48} className="text-gray-300 dark:text-white" />
                     :
                     null
                 }
-                {transaction?.transactionId && (
-                  <a
-                    href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/tx/${transaction.transactionId.toLowerCase()}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center text-indigo-600 dark:text-blue-600 text-base font-semibold space-x-0"
-                  >
-                    <span>View on Explorer</span>
-                    <TiArrowRight size={24} className="transform -rotate-45 mt-0.4" />
-                  </a>
-                )}
-              </div>
-              {toAsset && ![toAsset.contract_address, toAsset.contracts?.find(_contract => _contract.chain_id === generalTx?.receivingChainId)?.contract_address].includes(constants.AddressZero) && (
-                chain_id !== generalTx?.receivingChainId ?
-                  <Wallet
-                    chainIdToConnect={generalTx?.receivingChainId}
-                    buttonDisconnectTitle={<>
+                <div className="flex flex-col items-center space-y-1">
+                  {['Fulfilled'].includes(generalTx?.status) ?
+                    <span className="text-lg font-medium">Claim Successful</span>
+                    :
+                    [sendingTx?.status, receivingTx?.status].includes('Cancelled') ?
+                      <span className="text-lg font-medium">Cancel Successful</span>
+                      :
+                      null
+                  }
+                  {transaction?.transactionId && (
+                    <a
+                      href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/tx/${transaction.transactionId.toLowerCase()}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center text-indigo-600 dark:text-blue-600 text-base font-semibold space-x-0"
+                    >
+                      <span>View on Explorer</span>
+                      <TiArrowRight size={24} className="transform -rotate-45 mt-0.4" />
+                    </a>
+                  )}
+                </div>
+                {toAsset && ![toAsset.contract_address, toAsset.contracts?.find(_contract => _contract.chain_id === generalTx?.receivingChainId)?.contract_address].includes(constants.AddressZero) && (
+                  chain_id !== generalTx?.receivingChainId ?
+                    <Wallet
+                      chainIdToConnect={generalTx?.receivingChainId}
+                      buttonDisconnectTitle={<>
+                        <span>Add</span>
+                        <span className={`${toAsset?.contract_ticker_symbol || toAsset?.symbol ? 'font-bold' : ''}`}>{toAsset?.contract_ticker_symbol || toAsset?.symbol || 'Token'}</span>
+                        <span>to</span>
+                        <span className="pr-0.5">MetaMask</span>
+                        <Img
+                          src="/logos/wallets/metamask.png"
+                          alt=""
+                          className="w-5 h-5"
+                        />
+                      </>}
+                      buttonDisconnectClassName="w-auto bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg flex items-center justify-center text-sm font-medium space-x-1.5 py-2.5 px-3"
+                    />
+                    :
+                    <button
+                      onClick={() => addTokenToMetaMask(toAsset)}
+                      className="w-auto bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg flex items-center justify-center text-sm font-medium space-x-1.5 py-2.5 px-3"
+                    >
                       <span>Add</span>
                       <span className={`${toAsset?.contract_ticker_symbol || toAsset?.symbol ? 'font-bold' : ''}`}>{toAsset?.contract_ticker_symbol || toAsset?.symbol || 'Token'}</span>
                       <span>to</span>
@@ -801,50 +819,40 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                         alt=""
                         className="w-5 h-5"
                       />
-                    </>}
-                    buttonDisconnectClassName="w-auto bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg flex items-center justify-center text-sm font-medium space-x-1.5 py-2.5 px-3"
-                  />
-                  :
-                  <button
-                    onClick={() => addTokenToMetaMask(toAsset)}
-                    className="w-auto bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg flex items-center justify-center text-sm font-medium space-x-1.5 py-2.5 px-3"
-                  >
-                    <span>Add</span>
-                    <span className={`${toAsset?.contract_ticker_symbol || toAsset?.symbol ? 'font-bold' : ''}`}>{toAsset?.contract_ticker_symbol || toAsset?.symbol || 'Token'}</span>
-                    <span>to</span>
-                    <span className="pr-0.5">MetaMask</span>
-                    <Img
-                      src="/logos/wallets/metamask.png"
-                      alt=""
-                      className="w-5 h-5"
-                    />
-                  </button>
-              )}
-            </div>
-          )}
-          <div className="space-y-2">
-            {/*<div className="font-semibold">
-              You will need to sign 3 messages:
-            </div>*/}
-            <div className="space-y-1.5">
-              <div className="flex items-start space-x-1.5">
-                <BsFillCheckSquareFill size={20} className="text-green-500" />
-                <span className="text-gray-900 dark:text-gray-400">Approve Token{/*Signature to approve token*/}</span>
+                    </button>
+                )}
               </div>
-              <div className="flex items-start space-x-1.5">
-                <BsFillCheckSquareFill size={20} className="text-green-500" />
-                <span className="text-gray-900 dark:text-gray-400">Send Transaction{/*Transaction to send funds across chains*/}</span>
-              </div>
-              <div className="flex items-start space-x-1.5">
-                {['Fulfilled'].includes(generalTx?.status) ?
-                  <BsFillCheckSquareFill size={20} className="text-green-500" />
-                  :
-                  [sendingTx?.status, receivingTx?.status].includes('Cancelled') ?
-                    <BsFillXSquareFill size={20} className="text-red-500" />
+            )}
+            <div className="sm:order-1 flex flex-col items-center justify-center space-y-2">
+              {/*<div className="font-semibold">
+                You will need to sign 3 messages:
+              </div>*/}
+              <div className="text-lg space-y-0">
+                <div className="flex items-center space-x-3">
+                  <BsFillCheckCircleFill size={32} className="text-green-500 dark:text-white" />
+                  <span className="text-gray-900 dark:text-gray-100">Approve Token{/*Signature to approve token*/}</span>
+                </div>
+                <div className="w-8 h-8 flex justify-center">
+                  <div className="w-2 h-full bg-green-300 dark:bg-gray-100" />
+                </div>
+                <div className="flex items-center space-x-3">
+                  <BsFillCheckCircleFill size={32} className="text-green-500 dark:text-white" />
+                  <span className="text-gray-900 dark:text-gray-100">Send Transaction{/*Transaction to send funds across chains*/}</span>
+                </div>
+                <div className="w-8 h-8 flex justify-center">
+                  <div className={`w-2 h-full ${finish ? `bg-${['Fulfilled'].includes(generalTx?.status) ? 'green' : 'red'}-300 dark:bg-gray-100` : 'bg-gray-200 dark:bg-gray-500'}`} />
+                </div>
+                <div className="flex items-center space-x-3">
+                  {['Fulfilled'].includes(generalTx?.status) ?
+                    <BsFillCheckCircleFill size={32} className="text-green-500 dark:text-white" />
                     :
-                    <Loader type={['Prepared'].includes(receivingTx?.status) ? 'Puff' : 'Rings'} color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="20" height="20" />
-                }
-                <span className="text-gray-900 dark:text-gray-400">Sign to Claim{/*Signature to claim your Connext transaction on the destination chain*/}</span>
+                    [sendingTx?.status, receivingTx?.status].includes('Cancelled') ?
+                      <BsFillXCircleFill size={32} className="text-red-500 dark:text-white" />
+                      :
+                      <Loader type={['Prepared'].includes(receivingTx?.status) ? 'Puff' : 'Rings'} color={theme === 'dark' ? '#9CA3AF' : '#9CA3AF'} width="32" height="32" />
+                  }
+                  <span className={`${finish ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'}`}>Sign to Claim{/*Signature to claim your Connext transaction on the destination chain*/}</span>
+                </div>
               </div>
             </div>
           </div>

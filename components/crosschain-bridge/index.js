@@ -893,7 +893,7 @@ export default function CrosschainBridge() {
                     null
                     :
                     fromBalance ?
-                      <div className="flex items-center text-gray-400 dark:text-gray-600 text-sm space-x-1.5">
+                      <div className="flex items-center text-gray-500 dark:text-gray-400 text-sm space-x-1.5">
                         <IoWallet size={20} />
                         <span className="font-mono">{numberFormat((fromBalance.balance || 0) / Math.pow(10, fromBalance.contract_decimals), '0,0.00000000')}</span>
                         <span className="font-semibold">{fromBalance.contract_ticker_symbol}</span>
@@ -904,7 +904,7 @@ export default function CrosschainBridge() {
                         :
                         balances_data?.[swapConfig.fromChainId] ?
                           true || toBalance ?
-                            <div className="text-gray-400 dark:text-gray-600 text-sm">-</div>
+                            <div className="text-gray-500 dark:text-gray-400 text-sm">-</div>
                             :
                             null
                           :
@@ -999,7 +999,7 @@ export default function CrosschainBridge() {
                     null
                     :
                     toBalance ?
-                      <div className="flex items-center text-gray-400 dark:text-gray-600 text-sm space-x-1.5">
+                      <div className="flex items-center text-gray-500 dark:text-gray-400 text-sm space-x-1.5">
                         <IoWallet size={20} />
                         <span className="font-mono">{numberFormat((toBalance.balance || 0) / Math.pow(10, toBalance.contract_decimals), '0,0.00000000')}</span>
                         <span className="font-semibold">{toBalance.contract_ticker_symbol}</span>
@@ -1010,7 +1010,7 @@ export default function CrosschainBridge() {
                         :
                         balances_data?.[swapConfig.toChainId] ?
                           true || fromBalance ?
-                            <div className="text-gray-400 dark:text-gray-600 text-sm">-</div>
+                            <div className="text-gray-500 dark:text-gray-400 text-sm">-</div>
                             :
                             null
                           :
@@ -1086,11 +1086,11 @@ export default function CrosschainBridge() {
                     :
                     !estimatedAmountResponse && typeof estimatedFees === 'number' ?
                       feesPopover(
-                        <span className="flex items-center text-gray-400 dark:text-gray-200 text-sm space-x-1">
+                        <span className="flex items-center text-gray-500 dark:text-gray-200 text-sm space-x-1">
                           <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.000000')}` : 'N/A'}</span>
                           <span className="font-semibold">{toAsset?.symbol}</span>
                           {!estimatedAmount && (
-                            <span className="font-mono lowercase text-gray-300 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
+                            <span className="font-mono lowercase text-gray-400 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
                           )}
                         </span>
                       )
@@ -1145,8 +1145,8 @@ export default function CrosschainBridge() {
                 updateOptions={_options => setAdvancedOptions(_options)}
               />
             </div>
-            {isSupport() && (swapData || balances_data?.[swapConfig.fromChainId])/* && typeof estimatedFees === 'number'*/ && typeof swapConfig.amount === 'number' ?
-              !estimatingFees && swapConfig.fromAssetId === swapConfig.toAssetId && swapConfig.amount < estimatedFees ?
+            {isSupport() && (swapData || balances_data?.[swapConfig.fromChainId])/* && typeof estimatedFees === 'number'*/ && (typeof swapConfig.amount === 'number' || mustChangeChain) ?
+              !mustChangeChain && !estimatingFees && swapConfig.fromAssetId === swapConfig.toAssetId && swapConfig.amount < estimatedFees ?
                 <div className="sm:pt-1.5 pb-1">
                   <Alert
                     color="bg-red-400 dark:bg-red-500 text-left text-white"
@@ -1158,7 +1158,7 @@ export default function CrosschainBridge() {
                   </Alert>
                 </div>
                 :
-                !estimatedAmountResponse && check_balances && fromBalanceAmount < swapConfig.amount ?
+                !mustChangeChain && !estimatedAmountResponse && check_balances && fromBalanceAmount < swapConfig.amount ?
                   <div className="sm:pt-1.5 pb-1">
                     <Alert
                       color="bg-red-400 dark:bg-red-500 text-left text-white"
@@ -1170,7 +1170,7 @@ export default function CrosschainBridge() {
                     </Alert>
                   </div>
                   :
-                  !swapData && !(fromChainSynced && toChainSynced) ?
+                  !mustChangeChain && !swapData && !(fromChainSynced && toChainSynced) ?
                     <div className="sm:pt-1.5 pb-1">
                       <Alert
                         color="bg-red-400 dark:bg-red-500 text-left text-white"
@@ -1580,7 +1580,7 @@ export default function CrosschainBridge() {
           </div>
         </div>
       </div>
-      <div className="col-span-1 lg:col-span-2 lg:min-h-screen">
+      <div className="col-span-1 lg:col-span-2 mb-4">
         <ActiveTransactions
           setActiveTransactionOpen={open => setActiveTransactionOpen(open)}
         />

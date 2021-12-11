@@ -105,7 +105,7 @@ export default function ChainsStatus() {
 
   return (
     <>
-      {!chains_status_data && (
+      {!chains_status_data && address && (
         <div className="w-full h-8 xl:h-10 bg-gray-100 dark:bg-gray-900 overflow-x-auto flex items-center py-2 px-2 sm:px-4">
           {!chains_status_data && (
             address ?
@@ -114,7 +114,7 @@ export default function ChainsStatus() {
                 <span>Checking Subgraph Status</span>
               </span>
               :
-              <span className="font-mono text-blue-600 dark:text-blue-400 text-2xs xl:text-sm ml-auto">Please connect your wallet.</span>
+              null//<span className="font-mono text-blue-600 dark:text-blue-400 text-2xs xl:text-sm ml-auto">Please connect your wallet.</span>
           )}
           {chains_status_data?.map((chain, i) => (
             <div key={i} className="min-w-max flex items-center text-2xs xl:text-sm space-x-1.5 xl:space-x-2 mr-4">

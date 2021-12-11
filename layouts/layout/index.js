@@ -66,10 +66,10 @@ export default function Layout({ children }) {
         className={`antialiased disable-scrollbars font-sans text-sm ${theme}`}
       >
         <div className="wrapper">
-          <div className="main w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-white">
+          <div className="main w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-white" style={{ minHeight: 'calc(100vh - 44px)' }}>
             <Navbar />
             <ChainsStatus />
-            <div className="w-full min-h-screen p-4">
+            <div className="w-full p-4">
               {children}
             </div>
           </div>
