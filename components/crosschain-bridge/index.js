@@ -19,7 +19,7 @@ import { TiArrowRight, TiWarning } from 'react-icons/ti'
 import Network from './network'
 import Asset from './asset'
 import AdvancedOptions from './advanced-options'
-import TransationState from './transaction-state'
+import TransactionState from './transaction-state'
 import ActiveTransactions from './active-transactions'
 import Wallet from '../wallet'
 import Popover from '../popover'
@@ -144,7 +144,7 @@ export default function CrosschainBridge() {
 
     getData()
 
-    const interval = setInterval(() => getData(), 1 * 60 * 1000)
+    const interval = setInterval(() => getData(), 0.5 * 60 * 1000)
     return () => clearInterval(interval)
   }, [rpcs_data])
   // wallet
@@ -313,6 +313,16 @@ export default function CrosschainBridge() {
 
   const getChainBalances = async _chain_id => {
     if (_chain_id && address) {
+      const _contracts = assets_data?.map(_asset => { return { ..._asset, contracts: _asset?.contracts?.find(_contract => _contract.chain_id === _chain_id) } }).filter(_asset => _asset?.contracts?.contract_address) || []
+
+      if (!balances_data?.[_chain_id]) {
+        for (let i = 0; i < _contracts.length; i++) {
+          const _contract = _contracts[i]
+
+          getChainTokenRPC(_chain_id, _contract)
+        }
+      }
+
       const response = await getBalances(_chain_id, address)
 
       if (response?.data?.items) {
@@ -322,20 +332,19 @@ export default function CrosschainBridge() {
           type: BALANCES_DATA,
           value: { [`${_chain_id}`]: _assets },
         })
+
+        for (let i = 0; i < _contracts.length; i++) {
+          const _contract = _contracts[i]
+
+          getChainTokenRPC(_chain_id, _contract, _assets.find(_asset => _asset?.contract_address === _contract.contracts.contract_address || (_contract.contracts.contract_address === constants.AddressZero && _contract.symbol?.toLowerCase() === _asset?.contract_ticker_symbol?.toLowerCase())))
+        }
       }
-      else if (!(balances_data?.[_chain_id]?.length > 0)) {
-        dispatch({
-          type: BALANCES_DATA,
-          value: { [`${_chain_id}`]: [] },
-        })
-      }
+      else if (balances_data?.[_chain_id] && balances_data?.[_chain_id]?.length < 1) {
+        for (let i = 0; i < _contracts.length; i++) {
+          const _contract = _contracts[i]
 
-      const _contracts = assets_data?.map(_asset => { return { ..._asset, contracts: _asset?.contracts?.find(_contract => _contract.chain_id === _chain_id) } }).filter(_asset => _asset?.contracts?.contract_address) || []
-
-      for (let i = 0; i < _contracts.length; i++) {
-        const _contract = _contracts[i]
-
-        getChainTokenRPC(_chain_id, _contract, _assets.find(_asset => _asset?.contract_address === _contract.contracts.contract_address || (_contract.contracts.contract_address === constants.AddressZero && _contract.symbol?.toLowerCase() === _asset?.contract_ticker_symbol?.toLowerCase())))
+          getChainTokenRPC(_chain_id, _contract)
+        }
       }
     }
   }
@@ -641,6 +650,13 @@ export default function CrosschainBridge() {
     setSwapResponse(null)
 
     setActiveTransactionOpen(null)
+
+    if (swapConfig?.fromChainId) {
+      getChainBalances(swapConfig.fromChainId)
+    }
+    if (swapConfig?.toChainId) {
+      getChainBalances(swapConfig.toChainId)
+    }
   }
 
   const fromChain = chains_data?.find(_chain => _chain?.chain_id === swapConfig.fromChainId)
@@ -1510,7 +1526,7 @@ export default function CrosschainBridge() {
                               </div>
                               :
                               swapData ?
-                                <TransationState
+                                <TransactionState
                                   data={swapData}
                                   buttonTitle={<span>View Transaction</span>}
                                   buttonClassName="hidden w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3"

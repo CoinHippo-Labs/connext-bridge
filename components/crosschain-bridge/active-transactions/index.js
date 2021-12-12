@@ -10,7 +10,7 @@ import Loader from 'react-loader-spinner'
 import HeadShake from 'react-reveal/HeadShake'
 import { TiArrowRight } from 'react-icons/ti'
 
-import TransationState from '../transaction-state'
+import TransactionState from '../transaction-state'
 import Copy from '../../copy'
 import Widget from '../../widget'
 
@@ -170,7 +170,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
   return address && (transactionsComponent || (loading && !transactions?.data)) && (
     <div className="lg:max-w-xs lg:ml-auto">
       {swapData && (
-        <TransationState
+        <TransactionState
           data={swapData}
           buttonClassName="hidden"
           onClose={() => {

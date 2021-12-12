@@ -420,7 +420,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
               <TiArrowRight size={24} className="transform rotate-90 sm:rotate-0 text-gray-400 dark:text-gray-600" />
             </div>
             <div className="flex flex-col items-center">
-              <div className="min-w-max grid grid-flow-row grid-cols-3 gap-2 sm:mt-0 lg:-mt-2">
+              <div className="min-w-max grid grid-flow-row grid-cols-3 gap-2">
                 {/*loaded ?
                   generalTx?.sendingChain && (
                     <Img
@@ -443,7 +443,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                 <Img
                   src="/logos/connext/logo.png"
                   alt=""
-                  className="w-8 sm:w-6 lg:w-10 h-8 sm:h-6 lg:h-10 rounded-full"
+                  className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
                 />
                 {/*loaded ?
                   generalTx?.receivingChain && (
@@ -467,7 +467,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
               {generalTx?.router?.id && (
                 ens_data?.[generalTx.router.id.toLowerCase()]?.name ?
                   <>
-                    <div className="flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs font-medium space-x-1 mt-0.5">
+                    <div className="flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs font-medium space-x-1 mt-1.5">
                       <MdOutlineRouter size={16} className="mb-0.5" />
                       <a
                         href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${generalTx.router.id}`}
@@ -490,7 +490,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                   </>
                   :
                   <>
-                    <div className="flex items-center font-medium space-x-1 mt-0">
+                    <div className="flex items-center font-medium space-x-1 mt-1">
                       <a
                         href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${generalTx.router.id}`}
                         target="_blank"
@@ -879,7 +879,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
             </div>
           )}
         </div>}
-        cancelDisabled={cancelDisabled && !finish}
+        cancelDisabled={(cancelDisabled || actionDisabled) && !finish}
         onClose={() => {
           if (onClose) {
             onClose()
