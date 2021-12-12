@@ -46,7 +46,7 @@
       {
         "contract_address": "0xb44a9b6905af7c801311e8f4e76932ee959c663c",
         "chain_id": 1285,
-        "contract_decimals": 6,
+        "contract_decimals": 6
       }
     ]
   },
@@ -97,7 +97,7 @@
       {
         "contract_address": "0xe3f5a90f9cb311505cd691a46596599aa1a0ad7d",
         "chain_id": 1285,
-        "contract_decimals": 6,
+        "contract_decimals": 6
       }
     ]
   },
@@ -143,7 +143,7 @@
       {
         "contract_address": "0x0000000000000000000000000000000000000000",
         "chain_id": 100,
-        "contract_decimals": 18,
+        "contract_decimals": 18
       }
     ]
   },
@@ -184,7 +184,7 @@
       {
         "contract_address": "0x74b23882a30290451a17c44f4f05243b6b58c76d",
         "chain_id": 250,
-        "contract_decimals": 18,
+        "contract_decimals": 18
       }
     ]
   },
@@ -210,7 +210,7 @@
       {
         "contract_address": "0x321162cd933e2be498cd2267a90534a804051b11",
         "chain_id": 250,
-        "contract_decimals": 8,
+        "contract_decimals": 8
       }
     ]
   }
