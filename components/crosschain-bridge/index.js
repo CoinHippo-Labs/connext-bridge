@@ -938,6 +938,7 @@ export default function CrosschainBridge() {
                       toChainId: swapConfig.fromChainId,
                       fromAssetId: swapConfig.toAssetId,
                       toAssetId: swapConfig.fromAssetId,
+                      amount: null,
                     })
 
                     if (swapConfig.fromChainId !== swapConfig.toChainId) {
@@ -1162,19 +1163,24 @@ export default function CrosschainBridge() {
               />
             </div>
             {isSupport() && (swapData || balances_data?.[swapConfig.fromChainId])/* && typeof estimatedFees === 'number'*/ && (typeof swapConfig.amount === 'number' || mustChangeChain) ?
-              !mustChangeChain && !estimatingFees && swapConfig.fromAssetId === swapConfig.toAssetId && swapConfig.amount < estimatedFees ?
+              !estimatedAmountResponse && mustChangeChain ?
                 <div className="sm:pt-1.5 pb-1">
-                  <Alert
-                    color="bg-red-400 dark:bg-red-500 text-left text-white"
-                    icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
-                    closeDisabled={true}
-                    rounded={true}
-                  >
-                    <span className="font-mono text-sm">You must send at least {numberFormat(estimatedFees, '0,0.000000')} {toAsset?.symbol} amount to cover fees.</span>
-                  </Alert>
+                  <Wallet
+                    chainIdToConnect={swapConfig.fromChainId}
+                    buttonDisconnectTitle={<>
+                      <span>Switch to</span>
+                      <Img
+                        src={fromChain?.image}
+                        alt=""
+                        className="w-8 h-8 rounded-full"
+                      />
+                      <span className="font-semibold">{fromChain?.title}</span>
+                    </>}
+                    buttonDisconnectClassName="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-sm sm:text-base space-x-2 py-4 px-3"
+                  />
                 </div>
                 :
-                !mustChangeChain && !estimatedAmountResponse && check_balances && fromBalanceAmount < swapConfig.amount ?
+                !mustChangeChain && !estimatingFees && swapConfig.fromAssetId === swapConfig.toAssetId && swapConfig.amount < estimatedFees ?
                   <div className="sm:pt-1.5 pb-1">
                     <Alert
                       color="bg-red-400 dark:bg-red-500 text-left text-white"
@@ -1182,11 +1188,11 @@ export default function CrosschainBridge() {
                       closeDisabled={true}
                       rounded={true}
                     >
-                      <span className="font-mono text-sm">Insufficient Funds</span>
+                      <span className="font-mono text-sm">You must send at least {numberFormat(estimatedFees, '0,0.000000')} {toAsset?.symbol} amount to cover fees.</span>
                     </Alert>
                   </div>
                   :
-                  !mustChangeChain && !swapData && !(fromChainSynced && toChainSynced) ?
+                  !mustChangeChain && !estimatedAmountResponse && check_balances && fromBalanceAmount < swapConfig.amount ?
                     <div className="sm:pt-1.5 pb-1">
                       <Alert
                         color="bg-red-400 dark:bg-red-500 text-left text-white"
@@ -1194,42 +1200,37 @@ export default function CrosschainBridge() {
                         closeDisabled={true}
                         rounded={true}
                       >
-                        <span className="font-mono text-sm">
-                          {unsyncedChains.map((_chain, i) => (
-                            <span key={i} className="inline-flex items-baseline mr-2">
-                              {_chain.image && (
-                                <Img
-                                  src={_chain.image}
-                                  alt=""
-                                  className="w-4 h-4 rounded-full self-center mr-1"
-                                />
-                              )}
-                              <span className="font-bold">{_chain.title}</span>
-                              {i < unsyncedChains.length - 1 && (
-                                <span className="ml-1.5">&</span>
-                              )}
-                            </span>
-                          ))}
-                          <span>subgraph{unsyncedChains.length > 1 ? 's' : ''} is out of sync. Please try again later.</span>
-                        </span>
+                        <span className="font-mono text-sm">Insufficient Funds</span>
                       </Alert>
                     </div>
                     :
-                    !estimatedAmountResponse && mustChangeChain ?
+                    !mustChangeChain && !swapData && !(fromChainSynced && toChainSynced) ?
                       <div className="sm:pt-1.5 pb-1">
-                        <Wallet
-                          chainIdToConnect={swapConfig.fromChainId}
-                          buttonDisconnectTitle={<>
-                            <span>Switch to</span>
-                            <Img
-                              src={fromChain?.image}
-                              alt=""
-                              className="w-8 h-8 rounded-full"
-                            />
-                            <span className="font-semibold">{fromChain?.title}</span>
-                          </>}
-                          buttonDisconnectClassName="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-sm sm:text-base space-x-2 py-4 px-3"
-                        />
+                        <Alert
+                          color="bg-red-400 dark:bg-red-500 text-left text-white"
+                          icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                          closeDisabled={true}
+                          rounded={true}
+                        >
+                          <span className="font-mono text-sm">
+                            {unsyncedChains.map((_chain, i) => (
+                              <span key={i} className="inline-flex items-baseline mr-2">
+                                {_chain.image && (
+                                  <Img
+                                    src={_chain.image}
+                                    alt=""
+                                    className="w-4 h-4 rounded-full self-center mr-1"
+                                  />
+                                )}
+                                <span className="font-bold">{_chain.title}</span>
+                                {i < unsyncedChains.length - 1 && (
+                                  <span className="ml-1.5">&</span>
+                                )}
+                              </span>
+                            ))}
+                            <span>subgraph{unsyncedChains.length > 1 ? 's' : ''} is out of sync. Please try again later.</span>
+                          </span>
+                        </Alert>
                       </div>
                       :
                       activeTransactionOpen ?
