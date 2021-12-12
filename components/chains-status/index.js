@@ -33,9 +33,8 @@ export default function ChainsStatus() {
         const _chain = chains_data[i]
 
         chainConfig[_chain?.chain_id] = {
-          provider: new providers.FallbackProvider(_chain?.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')).map(rpc => new providers.JsonRpcProvider(rpc)) || []),
           providers: _chain?.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')) || [],
-          subgraph: _chain?.subgraph,
+          // subgraph: _chain?.subgraph,
         }
 
         rpcs[_chain?.chain_id] = new providers.FallbackProvider(_chain?.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')).map(rpc => new providers.JsonRpcProvider(rpc)) || [])
