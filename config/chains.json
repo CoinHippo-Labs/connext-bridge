@@ -244,7 +244,7 @@
         "nativeCurrency": {
           "name": "Moonriver",
           "symbol": "MOVR",
-          "decimals": 18,
+          "decimals": 18
         },
         "blockExplorerUrls": ["https://blockscout.moonriver.moonbeam.network"]
       }
