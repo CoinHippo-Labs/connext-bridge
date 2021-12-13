@@ -14,7 +14,7 @@ export default function Assets({ id, inputSearch, handleDropdownClick, from, to,
 
   const _assets = _.orderBy(assets_data?.filter(item => !item.menu_hidden).filter(item => !inputSearch || item).map(item => {
     return { ...item, scores: ['symbol', 'id'].map(field => item[field] && item[field].toLowerCase().includes(inputSearch.toLowerCase()) ? inputSearch.length > 1 ? (inputSearch.length / item[field].length) : .5 : -1) }
-  }).map(item => { return { ...item, max_score: _.max(item.scores) } }).filter(item => item.max_score > 3 / 10) || [], ['max_score'], ['desc'])
+  }).map(item => { return { ...item, max_score: _.max(item.scores) } }).filter(item => item.max_score > 1 / 10) || [], ['max_score'], ['desc'])
 
   const chain = chains_data?.find(_chain => _chain?.chain_id === chain_id)
 
