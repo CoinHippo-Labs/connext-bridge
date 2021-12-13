@@ -9,12 +9,15 @@ import { constants, Contract } from 'ethers'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
+import Linkify from 'react-linkify'
+import parse from 'html-react-parser'
 import { MdSwapVerticalCircle, MdSwapHorizontalCircle, MdRefresh } from 'react-icons/md'
 import { IoWallet } from 'react-icons/io5'
 import { IoMdInformationCircle } from 'react-icons/io'
 import { BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
 import { FaCheckCircle, FaClock, FaTimesCircle } from 'react-icons/fa'
 import { TiArrowRight, TiWarning } from 'react-icons/ti'
+import { HiSpeakerphone } from 'react-icons/hi'
 
 import Network from './network'
 import Asset from './asset'
@@ -49,9 +52,10 @@ const check_balances = true && !['testnet'].includes(process.env.NEXT_PUBLIC_NET
 
 export default function CrosschainBridge() {
   const dispatch = useDispatch()
-  const { chains, assets, chains_status, balances, tokens, max_transfers, ens, wallet, sdk, rpcs, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, balances: state.balances, tokens: state.tokens, max_transfers: state.max_transfers, ens: state.ens, wallet: state.wallet, sdk: state.sdk, rpcs: state.rpcs, preferences: state.preferences }), shallowEqual)
+  const { chains, assets, announcement, chains_status, balances, tokens, max_transfers, ens, wallet, sdk, rpcs, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, announcement: state.announcement, chains_status: state.chains_status, balances: state.balances, tokens: state.tokens, max_transfers: state.max_transfers, ens: state.ens, wallet: state.wallet, sdk: state.sdk, rpcs: state.rpcs, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
+  const { announcement_data } = { ...announcement }
   const { chains_status_data } = { ...chains_status }
   const { balances_data } = { ...balances }
   const { tokens_data } = { ...tokens }
@@ -450,7 +454,7 @@ export default function CrosschainBridge() {
 
       setTokenApproveResponse({ status: 'success', message: `${asset?.symbol} Approval Transaction Confirmed.`, tx_hash })
     } catch (error) {
-      setTokenApproveResponse({ status: 'failed', message: error?.message })
+      setTokenApproveResponse({ status: 'failed', message: error?.data?.message || error?.message })
     }
   }
 
@@ -551,7 +555,7 @@ export default function CrosschainBridge() {
                   //   setEstimateTrigger(moment().valueOf())
                   // }
                   // else {
-                    setEstimatedAmountResponse({ status: 'failed', message: error?.message })
+                    setEstimatedAmountResponse({ status: 'failed', message: error?.data?.message || error?.message })
                   // }
                 }
               }
@@ -593,7 +597,7 @@ export default function CrosschainBridge() {
               }
             } catch (error) {
                 if (!controller.signal.aborted) {
-                  setEstimatedAmountResponse({ status: 'failed', message: error?.message })
+                  setEstimatedAmountResponse({ status: 'failed', message: error?.data?.message || error?.message })
                 }
               }
 
@@ -619,7 +623,7 @@ export default function CrosschainBridge() {
         setSwapData({ ...response, sendingChainId: estimatedAmount?.bid?.sendingChainId, receivingChainId: estimatedAmount?.bid?.receivingChainId })
         setSwapResponse(null)
       } catch (error) {
-        setSwapResponse({ status: 'failed', message: error?.message })
+        setSwapResponse({ status: 'failed', message: error?.data?.message || error?.message })
       }
     }
 
@@ -788,8 +792,23 @@ export default function CrosschainBridge() {
     <div className="grid grid-flow-row grid-cols-1 lg:grid-cols-8 items-start gap-4">
       <div className="hidden lg:block col-span-0 lg:col-span-2" />
       <div className="col-span-1 lg:col-span-4">
-        {chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).length > 0 && (
-          <div className="px-0">
+        <div className="space-y-4 px-0">
+          {announcement_data?.data && (
+            <Alert
+              color="xl:max-w-lg bg-yellow-400 dark:bg-blue-600 text-left text-white mx-auto"
+              icon={<HiSpeakerphone className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+              closeDisabled={true}
+              rounded={true}
+              className="items-start"
+            >
+              <div className="block leading-4 text-xs xl:text-base font-medium">
+                <span className="mr-2">
+                  <Linkify>{parse(announcement_data?.data)}</Linkify>
+                </span>
+              </div>
+            </Alert>
+          )}
+          {chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).length > 0 && (
             <Alert
               color="xl:max-w-lg bg-yellow-400 dark:bg-blue-600 text-left text-white mx-auto"
               icon={<TiWarning className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
@@ -811,8 +830,8 @@ export default function CrosschainBridge() {
                 </a>.
               </div>
             </Alert>
-          </div>
-        )}
+          )}
+        </div>
         <div className="flex flex-col items-center justify-center space-y-2 sm:space-y-3 my-8 sm:my-12">
           <div className="w-full max-w-lg flex items-center justify-between space-x-2">
             <div className="flex items-center space-x-2">

@@ -3,6 +3,7 @@ import { combineReducers } from 'redux'
 import preferences from './preferences'
 import chains from './chains'
 import assets from './assets'
+import announcement from './announcement'
 import chains_status from './chains-status'
 import chains_status_sync from './chains-status-sync'
 import balances from './balances'
@@ -17,6 +18,7 @@ export default combineReducers({
   preferences,
   chains,
   assets,
+  announcement,
   chains_status,
   chains_status_sync,
   balances,

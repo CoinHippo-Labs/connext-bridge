@@ -11,10 +11,10 @@ import Network from './network'
 import Wallet from '../wallet'
 import Copy from '../copy'
 
-import { chains, assets } from '../../lib/api/bridge_config'
+import { chains, assets, announcement } from '../../lib/api/bridge_config'
 import { ellipseAddress } from '../../lib/utils'
 
-import { THEME, CHAINS_DATA, ASSETS_DATA } from '../../reducers/types'
+import { THEME, CHAINS_DATA, ASSETS_DATA, ANNOUNCEMENT_DATA } from '../../reducers/types'
 
 export default function Navbar() {
   const dispatch = useDispatch()
@@ -48,6 +48,24 @@ export default function Navbar() {
     }
 
     getData()
+  }, [])
+
+  useEffect(() => {
+    const getData = async () => {
+      const response = await announcement()
+
+      dispatch({
+        type: ANNOUNCEMENT_DATA,
+        value: response,
+      })
+    }
+
+    getData()
+
+    const interval = setInterval(() => getData(), 1 * 60 * 1000)
+    return () => {
+      clearInterval(interval)
+    }
   }, [])
 
   return (

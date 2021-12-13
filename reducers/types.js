@@ -7,6 +7,9 @@ export const CHAINS_DATA = 'chains_data'
 // assets
 export const ASSETS_DATA = 'assets_data'
 
+// announcement
+export const ANNOUNCEMENT_DATA = 'announcement_data'
+
 // chains status
 export const CHAINS_STATUS_DATA = 'chains_status_data'
 export const CHAINS_STATUS_SYNC_DATA = 'chains_status_sync_data'
