@@ -1180,7 +1180,7 @@ export default function CrosschainBridge() {
                   />
                 </div>
                 :
-                !mustChangeChain && !estimatingFees && swapConfig.fromAssetId === swapConfig.toAssetId && swapConfig.amount < estimatedFees ?
+                !swapData && !estimatingFees && swapConfig.fromAssetId === swapConfig.toAssetId && swapConfig.amount < estimatedFees ?
                   <div className="sm:pt-1.5 pb-1">
                     <Alert
                       color="bg-red-400 dark:bg-red-500 text-left text-white"
@@ -1192,7 +1192,7 @@ export default function CrosschainBridge() {
                     </Alert>
                   </div>
                   :
-                  !mustChangeChain && !estimatedAmountResponse && check_balances && fromBalanceAmount < swapConfig.amount ?
+                  !swapData && !estimatedAmountResponse && check_balances && fromBalanceAmount < swapConfig.amount ?
                     <div className="sm:pt-1.5 pb-1">
                       <Alert
                         color="bg-red-400 dark:bg-red-500 text-left text-white"
@@ -1204,7 +1204,7 @@ export default function CrosschainBridge() {
                       </Alert>
                     </div>
                     :
-                    !mustChangeChain && !swapData && !(fromChainSynced && toChainSynced) ?
+                    !swapData && !(fromChainSynced && toChainSynced) ?
                       <div className="sm:pt-1.5 pb-1">
                         <Alert
                           color="bg-red-400 dark:bg-red-500 text-left text-white"
@@ -1486,7 +1486,7 @@ export default function CrosschainBridge() {
                             }
                           </div>
                           :
-                          estimatedAmountResponse ?
+                          !swapData && estimatedAmountResponse ?
                             <div className="sm:pt-1.5 pb-1">
                               <Alert
                                 color={`${estimatedAmountResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : estimatedAmountResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
@@ -1506,7 +1506,7 @@ export default function CrosschainBridge() {
                               </Alert>
                             </div>
                             :
-                            swapResponse ?
+                            !swapData && swapResponse ?
                               <div className="sm:pt-1.5 pb-1">
                                 <Alert
                                   color={`${swapResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : swapResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
