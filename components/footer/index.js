@@ -19,6 +19,9 @@ export default function Footer() {
             className="w-4 h-4 rounded-full"
           />
           <span>Connext Protocol</span>
+          {process.env.NEXT_PUBLIC_SDK_VERSION && (
+            <span className="text-gray-400 dark:text-gray-600 font-light">(SDK v{process.env.NEXT_PUBLIC_SDK_VERSION})</span>
+          )}
         </div>
       </span>
       <span className="hidden md:block w-full md:w-1/3 flex items-center justify-center text-gray-400">
