@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
+import { Img } from 'react-image'
 import { FiMenu, FiMoon, FiSun } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
 
@@ -91,9 +92,18 @@ export default function Navbar() {
                 <Copy
                   size={16}
                   text={address}
-                  copyTitle={<span className="text-gray-400 dark:text-white text-xs xl:text-sm font-semibold">
-                    {ellipseAddress(ens_data?.[address?.toLowerCase()]?.name, 10) || ellipseAddress(address?.toLowerCase(), 6)}
-                  </span>}
+                  copyTitle={<div className="flex items-center">
+                    {ens_data?.[address?.toLowerCase()]?.name && (
+                      <Img
+                        src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${ens_data[address?.toLowerCase()].name}`}
+                        alt=""
+                        className="w-8 h-8 rounded-full mr-2"
+                      />
+                    )}
+                    <span className="text-gray-400 dark:text-white text-xs xl:text-sm font-semibold">
+                      {ellipseAddress(ens_data?.[address?.toLowerCase()]?.name, 10) || ellipseAddress(address?.toLowerCase(), 6)}
+                    </span>
+                  </div>}
                 />
               </div>
             </>

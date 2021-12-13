@@ -132,6 +132,8 @@ export default function CrosschainBridge() {
     else {
       reset()
     }
+
+    getDomain(address)
   }, [address])
 
   useEffect(() => {
@@ -1371,6 +1373,13 @@ export default function CrosschainBridge() {
                                         <span className="hidden sm:block">:</span>
                                       </div>
                                       {receivingAddress && (<div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
+                                        {ens_data?.[receivingAddress?.toLowerCase()]?.name && (
+                                          <Img
+                                            src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${ens_data?.[receivingAddress.toLowerCase()].name}`}
+                                            alt=""
+                                            className="w-6 h-6 rounded-full"
+                                          />
+                                        )}
                                         <span className="text-gray-900 dark:text-gray-100 text-base sm:text-xs xl:text-base font-semibold">
                                           {ellipseAddress(ens_data?.[receivingAddress?.toLowerCase()]?.name, 10) || ellipseAddress(receivingAddress?.toLowerCase(), 10)}
                                         </span>

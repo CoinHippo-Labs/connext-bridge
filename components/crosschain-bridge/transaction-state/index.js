@@ -249,6 +249,13 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
               generalTx?.sendingAddress ?
                 <div className="min-w-max">
                   <div className="flex items-center space-x-1.5">
+                    {ens_data?.[generalTx.sendingAddress?.toLowerCase()]?.name && (
+                      <Img
+                        src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${ens_data.[generalTx.sendingAddress.toLowerCase()].name}`}
+                        alt=""
+                        className="w-6 h-6 rounded-full"
+                      />
+                    )}
                     <a
                       href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${generalTx.sendingAddress}`}
                       target="_blank"
@@ -297,6 +304,13 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
               data?.sendingChainId && data.prepareResponse?.from ?
                 <div className="min-w-max">
                   <div className="flex items-center space-x-1.5">
+                    {ens_data?.[data.prepareResponse.from?.toLowerCase()]?.name && (
+                      <Img
+                        src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${ens_data.[data.prepareResponse.from.toLowerCase()].name}`}
+                        alt=""
+                        className="w-6 h-6 rounded-full"
+                      />
+                    )}
                     <a
                       href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${data.prepareResponse.from.toLowerCase()}`}
                       target="_blank"
@@ -594,6 +608,13 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
               generalTx?.receivingAddress ?
                 <div className="min-w-max">
                   <div className="flex items-center space-x-1.5">
+                    {ens_data?.[generalTx.receivingAddress?.toLowerCase()]?.name && (
+                      <Img
+                        src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${ens_data.[generalTx.receivingAddress.toLowerCase()].name}`}
+                        alt=""
+                        className="w-6 h-6 rounded-full"
+                      />
+                    )}
                     <a
                       href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${generalTx.receivingAddress}`}
                       target="_blank"
@@ -642,6 +663,13 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
               /*data?.receivingChainId && data.prepareResponse?.to ?
                 <div className="min-w-max">
                   <div className="flex items-center space-x-1.5">
+                    {ens_data?.[data.prepareResponse.to?.toLowerCase()]?.name && (
+                      <Img
+                        src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${ens_data.[data.prepareResponse.to.toLowerCase()].name}`}
+                        alt=""
+                        className="w-6 h-6 rounded-full"
+                      />
+                    )}
                     <a
                       href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${data.prepareResponse.to.toLowerCase()}`}
                       target="_blank"
