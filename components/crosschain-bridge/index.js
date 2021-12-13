@@ -738,6 +738,8 @@ export default function CrosschainBridge() {
   }
   maxAmount = maxAmount > smallNumber ? maxAmount : 0
 
+  const isNative = fromContract?.is_native
+
   const estimatedFees = typeof confirmFees === 'number' ? confirmFees : fees && ((fees.gas || 0) + (fees.relayer || 0) + (fees.router || 0))
   const feesPopover = children => (
     <Popover
@@ -1061,20 +1063,23 @@ export default function CrosschainBridge() {
                     <div className="hidden sm:block order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-5 pt-0 sm:pt-2" />
                     <div className="w-full order-3 sm:order-4 sm:col-span-3 -mt-1.5 sm:-mt-5 mx-auto pt-3 sm:pt-2">
                       <div className="w-64 h-4 flex items-center justify-end mx-auto pr-12 sm:pr-3">
-                        {balances_data?.[swapConfig.fromChainId] ?
-                          <button
-                            onClick={() => {
-                              setSwapConfig({
-                                ...swapConfig,
-                                amount: maxAmount,
-                              })
-                            }}
-                            className="text-gray-800 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100 text-sm font-bold"
-                          >
-                            Max
-                          </button>
+                        {isNative ?
+                          null
                           :
-                          <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
+                          balances_data?.[swapConfig.fromChainId] ?
+                            <button
+                              onClick={() => {
+                                setSwapConfig({
+                                  ...swapConfig,
+                                  amount: maxAmount,
+                                })
+                              }}
+                              className="text-gray-800 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100 text-sm font-bold"
+                            >
+                              Max
+                            </button>
+                            :
+                            <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
                         }
                       </div>
                     </div>
