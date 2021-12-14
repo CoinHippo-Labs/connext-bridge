@@ -517,11 +517,12 @@ export default function CrosschainBridge() {
                     getDomain(address)
                     getDomain(advancedOptions?.receiving_address || address)
 
+                    const gasFee = response?.gasFeeInReceivingToken && BigNumber(response.gasFeeInReceivingToken).shiftedBy(-toContract?.contract_decimals).toNumber()
                     let routerFee
 
                     if (response?.bid) {
                       if (swapConfig.fromAssetId === swapConfig.toAssetId) {
-                        routerFee = swapConfig.amount - BigNumber(response.bid.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber()
+                        routerFee = swapConfig.amount - BigNumber(response.bid.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber() - gasFee
                       }
                       else {
                         if (typeof tokens_data?.[`${swapConfig.fromChainId}_${fromContract?.contract_address}`]?.prices?.[0]?.price === 'number' &&
@@ -534,14 +535,15 @@ export default function CrosschainBridge() {
 
                           const fromValue = swapConfig.amount * fromPrice
                           const toValue = receivedAmount * toPrice
+                          const gasValue = gasFee * toPrice
 
-                          routerFee = (fromValue - toValue) / toPrice
+                          routerFee = (fromValue - toValue - gasValue) / toPrice
                         }
                       }
                     }
 
                     setFees({
-                      gas: response?.gasFeeInReceivingToken && BigNumber(response.gasFeeInReceivingToken).shiftedBy(-toContract?.contract_decimals).toNumber(),
+                      gas: gasFee,
                       relayer: BigNumber(response?.metaTxRelayerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
                       router: routerFee,
                     })
@@ -696,7 +698,7 @@ export default function CrosschainBridge() {
   let confirmRouterFee
   if (estimatedAmount?.bid) {
     if (confirmFromAsset.id === confirmToAsset.id) {
-      confirmRouterFee = confirmAmount - confirmAmountReceived
+      confirmRouterFee = confirmAmount - confirmAmountReceived - confirmGasFee
     }
     else {
       if (typeof tokens_data?.[`${confirmFromChain?.chain_id}_${confirmFromContract?.contract_address}`]?.prices?.[0]?.price === 'number' &&
@@ -707,8 +709,9 @@ export default function CrosschainBridge() {
 
         const fromValue = confirmAmount * fromPrice
         const toValue = confirmAmountReceived * toPrice
+        const gasValue = confirmGasFee * toPrice
 
-        confirmRouterFee = (fromValue - toValue) / toPrice
+        confirmRouterFee = (fromValue - toValue - gasValue) / toPrice
       }
     }
   }
