@@ -1334,7 +1334,7 @@ export default function CrosschainBridge() {
                                           </span>
                                         </div>
                                       )}
-                                      <TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500 -mt-4" />
+                                      {/*<TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500 -mt-4" />*/}
                                       <div className="flex flex-col items-center space-y-0.5">
                                         <Img
                                           src="/logos/connext/logo.png"
@@ -1353,7 +1353,7 @@ export default function CrosschainBridge() {
                                           <Copy size={14} text={estimatedAmount.bid?.router?.toLowerCase()} />
                                         </div>
                                       </div>
-                                      <TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500 -mt-4" />
+                                      {/*<TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500 -mt-4" />*/}
                                       {confirmToChain && (
                                         <div className="flex flex-col items-center space-y-0.5">
                                           <img
