@@ -54,14 +54,14 @@ export default function Networks({ id, inputSearch, handleDropdownClick, from, t
               title="Disabled"
               className="dropdown-item rounded-lg cursor-not-allowed flex items-center justify-start space-x-2 p-2"
             >
-              <div className="w-4/6 flex items-center space-x-2">
+              <div className="w-5/6 sm:w-4/6 flex items-center space-x-2">
                 <IoRadioButtonOn size={12} className="w-4 text-gray-400 dark:text-gray-600" />
                 <Img
                   src={item.image}
                   alt=""
                   className="w-8 h-8 rounded-full"
                 />
-                <span className="w-2/6 text-base font-medium">{item.title}</span>
+                <span className="w-1/6 sm:w-2/6 text-base font-medium">{item.title}</span>
               </div>
             </div>
             :
@@ -70,7 +70,7 @@ export default function Networks({ id, inputSearch, handleDropdownClick, from, t
               onClick={() => handleDropdownClick(item.chain_id)}
               className={`dropdown-item ${item.chain_id === id ? 'bg-gray-100 dark:bg-black' : 'hover:bg-gray-50 dark:hover:bg-gray-800'} rounded-lg cursor-pointer flex items-center justify-start space-x-2 p-2`}
             >
-              <div className="w-4/6 flex items-center space-x-2">
+              <div className="w-5/6 sm:w-4/6 flex items-center space-x-2">
                 <IoRadioButtonOn size={12} className={`w-4 ${!chains_status_data || chains_status_data?.find(_chain => _chain?.id === item.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
                 <Img
                   src={item.image}
@@ -80,7 +80,7 @@ export default function Networks({ id, inputSearch, handleDropdownClick, from, t
                 <span className="whitespace-nowrap text-base font-medium">{item.title}</span>
               </div>
               {(item.chain_id === from || item.chain_id === to) && (
-                <div className="w-2/6 text-gray-400 dark:text-gray-500 italic text-right">
+                <div className="w-1/6 sm:w-2/6 text-gray-400 dark:text-gray-500 italic text-right">
                   {_.uniq([item.chain_id === from ? 'From' : 'To', item.chain_id === to ? 'To' : 'From']).join(' & ')}
                 </div>
               )}
