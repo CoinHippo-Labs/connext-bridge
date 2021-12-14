@@ -7,6 +7,8 @@ import { constants } from 'ethers'
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
 import Pulse from 'react-reveal/Pulse'
+import Flip from 'react-reveal/Flip'
+import LightSpeed from 'react-reveal/LightSpeed'
 import { MdOutlineRouter, MdPending } from 'react-icons/md'
 import { TiArrowRight } from 'react-icons/ti'
 import { FaCheckCircle, FaClock, FaTimesCircle, FaQuestion } from 'react-icons/fa'
@@ -20,7 +22,7 @@ import Copy from '../../copy'
 import { transactions as getTransactions } from '../../../lib/api/subgraph'
 import { domains } from '../../../lib/api/ens'
 import { chainTitle } from '../../../lib/object/chain'
-import { ellipseAddress } from '../../../lib/utils'
+import { numberFormat, ellipseAddress } from '../../../lib/utils'
 
 import { ENS_DATA } from '../../../reducers/types'
 
@@ -180,7 +182,11 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
   const fromChain = chains_data?.find(_chain => _chain?.chain_id === generalTx?.sendingChainId || _chain?.chain_id === data?.sendingChainId)
   const toChain = chains_data?.find(_chain => _chain?.chain_id === generalTx?.receivingChainId || _chain?.chain_id === data?.receivingChainId)
 
+  const fromAsset = (assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.sendingChainId && _contract?.contract_address === generalTx?.sendingAssetId)) || generalTx?.sendingAsset) && { ...assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.sendingChainId && _contract?.contract_address === generalTx?.sendingAssetId)), ...generalTx?.sendingAsset }
   const toAsset = (assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.receivingChainId && _contract?.contract_address === generalTx?.receivingAssetId)) || generalTx?.receivingAsset) && { ...assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.receivingChainId && _contract?.contract_address === generalTx?.receivingAssetId)), ...generalTx?.receivingAsset }
+
+  const fromAmount = sendingTx && fromAsset && Number(sendingTx.amount) / Math.pow(10, fromAsset.contract_decimals)
+  const toAmount = receivingTx && toAsset && Number(receivingTx.amount) / Math.pow(10, toAsset.contract_decimals)
 
   const loaded = data?.transactionId && transaction?.transactionId === data.transactionId && generalTx
 
@@ -205,6 +211,38 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
       )}
       <span className="font-semibold">Claim{fulfilling || fulfillResponse?.status === 'pending' ? 'ing' : ''} Funds</span>
     </button>
+  )
+
+  const fromAssetAmount = typeof fromAmount === 'number' && (
+    <div className={`min-w-max max-w-min bg-gray-100 bg-gray-800 rounded-2xl flex items-center justify-center sm:justify-start space-x-2 mt-1.5 mx-auto ${finish ? 'sm:ml-0' : ''} py-1.5 px-3`}>
+      {fromAsset?.icon && (
+        <Img
+          src={fromAsset.icon}
+          alt=""
+          className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
+        />
+      )}
+      <span className="flex items-center text-gray-700 dark:text-gray-300 text-base font-semibold">
+        <span className="font-mono mr-1.5">{numberFormat(fromAmount, '0,0.000000')}</span>
+        <span>{fromAsset?.symbol}</span>
+      </span>
+    </div>
+  )
+
+  const toAssetAmount = typeof toAmount === 'number' && (
+    <div className={`min-w-max max-w-min bg-gray-100 bg-gray-800 rounded-2xl flex items-center justify-center sm:justify-end space-x-2 mt-1.5 mx-auto ${finish ? 'sm:mr-0' : ''} py-1.5 px-3`}>
+      {toAsset?.icon && (
+        <Img
+          src={toAsset.icon}
+          alt=""
+          className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
+        />
+      )}
+      <span className="flex items-center text-gray-700 dark:text-gray-300 text-base font-semibold">
+        <span className="font-mono mr-1.5">{numberFormat(toAmount, '0,0.000000')}</span>
+        <span>{toAsset?.symbol}</span>
+      </span>
+    </div>
   )
 
   return (
@@ -296,6 +334,11 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                       )}
                       <span className="text-gray-700 dark:text-gray-300 text-lg sm:text-base lg:text-lg font-semibold">{chainTitle(generalTx.sendingChain)}</span>
                     </div>
+                  )}
+                  {finish && (
+                    <Flip right>
+                      {fromAssetAmount}
+                    </Flip>
                   )}
                 </div>
                 :
@@ -417,6 +460,11 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                       </a>
                     </div>
                   )}
+                  {!finish && !receivingTx && !['Prepared'].includes(sendingTx?.status) && (
+                    <LightSpeed left>
+                      {fromAssetAmount}
+                    </LightSpeed>
+                  )}
                 </>
                 :
                 <>
@@ -522,6 +570,11 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                     </div>
                   </>
               )}
+              {!finish && !['Prepared'].includes(receivingTx?.status) && ['Prepared'].includes(sendingTx?.status) && (
+                <LightSpeed left>
+                  {fromAssetAmount}
+                </LightSpeed>
+              )}
             </div>
             <div className="mx-auto">
               <TiArrowRight size={24} className="transform rotate-90 sm:rotate-0 text-gray-400 dark:text-gray-600" />
@@ -587,6 +640,11 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                         }
                       </a>
                     </div>
+                  )}
+                  {!finish && ['Prepared'].includes(receivingTx?.status) && (
+                    <LightSpeed left>
+                      {toAssetAmount}
+                    </LightSpeed>
                   )}
                 </>
                 :
@@ -655,6 +713,11 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                       )}
                       <span className="text-gray-700 dark:text-gray-300 text-lg sm:text-base lg:text-lg font-semibold">{chainTitle(generalTx.receivingChain)}</span>
                     </div>
+                  )}
+                  {finish && ![sendingTx?.status, receivingTx?.status].includes('Cancelled') && (
+                    <LightSpeed left>
+                      {toAssetAmount}
+                    </LightSpeed>
                   )}
                 </div>
                 :
@@ -806,7 +869,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                   }
                   {transaction?.transactionId && (
                     <a
-                      href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/tx/${transaction.transactionId.toLowerCase()}`}
+                      href={toChain?.explorer ? `${toChain.explorer.url}${toChain.explorer.transaction_path?.replace('{tx}', fulfillResponse?.tx_hash)}` : `${process.env.NEXT_PUBLIC_EXPLORER_URL}/tx/${transaction.transactionId.toLowerCase()}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center text-indigo-600 dark:text-blue-600 text-base font-semibold space-x-0"
