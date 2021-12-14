@@ -207,6 +207,11 @@
         "contract_decimals": 8
       },
       {
+        "contract_address": "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f",
+        "chain_id": 42161,
+        "contract_decimals": 8
+      },
+      {
         "contract_address": "0x50b7545627a5162f82a992c33b87adc75187b218",
         "chain_id": 43114,
         "contract_decimals": 8
