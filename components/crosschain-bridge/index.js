@@ -14,7 +14,7 @@ import parse from 'html-react-parser'
 import { MdSwapVerticalCircle, MdSwapHorizontalCircle, MdRefresh } from 'react-icons/md'
 import { IoWallet } from 'react-icons/io5'
 import { IoMdInformationCircle } from 'react-icons/io'
-import { BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
+import { BiMessageError, BiMessageCheck, BiMessageDetail, BiChevronDown, BiChevronUp } from 'react-icons/bi'
 import { FaCheckCircle, FaClock, FaTimesCircle } from 'react-icons/fa'
 import { TiArrowRight, TiWarning } from 'react-icons/ti'
 import { HiSpeakerphone } from 'react-icons/hi'
@@ -95,6 +95,7 @@ export default function CrosschainBridge() {
   const [estimatedAmountResponse, setEstimatedAmountResponse] = useState(null)
   const [bidExpiresSecond, setBidExpiresSecond] = useState(null)
   const [numReceivedBid, setNumReceivedBid] = useState(null)
+  const [confirmFeesCollapsed, setConfirmFeesCollapsed] = useState(null)
 
   const [startingSwap, setStartingSwap] = useState(null)
   const [swapData, setSwapData] = useState(null)
@@ -150,7 +151,7 @@ export default function CrosschainBridge() {
 
     getData()
 
-    const interval = setInterval(() => getData(), 0.5 * 60 * 1000)
+    const interval = setInterval(() => getData(), 0.25 * 60 * 1000)
     return () => clearInterval(interval)
   }, [rpcs_data])
   // wallet
@@ -1317,17 +1318,20 @@ export default function CrosschainBridge() {
                                     <span>Swap</span>
                                     <span className="font-bold">{fromAsset?.symbol}</span>
                                   </>}
-                                  onClick={() => setTokenApproveResponse(null)}
+                                  onClick={() => {
+                                    setTokenApproveResponse(null)
+                                    setConfirmFeesCollapsed(true)
+                                  }}
                                   buttonClassName="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3"
                                   title="Swap Confirmation"
-                                  body={<div className="flex flex-col space-y-3 sm:space-y-4 -mb-2">
-                                    <div className="flex items-center space-x-2 mx-auto py-2">
+                                  body={<div className="flex flex-col space-y-3 sm:space-y-4 mt-0.5 -mb-2">
+                                    <div className="flex items-center space-x-8 mx-auto py-2">
                                       {confirmFromChain && (
-                                        <div className="flex flex-col items-center space-y-0.5">
+                                        <div className="flex flex-col items-center space-y-1">
                                           <Img
                                             src={confirmFromChain.image}
                                             alt=""
-                                            className="w-8 h-8 rounded-full"
+                                            className="w-10 h-10 rounded-full"
                                           />
                                           <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
                                             {chainTitle(confirmFromChain)}
@@ -1335,13 +1339,14 @@ export default function CrosschainBridge() {
                                         </div>
                                       )}
                                       {/*<TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500 -mt-4" />*/}
-                                      <div className="flex flex-col items-center space-y-0.5">
+                                      <div className="flex flex-col items-center space-y-1">
                                         <Img
                                           src="/logos/connext/logo.png"
                                           alt=""
-                                          className="w-8 h-8 rounded-full"
+                                          className="w-10 h-10 rounded-full"
                                         />
-                                        <div className="flex items-center space-x-1">
+                                        <div className="h-4" />
+                                        {/*<div className="flex items-center space-x-1">
                                           <a
                                             href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${estimatedAmount.bid?.router?.toLowerCase()}`}
                                             target="_blank"
@@ -1351,15 +1356,15 @@ export default function CrosschainBridge() {
                                             {ens_data?.[estimatedAmount.bid?.router?.toLowerCase()]?.name || ellipseAddress(estimatedAmount.bid?.router?.toLowerCase(), 5)}
                                           </a>
                                           <Copy size={14} text={estimatedAmount.bid?.router?.toLowerCase()} />
-                                        </div>
+                                        </div>*/}
                                       </div>
                                       {/*<TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500 -mt-4" />*/}
                                       {confirmToChain && (
-                                        <div className="flex flex-col items-center space-y-0.5">
+                                        <div className="flex flex-col items-center space-y-1">
                                           <img
                                             src={confirmToChain.image}
                                             alt=""
-                                            className="w-8 h-8 rounded-full"
+                                            className="w-10 h-10 rounded-full"
                                           />
                                           <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
                                             {chainTitle(confirmToChain)}
@@ -1389,7 +1394,7 @@ export default function CrosschainBridge() {
                                             href={`${confirmToChain.explorer.url}${confirmToChain.explorer.address_path?.replace('{address}', receivingAddress)}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-gray-900 dark:text-white"
+                                            className="text-blue-600 dark:text-white"
                                           >
                                             {confirmToChain.explorer.icon ?
                                               <Img
@@ -1404,6 +1409,27 @@ export default function CrosschainBridge() {
                                         )}
                                       </div>)}
                                     </div>
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                                      <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
+                                        Router Address
+                                        <span className="hidden sm:block">:</span>
+                                      </div>
+                                      <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
+                                        <span className="text-gray-900 dark:text-gray-100 text-base sm:text-xs xl:text-base font-semibold">
+                                          {ens_data?.[estimatedAmount.bid?.router?.toLowerCase()]?.name || ellipseAddress(estimatedAmount.bid?.router?.toLowerCase(), 10)}
+                                        </span>
+                                        <Copy size={18} text={estimatedAmount.bid?.router?.toLowerCase()} />
+                                        <a
+                                          href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${estimatedAmount.bid?.router?.toLowerCase()}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-blue-600 dark:text-white"
+                                        >
+                                          <TiArrowRight size={20} className="transform -rotate-45" />
+                                        </a>
+                                      </div>
+                                    </div>
+                                    <div className="h-1 border-t border-gray-200 dark:border-gray-600" />
                                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
                                       <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
                                         Send Amount
@@ -1424,31 +1450,62 @@ export default function CrosschainBridge() {
                                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
                                       <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
                                         Fees
+                                        {feesPopover(
+                                          <IoMdInformationCircle size={16} className="text-gray-400 dark:text-gray-600 ml-1.5" />
+                                        )}
                                         <span className="hidden sm:block">:</span>
                                       </div>
-                                      <div className="flex flex-col items-start sm:items-end py-1">
-                                        <div className="w-full grid grid-flow-row grid-cols-2 gap-1.5">
-                                          <span className="text-gray-400 dark:text-gray-500 text-sm">Dest. Tx Cost:</span>
-                                          <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
-                                            <span className="font-mono">{numberFormat(confirmGasFee, '0,0.00000000')}</span>
-                                            <span>{confirmToAsset?.symbol}</span>
+                                      <div className="flex items-start space-x-1.5">
+                                        {/*<button
+                                          onClick={() => setConfirmFeesCollapsed(!confirmFeesCollapsed)}
+                                          className="bg-transparent text-gray-400 dark:text-gray-500 flex items-center text-sm space-x-1 mt-0.5"
+                                        >
+                                          {confirmFeesCollapsed ?
+                                            <BiChevronDown size={20} />
+                                            :
+                                            <BiChevronUp size={20} />
+                                          }
+                                        </button>*/}
+                                        {confirmFeesCollapsed ?
+                                          <div>
+                                            {feesPopover(
+                                              <div className="text-lg space-x-1.5">
+                                                <span className="font-mono font-semibold">{numberFormat(estimatedFees, '0,0.00000000')}</span>
+                                                <span className="font-semibold">{confirmToAsset?.symbol}</span>
+                                              </div>
+                                            )}
+                                            {estimatedFees && typeof tokens_data?.[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                                              <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
+                                                ({currency_symbol}{numberFormat(estimatedFees * tokens_data[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                                              </div>
+                                            )}
                                           </div>
-                                          <span className="text-gray-400 dark:text-gray-500 text-sm">Relayer Fee:</span>
-                                          <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
-                                            <span className="font-mono">{numberFormat(confirmRelayerFee, '0,0.00000000')}</span>
-                                            <span>{confirmToAsset?.symbol}</span>
+                                          :
+                                          <div className="flex flex-col items-start sm:items-end py-1">
+                                            <div className="w-full grid grid-flow-row grid-cols-2 gap-1.5">
+                                              <span className="text-gray-400 dark:text-gray-500 text-sm">Dest. Tx Cost:</span>
+                                              <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
+                                                <span className="font-mono">{numberFormat(confirmGasFee, '0,0.00000000')}</span>
+                                                <span>{confirmToAsset?.symbol}</span>
+                                              </div>
+                                              <span className="text-gray-400 dark:text-gray-500 text-sm">Relayer Fee:</span>
+                                              <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
+                                                <span className="font-mono">{numberFormat(confirmRelayerFee, '0,0.00000000')}</span>
+                                                <span>{confirmToAsset?.symbol}</span>
+                                              </div>
+                                              <span className="text-gray-400 dark:text-gray-500 text-sm">Router Fee:</span>
+                                              <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
+                                                <span className="font-mono">{numberFormat(confirmRouterFee, '0,0.00000000')}</span>
+                                                <span>{confirmToAsset?.symbol}</span>
+                                              </div>
+                                              <span className="text-gray-500 dark:text-gray-400 text-base">Total:</span>
+                                              <div className="text-gray-800 dark:text-gray-200 text-base text-right space-x-1.5">
+                                                <span className="font-mono font-medium">{numberFormat(estimatedFees, '0,0.00000000')}</span>
+                                                <span className="font-medium">{confirmToAsset?.symbol}</span>
+                                              </div>
+                                            </div>
                                           </div>
-                                          <span className="text-gray-400 dark:text-gray-500 text-sm">Router Fee:</span>
-                                          <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
-                                            <span className="font-mono">{numberFormat(confirmRouterFee, '0,0.00000000')}</span>
-                                            <span>{confirmToAsset?.symbol}</span>
-                                          </div>
-                                          <span className="text-gray-500 dark:text-gray-400 text-base">Total:</span>
-                                          <div className="text-gray-500 dark:text-gray-400 text-base text-right space-x-1.5">
-                                            <span className="font-mono font-medium">{numberFormat(estimatedFees, '0,0.00000000')}</span>
-                                            <span className="font-medium">{confirmToAsset?.symbol}</span>
-                                          </div>
-                                        </div>
+                                        }
                                       </div>
                                     </div>
                                     {/*<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
