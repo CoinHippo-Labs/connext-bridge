@@ -53,7 +53,7 @@ export default function AdvancedOptions({ applied = false, disabled = false, ini
     <>
       <button
         onClick={() => setCollapse(!collapse)}
-        className="bg-transparent text-gray-400 dark:text-gray-500 flex items-center text-sm space-x-1 ml-auto"
+        className="bg-transparent flex items-center text-gray-400 dark:text-gray-500 text-sm space-x-1 ml-auto"
       >
         {applied && (
           <>

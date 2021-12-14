@@ -14,7 +14,7 @@ import parse from 'html-react-parser'
 import { MdSwapVerticalCircle, MdSwapHorizontalCircle, MdRefresh } from 'react-icons/md'
 import { IoWallet } from 'react-icons/io5'
 import { IoMdInformationCircle } from 'react-icons/io'
-import { BiMessageError, BiMessageCheck, BiMessageDetail, BiChevronDown, BiChevronUp } from 'react-icons/bi'
+import { BiMessageError, BiMessageCheck, BiMessageDetail, BiChevronRight, BiChevronUp } from 'react-icons/bi'
 import { FaCheckCircle, FaClock, FaTimesCircle } from 'react-icons/fa'
 import { TiArrowRight, TiWarning } from 'react-icons/ti'
 import { HiSpeakerphone } from 'react-icons/hi'
@@ -1450,62 +1450,95 @@ export default function CrosschainBridge() {
                                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
                                       <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
                                         Fees
-                                        {feesPopover(
+                                        {/*feesPopover(
                                           <IoMdInformationCircle size={16} className="text-gray-400 dark:text-gray-600 ml-1.5" />
-                                        )}
+                                        )*/}
                                         <span className="hidden sm:block">:</span>
                                       </div>
-                                      <div className="flex items-start space-x-1.5">
-                                        {/*<button
-                                          onClick={() => setConfirmFeesCollapsed(!confirmFeesCollapsed)}
-                                          className="bg-transparent text-gray-400 dark:text-gray-500 flex items-center text-sm space-x-1 mt-0.5"
-                                        >
-                                          {confirmFeesCollapsed ?
-                                            <BiChevronDown size={20} />
-                                            :
-                                            <BiChevronUp size={20} />
-                                          }
-                                        </button>*/}
-                                        {confirmFeesCollapsed ?
-                                          <div>
-                                            {feesPopover(
-                                              <div className="text-lg space-x-1.5">
-                                                <span className="font-mono font-semibold">{numberFormat(estimatedFees, '0,0.00000000')}</span>
-                                                <span className="font-semibold">{confirmToAsset?.symbol}</span>
-                                              </div>
-                                            )}
-                                            {estimatedFees && typeof tokens_data?.[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
-                                              <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
-                                                ({currency_symbol}{numberFormat(estimatedFees * tokens_data[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`].prices[0].price, '0,0.00000000')})
-                                              </div>
-                                            )}
-                                          </div>
-                                          :
-                                          <div className="flex flex-col items-start sm:items-end py-1">
-                                            <div className="w-full grid grid-flow-row grid-cols-2 gap-1.5">
-                                              <span className="text-gray-400 dark:text-gray-500 text-sm">Dest. Tx Cost:</span>
-                                              <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
-                                                <span className="font-mono">{numberFormat(confirmGasFee, '0,0.00000000')}</span>
-                                                <span>{confirmToAsset?.symbol}</span>
-                                              </div>
-                                              <span className="text-gray-400 dark:text-gray-500 text-sm">Relayer Fee:</span>
-                                              <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
-                                                <span className="font-mono">{numberFormat(confirmRelayerFee, '0,0.00000000')}</span>
-                                                <span>{confirmToAsset?.symbol}</span>
-                                              </div>
-                                              <span className="text-gray-400 dark:text-gray-500 text-sm">Router Fee:</span>
-                                              <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
-                                                <span className="font-mono">{numberFormat(confirmRouterFee, '0,0.00000000')}</span>
-                                                <span>{confirmToAsset?.symbol}</span>
-                                              </div>
-                                              <span className="text-gray-500 dark:text-gray-400 text-base">Total:</span>
-                                              <div className="text-gray-800 dark:text-gray-200 text-base text-right space-x-1.5">
-                                                <span className="font-mono font-medium">{numberFormat(estimatedFees, '0,0.00000000')}</span>
-                                                <span className="font-medium">{confirmToAsset?.symbol}</span>
+                                      <div className="flex items-center space-x-1.5">
+                                        <div className="w-full">
+                                          <button
+                                            onClick={() => setConfirmFeesCollapsed(!confirmFeesCollapsed)}
+                                            className="bg-transparent flex items-start text-sm space-x-1.5 sm:ml-auto"
+                                          >
+                                            {confirmFeesCollapsed ?
+                                              <BiChevronRight size={20} className="text-gray-400 dark:text-gray-500 mt-1" />
+                                              :
+                                              <BiChevronUp size={20} className="text-gray-400 dark:text-gray-500 mt-1" />
+                                            }
+                                            <div className="text-lg space-x-1.5">
+                                              <span className="font-mono font-semibold">{numberFormat(estimatedFees, '0,0.00000000')}</span>
+                                              <span className="font-semibold">{confirmToAsset?.symbol}</span>
+                                            </div>
+                                          </button>
+                                          {!confirmFeesCollapsed && (
+                                            <div className="flex flex-col items-start sm:items-end py-1.5">
+                                              <div className="w-full grid grid-flow-row grid-cols-2 gap-1.5">
+                                                <span className="flex items-center text-gray-400 dark:text-gray-500 text-sm mr-4">
+                                                  Dest. Tx Cost
+                                                  <Popover
+                                                    placement="bottom"
+                                                    title="Dest. Tx Cost"
+                                                    content={<div className="w-52 min-w-lg text-gray-600 dark:text-gray-400 text-xs">
+                                                      Covers gas expense for sending funds to user on receiving chain.
+                                                    </div>}
+                                                  >
+                                                    <IoMdInformationCircle size={16} className="text-gray-300 dark:text-gray-600 ml-1" />
+                                                  </Popover>
+                                                  :
+                                                  </span>
+                                                <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
+                                                  <span className="font-mono">{numberFormat(confirmGasFee, '0,0.00000000')}</span>
+                                                  <span>{confirmToAsset?.symbol}</span>
+                                                </div>
+                                                <span className="flex items-center text-gray-400 dark:text-gray-500 text-sm mr-4">
+                                                  Relayer Fee
+                                                  <Popover
+                                                    placement="bottom"
+                                                    title="Relayer Fee"
+                                                    content={<div className="w-52 text-gray-600 dark:text-gray-400 text-xs">
+                                                      Covers gas expense for claiming user funds on receiving chain.
+                                                    </div>}
+                                                  >
+                                                    <IoMdInformationCircle size={16} className="text-gray-300 dark:text-gray-600 ml-1" />
+                                                  </Popover>
+                                                  :
+                                                </span>
+                                                <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
+                                                  <span className="font-mono">{numberFormat(confirmRelayerFee, '0,0.00000000')}</span>
+                                                  <span>{confirmToAsset?.symbol}</span>
+                                                </div>
+                                                <span className="flex items-center text-gray-400 dark:text-gray-500 text-sm mr-4">
+                                                  Router Fee
+                                                  <Popover
+                                                    placement="bottom"
+                                                    title="Router Fee"
+                                                    content={<div className="w-32 text-gray-600 dark:text-gray-400 text-xs">
+                                                      Router service fee.
+                                                    </div>}
+                                                  >
+                                                    <IoMdInformationCircle size={16} className="text-gray-300 dark:text-gray-600 ml-1" />
+                                                  </Popover>
+                                                  :
+                                                </span>
+                                                <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
+                                                  <span className="font-mono">{numberFormat(confirmRouterFee, '0,0.00000000')}</span>
+                                                  <span>{confirmToAsset?.symbol}</span>
+                                                </div>
+                                                {/*<span className="text-gray-500 dark:text-gray-400 text-base">Total:</span>
+                                                <div className="text-gray-800 dark:text-gray-200 text-base text-right space-x-1.5">
+                                                  <span className="font-mono font-medium">{numberFormat(estimatedFees, '0,0.00000000')}</span>
+                                                  <span className="font-medium">{confirmToAsset?.symbol}</span>
+                                                </div>*/}
                                               </div>
                                             </div>
-                                          </div>
-                                        }
+                                          )}
+                                          {estimatedFees && typeof tokens_data?.[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                                            <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
+                                              ({currency_symbol}{numberFormat(estimatedFees * tokens_data[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                                            </div>
+                                          )}
+                                        </div>
                                       </div>
                                     </div>
                                     {/*<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
