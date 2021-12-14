@@ -77,7 +77,7 @@ export default function Modal({ id = 'portal', hidden, buttonTitle, disabled, on
                   </div>
                 </div>
                 {!noButtons && (
-                  <div className="border-t border-gray-200 dark:border-gray-700 border-solid rounded-b flex items-center justify-end space-x-2 p-4">
+                  <div className={`border-t border-gray-200 dark:border-gray-700 border-solid rounded-b flex items-center justify-end space-x-${cancelButtonClassName?.includes('hidden') ? 0 : 2} p-4`}>
                     <button
                       type="button"
                       disabled={cancelDisabled}
