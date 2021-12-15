@@ -24,6 +24,7 @@ import Asset from './asset'
 import AdvancedOptions from './advanced-options'
 import TransactionState from './transaction-state'
 import ActiveTransactions from './active-transactions'
+import Faucets from './faucets'
 import Wallet from '../wallet'
 import Popover from '../popover'
 import Alert from '../alerts'
@@ -1721,6 +1722,14 @@ export default function CrosschainBridge() {
               />
             )}
           </div>
+          {['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) && (
+            <>
+              <div />
+              <div className="w-full max-w-lg bg-white dark:bg-black rounded-2xl flex flex-col items-center justify-center">
+                <Faucets/>
+              </div>
+            </>
+          )}
         </div>
       </div>
       <div className="col-span-1 lg:col-span-2 mb-4">
