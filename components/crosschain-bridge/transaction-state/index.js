@@ -214,10 +214,10 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
   )
 
   const fromAssetAmount = typeof fromAmount === 'number' && (
-    <div className={`min-w-max max-w-min bg-gray-100 bg-gray-800 rounded-2xl flex items-center justify-center sm:justify-start space-x-2 mt-1.5 mx-auto ${finish ? 'sm:ml-0' : ''} py-1.5 px-3`}>
-      {fromAsset?.icon && (
+    <div className={`min-w-max max-w-min bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center sm:justify-start space-x-2 mt-1.5 mx-auto ${finish ? 'sm:ml-0' : ''} py-1.5 px-3`}>
+      {fromAsset?.image && (
         <Img
-          src={fromAsset.icon}
+          src={fromAsset.image}
           alt=""
           className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
         />
@@ -230,10 +230,10 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
   )
 
   const toAssetAmount = typeof toAmount === 'number' && (
-    <div className={`min-w-max max-w-min bg-gray-100 bg-gray-800 rounded-2xl flex items-center justify-center sm:justify-end space-x-2 mt-1.5 mx-auto ${finish ? 'sm:mr-0' : ''} py-1.5 px-3`}>
-      {toAsset?.icon && (
+    <div className={`min-w-max max-w-min bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center sm:justify-end space-x-2 mt-1.5 mx-auto ${finish ? 'sm:mr-0' : ''} py-1.5 px-3`}>
+      {toAsset?.image && (
         <Img
-          src={toAsset.icon}
+          src={toAsset.image}
           alt=""
           className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
         />
