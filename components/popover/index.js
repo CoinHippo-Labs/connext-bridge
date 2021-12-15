@@ -36,8 +36,36 @@ export default function Popover({ placement, title, content, children, className
       setHidden(!hidden)
     }
 
+    const handleMouseEnter = event => {
+      if (
+        buttonRef.current.contains(event.target) ||
+        popoverRef.current.contains(event.target)
+      ) {
+        setHidden(false)
+      }
+    }
+
+    const handleMouseLeave = event => {
+      if (
+        buttonRef.current.contains(event.target) ||
+        popoverRef.current.contains(event.target)
+      ) {
+        setHidden(true)
+      }
+    }
+
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    buttonRef?.current?.addEventListener('mouseenter', handleMouseEnter)
+    buttonRef?.current?.addEventListener('mouseleave', handleMouseLeave)
+    popoverRef?.current?.addEventListener('mouseenter', handleMouseEnter)
+    popoverRef?.current?.addEventListener('mouseleave', handleMouseLeave)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      buttonRef?.current?.removeEventListener('mouseenter', handleMouseEnter)
+      buttonRef?.current?.removeEventListener('mouseleave', handleMouseLeave)
+      popoverRef?.current?.removeEventListener('mouseenter', handleMouseEnter)
+      popoverRef?.current?.removeEventListener('mouseleave', handleMouseLeave)
+    }
   }, [hidden, popoverRef, buttonRef])
 
   const handlePopoverClick = () => setHidden(!hidden)
