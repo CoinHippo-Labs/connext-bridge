@@ -13,12 +13,12 @@ export default function AdvancedOptions({ applied = false, disabled = false, ini
   const [collapse, setCollapse] = useState(true)
 
   const items = [
-    {
-      label: 'Infinite Approval',
-      name: 'infinite_approval',
-      type: 'checkbox',
-      options: [{ value: true, label: 'Activate Infinite Approval' }],
-    },
+    // {
+    //   label: 'Infinite Approval',
+    //   name: 'infinite_approval',
+    //   type: 'checkbox',
+    //   options: [{ value: true, label: 'Activate Infinite Approval' }],
+    // },
     {
       label: 'Receiving address',
       name: 'receiving_address',

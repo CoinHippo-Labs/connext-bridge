@@ -9,12 +9,14 @@ import { constants, Contract } from 'ethers'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
+import Switch from 'react-switch'
 import Linkify from 'react-linkify'
 import parse from 'html-react-parser'
 import { MdSwapVerticalCircle, MdSwapHorizontalCircle, MdRefresh } from 'react-icons/md'
 import { IoWallet } from 'react-icons/io5'
 import { IoMdInformationCircle } from 'react-icons/io'
-import { BiMessageError, BiMessageCheck, BiMessageDetail, BiChevronRight, BiChevronUp } from 'react-icons/bi'
+import { BsFillQuestionCircleFill } from 'react-icons/bs'
+import { BiMessageError, BiMessageCheck, BiMessageDetail, BiChevronRight, BiChevronUp, BiInfinite, BiLock } from 'react-icons/bi'
 import { FaCheckCircle, FaClock, FaTimesCircle } from 'react-icons/fa'
 import { TiArrowRight, TiWarning } from 'react-icons/ti'
 import { HiSpeakerphone } from 'react-icons/hi'
@@ -68,8 +70,8 @@ export default function CrosschainBridge() {
   const { rpcs_data } = { ...rpcs }
   const { theme } = { ...preferences }
 
+  const defaultInfiniteApproval = false
   const defaultAdvancedOptions = {
-    infinite_approval: true,
     receiving_address: '',
     contract_address: '',
     call_data: '',
@@ -79,6 +81,7 @@ export default function CrosschainBridge() {
   const [controller, setController] = useState(new AbortController())
 
   const [swapConfig, setSwapConfig] = useState({})
+  const [infiniteApproval, setInfiniteApproval] = useState(defaultInfiniteApproval)
   const [advancedOptions, setAdvancedOptions] = useState(defaultAdvancedOptions)
 
   const [estimateTrigger, setEstimateTrigger] = useState(null)
@@ -624,7 +627,7 @@ export default function CrosschainBridge() {
 
     if (sdk_data) {
       try {
-        const response = await sdk_data.prepareTransfer(estimatedAmount, advancedOptions?.infinite_approval)
+        const response = await sdk_data.prepareTransfer(estimatedAmount, infiniteApproval/*advancedOptions?.infinite_approval*/)
 
         setSwapData({ ...response, sendingChainId: estimatedAmount?.bid?.sendingChainId, receivingChainId: estimatedAmount?.bid?.receivingChainId })
         setSwapResponse(null)
@@ -1185,6 +1188,51 @@ export default function CrosschainBridge() {
                 </div>
               </div>
             )}
+            {swapConfig.fromAssetId && (
+              <div className="grid grid-flow-row grid-cols-2 sm:grid-cols-5 sm:gap-4 mb-4 sm:mb-2 pb-0.5">
+                <div className="sm:col-span-2 flex items-center justify-start space-x-1">
+                  <span className="text-gray-400 dark:text-gray-600 text-base">Allowance</span>
+                  <Popover
+                    placement="bottom"
+                    title="Allowance"
+                    content={<div className="w-72">
+                      Only the exact amount is allowed to be transferred. You will need to reapprove for a subsequent transaction.
+                    </div>}
+                  >
+                    <span className="text-gray-400 dark:text-gray-600">
+                      <BsFillQuestionCircleFill size={14} />
+                    </span>
+                  </Popover>
+                </div>
+                <div className="sm:col-span-3 flex items-center justify-end space-x-2">
+                  <div className="flex items-center space-x-1.5">
+                    {infiniteApproval ?
+                      <BiInfinite size={16} />
+                      :
+                      <BiLock size={16} className="mb-0.5" />
+                    }
+                    <span className="font-medium">{infiniteApproval ? 'Infinite' : 'Exact'}</span>
+                  </div>
+                  <Switch
+                    disabled={actionDisabled}
+                    checked={infiniteApproval}
+                    onChange={() => setInfiniteApproval(!infiniteApproval)}
+                    onColor="#4F46E5"
+                    onHandleColor="#E0E7FF"
+                    offColor="#E5E7EB"
+                    offHandleColor="#F9FAFB"
+                    handleDiameter={24}
+                    uncheckedIcon={false}
+                    checkedIcon={false}
+                    boxShadow="0px 1px 5px rgba(0, 0, 0, 0.2)"
+                    activeBoxShadow="0px 1px 5px rgba(0, 0, 0, 0.2)"
+                    height={20}
+                    width={48}
+                    className="react-switch"
+                  />
+                </div>
+              </div>
+            )}
             <div className="grid grid-flow-row grid-cols-1 sm:gap-4 mb-8 sm:mb-4">
               <AdvancedOptions
                 applied={!_.isEqual(advancedOptions, defaultAdvancedOptions)}
@@ -1483,7 +1531,7 @@ export default function CrosschainBridge() {
                                                   <Popover
                                                     placement="bottom"
                                                     title="Dest. Tx Cost"
-                                                    content={<div className="w-52 min-w-lg text-gray-600 dark:text-gray-400 text-xs">
+                                                    content={<div className="w-52 text-gray-600 dark:text-gray-400 text-xs">
                                                       Covers gas expense for sending funds to user on receiving chain.
                                                     </div>}
                                                   >
