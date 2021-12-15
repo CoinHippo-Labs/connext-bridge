@@ -282,7 +282,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
           )}
         </div>}
         body={<div className="space-y-8 sm:space-y-4 mt-1">
-          <div className="overflow-x-scroll flex flex-col sm:flex-row items-center sm:items-start space-y-3 sm:space-y-0 mt-2">
+          <div className="overflow-x-scroll lg:overflow-x-visible flex flex-col sm:flex-row items-center sm:items-start space-y-3 sm:space-y-0 mt-2">
             {loaded ?
               generalTx?.sendingAddress ?
                 <div className="min-w-max">
