@@ -91,7 +91,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
           {transaction && (
             <div className="flex items-center space-x-1">
               <span className="cursor-pointer text-indigo-600 dark:text-gray-200 text-sm font-medium">
-                {ellipseAddress(transaction.crosschainTx?.invariant?.transactionId?.toLowerCase(), 8)}
+                {ellipseAddress(transaction.crosschainTx?.invariant?.transactionId?.toLowerCase(), 6)}
               </span>
               <Copy
                 size={14}
