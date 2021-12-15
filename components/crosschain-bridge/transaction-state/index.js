@@ -281,7 +281,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
             </a>
           )}
         </div>}
-        body={<div className="space-y-4 mt-1">
+        body={<div className="space-y-8 sm:space-y-4 mt-1">
           <div className="overflow-x-scroll flex flex-col sm:flex-row items-center sm:items-start space-y-3 sm:space-y-0 mt-2">
             {loaded ?
               generalTx?.sendingAddress ?
@@ -794,7 +794,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                 </div>
             }
           </div>
-          <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-2 py-4">
+          <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-2 gap-16 sm:gap-2 py-4">
             {web3_provider && loaded && !finish && [sendingTx?.status, receivingTx?.status].includes('Prepared') && (['Prepared'].includes(receivingTx?.status) || canCancelSender) && (
               <div className="sm:order-2 flex flex-col items-center justify-center space-y-3">
                 {(canCancelSender ? sendingTx : receivingTx) && address?.toLowerCase() !== (canCancelSender ? sendingTx?.sendingAddress?.toLowerCase() : receivingTx?.sendingAddress?.toLowerCase()) ?
