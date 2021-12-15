@@ -94,7 +94,7 @@ export default function Faucets() {
         className="w-full bg-transparent flex items-center justify-center text-gray-400 dark:text-gray-500 text-lg space-x-1 my-4"
       >
         {!signer && (
-          <span>Connect wallet to </span>
+          <span>Connect wallet to</span>
         )}
         <span>Faucets</span>
         {collapse ?
