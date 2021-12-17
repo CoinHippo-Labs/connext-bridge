@@ -1021,7 +1021,7 @@ export default function CrosschainBridge() {
                       getChainAssets(swapConfig.fromChainId)
                     }
                   }}
-                  className={`z-10 ${actionDisabled ? 'cursor-not-allowed' : ''}`}
+                  className={`${actionDisabled ? 'cursor-not-allowed' : ''}`}
                 >
                   <MdSwapVerticalCircle size={40} className="sm:hidden rounded-full shadow-lg text-indigo-500 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-white" />
                   <MdSwapHorizontalCircle size={40} className="hidden sm:block rounded-full shadow-lg text-indigo-500 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-white" />
