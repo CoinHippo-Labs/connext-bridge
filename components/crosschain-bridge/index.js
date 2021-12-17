@@ -648,7 +648,7 @@ export default function CrosschainBridge() {
     setStartingSwap(false)
   }
 
-  const reset = () => {
+  const reset = async () => {
     setSwapConfig({ ...swapConfig, amount: null })
     setAdvancedOptions(defaultAdvancedOptions)
 
@@ -679,6 +679,9 @@ export default function CrosschainBridge() {
     if (swapConfig?.toChainId) {
       getChainBalances(swapConfig.toChainId)
     }
+
+    const _approved = await isTokenApproved()
+    setTokenApproved(_approved)
   }
 
   const fromChain = chains_data?.find(_chain => _chain?.chain_id === swapConfig.fromChainId)
