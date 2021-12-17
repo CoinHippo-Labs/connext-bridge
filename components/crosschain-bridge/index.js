@@ -454,7 +454,7 @@ export default function CrosschainBridge() {
     setTokenApproveResponse(null)
 
     try {
-      const tx_approve = await approve(signer, contract?.contract_address, getDeployedTransactionManagerContract(swapConfig.fromChainId)?.address, BigNumber(swapConfig.amount).shiftedBy(contract?.contract_decimals).toString())
+      const tx_approve = await approve(signer, contract?.contract_address, getDeployedTransactionManagerContract(swapConfig.fromChainId)?.address, infiniteApproval ? constants.MaxUint256 : BigNumber(swapConfig.amount).shiftedBy(contract?.contract_decimals).toString())
 
       const tx_hash = tx_approve?.hash
 
@@ -806,7 +806,7 @@ export default function CrosschainBridge() {
   )
 
   const mustChangeChain = swapConfig.fromChainId && chain_id !== swapConfig.fromChainId && !swapData && !activeTransactionOpen
-  const mustApproveToken = false && !tokenApproved.gte(BigNumber(swapConfig.amount).shiftedBy(fromContract?.contract_decimals))
+  const mustApproveToken = !(tokenApproved && (typeof tokenApproved === 'boolean' ? tokenApproved : tokenApproved.gte(BigNumber(swapConfig.amount).shiftedBy(fromContract?.contract_decimals))))
 
   const actionDisabled = tokenApproveResponse?.status === 'pending' || startingSwap
 
@@ -1378,7 +1378,7 @@ export default function CrosschainBridge() {
                               </button>
                               :
                               mustApproveToken ?
-                                typeof tokenApproved === 'boolean' && (
+                                (typeof tokenApproved === 'boolean' || tokenApproved) && (
                                   <div className="sm:pt-1.5 pb-1">
                                     <button
                                       disabled={actionDisabled}
