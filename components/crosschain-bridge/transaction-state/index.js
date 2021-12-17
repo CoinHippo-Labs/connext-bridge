@@ -82,7 +82,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
 
     getData()
 
-    const interval = setInterval(() => getData(), 15 * 1000)
+    const interval = setInterval(() => getData(), 5 * 1000)
     return () => clearInterval(interval)
   }, [data])
 

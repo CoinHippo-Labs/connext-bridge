@@ -51,7 +51,7 @@ const approve_response_countdown_second = 10
 
 BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
 
-const check_balances = true && !['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK)
+const check_balances = false && !['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK)
 
 export default function CrosschainBridge() {
   const dispatch = useDispatch()
@@ -237,6 +237,12 @@ export default function CrosschainBridge() {
   }, [address, chain_id, swapConfig])
 
   useEffect(() => {
+    if (tokenApproved === true || (tokenApproved && tokenApproved?.toNumber() >= constants.MaxUint256)) {
+      setInfiniteApproval(true)
+    }
+  }, [tokenApproved])
+
+  useEffect(() => {
     if (typeof tokenApproveResponseCountDown === 'number') {
       if (tokenApproveResponseCountDown === 0) {
         setTokenApproveResponse(null)
@@ -418,18 +424,18 @@ export default function CrosschainBridge() {
   const isTokenApproved = async isAfterApprove => {
     let approved = false
 
-    if (address && chain_id && chain_id === swapConfig.fromChainId && swapConfig.fromAssetId && typeof swapConfig.amount === 'number' && (isAfterApprove || !tokenApproveResponse)) {
+    if (address && chain_id/* && chain_id === swapConfig.fromChainId*/ && swapConfig.fromAssetId/* && typeof swapConfig.amount === 'number'*/ && (isAfterApprove || !tokenApproveResponse)) {
       const fromChainSynced = getChainSynced(swapConfig.fromChainId)
       const toChainSynced = getChainSynced(swapConfig.toChainId)
 
-      if (isSupport() && fromChainSynced && toChainSynced) {
+      if (isSupport()/* && fromChainSynced && toChainSynced*/) {
         const asset = assets_data?.find(_asset => _asset?.id === swapConfig.fromAssetId)
         const contract = asset.contracts?.find(_contract => _contract?.chain_id === swapConfig.fromChainId)
 
         if (contract?.contract_address) {
           if (contract.contract_address !== constants.AddressZero) {
             approved = await getApproved(signer, contract.contract_address, getDeployedTransactionManagerContract(swapConfig.fromChainId)?.address)
-            approved = approved.gte(BigNumber(swapConfig.amount).shiftedBy(contract?.contract_decimals))
+            // approved = approved.gte(BigNumber(swapConfig.amount).shiftedBy(contract?.contract_decimals))
           }
           else {
             approved = true
@@ -478,6 +484,9 @@ export default function CrosschainBridge() {
       if (fromContract && toContract) {      
         setEstimatedAmountResponse(null)
 
+        const _approved = await isTokenApproved()
+        setTokenApproved(_approved)
+
         if (typeof swapConfig.amount === 'number') {
           setTokenApproveResponse(null)
 
@@ -491,9 +500,6 @@ export default function CrosschainBridge() {
           if (sdk_data) {
             if (!controller.signal.aborted) {
               setEstimatingAmount(true)
-
-              const _approved = await isTokenApproved()
-              setTokenApproved(_approved)
 
               setBidExpiresSecond(bid_expires_second)
               setNumReceivedBid(0)
@@ -634,6 +640,9 @@ export default function CrosschainBridge() {
       } catch (error) {
         setSwapResponse({ status: 'failed', message: error?.data?.message || error?.message })
       }
+
+      const _approved = await isTokenApproved()
+      setTokenApproved(_approved)
     }
 
     setStartingSwap(false)
@@ -794,9 +803,40 @@ export default function CrosschainBridge() {
   )
 
   const mustChangeChain = swapConfig.fromChainId && chain_id !== swapConfig.fromChainId && !swapData && !activeTransactionOpen
-  const mustApproveToken = !tokenApproved
+  const mustApproveToken = false && !tokenApproved.gte(BigNumber(swapConfig.amount).shiftedBy(fromContract?.contract_decimals))
 
   const actionDisabled = tokenApproveResponse?.status === 'pending' || startingSwap
+
+  const unlimitAllowance = tokenApproved === true || (tokenApproved && tokenApproved?.toNumber() >= constants.MaxUint256)
+  const allowanceComponent = (
+    <>
+      <div className={`flex items-center ${unlimitAllowance ? 'text-gray-400 dark:text-gray-600' : ''} space-x-1.5`}>
+        {infiniteApproval ?
+          <BiInfinite size={16} />
+          :
+          <BiLock size={16} className="mb-0.5" />
+        }
+        <span className="font-medium">{infiniteApproval ? 'Infinite' : 'Exact'}</span>
+      </div>
+      <Switch
+        disabled={actionDisabled || unlimitAllowance}
+        checked={infiniteApproval}
+        onChange={() => setInfiniteApproval(!infiniteApproval)}
+        onColor="#6366F1"
+        onHandleColor="#C7D2FE"
+        offColor="#E5E7EB"
+        offHandleColor="#F9FAFB"
+        handleDiameter={24}
+        uncheckedIcon={false}
+        checkedIcon={false}
+        boxShadow="0px 1px 5px rgba(0, 0, 0, 0.2)"
+        activeBoxShadow="0px 1px 5px rgba(0, 0, 0, 0.2)"
+        height={20}
+        width={48}
+        className="react-switch"
+      />
+    </>
+  )
 
   return (
     <div className="grid grid-flow-row grid-cols-1 lg:grid-cols-8 items-start gap-4">
@@ -972,11 +1012,13 @@ export default function CrosschainBridge() {
                       amount: null,
                     })
 
+                    setInfiniteApproval(defaultInfiniteApproval)
+
                     if (swapConfig.fromChainId !== swapConfig.toChainId) {
                       getChainAssets(swapConfig.fromChainId)
                     }
                   }}
-                  className={`${actionDisabled ? 'cursor-not-allowed' : ''}`}
+                  className={`z-10 ${actionDisabled ? 'cursor-not-allowed' : ''}`}
                 >
                   <MdSwapVerticalCircle size={40} className="sm:hidden rounded-full shadow-lg text-indigo-500 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-white" />
                   <MdSwapHorizontalCircle size={40} className="hidden sm:block rounded-full shadow-lg text-indigo-500 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-white" />
@@ -1188,7 +1230,7 @@ export default function CrosschainBridge() {
                 </div>
               </div>
             )}
-            {swapConfig.fromAssetId && (
+            {swapConfig.fromAssetId && fromContract?.contract_address !== constants.AddressZero && typeof swapConfig.amount === 'number' && (
               <div className="grid grid-flow-row grid-cols-2 sm:grid-cols-5 sm:gap-4 mb-4 sm:mb-2 pb-0.5">
                 <div className="sm:col-span-2 flex items-center justify-start space-x-1">
                   <span className="text-gray-400 dark:text-gray-600 text-base">Allowance</span>
@@ -1205,31 +1247,19 @@ export default function CrosschainBridge() {
                   </Popover>
                 </div>
                 <div className="sm:col-span-3 flex items-center justify-end space-x-2">
-                  <div className="flex items-center space-x-1.5">
-                    {infiniteApproval ?
-                      <BiInfinite size={16} />
-                      :
-                      <BiLock size={16} className="mb-0.5" />
-                    }
-                    <span className="font-medium">{infiniteApproval ? 'Infinite' : 'Exact'}</span>
-                  </div>
-                  <Switch
-                    disabled={actionDisabled}
-                    checked={infiniteApproval}
-                    onChange={() => setInfiniteApproval(!infiniteApproval)}
-                    onColor="#4F46E5"
-                    onHandleColor="#E0E7FF"
-                    offColor="#E5E7EB"
-                    offHandleColor="#F9FAFB"
-                    handleDiameter={24}
-                    uncheckedIcon={false}
-                    checkedIcon={false}
-                    boxShadow="0px 1px 5px rgba(0, 0, 0, 0.2)"
-                    activeBoxShadow="0px 1px 5px rgba(0, 0, 0, 0.2)"
-                    height={20}
-                    width={48}
-                    className="react-switch"
-                  />
+                  {unlimitAllowance ?
+                    <Popover
+                      placement="top"
+                      title={`${fromAsset?.symbol} Allowance`}
+                      content={<div className="w-36">Infinite allowance on</div>}
+                    >
+                      <div className="flex items-center justify-end capitalize space-x-2">
+                        {allowanceComponent}
+                      </div>
+                    </Popover>
+                    :
+                    allowanceComponent
+                  }
                 </div>
               </div>
             )}
@@ -1242,7 +1272,7 @@ export default function CrosschainBridge() {
               />
             </div>
             {isSupport() && (swapData || balances_data?.[swapConfig.fromChainId])/* && typeof estimatedFees === 'number'*/ && (typeof swapConfig.amount === 'number' || mustChangeChain) ?
-              !estimatedAmountResponse && mustChangeChain ?
+              mustChangeChain ?
                 <div className="sm:pt-1.5 pb-1">
                   <Wallet
                     chainIdToConnect={swapConfig.fromChainId}
@@ -1259,7 +1289,7 @@ export default function CrosschainBridge() {
                   />
                 </div>
                 :
-                !swapData && !estimatingFees && swapConfig.fromAssetId === swapConfig.toAssetId && swapConfig.amount < estimatedFees ?
+                !estimatedAmountResponse && !swapData && !estimatingFees && swapConfig.fromAssetId === swapConfig.toAssetId && swapConfig.amount < estimatedFees ?
                   <div className="sm:pt-1.5 pb-1">
                     <Alert
                       color="bg-red-400 dark:bg-red-500 text-left text-white"
