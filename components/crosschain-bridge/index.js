@@ -733,7 +733,9 @@ export default function CrosschainBridge() {
   }
   const confirmFees = estimatedAmount && ((confirmGasFee || 0) + (confirmRelayerFee || 0) + (confirmRouterFee || 0))
 
-  let maxAmount = Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals)
+  let maxBalanceAmount = Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals)
+  maxBalanceAmount = maxBalanceAmount > smallNumber ? maxBalanceAmount : 0
+  let maxAmount = maxBalanceAmount
   if (swapConfig.fromAssetId && swapConfig.toAssetId) {
     const asset = max_transfers_data?.[swapConfig.toChainId]?.[toContract?.contract_address]
 
@@ -763,6 +765,7 @@ export default function CrosschainBridge() {
     }
   }
   maxAmount = maxAmount > smallNumber ? maxAmount : 0
+  const isMaxLiquidity = maxAmount < maxBalanceAmount && typeof amount === 'number' && amount === maxAmount
 
   const isNative = fromContract?.is_native
 
@@ -1136,7 +1139,7 @@ export default function CrosschainBridge() {
                   <>
                     <div className="hidden sm:block order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-5 pt-0 sm:pt-2" />
                     <div className="w-full order-3 sm:order-4 sm:col-span-3 -mt-1.5 sm:-mt-5 mx-auto pt-3 sm:pt-2">
-                      <div className="w-64 h-4 flex items-center justify-end mx-auto pr-12 sm:pr-3">
+                      <div className={`w-64 h-4 flex items-center justify-end mx-auto pr-12 sm:pr-${isMaxLiquidity ? 0 : 3}`}>
                         {isNative ?
                           null
                           :
@@ -1148,9 +1151,12 @@ export default function CrosschainBridge() {
                                   amount: maxAmount,
                                 })
                               }}
-                              className="text-gray-800 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100 text-sm font-bold"
+                              className="text-gray-800 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100 text-sm font-bold space-x-1"
                             >
-                              Max
+                              <span>Max</span>
+                              {isMaxLiquidity && (
+                                <span className="text-gray-400 dark:text-gray-500 text-xs font-normal">(available liquidity)</span>
+                              )}
                             </button>
                             :
                             <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
