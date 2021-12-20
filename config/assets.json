@@ -47,6 +47,11 @@
         "contract_address": "0xb44a9b6905af7c801311e8f4e76932ee959c663c",
         "chain_id": 1285,
         "contract_decimals": 6
+      },
+      {
+        "contract_address": "0xfadbbf8ce7d5b7041be672561bba99f79c532e10",
+        "chain_id": 122,
+        "contract_decimals": 6
       }
     ]
   },
@@ -97,6 +102,11 @@
       {
         "contract_address": "0xe3f5a90f9cb311505cd691a46596599aa1a0ad7d",
         "chain_id": 1285,
+        "contract_decimals": 6
+      },
+      {
+        "contract_address": "0x620fd5fa44be6af63715ef4e65ddfa0387ad13f5",
+        "chain_id": 122,
         "contract_decimals": 6
       }
     ]
@@ -149,6 +159,11 @@
       {
         "contract_address": "0x80a16016cc4a2e6a2caca8a4a498b1699ff0f844",
         "chain_id": 1285,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0x94ba7a27c7a95863d1bdc7645ac2951e0cca06ba",
+        "chain_id": 122,
         "contract_decimals": 18
       }
     ]
@@ -204,6 +219,11 @@
         "contract_address": "0x639a647fbe20b6c8ac19e48e2de44ea792c62c5c",
         "chain_id": 1285,
         "contract_decimals": 18
+      },
+      {
+        "contract_address": "0xa722c13135930332eb3d749b2f0906559d2c5b99",
+        "chain_id": 122,
+        "contract_decimals": 18
       }
     ]
   },
@@ -247,13 +267,18 @@
         "contract_decimals": 8
       },
       {
-        "contract_address": "0x6ab6d61428fde76768d7b45d8bfeec19c6ef91a8",
+        "contract_address": "0x8e5bbbb09ed1ebde8674cda39a0c169401db4252",
         "chain_id": 100,
         "contract_decimals": 8
       },
       {
-        "contract_address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+        "contract_address": "0x6ab6d61428fde76768d7b45d8bfeec19c6ef91a8",
         "chain_id": 1285,
+        "contract_decimals": 8
+      },
+      {
+        "contract_address": "0x33284f95ccb7b948d9d352e1439561cf83d8d00d",
+        "chain_id": 122,
         "contract_decimals": 8
       }
     ]
@@ -285,6 +310,11 @@
       {
         "contract_address": "0xfadc59d012ba3c110b08a15b7755a5cb7cbe77d7",
         "chain_id": 100,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0x025a4c577198d116ea499193e6d735fdb2e6e841",
+        "chain_id": 122,
         "contract_decimals": 18
       }
     ]
