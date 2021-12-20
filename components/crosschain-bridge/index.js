@@ -528,34 +528,37 @@ export default function CrosschainBridge() {
                     getDomain(advancedOptions?.receiving_address || address)
 
                     const gasFee = response?.gasFeeInReceivingToken && BigNumber(response.gasFeeInReceivingToken).shiftedBy(-toContract?.contract_decimals).toNumber()
-                    let routerFee
+                    const routerFee = response?.routerFee && BigNumber(response.routerFee).shiftedBy(-toContract?.contract_decimals).toNumber()
+                    const totalFee = response?.totalFee && BigNumber(response.totalFee).shiftedBy(-toContract?.contract_decimals).toNumber()
+                    // let routerFee
 
-                    if (response?.bid) {
-                      if (swapConfig.fromAssetId === swapConfig.toAssetId) {
-                        routerFee = swapConfig.amount - BigNumber(response.bid.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber() - gasFee
-                      }
-                      else {
-                        if (typeof tokens_data?.[`${swapConfig.fromChainId}_${fromContract?.contract_address}`]?.prices?.[0]?.price === 'number' &&
-                          typeof tokens_data?.[`${swapConfig.toChainId}_${toContract?.contract_address}`]?.prices?.[0]?.price === 'number'
-                        ) {
-                          const receivedAmount = BigNumber(response.bid.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber()
+                    // if (response?.bid) {
+                    //   if (swapConfig.fromAssetId === swapConfig.toAssetId) {
+                    //     routerFee = swapConfig.amount - BigNumber(response.bid.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber() - gasFee
+                    //   }
+                    //   else {
+                    //     if (typeof tokens_data?.[`${swapConfig.fromChainId}_${fromContract?.contract_address}`]?.prices?.[0]?.price === 'number' &&
+                    //       typeof tokens_data?.[`${swapConfig.toChainId}_${toContract?.contract_address}`]?.prices?.[0]?.price === 'number'
+                    //     ) {
+                    //       const receivedAmount = BigNumber(response.bid.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber()
 
-                          const fromPrice = tokens_data[`${swapConfig.fromChainId}_${fromContract?.contract_address}`].prices[0].price
-                          const toPrice = tokens_data[`${swapConfig.toChainId}_${toContract?.contract_address}`].prices[0].price
+                    //       const fromPrice = tokens_data[`${swapConfig.fromChainId}_${fromContract?.contract_address}`].prices[0].price
+                    //       const toPrice = tokens_data[`${swapConfig.toChainId}_${toContract?.contract_address}`].prices[0].price
 
-                          const fromValue = swapConfig.amount * fromPrice
-                          const toValue = receivedAmount * toPrice
-                          const gasValue = gasFee * toPrice
+                    //       const fromValue = swapConfig.amount * fromPrice
+                    //       const toValue = receivedAmount * toPrice
+                    //       const gasValue = gasFee * toPrice
 
-                          routerFee = (fromValue - toValue - gasValue) / toPrice
-                        }
-                      }
-                    }
+                    //       routerFee = (fromValue - toValue - gasValue) / toPrice
+                    //     }
+                    //   }
+                    // }
 
                     setFees({
                       gas: gasFee,
                       relayer: BigNumber(response?.metaTxRelayerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
                       router: routerFee,
+                      total: totalFee,
                     })
 
                     setEstimatedAmount(response)
@@ -711,27 +714,29 @@ export default function CrosschainBridge() {
   const confirmAmountReceived = confirmToContract && estimatedAmount?.bid?.amountReceived && BigNumber(estimatedAmount.bid.amountReceived).shiftedBy(-confirmToContract?.contract_decimals).toNumber()
   const confirmGasFee = confirmToContract && estimatedAmount?.gasFeeInReceivingToken && BigNumber(estimatedAmount.gasFeeInReceivingToken).shiftedBy(-confirmToContract?.contract_decimals).toNumber()
   const confirmRelayerFee = confirmToContract && estimatedAmount && BigNumber(estimatedAmount.metaTxRelayerFee || '0').shiftedBy(-confirmToContract?.contract_decimals).toNumber()
-  let confirmRouterFee
-  if (estimatedAmount?.bid) {
-    if (confirmFromAsset.id === confirmToAsset.id) {
-      confirmRouterFee = confirmAmount - confirmAmountReceived - confirmGasFee
-    }
-    else {
-      if (typeof tokens_data?.[`${confirmFromChain?.chain_id}_${confirmFromContract?.contract_address}`]?.prices?.[0]?.price === 'number' &&
-        typeof tokens_data?.[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number'
-      ) {
-        const fromPrice = tokens_data[`${confirmFromChain?.chain_id}_${confirmFromContract?.contract_address}`].prices[0].price
-        const toPrice = tokens_data[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`].prices[0].price
+  const confirmRouterFee = confirmToContract && estimatedAmount && BigNumber(estimatedAmount.routerFee || '0').shiftedBy(-confirmToContract?.contract_decimals).toNumber()
+  // let confirmRouterFee
+  // if (estimatedAmount?.bid) {
+  //   if (confirmFromAsset.id === confirmToAsset.id) {
+  //     confirmRouterFee = confirmAmount - confirmAmountReceived - confirmGasFee
+  //   }
+  //   else {
+  //     if (typeof tokens_data?.[`${confirmFromChain?.chain_id}_${confirmFromContract?.contract_address}`]?.prices?.[0]?.price === 'number' &&
+  //       typeof tokens_data?.[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number'
+  //     ) {
+  //       const fromPrice = tokens_data[`${confirmFromChain?.chain_id}_${confirmFromContract?.contract_address}`].prices[0].price
+  //       const toPrice = tokens_data[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`].prices[0].price
 
-        const fromValue = confirmAmount * fromPrice
-        const toValue = confirmAmountReceived * toPrice
-        const gasValue = confirmGasFee * toPrice
+  //       const fromValue = confirmAmount * fromPrice
+  //       const toValue = confirmAmountReceived * toPrice
+  //       const gasValue = confirmGasFee * toPrice
 
-        confirmRouterFee = (fromValue - toValue - gasValue) / toPrice
-      }
-    }
-  }
-  const confirmFees = estimatedAmount && ((confirmGasFee || 0) + (confirmRelayerFee || 0) + (confirmRouterFee || 0))
+  //       confirmRouterFee = (fromValue - toValue - gasValue) / toPrice
+  //     }
+  //   }
+  // }
+  // const confirmFees = estimatedAmount && ((confirmGasFee || 0) + (confirmRelayerFee || 0) + (confirmRouterFee || 0))
+  const confirmFees = confirmToContract && estimatedAmount && BigNumber(estimatedAmount.totalFee || '0').shiftedBy(-confirmToContract?.contract_decimals).toNumber()
 
   let maxBalanceAmount = Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals)
   maxBalanceAmount = maxBalanceAmount > smallNumber ? maxBalanceAmount : 0
