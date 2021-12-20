@@ -108,7 +108,7 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
         <>
           {!showInput ?
             side === 'from' && amountOnChange ?
-              <span className="text-gray-400 dark:text-gray-600 text-base italic mr-1">No Route</span>
+              <span className="h-7 flex items-center text-gray-400 dark:text-gray-600 text-sm italic mr-1">Unsupported chain/asset combo</span>
               :
               null
             :
