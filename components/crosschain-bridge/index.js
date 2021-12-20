@@ -1202,9 +1202,9 @@ export default function CrosschainBridge() {
                             )}
                           </span>
                         )}
-                        {estimatedFees && typeof tokens_data?.[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                        {typeof estimatedFees === 'number' && typeof tokens_data?.[`${fromChain?.chain_id}_${fromContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
                           <div className="font-mono text-gray-400 dark:text-gray-500 text-2xs sm:text-right">
-                            ({currency_symbol}{numberFormat(estimatedFees * tokens_data[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                            ({estimatedAmount ? '' : '~'}{currency_symbol}{numberFormat(estimatedFees * tokens_data[`${fromChain?.chain_id}_${fromContract?.contract_address}`].prices[0].price, '0,0.00000000')})
                           </div>
                         )}
                       </div>
