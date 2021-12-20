@@ -772,6 +772,10 @@ export default function CrosschainBridge() {
   maxAmount = maxAmount > smallNumber ? maxAmount : 0
   const isMaxLiquidity = maxAmount < maxBalanceAmount && typeof amount === 'number' && amount === maxAmount
 
+  if (maxAmount > 0 && !isMaxLiquidity && typeof fromContract?.contract_decimals === 'number') {
+    maxAmount = Math.floor(maxAmount * Math.pow(10, fromContract.contract_decimals)) / Math.pow(10, fromContract.contract_decimals)
+  }
+
   const isNative = fromContract?.is_native
 
   const estimatedFees = typeof confirmFees === 'number' ? confirmFees : fees && ((fees.gas || 0) + (fees.relayer || 0) + (fees.router || 0))
