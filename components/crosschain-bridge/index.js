@@ -1174,13 +1174,13 @@ export default function CrosschainBridge() {
             )}
             {isSupport() && web3_provider && (estimatingAmount || estimatingFees || typeof estimatedFees === 'number') && (
               <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 mb-8 sm:mb-4 pb-0.5">
-                <div className="sm:col-span-2 flex items-center justify-center sm:justify-start space-x-1">
+                <div className="sm:col-span-2 flex items-start justify-center sm:justify-start space-x-1">
                   <span className="text-gray-400 dark:text-gray-600 text-base">{estimatedAmount || estimatingAmount ? '' : 'Estimated '}Fees</span>
                   {!(estimatedAmountResponse || estimatingAmount || estimatingFees || typeof estimatedFees !== 'number') && (
                     feesPopover(
-                      <span className="text-gray-400 dark:text-gray-600">
+                      <div className="text-gray-400 dark:text-gray-600 mt-1">
                         <IoMdInformationCircle size={16} />
-                      </span>
+                      </div>
                     )
                   )}
                 </div>
@@ -1192,15 +1192,22 @@ export default function CrosschainBridge() {
                     </div>
                     :
                     !estimatedAmountResponse && typeof estimatedFees === 'number' ?
-                      feesPopover(
-                        <span className="flex items-center text-gray-500 dark:text-gray-200 text-sm space-x-1">
-                          <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.000000')}` : 'N/A'}</span>
-                          <span className="font-semibold">{toAsset?.symbol}</span>
-                          {!estimatedAmount && (
-                            <span className="font-mono lowercase text-gray-400 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
-                          )}
-                        </span>
-                      )
+                      <div className="flex flex-col items-center sm:items-end space-y-1">
+                        {feesPopover(
+                          <span className="flex items-center text-gray-500 dark:text-gray-200 text-sm space-x-1">
+                            <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.000000')}` : 'N/A'}</span>
+                            <span className="font-semibold">{toAsset?.symbol}</span>
+                            {!estimatedAmount && (
+                              <span className="font-mono lowercase text-gray-400 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
+                            )}
+                          </span>
+                        )}
+                        {estimatedFees && typeof tokens_data?.[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                          <div className="font-mono text-gray-400 dark:text-gray-500 text-2xs sm:text-right">
+                            ({currency_symbol}{numberFormat(estimatedFees * tokens_data[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                          </div>
+                        )}
+                      </div>
                       :
                       <div className="text-gray-400 dark:text-gray-600 text-sm">-</div>
                   }

@@ -259,5 +259,34 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     }
+  },
+  {
+    "id": "fuse",
+    "title": "Fuse",
+    "short_name": "FUSE",
+    "chain_id": 122,
+    "provider_params": [
+      {
+        "chainId": "0x7a",
+        "chainName": "Fuse Network",
+        "rpcUrls": ["https://rpc.fuse.io"],
+        "nativeCurrency": {
+          "name": "Fuse Token",
+          "symbol": "FUSE",
+          "decimals": 18
+        },
+        "blockExplorerUrls": ["https://explorer.fuse.io"]
+      }
+    ],
+    "explorer": {
+      "name": "Fuse Explorer",
+      "url": "https://explorer.fuse.io",
+      "icon": "/logos/explorers/fuse.png",
+      "block_path": "/blocks/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/tokens/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    }
   }
 ]
