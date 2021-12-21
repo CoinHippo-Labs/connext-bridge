@@ -16,7 +16,7 @@ import { MdSwapVerticalCircle, MdSwapHorizontalCircle, MdRefresh } from 'react-i
 import { IoWallet } from 'react-icons/io5'
 import { IoMdInformationCircle } from 'react-icons/io'
 import { BsFillQuestionCircleFill } from 'react-icons/bs'
-import { BiMessageError, BiMessageCheck, BiMessageDetail, BiChevronRight, BiChevronUp, BiInfinite, BiLock } from 'react-icons/bi'
+import { BiMessageError, BiMessageDots, BiMessageCheck, BiMessageDetail, BiChevronRight, BiChevronUp, BiInfinite, BiLock } from 'react-icons/bi'
 import { FaCheckCircle, FaClock, FaTimesCircle } from 'react-icons/fa'
 import { TiArrowRight, TiWarning } from 'react-icons/ti'
 import { HiSpeakerphone } from 'react-icons/hi'
@@ -1765,7 +1765,16 @@ export default function CrosschainBridge() {
                                   cancelDisabled={true}
                                 />
                                 :
-                                null
+                                <div className="sm:pt-1.5 pb-1">
+                                  <Alert
+                                    color="bg-blue-500 dark:bg-blue-600 text-left text-white"
+                                    icon={<BiMessageDots className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                                    closeDisabled={true}
+                                    rounded={true}
+                                  >
+                                    <span className="font-mono text-sm">Please retry insert the amount.</span>
+                                  </Alert>
+                                </div>
               :
               web3_provider ?
                 <button
