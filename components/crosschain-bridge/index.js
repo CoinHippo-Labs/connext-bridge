@@ -1725,7 +1725,7 @@ export default function CrosschainBridge() {
                                 rounded={true}
                               >
                                 <div className="flex items-center justify-between space-x-1">
-                                  <span className={`break-${isBreakAll(estimatedAmountResponse.message) ? 'all' : 'words'} font-mono text-sm`}>{estimatedAmountResponse.message}</span>
+                                  <span className={`break-${isBreakAll(estimatedAmountResponse.message) ? 'all' : 'normal'} font-mono text-sm`}>{estimatedAmountResponse.message}</span>
                                   <button
                                     onClick={() => setEstimateTrigger(moment().valueOf())}
                                     className="bg-red-500 dark:bg-red-400 flex items-center justify-center text-white rounded-full p-2"
@@ -1745,7 +1745,7 @@ export default function CrosschainBridge() {
                                   rounded={true}
                                 >
                                   <div className="flex items-center justify-between space-x-1">
-                                    <span className={`break-${isBreakAll(swapResponse.message) ? 'all' : 'words'} font-mono text-sm`}>{swapResponse.message}</span>
+                                    <span className={`break-${isBreakAll(swapResponse.message) ? 'all' : 'normal'} font-mono text-sm`}>{swapResponse.message}</span>
                                     <button
                                       onClick={() => setEstimateTrigger(moment().valueOf())}
                                       className="bg-red-500 dark:bg-red-400 flex items-center justify-center text-white rounded-full p-2"
