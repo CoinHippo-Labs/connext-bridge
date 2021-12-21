@@ -774,6 +774,18 @@ export default function CrosschainBridge() {
 
   if (maxAmount > 0 && !isMaxLiquidity && typeof fromContract?.contract_decimals === 'number') {
     maxAmount = Math.floor(maxAmount * Math.pow(10, fromContract.contract_decimals)) / Math.pow(10, fromContract.contract_decimals)
+  
+    try {
+      if (maxAmount) {
+        let _maxAmount = maxAmount.toString()
+
+        if (_maxAmount.includes('.') && _maxAmount.substring(_maxAmount.indexOf('.') + 1)?.length > 6) {
+          _maxAmount = _maxAmount.substring(0, _maxAmount.indexOf('.') + 1 + 6)
+
+          maxAmount = Number(_maxAmount)
+        }
+      }
+    } catch (error) {}
   }
 
   const isNative = fromContract?.is_native
