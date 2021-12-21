@@ -223,7 +223,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
         />
       )}
       <span className="flex items-center text-gray-700 dark:text-gray-300 text-base font-semibold">
-        <span className="font-mono mr-1.5">{numberFormat(fromAmount, '0,0.000000')}</span>
+        <span className="font-mono mr-1.5">{numberFormat(fromAmount, '0,0.000000', true)}</span>
         <span>{fromAsset?.symbol}</span>
       </span>
     </div>
@@ -239,7 +239,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
         />
       )}
       <span className="flex items-center text-gray-700 dark:text-gray-300 text-base font-semibold">
-        <span className="font-mono mr-1.5">{numberFormat(toAmount, '0,0.000000')}</span>
+        <span className="font-mono mr-1.5">{numberFormat(toAmount, '0,0.000000', true)}</span>
         <span>{toAsset?.symbol}</span>
       </span>
     </div>

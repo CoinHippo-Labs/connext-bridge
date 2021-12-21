@@ -1239,7 +1239,7 @@ export default function CrosschainBridge() {
                         :
                         !estimatedAmountResponse && estimatedAmount ?
                           <span className="font-semibold">
-                            {numberFormat(confirmAmountReceived, '0,0.00000000')}
+                            {numberFormat(confirmAmountReceived, '0,0.00000000', true)}
                           </span>
                           :
                           <span className="text-gray-400 dark:text-gray-500">-</span>
@@ -1544,7 +1544,7 @@ export default function CrosschainBridge() {
                                       </div>
                                       <div>
                                         <div className="text-lg space-x-1.5">
-                                          <span className="font-mono font-semibold">{numberFormat(confirmAmount, '0,0.00000000')}</span>
+                                          <span className="font-mono font-semibold">{numberFormat(confirmAmount, '0,0.00000000', true)}</span>
                                           <span className="font-semibold">{confirmFromAsset?.symbol}</span>
                                         </div>
                                         {confirmAmount && typeof tokens_data?.[`${confirmFromChain?.chain_id}_${confirmFromContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
@@ -1682,7 +1682,7 @@ export default function CrosschainBridge() {
                                       </div>
                                       <div>
                                         <div className="text-lg space-x-1.5">
-                                          <span className="font-mono font-semibold">{numberFormat(confirmAmountReceived, '0,0.00000000')}</span>
+                                          <span className="font-mono font-semibold">{numberFormat(confirmAmountReceived, '0,0.00000000', true)}</span>
                                           <span className="font-semibold">{confirmToAsset?.symbol}</span>
                                         </div>
                                         {confirmAmountReceived && typeof tokens_data?.[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
