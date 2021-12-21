@@ -246,14 +246,14 @@
           "symbol": "MOVR",
           "decimals": 18
         },
-        "blockExplorerUrls": ["https://blockscout.moonriver.moonbeam.network"]
+        "blockExplorerUrls": ["https://moonriver.moonscan.io"]
       }
     ],
     "explorer": {
-      "name": "BlockScout",
-      "url": "https://blockscout.moonriver.moonbeam.network",
-      "icon": "/logos/explorers/blockscout.png",
-      "block_path": "/blocks/{block}",
+      "name": "Moonscan",
+      "url": "https://moonriver.moonscan.io",
+      "icon": "/logos/explorers/moonscan.png",
+      "block_path": "/block/{block}",
       "address_path": "/address/{address}",
       "contract_path": "/tokens/{address}",
       "contract_0_path": "/address/{address}",
