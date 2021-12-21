@@ -51,7 +51,7 @@ const approve_response_countdown_second = 10
 
 BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
 
-const check_balances = false && !['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK)
+const check_balances = true && !['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK)
 
 export default function CrosschainBridge() {
   const dispatch = useDispatch()
