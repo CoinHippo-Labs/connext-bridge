@@ -185,8 +185,8 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
   const fromAsset = (assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.sendingChainId && _contract?.contract_address === generalTx?.sendingAssetId)) || generalTx?.sendingAsset) && { ...assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.sendingChainId && _contract?.contract_address === generalTx?.sendingAssetId)), ...generalTx?.sendingAsset }
   const toAsset = (assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.receivingChainId && _contract?.contract_address === generalTx?.receivingAssetId)) || generalTx?.receivingAsset) && { ...assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.receivingChainId && _contract?.contract_address === generalTx?.receivingAssetId)), ...generalTx?.receivingAsset }
 
-  const fromAmount = sendingTx && fromAsset && Number(sendingTx.amount) / Math.pow(10, fromAsset.contract_decimals)
-  const toAmount = receivingTx && toAsset && Number(receivingTx.amount) / Math.pow(10, toAsset.contract_decimals)
+  const fromAmount = (sendingTx || generalTx) && fromAsset && (Number(sendingTx?.amount || generalTx?.amount) / Math.pow(10, fromAsset.contract_decimals))
+  const toAmount = receivingTx && toAsset && (Number(receivingTx.amount) / Math.pow(10, toAsset.contract_decimals))
 
   const loaded = data?.transactionId && transaction?.transactionId === data.transactionId && generalTx
 
