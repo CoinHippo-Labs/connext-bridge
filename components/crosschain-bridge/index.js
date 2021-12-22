@@ -143,7 +143,7 @@ export default function CrosschainBridge() {
 
   useEffect(() => {
     const getData = () => {
-      if (address) {
+      if (address && !swapData) {
         if (swapConfig.fromChainId) {
           getChainBalances(swapConfig.fromChainId)
         }
