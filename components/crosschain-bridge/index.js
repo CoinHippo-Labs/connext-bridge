@@ -143,7 +143,7 @@ export default function CrosschainBridge() {
 
   useEffect(() => {
     const getData = () => {
-      if (address && !swapData) {
+      if (address && !startingSwap && !swapData && !['pending'].includes(tokenApproveResponse?.status)) {
         if (swapConfig.fromChainId) {
           getChainBalances(swapConfig.fromChainId)
         }
