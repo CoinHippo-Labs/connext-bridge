@@ -1159,9 +1159,9 @@ export default function CrosschainBridge() {
                 </div>
                 {address && isSupport() && (
                   <>
-                    <div className={`${typeof maxTransfer === 'number' ? '' : 'hidden'} sm:block order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-5 pt-0 sm:pt-2`}>
+                    <div className={`${typeof maxTransfer === 'number' ? 'mt-2' : 'hidden mt-8'} sm:block order-4 sm:order-3 sm:col-span-2 sm:-mt-5 pt-0 sm:pt-2`}>
                       {typeof maxTransfer === 'number' && (
-                        <div className="h-4 flex items-center justify-center sm:justify-start text-gray-400 dark:text-gray-500 text-3xs space-x-1.5 mx-auto">
+                        <div className="h-4 flex items-center justify-center sm:justify-start text-gray-400 dark:text-gray-500 text-2xs space-x-1.5 mx-auto">
                           <span className="whitespace-nowrap">Max Transfer:</span>
                           <span className="flex items-center text-2xs space-x-1">
                             <span className="font-mono">{numberFormat(maxTransfer, '0,0.000000')}</span>
