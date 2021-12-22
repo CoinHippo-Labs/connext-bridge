@@ -1205,7 +1205,7 @@ export default function CrosschainBridge() {
                   <span className="text-gray-400 dark:text-gray-600 text-base">{estimatedAmount || estimatingAmount ? '' : 'Estimated '}Fees</span>
                   {!(estimatedAmountResponse || estimatingAmount || estimatingFees || typeof estimatedFees !== 'number') && (
                     feesPopover(
-                      <div className="text-gray-400 dark:text-gray-600 mt-1">
+                      <div className="text-gray-400 dark:text-gray-600 sm:mt-1">
                         <IoMdInformationCircle size={16} />
                       </div>
                     )
