@@ -186,7 +186,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
   const toAsset = (assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.receivingChainId && _contract?.contract_address === generalTx?.receivingAssetId)) || generalTx?.receivingAsset) && { ...assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.receivingChainId && _contract?.contract_address === generalTx?.receivingAssetId)), ...generalTx?.receivingAsset }
 
   const fromAmount = (sendingTx || generalTx) && fromAsset && (Number(sendingTx?.amount || generalTx?.amount) / Math.pow(10, fromAsset.contract_decimals))
-  const toAmount = receivingTx && toAsset && (Number(receivingTx.amount) / Math.pow(10, toAsset.contract_decimals))
+  const toAmount = (receivingTx || generalTx) && toAsset && (Number(receivingTx?.amount || generalTx?.amount) / Math.pow(10, toAsset.contract_decimals))
 
   const loaded = data?.transactionId && transaction?.transactionId === data.transactionId && generalTx
 
