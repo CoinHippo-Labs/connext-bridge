@@ -24,7 +24,7 @@ export default function ChainsStatus() {
   const { rpcs_data } = { ...rpcs }
   const { theme } = { ...preferences }
 
-  useEffect(() => {
+  useEffect(async () => {
     if (chains_data && signer) {
       const chainConfig = {}
       const rpcs = {}
@@ -42,7 +42,7 @@ export default function ChainsStatus() {
 
       dispatch({
         type: SDK_DATA,
-        value: new NxtpSdk({ chainConfig, signer }),
+        value: await NxtpSdk.create({ chainConfig, signer }),
       })
 
       dispatch({

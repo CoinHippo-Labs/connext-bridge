@@ -740,22 +740,23 @@ export default function CrosschainBridge() {
 
   let maxBalanceAmount = Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals)
   maxBalanceAmount = maxBalanceAmount > smallNumber ? maxBalanceAmount : 0
+  let maxTransfer = null
   let maxAmount = maxBalanceAmount
   if (swapConfig.fromAssetId && swapConfig.toAssetId) {
     const asset = max_transfers_data?.[swapConfig.toChainId]?.[toContract?.contract_address]
 
     if (asset) {
+      maxTransfer = (asset.amount || 0) / Math.pow(10, toContract?.contract_decimals || 0)
+
       if (swapConfig.fromAssetId === swapConfig.toAssetId) {
-        if (asset.amount / Math.pow(10, toContract?.contract_decimals) < maxAmount) {
-          maxAmount = asset.amount / Math.pow(10, toContract?.contract_decimals)
+        if (maxTransfer < maxAmount) {
+          maxAmount = maxTransfer
         }
       }
       else {
         if (typeof tokens_data?.[`${swapConfig.fromChainId}_${fromContract?.contract_address}`]?.prices?.[0]?.price === 'number' &&
           typeof tokens_data?.[`${swapConfig.toChainId}_${toContract?.contract_address}`]?.prices?.[0]?.price === 'number'
         ) {
-          const maxTransfer = (asset.amount || 0) / Math.pow(10, toContract?.contract_decimals || 0)
-
           const fromPrice = tokens_data[`${swapConfig.fromChainId}_${fromContract?.contract_address}`].prices[0].price
           const toPrice = tokens_data[`${swapConfig.toChainId}_${toContract?.contract_address}`].prices[0].price
 
@@ -1158,7 +1159,17 @@ export default function CrosschainBridge() {
                 </div>
                 {address && isSupport() && (
                   <>
-                    <div className="hidden sm:block order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-5 pt-0 sm:pt-2" />
+                    <div className={`${typeof maxTransfer === 'number' ? '' : 'hidden'} sm:block order-4 sm:order-3 sm:col-span-2 mt-8 sm:-mt-5 pt-0 sm:pt-2`}>
+                      {typeof maxTransfer === 'number' && (
+                        <div className="h-4 flex items-center justify-center sm:justify-start text-gray-400 dark:text-gray-500 text-3xs space-x-1.5 mx-auto">
+                          <span className="whitespace-nowrap">Max Transfer:</span>
+                          <span className="flex items-center text-2xs space-x-1">
+                            <span className="font-mono">{numberFormat(maxTransfer, '0,0.000000')}</span>
+                            <span className="font-medium">{toAsset?.symbol}</span>
+                          </span>
+                        </div>
+                      )}
+                    </div>
                     <div className="w-full order-3 sm:order-4 sm:col-span-3 -mt-1.5 sm:-mt-5 mx-auto pt-3 sm:pt-2">
                       <div className={`w-64 h-4 flex items-center justify-end mx-auto pr-12 sm:pr-${isMaxLiquidity ? 0 : 3}`}>
                         {isNative ?
