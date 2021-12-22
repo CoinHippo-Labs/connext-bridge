@@ -433,7 +433,9 @@ export default function CrosschainBridge() {
           getChainTokenMulticall(_chain_id, _contracts?.filter(_contract => _contract?.contracts?.contract_address !== constants.AddressZero))
 
           if (hasAddressZero) {
-            getChainTokenRPC(_chain_id, _contracts?.find(_contract => _contract?.contracts?.contract_address === constants.AddressZero))
+            const _contract = _contracts?.find(_contract => _contract?.contracts?.contract_address === constants.AddressZero)
+
+            getChainTokenRPC(_chain_id, _contract)
           }
         }
         else {
@@ -459,7 +461,9 @@ export default function CrosschainBridge() {
           getChainTokenMulticall(_chain_id, _contracts?.filter(_contract => _contract?.contracts?.contract_address !== constants.AddressZero), _assets)
 
           if (hasAddressZero) {
-            getChainTokenRPC(_chain_id, _contracts?.find(_contract => _contract?.contracts?.contract_address === constants.AddressZero), _assets.find(_asset => _contract.contracts.contract_address === constants.AddressZero && _contract.symbol?.toLowerCase() === _asset?.contract_ticker_symbol?.toLowerCase()))
+            const _contract = _contracts?.find(_contract => _contract?.contracts?.contract_address === constants.AddressZero)
+
+            getChainTokenRPC(_chain_id, _contract, _assets.find(_asset => _contract.contracts.contract_address === constants.AddressZero && _contract.symbol?.toLowerCase() === _asset?.contract_ticker_symbol?.toLowerCase()))
           }
         }
         else {
@@ -475,7 +479,9 @@ export default function CrosschainBridge() {
           getChainTokenMulticall(_chain_id, _contracts?.filter(_contract => _contract?.contracts?.contract_address !== constants.AddressZero))
 
           if (hasAddressZero) {
-            getChainTokenRPC(_chain_id, _contracts?.find(_contract => _contract?.contracts?.contract_address === constants.AddressZero))
+            const _contract = _contracts?.find(_contract => _contract?.contracts?.contract_address === constants.AddressZero)
+
+            getChainTokenRPC(_chain_id, _contract)
           }
         }
         else {
