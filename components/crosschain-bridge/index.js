@@ -4,7 +4,9 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { getDeployedTransactionManagerContract } from '@connext/nxtp-sdk'
-import { getRandomBytes32 } from '@connext/nxtp-utils'
+import { getRandomBytes32, multicall } from '@connext/nxtp-utils'
+import ERC20 from '@connext/nxtp-contracts/artifacts/contracts/interfaces/IERC20Minimal.sol/IERC20Minimal.json'
+import contractDeployments from '@connext/nxtp-contracts/deployments.json'
 import { constants, Contract } from 'ethers'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
@@ -279,6 +281,97 @@ export default function CrosschainBridge() {
 
   const getChainSynced = _chain_id => !chains_status_data || chains_status_data.find(_chain => _chain.chain_id === _chain_id)?.synced
 
+  const getDeployedPriceOracleContract = _chain_id => {
+    const record = contractDeployments?.[_chain_id?.toString()] || {}
+    const name = Object.keys(record)[0]
+
+    if (!name) {
+      return undefined
+    }
+
+    const contract = record[name]?.contracts?.ConnextPriceOracle
+
+    return contract
+  }
+
+  const getDeployedMulticallContract = _chain_id => {
+    const record = contractDeployments?.[_chain_id?.toString()] || {}
+    const name = Object.keys(record)[0]
+
+    if (!name) {
+      return undefined
+    }
+
+    const contract = record[name]?.contracts?.Multicall
+
+    return contract
+  }
+
+  const getChainBalancesMulticall = async (_chain_id, _contracts) => {
+    // const priceOracleContract = getDeployedPriceOracleContract(_chain_id)
+    const calls = _contracts.map(_contract => {
+      // return {
+      //   address: priceOracleContract?.address,
+      //   name: 'getTokenPrice',
+      //   params: [_contract],
+      // }
+      return {
+        address: _contract,
+        name: 'balanceOf',
+        params: [address],
+      }
+    })
+    const multicallAddress = getDeployedMulticallContract(_chain_id)?.address
+    const rpcUrls = chains_data?.filter(_chain => _chain?.chain_id === _chain_id).flatMap(_chain => _chain?.provider_params?.flatMap(_param => _param?.rpcUrls || [])) || []
+    const rpcUrl = rpcUrls[Math.floor(Math.random() * (rpcUrls.length - 1))]
+
+    // return await multicall(priceOracleContract.abi, calls, multicallAddress, rpcUrl)
+    return await multicall(ERC20.abi, calls, multicallAddress, rpcUrl)
+  }
+
+  const getChainTokenMulticall = async (_chain_id, _contracts, _assets) => {
+    if (_chain_id && _contracts) {
+      let balances = await getChainBalancesMulticall(_chain_id, _contracts?.map(_contract => _contract?.contracts?.contract_address))
+
+      if (balances) {
+        const assets = []
+
+        for (let i = 0; i < balances.length; i ++) {
+          const balance = balances[i]?.toString()
+          const _contract = _contracts[i]
+
+          if (_contract) {
+            const _balance = BigNumber(balance).shiftedBy(-_contract.contracts?.contract_decimals).toNumber()
+
+            let _asset = _assets?.find(_asset => _asset?.contract_address === _contract.contracts?.contract_address || (_contract.contracts?.contract_address === constants.AddressZero && _contract.symbol?.toLowerCase() === _asset?.contract_ticker_symbol?.toLowerCase()))
+
+            if (_asset) {
+              _asset = {
+                ..._asset,
+                balance,
+                quote: (_asset.quote_rate || 0) * _balance,
+              }
+            }
+            else {
+              _asset = {
+                ..._contract.contracts,
+                contract_ticker_symbol: _contract.symbol,
+                balance,
+              }
+            }
+
+            assets.push(_asset)
+          }
+        }
+
+        dispatch({
+          type: BALANCES_DATA,
+          value: { [`${_chain_id}`]: assets },
+        })
+      }
+    }
+  }
+
   const getChainBalanceRPC = async (_chain_id, contract_address) => {
     let balance
 
@@ -332,11 +425,23 @@ export default function CrosschainBridge() {
     if (_chain_id && address) {
       const _contracts = assets_data?.map(_asset => { return { ..._asset, contracts: _asset?.contracts?.find(_contract => _contract.chain_id === _chain_id) } }).filter(_asset => _asset?.contracts?.contract_address) || []
 
-      if (!balances_data?.[_chain_id]) {
-        for (let i = 0; i < _contracts.length; i++) {
-          const _contract = _contracts[i]
+      const multicallAddress = getDeployedMulticallContract(_chain_id)?.address
+      const hasAddressZero = _contracts.findIndex(_contract => _contract?.contracts?.contract_address === constants.AddressZero) > -1
 
-          getChainTokenRPC(_chain_id, _contract)
+      if (!balances_data?.[_chain_id]) {
+        if (multicallAddress) {
+          getChainTokenMulticall(_chain_id, _contracts?.filter(_contract => _contract?.contracts?.contract_address !== constants.AddressZero))
+
+          if (hasAddressZero) {
+            getChainTokenRPC(_chain_id, _contracts?.find(_contract => _contract?.contracts?.contract_address === constants.AddressZero))
+          }
+        }
+        else {
+          for (let i = 0; i < _contracts.length; i++) {
+            const _contract = _contracts[i]
+
+            getChainTokenRPC(_chain_id, _contract)
+          }
         }
       }
 
@@ -350,17 +455,35 @@ export default function CrosschainBridge() {
           value: { [`${_chain_id}`]: _assets },
         })
 
-        for (let i = 0; i < _contracts.length; i++) {
-          const _contract = _contracts[i]
+        if (multicallAddress) {
+          getChainTokenMulticall(_chain_id, _contracts?.filter(_contract => _contract?.contracts?.contract_address !== constants.AddressZero), _assets)
 
-          getChainTokenRPC(_chain_id, _contract, _assets.find(_asset => _asset?.contract_address === _contract.contracts.contract_address || (_contract.contracts.contract_address === constants.AddressZero && _contract.symbol?.toLowerCase() === _asset?.contract_ticker_symbol?.toLowerCase())))
+          if (hasAddressZero) {
+            getChainTokenRPC(_chain_id, _contracts?.find(_contract => _contract?.contracts?.contract_address === constants.AddressZero), _assets.find(_asset => _contract.contracts.contract_address === constants.AddressZero && _contract.symbol?.toLowerCase() === _asset?.contract_ticker_symbol?.toLowerCase()))
+          }
+        }
+        else {
+          for (let i = 0; i < _contracts.length; i++) {
+            const _contract = _contracts[i]
+
+            getChainTokenRPC(_chain_id, _contract, _assets.find(_asset => _asset?.contract_address === _contract.contracts.contract_address || (_contract.contracts.contract_address === constants.AddressZero && _contract.symbol?.toLowerCase() === _asset?.contract_ticker_symbol?.toLowerCase())))
+          }
         }
       }
       else if (balances_data?.[_chain_id] && balances_data?.[_chain_id]?.length < 1) {
-        for (let i = 0; i < _contracts.length; i++) {
-          const _contract = _contracts[i]
+        if (multicallAddress) {
+          getChainTokenMulticall(_chain_id, _contracts?.filter(_contract => _contract?.contracts?.contract_address !== constants.AddressZero))
 
-          getChainTokenRPC(_chain_id, _contract)
+          if (hasAddressZero) {
+            getChainTokenRPC(_chain_id, _contracts?.find(_contract => _contract?.contracts?.contract_address === constants.AddressZero))
+          }
+        }
+        else {
+          for (let i = 0; i < _contracts.length; i++) {
+            const _contract = _contracts[i]
+
+            getChainTokenRPC(_chain_id, _contract)
+          }
         }
       }
     }

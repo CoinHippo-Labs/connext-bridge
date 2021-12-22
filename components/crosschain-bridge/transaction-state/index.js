@@ -19,7 +19,7 @@ import Notification from '../../notifications'
 import Modal from '../../modals/modal-confirm'
 import Copy from '../../copy'
 
-import { transactions as getTransactions } from '../../../lib/api/subgraph'
+import { transactions as getTransactions, transactionFromSdk } from '../../../lib/api/subgraph'
 import { domains } from '../../../lib/api/ens'
 import { chainTitle } from '../../../lib/object/chain'
 import { numberFormat, ellipseAddress } from '../../../lib/utils'
@@ -55,9 +55,11 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
         let sendingTx, receivingTx
 
         let response = await getTransactions({ chain_id: chains_data?.find(_chain => _chain.chain_id === sendingChainId)?.id }, chains_data, tokens_data, transactionId)
+        // let response = await transactionFromSdk(sdk_data, sendingChainId, transactionId, chains_data, tokens_data)
         sendingTx = response?.data?.[0]
 
         response = await getTransactions({ chain_id: chains_data?.find(_chain => _chain.chain_id === receivingChainId)?.id }, chains_data, tokens_data, transactionId)
+        // response = await transactionFromSdk(sdk_data, receivingChainId, transactionId, chains_data, tokens_data)
         receivingTx = response?.data?.[0]
 
         getDomain((receivingTx || sendingTx)?.router?.id)
