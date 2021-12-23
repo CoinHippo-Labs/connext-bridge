@@ -613,9 +613,6 @@ export default function CrosschainBridge() {
       if (fromContract && toContract) {      
         setEstimatedAmountResponse(null)
 
-        const _approved = await isTokenApproved()
-        setTokenApproved(_approved)
-
         if (typeof swapConfig.amount === 'number') {
           setTokenApproveResponse(null)
 
@@ -756,6 +753,9 @@ export default function CrosschainBridge() {
 
         getTokenPrice(swapConfig?.fromChainId, fromContract?.contract_address)
         getTokenPrice(swapConfig?.toChainId, toContract?.contract_address)
+
+        const _approved = await isTokenApproved()
+        setTokenApproved(_approved)
       }
     }
   }
@@ -1918,16 +1918,27 @@ export default function CrosschainBridge() {
                                   cancelDisabled={true}
                                 />
                                 :
-                                <div className="sm:pt-1.5 pb-1">
-                                  <Alert
-                                    color="bg-blue-500 dark:bg-blue-600 text-left text-white"
-                                    icon={<BiMessageDots className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
-                                    closeDisabled={true}
-                                    rounded={true}
-                                  >
-                                    <span className="font-mono text-sm">Please retry insert the amount.</span>
-                                  </Alert>
-                                </div>
+                                estimateTrigger ?
+                                  <div className="sm:pt-1.5 pb-1">
+                                    <Alert
+                                      color="bg-blue-400 dark:bg-blue-600 text-left text-white"
+                                      icon={<BiMessageDots className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                                      closeDisabled={true}
+                                      rounded={true}
+                                    >
+                                      <div className="flex items-center justify-between space-x-1">
+                                        <span className="font-mono text-sm">Please retry insert the amount.</span>
+                                        <button
+                                          onClick={() => setEstimateTrigger(moment().valueOf())}
+                                          className="bg-blue-500 dark:bg-blue-400 flex items-center justify-center text-white rounded-full p-2"
+                                        >
+                                          <MdRefresh size={20} />
+                                        </button>
+                                      </div>
+                                    </Alert>
+                                  </div>
+                                  :
+                                  null
               :
               web3_provider ?
                 <button
