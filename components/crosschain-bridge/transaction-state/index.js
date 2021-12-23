@@ -186,9 +186,11 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
 
   const fromAsset = (assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.sendingChainId && _contract?.contract_address === generalTx?.sendingAssetId)) || generalTx?.sendingAsset) && { ...assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.sendingChainId && _contract?.contract_address === generalTx?.sendingAssetId)), ...generalTx?.sendingAsset }
   const toAsset = (assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.receivingChainId && _contract?.contract_address === generalTx?.receivingAssetId)) || generalTx?.receivingAsset) && { ...assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.receivingChainId && _contract?.contract_address === generalTx?.receivingAssetId)), ...generalTx?.receivingAsset }
+  const fromContract = Array.isArray(fromAsset?.contracts) && _.head(fromAsset.contracts.filter(_contract => _contract?.chain_id === generalTx?.sendingChainId))
+  const toContract = Array.isArray(toAsset?.contracts) && _.head(toAsset.contracts.filter(_contract => _contract?.chain_id === generalTx?.receivingAssetId))
 
-  const fromAmount = sendingTx?.amount && fromAsset && (Number(sendingTx?.amount) / Math.pow(10, fromAsset.contract_decimals))
-  const toAmount = receivingTx?.amount && toAsset && (Number(receivingTx?.amount) / Math.pow(10, toAsset.contract_decimals))
+  const fromAmount = sendingTx?.amount && (fromAsset?.contract_decimals || fromContract?.contract_decimals) && (Number(sendingTx?.amount) / Math.pow(10, fromAsset?.contract_decimals || fromContract?.contract_decimals))
+  const toAmount = receivingTx?.amount && (toAsset?.contract_decimals || toContract?.contract_decimals) && (Number(receivingTx?.amount) / Math.pow(10, toAsset.contract_decimals || toContract?.contract_decimals))
 
   const loaded = data?.transactionId && transaction?.transactionId === data.transactionId && generalTx
 
