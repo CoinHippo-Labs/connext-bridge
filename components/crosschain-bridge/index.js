@@ -1930,7 +1930,7 @@ export default function CrosschainBridge() {
                                         <span className="font-mono text-sm">Please retry insert the amount.</span>
                                         <button
                                           onClick={() => setEstimateTrigger(moment().valueOf())}
-                                          className="bg-blue-500 dark:bg-blue-400 flex items-center justify-center text-white rounded-full p-2"
+                                          className="bg-blue-500 dark:bg-blue-500 flex items-center justify-center text-white rounded-full p-2"
                                         >
                                           <MdRefresh size={20} />
                                         </button>
