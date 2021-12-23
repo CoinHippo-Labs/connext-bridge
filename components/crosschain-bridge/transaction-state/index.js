@@ -187,8 +187,8 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
   const fromAsset = (assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.sendingChainId && _contract?.contract_address === generalTx?.sendingAssetId)) || generalTx?.sendingAsset) && { ...assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.sendingChainId && _contract?.contract_address === generalTx?.sendingAssetId)), ...generalTx?.sendingAsset }
   const toAsset = (assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.receivingChainId && _contract?.contract_address === generalTx?.receivingAssetId)) || generalTx?.receivingAsset) && { ...assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract?.chain_id === generalTx?.receivingChainId && _contract?.contract_address === generalTx?.receivingAssetId)), ...generalTx?.receivingAsset }
 
-  const fromAmount = (sendingTx || generalTx) && fromAsset && (Number(sendingTx?.amount || generalTx?.amount) / Math.pow(10, fromAsset.contract_decimals))
-  const toAmount = (receivingTx || generalTx) && toAsset && (Number(receivingTx?.amount || generalTx?.amount) / Math.pow(10, toAsset.contract_decimals))
+  const fromAmount = sendingTx?.amount && fromAsset && (Number(sendingTx?.amount) / Math.pow(10, fromAsset.contract_decimals))
+  const toAmount = receivingTx?.amount && toAsset && (Number(receivingTx?.amount) / Math.pow(10, toAsset.contract_decimals))
 
   const loaded = data?.transactionId && transaction?.transactionId === data.transactionId && generalTx
 
@@ -215,7 +215,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
     </button>
   )
 
-  const fromAssetAmount = typeof fromAmount === 'number' && (
+  const fromAssetAmount = typeof fromAmount === 'number' && fromAmount > 0 && (
     <div className={`min-w-max max-w-min bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center sm:justify-start space-x-2 mt-1.5 mx-auto ${finish ? 'sm:ml-0' : ''} py-1.5 px-3`}>
       {fromAsset?.image && (
         <Img
@@ -231,7 +231,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
     </div>
   )
 
-  const toAssetAmount = typeof toAmount === 'number' && (
+  const toAssetAmount = typeof toAmount === 'number' && toAmount > 0 && (
     <div className={`min-w-max max-w-min bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center sm:justify-end space-x-2 mt-1.5 mx-auto ${finish ? 'sm:mr-0' : ''} py-1.5 px-3`}>
       {toAsset?.image && (
         <Img
