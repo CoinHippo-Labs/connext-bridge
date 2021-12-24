@@ -680,9 +680,15 @@ export default function CrosschainBridge() {
                     //   }
                     // }
 
+                    // setFees({
+                    //   gas: gasFee,
+                    //   relayer: BigNumber(response?.metaTxRelayerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
+                    //   router: routerFee,
+                    //   total: totalFee,
+                    // })
                     setFees({
-                      gas: gasFee,
                       relayer: BigNumber(response?.metaTxRelayerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
+                      gas: gasFee,
                       router: routerFee,
                       total: totalFee,
                     })
@@ -718,32 +724,49 @@ export default function CrosschainBridge() {
             setEstimatingFees(true)
 
             try {
-              const gasResponse = await sdk_data.estimateFeeForRouterTransferInReceivingToken(
-                swapConfig.fromChainId,
-                fromContract?.contract_address,
-                swapConfig.toChainId,
-                toContract?.contract_address,
-              )
+              // const gasResponse = await sdk_data.estimateFeeForRouterTransferInReceivingToken(
+              //   swapConfig.fromChainId,
+              //   fromContract?.contract_address,
+              //   swapConfig.toChainId,
+              //   toContract?.contract_address,
+              // )
 
-              const relayerResponse = await sdk_data.estimateMetaTxFeeInReceivingToken(
-                swapConfig.fromChainId,
-                fromContract?.contract_address,
-                swapConfig.toChainId,
-                toContract?.contract_address,
-              )
+              // const relayerResponse = await sdk_data.estimateMetaTxFeeInReceivingToken(
+              //   swapConfig.fromChainId,
+              //   fromContract?.contract_address,
+              //   swapConfig.toChainId,
+              //   toContract?.contract_address,
+              // )
+
+              // if (!controller.signal.aborted) {
+              //   setFees({
+              //     gas: gasResponse && BigNumber(gasResponse.toString()).shiftedBy(-toContract?.contract_decimals).toNumber(),
+              //     relayer: relayerResponse && BigNumber(relayerResponse.toString()).shiftedBy(-toContract?.contract_decimals).toNumber(),
+              //     router: null,
+              //   })
+              // }
+
+              const response = await sdk_data.getEstimateReceiverAmount({
+                amount: '0',
+                sendingChainId: swapConfig.fromChainId,
+                sendingAssetId: fromContract?.contract_address,
+                receivingChainId: swapConfig.toChainId,
+                receivingAssetId: toContract?.contract_address,
+              })
 
               if (!controller.signal.aborted) {
                 setFees({
-                  gas: gasResponse && BigNumber(gasResponse.toString()).shiftedBy(-toContract?.contract_decimals).toNumber(),
-                  relayer: relayerResponse && BigNumber(relayerResponse.toString()).shiftedBy(-toContract?.contract_decimals).toNumber(),
-                  router: null,
+                  relayer: BigNumber(response?.relayerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
+                  gas: BigNumber(response?.gasFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
+                  router: BigNumber(response?.routerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
+                  total: BigNumber(response?.totalFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
                 })
               }
             } catch (error) {
-                if (!controller.signal.aborted) {
-                  setEstimatedAmountResponse({ status: 'failed', message: error?.data?.message || error?.message })
-                }
+              if (!controller.signal.aborted) {
+                setEstimatedAmountResponse({ status: 'failed', message: error?.data?.message || error?.message })
               }
+            }
 
             if (!controller.signal.aborted) {
               setEstimatingFees(false)
@@ -840,10 +863,10 @@ export default function CrosschainBridge() {
   const confirmToContract = confirmToAsset?.contracts?.find(_contract => _contract?.chain_id === estimatedAmount?.bid?.receivingChainId)
   const receivingAddress = estimatedAmount?.bid?.receivingAddress
   const confirmAmount = confirmFromContract && estimatedAmount?.bid?.amount && BigNumber(estimatedAmount.bid.amount).shiftedBy(-confirmFromContract?.contract_decimals).toNumber()
-  const confirmAmountReceived = confirmToContract && estimatedAmount?.bid?.amountReceived && BigNumber(estimatedAmount.bid.amountReceived).shiftedBy(-confirmToContract?.contract_decimals).toNumber()
-  const confirmGasFee = confirmToContract && estimatedAmount?.gasFeeInReceivingToken && BigNumber(estimatedAmount.gasFeeInReceivingToken).shiftedBy(-confirmToContract?.contract_decimals).toNumber()
   const confirmRelayerFee = confirmToContract && estimatedAmount && BigNumber(estimatedAmount.metaTxRelayerFee || '0').shiftedBy(-confirmToContract?.contract_decimals).toNumber()
+  const confirmGasFee = confirmToContract && estimatedAmount?.gasFeeInReceivingToken && BigNumber(estimatedAmount.gasFeeInReceivingToken).shiftedBy(-confirmToContract?.contract_decimals).toNumber()
   const confirmRouterFee = confirmToContract && estimatedAmount && BigNumber(estimatedAmount.routerFee || '0').shiftedBy(-confirmToContract?.contract_decimals).toNumber()
+  const confirmAmountReceived = confirmToContract && estimatedAmount?.bid?.amountReceived && BigNumber(estimatedAmount.bid.amountReceived).shiftedBy(-confirmToContract?.contract_decimals).toNumber() - confirmRelayerFee
   // let confirmRouterFee
   // if (estimatedAmount?.bid) {
   //   if (confirmFromAsset.id === confirmToAsset.id) {
@@ -920,7 +943,7 @@ export default function CrosschainBridge() {
 
   const isNative = fromContract?.is_native
 
-  const estimatedFees = typeof confirmFees === 'number' ? confirmFees : fees && ((fees.gas || 0) + (fees.relayer || 0) + (fees.router || 0))
+  const estimatedFees = typeof confirmFees === 'number' ? confirmFees : fees?.total//fees && ((fees.gas || 0) + (fees.relayer || 0) + (fees.router || 0))
   const feesPopover = children => (
     <Popover
       placement="bottom"
@@ -935,19 +958,19 @@ export default function CrosschainBridge() {
         <div className="flex items-center justify-between space-x-2">
           <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-xs font-medium">Dest. Tx Cost:</span>
           <span className="text-gray-600 dark:text-gray-400 text-xs space-x-1">
-            <span className="font-mono">{typeof (estimatedAmount ? confirmGasFee : fees?.gas) === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedAmount ? confirmGasFee : fees.gas, '0,0.00000000')}` : 'N/A'}</span>
-            <span className="font-semibold">{(estimatedAmount ? confirmToAsset : toAsset)?.symbol}</span>
-          </span>
-        </div>
-        <div className="flex items-center justify-between space-x-2">
-          <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-xs font-medium">Relayer Fee:</span>
-          <span className="text-gray-600 dark:text-gray-400 text-xs space-x-1">
             <span className="font-mono">{typeof (estimatedAmount ? confirmRelayerFee : fees?.relayer) === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedAmount ? confirmRelayerFee : fees.relayer, '0,0.00000000')}` : 'N/A'}</span>
             <span className="font-semibold">{(estimatedAmount ? confirmToAsset : toAsset)?.symbol}</span>
           </span>
         </div>
         <div className="flex items-center justify-between space-x-2">
-          <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-xs font-medium">Router Fee:</span>
+          <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-xs font-medium">Gas Fee:</span>
+          <span className="text-gray-600 dark:text-gray-400 text-xs space-x-1">
+            <span className="font-mono">{typeof (estimatedAmount ? confirmGasFee : fees?.gas) === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedAmount ? confirmGasFee : fees.gas, '0,0.00000000')}` : 'N/A'}</span>
+            <span className="font-semibold">{(estimatedAmount ? confirmToAsset : toAsset)?.symbol}</span>
+          </span>
+        </div>
+        <div className="flex items-center justify-between space-x-2">
+          <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-xs font-medium">LP Fee:</span>
           <span className="text-gray-600 dark:text-gray-400 text-xs space-x-1">
             <span className="font-mono">{typeof (estimatedAmount ? confirmRouterFee : fees?.router) === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedAmount ? confirmRouterFee : fees.router, '0,0.00000000')}` : `${process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT}%`}</span>
             <span className="font-semibold">{(estimatedAmount ? confirmToAsset : toAsset)?.symbol}</span>
@@ -1739,8 +1762,8 @@ export default function CrosschainBridge() {
                                                   <Popover
                                                     placement="bottom"
                                                     title="Dest. Tx Cost"
-                                                    content={<div className="w-52 text-gray-600 dark:text-gray-400 text-xs">
-                                                      Covers gas expense for sending funds to user on receiving chain.
+                                                    content={<div className="w-60 text-gray-600 dark:text-gray-400 text-xs">
+                                                      Fee for relayer to deliver funds to user on receiving chain.
                                                     </div>}
                                                   >
                                                     <IoMdInformationCircle size={16} className="text-gray-300 dark:text-gray-600 ml-1" />
@@ -1748,16 +1771,16 @@ export default function CrosschainBridge() {
                                                   :
                                                   </span>
                                                 <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
-                                                  <span className="font-mono">{numberFormat(confirmGasFee, '0,0.00000000')}</span>
+                                                  <span className="font-mono">{numberFormat(confirmRelayerFee, '0,0.00000000')}</span>
                                                   <span>{confirmToAsset?.symbol}</span>
                                                 </div>
                                                 <span className="flex items-center text-gray-400 dark:text-gray-500 text-sm mr-4">
-                                                  Relayer Fee
+                                                  Gas Fee
                                                   <Popover
                                                     placement="bottom"
-                                                    title="Relayer Fee"
-                                                    content={<div className="w-52 text-gray-600 dark:text-gray-400 text-xs">
-                                                      Covers gas expense for claiming user funds on receiving chain.
+                                                    title="Gas Fee"
+                                                    content={<div className="w-40 text-gray-600 dark:text-gray-400 text-xs">
+                                                      Covers gas expense for router transactions on sending and receiving chains."
                                                     </div>}
                                                   >
                                                     <IoMdInformationCircle size={16} className="text-gray-300 dark:text-gray-600 ml-1" />
@@ -1765,16 +1788,16 @@ export default function CrosschainBridge() {
                                                   :
                                                 </span>
                                                 <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
-                                                  <span className="font-mono">{numberFormat(confirmRelayerFee, '0,0.00000000')}</span>
+                                                  <span className="font-mono">{numberFormat(confirmGasFee, '0,0.00000000')}</span>
                                                   <span>{confirmToAsset?.symbol}</span>
                                                 </div>
                                                 <span className="flex items-center text-gray-400 dark:text-gray-500 text-sm mr-4">
-                                                  Router Fee
+                                                  LP Fee
                                                   <Popover
                                                     placement="bottom"
-                                                    title="Router Fee"
-                                                    content={<div className="w-32 text-gray-600 dark:text-gray-400 text-xs">
-                                                      Router service fee.
+                                                    title="LP Fee"
+                                                    content={<div className="w-44 text-gray-600 dark:text-gray-400 text-xs">
+                                                      Liquidity provider service fee.
                                                     </div>}
                                                   >
                                                     <IoMdInformationCircle size={16} className="text-gray-300 dark:text-gray-600 ml-1" />
