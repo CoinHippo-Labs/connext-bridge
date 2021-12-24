@@ -53,7 +53,7 @@ const approve_response_countdown_second = 10
 
 BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
 
-const check_balances = true && !['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK)
+const check_balances = false && !['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK)
 
 export default function CrosschainBridge() {
   const dispatch = useDispatch()
@@ -655,7 +655,9 @@ export default function CrosschainBridge() {
 
                     const gasFee = response?.gasFeeInReceivingToken && BigNumber(response.gasFeeInReceivingToken).shiftedBy(-toContract?.contract_decimals).toNumber()
                     const routerFee = response?.routerFee && BigNumber(response.routerFee).shiftedBy(-toContract?.contract_decimals).toNumber()
-                    const totalFee = response?.totalFee && BigNumber(response.totalFee).shiftedBy(-toContract?.contract_decimals).toNumber()
+                    // const totalFee = response?.totalFee && BigNumber(response.totalFee).shiftedBy(-toContract?.contract_decimals).toNumber()
+                    /* hotfix */
+                    const totalFee = BigNumber(response.bid.amount).shiftedBy(-fromContract?.contract_decimals).toNumber() - BigNumber(response.bid.amountReceived).shiftedBy(-toContract?.contract_decimals).toNumber() + BigNumber(response?.metaTxRelayerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber()
                     // let routerFee
 
                     // if (response?.bid) {
@@ -888,7 +890,9 @@ export default function CrosschainBridge() {
   //   }
   // }
   // const confirmFees = estimatedAmount && ((confirmGasFee || 0) + (confirmRelayerFee || 0) + (confirmRouterFee || 0))
-  const confirmFees = confirmToContract && estimatedAmount && BigNumber(estimatedAmount.totalFee || '0').shiftedBy(-confirmToContract?.contract_decimals).toNumber()
+  /* hotfix */
+  const confirmFees = confirmToContract && estimatedAmount && (confirmAmount - confirmAmountReceived + confirmRelayerFee)
+  // const confirmFees = confirmToContract && estimatedAmount && BigNumber(estimatedAmount.totalFee || '0').shiftedBy(-confirmToContract?.contract_decimals).toNumber()
 
   let maxBalanceAmount = Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals)
   maxBalanceAmount = maxBalanceAmount > smallNumber ? maxBalanceAmount : 0
@@ -944,7 +948,8 @@ export default function CrosschainBridge() {
   const isNative = fromContract?.is_native
 
   const estimatedFees = typeof confirmFees === 'number' ? confirmFees : fees?.total//fees && ((fees.gas || 0) + (fees.relayer || 0) + (fees.router || 0))
-  const feesPopover = children => (
+  // hotfix
+  const feesPopover = children => children || (
     <Popover
       placement="bottom"
       title={<div className="flex items-center space-x-2">
@@ -1356,13 +1361,13 @@ export default function CrosschainBridge() {
               <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 mb-8 sm:mb-4 pb-0.5">
                 <div className="sm:col-span-2 flex items-start justify-center sm:justify-start space-x-1">
                   <span className="text-gray-400 dark:text-gray-600 text-base">{estimatedAmount || estimatingAmount ? '' : 'Estimated '}Fees</span>
-                  {!(estimatedAmountResponse || estimatingAmount || estimatingFees || typeof estimatedFees !== 'number') && (
+                  {/* hotfix *//*!(estimatedAmountResponse || estimatingAmount || estimatingFees || typeof estimatedFees !== 'number') && (
                     feesPopover(
                       <div className="text-gray-400 dark:text-gray-600 sm:mt-1">
                         <IoMdInformationCircle size={16} />
                       </div>
                     )
-                  )}
+                  )*/}
                 </div>
                 <div className="sm:col-span-3 flex items-center justify-center sm:justify-end sm:mr-1">
                   {estimatingAmount || estimatingFees || typeof estimatedFees !== 'number' ?
@@ -1718,7 +1723,7 @@ export default function CrosschainBridge() {
                                         Send Amount
                                         <span className="hidden sm:block">:</span>
                                       </div>
-                                      <div>
+                                      <div className="sm:text-right">
                                         <div className="text-lg space-x-1.5">
                                           <span className="font-mono font-semibold">{numberFormat(confirmAmount, '0,0.00000000', true)}</span>
                                           <span className="font-semibold">{confirmFromAsset?.symbol}</span>
@@ -1744,17 +1749,17 @@ export default function CrosschainBridge() {
                                             onClick={() => setConfirmFeesCollapsed(!confirmFeesCollapsed)}
                                             className="bg-transparent flex items-start text-sm space-x-1.5 sm:ml-auto"
                                           >
-                                            {confirmFeesCollapsed ?
+                                            {/* hotfix *//*confirmFeesCollapsed ?
                                               <BiChevronRight size={20} className="text-gray-400 dark:text-gray-500 mt-1" />
                                               :
                                               <BiChevronUp size={20} className="text-gray-400 dark:text-gray-500 mt-1" />
-                                            }
+                                            */}
                                             <div className="text-lg space-x-1.5">
                                               <span className="font-mono font-semibold">{numberFormat(estimatedFees, '0,0.00000000')}</span>
                                               <span className="font-semibold">{confirmToAsset?.symbol}</span>
                                             </div>
                                           </button>
-                                          {!confirmFeesCollapsed && (
+                                          {/* hotfix */false && !confirmFeesCollapsed && (
                                             <div className="flex flex-col items-start sm:items-end py-1.5">
                                               <div className="w-full grid grid-flow-row grid-cols-2 gap-1.5">
                                                 <span className="flex items-center text-gray-400 dark:text-gray-500 text-sm mr-4">
@@ -1856,7 +1861,7 @@ export default function CrosschainBridge() {
                                         Estimated Received
                                         <span className="hidden sm:block">:</span>
                                       </div>
-                                      <div>
+                                      <div className="sm:text-right">
                                         <div className="text-lg space-x-1.5">
                                           <span className="font-mono font-semibold">{numberFormat(confirmAmountReceived, '0,0.00000000', true)}</span>
                                           <span className="font-semibold">{confirmToAsset?.symbol}</span>
