@@ -522,16 +522,26 @@ export default function CrosschainBridge() {
     }
   }
 
-  const getChainAssets = async _chain_id => {
+  const getChainAssets = async (_chain_id, chainsConfig) => {
     if (_chain_id && chains_data) {
       const key = _chain_id
 
       const response = await assetBalances({ chain_id: chains_data?.find(_chain => _chain.chain_id === _chain_id)?.id })
 
+      let routerStatus
+
+      if (key === chainsConfig?.toChainId && chainsConfig?.fromChainId && sdk_data) {
+        const routerStatusResponse = await sdk_data.getRouterStatus(process.env.NEXT_PUBLIC_APP_NAME)
+
+        if (routerStatusResponse) {
+          routerStatus = routerStatusResponse.filter(_router => _router?.supportedChains?.findIndex(chain_id => chain_id && chains_data?.findIndex(_chain => _chain?.chain_id === chain_id) > -1) > -1).map(_router => { return { ..._router, routerAddress: _router.routerAddress?.toLowerCase() } })
+        }
+      }
+
       if (response?.data) {
         dispatch({
           type: MAX_TRANSFERS_DATA,
-          value: { [`${key}`]: Object.fromEntries(Object.entries(_.groupBy(response.data.filter(_asset => _asset?.assetId && _asset?.amount && Number(_asset.amount) > 0), 'assetId')).map(([key, value]) => [key, _.maxBy(value?.map(_asset => { return { ..._asset, amount: Number(_asset?.amount) } }) || [], 'amount')])) }, 
+          value: { [`${key}`]: Object.fromEntries(Object.entries(_.groupBy(response.data.filter(_asset => _asset?.assetId && _asset?.amount && Number(_asset.amount) > 0 && (!routerStatus || !chainsConfig || routerStatus.findIndex(_router => _router.routerAddress === _asset.router?.id && _router.supportedChains?.includes(chainsConfig.fromChainId) && _router.supportedChains?.includes(chainsConfig.toChainId)) > -1)), 'assetId')).map(([key, value]) => [key, _.maxBy(value?.map(_asset => { return { ..._asset, amount: Number(_asset?.amount) } }) || [], 'amount')])) }, 
         })
       }
     }
@@ -1109,10 +1119,13 @@ export default function CrosschainBridge() {
                   disabled={actionDisabled}
                   chain_id={swapConfig.fromChainId}
                   onSelect={_chain_id => {
+                    const fromChainId = _chain_id
+                    const toChainId = _chain_id === swapConfig.toChainId/* && swapConfig.fromAssetId && swapConfig.fromAssetId === swapConfig.toAssetId*/ ? swapConfig.fromChainId : swapConfig.toChainId
+
                     setSwapConfig({
                       ...swapConfig,
-                      fromChainId: _chain_id,
-                      toChainId: _chain_id === swapConfig.toChainId/* && swapConfig.fromAssetId && swapConfig.fromAssetId === swapConfig.toAssetId*/ ? swapConfig.fromChainId : swapConfig.toChainId,
+                      fromChainId,
+                      toChainId,
                     })
 
                     if (_chain_id !== swapConfig.toChainId/* && swapConfig.fromAssetId*/) {
@@ -1120,7 +1133,7 @@ export default function CrosschainBridge() {
                     }
 
                     if (_chain_id === swapConfig.toChainId && swapConfig.fromAssetId && swapConfig.fromAssetId === swapConfig.toAssetId) {
-                      getChainAssets(swapConfig.fromChainId)
+                      getChainAssets(swapConfig.fromChainId, { fromChainId, toChainId })
                     }
                   }}
                 />
@@ -1189,10 +1202,13 @@ export default function CrosschainBridge() {
                 <button
                   disabled={actionDisabled}
                   onClick={() => {
+                    const fromChainId = swapConfig.toChainId
+                    const toChainId = swapConfig.fromChainId
+
                     setSwapConfig({
                       ...swapConfig,
-                      fromChainId: swapConfig.toChainId,
-                      toChainId: swapConfig.fromChainId,
+                      fromChainId,
+                      toChainId,
                       fromAssetId: swapConfig.toAssetId,
                       toAssetId: swapConfig.fromAssetId,
                       amount: null,
@@ -1201,7 +1217,7 @@ export default function CrosschainBridge() {
                     setInfiniteApproval(defaultInfiniteApproval)
 
                     if (swapConfig.fromChainId !== swapConfig.toChainId) {
-                      getChainAssets(swapConfig.fromChainId)
+                      getChainAssets(swapConfig.fromChainId, { fromChainId, toChainId })
                     }
                   }}
                   className={`${actionDisabled ? 'cursor-not-allowed' : ''}`}
@@ -1219,9 +1235,12 @@ export default function CrosschainBridge() {
                   disabled={actionDisabled}
                   chain_id={swapConfig.toChainId}
                   onSelect={_chain_id => {
+                    const fromChainId = _chain_id === swapConfig.fromChainId/* && swapConfig.fromAssetId && swapConfig.fromAssetId === swapConfig.toAssetId*/ ? swapConfig.toChainId : swapConfig.fromChainId
+                    const toChainId = _chain_id
+
                     setSwapConfig({
                       ...swapConfig,
-                      fromChainId: _chain_id === swapConfig.fromChainId/* && swapConfig.fromAssetId && swapConfig.fromAssetId === swapConfig.toAssetId*/ ? swapConfig.toChainId : swapConfig.fromChainId,
+                      fromChainId,
                       toChainId: _chain_id,
                     })
 
@@ -1229,7 +1248,7 @@ export default function CrosschainBridge() {
                       getChainBalances(_chain_id)
                     }
 
-                    getChainAssets(_chain_id)
+                    getChainAssets(_chain_id, { fromChainId, toChainId })
                   }}
                 />
                 <Asset
@@ -1477,8 +1496,8 @@ export default function CrosschainBridge() {
                 updateOptions={_options => setAdvancedOptions(_options)}
               />
             </div>
-            {isSupport() && (swapData || balances_data?.[swapConfig.fromChainId])/* && typeof estimatedFees === 'number'*/ && (typeof swapConfig.amount === 'number' || mustChangeChain) ?
-              mustChangeChain ?
+            {isSupport() && (swapData || balances_data?.[swapConfig.fromChainId])/* && typeof estimatedFees === 'number'*/ && (typeof swapConfig.amount === 'number' || (mustChangeChain && web3_provider)) ?
+              !estimatedAmountResponse && mustChangeChain ?
                 <div className="sm:pt-1.5 pb-1">
                   <Wallet
                     chainIdToConnect={swapConfig.fromChainId}
