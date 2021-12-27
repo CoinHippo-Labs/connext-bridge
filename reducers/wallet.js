@@ -3,6 +3,7 @@ import { WALLET_DATA, WALLET_RESET } from './types'
 const initial_wallet_data = {
   provider: null,
   web3_provider: null,
+  signer: null,
   chain_id: null,
   address: null,
 }

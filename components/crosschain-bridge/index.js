@@ -38,7 +38,7 @@ import Copy from '../copy'
 
 import { balances as getBalances, contracts as getContracts } from '../../lib/api/covalent'
 import { assetBalances } from '../../lib/api/subgraph'
-import { domains } from '../../lib/api/ens'
+import { domains, getENS } from '../../lib/api/ens'
 import { chainTitle } from '../../lib/object/chain'
 import { getApproved, approve } from '../../lib/object/contract'
 import { currency_symbol } from '../../lib/object/currency'
@@ -552,9 +552,15 @@ export default function CrosschainBridge() {
       const response = await domains({ where: `{ resolvedAddress_in: ["${address.toLowerCase()}"] }` })
 
       if (response?.data) {
+        let ensResponse
+
+        if (response?.data?.length > 1) {
+          ensResponse = await getENS(address)
+        }
+
         dispatch({
           type: ENS_DATA,
-          value: Object.fromEntries(response.data.map(domain => [domain?.resolvedAddress?.id?.toLowerCase(), { ...domain }])),
+          value: Object.fromEntries(response.data.filter(domain => !ensResponse?.reverseRecord || domain?.name === ensResponse.reverseRecord).map(domain => [domain?.resolvedAddress?.id?.toLowerCase(), { ...domain }])),
         })
       }
     }
