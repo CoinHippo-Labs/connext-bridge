@@ -1347,8 +1347,8 @@ export default function CrosschainBridge() {
                         </div>
                       )}
                     </div>
-                    <div className="w-full order-3 sm:order-4 sm:col-span-3 -mt-1.5 sm:-mt-5 mx-auto pt-3 sm:pt-2">
-                      <div className={`w-64 h-4 flex items-center justify-end mx-auto pr-12 sm:pr-${isMaxLiquidity ? 0 : 3}`}>
+                    <div className="w-48 sm:w-full order-3 sm:order-4 sm:col-span-3 -mt-1.5 sm:-mt-5 mx-auto pt-3 sm:pt-2">
+                      <div className="w-full h-4 flex items-center justify-end mx-auto">
                         {isNative ?
                           null
                           :
@@ -1360,7 +1360,7 @@ export default function CrosschainBridge() {
                                   amount: maxAmount,
                                 })
                               }}
-                              className="text-gray-800 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100 text-sm font-bold space-x-1"
+                              className={`text-gray-800 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100 text-sm font-bold space-x-1 mr-${isMaxLiquidity ? 0 : '4 pr-0.5'}`}
                             >
                               <span>Max</span>
                               {isMaxLiquidity && (
@@ -1368,7 +1368,7 @@ export default function CrosschainBridge() {
                               )}
                             </button>
                             :
-                            <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
+                            <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" className="mr-4 pr-0.5" />
                         }
                       </div>
                     </div>
@@ -1925,7 +1925,7 @@ export default function CrosschainBridge() {
                                 rounded={true}
                               >
                                 <div className="flex items-center justify-between space-x-1">
-                                  <span className={`break-${isBreakAll(estimatedAmountResponse.message) ? 'all' : 'normal'} font-mono text-sm`}>{estimatedAmountResponse.message}</span>
+                                  <span className={`break-${isBreakAll(estimatedAmountResponse.message) ? 'all' : 'words'} font-mono text-sm`}>{estimatedAmountResponse.message}</span>
                                   <button
                                     onClick={() => setEstimateTrigger(moment().valueOf())}
                                     className="bg-red-500 dark:bg-red-400 flex items-center justify-center text-white rounded-full p-2"
@@ -1945,7 +1945,7 @@ export default function CrosschainBridge() {
                                   rounded={true}
                                 >
                                   <div className="flex items-center justify-between space-x-1">
-                                    <span className={`break-${isBreakAll(swapResponse.message) ? 'all' : 'normal'} font-mono text-sm`}>{swapResponse.message}</span>
+                                    <span className={`break-${isBreakAll(swapResponse.message) ? 'all' : 'words'} font-mono text-sm`}>{swapResponse.message}</span>
                                     <button
                                       onClick={() => setEstimateTrigger(moment().valueOf())}
                                       className="bg-red-500 dark:bg-red-400 flex items-center justify-center text-white rounded-full p-2"

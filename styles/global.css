@@ -79,7 +79,9 @@ button {
 }
 
 body {
-  @apply font-sans antialiased text-sm disable-scrollbars;
+  @apply font-sans antialiased text-sm;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
 }
 
 [data-background="light"] {
