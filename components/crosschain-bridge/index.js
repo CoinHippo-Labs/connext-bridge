@@ -554,7 +554,7 @@ export default function CrosschainBridge() {
       if (response?.data) {
         let ensResponse
 
-        if (response?.data?.length > 1) {
+        if (response.data.length > 1) {
           ensResponse = await getENS(address)
         }
 
