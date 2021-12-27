@@ -44,7 +44,7 @@ export default function Navbar() {
 
       dispatch({
         type: ASSETS_DATA,
-        value: response?.filter(_asset => !process.env.NEXT_PUBLIC_SITE_URL?.includes('staging') || _asset?.is_staging) || [],
+        value: response?.filter(_asset => !_asset?.is_staging || process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')) || [],
       })
     }
 
