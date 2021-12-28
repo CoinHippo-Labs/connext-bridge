@@ -738,56 +738,58 @@ export default function CrosschainBridge() {
           setEstimatedAmount(null)
           setEstimatingAmount(false)
 
-          if (!controller.signal.aborted) {
-            setEstimatingFees(true)
-
-            try {
-              // const gasResponse = await sdk_data.estimateFeeForRouterTransferInReceivingToken(
-              //   swapConfig.fromChainId,
-              //   fromContract?.contract_address,
-              //   swapConfig.toChainId,
-              //   toContract?.contract_address,
-              // )
-
-              // const relayerResponse = await sdk_data.estimateMetaTxFeeInReceivingToken(
-              //   swapConfig.fromChainId,
-              //   fromContract?.contract_address,
-              //   swapConfig.toChainId,
-              //   toContract?.contract_address,
-              // )
-
-              // if (!controller.signal.aborted) {
-              //   setFees({
-              //     gas: gasResponse && BigNumber(gasResponse.toString()).shiftedBy(-toContract?.contract_decimals).toNumber(),
-              //     relayer: relayerResponse && BigNumber(relayerResponse.toString()).shiftedBy(-toContract?.contract_decimals).toNumber(),
-              //     router: null,
-              //   })
-              // }
-
-              const response = await sdk_data.getEstimateReceiverAmount({
-                amount: '0',
-                sendingChainId: swapConfig.fromChainId,
-                sendingAssetId: fromContract?.contract_address,
-                receivingChainId: swapConfig.toChainId,
-                receivingAssetId: toContract?.contract_address,
-              })
-
-              if (!controller.signal.aborted) {
-                setFees({
-                  relayer: BigNumber(response?.relayerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
-                  gas: BigNumber(response?.gasFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
-                  router: BigNumber(response?.routerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
-                  total: BigNumber(response?.totalFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
-                })
-              }
-            } catch (error) {
-              if (!controller.signal.aborted) {
-                setEstimatedAmountResponse({ status: 'failed', message: error?.data?.message || error?.message })
-              }
-            }
-
+          if (sdk_data) {
             if (!controller.signal.aborted) {
-              setEstimatingFees(false)
+              setEstimatingFees(true)
+
+              try {
+                // const gasResponse = await sdk_data.estimateFeeForRouterTransferInReceivingToken(
+                //   swapConfig.fromChainId,
+                //   fromContract?.contract_address,
+                //   swapConfig.toChainId,
+                //   toContract?.contract_address,
+                // )
+
+                // const relayerResponse = await sdk_data.estimateMetaTxFeeInReceivingToken(
+                //   swapConfig.fromChainId,
+                //   fromContract?.contract_address,
+                //   swapConfig.toChainId,
+                //   toContract?.contract_address,
+                // )
+
+                // if (!controller.signal.aborted) {
+                //   setFees({
+                //     gas: gasResponse && BigNumber(gasResponse.toString()).shiftedBy(-toContract?.contract_decimals).toNumber(),
+                //     relayer: relayerResponse && BigNumber(relayerResponse.toString()).shiftedBy(-toContract?.contract_decimals).toNumber(),
+                //     router: null,
+                //   })
+                // }
+
+                const response = await sdk_data.getEstimateReceiverAmount({
+                  amount: '0',
+                  sendingChainId: swapConfig.fromChainId,
+                  sendingAssetId: fromContract?.contract_address,
+                  receivingChainId: swapConfig.toChainId,
+                  receivingAssetId: toContract?.contract_address,
+                })
+
+                if (!controller.signal.aborted) {
+                  setFees({
+                    relayer: BigNumber(response?.relayerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
+                    gas: BigNumber(response?.gasFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
+                    router: BigNumber(response?.routerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
+                    total: BigNumber(response?.totalFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
+                  })
+                }
+              } catch (error) {
+                if (!controller.signal.aborted) {
+                  setEstimatedAmountResponse({ status: 'failed', message: error?.data?.message || error?.message })
+                }
+              }
+
+              if (!controller.signal.aborted) {
+                setEstimatingFees(false)
+              }
             }
           }
         }
