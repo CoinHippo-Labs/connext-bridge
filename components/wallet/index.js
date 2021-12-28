@@ -65,8 +65,8 @@ export default function Wallet({ chainIdToConnect, hidden, disabled = false, but
     })
   }, [web3Modal])
 
-  const disconnect = useCallback(async () => {
-    if (web3Modal) {
+  const disconnect = useCallback(async (e, is_reestablish) => {
+    if (web3Modal && !is_reestablish) {
       await web3Modal.clearCachedProvider()
     }
 
@@ -132,10 +132,10 @@ export default function Wallet({ chainIdToConnect, hidden, disabled = false, but
         }
       }
 
-      const handleDisconnect = ({ code }) => {
-        disconnect()
+      const handleDisconnect = e => {
+        disconnect(e, e.code === 1013)
 
-        if (code === 1013) {
+        if (e.code === 1013) {
           connect()
         }
       }
