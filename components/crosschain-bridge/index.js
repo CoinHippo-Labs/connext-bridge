@@ -53,7 +53,7 @@ const approve_response_countdown_second = 10
 
 BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
 
-const check_balances = true && !['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK)
+const check_balances = false && !['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK)
 
 export default function CrosschainBridge() {
   const dispatch = useDispatch()
@@ -67,7 +67,7 @@ export default function CrosschainBridge() {
   const { max_transfers_data } = { ...max_transfers }
   const { ens_data } = { ...ens }
   const { wallet_data } = { ...wallet }
-  const { web3_provider, signer, chain_id, address } = { ...wallet_data }
+  const { provider, web3_provider, signer, chain_id, address } = { ...wallet_data }
   const { sdk_data } = { ...sdk }
   const { rpcs_data } = { ...rpcs }
   const { theme } = { ...preferences }
@@ -1006,6 +1006,7 @@ export default function CrosschainBridge() {
   )
 
   const mustChangeChain = swapConfig.fromChainId && chain_id !== swapConfig.fromChainId && !swapData && !activeTransactionOpen
+  const isWalletConnect = provider?.constructor?.name === 'WalletConnectProvider'
 
   const mustApproveToken = isSupport() && fromContract && !(tokenApproved && (typeof tokenApproved === 'boolean' ? tokenApproved : tokenApproved.gte(BigNumber(swapConfig.amount).shiftedBy(fromContract?.contract_decimals))))
 
@@ -1510,7 +1511,7 @@ export default function CrosschainBridge() {
                   <Wallet
                     chainIdToConnect={swapConfig.fromChainId}
                     buttonDisconnectTitle={<>
-                      <span>Switch to</span>
+                      <span>{isWalletConnect ? 'Reconnect' : 'Switch'} to</span>
                       <Img
                         src={fromChain?.image}
                         alt=""
