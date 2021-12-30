@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import Web3Modal from 'web3modal'
@@ -28,7 +28,7 @@ const providerOptions = {
         3: `https://ropsten.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`,
         4: `https://rinkey.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`,
         5: `https://goerli.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`,
-        6: `https://kovan.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`,
+        42: `https://kovan.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`,
         97: 'https://data-seed-prebsc-1-s1.binance.org:8545',
         80001: 'https://rpc-mumbai.maticvigil.com',
         421611: 'https://rinkeby.arbitrum.io/rpc',
@@ -40,19 +40,61 @@ const providerOptions = {
   },
 }
 
-const web3Modal = typeof window !== 'undefined' && new Web3Modal({
-  network: 'mainnet', // optional
-  cacheProvider: true,
-  providerOptions,
-})
+const chainIdToNetwork = chain_id => {
+  return {
+    1: 'mainnet',
+    56: 'binance',
+    137: 'matic',
+    42161: 'arbitrum',
+    10: 'optimism',
+    // 43114: 'avax',
+    // 250: 'fantom',
+    100: 'xdai',
+    // 1285: 'moonriver',
+    // 122: 'fuse',
+    3: 'ropsten',
+    4: 'rinkeby',
+    5: 'goerli',
+    42: 'kovan',
+    80001: 'mumbai',
+    421611: 'arbitrum-rinkeby',
+  }[chain_id]
+}
 
-export default function Wallet({ chainIdToConnect, hidden, disabled = false, buttonConnectTitle, buttonConnectClassName, buttonDisconnectTitle, buttonDisconnectClassName, onChangeNetwork }) {
+let web3Modal
+
+export default function Wallet({ chainIdToConnect, main, hidden, disabled = false, buttonConnectTitle, buttonConnectClassName, buttonDisconnectTitle, buttonDisconnectClassName, onChangeNetwork }) {
   const dispatch = useDispatch()
   const { chains, wallet, preferences } = useSelector(state => ({ chains: state.chains, wallet: state.wallet, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
   const { wallet_data } = { ...wallet }
   const { provider, web3_provider, chain_id } = { ...wallet_data }
   const { theme } = { ...preferences }
+
+  const [defaultChainId, setDefaultChainId] = useState(null)
+
+  useEffect(() => {
+    if (chainIdToConnect && chainIdToConnect !== defaultChainId) {
+      setDefaultChainId(chainIdToConnect)
+    }
+  }, [chainIdToConnect])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (web3_provider) {
+        dispatch({
+          type: WALLET_DATA,
+          value: { default_chain_id: defaultChainId },
+        })
+      }
+
+      web3Modal = new Web3Modal({
+        network: chainIdToNetwork(defaultChainId) || 'mainnet',
+        cacheProvider: true,
+        providerOptions,
+      })
+    }
+  }, [defaultChainId])
 
   useEffect(() => {
     if (web3Modal?.cachedProvider) {
@@ -178,7 +220,7 @@ export default function Wallet({ chainIdToConnect, hidden, disabled = false, but
   return !hidden && (
     <>
       {web3_provider ?
-        chainIdToConnect ?
+        !main && chainIdToConnect ?
           <button
             disabled={disabled}
             onClick={() => {

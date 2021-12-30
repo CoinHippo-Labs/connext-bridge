@@ -137,7 +137,7 @@ export default function CrosschainBridge() {
       // }
     }
     else {
-      reset()
+      reset(true)
     }
 
     getDomain(address)
@@ -823,8 +823,12 @@ export default function CrosschainBridge() {
     setStartingSwap(false)
   }
 
-  const reset = async () => {
-    setSwapConfig({ ...swapConfig, amount: null })
+  const reset = async is_from_address => {
+    const isReset = !is_from_address || (address && swapData?.prepareResponse?.from?.toLowerCase() !== address?.toLowerCase())
+
+    if (isReset) {
+      setSwapConfig({ ...swapConfig, amount: null })
+    }
     setAdvancedOptions(defaultAdvancedOptions)
 
     setEstimateTrigger(null)
@@ -843,7 +847,9 @@ export default function CrosschainBridge() {
     setNumReceivedBid(null)
 
     setStartingSwap(null)
-    setSwapData(null)
+    if (isReset) {
+      setSwapData(null)
+    }
     setSwapResponse(null)
 
     setActiveTransactionOpen(null)
@@ -2006,6 +2012,7 @@ export default function CrosschainBridge() {
                 </button>
                 :
                 <Wallet
+                  chainIdToConnect={swapConfig.fromChainId}
                   buttonConnectTitle={<>
                     <span>Connect Wallet</span>
                     {/*<Img

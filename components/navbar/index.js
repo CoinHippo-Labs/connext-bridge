@@ -22,7 +22,7 @@ export default function Navbar() {
   const { ens, wallet, preferences } = useSelector(state => ({ ens: state.ens, wallet: state.wallet, preferences: state.preferences }), shallowEqual)
   const { ens_data } = { ...ens }
   const { wallet_data } = { ...wallet }
-  const { web3_provider, chain_id, address } = { ...wallet_data }
+  const { web3_provider, chain_id, address, default_chain_id } = { ...wallet_data }
   const { theme } = { ...preferences }
 
   useEffect(() => {
@@ -109,7 +109,10 @@ export default function Navbar() {
             </>
           )}
           <div className="mx-2">
-            <Wallet />
+            <Wallet
+              chainIdToConnect={default_chain_id}
+              main={true}
+            />
           </div>
           {web3_provider && (<Network chain_id={chain_id} />)}
           <button

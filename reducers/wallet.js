@@ -6,6 +6,7 @@ const initial_wallet_data = {
   signer: null,
   chain_id: null,
   address: null,
+  default_chain_id: null,
 }
 
 export default function data(
