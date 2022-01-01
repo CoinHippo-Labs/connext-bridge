@@ -64,7 +64,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
 
         getDomain((receivingTx || sendingTx)?.router?.id)
         getDomain(address)
-        getDomain((receivingTx || sendingTx)?.sendingAddress)
+        getDomain((receivingTx || sendingTx)?.user?.id || (receivingTx || sendingTx)?.sendingAddress)
         getDomain((receivingTx || sendingTx)?.receivingAddress)
 
         setTransaction({ transactionId, sendingChainId, receivingChainId, sendingTx, receivingTx })
@@ -805,55 +805,61 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
             }
           </div>
           <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-2 gap-16 sm:gap-2 py-4">
-            {web3_provider && loaded && !finish && [sendingTx?.status, receivingTx?.status].includes('Prepared') && (['Prepared'].includes(receivingTx?.status) || canCancelSender) && (
+            {web3_provider && !finish && (
               <div className="sm:order-2 flex flex-col items-center justify-center space-y-3">
-                {(canCancelSender ? sendingTx : receivingTx) && address?.toLowerCase() !== (canCancelSender ? sendingTx?.sendingAddress?.toLowerCase() : receivingTx?.sendingAddress?.toLowerCase()) ?
-                  <span className="min-w-max flex flex-col text-gray-400 dark:text-gray-500 text-center mx-auto">
-                    <span>Address not match.</span>
-                    <span className="flex items-center">
-                      (Your<span className="hidden sm:block ml-1">connected addr</span>: {ellipseAddress(ens_data?.[address?.toLowerCase()]?.name, 10) || ellipseAddress(address?.toLowerCase(), 6)})
+                {loaded && [sendingTx?.status, receivingTx?.status].includes('Prepared') && (['Prepared'].includes(receivingTx?.status) || canCancelSender) ?
+                  (canCancelSender ? sendingTx : receivingTx) && address?.toLowerCase() !== (canCancelSender ? sendingTx?.user?.id?.toLowerCase() : receivingTx?.user?.id?.toLowerCase()) ?
+                    <span className="min-w-max flex flex-col text-gray-400 dark:text-gray-500 text-center mx-auto">
+                      <span>Address not match.</span>
+                      <span className="flex items-center">
+                        (Your<span className="hidden sm:block ml-1">connected addr</span>: {ellipseAddress(ens_data?.[address?.toLowerCase()]?.name, 10) || ellipseAddress(address?.toLowerCase(), 6)})
+                      </span>
                     </span>
-                  </span>
+                    :
+                    <>
+                      {['Prepared'].includes(receivingTx?.status) && (
+                        actionDisabled ?
+                          fulfillButton
+                          :
+                          <Pulse duration={1500} forever>
+                            {fulfillButton}
+                          </Pulse>
+                      )}
+                      {(['Prepared'].includes(receivingTx?.status) || canCancelSender) && (
+                        chain_id !== (canCancelSender ? generalTx?.sendingChainId : generalTx?.receivingChainId) ?
+                          <Wallet
+                            chainIdToConnect={canCancelSender ? generalTx?.sendingChainId : generalTx?.receivingChainId}
+                            disabled={actionDisabled}
+                            buttonDisconnectTitle={<>
+                              <span className="font-medium">Cancel</span>
+                              <Img
+                                src={(canCancelSender ? fromChain : toChain)?.image}
+                                alt=""
+                                className="w-6 h-6 rounded-full"
+                              />
+                              <span className="font-light">Transaction</span>
+                            </>}
+                            buttonDisconnectClassName={`w-auto bg-gray-100 dark:bg-gray-800 rounded-lg shadow flex items-center justify-center ${actionDisabled ? 'cursor-not-allowed text-gray-600 dark:text-gray-400' : ''} text-sm sm:text-base space-x-1.5 mx-auto py-2.5 px-3`}
+                          />
+                          :
+                          <button
+                            type="button"
+                            disabled={actionDisabled}
+                            onClick={() => cancel(canCancelSender ? sendingTx : receivingTx, canCancelSender ? generalTx?.sendingChainId : generalTx?.receivingChainId)}
+                            className={`w-auto bg-gray-100 dark:bg-gray-800 rounded-lg shadow flex items-center justify-center ${actionDisabled ? 'cursor-not-allowed text-gray-600 dark:text-gray-400' : ''} text-sm sm:text-base space-x-1.5 mx-auto py-2.5 px-3`}
+                          >
+                            {(cancelling || cancelResponse?.status === 'pending') && (
+                              <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#6B7280'} width="16" height="16" />
+                            )}
+                            <span className="font-medium">Cancel{cancelling || cancelResponse?.status === 'pending' ? 'ling' : ''}</span>
+                            <span className="font-light">Transaction</span>
+                          </button>
+                      )}
+                    </>
                   :
                   <>
-                    {['Prepared'].includes(receivingTx?.status) && (
-                      actionDisabled ?
-                        fulfillButton
-                        :
-                        <Pulse duration={1500} forever>
-                          {fulfillButton}
-                        </Pulse>
-                    )}
-                    {(['Prepared'].includes(receivingTx?.status) || canCancelSender) && (
-                      chain_id !== (canCancelSender ? generalTx?.sendingChainId : generalTx?.receivingChainId) ?
-                        <Wallet
-                          chainIdToConnect={canCancelSender ? generalTx?.sendingChainId : generalTx?.receivingChainId}
-                          disabled={actionDisabled}
-                          buttonDisconnectTitle={<>
-                            <span className="font-medium">Cancel</span>
-                            <Img
-                              src={(canCancelSender ? fromChain : toChain)?.image}
-                              alt=""
-                              className="w-6 h-6 rounded-full"
-                            />
-                            <span className="font-light">Transaction</span>
-                          </>}
-                          buttonDisconnectClassName={`w-auto bg-gray-100 dark:bg-gray-800 rounded-lg shadow flex items-center justify-center ${actionDisabled ? 'cursor-not-allowed text-gray-600 dark:text-gray-400' : ''} text-sm sm:text-base space-x-1.5 mx-auto py-2.5 px-3`}
-                        />
-                        :
-                        <button
-                          type="button"
-                          disabled={actionDisabled}
-                          onClick={() => cancel(canCancelSender ? sendingTx : receivingTx, canCancelSender ? generalTx?.sendingChainId : generalTx?.receivingChainId)}
-                          className={`w-auto bg-gray-100 dark:bg-gray-800 rounded-lg shadow flex items-center justify-center ${actionDisabled ? 'cursor-not-allowed text-gray-600 dark:text-gray-400' : ''} text-sm sm:text-base space-x-1.5 mx-auto py-2.5 px-3`}
-                        >
-                          {(cancelling || cancelResponse?.status === 'pending') && (
-                            <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#6B7280'} width="16" height="16" />
-                          )}
-                          <span className="font-medium">Cancel{cancelling || cancelResponse?.status === 'pending' ? 'ling' : ''}</span>
-                          <span className="font-light">Transaction</span>
-                        </button>
-                    )}
+                    <div className="skeleton w-full max-w-xs h-14" />
+                    <div className="skeleton w-48 h-10 mt-3" />
                   </>
                 }
               </div>
