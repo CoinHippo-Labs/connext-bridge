@@ -43,6 +43,9 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
           setTransactions({ address, data: _.orderBy(response || [], ['crosschainTx.sending.expiry'], ['desc']) })
         }
       }
+      else {
+        setTransactions(null)
+      }
 
       setLoading(false)
     }
@@ -51,7 +54,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
 
     const interval = setInterval(() => getData(), 0.5 * 60 * 1000)
     return () => clearInterval(interval)
-  }, [sdk_data, signer, getTrigger])
+  }, [sdk_data, address, getTrigger])
 
   useEffect(() => {
     if (swapData && setActiveTransactionOpen) {
