@@ -4,10 +4,11 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { getDeployedTransactionManagerContract } from '@connext/nxtp-sdk'
-import { getRandomBytes32, multicall } from '@connext/nxtp-utils'
+import { getRandomBytes32, multicall, getHardcodedGasLimits } from '@connext/nxtp-utils'
 import ERC20 from '@connext/nxtp-contracts/artifacts/contracts/interfaces/IERC20Minimal.sol/IERC20Minimal.json'
 import contractDeployments from '@connext/nxtp-contracts/deployments.json'
 import { constants, Contract } from 'ethers'
+import Web3 from 'web3'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
@@ -618,6 +619,26 @@ export default function CrosschainBridge() {
 
   const isBreakAll = async message => ['code=', ' 0x'].findIndex(pattern => message?.includes(pattern)) > -1
 
+  const getChainPrepareGasFee = async chain_id => {
+    let gasFee
+
+    if (chain_id && rpcs_data?.[chain_id]) {
+      const chain = chains_data?.find(_chain => _chain?.chain_id === chain_id)
+
+      if (chain) {
+        const gasLimit = getHardcodedGasLimits(chain_id)?.prepare || '0'
+
+        const provider_url = _.head(rpcs_data?.[chain_id]?.providerConfigs?.map(_provider => _provider?.provider?.connection?.url))
+        const web3 = new Web3(provider_url)
+        const gasPrice = await web3.eth.getGasPrice()
+
+        gasFee = BigNumber(gasPrice).multipliedBy(gasLimit).shiftedBy(-chain?.provider_params?.[0]?.nativeCurrency?.decimals).toString()
+      }
+    }
+
+    return gasFee
+  }
+
   const estimate = async controller => {
     if (isSupport() && !swapData) {
       const fromAsset = swapConfig.fromChainId && swapConfig.fromAssetId && assets_data?.find(_asset => _asset?.id === swapConfig.fromAssetId && _asset.contracts?.findIndex(_contract => _contract?.chain_id === swapConfig.fromChainId) > -1)
@@ -628,6 +649,8 @@ export default function CrosschainBridge() {
 
       if (fromContract && toContract) {      
         setEstimatedAmountResponse(null)
+
+        const prepareGasFee = fromContract?.is_native && await getChainPrepareGasFee(swapConfig.fromChainId)
 
         if (typeof swapConfig.amount === 'number') {
           setTokenApproveResponse(null)
@@ -709,6 +732,7 @@ export default function CrosschainBridge() {
                       gas: gasFee,
                       router: routerFee,
                       total: totalFee,
+                      prepareGasFee,
                     })
 
                     setEstimatedAmount(response)
@@ -779,6 +803,7 @@ export default function CrosschainBridge() {
                     gas: BigNumber(response?.gasFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
                     router: BigNumber(response?.routerFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
                     total: BigNumber(response?.totalFee || '0').shiftedBy(-toContract?.contract_decimals).toNumber(),
+                    prepareGasFee,
                   })
                 }
               } catch (error) {
@@ -955,7 +980,9 @@ export default function CrosschainBridge() {
 
   if (maxAmount > 0 && !isMaxLiquidity && typeof fromContract?.contract_decimals === 'number') {
     maxAmount = Math.floor(maxAmount * Math.pow(10, fromContract.contract_decimals)) / Math.pow(10, fromContract.contract_decimals)
-  
+
+    maxAmount = maxAmount - (fees?.prepareGasFee || 0)
+
     try {
       if (maxAmount) {
         let _maxAmount = maxAmount.toString()
@@ -1364,10 +1391,10 @@ export default function CrosschainBridge() {
                     </div>
                     <div className="w-48 sm:w-full order-3 sm:order-4 sm:col-span-3 -mt-1.5 sm:-mt-5 mx-auto pt-3 sm:pt-2">
                       <div className="w-full h-4 flex items-center justify-end mx-auto">
-                        {isNative ?
+                        {/*isNative ?
                           null
-                          :
-                          balances_data?.[swapConfig.fromChainId] ?
+                          :*/
+                          true && balances_data?.[swapConfig.fromChainId] ?
                             <button
                               onClick={() => {
                                 setSwapConfig({
