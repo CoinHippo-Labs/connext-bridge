@@ -885,7 +885,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                   }
                   {transaction?.transactionId && (
                     <a
-                      href={toChain?.explorer ? `${toChain.explorer.url}${toChain.explorer.transaction_path?.replace('{tx}', fulfillResponse?.tx_hash)}` : `${process.env.NEXT_PUBLIC_EXPLORER_URL}/tx/${transaction.transactionId.toLowerCase()}`}
+                      href={toChain?.explorer && (receivingTx?.fulfillTransactionHash || receivingTx?.cancelTransactionHash) ? `${toChain.explorer.url}${toChain.explorer.transaction_path?.replace('{tx}', receivingTx?.fulfillTransactionHash || receivingTx?.cancelTransactionHash)}` : `${process.env.NEXT_PUBLIC_EXPLORER_URL}/tx/${transaction.transactionId.toLowerCase()}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center text-indigo-600 dark:text-blue-600 text-base font-semibold space-x-0"
