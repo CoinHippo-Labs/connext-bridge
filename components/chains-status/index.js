@@ -42,7 +42,7 @@ export default function ChainsStatus() {
 
       dispatch({
         type: SDK_DATA,
-        value: await NxtpSdk.create({ chainConfig, signer, skipPolling: true }),
+        value: await NxtpSdk.create({ chainConfig, signer, skipPolling: false/*true*/ }),
       })
 
       dispatch({
