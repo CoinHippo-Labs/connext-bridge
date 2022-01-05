@@ -64,7 +64,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
 
     getData()
 
-    interval = setInterval(() => getData(), 0.5 * 60 * 1000)
+    interval = setInterval(() => getData(), 1 * 60 * 1000)
     return () => clearInterval(interval)
   }, [sdk_data, address, getTrigger])
 

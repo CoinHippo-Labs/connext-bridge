@@ -449,51 +449,51 @@ export default function CrosschainBridge() {
         }
       }
 
-      const response = await getBalances(_chain_id, address)
+      // const response = await getBalances(_chain_id, address)
 
-      if (response?.data?.items) {
-        const _assets = response?.data?.items.filter(_item => _item.contract_decimals)
+      // if (response?.data?.items) {
+      //   const _assets = response?.data?.items.filter(_item => _item.contract_decimals)
 
-        dispatch({
-          type: BALANCES_DATA,
-          value: { [`${_chain_id}`]: _assets },
-        })
+      //   dispatch({
+      //     type: BALANCES_DATA,
+      //     value: { [`${_chain_id}`]: _assets },
+      //   })
 
-        if (multicallAddress) {
-          getChainTokenMulticall(_chain_id, _contracts?.filter(_contract => _contract?.contracts?.contract_address !== constants.AddressZero), _assets)
+      //   if (multicallAddress) {
+      //     getChainTokenMulticall(_chain_id, _contracts?.filter(_contract => _contract?.contracts?.contract_address !== constants.AddressZero), _assets)
 
-          if (hasAddressZero) {
-            const _contract = _contracts?.find(_contract => _contract?.contracts?.contract_address === constants.AddressZero)
+      //     if (hasAddressZero) {
+      //       const _contract = _contracts?.find(_contract => _contract?.contracts?.contract_address === constants.AddressZero)
 
-            getChainTokenRPC(_chain_id, _contract, _assets.find(_asset => _contract.contracts.contract_address === constants.AddressZero && _contract.symbol?.toLowerCase() === _asset?.contract_ticker_symbol?.toLowerCase()))
-          }
-        }
-        else {
-          for (let i = 0; i < _contracts.length; i++) {
-            const _contract = _contracts[i]
+      //       getChainTokenRPC(_chain_id, _contract, _assets.find(_asset => _contract.contracts.contract_address === constants.AddressZero && _contract.symbol?.toLowerCase() === _asset?.contract_ticker_symbol?.toLowerCase()))
+      //     }
+      //   }
+      //   else {
+      //     for (let i = 0; i < _contracts.length; i++) {
+      //       const _contract = _contracts[i]
 
-            getChainTokenRPC(_chain_id, _contract, _assets.find(_asset => _asset?.contract_address === _contract.contracts.contract_address || (_contract.contracts.contract_address === constants.AddressZero && _contract.symbol?.toLowerCase() === _asset?.contract_ticker_symbol?.toLowerCase())))
-          }
-        }
-      }
-      else if (balances_data?.[_chain_id] && balances_data?.[_chain_id]?.length < 1) {
-        if (multicallAddress) {
-          getChainTokenMulticall(_chain_id, _contracts?.filter(_contract => _contract?.contracts?.contract_address !== constants.AddressZero))
+      //       getChainTokenRPC(_chain_id, _contract, _assets.find(_asset => _asset?.contract_address === _contract.contracts.contract_address || (_contract.contracts.contract_address === constants.AddressZero && _contract.symbol?.toLowerCase() === _asset?.contract_ticker_symbol?.toLowerCase())))
+      //     }
+      //   }
+      // }
+      // else if (balances_data?.[_chain_id] && balances_data?.[_chain_id]?.length < 1) {
+      //   if (multicallAddress) {
+      //     getChainTokenMulticall(_chain_id, _contracts?.filter(_contract => _contract?.contracts?.contract_address !== constants.AddressZero))
 
-          if (hasAddressZero) {
-            const _contract = _contracts?.find(_contract => _contract?.contracts?.contract_address === constants.AddressZero)
+      //     if (hasAddressZero) {
+      //       const _contract = _contracts?.find(_contract => _contract?.contracts?.contract_address === constants.AddressZero)
 
-            getChainTokenRPC(_chain_id, _contract)
-          }
-        }
-        else {
-          for (let i = 0; i < _contracts.length; i++) {
-            const _contract = _contracts[i]
+      //       getChainTokenRPC(_chain_id, _contract)
+      //     }
+      //   }
+      //   else {
+      //     for (let i = 0; i < _contracts.length; i++) {
+      //       const _contract = _contracts[i]
 
-            getChainTokenRPC(_chain_id, _contract)
-          }
-        }
-      }
+      //       getChainTokenRPC(_chain_id, _contract)
+      //     }
+      //   }
+      // }
     }
   }
 
