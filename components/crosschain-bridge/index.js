@@ -97,6 +97,7 @@ export default function CrosschainBridge() {
   const [estimatingFees, setEstimatingFees] = useState(null)
   const [refreshEstimatedFeesSecond, setRefreshEstimatedFeesSecond] = useState(null)
 
+  const [transactionId, setTransactionId] = useState(getRandomBytes32())
   const [estimatedAmount, setEstimatedAmount] = useState(null)
   const [estimatingAmount, setEstimatingAmount] = useState(null)
   const [estimatedAmountResponse, setEstimatedAmountResponse] = useState(null)
@@ -677,7 +678,7 @@ export default function CrosschainBridge() {
                   receivingAssetId: toContract?.contract_address,
                   receivingAddress: advancedOptions?.receiving_address || address,
                   amount: BigNumber(swapConfig.amount).shiftedBy(fromContract?.contract_decimals).toString(),
-                  transactionId: getRandomBytes32(),
+                  transactionId,
                   expiry: moment().add(expiry_hours, 'hours').unix(),
                   callTo: advancedOptions?.contract_address || undefined,
                   callData: advancedOptions?.call_data || undefined,
@@ -840,6 +841,8 @@ export default function CrosschainBridge() {
       } catch (error) {
         setSwapResponse({ status: 'failed', message: error?.data?.message || error?.message })
       }
+
+      setTransactionId(getRandomBytes32())
 
       const _approved = await isTokenApproved()
       setTokenApproved(_approved)
