@@ -683,7 +683,7 @@ export default function CrosschainBridge() {
                   callTo: advancedOptions?.contract_address || undefined,
                   callData: advancedOptions?.call_data || undefined,
                   initiator: undefined,
-                  preferredRouters: advancedOptions?.preferred_router?.split(',') || undefined,
+                  preferredRouters: advancedOptions?.preferred_router?.length > 0 ? advancedOptions.preferred_router.split(',') : undefined,
                   dryRun: false,
                 })
 
