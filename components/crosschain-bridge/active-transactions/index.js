@@ -54,17 +54,17 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
 
       setLoading(false)
 
-      // if (!response || response.length > 0) {
-      //   interval = setInterval(() => getData(), 0.25 * 60 * 1000)
-      // }
-      // else {
-      //   interval = null
-      // }
+      if (!response || response.length > 0) {
+        interval = setInterval(() => getData(), 0.25 * 60 * 1000)
+      }
+      else {
+        interval = null
+      }
+      console.log('x')
     }
 
     getData()
 
-    interval = setInterval(() => getData(), 1 * 60 * 1000)
     return () => clearInterval(interval)
   }, [sdk_data, address, getTrigger])
 
