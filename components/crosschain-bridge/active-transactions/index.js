@@ -33,19 +33,18 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
   const [timer, setTimer] = useState(null)
 
   useEffect(() => {
-    let interval
-
     const getData = async () => {
       setLoading(true)
 
-      let response
-
       if (sdk_data && address) {
+        if (!transactions || transactions.address !== address || transactions.data?.length > 0) {
+          try {
+            const response = await sdk_data.getActiveTransactions()
 
-        response = await sdk_data.getActiveTransactions()
-
-        if (response) {
-          setTransactions({ address, data: _.orderBy(response || [], ['crosschainTx.sending.expiry'], ['desc']) })
+            if (response) {
+              setTransactions({ address, data: _.orderBy(response || [], ['crosschainTx.sending.expiry'], ['desc']) })
+            }
+          } catch (error) {}
         }
       }
       else {
@@ -53,18 +52,11 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
       }
 
       setLoading(false)
-
-      if (!response || response.length > 0) {
-        interval = setInterval(() => getData(), 0.25 * 60 * 1000)
-      }
-      else {
-        interval = null
-      }
-      console.log('x')
     }
 
     getData()
 
+    const interval = setInterval(() => getData(), 0.25 * 60 * 1000)
     return () => clearInterval(interval)
   }, [sdk_data, address, getTrigger])
 
