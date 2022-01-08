@@ -3,7 +3,8 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
 import moment from 'moment'
-import { constants } from 'ethers'
+import { providers, constants, Contract } from 'ethers'
+import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
 import Pulse from 'react-reveal/Pulse'
@@ -18,13 +19,17 @@ import Wallet from '../../wallet'
 import Notification from '../../notifications'
 import Modal from '../../modals/modal-confirm'
 import Copy from '../../copy'
+import Popover from '../../popover'
 
+import { balances } from '../../../lib/api/covalent'
 import { transactions as getTransactions, transactionFromSdk } from '../../../lib/api/subgraph'
 import { domains, getENS } from '../../../lib/api/ens'
 import { chainTitle } from '../../../lib/object/chain'
 import { numberFormat, ellipseAddress } from '../../../lib/utils'
 
 import { ENS_DATA } from '../../../reducers/types'
+
+BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
 
 export default function TransactionState({ data, defaultHidden = false, buttonTitle, buttonClassName, onClose, cancelDisabled, onFinish }) {
   const dispatch = useDispatch()
@@ -46,6 +51,11 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
 
   const [cancelling, setCancelling] = useState(false)
   const [cancelResponse, setCancelResponse] = useState(null)
+
+  const [routerGasBalance, setRouterGasBalance] = useState(null)
+
+  const { sendingTx, receivingTx } = { ...transaction }
+  const generalTx = _.last([sendingTx, receivingTx].filter(tx => tx))
 
   useEffect(() => {
     const getData = async () => {
@@ -87,6 +97,28 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
     const interval = setInterval(() => getData(), 15 * 1000)
     return () => clearInterval(interval)
   }, [data])
+
+  useEffect(async () => {
+    if (chains_data && generalTx?.router?.id && !receivingTx && generalTx.receivingChainId) {
+      const _network = chains_data.find(_network => _network?.chain_id === generalTx.receivingChainId)
+
+      const useRPC = ![100].includes(generalTx.receivingChainId)
+
+      const response = !useRPC ?
+        await balances(generalTx.receivingChainId, generalTx.router.id)
+        :
+        await getChainTokenRPC(generalTx.receivingChainId, { contract_address: constants.AddressZero, contract_decimals: _network?.currency?.decimals, contract_symbol: _network?.currency?.gas_symbol }, generalTx.router.id)
+
+      const balanceData = _.head(((useRPC ? response : response?.data?.items) || [{ logo_url: _network?.icon, contract_name: _network?.currency?.name, contract_ticker_symbol: _network?.currency?.gas_symbol }]).map(_balance => { return { ..._balance, chain_data: _network, logo_url: _network?.icon, contract_name: _network?.currency?.name } }).filter(_balance => _balance?.contract_ticker_symbol?.toLowerCase() === _network?.currency?.gas_symbol?.toLowerCase()))
+    
+      if (balanceData) {
+        setRouterGasBalance(balanceData)
+      }
+    }
+    else {
+      setRouterGasBalance(null)
+    }
+  }, [transaction])
 
   const getDomain = async address => {
     if (address && !ens_data?.[address.toLowerCase()]) {
@@ -184,8 +216,52 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
     }
   }
 
-  const { sendingTx, receivingTx } = { ...transaction }
-  const generalTx = _.last([sendingTx, receivingTx].filter(tx => tx))
+  const getChainBalanceRPC = async (_chain_id, contract_address, address) => {
+    let balance
+
+    if (_chain_id && address) {
+      const provider_urls = rpcs_data?.[_chain_id]?.providerConfigs?.map(_provider => _provider?.provider?.connection?.url).filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')).map(rpc => new providers.JsonRpcProvider(rpc)) || []
+      const provider = new providers.FallbackProvider(provider_urls)
+
+      if (contract_address === constants.AddressZero) {
+        balance = await provider.getBalance(address)
+      }
+      else {
+        const contract = new Contract(contract_address, ['function balanceOf(address owner) view returns (uint256)'], provider)
+        balance = await contract.balanceOf(address)
+      }
+    }
+
+    return balance
+  }
+
+  const getChainTokenRPC = async (_chain_id, _contract, address, _asset) => {
+    if (_chain_id && _contract) {
+      let balance = await getChainBalanceRPC(_chain_id, _contract.contract_address, address)
+
+      if (balance) {
+        balance = balance.toString()
+        const _balance = BigNumber(balance).shiftedBy(-_contract.contract_decimals).toNumber()
+
+        if (_asset) {
+          _asset = {
+            ..._asset,
+            balance,
+            quote: (_asset.quote_rate || 0) * _balance,
+          }
+        }
+        else {
+          _asset = {
+            ..._contract,
+            contract_ticker_symbol: _contract.contract_symbol,
+            balance,
+          }
+        }
+      }
+    }
+
+    return [_asset]
+  }
 
   const fromChain = chains_data?.find(_chain => _chain?.chain_id === generalTx?.sendingChainId || _chain?.chain_id === data?.sendingChainId)
   const toChain = chains_data?.find(_chain => _chain?.chain_id === generalTx?.receivingChainId || _chain?.chain_id === data?.receivingChainId)
@@ -254,6 +330,8 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
       </span>
     </div>
   )
+
+  const lowGas = !receivingTx && routerGasBalance && (routerGasBalance.balance / Math.pow(10, routerGasBalance.contract_decimals)) < Number(process.env.NEXT_PUBLIC_LOW_GAS_THRESHOLD)
 
   return (
     <>
@@ -624,6 +702,17 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                       }
                     </div>
                   </div>
+                  {lowGas && (
+                    <div className="mt-1">
+                      <Popover
+                        placement="top"
+                        title={<span className="text-xs">Router out of gas</span>}
+                        content={<div className="w-52 text-xs">Low Gas on Router, Transaction Might Not Complete Until Refilled</div>}
+                      >
+                        <span className="text-red-500 text-xs">Router out of gas</span>
+                      </Popover>
+                    </div>
+                  )}
                   {receivingTx?.chainTx && receivingTx?.receivingChain?.explorer?.url && (
                     <div className="flex items-center space-x-1 mt-1">
                       <Copy
