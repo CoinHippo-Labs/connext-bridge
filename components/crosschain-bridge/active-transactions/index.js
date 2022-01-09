@@ -43,7 +43,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen, trigger }
       setLoading(true)
 
       if (sdk_data && address) {
-        if (!transactions || transactions.address !== address || transactions.data?.length > 0) {
+        if (!transactions || transactions.address !== address || transactions.data?.length > 0 || moment().diff(moment(getTrigger), 'seconds') < 15) {
           try {
             const response = await sdk_data.getActiveTransactions()
 
