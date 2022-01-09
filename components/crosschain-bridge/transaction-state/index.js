@@ -914,7 +914,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                             {fulfillButton}
                           </Pulse>
                       )}
-                      {(['Prepared'].includes(receivingTx?.status) || canCancelSender) && (
+                      {/*(['Prepared'].includes(receivingTx?.status) || canCancelSender) && (
                         chain_id !== (canCancelSender ? generalTx?.sendingChainId : generalTx?.receivingChainId) ?
                           <Wallet
                             chainIdToConnect={canCancelSender ? generalTx?.sendingChainId : generalTx?.receivingChainId}
@@ -943,7 +943,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                             <span className="font-medium">Cancel{cancelling || cancelResponse?.status === 'pending' ? 'ling' : ''}</span>
                             <span className="font-light">Transaction</span>
                           </button>
-                      )}
+                      )*/}
                     </>
                   :
                   <>
