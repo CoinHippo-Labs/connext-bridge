@@ -110,6 +110,7 @@ export default function CrosschainBridge() {
   const [swapResponse, setSwapResponse] = useState(null)
 
   const [activeTransactionOpen, setActiveTransactionOpen] = useState(null)
+  const [activeTransactionTrigger, setActiveTransactionTrigger] = useState(null)
 
   // wallet
   useEffect(() => {
@@ -881,6 +882,7 @@ export default function CrosschainBridge() {
     setSwapResponse(null)
 
     setActiveTransactionOpen(null)
+    setActiveTransactionTrigger(false)
 
     if (swapConfig?.fromChainId) {
       getChainBalances(swapConfig.fromChainId)
@@ -2006,7 +2008,10 @@ export default function CrosschainBridge() {
                                   data={swapData}
                                   buttonTitle={<span>View Transaction</span>}
                                   buttonClassName="hidden w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3"
-                                  onClose={() => reset()}
+                                  onClose={() => {
+                                    setActiveTransactionTrigger(true)
+                                    reset()
+                                  }}
                                   cancelDisabled={true}
                                 />
                                 :
@@ -2104,6 +2109,7 @@ export default function CrosschainBridge() {
       <div className="col-span-1 lg:col-span-2 mb-4">
         <ActiveTransactions
           setActiveTransactionOpen={open => setActiveTransactionOpen(open)}
+          trigger={activeTransactionTrigger}
         />
       </div>
     </div>

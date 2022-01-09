@@ -16,7 +16,7 @@ import Widget from '../../widget'
 
 import { numberFormat, ellipseAddress } from '../../../lib/utils'
 
-export default function ActiveTransactions({ setActiveTransactionOpen }) {
+export default function ActiveTransactions({ setActiveTransactionOpen, trigger }) {
   const { chains, assets, wallet, sdk, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, wallet: state.wallet, sdk: state.sdk, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
@@ -31,6 +31,12 @@ export default function ActiveTransactions({ setActiveTransactionOpen }) {
   const [getTrigger, setGetTrigger] = useState(null)
 
   const [timer, setTimer] = useState(null)
+
+  useEffect(() => {
+    if (trigger) {
+      setGetTrigger(moment().valueOf())
+    }
+  }, [trigger])
 
   useEffect(() => {
     const getData = async () => {
