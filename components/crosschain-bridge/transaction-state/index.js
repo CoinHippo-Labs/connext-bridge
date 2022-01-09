@@ -108,9 +108,9 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
       const response = !useRPC ?
         await balances(generalTx.receivingChainId, generalTx.router.id)
         :
-        await getChainTokenRPC(generalTx.receivingChainId, { contract_address: constants.AddressZero, contract_decimals: _network?.currency?.decimals, contract_symbol: _network?.currency?.gas_symbol }, generalTx.router.id)
+        await getChainTokenRPC(generalTx.receivingChainId, { contract_address: constants.AddressZero, contract_decimals: _network?.provider_params?.[0]?.nativeCurrency?.decimals, contract_symbol: _network?.provider_params?.[0]?.nativeCurrency?.symbol }, generalTx.router.id)
 
-      const balanceData = _.head(((useRPC ? response : response?.data?.items) || [{ logo_url: _network?.icon, contract_name: _network?.currency?.name, contract_ticker_symbol: _network?.currency?.gas_symbol }]).map(_balance => { return { ..._balance, chain_data: _network, logo_url: _network?.icon, contract_name: _network?.currency?.name } }).filter(_balance => _balance?.contract_ticker_symbol?.toLowerCase() === _network?.currency?.gas_symbol?.toLowerCase()))
+      const balanceData = _.head(((useRPC ? response : response?.data?.items) || [{ logo_url: _network?.image, contract_name: _network?.provider_params?.[0]?.nativeCurrency?.name, contract_ticker_symbol: _network?.provider_params?.[0]?.nativeCurrency?.symbol }]).map(_balance => { return { ..._balance, chain_data: _network, logo_url: _network?.image, contract_name: _network?.provider_params?.[0]?.nativeCurrency?.name } }).filter(_balance => _balance?.contract_ticker_symbol?.toLowerCase() === _network?.provider_params?.[0]?.nativeCurrency?.symbol?.toLowerCase()))
     
       if (balanceData) {
         setRouterGasBalance(balanceData)
