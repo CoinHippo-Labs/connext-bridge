@@ -7,7 +7,6 @@ import { providers, utils } from 'ethers'
 import { Img } from 'react-image'
 import { IoWalletOutline } from 'react-icons/io5'
 
-import { networks } from '../../lib/menus'
 import { WALLET_DATA, WALLET_RESET } from '../../reducers/types'
 
 const providerOptions = {
@@ -35,6 +34,7 @@ const providerOptions = {
         69: 'https://kovan.optimism.io',
         43113: 'https://api.avax-test.network/ext/bc/C/rpc',
         4002: 'https://rpc.testnet.fantom.network',
+        1287: 'https://rpc.api.moonbase.moonbeam.network',
       },
     },
   },
