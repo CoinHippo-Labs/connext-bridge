@@ -232,9 +232,9 @@
     }
   },
   {
-    "id": "glmr",
+    "id": "mbeam",
     "title": "Moonbeam",
-    "short_name": "GLMR",
+    "short_name": "MBEAM",
     "chain_id": 1284,
     "provider_params": [
       {
