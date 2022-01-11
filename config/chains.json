@@ -224,9 +224,9 @@
       "name": "BlockScout",
       "url": "https://blockscout.com/xdai/mainnet",
       "icon": "/logos/explorers/blockscout.png",
-      "block_path": "/block/{block}",
+      "block_path": "/blocks/{block}",
       "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
+      "contract_path": "/tokens/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     }
