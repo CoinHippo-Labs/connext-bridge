@@ -232,6 +232,35 @@
     }
   },
   {
+    "id": "glmr",
+    "title": "Moonbeam",
+    "short_name": "GLMR",
+    "chain_id": 1284,
+    "provider_params": [
+      {
+        "chainId": "0x504",
+        "chainName": "Moonbeam",
+        "rpcUrls": ["https://rpc.api.moonbeam.network", "https://moonbeam.api.onfinality.io/public"],
+        "nativeCurrency": {
+          "name": "Glimmer",
+          "symbol": "MOVR",
+          "decimals": 18
+        },
+        "blockExplorerUrls": ["https://blockscout.moonbeam.network"]
+      }
+    ],
+    "explorer": {
+      "name": "BlockScout",
+      "url": "https://blockscout.moonbeam.network",
+      "icon": "/logos/explorers/blockscout.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/tokens/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    }
+  },
+  {
     "id": "movr",
     "title": "Moonriver",
     "short_name": "MOVR",
