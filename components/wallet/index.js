@@ -22,6 +22,7 @@ const providerOptions = {
         43114: 'https://api.avax.network/ext/bc/C/rpc',
         250: 'https://rpc.ftm.tools',
         100: 'https://rpc.xdaichain.com',
+        1284: 'https://moonbeam.api.onfinality.io/public',
         1285: 'https://rpc.moonriver.moonbeam.network',
         122: 'https://rpc.fuse.io',
         3: `https://ropsten.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`,

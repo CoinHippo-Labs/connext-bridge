@@ -1642,7 +1642,7 @@ export default function CrosschainBridge() {
                                   <span className="font-bold">{fromAsset?.symbol}</span>
                                 )}
                                 {estimatingAmount && typeof bidExpiresSecond === 'number' && (
-                                  <span className="text-gray-200 dark:text-gray-100 text-sm font-medium mt-0.5">{numReceivedBid ? `- Received ${numReceivedBid} Bid${numReceivedBid > 1 ? 's' : ''}` : '- Next bid in'} ({bidExpiresSecond}s)</span>
+                                  <span className="text-gray-200 dark:text-gray-100 text-sm font-medium mt-0.5">{numReceivedBid ? '- Next bid in'/*`- Received ${numReceivedBid} Bid${numReceivedBid > 1 ? 's' : ''}`*/ : '- Next bid in'} ({bidExpiresSecond}s)</span>
                                 )}
                               </button>
                               :
