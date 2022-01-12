@@ -620,7 +620,7 @@ export default function CrosschainBridge() {
     }
   }
 
-  const isBreakAll = async message => ['code=', ' 0x'].findIndex(pattern => message?.includes(pattern)) > -1
+  const isBreakAll = message => ['code=', ' 0x'].findIndex(pattern => message?.includes(pattern)) > -1
 
   const getChainPrepareGasFee = async chain_id => {
     let gasFee
@@ -865,6 +865,7 @@ export default function CrosschainBridge() {
 
       if (isTestnet) {
         dev.registerProvider(fromChainNomadId, rpcs_data?.[fromChain?.chain_id])
+        dev.registerProvider(toChainNomadId, rpcs_data?.[toChain?.chain_id])
         dev.registerSigner(fromChainNomadId, signer)
       }
       else {
@@ -888,7 +889,7 @@ export default function CrosschainBridge() {
           receivingAddress,
         ))
 
-      setSwapResponse({ status: 'success', message: 'Sending through NOMAD', hash: response?.transactionHash() })
+      setSwapResponse({ status: 'success', message: 'Sending through NOMAD', hash: response?.dispatch?.transactionHash })
     } catch (error) {
       setSwapResponse({ status: 'failed', message: error?.data?.message || error?.message })
     }
@@ -1128,7 +1129,7 @@ export default function CrosschainBridge() {
     </>
   )
 
-  const useNomad = !isExceedMaxLiquidity && swapConfig.fromChainId && swapConfig.toChainId && fromAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1 && toAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1
+  const useNomad = (isExceedMaxLiquidity || ['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK)) && swapConfig.fromChainId && swapConfig.toChainId && fromAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1 && toAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1
   const nomadUrl = useNomad && (fromChain.optional_bridge_urls?.find(url => url?.includes('.nomad.')) || toChain.optional_bridge_urls?.find(url => url?.includes('.nomad.')))
   receivingAddress = useNomad ? advancedOptions?.receiving_address || address : receivingAddress
 
@@ -1678,16 +1679,16 @@ export default function CrosschainBridge() {
                                 rounded={true}
                               >
                                 <div className="flex items-center justify-between space-x-1">
-                                  <div className="flex items-center space-x-1">
+                                  <div className="flex items-center space-x-2">
                                     <span className={`break-${isBreakAll(swapResponse.message) ? 'all' : 'words'} font-mono leading-5 text-xs`}>{swapResponse.message}</span>
                                     {['success'].includes(swapResponse.status) && swapResponse.hash && nomadUrl && (
                                       <a
-                                        href={`${nomadUrl}/tx/nomad/${fromChain?.title?.nomad?.id}/${swapResponse.hash}`}
+                                        href={`${nomadUrl}/tx/nomad/${fromChain?.nomad?.id}/${swapResponse.hash}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="flex items-center font-semibold pr-1.5"
                                       >
-                                        <span>View on NOMAD</span>
+                                        <span className="underline">View on NOMAD</span>
                                         <TiArrowRight size={16} className="transform -rotate-45" />
                                       </a>
                                     )}
@@ -1819,7 +1820,7 @@ export default function CrosschainBridge() {
                                 {startingSwap && (
                                   <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="20" height="20" />
                                 )}
-                                <span className="text-base">Confirm</span>
+                                <span className="text-base">{startingSwap ? 'Sending' : 'Confirm'}</span>
                               </span>}
                               confirmDisabled={startingSwap}
                               onConfirmHide={false}
