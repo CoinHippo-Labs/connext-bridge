@@ -2114,7 +2114,7 @@ export default function CrosschainBridge() {
                           rel="noopener noreferrer"
                           className="underline font-semibold mr-1"
                         >
-                          {new URL(url).hostname}
+                          {new URL(url)?.hostname}
                         </a>
                       ))}
                     </>
