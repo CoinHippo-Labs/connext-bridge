@@ -26,6 +26,9 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
+    },
+    "nomad": {
+      "id": "ethereum"
     }
   },
   {
@@ -259,7 +262,10 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
-    "optional_bridge_urls": ["https://app.nomad.xyz"]
+    "optional_bridge_urls": ["https://app.nomad.xyz"],
+    "nomad": {
+      "id": "moonbeam"
+    }
   },
   {
     "id": "movr",

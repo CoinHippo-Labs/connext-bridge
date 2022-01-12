@@ -7,6 +7,7 @@ import { getDeployedTransactionManagerContract } from '@connext/nxtp-sdk'
 import { getRandomBytes32, multicall, getHardcodedGasLimits } from '@connext/nxtp-utils'
 import ERC20 from '@connext/nxtp-contracts/artifacts/contracts/interfaces/IERC20Minimal.sol/IERC20Minimal.json'
 import contractDeployments from '@connext/nxtp-contracts/deployments.json'
+import { dev, mainnet } from '@nomad-xyz/sdk'
 import { constants, Contract } from 'ethers'
 import Web3 from 'web3'
 import BigNumber from 'bignumber.js'
@@ -15,7 +16,7 @@ import Loader from 'react-loader-spinner'
 import Switch from 'react-switch'
 import Linkify from 'react-linkify'
 import parse from 'html-react-parser'
-import { MdSwapVerticalCircle, MdSwapHorizontalCircle, MdRefresh } from 'react-icons/md'
+import { MdSwapVerticalCircle, MdSwapHorizontalCircle, MdRefresh, MdClose } from 'react-icons/md'
 import { IoWallet } from 'react-icons/io5'
 import { IoMdInformationCircle } from 'react-icons/io'
 import { BsFillQuestionCircleFill } from 'react-icons/bs'
@@ -852,6 +853,51 @@ export default function CrosschainBridge() {
     setStartingSwap(false)
   }
 
+  const swapNomad = async (fromChain, toChain, fromAsset, toAsset, fromContract, toContract) => {
+    setStartingSwap(true)
+
+    try {
+      const isTestnet = ['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK)
+
+      const fromChainNomadId = fromChain?.nomad?.id
+      const toChainNomadId = toChain?.nomad?.id
+      const receivingAddress = advancedOptions?.receiving_address || address
+
+      if (isTestnet) {
+        dev.registerProvider(fromChainNomadId, rpcs_data?.[fromChain?.chain_id])
+        dev.registerSigner(fromChainNomadId, signer)
+      }
+      else {
+        mainnet.registerProvider(fromChainNomadId, rpcs_data?.[fromChain?.chain_id])
+        mainnet.registerSigner(fromChainNomadId, signer)
+      }
+
+      const response = fromContract?.is_native ?
+        await ((isTestnet ? dev : mainnet).sendNative(
+          fromChainNomadId,
+          toChainNomadId,
+          BigNumber(swapConfig.amount).shiftedBy(fromContract?.contract_decimals).toString(),
+          receivingAddress,
+        ))
+        :
+        await ((isTestnet ? dev : mainnet).send(
+          fromChainNomadId,
+          toChainNomadId,
+          { domain: fromChainNomadId, id: fromContract?.contract_address },
+          BigNumber(swapConfig.amount).shiftedBy(fromContract?.contract_decimals).toString(),
+          receivingAddress,
+        ))
+
+      setSwapResponse({ status: 'success', message: 'Sending through NOMAD', hash: response?.transactionHash() })
+    } catch (error) {
+      setSwapResponse({ status: 'failed', message: error?.data?.message || error?.message })
+    }
+
+    setTransactionId(getRandomBytes32())
+
+    setStartingSwap(false)
+  }
+
   const reset = async is_from_address => {
     const isReset = !is_from_address || (address && swapData?.prepareResponse?.from?.toLowerCase() !== address?.toLowerCase())
 
@@ -917,7 +963,7 @@ export default function CrosschainBridge() {
   const confirmToAsset = assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract.chain_id === estimatedAmount?.bid?.receivingChainId && _contract.contract_address?.toLowerCase() === estimatedAmount?.bid?.receivingAssetId?.toLowerCase()))
   const confirmFromContract = confirmFromAsset?.contracts?.find(_contract => _contract?.chain_id === estimatedAmount?.bid?.sendingChainId)
   const confirmToContract = confirmToAsset?.contracts?.find(_contract => _contract?.chain_id === estimatedAmount?.bid?.receivingChainId)
-  const receivingAddress = estimatedAmount?.bid?.receivingAddress
+  let receivingAddress = estimatedAmount?.bid?.receivingAddress
   const confirmAmount = confirmFromContract && estimatedAmount?.bid?.amount && BigNumber(estimatedAmount.bid.amount).shiftedBy(-confirmFromContract?.contract_decimals).toNumber()
   const confirmRelayerFee = confirmToContract && estimatedAmount && BigNumber(estimatedAmount.metaTxRelayerFee || '0').shiftedBy(-confirmToContract?.contract_decimals).toNumber()
   const confirmGasFee = confirmToContract && estimatedAmount?.gasFeeInReceivingToken && BigNumber(estimatedAmount.gasFeeInReceivingToken).shiftedBy(-confirmToContract?.contract_decimals).toNumber()
@@ -1081,6 +1127,10 @@ export default function CrosschainBridge() {
       />
     </>
   )
+
+  const useNomad = !isExceedMaxLiquidity && swapConfig.fromChainId && swapConfig.toChainId && fromAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1 && toAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1
+  const nomadUrl = useNomad && (fromChain.optional_bridge_urls?.find(url => url?.includes('.nomad.')) || toChain.optional_bridge_urls?.find(url => url?.includes('.nomad.')))
+  receivingAddress = useNomad ? advancedOptions?.receiving_address || address : receivingAddress
 
   return (
     <div className="grid grid-flow-row grid-cols-1 lg:grid-cols-8 items-start gap-4">
@@ -1618,382 +1668,523 @@ export default function CrosschainBridge() {
                       activeTransactionOpen ?
                         null
                         :
-                        !swapData && !swapResponse && !estimatedAmountResponse && (estimatedAmount || estimatingAmount) ?
-                          <div className="sm:pt-1.5 pb-1">
-                            {!estimatingAmount && estimatedAmount && estimatedFees > confirmAmountReceived && (
-                              <div className="order-2 sm:col-span-5 flex flex-wrap items-center justify-center text-yellow-500 dark:text-yellow-400 mt-4 sm:mt-0 mb-2">
-                                <TiWarning size={16} className="mb-0.5 mr-1.5" />
-                                <span>Fee is greater than estimated received.</span>
-                              </div>
-                            )}
-                            {estimatingAmount ?
-                              <button
-                                disabled={estimatingAmount}
-                                className={`w-full ${estimatingAmount ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${estimatingAmount ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex flex-wrap items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3`}
-                              >
-                                {estimatingAmount ?
-                                  <>
-                                    <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
-                                    <span>Searching Routes</span>
-                                  </>
-                                  :
-                                  <span>Swap</span>
-                                }
-                                {swapConfig.fromAssetId === swapConfig.toAssetId && (
-                                  <span className="font-bold">{fromAsset?.symbol}</span>
-                                )}
-                                {estimatingAmount && typeof bidExpiresSecond === 'number' && (
-                                  <span className="text-gray-200 dark:text-gray-100 text-sm font-medium mt-0.5">{numReceivedBid ? '- Next bid in'/*`- Received ${numReceivedBid} Bid${numReceivedBid > 1 ? 's' : ''}`*/ : '- Next bid in'} ({bidExpiresSecond}s)</span>
-                                )}
-                              </button>
-                              :
-                              mustApproveToken ?
-                                (typeof tokenApproved === 'boolean' || tokenApproved) && (
-                                  <div className="sm:pt-1.5 pb-1">
-                                    <button
-                                      disabled={actionDisabled}
-                                      onClick={() => approveToken()}
-                                      className={`w-full ${actionDisabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${actionDisabled ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3`}
-                                    >
-                                      {tokenApproveResponse?.status === 'pending' ?
-                                        <>
-                                          <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
-                                          <span>Approving</span>
-                                        </>
-                                        :
-                                        <span>Approve</span>
-                                      }
-                                      <span className="font-semibold">{fromAsset?.symbol}</span>
-                                    </button>
-                                  </div>
-                                )
-                                :
-                                <ModalConfirm
-                                  buttonTitle={<>
-                                    <span>Swap</span>
-                                    <span className="font-bold">{fromAsset?.symbol}</span>
-                                  </>}
-                                  onClick={() => {
-                                    setTokenApproveResponse(null)
-                                    setConfirmFeesCollapsed(true)
-                                  }}
-                                  buttonClassName="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3"
-                                  title="Swap Confirmation"
-                                  body={<div className="flex flex-col space-y-3 sm:space-y-4 mt-0.5 -mb-2">
-                                    <div className="flex items-center space-x-8 mx-auto py-2">
-                                      {confirmFromChain && (
-                                        <div className="flex flex-col items-center space-y-1">
-                                          <Img
-                                            src={confirmFromChain.image}
-                                            alt=""
-                                            className="w-10 h-10 rounded-full"
-                                          />
-                                          <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
-                                            {chainTitle(confirmFromChain)}
-                                          </span>
-                                        </div>
-                                      )}
-                                      {/*<TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500 -mt-4" />*/}
-                                      <div className="flex flex-col items-center space-y-1">
-                                        <Img
-                                          src="/logos/connext/logo.png"
-                                          alt=""
-                                          className="w-10 h-10 rounded-full"
-                                        />
-                                        <div className="h-4" />
-                                        {/*<div className="flex items-center space-x-1">
-                                          <a
-                                            href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${estimatedAmount.bid?.router?.toLowerCase()}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
-                                          >
-                                            {ens_data?.[estimatedAmount.bid?.router?.toLowerCase()]?.name || ellipseAddress(estimatedAmount.bid?.router?.toLowerCase(), 5)}
-                                          </a>
-                                          <Copy size={14} text={estimatedAmount.bid?.router?.toLowerCase()} />
-                                        </div>*/}
-                                      </div>
-                                      {/*<TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500 -mt-4" />*/}
-                                      {confirmToChain && (
-                                        <div className="flex flex-col items-center space-y-1">
-                                          <img
-                                            src={confirmToChain.image}
-                                            alt=""
-                                            className="w-10 h-10 rounded-full"
-                                          />
-                                          <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
-                                            {chainTitle(confirmToChain)}
-                                          </span>
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
-                                      <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
-                                        Receiving Address
-                                        <span className="hidden sm:block">:</span>
-                                      </div>
-                                      {receivingAddress && (<div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
-                                        {ens_data?.[receivingAddress?.toLowerCase()]?.name && (
-                                          <Img
-                                            src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${ens_data?.[receivingAddress.toLowerCase()].name}`}
-                                            alt=""
-                                            className="w-6 h-6 rounded-full"
-                                          />
-                                        )}
-                                        <span className="text-gray-900 dark:text-gray-100 text-base sm:text-xs xl:text-base font-semibold">
-                                          {ellipseAddress(ens_data?.[receivingAddress?.toLowerCase()]?.name, 10) || ellipseAddress(receivingAddress?.toLowerCase(), 10)}
-                                        </span>
-                                        <Copy size={18} text={receivingAddress} />
-                                        {confirmToChain?.explorer?.url && (
-                                          <a
-                                            href={`${confirmToChain.explorer.url}${confirmToChain.explorer.address_path?.replace('{address}', receivingAddress)}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-600 dark:text-white"
-                                          >
-                                            {confirmToChain.explorer.icon ?
-                                              <Img
-                                                src={confirmToChain.explorer.icon}
-                                                alt=""
-                                                className="w-5 sm:w-4 xl:w-5 h-5 sm:h-4 xl:h-5 rounded-full opacity-60 hover:opacity-100"
-                                              />
-                                              :
-                                              <TiArrowRight size={20} className="transform -rotate-45" />
-                                            }
-                                          </a>
-                                        )}
-                                      </div>)}
-                                    </div>
-                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
-                                      <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
-                                        Router Address
-                                        <span className="hidden sm:block">:</span>
-                                      </div>
-                                      <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
-                                        <span className="text-gray-900 dark:text-gray-100 text-base sm:text-xs xl:text-base font-semibold">
-                                          {ens_data?.[estimatedAmount.bid?.router?.toLowerCase()]?.name || ellipseAddress(estimatedAmount.bid?.router?.toLowerCase(), 10)}
-                                        </span>
-                                        <Copy size={18} text={estimatedAmount.bid?.router?.toLowerCase()} />
-                                        <a
-                                          href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${estimatedAmount.bid?.router?.toLowerCase()}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-blue-600 dark:text-white"
-                                        >
-                                          <TiArrowRight size={20} className="transform -rotate-45" />
-                                        </a>
-                                      </div>
-                                    </div>
-                                    <div className="h-1 border-t border-gray-200 dark:border-gray-600" />
-                                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
-                                      <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
-                                        Send Amount
-                                        <span className="hidden sm:block">:</span>
-                                      </div>
-                                      <div className="sm:text-right">
-                                        <div className="text-lg space-x-1.5">
-                                          <span className="font-mono font-semibold">{numberFormat(confirmAmount, '0,0.00000000', true)}</span>
-                                          <span className="font-semibold">{confirmFromAsset?.symbol}</span>
-                                        </div>
-                                        {confirmAmount && typeof tokens_data?.[`${confirmFromChain?.chain_id}_${confirmFromContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
-                                          <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
-                                            ({currency_symbol}{numberFormat(confirmAmount * tokens_data[`${confirmFromChain?.chain_id}_${confirmFromContract?.contract_address}`].prices[0].price, '0,0.00000000')})
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
-                                      <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
-                                        Fees
-                                        {/*feesPopover(
-                                          <IoMdInformationCircle size={16} className="text-gray-400 dark:text-gray-600 ml-1.5" />
-                                        )*/}
-                                        <span className="hidden sm:block">:</span>
-                                      </div>
-                                      <div className="flex items-center space-x-1.5">
-                                        <div className="w-full">
-                                          <button
-                                            onClick={() => setConfirmFeesCollapsed(!confirmFeesCollapsed)}
-                                            className="bg-transparent flex items-start text-sm space-x-1.5 sm:ml-auto"
-                                          >
-                                            {/* hotfix *//*confirmFeesCollapsed ?
-                                              <BiChevronRight size={20} className="text-gray-400 dark:text-gray-500 mt-1" />
-                                              :
-                                              <BiChevronUp size={20} className="text-gray-400 dark:text-gray-500 mt-1" />
-                                            */}
-                                            <div className="text-lg space-x-1.5">
-                                              <span className="font-mono font-semibold">{numberFormat(estimatedFees, '0,0.00000000')}</span>
-                                              <span className="font-semibold">{confirmToAsset?.symbol}</span>
-                                            </div>
-                                          </button>
-                                          {/* hotfix */false && !confirmFeesCollapsed && (
-                                            <div className="flex flex-col items-start sm:items-end py-1.5">
-                                              <div className="w-full grid grid-flow-row grid-cols-2 gap-1.5">
-                                                <span className="flex items-center text-gray-400 dark:text-gray-500 text-sm mr-4">
-                                                  Dest. Tx Cost
-                                                  <Popover
-                                                    placement="bottom"
-                                                    title="Dest. Tx Cost"
-                                                    content={<div className="w-60 text-gray-600 dark:text-gray-400 text-xs">
-                                                      Fee for relayer to deliver funds to user on receiving chain.
-                                                    </div>}
-                                                  >
-                                                    <IoMdInformationCircle size={16} className="text-gray-300 dark:text-gray-600 ml-1" />
-                                                  </Popover>
-                                                  :
-                                                  </span>
-                                                <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
-                                                  <span className="font-mono">{numberFormat(confirmRelayerFee, '0,0.00000000')}</span>
-                                                  <span>{confirmToAsset?.symbol}</span>
-                                                </div>
-                                                <span className="flex items-center text-gray-400 dark:text-gray-500 text-sm mr-4">
-                                                  Gas Fee
-                                                  <Popover
-                                                    placement="bottom"
-                                                    title="Gas Fee"
-                                                    content={<div className="w-40 text-gray-600 dark:text-gray-400 text-xs">
-                                                      Covers gas expense for router transactions on sending and receiving chains."
-                                                    </div>}
-                                                  >
-                                                    <IoMdInformationCircle size={16} className="text-gray-300 dark:text-gray-600 ml-1" />
-                                                  </Popover>
-                                                  :
-                                                </span>
-                                                <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
-                                                  <span className="font-mono">{numberFormat(confirmGasFee, '0,0.00000000')}</span>
-                                                  <span>{confirmToAsset?.symbol}</span>
-                                                </div>
-                                                <span className="flex items-center text-gray-400 dark:text-gray-500 text-sm mr-4">
-                                                  LP Fee
-                                                  <Popover
-                                                    placement="bottom"
-                                                    title="LP Fee"
-                                                    content={<div className="w-44 text-gray-600 dark:text-gray-400 text-xs">
-                                                      Liquidity provider service fee.
-                                                    </div>}
-                                                  >
-                                                    <IoMdInformationCircle size={16} className="text-gray-300 dark:text-gray-600 ml-1" />
-                                                  </Popover>
-                                                  :
-                                                </span>
-                                                <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
-                                                  <span className="font-mono">{numberFormat(confirmRouterFee, '0,0.00000000')}</span>
-                                                  <span>{confirmToAsset?.symbol}</span>
-                                                </div>
-                                                {/*<span className="text-gray-500 dark:text-gray-400 text-base">Total:</span>
-                                                <div className="text-gray-800 dark:text-gray-200 text-base text-right space-x-1.5">
-                                                  <span className="font-mono font-medium">{numberFormat(estimatedFees, '0,0.00000000')}</span>
-                                                  <span className="font-medium">{confirmToAsset?.symbol}</span>
-                                                </div>*/}
-                                              </div>
-                                            </div>
-                                          )}
-                                          {estimatedFees && typeof tokens_data?.[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
-                                            <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
-                                              ({currency_symbol}{numberFormat(estimatedFees * tokens_data[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`].prices[0].price, '0,0.00000000')})
-                                            </div>
-                                          )}
-                                        </div>
-                                      </div>
-                                    </div>
-                                    {/*<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
-                                      <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
-                                        Slippage
-                                        <span className="hidden sm:block">:</span>
-                                      </div>
-                                      <div className="text-gray-500 dark:text-gray-400 text-base space-x-1.5">
-                                        <span className="font-mono font-medium">{estimatedAmount.bid?.slippage ? numberFormat(estimatedAmount.bid.slippage, '0,0.00000000') : 'N/A'}</span>
-                                        <span className="font-medium">%</span>
-                                      </div>
-                                    </div>
-                                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
-                                      <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
-                                        Minimum Received
-                                        <span className="hidden sm:block">:</span>
-                                      </div>
-                                      <div>
-                                        <div className="text-gray-500 dark:text-gray-400 text-base space-x-1.5">
-                                          <span className="font-mono font-medium">{estimatedAmount.bid?.minimumReceived ? numberFormat(BigNumber(estimatedAmount.bid?.minimumReceived).shiftedBy(-confirmToContract?.contract_decimals).toNumber(), '0,0.00000000') : 'N/A'}</span>
-                                          <span className=" font-medium">{confirmToAsset?.symbol}</span>
-                                        </div>
-                                        {estimatedAmount.bid?.minimumReceived && typeof tokens_data?.[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
-                                          <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
-                                            ({currency_symbol}{numberFormat(BigNumber(estimatedAmount.bid?.minimumReceived).shiftedBy(-confirmToContract?.contract_decimals).toNumber() * tokens_data[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`].prices[0].price, '0,0.00000000')})
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>*/}
-                                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
-                                      <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg sm:text-sm lg:text-base">
-                                        Estimated Received
-                                        <span className="hidden sm:block">:</span>
-                                      </div>
-                                      <div className="sm:text-right">
-                                        <div className="text-lg space-x-1.5">
-                                          <span className="font-mono font-semibold">{numberFormat(confirmAmountReceived, '0,0.00000000', true)}</span>
-                                          <span className="font-semibold">{confirmToAsset?.symbol}</span>
-                                        </div>
-                                        {confirmAmountReceived && typeof tokens_data?.[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
-                                          <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
-                                            ({currency_symbol}{numberFormat(confirmAmountReceived * tokens_data[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`].prices[0].price, '0,0.00000000')})
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                    {estimatedFees > confirmAmountReceived && (
-                                      <div className="flex items-center text-base sm:text-lg font-medium pt-2">
-                                        <TiWarning size={20} className="text-yellow-500 mr-1.5" />
-                                        <span>Are you sure that you want to swap?</span>
-                                      </div>
-                                    )}
-                                  </div>}
-                                  cancelButtonTitle="Cancel"
-                                  cancelDisabled={startingSwap}
-                                  cancelButtonClassName="hidden"
-                                  confirmButtonTitle={<span className="flex items-center justify-center space-x-1.5 py-2">
-                                    {startingSwap && (
-                                      <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="20" height="20" />
-                                    )}
-                                    <span className="text-base">Confirm</span>
-                                  </span>}
-                                  confirmDisabled={startingSwap}
-                                  onConfirmHide={false}
-                                  onConfirm={() => swap()}
-                                  confirmButtonClassName="w-full btn btn-default btn-rounded bg-blue-600 hover:bg-blue-500 justify-center text-white"
-                                />
-                            }
-                          </div>
-                          :
-                          !swapData && estimatedAmountResponse ?
+                        useNomad ?
+                          swapResponse ?
                             <div className="sm:pt-1.5 pb-1">
                               <Alert
-                                color={`${estimatedAmountResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : estimatedAmountResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
-                                icon={estimatedAmountResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : estimatedAmountResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                                color={`${swapResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : swapResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white mb-4 sm:mb-6`}
+                                icon={swapResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : swapResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
                                 closeDisabled={true}
                                 rounded={true}
                               >
                                 <div className="flex items-center justify-between space-x-1">
-                                  <span className={`break-${isBreakAll(estimatedAmountResponse.message) ? 'all' : 'words'} font-mono text-sm`}>{estimatedAmountResponse.message}</span>
+                                  <div className="flex items-center space-x-1">
+                                    <span className={`break-${isBreakAll(swapResponse.message) ? 'all' : 'words'} font-mono leading-5 text-xs`}>{swapResponse.message}</span>
+                                    {['success'].includes(swapResponse.status) && swapResponse.hash && nomadUrl && (
+                                      <a
+                                        href={`${nomadUrl}/tx/nomad/${fromChain?.title?.nomad?.id}/${swapResponse.hash}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center font-semibold pr-1.5"
+                                      >
+                                        <span>View on NOMAD</span>
+                                        <TiArrowRight size={16} className="transform -rotate-45" />
+                                      </a>
+                                    )}
+                                  </div>
                                   <button
-                                    onClick={() => setEstimateTrigger(moment().valueOf())}
-                                    className="bg-red-500 dark:bg-red-400 flex items-center justify-center text-white rounded-full p-2"
+                                    onClick={() => reset()}
+                                    className={`${swapResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-400' : 'bg-green-500 dark:bg-green-400'} flex items-center justify-center text-white rounded-full p-2`}
                                   >
-                                    <MdRefresh size={20} />
+                                    <MdClose size={20} />
                                   </button>
                                 </div>
                               </Alert>
                             </div>
                             :
-                            !swapData && swapResponse ?
+                            <ModalConfirm
+                              buttonTitle={<>
+                                <span>Swap</span>
+                                <span className="font-bold">{fromAsset?.symbol}</span>
+                                <span>via</span>
+                                <Img
+                                  src="/logos/externals/nomad.svg"
+                                  alt=""
+                                />
+                              </>}
+                              onClick={() => {
+                                setTokenApproveResponse(null)
+                                setConfirmFeesCollapsed(true)
+                              }}
+                              buttonClassName="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3"
+                              title="Swap Confirmation"
+                              body={<div className="flex flex-col space-y-3 sm:space-y-4 mt-0.5 -mb-2">
+                                <div className="flex items-center space-x-8 mx-auto py-2">
+                                  {fromChain && (
+                                    <div className="flex flex-col items-center space-y-1">
+                                      <Img
+                                        src={fromChain.image}
+                                        alt=""
+                                        className="w-10 h-10 rounded-full"
+                                      />
+                                      <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
+                                        {chainTitle(fromChain)}
+                                      </span>
+                                    </div>
+                                  )}
+                                  <div className="flex flex-col items-center space-y-1">
+                                    <div className="bg-black rounded-2xl flex items-center py-1 px-2">
+                                      <Img
+                                        src="/logos/externals/nomad.svg"
+                                        alt=""
+                                      />
+                                    </div>
+                                    <div className="h-4" />
+                                  </div>
+                                  {toChain && (
+                                    <div className="flex flex-col items-center space-y-1">
+                                      <img
+                                        src={toChain.image}
+                                        alt=""
+                                        className="w-10 h-10 rounded-full"
+                                      />
+                                      <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
+                                        {chainTitle(toChain)}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                                  <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
+                                    Receiving Address
+                                    <span className="hidden sm:block">:</span>
+                                  </div>
+                                  {receivingAddress && (
+                                    <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
+                                      {ens_data?.[receivingAddress?.toLowerCase()]?.name && (
+                                        <Img
+                                          src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${ens_data?.[receivingAddress.toLowerCase()].name}`}
+                                          alt=""
+                                          className="w-6 h-6 rounded-full"
+                                        />
+                                      )}
+                                      <span className="text-gray-900 dark:text-gray-100 text-base sm:text-xs xl:text-base font-semibold">
+                                        {ellipseAddress(ens_data?.[receivingAddress?.toLowerCase()]?.name, 10) || ellipseAddress(receivingAddress?.toLowerCase(), 10)}
+                                      </span>
+                                      <Copy size={18} text={receivingAddress} />
+                                      {toChain?.explorer?.url && (
+                                        <a
+                                          href={`${toChain.explorer.url}${toChain.explorer.address_path?.replace('{address}', receivingAddress)}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-blue-600 dark:text-white"
+                                        >
+                                          {toChain.explorer.icon ?
+                                            <Img
+                                              src={toChain.explorer.icon}
+                                              alt=""
+                                              className="w-5 sm:w-4 xl:w-5 h-5 sm:h-4 xl:h-5 rounded-full opacity-60 hover:opacity-100"
+                                            />
+                                            :
+                                            <TiArrowRight size={20} className="transform -rotate-45" />
+                                          }
+                                        </a>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="h-1 border-t border-gray-200 dark:border-gray-600" />
+                                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                                  <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
+                                    Send Amount
+                                    <span className="hidden sm:block">:</span>
+                                  </div>
+                                  <div className="sm:text-right">
+                                    <div className="text-lg space-x-1.5">
+                                      <span className="font-mono font-semibold">{numberFormat(swapConfig.amount, '0,0.00000000', true)}</span>
+                                      <span className="font-semibold">{fromAsset?.symbol}</span>
+                                    </div>
+                                    {swapConfig.amount && typeof tokens_data?.[`${fromChain?.chain_id}_${fromContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                                      <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
+                                        ({currency_symbol}{numberFormat(swapConfig.amount * tokens_data[`${fromChain?.chain_id}_${fromContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>}
+                              cancelButtonTitle="Cancel"
+                              cancelDisabled={startingSwap}
+                              cancelButtonClassName="hidden"
+                              confirmButtonTitle={<span className="flex items-center justify-center space-x-1.5 py-2">
+                                {startingSwap && (
+                                  <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="20" height="20" />
+                                )}
+                                <span className="text-base">Confirm</span>
+                              </span>}
+                              confirmDisabled={startingSwap}
+                              onConfirmHide={false}
+                              onConfirm={() => swapNomad(fromChain, toChain, fromAsset, toAsset, fromContract, toContract)}
+                              confirmButtonClassName="w-full btn btn-default btn-rounded bg-blue-600 hover:bg-blue-500 justify-center text-white"
+                            />
+                          :
+                          !swapData && !swapResponse && !estimatedAmountResponse && (estimatedAmount || estimatingAmount) ?
+                            <div className="sm:pt-1.5 pb-1">
+                              {!estimatingAmount && estimatedAmount && estimatedFees > confirmAmountReceived && (
+                                <div className="order-2 sm:col-span-5 flex flex-wrap items-center justify-center text-yellow-500 dark:text-yellow-400 mt-4 sm:mt-0 mb-2">
+                                  <TiWarning size={16} className="mb-0.5 mr-1.5" />
+                                  <span>Fee is greater than estimated received.</span>
+                                </div>
+                              )}
+                              {estimatingAmount ?
+                                <button
+                                  disabled={estimatingAmount}
+                                  className={`w-full ${estimatingAmount ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${estimatingAmount ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex flex-wrap items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3`}
+                                >
+                                  {estimatingAmount ?
+                                    <>
+                                      <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
+                                      <span>Searching Routes</span>
+                                    </>
+                                    :
+                                    <span>Swap</span>
+                                  }
+                                  {swapConfig.fromAssetId === swapConfig.toAssetId && (
+                                    <span className="font-bold">{fromAsset?.symbol}</span>
+                                  )}
+                                  {estimatingAmount && typeof bidExpiresSecond === 'number' && (
+                                    <span className="text-gray-200 dark:text-gray-100 text-sm font-medium mt-0.5">{numReceivedBid ? '- Next bid in'/*`- Received ${numReceivedBid} Bid${numReceivedBid > 1 ? 's' : ''}`*/ : '- Next bid in'} ({bidExpiresSecond}s)</span>
+                                  )}
+                                </button>
+                                :
+                                mustApproveToken ?
+                                  (typeof tokenApproved === 'boolean' || tokenApproved) && (
+                                    <div className="sm:pt-1.5 pb-1">
+                                      <button
+                                        disabled={actionDisabled}
+                                        onClick={() => approveToken()}
+                                        className={`w-full ${actionDisabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'} ${actionDisabled ? 'cursor-not-allowed' : ''} rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3`}
+                                      >
+                                        {tokenApproveResponse?.status === 'pending' ?
+                                          <>
+                                            <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
+                                            <span>Approving</span>
+                                          </>
+                                          :
+                                          <span>Approve</span>
+                                        }
+                                        <span className="font-semibold">{fromAsset?.symbol}</span>
+                                      </button>
+                                    </div>
+                                  )
+                                  :
+                                  <ModalConfirm
+                                    buttonTitle={<>
+                                      <span>Swap</span>
+                                      <span className="font-bold">{fromAsset?.symbol}</span>
+                                    </>}
+                                    onClick={() => {
+                                      setTokenApproveResponse(null)
+                                      setConfirmFeesCollapsed(true)
+                                    }}
+                                    buttonClassName="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3"
+                                    title="Swap Confirmation"
+                                    body={<div className="flex flex-col space-y-3 sm:space-y-4 mt-0.5 -mb-2">
+                                      <div className="flex items-center space-x-8 mx-auto py-2">
+                                        {confirmFromChain && (
+                                          <div className="flex flex-col items-center space-y-1">
+                                            <Img
+                                              src={confirmFromChain.image}
+                                              alt=""
+                                              className="w-10 h-10 rounded-full"
+                                            />
+                                            <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
+                                              {chainTitle(confirmFromChain)}
+                                            </span>
+                                          </div>
+                                        )}
+                                        {/*<TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500 -mt-4" />*/}
+                                        <div className="flex flex-col items-center space-y-1">
+                                          <Img
+                                            src="/logos/connext/logo.png"
+                                            alt=""
+                                            className="w-10 h-10 rounded-full"
+                                          />
+                                          <div className="h-4" />
+                                          {/*<div className="flex items-center space-x-1">
+                                            <a
+                                              href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${estimatedAmount.bid?.router?.toLowerCase()}`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-gray-900 dark:text-gray-100 text-xs font-semibold"
+                                            >
+                                              {ens_data?.[estimatedAmount.bid?.router?.toLowerCase()]?.name || ellipseAddress(estimatedAmount.bid?.router?.toLowerCase(), 5)}
+                                            </a>
+                                            <Copy size={14} text={estimatedAmount.bid?.router?.toLowerCase()} />
+                                          </div>*/}
+                                        </div>
+                                        {/*<TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500 -mt-4" />*/}
+                                        {confirmToChain && (
+                                          <div className="flex flex-col items-center space-y-1">
+                                            <img
+                                              src={confirmToChain.image}
+                                              alt=""
+                                              className="w-10 h-10 rounded-full"
+                                            />
+                                            <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
+                                              {chainTitle(confirmToChain)}
+                                            </span>
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                                        <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
+                                          Receiving Address
+                                          <span className="hidden sm:block">:</span>
+                                        </div>
+                                        {receivingAddress && (
+                                          <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
+                                            {ens_data?.[receivingAddress?.toLowerCase()]?.name && (
+                                              <Img
+                                                src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${ens_data?.[receivingAddress.toLowerCase()].name}`}
+                                                alt=""
+                                                className="w-6 h-6 rounded-full"
+                                              />
+                                            )}
+                                            <span className="text-gray-900 dark:text-gray-100 text-base sm:text-xs xl:text-base font-semibold">
+                                              {ellipseAddress(ens_data?.[receivingAddress?.toLowerCase()]?.name, 10) || ellipseAddress(receivingAddress?.toLowerCase(), 10)}
+                                            </span>
+                                            <Copy size={18} text={receivingAddress} />
+                                            {confirmToChain?.explorer?.url && (
+                                              <a
+                                                href={`${confirmToChain.explorer.url}${confirmToChain.explorer.address_path?.replace('{address}', receivingAddress)}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 dark:text-white"
+                                              >
+                                                {confirmToChain.explorer.icon ?
+                                                  <Img
+                                                    src={confirmToChain.explorer.icon}
+                                                    alt=""
+                                                    className="w-5 sm:w-4 xl:w-5 h-5 sm:h-4 xl:h-5 rounded-full opacity-60 hover:opacity-100"
+                                                  />
+                                                  :
+                                                  <TiArrowRight size={20} className="transform -rotate-45" />
+                                                }
+                                              </a>
+                                            )}
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                                        <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
+                                          Router Address
+                                          <span className="hidden sm:block">:</span>
+                                        </div>
+                                        <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
+                                          <span className="text-gray-900 dark:text-gray-100 text-base sm:text-xs xl:text-base font-semibold">
+                                            {ens_data?.[estimatedAmount.bid?.router?.toLowerCase()]?.name || ellipseAddress(estimatedAmount.bid?.router?.toLowerCase(), 10)}
+                                          </span>
+                                          <Copy size={18} text={estimatedAmount.bid?.router?.toLowerCase()} />
+                                          <a
+                                            href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${estimatedAmount.bid?.router?.toLowerCase()}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 dark:text-white"
+                                          >
+                                            <TiArrowRight size={20} className="transform -rotate-45" />
+                                          </a>
+                                        </div>
+                                      </div>
+                                      <div className="h-1 border-t border-gray-200 dark:border-gray-600" />
+                                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                                        <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
+                                          Send Amount
+                                          <span className="hidden sm:block">:</span>
+                                        </div>
+                                        <div className="sm:text-right">
+                                          <div className="text-lg space-x-1.5">
+                                            <span className="font-mono font-semibold">{numberFormat(confirmAmount, '0,0.00000000', true)}</span>
+                                            <span className="font-semibold">{confirmFromAsset?.symbol}</span>
+                                          </div>
+                                          {confirmAmount && typeof tokens_data?.[`${confirmFromChain?.chain_id}_${confirmFromContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                                            <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
+                                              ({currency_symbol}{numberFormat(confirmAmount * tokens_data[`${confirmFromChain?.chain_id}_${confirmFromContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                                        <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
+                                          Fees
+                                          {/*feesPopover(
+                                            <IoMdInformationCircle size={16} className="text-gray-400 dark:text-gray-600 ml-1.5" />
+                                          )*/}
+                                          <span className="hidden sm:block">:</span>
+                                        </div>
+                                        <div className="flex items-center space-x-1.5">
+                                          <div className="w-full">
+                                            <button
+                                              onClick={() => setConfirmFeesCollapsed(!confirmFeesCollapsed)}
+                                              className="bg-transparent flex items-start text-sm space-x-1.5 sm:ml-auto"
+                                            >
+                                              {/* hotfix *//*confirmFeesCollapsed ?
+                                                <BiChevronRight size={20} className="text-gray-400 dark:text-gray-500 mt-1" />
+                                                :
+                                                <BiChevronUp size={20} className="text-gray-400 dark:text-gray-500 mt-1" />
+                                              */}
+                                              <div className="text-lg space-x-1.5">
+                                                <span className="font-mono font-semibold">{numberFormat(estimatedFees, '0,0.00000000')}</span>
+                                                <span className="font-semibold">{confirmToAsset?.symbol}</span>
+                                              </div>
+                                            </button>
+                                            {/* hotfix */false && !confirmFeesCollapsed && (
+                                              <div className="flex flex-col items-start sm:items-end py-1.5">
+                                                <div className="w-full grid grid-flow-row grid-cols-2 gap-1.5">
+                                                  <span className="flex items-center text-gray-400 dark:text-gray-500 text-sm mr-4">
+                                                    Dest. Tx Cost
+                                                    <Popover
+                                                      placement="bottom"
+                                                      title="Dest. Tx Cost"
+                                                      content={<div className="w-60 text-gray-600 dark:text-gray-400 text-xs">
+                                                        Fee for relayer to deliver funds to user on receiving chain.
+                                                      </div>}
+                                                    >
+                                                      <IoMdInformationCircle size={16} className="text-gray-300 dark:text-gray-600 ml-1" />
+                                                    </Popover>
+                                                    :
+                                                    </span>
+                                                  <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
+                                                    <span className="font-mono">{numberFormat(confirmRelayerFee, '0,0.00000000')}</span>
+                                                    <span>{confirmToAsset?.symbol}</span>
+                                                  </div>
+                                                  <span className="flex items-center text-gray-400 dark:text-gray-500 text-sm mr-4">
+                                                    Gas Fee
+                                                    <Popover
+                                                      placement="bottom"
+                                                      title="Gas Fee"
+                                                      content={<div className="w-40 text-gray-600 dark:text-gray-400 text-xs">
+                                                        Covers gas expense for router transactions on sending and receiving chains."
+                                                      </div>}
+                                                    >
+                                                      <IoMdInformationCircle size={16} className="text-gray-300 dark:text-gray-600 ml-1" />
+                                                    </Popover>
+                                                    :
+                                                  </span>
+                                                  <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
+                                                    <span className="font-mono">{numberFormat(confirmGasFee, '0,0.00000000')}</span>
+                                                    <span>{confirmToAsset?.symbol}</span>
+                                                  </div>
+                                                  <span className="flex items-center text-gray-400 dark:text-gray-500 text-sm mr-4">
+                                                    LP Fee
+                                                    <Popover
+                                                      placement="bottom"
+                                                      title="LP Fee"
+                                                      content={<div className="w-44 text-gray-600 dark:text-gray-400 text-xs">
+                                                        Liquidity provider service fee.
+                                                      </div>}
+                                                    >
+                                                      <IoMdInformationCircle size={16} className="text-gray-300 dark:text-gray-600 ml-1" />
+                                                    </Popover>
+                                                    :
+                                                  </span>
+                                                  <div className="text-gray-400 dark:text-gray-500 text-sm text-right space-x-1.5">
+                                                    <span className="font-mono">{numberFormat(confirmRouterFee, '0,0.00000000')}</span>
+                                                    <span>{confirmToAsset?.symbol}</span>
+                                                  </div>
+                                                  {/*<span className="text-gray-500 dark:text-gray-400 text-base">Total:</span>
+                                                  <div className="text-gray-800 dark:text-gray-200 text-base text-right space-x-1.5">
+                                                    <span className="font-mono font-medium">{numberFormat(estimatedFees, '0,0.00000000')}</span>
+                                                    <span className="font-medium">{confirmToAsset?.symbol}</span>
+                                                  </div>*/}
+                                                </div>
+                                              </div>
+                                            )}
+                                            {estimatedFees && typeof tokens_data?.[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                                              <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
+                                                ({currency_symbol}{numberFormat(estimatedFees * tokens_data[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      {/*<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                                        <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
+                                          Slippage
+                                          <span className="hidden sm:block">:</span>
+                                        </div>
+                                        <div className="text-gray-500 dark:text-gray-400 text-base space-x-1.5">
+                                          <span className="font-mono font-medium">{estimatedAmount.bid?.slippage ? numberFormat(estimatedAmount.bid.slippage, '0,0.00000000') : 'N/A'}</span>
+                                          <span className="font-medium">%</span>
+                                        </div>
+                                      </div>
+                                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                                        <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
+                                          Minimum Received
+                                          <span className="hidden sm:block">:</span>
+                                        </div>
+                                        <div>
+                                          <div className="text-gray-500 dark:text-gray-400 text-base space-x-1.5">
+                                            <span className="font-mono font-medium">{estimatedAmount.bid?.minimumReceived ? numberFormat(BigNumber(estimatedAmount.bid?.minimumReceived).shiftedBy(-confirmToContract?.contract_decimals).toNumber(), '0,0.00000000') : 'N/A'}</span>
+                                            <span className=" font-medium">{confirmToAsset?.symbol}</span>
+                                          </div>
+                                          {estimatedAmount.bid?.minimumReceived && typeof tokens_data?.[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                                            <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
+                                              ({currency_symbol}{numberFormat(BigNumber(estimatedAmount.bid?.minimumReceived).shiftedBy(-confirmToContract?.contract_decimals).toNumber() * tokens_data[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>*/}
+                                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                                        <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg sm:text-sm lg:text-base">
+                                          Estimated Received
+                                          <span className="hidden sm:block">:</span>
+                                        </div>
+                                        <div className="sm:text-right">
+                                          <div className="text-lg space-x-1.5">
+                                            <span className="font-mono font-semibold">{numberFormat(confirmAmountReceived, '0,0.00000000', true)}</span>
+                                            <span className="font-semibold">{confirmToAsset?.symbol}</span>
+                                          </div>
+                                          {confirmAmountReceived && typeof tokens_data?.[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                                            <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
+                                              ({currency_symbol}{numberFormat(confirmAmountReceived * tokens_data[`${confirmToChain?.chain_id}_${confirmToContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                      {estimatedFees > confirmAmountReceived && (
+                                        <div className="flex items-center text-base sm:text-lg font-medium pt-2">
+                                          <TiWarning size={20} className="text-yellow-500 mr-1.5" />
+                                          <span>Are you sure that you want to swap?</span>
+                                        </div>
+                                      )}
+                                    </div>}
+                                    cancelButtonTitle="Cancel"
+                                    cancelDisabled={startingSwap}
+                                    cancelButtonClassName="hidden"
+                                    confirmButtonTitle={<span className="flex items-center justify-center space-x-1.5 py-2">
+                                      {startingSwap && (
+                                        <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="20" height="20" />
+                                      )}
+                                      <span className="text-base">Confirm</span>
+                                    </span>}
+                                    confirmDisabled={startingSwap}
+                                    onConfirmHide={false}
+                                    onConfirm={() => swap()}
+                                    confirmButtonClassName="w-full btn btn-default btn-rounded bg-blue-600 hover:bg-blue-500 justify-center text-white"
+                                  />
+                              }
+                            </div>
+                            :
+                            !swapData && estimatedAmountResponse ?
                               <div className="sm:pt-1.5 pb-1">
                                 <Alert
-                                  color={`${swapResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : swapResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
-                                  icon={swapResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : swapResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                                  color={`${estimatedAmountResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : estimatedAmountResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
+                                  icon={estimatedAmountResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : estimatedAmountResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
                                   closeDisabled={true}
                                   rounded={true}
                                 >
                                   <div className="flex items-center justify-between space-x-1">
-                                    <span className={`break-${isBreakAll(swapResponse.message) ? 'all' : 'words'} font-mono text-sm`}>{swapResponse.message}</span>
+                                    <span className={`break-${isBreakAll(estimatedAmountResponse.message) ? 'all' : 'words'} font-mono text-sm`}>{estimatedAmountResponse.message}</span>
                                     <button
                                       onClick={() => setEstimateTrigger(moment().valueOf())}
                                       className="bg-red-500 dark:bg-red-400 flex items-center justify-center text-white rounded-full p-2"
@@ -2004,39 +2195,59 @@ export default function CrosschainBridge() {
                                 </Alert>
                               </div>
                               :
-                              swapData ?
-                                <TransactionState
-                                  data={swapData}
-                                  buttonTitle={<span>View Transaction</span>}
-                                  buttonClassName="hidden w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3"
-                                  onClose={() => {
-                                    setActiveTransactionTrigger(true)
-                                    reset()
-                                  }}
-                                  cancelDisabled={true}
-                                />
+                              !swapData && swapResponse ?
+                                <div className="sm:pt-1.5 pb-1">
+                                  <Alert
+                                    color={`${swapResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : swapResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
+                                    icon={swapResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : swapResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                                    closeDisabled={true}
+                                    rounded={true}
+                                  >
+                                    <div className="flex items-center justify-between space-x-1">
+                                      <span className={`break-${isBreakAll(swapResponse.message) ? 'all' : 'words'} font-mono text-sm`}>{swapResponse.message}</span>
+                                      <button
+                                        onClick={() => setEstimateTrigger(moment().valueOf())}
+                                        className="bg-red-500 dark:bg-red-400 flex items-center justify-center text-white rounded-full p-2"
+                                      >
+                                        <MdRefresh size={20} />
+                                      </button>
+                                    </div>
+                                  </Alert>
+                                </div>
                                 :
-                                estimateTrigger ?
-                                  <div className="sm:pt-1.5 pb-1">
-                                    <Alert
-                                      color="bg-blue-400 dark:bg-blue-600 text-left text-white"
-                                      icon={<BiMessageDots className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
-                                      closeDisabled={true}
-                                      rounded={true}
-                                    >
-                                      <div className="flex items-center justify-between space-x-1">
-                                        <span className="font-mono text-sm">Please retry insert the amount.</span>
-                                        <button
-                                          onClick={() => setEstimateTrigger(moment().valueOf())}
-                                          className="bg-blue-500 dark:bg-blue-500 flex items-center justify-center text-white rounded-full p-2"
-                                        >
-                                          <MdRefresh size={20} />
-                                        </button>
-                                      </div>
-                                    </Alert>
-                                  </div>
+                                swapData ?
+                                  <TransactionState
+                                    data={swapData}
+                                    buttonTitle={<span>View Transaction</span>}
+                                    buttonClassName="hidden w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3"
+                                    onClose={() => {
+                                      setActiveTransactionTrigger(true)
+                                      reset()
+                                    }}
+                                    cancelDisabled={true}
+                                  />
                                   :
-                                  null
+                                  estimateTrigger ?
+                                    <div className="sm:pt-1.5 pb-1">
+                                      <Alert
+                                        color="bg-blue-400 dark:bg-blue-600 text-left text-white"
+                                        icon={<BiMessageDots className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                                        closeDisabled={true}
+                                        rounded={true}
+                                      >
+                                        <div className="flex items-center justify-between space-x-1">
+                                          <span className="font-mono text-sm">Please retry insert the amount.</span>
+                                          <button
+                                            onClick={() => setEstimateTrigger(moment().valueOf())}
+                                            className="bg-blue-500 dark:bg-blue-500 flex items-center justify-center text-white rounded-full p-2"
+                                          >
+                                            <MdRefresh size={20} />
+                                          </button>
+                                        </div>
+                                      </Alert>
+                                    </div>
+                                    :
+                                    null
               :
               web3_provider ?
                 <button
