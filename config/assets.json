@@ -58,6 +58,12 @@
         "chain_id": 122,
         "contract_decimals": 6
       }
+    ],
+    "nomad_support": [
+      {
+        "from_chain_id": 1,
+        "to_chain_id": 1284
+      }
     ]
   },
   {
@@ -118,6 +124,12 @@
         "contract_address": "0x620fd5fa44be6af63715ef4e65ddfa0387ad13f5",
         "chain_id": 122,
         "contract_decimals": 6
+      }
+    ],
+    "nomad_support": [
+      {
+        "from_chain_id": 1,
+        "to_chain_id": 1284
       }
     ]
   },
@@ -180,6 +192,12 @@
         "contract_address": "0x94ba7a27c7a95863d1bdc7645ac2951e0cca06ba",
         "chain_id": 122,
         "contract_decimals": 18
+      }
+    ],
+    "nomad_support": [
+      {
+        "from_chain_id": 1,
+        "to_chain_id": 1284
       }
     ]
   },
@@ -244,6 +262,12 @@
         "contract_address": "0xa722c13135930332eb3d749b2f0906559d2c5b99",
         "chain_id": 122,
         "contract_decimals": 18
+      }
+    ],
+    "nomad_support": [
+      {
+        "from_chain_id": 1,
+        "to_chain_id": 1284
       }
     ]
   },
@@ -373,6 +397,23 @@
       },
       {
         "contract_address": "0x539bde0d7dbd336b79148aa742883198bbf60342",
+        "chain_id": 42161,
+        "contract_decimals": 18
+      }
+    ]
+  },
+  {
+    "id": "gth",
+    "symbol": "GTH",
+    "is_staging": true,
+    "contracts": [
+      {
+        "contract_address": "0xeb986da994e4a118d5956b02d8b7c3c7ce373674",
+        "chain_id": 1,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0xeb986da994e4a118d5956b02d8b7c3c7ce373674",
         "chain_id": 42161,
         "contract_decimals": 18
       }
