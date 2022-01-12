@@ -981,7 +981,8 @@ export default function CrosschainBridge() {
     }
   }
   maxAmount = maxAmount > smallNumber ? maxAmount : 0
-  const isMaxLiquidity = maxAmount < maxBalanceAmount && typeof amount === 'number' && amount === maxAmount
+  const isMaxLiquidity = maxAmount < maxBalanceAmount && typeof swapConfig.amount === 'number' && swapConfig.amount === maxAmount
+  const isExceedMaxLiquidity = typeof maxTransfer === 'number' && typeof swapConfig.amount === 'number' && swapConfig.amount > maxTransfer
 
   if (maxAmount > 0 && !isMaxLiquidity && typeof fromContract?.contract_decimals === 'number') {
     maxAmount = Math.floor(maxAmount * Math.pow(10, fromContract.contract_decimals)) / Math.pow(10, fromContract.contract_decimals)
@@ -2096,6 +2097,34 @@ export default function CrosschainBridge() {
               />
             )}
           </div>
+          {isExceedMaxLiquidity && (
+            <>
+              <div />
+              <div className="flex flex-wrap items-center justify-center text-yellow-500 dark:text-yellow-400 mt-4 sm:mt-0 mb-2">
+                <TiWarning size={16} className="mb-0.5 mr-1.5" />
+                <span>
+                  {toChain?.optional_bridge_urls?.length > 0 ?
+                    <>
+                      <span className="mr-1">Please try sending via</span>
+                      {toChain.optional_bridge_urls.map((url, i) => (
+                        <a
+                          key={i}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline font-semibold mr-1"
+                        >
+                          {new URL(url).hostname}
+                        </a>
+                      ))}
+                    </>
+                    :
+                    <>The inserted amount is higher than the available transfer size.</>
+                  }
+                </span>
+              </div>
+            </>
+          )}
           {['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) && (
             <>
               <div />
