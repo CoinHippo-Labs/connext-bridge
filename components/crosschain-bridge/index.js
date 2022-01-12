@@ -1475,7 +1475,7 @@ export default function CrosschainBridge() {
                 )}
               </div>
             )}
-            {isSupport() && web3_provider && (estimatingAmount || estimatingFees || typeof estimatedFees === 'number') && (
+            {isSupport() && web3_provider && !useNomad && (estimatingAmount || estimatingFees || typeof estimatedFees === 'number') && (
               <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 mb-8 sm:mb-4 pb-0.5">
                 <div className="sm:col-span-2 flex items-start justify-center sm:justify-start space-x-1">
                   <span className="text-gray-400 dark:text-gray-600 text-base">{estimatedAmount || estimatingAmount ? '' : 'Estimated '}Fees</span>
@@ -1517,7 +1517,7 @@ export default function CrosschainBridge() {
                 </div>
               </div>
             )}
-            {isSupport() && web3_provider && typeof swapConfig.amount === 'number' && (
+            {isSupport() && web3_provider && !useNomad && typeof swapConfig.amount === 'number' && (
               <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 mb-8 sm:mb-4 pb-0.5">
                 <div className="min-w-max order-1 sm:col-span-2 flex justify-center sm:justify-start">
                   <span className="text-gray-400 dark:text-gray-600 text-xl mr-2">Estimated Received</span>
@@ -1554,7 +1554,7 @@ export default function CrosschainBridge() {
                 </div>
               </div>
             )}
-            {swapConfig.fromAssetId && fromContract?.contract_address !== constants.AddressZero && typeof swapConfig.amount === 'number' && (
+            {!useNomad && swapConfig.fromAssetId && fromContract?.contract_address !== constants.AddressZero && typeof swapConfig.amount === 'number' && (
               <div className="grid grid-flow-row grid-cols-2 sm:grid-cols-5 sm:gap-4 mb-4 sm:mb-2 pb-0.5">
                 <div className="sm:col-span-2 flex items-center justify-start space-x-1">
                   <span className="text-gray-400 dark:text-gray-600 text-base">Allowance</span>
