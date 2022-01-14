@@ -1129,7 +1129,7 @@ export default function CrosschainBridge() {
     </>
   )
 
-  const useNomad = (isExceedMaxLiquidity || ['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK)) && swapConfig.fromChainId && swapConfig.toChainId && fromAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1 && toAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1
+  const useNomad = ((isExceedMaxLiquidity && process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')) || ['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK)) && swapConfig.fromChainId && swapConfig.toChainId && fromAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1 && toAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1
   const nomadUrl = useNomad && (fromChain.optional_bridge_urls?.find(url => url?.includes('.nomad.')) || toChain.optional_bridge_urls?.find(url => url?.includes('.nomad.')))
   receivingAddress = useNomad ? advancedOptions?.receiving_address || address : receivingAddress
 
@@ -2237,7 +2237,7 @@ export default function CrosschainBridge() {
                                         rounded={true}
                                       >
                                         <div className="flex items-center justify-between space-x-1">
-                                          <span className="font-mono text-sm">Please retry insert the amount.</span>
+                                          <span className="font-mono text-sm">Connecting to the protocol, please wait for seconds and reinsert the amount. If this message persists, please refresh the page.</span>
                                           <button
                                             onClick={() => setEstimateTrigger(moment().valueOf())}
                                             className="bg-blue-500 dark:bg-blue-500 flex items-center justify-center text-white rounded-full p-2"
