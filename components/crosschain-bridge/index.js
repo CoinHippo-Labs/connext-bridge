@@ -870,6 +870,7 @@ export default function CrosschainBridge() {
       }
       else {
         mainnet.registerProvider(fromChainNomadId, rpcs_data?.[fromChain?.chain_id])
+        mainnet.registerProvider(toChainNomadId, rpcs_data?.[toChain?.chain_id])
         mainnet.registerSigner(fromChainNomadId, signer)
       }
 
