@@ -5,7 +5,7 @@ import _ from 'lodash'
 import { BiChevronDown, BiChevronUp } from 'react-icons/bi'
 import { BsCheckCircleFill } from 'react-icons/bs'
 
-export default function AdvancedOptions({ applied = false, disabled = false, initialOptions, updateOptions }) {
+export default function AdvancedOptions({ applied = false, disabled = false, initialOptions, updateOptions, useNomad }) {
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
   const { theme } = { ...preferences }
 
@@ -30,20 +30,23 @@ export default function AdvancedOptions({ applied = false, disabled = false, ini
       name: 'contract_address',
       type: 'text',
       placeholder: 'To call a contract',
+      hide: useNomad,
     },
     {
       label: 'Call Data',
       name: 'call_data',
       type: 'text',
       placeholder: 'Only when calling a contract directly',
+      hide: useNomad,
     },
     {
       label: 'Preferred Router',
       name: 'preferred_router',
       type: 'text',
       placeholder: 'Specify a target router to handle transaction',
+      hide: useNomad,
     },
-  ]
+  ].filter(item => !item.hide)
 
   useEffect(() => {
     setOptions(initialOptions)

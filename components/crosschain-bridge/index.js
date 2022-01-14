@@ -1130,7 +1130,8 @@ export default function CrosschainBridge() {
     </>
   )
 
-  const useNomad = ((isExceedMaxLiquidity && process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')) || ['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK)) && swapConfig.fromChainId && swapConfig.toChainId && fromAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1 && toAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1
+  const supportNomad = swapConfig.fromChainId && swapConfig.toChainId && fromAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1 && toAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1
+  const useNomad = supportNomad && ((isExceedMaxLiquidity && process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')) || ['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK))
   const nomadUrl = useNomad && (fromChain.optional_bridge_urls?.find(url => url?.includes('.nomad.')) || toChain.optional_bridge_urls?.find(url => url?.includes('.nomad.')))
   receivingAddress = useNomad ? advancedOptions?.receiving_address || address : receivingAddress
 
@@ -1594,6 +1595,7 @@ export default function CrosschainBridge() {
                 disabled={['pending'].includes(tokenApproveResponse?.status)}
                 initialOptions={advancedOptions}
                 updateOptions={_options => setAdvancedOptions(_options)}
+                useNomad={useNomad}
               />
             </div>
             {isSupport() && (swapData || balances_data?.[swapConfig.fromChainId])/* && typeof estimatedFees === 'number'*/ && (typeof swapConfig.amount === 'number' || (mustChangeChain && web3_provider)) ?
@@ -1642,7 +1644,7 @@ export default function CrosschainBridge() {
                       swapResponse ?
                         <div className="sm:pt-1.5 pb-1">
                           <Alert
-                            color={`${swapResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : swapResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white mb-4 sm:mb-6`}
+                            color={`${swapResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : swapResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
                             icon={swapResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : swapResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
                             closeDisabled={true}
                             rounded={true}
@@ -2310,7 +2312,7 @@ export default function CrosschainBridge() {
               />
             )}
           </div>
-          {isExceedMaxLiquidity && (
+          {!useNomad && isExceedMaxLiquidity && (
             <>
               <div />
               <div className="flex flex-wrap items-center justify-center text-yellow-500 dark:text-yellow-400 mt-4 sm:mt-0 mb-2">
