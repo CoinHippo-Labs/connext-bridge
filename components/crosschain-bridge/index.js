@@ -1638,196 +1638,196 @@ export default function CrosschainBridge() {
                       </Alert>
                     </div>
                     :
-                    !swapData && !(fromChainSynced && toChainSynced) ?
-                      <div className="sm:pt-1.5 pb-1">
-                        <Alert
-                          color="bg-red-400 dark:bg-red-500 text-left text-white"
-                          icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
-                          closeDisabled={true}
-                          rounded={true}
-                        >
-                          <span className="font-mono text-sm">
-                            {unsyncedChains.map((_chain, i) => (
-                              <span key={i} className="inline-flex items-baseline mr-2">
-                                {_chain.image && (
-                                  <Img
-                                    src={_chain.image}
-                                    alt=""
-                                    className="w-4 h-4 rounded-full self-center mr-1"
-                                  />
-                                )}
-                                <span className="font-bold">{_chain.title}</span>
-                                {i < unsyncedChains.length - 1 && (
-                                  <span className="ml-1.5">&</span>
-                                )}
-                              </span>
-                            ))}
-                            <span>subgraph{unsyncedChains.length > 1 ? 's' : ''} is out of sync. Please try again later.</span>
-                          </span>
-                        </Alert>
-                      </div>
-                      :
-                      activeTransactionOpen ?
-                        null
-                        :
-                        useNomad ?
-                          swapResponse ?
-                            <div className="sm:pt-1.5 pb-1">
-                              <Alert
-                                color={`${swapResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : swapResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white mb-4 sm:mb-6`}
-                                icon={swapResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : swapResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
-                                closeDisabled={true}
-                                rounded={true}
-                              >
-                                <div className="flex items-center justify-between space-x-1">
-                                  <div className="flex items-center space-x-2">
-                                    <span className={`break-${isBreakAll(swapResponse.message) ? 'all' : 'words'} font-mono leading-5 text-xs`}>{swapResponse.message}</span>
-                                    {['success'].includes(swapResponse.status) && swapResponse.hash && nomadUrl && (
-                                      <a
-                                        href={`${nomadUrl}/tx/nomad/${fromChain?.nomad?.id}/${swapResponse.hash}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center font-semibold pr-1.5"
-                                      >
-                                        <span className="underline">View on NOMAD</span>
-                                        <TiArrowRight size={16} className="transform -rotate-45" />
-                                      </a>
-                                    )}
-                                  </div>
-                                  <button
-                                    onClick={() => reset()}
-                                    className={`${swapResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-400' : 'bg-green-500 dark:bg-green-400'} flex items-center justify-center text-white rounded-full p-2`}
+                    useNomad ?
+                      swapResponse ?
+                        <div className="sm:pt-1.5 pb-1">
+                          <Alert
+                            color={`${swapResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : swapResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white mb-4 sm:mb-6`}
+                            icon={swapResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : swapResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                            closeDisabled={true}
+                            rounded={true}
+                          >
+                            <div className="flex items-center justify-between space-x-1">
+                              <div className="flex items-center space-x-2">
+                                <span className={`break-${isBreakAll(swapResponse.message) ? 'all' : 'words'} font-mono leading-5 text-xs`}>{swapResponse.message}</span>
+                                {['success'].includes(swapResponse.status) && swapResponse.hash && nomadUrl && (
+                                  <a
+                                    href={`${nomadUrl}/tx/nomad/${fromChain?.nomad?.id}/${swapResponse.hash}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center font-semibold pr-1.5"
                                   >
-                                    <MdClose size={20} />
-                                  </button>
-                                </div>
-                              </Alert>
-                            </div>
-                            :
-                            <ModalConfirm
-                              buttonTitle={<>
-                                <span>Swap</span>
-                                <span className="font-bold">{fromAsset?.symbol}</span>
-                                <span>via</span>
-                                <Img
-                                  src="/logos/externals/nomad.svg"
-                                  alt=""
-                                />
-                              </>}
-                              onClick={() => {
-                                setTokenApproveResponse(null)
-                                setConfirmFeesCollapsed(true)
-                              }}
-                              buttonClassName="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3"
-                              title="Swap Confirmation"
-                              body={<div className="flex flex-col space-y-3 sm:space-y-4 mt-0.5 -mb-2">
-                                <div className="flex items-center space-x-8 mx-auto py-2">
-                                  {fromChain && (
-                                    <div className="flex flex-col items-center space-y-1">
-                                      <Img
-                                        src={fromChain.image}
-                                        alt=""
-                                        className="w-10 h-10 rounded-full"
-                                      />
-                                      <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
-                                        {chainTitle(fromChain)}
-                                      </span>
-                                    </div>
-                                  )}
-                                  <div className="flex flex-col items-center space-y-1">
-                                    <div className="bg-black rounded-2xl flex items-center py-1 px-2">
-                                      <Img
-                                        src="/logos/externals/nomad.svg"
-                                        alt=""
-                                      />
-                                    </div>
-                                    <div className="h-4" />
-                                  </div>
-                                  {toChain && (
-                                    <div className="flex flex-col items-center space-y-1">
-                                      <img
-                                        src={toChain.image}
-                                        alt=""
-                                        className="w-10 h-10 rounded-full"
-                                      />
-                                      <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
-                                        {chainTitle(toChain)}
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
-                                  <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
-                                    Receiving Address
-                                    <span className="hidden sm:block">:</span>
-                                  </div>
-                                  {receivingAddress && (
-                                    <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
-                                      {ens_data?.[receivingAddress?.toLowerCase()]?.name && (
-                                        <Img
-                                          src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${ens_data?.[receivingAddress.toLowerCase()].name}`}
-                                          alt=""
-                                          className="w-6 h-6 rounded-full"
-                                        />
-                                      )}
-                                      <span className="text-gray-900 dark:text-gray-100 text-base sm:text-xs xl:text-base font-semibold">
-                                        {ellipseAddress(ens_data?.[receivingAddress?.toLowerCase()]?.name, 10) || ellipseAddress(receivingAddress?.toLowerCase(), 10)}
-                                      </span>
-                                      <Copy size={18} text={receivingAddress} />
-                                      {toChain?.explorer?.url && (
-                                        <a
-                                          href={`${toChain.explorer.url}${toChain.explorer.address_path?.replace('{address}', receivingAddress)}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-blue-600 dark:text-white"
-                                        >
-                                          {toChain.explorer.icon ?
-                                            <Img
-                                              src={toChain.explorer.icon}
-                                              alt=""
-                                              className="w-5 sm:w-4 xl:w-5 h-5 sm:h-4 xl:h-5 rounded-full opacity-60 hover:opacity-100"
-                                            />
-                                            :
-                                            <TiArrowRight size={20} className="transform -rotate-45" />
-                                          }
-                                        </a>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="h-1 border-t border-gray-200 dark:border-gray-600" />
-                                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
-                                  <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
-                                    Send Amount
-                                    <span className="hidden sm:block">:</span>
-                                  </div>
-                                  <div className="sm:text-right">
-                                    <div className="text-lg space-x-1.5">
-                                      <span className="font-mono font-semibold">{numberFormat(swapConfig.amount, '0,0.00000000', true)}</span>
-                                      <span className="font-semibold">{fromAsset?.symbol}</span>
-                                    </div>
-                                    {swapConfig.amount && typeof tokens_data?.[`${fromChain?.chain_id}_${fromContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
-                                      <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
-                                        ({currency_symbol}{numberFormat(swapConfig.amount * tokens_data[`${fromChain?.chain_id}_${fromContract?.contract_address}`].prices[0].price, '0,0.00000000')})
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>}
-                              cancelButtonTitle="Cancel"
-                              cancelDisabled={startingSwap}
-                              cancelButtonClassName="hidden"
-                              confirmButtonTitle={<span className="flex items-center justify-center space-x-1.5 py-2">
-                                {startingSwap && (
-                                  <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="20" height="20" />
+                                    <span className="underline">View on NOMAD</span>
+                                    <TiArrowRight size={16} className="transform -rotate-45" />
+                                  </a>
                                 )}
-                                <span className="text-base">{startingSwap ? 'Sending' : 'Confirm'}</span>
-                              </span>}
-                              confirmDisabled={startingSwap}
-                              onConfirmHide={false}
-                              onConfirm={() => swapNomad(fromChain, toChain, fromAsset, toAsset, fromContract, toContract)}
-                              confirmButtonClassName="w-full btn btn-default btn-rounded bg-blue-600 hover:bg-blue-500 justify-center text-white"
+                              </div>
+                              <button
+                                onClick={() => reset()}
+                                className={`${swapResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-400' : 'bg-green-500 dark:bg-green-400'} flex items-center justify-center text-white rounded-full p-2`}
+                              >
+                                <MdClose size={20} />
+                              </button>
+                            </div>
+                          </Alert>
+                        </div>
+                        :
+                        <ModalConfirm
+                          buttonTitle={<>
+                            <span>Swap</span>
+                            <span className="font-bold">{fromAsset?.symbol}</span>
+                            <span>via</span>
+                            <Img
+                              src="/logos/externals/nomad.svg"
+                              alt=""
                             />
+                          </>}
+                          onClick={() => {
+                            setTokenApproveResponse(null)
+                            setConfirmFeesCollapsed(true)
+                          }}
+                          buttonClassName="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-lg shadow-lg flex items-center justify-center text-gray-100 hover:text-white text-base sm:text-lg space-x-2 py-4 px-3"
+                          title="Swap Confirmation"
+                          body={<div className="flex flex-col space-y-3 sm:space-y-4 mt-0.5 -mb-2">
+                            <div className="flex items-center space-x-8 mx-auto py-2">
+                              {fromChain && (
+                                <div className="flex flex-col items-center space-y-1">
+                                  <Img
+                                    src={fromChain.image}
+                                    alt=""
+                                    className="w-10 h-10 rounded-full"
+                                  />
+                                  <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
+                                    {chainTitle(fromChain)}
+                                  </span>
+                                </div>
+                              )}
+                              <div className="flex flex-col items-center space-y-1">
+                                <div className="bg-black rounded-2xl flex items-center py-1 px-2">
+                                  <Img
+                                    src="/logos/externals/nomad.svg"
+                                    alt=""
+                                  />
+                                </div>
+                                <div className="h-4" />
+                              </div>
+                              {toChain && (
+                                <div className="flex flex-col items-center space-y-1">
+                                  <img
+                                    src={toChain.image}
+                                    alt=""
+                                    className="w-10 h-10 rounded-full"
+                                  />
+                                  <span className="text-gray-600 dark:text-gray-400 text-xs font-semibold">
+                                    {chainTitle(toChain)}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                              <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
+                                Receiving Address
+                                <span className="hidden sm:block">:</span>
+                              </div>
+                              {receivingAddress && (
+                                <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
+                                  {ens_data?.[receivingAddress?.toLowerCase()]?.name && (
+                                    <Img
+                                      src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${ens_data?.[receivingAddress.toLowerCase()].name}`}
+                                      alt=""
+                                      className="w-6 h-6 rounded-full"
+                                    />
+                                  )}
+                                  <span className="text-gray-900 dark:text-gray-100 text-base sm:text-xs xl:text-base font-semibold">
+                                    {ellipseAddress(ens_data?.[receivingAddress?.toLowerCase()]?.name, 10) || ellipseAddress(receivingAddress?.toLowerCase(), 10)}
+                                  </span>
+                                  <Copy size={18} text={receivingAddress} />
+                                  {toChain?.explorer?.url && (
+                                    <a
+                                      href={`${toChain.explorer.url}${toChain.explorer.address_path?.replace('{address}', receivingAddress)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 dark:text-white"
+                                    >
+                                      {toChain.explorer.icon ?
+                                        <Img
+                                          src={toChain.explorer.icon}
+                                          alt=""
+                                          className="w-5 sm:w-4 xl:w-5 h-5 sm:h-4 xl:h-5 rounded-full opacity-60 hover:opacity-100"
+                                        />
+                                        :
+                                        <TiArrowRight size={20} className="transform -rotate-45" />
+                                      }
+                                    </a>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                            <div className="h-1 border-t border-gray-200 dark:border-gray-600" />
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-1 xl:space-x-2">
+                              <div className="flex items-center text-gray-400 dark:text-gray-500 text-lg md:text-sm lg:text-base">
+                                Send Amount
+                                <span className="hidden sm:block">:</span>
+                              </div>
+                              <div className="sm:text-right">
+                                <div className="text-lg space-x-1.5">
+                                  <span className="font-mono font-semibold">{numberFormat(swapConfig.amount, '0,0.00000000', true)}</span>
+                                  <span className="font-semibold">{fromAsset?.symbol}</span>
+                                </div>
+                                {swapConfig.amount && typeof tokens_data?.[`${fromChain?.chain_id}_${fromContract?.contract_address}`]?.prices?.[0]?.price === 'number' && (
+                                  <div className="font-mono text-gray-400 dark:text-gray-500 text-sm sm:text-right">
+                                    ({currency_symbol}{numberFormat(swapConfig.amount * tokens_data[`${fromChain?.chain_id}_${fromContract?.contract_address}`].prices[0].price, '0,0.00000000')})
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>}
+                          cancelButtonTitle="Cancel"
+                          cancelDisabled={startingSwap}
+                          cancelButtonClassName="hidden"
+                          confirmButtonTitle={<span className="flex items-center justify-center space-x-1.5 py-2">
+                            {startingSwap && (
+                              <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="20" height="20" />
+                            )}
+                            <span className="text-base">{startingSwap ? 'Sending' : 'Confirm'}</span>
+                          </span>}
+                          confirmDisabled={startingSwap}
+                          onConfirmHide={false}
+                          onConfirm={() => swapNomad(fromChain, toChain, fromAsset, toAsset, fromContract, toContract)}
+                          confirmButtonClassName="w-full btn btn-default btn-rounded bg-blue-600 hover:bg-blue-500 justify-center text-white"
+                        />
+                      :
+                      !swapData && !(fromChainSynced && toChainSynced) ?
+                        <div className="sm:pt-1.5 pb-1">
+                          <Alert
+                            color="bg-red-400 dark:bg-red-500 text-left text-white"
+                            icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                            closeDisabled={true}
+                            rounded={true}
+                          >
+                            <span className="font-mono text-sm">
+                              {unsyncedChains.map((_chain, i) => (
+                                <span key={i} className="inline-flex items-baseline mr-2">
+                                  {_chain.image && (
+                                    <Img
+                                      src={_chain.image}
+                                      alt=""
+                                      className="w-4 h-4 rounded-full self-center mr-1"
+                                    />
+                                  )}
+                                  <span className="font-bold">{_chain.title}</span>
+                                  {i < unsyncedChains.length - 1 && (
+                                    <span className="ml-1.5">&</span>
+                                  )}
+                                </span>
+                              ))}
+                              <span>subgraph{unsyncedChains.length > 1 ? 's' : ''} is out of sync. Please try again later.</span>
+                            </span>
+                          </Alert>
+                        </div>
+                        :
+                        activeTransactionOpen ?
+                          null
                           :
                           !swapData && !swapResponse && !estimatedAmountResponse && (estimatedAmount || estimatingAmount) ?
                             <div className="sm:pt-1.5 pb-1">
