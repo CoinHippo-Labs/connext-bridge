@@ -1187,7 +1187,7 @@ export default function CrosschainBridge() {
                 alt=""
                 className="w-7 sm:w-8 h-7 sm:h-8 rounded-full"
               />*/}
-              <h1 className="uppercase text-base sm:text-lg font-bold">Cross-Chain Swap</h1>
+              <h1 className="uppercase text-base sm:text-lg font-bold">Cross-Chain Transfer</h1>
             </div>
             <div className="flex items-center space-x-2.5">
               {toChain && (
@@ -1462,7 +1462,7 @@ export default function CrosschainBridge() {
                                 <span className="font-mono">{numberFormat(maxTransfer, '0,0.000000')}</span>
                                 <span className="font-medium">{toAsset?.symbol}</span>
                               </span>
-                              <span className="whitespace-nowrap">~35 minutes</span>
+                              <span className="whitespace-nowrap">35 - 60 minutes</span>
                               <div className="bg-black rounded-2xl flex items-center py-0.5 px-1.5">
                                 <Img
                                   src="/logos/externals/nomad.svg"
