@@ -74,6 +74,11 @@ export default function CrosschainBridge() {
   const { rpcs_data } = { ...rpcs }
   const { theme } = { ...preferences }
 
+  const protocols = [
+    { id: 'connext', value: null, title: 'Connext', image: '/logos/connext/logo_with_title.png' },
+    { id: 'nomad', value: 'nomad', title: 'Nomad', image: '/logos/externals/nomad.svg' },
+  ]
+
   const defaultInfiniteApproval = false
   const defaultAdvancedOptions = {
     receiving_address: '',
@@ -85,6 +90,7 @@ export default function CrosschainBridge() {
   const [controller, setController] = useState(new AbortController())
 
   const [swapConfig, setSwapConfig] = useState({})
+  const [bridgeProtocol, setBridgeProtocol] = useState(null)
   const [infiniteApproval, setInfiniteApproval] = useState(defaultInfiniteApproval)
   const [advancedOptions, setAdvancedOptions] = useState(defaultAdvancedOptions)
 
@@ -900,11 +906,14 @@ export default function CrosschainBridge() {
     setStartingSwap(false)
   }
 
-  const reset = async is_from_address => {
+  const reset = async (is_from_address, is_from_switch_protocol) => {
     const isReset = !is_from_address || (address && swapData?.prepareResponse?.from?.toLowerCase() !== address?.toLowerCase())
 
     if (isReset) {
       setSwapConfig({ ...swapConfig, amount: null })
+      if (!is_from_switch_protocol) {
+        setBridgeProtocol(null)
+      }
     }
     setAdvancedOptions(defaultAdvancedOptions)
 
@@ -1130,8 +1139,8 @@ export default function CrosschainBridge() {
     </>
   )
 
-  const supportNomad = swapConfig.fromChainId && swapConfig.toChainId && fromAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1 && toAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1
-  const useNomad = supportNomad && ((isExceedMaxLiquidity && process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')) || ['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK))
+  const supportNomad = (process.env.NEXT_PUBLIC_NETWORK || process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')) && swapConfig.fromChainId && swapConfig.toChainId && fromAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1 && toAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1
+  const useNomad = supportNomad && bridgeProtocol === 'nomad'
   const nomadUrl = useNomad && (fromChain.optional_bridge_urls?.find(url => url?.includes('.nomad.')) || toChain.optional_bridge_urls?.find(url => url?.includes('.nomad.')))
   receivingAddress = useNomad ? advancedOptions?.receiving_address || address : receivingAddress
 
@@ -1187,7 +1196,7 @@ export default function CrosschainBridge() {
                 alt=""
                 className="w-7 sm:w-8 h-7 sm:h-8 rounded-full"
               />*/}
-              <h1 className="uppercase text-base sm:text-lg font-bold">Cross-Chain Transfer</h1>
+              <h1 className="uppercase text-sm sm:text-lg font-bold">Cross-Chain Transfer</h1>
             </div>
             <div className="flex items-center space-x-2.5">
               {toChain && (
@@ -1415,6 +1424,33 @@ export default function CrosschainBridge() {
                 </div>
               </div>
             </div>
+            {supportNomad && (
+              <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 mb-8 sm:mb-4">
+                <div className="order-1 sm:col-span-2 flex items-center justify-center sm:justify-start space-x-2">
+                  <span className="text-gray-400 dark:text-gray-600 text-base">via Protocol</span>
+                </div>
+                <div className="order-2 sm:col-span-3 flex flex-col items-center sm:items-end space-y-0">
+                  <div className="h-10 sm:h-7 flex items-center justify-center sm:justify-start space-x-1.5">
+                    {protocols.filter(protocol => ['connext', 'nomad'].includes(protocol.id)).map((protocol, i) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          setBridgeProtocol(protocol.value)
+                          reset(false, true)
+                        }}
+                        className={`w-full ${protocol.value === bridgeProtocol ? 'bg-indigo-600 dark:bg-indigo-600' : 'bg-gray-300 hover:bg-blue-300 dark:bg-gray-800 dark:hover:bg-indigo-600 opacity-75 dark:opacity-50'} rounded-2xl shadow-lg flex items-center justify-center text-gray-400 dark:text-gray-500 text-base sm:text-lg font-semibold space-x-2 py-1 px-2`}
+                      >
+                        <Img
+                          src={protocol.image}
+                          alt=""
+                          className="h-5"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
             {swapConfig.fromAssetId && (
               <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 sm:gap-4 mb-8 sm:mb-4">
                 <div className="order-1 sm:col-span-2 flex items-center justify-center sm:justify-start space-x-2">
@@ -1437,9 +1473,9 @@ export default function CrosschainBridge() {
                 </div>
                 {address && isSupport() && (
                   <>
-                    <div className={`${typeof maxTransfer === 'number' ? 'mt-2' : 'hidden mt-8'} sm:block order-4 sm:order-3 sm:col-span-${useNomad ? 3 : 2} sm:-mt-5 pt-0 sm:pt-2`}>
+                    <div className={`${typeof maxTransfer === 'number' ? 'mt-2' : 'hidden mt-8'} sm:block order-4 sm:order-3 sm:col-span-${supportNomad ? 3 : 2} sm:-mt-5 pt-0 sm:pt-2`}>
                       {typeof maxTransfer === 'number' && (
-                        useNomad ?
+                        supportNomad ?
                           <>
                             <div className="h-4 flex items-center justify-center sm:justify-start text-gray-400 dark:text-gray-500 text-2xs space-x-1.5 mx-auto">
                               <span className="flex items-center text-2xs space-x-1">
@@ -1447,27 +1483,27 @@ export default function CrosschainBridge() {
                                 <span className="font-mono">{numberFormat(maxTransfer, '0,0.000000')}</span>
                                 <span className="font-medium">{toAsset?.symbol}</span>
                               </span>
-                              <span className="whitespace-nowrap">{"< "}5 minutes</span>
-                              <div className="bg-black rounded-2xl flex items-center py-0.5 px-1.5">
+                              <span className="whitespace-nowrap">{"< "}5 mins</span>
+                              <div className="bg-gray-800 dark:bg-black rounded-xl flex items-center py-1 px-2">
                                 <Img
-                                  src="/logos/connext/logo_with_title.png"
+                                  src={protocols.find(protocol => protocol.id === 'connext')?.image}
                                   alt=""
-                                  className="h-3.5"
+                                  className="h-4"
                                 />
                               </div>
                             </div>
-                            <div className="h-4 flex items-center justify-center sm:justify-start text-gray-400 dark:text-gray-500 text-2xs space-x-1.5 mt-1 mx-auto">
+                            <div className="h-4 flex items-center justify-center sm:justify-start text-gray-400 dark:text-gray-500 text-2xs space-x-1.5 mt-2 mx-auto">
                               <span className="flex items-center text-2xs space-x-1">
                                 <span className="text-xs">{">"}</span>
                                 <span className="font-mono">{numberFormat(maxTransfer, '0,0.000000')}</span>
                                 <span className="font-medium">{toAsset?.symbol}</span>
                               </span>
-                              <span className="whitespace-nowrap">35 - 60 minutes</span>
-                              <div className="bg-black rounded-2xl flex items-center py-0.5 px-1.5">
+                              <span className="whitespace-nowrap">35 - 60 mins</span>
+                              <div className="bg-gray-800 dark:bg-black rounded-xl flex items-center py-1 px-1.5">
                                 <Img
-                                  src="/logos/externals/nomad.svg"
+                                  src={protocols.find(protocol => protocol.id === 'nomad')?.image}
                                   alt=""
-                                  className="h-3"
+                                  className="h-3.5"
                                 />
                               </div>
                             </div>
@@ -1482,7 +1518,7 @@ export default function CrosschainBridge() {
                           </div>
                       )}
                     </div>
-                    <div className={`w-48 sm:w-full order-3 sm:order-4 sm:col-span-${useNomad ? 2 : 3} -mt-1.5 sm:-mt-5 mx-auto pt-3 sm:pt-2`}>
+                    <div className={`w-48 sm:w-full order-3 sm:order-4 sm:col-span-${supportNomad ? 2 : 3} -mt-1.5 sm:-mt-5 mx-auto pt-3 sm:pt-2`}>
                       <div className="w-full h-4 flex items-center justify-end mx-auto">
                         {/*isNative ?
                           null
@@ -1633,7 +1669,7 @@ export default function CrosschainBridge() {
               />
             </div>
             {isSupport() && (swapData || balances_data?.[swapConfig.fromChainId])/* && typeof estimatedFees === 'number'*/ && (typeof swapConfig.amount === 'number' || (mustChangeChain && web3_provider)) ?
-              !estimatedAmountResponse && mustChangeChain ?
+              (useNomad || !estimatedAmountResponse) && mustChangeChain ?
                 <div className="sm:pt-1.5 pb-1">
                   <Wallet
                     chainIdToConnect={swapConfig.fromChainId}
@@ -1662,7 +1698,7 @@ export default function CrosschainBridge() {
                     </Alert>
                   </div>
                   :
-                  !swapData && !estimatedAmountResponse && check_balances && fromBalanceAmount < swapConfig.amount ?
+                  !swapData && (useNomad || !estimatedAmountResponse) && check_balances && fromBalanceAmount < swapConfig.amount ?
                     <div className="sm:pt-1.5 pb-1">
                       <Alert
                         color="bg-red-400 dark:bg-red-500 text-left text-white"
