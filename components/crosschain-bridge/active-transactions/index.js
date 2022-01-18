@@ -137,7 +137,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen, trigger }
           {fromAsset && (
             <div className="max-w-min w-auto bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center space-x-1 py-1 px-2.5">
               <span className="font-mono">{numberFormat(Number(transaction?.crosschainTx?.sending?.amount) / Math.pow(10, fromAsset?.contracts?.find(_contract => _contract?.chain_id === fromChain?.chain_id)?.contract_decimals), '0,0.000000', true)}</span>
-              <span className="font-semibold">{fromAsset.symbol}</span>
+              <span className="font-semibold">{fromAsset.contracts?.find(_contract => _contract?.chain_id === fromChain?.chain_id)?.symbol || fromAsset.symbol}</span>
             </div>
           )}
           <div className="flex flex-col items-center">

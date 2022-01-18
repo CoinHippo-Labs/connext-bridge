@@ -58,7 +58,7 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
                 className="w-6 h-6 rounded-full"
               />
               {!showInput && (
-                <span className="font-semibold">{asset.symbol}</span>
+                <span className="font-semibold">{(side === 'from' ? fromAsset : toAsset)?.contracts?.find(_contract => _contract?.chain_id === (side === 'from' ? fromChainId : toChainId))?.symbol || asset.symbol}</span>
               )}
             </div>
             :

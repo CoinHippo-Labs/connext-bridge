@@ -207,7 +207,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
             type: 'ERC20',
             options: {
               address: _asset.contract_address || _asset?.contracts?.find(_contract => _contract.chain_id === _chain_id)?.contract_address,
-              symbol: _asset.contract_ticker_symbol || _asset.symbol,
+              symbol: _asset.contract_ticker_symbol || _asset?.contracts?.find(_contract => _contract.chain_id === _chain_id)?.symbol || _asset.symbol,
               decimals: _asset.contract_decimals || _asset?.contracts?.find(_contract => _contract.chain_id === _chain_id)?.contract_decimals,
               image: _asset.image || _.last(_asset.logo_url),
             },
@@ -311,7 +311,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
       )}
       <span className="flex items-center text-gray-700 dark:text-gray-300 text-base font-semibold">
         <span className="font-mono mr-1.5">{numberFormat(fromAmount, '0,0.000000', true)}</span>
-        <span>{fromAsset?.symbol}</span>
+        <span>{fromContract?.symbol || fromAsset?.symbol}</span>
       </span>
     </div>
   )
@@ -327,7 +327,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
       )}
       <span className="flex items-center text-gray-700 dark:text-gray-300 text-base font-semibold">
         <span className="font-mono mr-1.5">{numberFormat(toAmount, '0,0.000000', true)}</span>
-        <span>{toAsset?.symbol}</span>
+        <span>{toContract?.symbol || toAsset?.symbol}</span>
       </span>
     </div>
   )
@@ -991,7 +991,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                       chainIdToConnect={generalTx?.receivingChainId}
                       buttonDisconnectTitle={<>
                         <span>Add</span>
-                        <span className={`${toAsset?.contract_ticker_symbol || toAsset?.symbol ? 'font-bold' : ''}`}>{toAsset?.contract_ticker_symbol || toAsset?.symbol || 'Token'}</span>
+                        <span className={`${toAsset?.contract_ticker_symbol || toContract?.symbol || toAsset?.symbol ? 'font-bold' : ''}`}>{toAsset?.contract_ticker_symbol || toContract?.symbol || toAsset?.symbol || 'Token'}</span>
                         <span>to</span>
                         <span className="pr-0.5">MetaMask</span>
                         <Img
@@ -1008,7 +1008,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                       className="w-auto bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg flex items-center justify-center text-sm font-medium space-x-1.5 py-2.5 px-3"
                     >
                       <span>Add</span>
-                      <span className={`${toAsset?.contract_ticker_symbol || toAsset?.symbol ? 'font-bold' : ''}`}>{toAsset?.contract_ticker_symbol || toAsset?.symbol || 'Token'}</span>
+                      <span className={`${toAsset?.contract_ticker_symbol || toContract?.symbol || toAsset?.symbol ? 'font-bold' : ''}`}>{toAsset?.contract_ticker_symbol || toContract?.symbol || toAsset?.symbol || 'Token'}</span>
                       <span>to</span>
                       <span className="pr-0.5">MetaMask</span>
                       <Img
