@@ -274,6 +274,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
 
   const fromAmount = sendingTx?.amount && (fromAsset?.contract_decimals || fromContract?.contract_decimals) && (Number(sendingTx?.amount) / Math.pow(10, fromAsset?.contract_decimals || fromContract?.contract_decimals))
   const toAmount = receivingTx?.amount && (toAsset?.contract_decimals || toContract?.contract_decimals) && (Number(receivingTx?.amount) / Math.pow(10, toAsset.contract_decimals || toContract?.contract_decimals))
+  const toRelayerFee = receivingTx?.relayerFee && (toAsset?.contract_decimals || toContract?.contract_decimals) && (Number(receivingTx?.relayerFee) / Math.pow(10, toAsset.contract_decimals || toContract?.contract_decimals))
 
   const loaded = data?.transactionId && transaction?.transactionId === data.transactionId && generalTx
 
@@ -897,6 +898,24 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
           <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-2 gap-16 sm:gap-2 py-4">
             {web3_provider && !finish && (
               <div className="sm:order-2 flex flex-col items-center justify-center space-y-3">
+                {typeof toRelayerFee === 'number' && toRelayerFee > 0 && (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-semibold">Relayer Fee:</span>
+                    <div className="min-w-max max-w-min bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center sm:justify-end space-x-2 mx-auto py-1 px-2.5">
+                      {toAsset?.image && (
+                        <Img
+                          src={toAsset.image}
+                          alt=""
+                          className="w-5 sm:w-4 lg:w-5 h-5 sm:h-4 lg:h-5 rounded-full"
+                        />
+                      )}
+                      <span className="flex items-center text-gray-700 dark:text-gray-300 text-sm font-semibold">
+                        <span className="font-mono mr-1">{numberFormat(toRelayerFee, '0,0.000000', true)}</span>
+                        <span>{toContract?.symbol || toAsset?.symbol}</span>
+                      </span>
+                    </div>
+                  </div>
+                )}
                 {loaded && [sendingTx?.status, receivingTx?.status].includes('Prepared') && (['Prepared'].includes(receivingTx?.status) || canCancelSender) ?
                   (canCancelSender ? sendingTx : receivingTx) && address?.toLowerCase() !== (canCancelSender ? sendingTx?.user?.id?.toLowerCase() : receivingTx?.user?.id?.toLowerCase()) ?
                     <span className="min-w-max flex flex-col text-gray-400 dark:text-gray-500 text-center mx-auto">
