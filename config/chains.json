@@ -249,13 +249,13 @@
           "symbol": "GLMR",
           "decimals": 18
         },
-        "blockExplorerUrls": ["https://blockscout.moonbeam.network"]
+        "blockExplorerUrls": ["https://moonbeam.moonscan.io"]
       }
     ],
     "explorer": {
-      "name": "BlockScout",
-      "url": "https://blockscout.moonbeam.network",
-      "icon": "/logos/explorers/blockscout.png",
+      "name": "Moonscan",
+      "url": "https://moonbeam.moonscan.io",
+      "icon": "/logos/explorers/moonbeam.png",
       "block_path": "/block/{block}",
       "address_path": "/address/{address}",
       "contract_path": "/tokens/{address}",
@@ -288,7 +288,7 @@
     "explorer": {
       "name": "Moonscan",
       "url": "https://moonriver.moonscan.io",
-      "icon": "/logos/explorers/moonscan.png",
+      "icon": "/logos/explorers/moonriver.png",
       "block_path": "/block/{block}",
       "address_path": "/address/{address}",
       "contract_path": "/tokens/{address}",
