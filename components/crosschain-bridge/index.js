@@ -85,6 +85,7 @@ export default function CrosschainBridge() {
     contract_address: '',
     call_data: '',
     preferred_router: '',
+    initiator: '',
   }
 
   const [controller, setController] = useState(new AbortController())
@@ -690,7 +691,7 @@ export default function CrosschainBridge() {
                   expiry: moment().add(expiry_hours, 'hours').unix(),
                   callTo: advancedOptions?.contract_address || undefined,
                   callData: advancedOptions?.call_data || undefined,
-                  initiator: undefined,
+                  initiator: advancedOptions?.initiator || undefined,
                   preferredRouters: advancedOptions?.preferred_router?.length > 0 ? advancedOptions.preferred_router.split(',') : undefined,
                   dryRun: false,
                 })

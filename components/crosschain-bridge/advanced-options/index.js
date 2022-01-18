@@ -46,6 +46,13 @@ export default function AdvancedOptions({ applied = false, disabled = false, ini
       placeholder: 'Specify a target router to handle transaction',
       hide: useNomad,
     },
+    {
+      label: 'Initiator',
+      name: 'initiator',
+      type: 'text',
+      placeholder: 'Specify an external signer',
+      hide: useNomad,
+    },
   ].filter(item => !item.hide)
 
   useEffect(() => {
