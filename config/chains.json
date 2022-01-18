@@ -207,13 +207,13 @@
   },
   {
     "id": "xdai",
-    "title": "xDAI Chain",
+    "title": "Gnosis Chain",
     "short_name": "xDAI",
     "chain_id": 100,
     "provider_params": [
       {
         "chainId": "0x64",
-        "chainName": "xDAI Chain",
+        "chainName": "Gnosis Chain",
         "rpcUrls": ["https://rpc.xdaichain.com", "https://xdai.poanetwork.dev", "wss://rpc.xdaichain.com/wss", "wss://xdai.poanetwork.dev/wss", "https://dai.poa.network", "ws://xdai.poanetwork.dev:8546"],
         "nativeCurrency": {
           "name": "xDAI",
