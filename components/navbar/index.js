@@ -91,7 +91,7 @@ export default function Navbar() {
                 rel="noopener noreferrer"
                 className="flex items-center uppercase text-indigo-500 dark:text-indigo-300 text-3xs sm:text-2xs xl:text-sm font-medium mx-0 xl:mx-2"
               >
-                <span className="block xl:hidden">View Txs</span>
+                <span className="block xl:hidden">View TXs</span>
                 <span className="hidden xl:block">View Transactions</span>
                 <TiArrowRight size={20} className="transform -rotate-45 mt-0.5 sm:mt-0" />
               </a>
