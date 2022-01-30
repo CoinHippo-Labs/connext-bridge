@@ -1140,7 +1140,7 @@ export default function CrosschainBridge() {
     </>
   )
 
-  const supportNomad = (true || process.env.NEXT_PUBLIC_NETWORK || process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')) && swapConfig.fromChainId && swapConfig.toChainId && fromAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1 && toAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1
+  const supportNomad = (true || ['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) || process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')) && swapConfig.fromChainId && swapConfig.toChainId && fromAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1 && toAsset?.nomad_support?.findIndex(pair => pair?.from_chain_id === swapConfig.fromChainId && pair?.to_chain_id === swapConfig.toChainId) > -1
   const useNomad = supportNomad && bridgeProtocol === 'nomad'
   const nomadUrl = useNomad && (fromChain.optional_bridge_urls?.find(url => url?.includes('.nomad.')) || toChain.optional_bridge_urls?.find(url => url?.includes('.nomad.')))
   receivingAddress = useNomad ? advancedOptions?.receiving_address || address : receivingAddress
