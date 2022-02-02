@@ -208,7 +208,7 @@
   {
     "id": "xdai",
     "title": "Gnosis Chain",
-    "short_name": "xDAI",
+    "short_name": "Gnosis",
     "chain_id": 100,
     "provider_params": [
       {
