@@ -8,8 +8,8 @@ import Networks from './networks'
 
 export default function DropdownNetwork({ chain_id }) {
   const { chains, preferences } = useSelector(state => ({ chains: state.chains, preferences: state.preferences }), shallowEqual)
-  const { chains_data } = { ...chains }
   const { theme } = { ...preferences }
+  const { chains_data } = { ...chains }
 
   const chain = chains_data?.find(_chain => _chain?.chain_id === chain_id)
 

@@ -66,11 +66,11 @@ let web3Modal
 
 export default function Wallet({ chainIdToConnect, main, hidden, disabled = false, buttonConnectTitle, buttonConnectClassName, buttonDisconnectTitle, buttonDisconnectClassName, onChangeNetwork }) {
   const dispatch = useDispatch()
-  const { chains, wallet, preferences } = useSelector(state => ({ chains: state.chains, wallet: state.wallet, preferences: state.preferences }), shallowEqual)
+  const { preferences, chains, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, wallet: state.wallet }), shallowEqual)
   const { chains_data } = { ...chains }
+  const { theme } = { ...preferences }
   const { wallet_data } = { ...wallet }
   const { provider, web3_provider, chain_id } = { ...wallet_data }
-  const { theme } = { ...preferences }
 
   const [defaultChainId, setDefaultChainId] = useState(null)
 
@@ -155,11 +155,9 @@ export default function Wallet({ chainIdToConnect, main, hidden, disabled = fals
           try {
             await provider.request({
               method: 'wallet_addEthereumChain',
-              params: chains_data?.find(_chain => _chain.chain_id === chainIdToConnect)?.provider_params,
+              params: chains_data?.find(c => c.chain_id === chainIdToConnect)?.provider_params,
             })
-          } catch (error) {
-            console.log(error)
-          }
+          } catch (error) {}
         }
       }
     }

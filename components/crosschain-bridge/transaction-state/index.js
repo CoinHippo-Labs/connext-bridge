@@ -65,11 +65,11 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
 
         let sendingTx, receivingTx
 
-        // let response = await getTransactions({ chain_id: chains_data?.find(_chain => _chain.chain_id === sendingChainId)?.id }, chains_data, tokens_data, transactionId)
+        // let response = await getTransactions({ chain_id: chains_data?.find(c => c.chain_id === sendingChainId)?.chain_id }, chains_data, tokens_data, transactionId)
         let response = await transactionFromSdk(sdk_data, sendingChainId, transactionId, chains_data, tokens_data)
         sendingTx = response?.data?.[0]
 
-        // response = await getTransactions({ chain_id: chains_data?.find(_chain => _chain.chain_id === receivingChainId)?.id }, chains_data, tokens_data, transactionId)
+        // response = await getTransactions({ chain_id: chains_data?.find(c => c.chain_id === receivingChainId)?.chain_id }, chains_data, tokens_data, transactionId)
         response = await transactionFromSdk(sdk_data, receivingChainId, transactionId, chains_data, tokens_data)
         receivingTx = response?.data?.[0]
 
@@ -146,7 +146,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
 
     if (sdk_data && txData) {
       try {
-        setFulfillResponse({ status: 'pending', message: 'Wait for Claiming', tx_hash: response?.hash || response?.transactionHash, ...response })
+        setFulfillResponse({ status: 'pending', message: 'Wait for Claiming' })
       
         const response = await sdk_data.fulfillTransfer({
           txData: {

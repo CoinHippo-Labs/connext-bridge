@@ -1,6 +1,6 @@
 [
   {
-    "id": "eth",
+    "id": "ethereum",
     "title": "Ethereum",
     "short_name": "ETH",
     "chain_id": 1,
@@ -32,7 +32,7 @@
     }
   },
   {
-    "id": "bsc",
+    "id": "binance",
     "title": "Binance Smart Chain",
     "short_name": "BSC",
     "chain_id": 56,
@@ -61,7 +61,7 @@
     }
   },
   {
-    "id": "matic",
+    "id": "polygon",
     "title": "Polygon",
     "short_name": "MATIC",
     "chain_id": 137,
@@ -90,7 +90,7 @@
     }
   },
   {
-    "id": "arb",
+    "id": "arbitrum",
     "title": "Arbitrum",
     "short_name": "ARB",
     "chain_id": 42161,
@@ -119,7 +119,7 @@
     }
   },
   {
-    "id": "opt",
+    "id": "optimism",
     "title": "Optimism",
     "short_name": "OPT",
     "chain_id": 10,
@@ -148,7 +148,7 @@
     }
   },
   {
-    "id": "avax",
+    "id": "avalanche",
     "title": "Avalanche",
     "short_name": "AVAX",
     "chain_id": 43114,
@@ -177,7 +177,7 @@
     }
   },
   {
-    "id": "ftm",
+    "id": "fantom",
     "title": "Fantom",
     "short_name": "FTM",
     "chain_id": 250,
@@ -206,9 +206,9 @@
     }
   },
   {
-    "id": "xdai",
+    "id": "gnosis",
     "title": "Gnosis Chain",
-    "short_name": "Gnosis",
+    "short_name": "GNO",
     "chain_id": 100,
     "provider_params": [
       {
@@ -235,7 +235,7 @@
     }
   },
   {
-    "id": "mbeam",
+    "id": "moonbeam",
     "title": "Moonbeam",
     "short_name": "MBEAM",
     "chain_id": 1284,
@@ -268,7 +268,7 @@
     }
   },
   {
-    "id": "movr",
+    "id": "moonriver",
     "title": "Moonriver",
     "short_name": "MOVR",
     "chain_id": 1285,

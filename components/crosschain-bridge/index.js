@@ -537,7 +537,7 @@ export default function CrosschainBridge() {
     if (_chain_id && chains_data) {
       const key = _chain_id
 
-      const response = await assetBalances({ chain_id: chains_data?.find(_chain => _chain.chain_id === _chain_id)?.id })
+      const response = await assetBalances({ chain_id: chains_data?.find(c => c.chain_id === _chain_id)?.chain_id })
 
       let routerStatus
 
