@@ -2,6 +2,7 @@
   {
     "id": "usdt",
     "symbol": "USDT",
+    "image": "/logos/assets/usdt.png",
     "contracts": [
       {
         "contract_address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
@@ -71,6 +72,7 @@
   {
     "id": "usdc",
     "symbol": "USDC",
+    "image": "/logos/assets/usdc.png",
     "contracts": [
       {
         "contract_address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
@@ -139,6 +141,7 @@
   {
     "id": "dai",
     "symbol": "DAI",
+    "image": "/logos/assets/dai.png",
     "contracts": [
       {
         "contract_address": "0x6b175474e89094c44da98b954eedeac495271d0f",
@@ -181,7 +184,8 @@
         "chain_id": 100,
         "contract_decimals": 18,
         "is_native": true,
-        "symbol": "xDAI"
+        "symbol": "xDAI",
+        "image": "/logos/assets/xdai.png"
       },
       {
         "contract_address": "0xc234a67a4f840e61ade794be47de455361b52413",
@@ -209,6 +213,7 @@
   {
     "id": "eth",
     "symbol": "ETH",
+    "image": "/logos/assets/eth.png",
     "contracts": [
       {
         "contract_address": "0x0000000000000000000000000000000000000000",
@@ -284,6 +289,7 @@
   {
     "id": "wbtc",
     "symbol": "WBTC",
+    "image": "/logos/assets/wbtc.png",
     "contracts": [
       {
         "contract_address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
@@ -348,6 +354,7 @@
   {
     "id": "grt",
     "symbol": "GRT",
+    "image": "/logos/assets/grt.png",
     "contracts": [
       {
         "contract_address": "0xc944e90c64b2c07662a292be6244bdf05cda44a7",
@@ -385,6 +392,7 @@
   {
     "id": "miva",
     "symbol": "MIVA",
+    "image": "/logos/assets/miva.png",
     "is_staging": true,
     "contracts": [
       {
@@ -402,6 +410,7 @@
   {
     "id": "magic",
     "symbol": "MAGIC",
+    "image": "/logos/assets/magic.png",
     "is_staging": true,
     "contracts": [
       {
@@ -419,6 +428,7 @@
   {
     "id": "gth",
     "symbol": "GTH",
+    "image": "/logos/assets/gth.png",
     "contracts": [
       {
         "contract_address": "0xeb986da994e4a118d5956b02d8b7c3c7ce373674",
@@ -435,6 +445,7 @@
   {
     "id": "fei",
     "symbol": "FEI",
+    "image": "/logos/assets/fei.png",
     "contracts": [
       {
         "contract_address": "0x956f47f50a910163d8bf957cf5846d573e7f87ca",

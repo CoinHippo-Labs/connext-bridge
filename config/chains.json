@@ -27,6 +27,7 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
+    "image": "/logos/chains/mainnet/ethereum.png",
     "nomad": {
       "id": "ethereum"
     }
@@ -58,7 +59,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "image": "/logos/chains/mainnet/binance.png"
   },
   {
     "id": "polygon",
@@ -87,7 +89,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "image": "/logos/chains/mainnet/polygon.png"
   },
   {
     "id": "arbitrum",
@@ -116,7 +119,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "image": "/logos/chains/mainnet/arbitrum.png"
   },
   {
     "id": "optimism",
@@ -145,7 +149,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "image": "/logos/chains/mainnet/optimism.png"
   },
   {
     "id": "avalanche",
@@ -174,7 +179,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "image": "/logos/chains/mainnet/avalanche.png"
   },
   {
     "id": "fantom",
@@ -203,7 +209,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "image": "/logos/chains/mainnet/fantom.png"
   },
   {
     "id": "gnosis",
@@ -232,7 +239,8 @@
       "contract_path": "/tokens/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "image": "/logos/chains/mainnet/gnosis.png"
   },
   {
     "id": "moonbeam",
@@ -262,6 +270,7 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
+    "image": "/logos/chains/mainnet/moonbeam.png",
     "optional_bridge_urls": ["https://app.nomad.xyz"],
     "nomad": {
       "id": "moonbeam"
@@ -294,7 +303,8 @@
       "contract_path": "/tokens/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "image": "/logos/chains/mainnet/moonriver.png"
   },
   {
     "id": "fuse",
@@ -323,6 +333,7 @@
       "contract_path": "/tokens/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "image": "/logos/chains/mainnet/fuse.png"
   }
 ]
