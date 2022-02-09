@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 
 import PropTypes from 'prop-types'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
-import { FaRegCopy, FaCheckCircle } from 'react-icons/fa'
+import { BsCheckCircleFill } from 'react-icons/bs'
+import { MdContentCopy } from 'react-icons/md'
 
 const Copy = ({ text, copyTitle, size = 16, onCopy, className = '' }) => {
   const [copied, setCopied] = useState(false)
@@ -15,9 +16,9 @@ const Copy = ({ text, copyTitle, size = 16, onCopy, className = '' }) => {
   return copied ?
     <div className={`${copyTitle ? 'min-w-max' : ''} flex items-center space-x-1`}>
       {copyTitle && (
-        <span className="text-gray-400 dark:text-gray-500 font-medium">{copyTitle}</span>
+        <span className="text-gray-400 dark:text-gray-600 font-medium">{copyTitle}</span>
       )}
-      <FaCheckCircle size={size} className={`text-green-400 dark:text-white ${className}`} />
+      <BsCheckCircleFill size={size} className={`text-green-400 dark:text-white ${className}`} />
     </div>
     :
     <CopyToClipboard
@@ -31,9 +32,9 @@ const Copy = ({ text, copyTitle, size = 16, onCopy, className = '' }) => {
     >
       <div className={`${copyTitle ? 'min-w-max' : ''} flex items-center space-x-1`}>
         {copyTitle && (
-          <span className="cursor-pointer text-gray-400 dark:text-gray-500 font-medium">{copyTitle}</span>
+          <span className="cursor-pointer text-gray-400 dark:text-gray-600 font-medium">{copyTitle}</span>
         )}
-        <FaRegCopy size={size} className={`cursor-pointer ${className.includes('text-') ? '' : 'text-gray-300 dark:text-gray-400'} ${className}`} />
+        <MdContentCopy size={size} className={`cursor-pointer ${className.includes('text-') ? '' : 'text-gray-300 hover:text-gray-400 dark:text-gray-600 dark:hover:text-gray-500'} ${className}`} />
       </div>
     </CopyToClipboard>
 }

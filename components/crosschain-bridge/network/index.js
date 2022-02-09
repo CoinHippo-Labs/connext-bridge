@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 
 import { Img } from 'react-image'
-import Loader from 'react-loader-spinner'
+import { Puff } from 'react-loader-spinner'
 import { IoRadioButtonOn } from 'react-icons/io5'
 
 import Search from './search'
@@ -46,7 +46,7 @@ export default function DropdownNetwork({ disabled, chain_id, onSelect, side = '
         chains_data ?
           <div className="w-48 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-3xl uppercase text-gray-500 hover:text-gray-600 dark:text-gray-200 dark:hover:text-gray-100 text-lg font-medium py-2 px-4">Chain</div>
           :
-          <Loader type="Puff" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="24" height="24" />
+          <Puff color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="24" height="24" />
       }
       disabled={disabled}
       onClick={open => setHidden(!open)}

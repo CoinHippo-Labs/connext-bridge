@@ -14,13 +14,13 @@ export default function Footer() {
         <div className="flex items-center text-gray-600 dark:text-white font-medium space-x-1.5">
           <span>Built with</span>
           <Img
-            src="/logos/connext/logo.png"
+            src="/logos/externals/connext/logo.png"
             alt=""
             className="w-4 h-4 rounded-full"
           />
           <span>Connext Protocol</span>
           {process.env.NEXT_PUBLIC_SDK_VERSION && (
-            <span className="text-gray-400 dark:text-gray-600 font-light">(SDK v{process.env.NEXT_PUBLIC_SDK_VERSION})</span>
+            <span className="font-mono text-gray-400 dark:text-gray-600 font-light">(SDK v{process.env.NEXT_PUBLIC_SDK_VERSION})</span>
           )}
         </div>
       </span>

@@ -3,7 +3,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
 import { Contract, utils } from 'ethers'
-import Loader from 'react-loader-spinner'
+import { Puff } from 'react-loader-spinner'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiChevronDown, BiChevronUp } from 'react-icons/bi'
 import { TiArrowRight } from 'react-icons/ti'
 
@@ -152,7 +152,7 @@ export default function Faucets() {
                 className="btn btn-default btn-rounded bg-indigo-500 hover:bg-indigo-600 flex items-center text-white space-x-1.5"
               >
                 {minting && (
-                  <Loader type="Puff" color={theme === 'dark' ? '#F9FAFB' : '#F9FAFB'} width="16" height="16" />
+                  <Puff color={theme === 'dark' ? '#F9FAFB' : '#F9FAFB'} width="16" height="16" />
                 )}
                 <span>Faucet</span>
                 {asset && (

@@ -9,8 +9,8 @@ import { chainTitle } from '../../../lib/object/chain'
 
 export default function Networks({ handleDropdownClick }) {
   const { chains, chains_status } = useSelector(state => ({ chains: state.chains, chains_status: state.chains_status }), shallowEqual)
-  const { chains_status_data } = { ...chains_status }
   const { chains_data } = { ...chains }
+  const { chains_status_data } = { ...chains_status }
 
   return (
     <>
@@ -37,7 +37,7 @@ export default function Networks({ handleDropdownClick }) {
               chainIdToConnect={item.chain_id}
               onChangeNetwork={handleDropdownClick}
               buttonDisconnectTitle={<>
-                <IoRadioButtonOn size={12} className={`min-w-max ${!chains_status_data || chains_status_data?.find(_chain => _chain?.id === item.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
+                <IoRadioButtonOn size={12} className={`min-w-max ${!chains_status_data || chains_status_data?.find(c => c?.id === item.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'}`} />
                 <Img
                   src={item.image}
                   alt=""

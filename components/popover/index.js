@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { usePopper } from 'react-popper'
 
-export default function Popover({ placement, title, content, children, className = '' }) {
+export default function Popover({ placement, title, content, children, className = '', titleClassName = '', contentClassName = '' }) {
   const [hidden, setHidden] = useState(true)
 
   const buttonRef = useRef(null)
@@ -71,7 +71,7 @@ export default function Popover({ placement, title, content, children, className
   const handlePopoverClick = () => setHidden(!hidden)
 
   return (
-    <div className="flex relative">
+    <div className="flex">
       <button
         ref={buttonRef}
         onClick={handlePopoverClick}
@@ -84,10 +84,10 @@ export default function Popover({ placement, title, content, children, className
           className={`w-auto no-underline break-words rounded-lg shadow-lg z-10 bg-white dark:bg-black border-0 border-gray-200 dark:border-gray-900 text-gray-900 dark:text-white text-sm font-normal ${hidden ? 'hidden' : 'block'}`}
           style={styles.offset}
         >
-          <div className="bg-gray-100 dark:bg-black border-b border-solid border-gray-200 dark:border-gray-900 rounded-t-lg uppercase text-gray-900 dark:text-white font-semibold mb-0 p-2">
+          <div className={`bg-gray-100 dark:bg-black border-b border-solid border-gray-200 dark:border-gray-900 rounded-t-lg uppercase text-gray-900 dark:text-white font-semibold mb-0 p-2 ${titleClassName}`}>
             {title}
           </div>
-          <div className="p-2">{content}</div>
+          <div className={`p-2 ${contentClassName}`}>{content}</div>
         </div>
       </div>
     </div>

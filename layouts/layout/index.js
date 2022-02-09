@@ -5,7 +5,6 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import Navbar from '../../components/navbar'
 import Footer from '../../components/footer'
-import ChainsStatus from '../../components/chains-status'
 
 import meta from '../../lib/meta'
 
@@ -68,8 +67,7 @@ export default function Layout({ children }) {
         <div className="wrapper">
           <div className="main w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-white" style={{ minHeight: 'calc(100vh - 44px)' }}>
             <Navbar />
-            <ChainsStatus />
-            <div className="w-full p-4">
+            <div className="w-full px-2 sm:px-4">
               {children}
             </div>
           </div>

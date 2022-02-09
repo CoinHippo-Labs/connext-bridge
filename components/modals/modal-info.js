@@ -3,7 +3,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import Portal from '../portal'
 import { FiX } from 'react-icons/fi'
 
-export default function Modal({ buttonTitle, buttonClassName, title, icon, body, onCancel, confirmButtonTitle, onConfirm, confirmButtonClassName }) {
+export default function Modal({ className = '', buttonTitle, buttonClassName, title, icon, body, onCancel, confirmButtonTitle, onConfirm, confirmButtonClassName }) {
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
   const { theme } = { ...preferences }
 
@@ -45,7 +45,7 @@ export default function Modal({ buttonTitle, buttonClassName, title, icon, body,
         <Portal selector="#portal">
           <div className="modal-backdrop fade-in" />
           <div data-background={theme} className={`modal show ${theme === 'dark' ? 'dark' : ''}`}>
-            <div ref={modalRef} className="w-auto max-w-sm lg:max-w-lg relative lg:my-4 mx-auto">
+            <div ref={modalRef} className={`w-auto ${className.includes('max-w-') ? '' : 'max-w-sm lg:max-w-lg'} relative lg:my-4 mx-auto ${className}`}>
               <div className="w-full bg-white dark:bg-gray-900 rounded-lg shadow-lg relative border-0 border-gray-100 dark:border-gray-800 outline-none flex flex-col items-center justify-center text-gray-900 dark:text-white">
                 <div className="w-full relative text-center p-4">
                   {icon}

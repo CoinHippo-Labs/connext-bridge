@@ -6,7 +6,7 @@ import moment from 'moment'
 import { NxtpSdkEvents } from '@connext/nxtp-sdk'
 import { Img } from 'react-image'
 import StackGrid from 'react-stack-grid'
-import Loader from 'react-loader-spinner'
+import { Bars, Rings, Oval, ThreeDots } from 'react-loader-spinner'
 import HeadShake from 'react-reveal/HeadShake'
 import { TiArrowRight } from 'react-icons/ti'
 
@@ -144,7 +144,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen, trigger }
             {transaction?.status === NxtpSdkEvents.SenderTransactionPrepared ?
               <div className="flex items-center justify-center space-x-2">
                 <span className="text-indigo-600 dark:text-white font-medium">Waiting for Router</span>
-                <Loader type="Bars" color={theme === 'dark' ? '#FFFFFF' : '#4F46E5'} width="16" height="16" />
+                <Bars color={theme === 'dark' ? '#FFFFFF' : '#4F46E5'} width="16" height="16" />
               </div>
               :
               transaction?.status === NxtpSdkEvents.ReceiverTransactionPrepared ?
@@ -157,7 +157,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen, trigger }
                     <span className="font-normal">Ready to</span>
                     <span className="flex items-center font-bold">
                       Claim
-                      <Loader type="Rings" color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="32" height="32" className="-ml-0.5" />
+                      <Rings color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="32" height="32" className="-ml-0.5" />
                     </span>
                   </button>
                 </HeadShake>
@@ -165,7 +165,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen, trigger }
                 transaction?.status === NxtpSdkEvents.ReceiverPrepareSigned ?
                   <div className="flex items-center justify-center space-x-2">
                     <span className="text-indigo-600 dark:text-white font-medium">Waiting for Relayer</span>
-                    <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#4F46E5'} width="16" height="16" />
+                    <Oval color={theme === 'dark' ? '#FFFFFF' : '#4F46E5'} width="16" height="16" />
                   </div>
                   :
                   null
@@ -222,7 +222,7 @@ export default function ActiveTransactions({ setActiveTransactionOpen, trigger }
         false && loading ?
           <div className="flex items-center justify-center space-x-2">
             <span className="text-indigo-600 dark:text-white font-semibold">Loading</span>
-            <Loader type="ThreeDots" color={theme === 'dark' ? '#FFFFFF' : '#4F46E5'} width="20" height="20" className="mt-0.5" />
+            <ThreeDots color={theme === 'dark' ? '#FFFFFF' : '#4F46E5'} width="20" height="20" className="mt-0.5" />
           </div>
           :
           null

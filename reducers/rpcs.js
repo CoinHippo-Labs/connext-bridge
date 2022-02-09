@@ -10,7 +10,7 @@ export default function data(
     case RPCS_DATA:
       return {
         ...state,
-        [`${RPCS_DATA}`]: action.value && { ...state?.[`${RPCS_DATA}`], ...action.value },
+        [`${RPCS_DATA}`]: action.value,
       }
     default:
       return state

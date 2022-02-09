@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 
-import Loader from 'react-loader-spinner'
-import { BsPatchExclamationFill } from 'react-icons/bs'
+import { Img } from 'react-image'
+import { Puff } from 'react-loader-spinner'
+import { RiQuestionLine } from 'react-icons/ri'
 
 import Networks from './networks'
 
@@ -11,7 +12,7 @@ export default function DropdownNetwork({ chain_id }) {
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
 
-  const chain = chains_data?.find(_chain => _chain?.chain_id === chain_id)
+  const chain = chains_data?.find(c => c?.chain_id === chain_id)
 
   const [hidden, setHidden] = useState(true)
 
@@ -45,7 +46,7 @@ export default function DropdownNetwork({ chain_id }) {
       >
         {chain ?
           chain.image ?
-            <img
+            <Img
               src={chain.image}
               alt=""
               className="w-6 h-6 rounded-full"
@@ -54,9 +55,9 @@ export default function DropdownNetwork({ chain_id }) {
             <span className="font-bold">{chain.short_name}</span>
           :
           chains_data ?
-            <BsPatchExclamationFill size={20} />
+            <RiQuestionLine size={20} />
             :
-            <Loader type="Puff" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="24" height="24" />
+            <Puff color={theme === 'dark' ? 'white' : '#3B82F6'} width="24" height="24" />
         }
       </button>
       <div

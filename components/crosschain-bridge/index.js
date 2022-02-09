@@ -12,7 +12,7 @@ import { constants, Contract } from 'ethers'
 import Web3 from 'web3'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
-import Loader from 'react-loader-spinner'
+import { ThreeDots, Oval, BallTriangle } from 'react-loader-spinner'
 import Switch from 'react-switch'
 import Linkify from 'react-linkify'
 import parse from 'html-react-parser'
@@ -44,7 +44,7 @@ import { domains, getENS } from '../../lib/api/ens'
 import { chainTitle } from '../../lib/object/chain'
 import { getApproved, approve } from '../../lib/object/contract'
 import { currency_symbol } from '../../lib/object/currency'
-import { smallNumber, numberFormat, ellipseAddress } from '../../lib/utils'
+import { numberFormat, ellipseAddress } from '../../lib/utils'
 
 import { CHAINS_STATUS_DATA, CHAINS_STATUS_SYNC_DATA, BALANCES_DATA, TOKENS_DATA, MAX_TRANSFERS_DATA, ENS_DATA } from '../../reducers/types'
 
@@ -54,6 +54,8 @@ const bid_expires_second = Number(process.env.NEXT_PUBLIC_BID_EXPIRES_SECOND)
 const approve_response_countdown_second = 10
 
 BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
+
+const minAmount = Math.pow(10, -6)
 
 const check_balances = true && !['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK)
 
@@ -75,8 +77,8 @@ export default function CrosschainBridge() {
   const { theme } = { ...preferences }
 
   const protocols = [
-    { id: 'connext', value: null, title: 'Connext', image: '/logos/connext/logo_with_title.png' },
-    { id: 'nomad', value: 'nomad', title: 'Nomad', image: '/logos/externals/nomad.svg' },
+    { id: 'connext', value: null, title: 'Connext', image: '/logos/externals/connext/logo_with_title.png' },
+    { id: 'nomad', value: 'nomad', title: 'Nomad', image: '/logos/externals/nomad/logo.svg' },
   ]
 
   const defaultInfiniteApproval = false
@@ -1007,7 +1009,7 @@ export default function CrosschainBridge() {
   // const confirmFees = confirmToContract && estimatedAmount && BigNumber(estimatedAmount.totalFee || '0').shiftedBy(-confirmToContract?.contract_decimals).toNumber()
 
   let maxBalanceAmount = Number(fromBalance?.balance || 0) / Math.pow(10, fromBalance?.contract_decimals)
-  maxBalanceAmount = maxBalanceAmount > smallNumber ? maxBalanceAmount : 0
+  maxBalanceAmount = maxBalanceAmount > minAmount ? maxBalanceAmount : 0
   let maxTransfer = null
   let maxAmount = maxBalanceAmount
   if (swapConfig.fromAssetId && swapConfig.toAssetId) {
@@ -1038,7 +1040,7 @@ export default function CrosschainBridge() {
       }
     }
   }
-  maxAmount = maxAmount > smallNumber ? maxAmount : 0
+  maxAmount = maxAmount > minAmount ? maxAmount : 0
   const isMaxLiquidity = maxAmount < maxBalanceAmount && typeof swapConfig.amount === 'number' && swapConfig.amount === maxAmount
   const isExceedMaxLiquidity = typeof maxTransfer === 'number' && typeof swapConfig.amount === 'number' && swapConfig.amount > maxTransfer
 
@@ -1305,7 +1307,7 @@ export default function CrosschainBridge() {
                             :
                             null
                           :
-                          <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
+                          <ThreeDots color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
                   }
                 </div>
               </div>
@@ -1420,7 +1422,7 @@ export default function CrosschainBridge() {
                             :
                             null
                           :
-                          <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
+                          <ThreeDots color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" />
                   }
                 </div>
               </div>
@@ -1540,7 +1542,7 @@ export default function CrosschainBridge() {
                               )}
                             </button>
                             :
-                            <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" className="mr-4 pr-0.5" />
+                            <ThreeDots color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" className="mr-4 pr-0.5" />
                         }
                       </div>
                     </div>
@@ -1564,7 +1566,7 @@ export default function CrosschainBridge() {
                   {estimatingAmount || estimatingFees || typeof estimatedFees !== 'number' ?
                     <div className="flex items-center space-x-1.5">
                       <span className="text-gray-400 dark:text-gray-600 text-sm">{estimatedAmount || estimatingAmount ? 'Calculating' : 'Estimating'}</span>
-                      <Loader type="BallTriangle" color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="20" height="20" />
+                      <BallTriangle color={theme === 'dark' ? '#F9FAFB' : '#9CA3AF'} width="20" height="20" />
                     </div>
                     :
                     !estimatedAmountResponse && typeof estimatedFees === 'number' ?
@@ -1607,7 +1609,7 @@ export default function CrosschainBridge() {
                   <div className="h-10 sm:h-7 flex items-center justify-center sm:justify-start space-x-2">
                     <div className="sm:w-48 font-mono flex items-center justify-end text-lg text-right sm:px-1">
                       {estimatingAmount ?
-                        <Loader type="ThreeDots" color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="24" height="24" className="mt-1.5" />
+                        <ThreeDots color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="24" height="24" className="mt-1.5" />
                         :
                         !estimatedAmountResponse && estimatedAmount ?
                           <span className="font-semibold">
@@ -1751,7 +1753,7 @@ export default function CrosschainBridge() {
                             <span className="font-bold">{fromContract?.symbol || fromAsset?.symbol}</span>
                             <span>via</span>
                             <Img
-                              src="/logos/externals/nomad.svg"
+                              src="/logos/externals/nomad/logo.svg"
                               alt=""
                             />
                           </>}
@@ -1778,7 +1780,7 @@ export default function CrosschainBridge() {
                               <div className="flex flex-col items-center space-y-1">
                                 <div className="bg-black rounded-2xl flex items-center py-1 px-2">
                                   <Img
-                                    src="/logos/externals/nomad.svg"
+                                    src="/logos/externals/nomad/logo.svg"
                                     alt=""
                                   />
                                 </div>
@@ -1786,7 +1788,7 @@ export default function CrosschainBridge() {
                               </div>
                               {toChain && (
                                 <div className="flex flex-col items-center space-y-1">
-                                  <img
+                                  <Img
                                     src={toChain.image}
                                     alt=""
                                     className="w-10 h-10 rounded-full"
@@ -1860,7 +1862,7 @@ export default function CrosschainBridge() {
                           cancelButtonClassName="hidden"
                           confirmButtonTitle={<span className="flex items-center justify-center space-x-1.5 py-2">
                             {startingSwap && (
-                              <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="20" height="20" />
+                              <Oval color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="20" height="20" />
                             )}
                             <span className="text-base">{startingSwap ? 'Sending' : 'Confirm'}</span>
                           </span>}
@@ -1917,7 +1919,7 @@ export default function CrosschainBridge() {
                                 >
                                   {estimatingAmount ?
                                     <>
-                                      <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
+                                      <Oval color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
                                       <span>Searching Routes</span>
                                     </>
                                     :
@@ -1941,7 +1943,7 @@ export default function CrosschainBridge() {
                                       >
                                         {tokenApproveResponse?.status === 'pending' ?
                                           <>
-                                            <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
+                                            <Oval color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
                                             <span>Approving</span>
                                           </>
                                           :
@@ -1980,7 +1982,7 @@ export default function CrosschainBridge() {
                                         {/*<TiArrowRight size={24} className="transform text-gray-400 dark:text-gray-500 -mt-4" />*/}
                                         <div className="flex flex-col items-center space-y-1">
                                           <Img
-                                            src="/logos/connext/logo.png"
+                                            src="/logos/externals/connext/logo.png"
                                             alt=""
                                             className="w-10 h-10 rounded-full"
                                           />
@@ -2238,7 +2240,7 @@ export default function CrosschainBridge() {
                                     cancelButtonClassName="hidden"
                                     confirmButtonTitle={<span className="flex items-center justify-center space-x-1.5 py-2">
                                       {startingSwap && (
-                                        <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="20" height="20" />
+                                        <Oval color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="20" height="20" />
                                       )}
                                       <span className="text-base">Confirm</span>
                                     </span>}
@@ -2363,7 +2365,7 @@ export default function CrosschainBridge() {
                 content={<span className="flex flex-wrap items-center">
                   <span className="mr-1.5">{tokenApproveResponse.message}</span>
                   {tokenApproveResponse.status === 'pending' && (
-                    <Loader type="ThreeDots" color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="16" height="16" className="mt-1 mr-1.5" />
+                    <ThreeDots color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="16" height="16" className="mt-1 mr-1.5" />
                   )}
                   {fromChain?.explorer?.url && tokenApproveResponse.tx_hash && (
                     <a

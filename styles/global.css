@@ -176,7 +176,8 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
-#modal-network {
+#modal-network,
+#modal-asset {
   .show {
     animation-duration: 0.1s !important;
   }

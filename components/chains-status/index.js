@@ -5,10 +5,8 @@ import _ from 'lodash'
 import { NxtpSdk } from '@connext/nxtp-sdk'
 import { providers } from 'ethers'
 import { Img } from 'react-image'
-import Loader from 'react-loader-spinner'
+import { Grid } from 'react-loader-spinner'
 import { TiWarning } from 'react-icons/ti'
-
-import Alert from '../alerts'
 
 import { CHAINS_STATUS_DATA, CHAINS_STATUS_SYNC_DATA, SDK_DATA, RPCS_DATA } from '../../reducers/types'
 
@@ -106,63 +104,12 @@ export default function ChainsStatus() {
     }
   }, [chains_status_sync_data])
 
-  return (
-    <>
-      {!chains_status_data && address && (
-        <div className="w-full h-8 xl:h-10 bg-gray-100 dark:bg-gray-900 overflow-x-auto flex items-center py-2 px-2 sm:px-4">
-          {!chains_status_data && (
-            address ?
-              <span className="flex flex-wrap items-center font-mono text-blue-600 dark:text-blue-400 text-2xs xl:text-sm space-x-1.5 xl:space-x-2 mx-auto">
-                <Loader type="Grid" color={theme === 'dark' ? '#60A5FA' : '#2563EB'} width="16" height="16" />
-                <span>Checking Subgraph Status</span>
-              </span>
-              :
-              null//<span className="font-mono text-blue-600 dark:text-blue-400 text-2xs xl:text-sm ml-auto">Please connect your wallet.</span>
-          )}
-          {chains_status_data?.map((chain, i) => (
-            <div key={i} className="min-w-max flex items-center text-2xs xl:text-sm space-x-1.5 xl:space-x-2 mr-4">
-              {chain.image && (
-                <Img
-                  src={chain.image}
-                  alt=""
-                  className="w-4 xl:w-5 h-4 xl:h-5 rounded-full"
-                />
-              )}
-              {chain.short_name && (
-                <span className="text-gray-700 dark:text-gray-300 font-semibold">{chain.short_name}</span>
-              )}
-              <span className={`capitalize ${chain.disabled ? 'text-gray-400 dark:text-gray-600' : !chain.synced ? 'text-red-500 dark:text-red-600' : 'text-green-600 dark:text-green-500'}`}>
-                {chain.disabled ? 'disabled' : !chain.synced ? 'unsynced' : 'synced'}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-      {/*chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).length > 0 && (
-        <div className="px-4">
-          <Alert
-            color="xl:max-w-lg bg-yellow-400 dark:bg-blue-600 text-left text-white mt-4 sm:mt-6 -mb-6 sm:-mb-2 mx-auto"
-            icon={<TiWarning className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
-            closeDisabled={true}
-            rounded={true}
-            className="items-start"
-          >
-            <div className="block font-mono leading-4 text-xs xl:text-base font-medium">
-              <span className="mr-2">
-                Transfers to and from <span className="font-semibold">{chains_status_data?.filter(_chain => !_chain.disabled && !_chain.synced).map(_chain => _chain?.short_name).join(', ')}</span> may be delayed temporarily. Funds are always safe! If you have active transactions, check their status
-              </span>
-              <a
-                href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}${address ? `/address/${address}` : ''}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline font-extrabold"
-              >
-                {address ? 'here' : 'here'}
-              </a>.
-            </div>
-          </Alert>
-        </div>
-      )*/}
-    </>
+  return !chains_status_data && address && (
+    <div className="w-full h-8 xl:h-10 bg-gray-100 dark:bg-gray-900 overflow-x-auto flex items-center py-2 px-2 sm:px-4">
+      <span className="flex flex-wrap items-center font-mono text-blue-600 dark:text-blue-400 text-2xs xl:text-sm space-x-1.5 xl:space-x-2 mx-auto">
+        <Grid color={theme === 'dark' ? '#60A5FA' : '#2563EB'} width="16" height="16" />
+        <span>Checking Subgraph Status</span>
+      </span>
+    </div>
   )
 }

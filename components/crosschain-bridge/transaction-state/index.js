@@ -6,7 +6,7 @@ import moment from 'moment'
 import { providers, constants, Contract } from 'ethers'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
-import Loader from 'react-loader-spinner'
+import { Oval, Puff, Rings, ThreeDots } from 'react-loader-spinner'
 import Pulse from 'react-reveal/Pulse'
 import Flip from 'react-reveal/Flip'
 import LightSpeed from 'react-reveal/LightSpeed'
@@ -22,7 +22,7 @@ import Copy from '../../copy'
 import Popover from '../../popover'
 
 import { balances } from '../../../lib/api/covalent'
-import { transactions as getTransactions, transactionFromSdk } from '../../../lib/api/subgraph'
+import { transactions, transactionFromSdk } from '../../../lib/api/subgraph'
 import { domains, getENS } from '../../../lib/api/ens'
 import { chainTitle } from '../../../lib/object/chain'
 import { numberFormat, ellipseAddress } from '../../../lib/utils'
@@ -65,11 +65,9 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
 
         let sendingTx, receivingTx
 
-        // let response = await getTransactions({ chain_id: chains_data?.find(c => c.chain_id === sendingChainId)?.chain_id }, chains_data, tokens_data, transactionId)
         let response = await transactionFromSdk(sdk_data, sendingChainId, transactionId, chains_data, tokens_data)
         sendingTx = response?.data?.[0]
 
-        // response = await getTransactions({ chain_id: chains_data?.find(c => c.chain_id === receivingChainId)?.chain_id }, chains_data, tokens_data, transactionId)
         response = await transactionFromSdk(sdk_data, receivingChainId, transactionId, chains_data, tokens_data)
         receivingTx = response?.data?.[0]
 
@@ -292,7 +290,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
       className={`w-full max-w-xs rounded-lg shadow-lg flex items-center justify-center ${actionDisabled ? 'bg-blue-400 dark:bg-blue-500 cursor-not-allowed text-gray-200' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-gray-100 hover:text-white'} text-base sm:text-lg space-x-1.5 mx-auto py-3.5 px-2.5`}
     >
       {(fulfilling || fulfillResponse?.status === 'pending') && (
-        <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="24" height="24" />
+        <Oval color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="24" height="24" />
       )}
       {!(fulfilling || fulfillResponse?.status === 'pending') && (
         <span className="font-light">Sign to</span>
@@ -416,7 +414,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                   {generalTx.sendingChain && (
                     <div className="flex items-center justify-center sm:justify-start space-x-2 mt-1">
                       {generalTx.sendingChain.image && (
-                        <img
+                        <Img
                           src={generalTx.sendingChain.image}
                           alt=""
                           className="w-8 sm:w-6 lg:w-8 h-8 sm:h-6 lg:h-8 rounded-full"
@@ -476,7 +474,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                   {fromChain && (
                     <div className="flex items-center justify-center sm:justify-start space-x-2 mt-1">
                       {fromChain.image && (
-                        <img
+                        <Img
                           src={fromChain.image}
                           alt=""
                           className="w-8 sm:w-6 lg:w-8 h-8 sm:h-6 lg:h-8 rounded-full"
@@ -511,7 +509,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                       sendingTx?.chainId && chains_data?.findIndex(_chain => !_chain.disabled && _chain.chain_id === sendingTx?.chainId) < 0 ?
                         <FaQuestion size={14} />
                         :
-                        <Loader type="Puff" color={theme === 'dark' ? '#F9FAFB' : '#F9FAFB'} width="16" height="16" />
+                        <Puff color={theme === 'dark' ? '#F9FAFB' : '#F9FAFB'} width="16" height="16" />
                     }
                     <div className="uppercase text-white text-xs font-semibold">
                       {sendingTx?.status || (
@@ -563,7 +561,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                   <div className="flex items-center text-gray-400 dark:text-gray-400 text-xs font-medium space-x-1 mt-0.5">
                     <span>fetching</span>
                     <span className="sm:hidden lg:block">status</span>
-                    <Loader type="ThreeDots" color={theme === 'dark' ? '#9CA3AF' : '#9CA3AF'} width="16" height="16" className="mt-1" />
+                    <ThreeDots color={theme === 'dark' ? '#9CA3AF' : '#9CA3AF'} width="16" height="16" className="mt-1" />
                   </div>
                 </>
               }
@@ -593,7 +591,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                 */}
                 <span />
                 <Img
-                  src="/logos/connext/logo.png"
+                  src="/logos/externals/connext/logo.png"
                   alt=""
                   className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
                 />
@@ -688,7 +686,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                         receivingTx?.chainId && chains_data?.findIndex(_chain => !_chain.disabled && _chain.chain_id === receivingTx?.chainId) < 0 ?
                           <FaQuestion size={14} />
                           :
-                          <Loader type="Puff" color={theme === 'dark' ? '#F9FAFB' : '#F9FAFB'} width="16" height="16" />
+                          <Puff color={theme === 'dark' ? '#F9FAFB' : '#F9FAFB'} width="16" height="16" />
                     }
                     <div className="uppercase text-white text-xs font-semibold">
                       {receivingTx?.status ?
@@ -755,7 +753,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                   <div className="flex items-center text-gray-400 dark:text-gray-400 text-xs font-medium space-x-1 mt-0.5">
                     <span>fetching</span>
                     <span className="sm:hidden lg:block">status</span>
-                    <Loader type="ThreeDots" color={theme === 'dark' ? '#9CA3AF' : '#9CA3AF'} width="16" height="16" className="mt-1" />
+                    <ThreeDots color={theme === 'dark' ? '#9CA3AF' : '#9CA3AF'} width="16" height="16" className="mt-1" />
                   </div>
                 </>
               }
@@ -866,7 +864,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                   {toChain && (
                     <div className="flex items-center justify-center sm:justify-end space-x-2 mt-1">
                       {toChain.image && (
-                        <img
+                        <Img
                           src={toChain.image}
                           alt=""
                           className="w-8 sm:w-6 lg:w-8 h-8 sm:h-6 lg:h-8 rounded-full"
@@ -882,7 +880,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                   {toChain && (
                     <div className="flex items-center justify-center sm:justify-end space-x-2 mt-1">
                       {toChain.image && (
-                        <img
+                        <Img
                           src={toChain.image}
                           alt=""
                           className="w-8 sm:w-6 lg:w-8 h-8 sm:h-6 lg:h-8 rounded-full"
@@ -958,7 +956,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                             className={`w-auto bg-gray-100 dark:bg-gray-800 rounded-lg shadow flex items-center justify-center ${actionDisabled ? 'cursor-not-allowed text-gray-600 dark:text-gray-400' : ''} text-sm sm:text-base space-x-1.5 mx-auto py-2.5 px-3`}
                           >
                             {(cancelling || cancelResponse?.status === 'pending') && (
-                              <Loader type="Oval" color={theme === 'dark' ? '#FFFFFF' : '#6B7280'} width="16" height="16" />
+                              <Oval color={theme === 'dark' ? '#FFFFFF' : '#6B7280'} width="16" height="16" />
                             )}
                             <span className="font-medium">Cancel{cancelling || cancelResponse?.status === 'pending' ? 'ling' : ''}</span>
                             <span className="font-light">Transaction</span>
@@ -1065,7 +1063,10 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
                     [sendingTx?.status, receivingTx?.status].includes('Cancelled') ?
                       <BsFillXCircleFill size={32} className="text-red-500 dark:text-white" />
                       :
-                      <Loader type={['Prepared'].includes(receivingTx?.status) ? 'Puff' : 'Rings'} color={theme === 'dark' ? '#9CA3AF' : '#9CA3AF'} width="32" height="32" />
+                      ['Prepared'].includes(receivingTx?.status) ?
+                        <Puff color={theme === 'dark' ? '#9CA3AF' : '#9CA3AF'} width="32" height="32" />
+                        :
+                        <Rings color={theme === 'dark' ? '#9CA3AF' : '#9CA3AF'} width="32" height="32" />
                   }
                   <span className={`${finish ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'}`}>Sign to Claim{/*Signature to claim your Connext transaction on the destination chain*/}</span>
                 </div>
@@ -1076,7 +1077,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
             <div className="space-y-2">
               <div className="flex items-center font-mono font-semibold space-x-1.5">
                 <span className="text-indigo-600 dark:text-white">Transaction in progress</span>
-                <Loader type="ThreeDots" width="20" color={theme === 'dark' ? '#F9FAFB' : '#4F46E5'} height="20" className="mt-1" />
+                <ThreeDots width="20" color={theme === 'dark' ? '#F9FAFB' : '#4F46E5'} height="20" className="mt-1" />
               </div>
               <div className="font-mono text-gray-400 dark:text-gray-400">
                 Please do not close this tab while the transaction is in progress. If you do, you will need to open up xpollinate again to manually claim your transaction.
@@ -1124,7 +1125,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
           content={<span className="flex flex-wrap items-center">
             <span className="mr-1.5">{fulfillResponse.message}</span>
             {fulfillResponse.status === 'pending' && (
-              <Loader type="ThreeDots" color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="16" height="16" className="mt-1 mr-1.5" />
+              <ThreeDots color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="16" height="16" className="mt-1 mr-1.5" />
             )}
             {toChain?.explorer?.url && fulfillResponse.tx_hash && (
               <a
@@ -1158,7 +1159,7 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
           content={<span className="flex flex-wrap items-center">
             <span className="mr-1.5">{cancelResponse.message}</span>
             {cancelResponse.status === 'pending' && (
-              <Loader type="ThreeDots" color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="16" height="16" className="mt-1 mr-1.5" />
+              <ThreeDots color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="16" height="16" className="mt-1 mr-1.5" />
             )}
             {(canCancelSender ? fromChain : toChain)?.explorer?.url && cancelResponse.tx_hash && (
               <a

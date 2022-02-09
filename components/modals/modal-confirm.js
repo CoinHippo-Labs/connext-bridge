@@ -63,7 +63,7 @@ export default function Modal({ id = 'portal', hidden, buttonTitle, disabled, on
         <Portal selector={`#${id}`}>
           <div className="modal-backdrop fade-in" />
           <div data-background={theme} className={`modal show ${theme === 'dark' ? 'dark' : ''}`}>
-            <div ref={modalRef} className={`w-full max-w-sm lg:max-w-lg relative lg:my-4 mx-auto ${modalClassName}`}>
+            <div ref={modalRef} className={`w-full ${modalClassName.includes('max-w-') ? '' : 'max-w-sm lg:max-w-lg'} relative lg:my-4 mx-auto ${modalClassName}`}>
               <div className="w-full bg-white dark:bg-gray-900 relative outline-none rounded-lg shadow-lg border-0 border-gray-200 dark:border-gray-700 flex flex-col text-gray-900 dark:text-white">
                 <div className="relative flex-auto p-4">
                   <div className="flex items-start justify-start space-x-4 p-2">

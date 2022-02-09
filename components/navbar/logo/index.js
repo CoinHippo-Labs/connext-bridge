@@ -1,19 +1,27 @@
 import Link from 'next/link'
+import { useSelector, shallowEqual } from 'react-redux'
 
 import { Img } from 'react-image'
 
 export default function Logo() {
+  const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
+  const { theme } = { ...preferences }
+
   return (
-    <div className="block logo ml-2.5 mr-1 sm:mx-3">
+    <div className="logo ml-2.5 mr-1 sm:mx-3">
       <Link href="/">
-        <a className="w-full flex items-center sm:space-x-2.5 lg:space-x-2">
-          <Img
-            src="/logos/logo.png"
-            alt=""
-            className="w-8 xl:w-10 h-8 xl:h-10 rounded-full"
-          />
-          <span className="hidden sm:block uppercase text-base font-bold">{process.env.NEXT_PUBLIC_APP_NAME}</span>
-          <span className="font-bold -mt-2 ml-2">{process.env.NEXT_PUBLIC_APP_VERSION}</span>
+         <a className="w-full flex items-center">
+          <div className="sm:mr-3">
+            <Img
+              src={`/logos/logo${theme === 'dark' ? '_white' : ''}.png`}
+              alt=""
+              className="w-8 h-8"
+            />
+          </div>
+          <div className="hidden sm:block lg:block xl:block">
+            <div className="normal-case text-sm font-bold">{process.env.NEXT_PUBLIC_APP_NAME}</div>
+            <div className="font-mono text-gray-400 dark:text-gray-600 text-xs">{process.env.NEXT_PUBLIC_NETWORK}</div>
+          </div>
         </a>
       </Link>
     </div>
