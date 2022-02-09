@@ -390,6 +390,33 @@
     ]
   },
   {
+    "id": "gno",
+    "symbol": "GNO",
+    "image": "/logos/assets/gno.png",
+    "contracts": [
+      {
+        "contract_address": "0x6810e776880c02933d47db1b9fc05908e5386b96",
+        "chain_id": 1,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0x5ffd62d3c3ee2e81c00a7b9079fb248e7df024a8",
+        "chain_id": 137,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0xa0b862f60edef4452f25b4160f177db44deb6cf1",
+        "chain_id": 42161,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0x9c58bacc331c9aa871afd802db6379a98e80cedb",
+        "chain_id": 100,
+        "contract_decimals": 18
+      }
+    ]
+  },
+  {
     "id": "miva",
     "symbol": "MIVA",
     "image": "/logos/assets/miva.png",
