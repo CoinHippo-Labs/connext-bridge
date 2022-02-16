@@ -4,7 +4,7 @@ import { FiSearch } from 'react-icons/fi'
 
 import Assets from './assets'
 
-export default function Search({ id, updateId, from, to, chain_id, side }) {
+export default function Search({ asset_id, updateAssetId, chain_id, from, to, side }) {
   const [inputSearch, setInputSearch] = useState('')
 
   return (
@@ -13,7 +13,7 @@ export default function Search({ id, updateId, from, to, chain_id, side }) {
         <div className="flex items-center justify-between">
           <input
             value={inputSearch}
-            onChange={event => setInputSearch(event.target.value)}
+            onChange={e => setInputSearch(e.target.value)}
             type="search"
             placeholder="Search..."
             className="w-4/6 h-10 bg-transparent appearance-none border-gray-300 focus:border-indigo-500 dark:border-gray-700 focus:ring-indigo-600 dark:focus:ring-gray-600 rounded-3xl text-sm pl-10 pr-5"
@@ -27,16 +27,16 @@ export default function Search({ id, updateId, from, to, chain_id, side }) {
         </div>
         <div className="w-full mx-auto py-2">
           <Assets
-            id={id}
+            asset_id={asset_id}
             inputSearch={inputSearch}
-            handleDropdownClick={_id => {
-              if (updateId) {
-                updateId(_id)
+            handleDropdownClick={_asset_id => {
+              if (updateAssetId) {
+                updateAssetId(_asset_id)
               }
             }}
+            chain_id={chain_id}
             from={from}
             to={to}
-            chain_id={chain_id}
             side={side}
           />
         </div>

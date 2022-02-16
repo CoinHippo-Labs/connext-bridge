@@ -12,8 +12,6 @@ export default function DropdownNetwork({ chain_id }) {
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
 
-  const chain = chains_data?.find(c => c?.chain_id === chain_id)
-
   const [hidden, setHidden] = useState(true)
 
   const buttonRef = useRef(null)
@@ -36,6 +34,8 @@ export default function DropdownNetwork({ chain_id }) {
   }, [hidden, buttonRef, dropdownRef])
 
   const handleDropdownClick = () => setHidden(!hidden)
+
+  const chain = chains_data?.find(c => c?.chain_id === chain_id)
 
   return (
     <div className="relative">

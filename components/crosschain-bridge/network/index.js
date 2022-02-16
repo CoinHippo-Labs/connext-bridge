@@ -10,13 +10,11 @@ import Modal from '../../modals/modal-confirm'
 
 import { chainTitle } from '../../../lib/object/chain'
 
-export default function DropdownNetwork({ disabled, chain_id, onSelect, side = 'from', from, to }) {
+export default function DropdownNetwork({ disabled, chain_id, onSelect, from, to, side = 'from' }) {
   const { chains, chains_status, preferences } = useSelector(state => ({ chains: state.chains, chains_status: state.chains_status, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
   const { chains_status_data } = { ...chains_status }
   const { theme } = { ...preferences }
-
-  const chain = chains_data?.find(_chain => _chain?.chain_id === chain_id)
 
   const [hidden, setHidden] = useState(true)
 
@@ -28,12 +26,18 @@ export default function DropdownNetwork({ disabled, chain_id, onSelect, side = '
     setHidden(!hidden)
   }
 
+  const chain = chains_data?.find(c => c?.chain_id === chain_id)
+
   return (
     <Modal
       hidden={hidden}
       buttonTitle={chain ?
         <div className="w-48 min-w-max bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-3xl flex items-center justify-center text-lg space-x-1.5 py-2 px-4">
-          <IoRadioButtonOn size={16} className={`${chain?.disabled ? 'text-gray-400 dark:text-gray-600' : !chains_status_data || chains_status_data?.find(_chain => _chain?.id === chain.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
+          {chains_status_data ?
+            <IoRadioButtonOn size={16} className={`${chain?.disabled ? 'text-gray-400 dark:text-gray-600' : chains_status_data?.find(c => c?.id === chain.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
+            :
+            <Puff color={theme === 'dark' ? '#60A5FA' : '#2563EB'} width="16" height="16" />
+          }
           <Img
             src={chain.image}
             alt=""
@@ -53,8 +57,8 @@ export default function DropdownNetwork({ disabled, chain_id, onSelect, side = '
       buttonClassName={`${!chains_data ? 'w-48' : ''} h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
       title={<span className="capitalize">{side}</span>}
       body={<Search
-        id={chain_id}
-        updateId={_id => handleDropdownClick(_id)}
+        chain_id={chain_id}
+        updateChainId={_chain_id => handleDropdownClick(_chain_id)}
         from={from}
         to={to}
       />}

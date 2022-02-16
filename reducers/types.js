@@ -10,6 +10,9 @@ export const CHAINS_DATA = 'chains_data'
 // assets
 export const ASSETS_DATA = 'assets_data'
 
+// tokens
+export const TOKENS_DATA = 'tokens_data'
+
 // ens
 export const ENS_DATA = 'ens_data'
 
@@ -36,14 +39,8 @@ export const WALLET_RESET = 'wallet_reset'
 
 
 
-// chains status
-export const CHAINS_STATUS_SYNC_DATA = 'chains_status_sync_data'
-
 // balances
 export const BALANCES_DATA = 'balances_data'
-
-// tokens
-export const TOKENS_DATA = 'tokens_data'
 
 // max transfers
 export const MAX_TRANSFERS_DATA = 'max_transfers_data'

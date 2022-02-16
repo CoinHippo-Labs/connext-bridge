@@ -12,7 +12,7 @@ import Modal from '../../modals/modal-confirm'
 
 import { chainTitle } from '../../../lib/object/chain'
 
-export default function DropdownAsset({ disabled, swapConfig, onSelect, side = 'from', from, to, amountOnChange }) {
+export default function DropdownAsset({ disabled, swapConfig, onSelect, from, to, side = 'from', amountOnChange }) {
   const { chains, assets, chains_status, wallet, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, chains_status: state.chains_status, wallet: state.wallet, preferences: state.preferences }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
@@ -43,7 +43,7 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
 
   const showInput = side === 'from' && amountOnChange && isSupport
 
-  const chain = chains_data?.find(_chain => _chain?.chain_id === (side === 'from' ? fromChainId : toChainId))
+  const chain = chains_data?.find(c => c?.chain_id === (side === 'from' ? fromChainId : toChainId))
 
   return (
     <div className={`relative flex items-center space-x-2.5 ${showInput ? 'mt-1 sm:mt-0' : ''}`}>   
@@ -76,7 +76,11 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
               {chain && (
                 <>
                   <div className="flex items-center space-x-1.5">
-                    <IoRadioButtonOn size={16} className={`${chain?.disabled ? 'text-gray-400 dark:text-gray-600' : !chains_status_data || chains_status_data?.find(_chain => _chain?.id === chain.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
+                    {chains_status_data ?
+                      <IoRadioButtonOn size={16} className={`${chain?.disabled ? 'text-gray-400 dark:text-gray-600' : chains_status_data?.find(c => c?.id === chain.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
+                      :
+                      <Puff color={theme === 'dark' ? '#60A5FA' : '#2563EB'} width="16" height="16" />
+                    }
                     <Img
                       src={chain.image}
                       alt=""
@@ -94,11 +98,11 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, side = '
             </div>
           </div>}
           body={<Search
-            id={asset?.id}
-            updateId={_id => handleDropdownClick(_id)}
+            asset_id={asset?.id}
+            updateAssetId={_asset_id => handleDropdownClick(_asset_id)}
+            chain_id={chain?.chain_id}
             from={from}
             to={to}
-            chain_id={chain?.chain_id}
             side={side}
           />}
           noButtons={true}

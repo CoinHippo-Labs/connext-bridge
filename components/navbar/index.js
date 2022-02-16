@@ -6,6 +6,7 @@ import { NxtpSdk } from '@connext/nxtp-sdk'
 import { providers } from 'ethers'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
+import { Grid } from 'react-loader-spinner'
 import { FiMenu, FiMoon, FiSun } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
 
@@ -13,7 +14,6 @@ import Logo from './logo'
 import DropdownNavigation from './navigation/dropdown'
 import Navigation from './navigation'
 import Network from './network'
-import ChainStatus from '../chains-status'
 import Wallet from '../wallet'
 import Copy from '../copy'
 
@@ -29,11 +29,12 @@ BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_
 
 export default function Navbar() {
   const dispatch = useDispatch()
-  const { preferences, chains, tokens, ens, asset_balances, sdk, rpcs, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, tokens: state.tokens, ens: state.ens, asset_balances: state.asset_balances, sdk: state.sdk, rpcs: state.rpcs, wallet: state.wallet }), shallowEqual)
+  const { preferences, chains, tokens, ens, chains_status, asset_balances, sdk, rpcs, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, tokens: state.tokens, ens: state.ens, chains_status: state.chains_status, asset_balances: state.asset_balances, sdk: state.sdk, rpcs: state.rpcs, wallet: state.wallet }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { tokens_data } = { ...tokens }
   const { ens_data } = { ...ens }
+  const { chains_status_data } = { ...chains_status }
   const { asset_balances_data } = { ...asset_balances }
   const { sdk_data } = { ...sdk }
   const { rpcs_data } = { ...rpcs }
@@ -88,68 +89,68 @@ export default function Navbar() {
   }, [])
 
   // sdk & rpcs
-  // useEffect(async () => {
-  //   if (chains_data && signer) {
-  //     const chainConfig = ['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) ?
-  //       { 1: { providers: ['https://api.mycryptoapi.com/eth', 'https://cloudflare-eth.com'] } }
-  //       :
-  //       {}
+  useEffect(async () => {
+    if (chains_data && signer) {
+      const chainConfig = ['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) ?
+        { 1: { providers: ['https://api.mycryptoapi.com/eth', 'https://cloudflare-eth.com'] } }
+        :
+        {}
 
-  //     const rpcs = {}
+      const rpcs = {}
 
-  //     for (let i = 0; i < chains_data.length; i++) {
-  //       const chain = chains_data[i]
+      for (let i = 0; i < chains_data.length; i++) {
+        const chain = chains_data[i]
 
-  //       chainConfig[chain?.chain_id] = {
-  //         providers: chain?.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')) || [],
-  //       }
+        chainConfig[chain?.chain_id] = {
+          providers: chain?.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')) || [],
+        }
 
-  //       rpcs[chain?.chain_id] = new providers.FallbackProvider(chain?.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')).map(rpc => new providers.JsonRpcProvider(rpc)) || [])
-  //     }
+        rpcs[chain?.chain_id] = new providers.FallbackProvider(chain?.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')).map(rpc => new providers.JsonRpcProvider(rpc)) || [])
+      }
 
-  //     dispatch({
-  //       type: SDK_DATA,
-  //       value: await NxtpSdk.create({ chainConfig, signer, skipPolling: false }),
-  //     })
+      dispatch({
+        type: SDK_DATA,
+        value: await NxtpSdk.create({ chainConfig, signer, skipPolling: false }),
+      })
 
-  //     if (!rpcs_data) {
-  //       dispatch({
-  //         type: RPCS_DATA,
-  //         value: rpcs,
-  //       })
-  //     }
-  //   }
-  // }, [chains_data, address])
+      if (!rpcs_data) {
+        dispatch({
+          type: RPCS_DATA,
+          value: rpcs,
+        })
+      }
+    }
+  }, [chains_data, address])
 
   // chains-status
-  // useEffect(() => {
-  //   const getChainStatus = async chain => {
-  //     if (sdk_data && chain) {
-  //       const response = await sdk_data.getSubgraphSyncStatus(chain.chain_id)
+  useEffect(() => {
+    const getChainStatus = async chain => {
+      if (sdk_data && chain) {
+        const response = await sdk_data.getSubgraphSyncStatus(chain.chain_id)
 
-  //       dispatch({
-  //         type: CHAINS_STATUS_DATA,
-  //         value: response?.latestBlock > -1 && {
-  //           ...chain,
-  //           ...response,
-  //         },
-  //       })
-  //     }
-  //   }
+        dispatch({
+          type: CHAINS_STATUS_DATA,
+          value: response?.latestBlock > -1 && {
+            ...chain,
+            ...response,
+          },
+        })
+      }
+    }
 
-  //   const getData = async () => {
-  //     if (sdk_data && chains_data) {
-  //       chains_data.filter(c => !c?.disabled).forEach(c => getChainStatus(c))
-  //     }
-  //   }
+    const getData = async () => {
+      if (sdk_data && chains_data) {
+        chains_data.filter(c => !c?.disabled).forEach(c => getChainStatus(c))
+      }
+    }
 
-  //   setTimeout(() => getData(), 15 * 1000)
+    setTimeout(() => getData(), 15 * 1000)
 
-  //   const interval = setInterval(() => getData(), 3 * 60 * 1000)
-  //   return () => {
-  //     clearInterval(interval)
-  //   }
-  // }, [sdk_data])
+    const interval = setInterval(() => getData(), 3 * 60 * 1000)
+    return () => {
+      clearInterval(interval)
+    }
+  }, [sdk_data])
 
   // routers-status
   useEffect(() => {
@@ -194,10 +195,10 @@ export default function Navbar() {
           tokenContracts = responseTokens?.data?.map(t => { return { ...t, id: `${chain.chain_id}_${t.contract_address}` } })
         }
 
-        // dispatch({
-        //   type: TOKENS_DATA,
-        //   value: tokenContracts || [],
-        // })
+        dispatch({
+          type: TOKENS_DATA,
+          value: tokenContracts || [],
+        })
       }
     }
 
@@ -304,7 +305,7 @@ export default function Navbar() {
                   href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${address}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center uppercase text-indigo-500 dark:text-indigo-300 text-3xs sm:text-2xs xl:text-sm font-medium mx-0 xl:mx-2"
+                  className="flex items-center uppercase text-blue-400 dark:text-blue-300 text-xs xl:text-sm font-medium mx-0 xl:mx-2"
                 >
                   <span className="block xl:hidden">View TXs</span>
                   <span className="hidden xl:block">View Transactions</span>
@@ -322,7 +323,7 @@ export default function Navbar() {
                           className="w-8 h-8 rounded-full mr-2"
                         />
                       )}
-                      <span className="text-gray-400 dark:text-white text-xs xl:text-sm font-semibold">
+                      <span className="text-gray-900 dark:text-white text-xs xl:text-sm font-semibold">
                         {ellipseAddress(ens_data?.[address?.toLowerCase()]?.name, 10) || ellipseAddress(address?.toLowerCase(), 6)}
                       </span>
                     </div>}
@@ -357,7 +358,14 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-      <ChainStatus />
+      {!chains_status_data && address && (
+        <div className="w-full h-8 xl:h-10 bg-gray-100 dark:bg-gray-900 overflow-x-auto flex items-center py-2 px-2 sm:px-4">
+          <span className="flex flex-wrap items-center font-mono text-blue-600 dark:text-blue-400 text-2xs xl:text-sm space-x-1.5 xl:space-x-2 mx-auto">
+            <Grid color={theme === 'dark' ? '#60A5FA' : '#2563EB'} width="16" height="16" />
+            <span>Checking Subgraph Status</span>
+          </span>
+        </div>
+      )}
     </>
   )
 }

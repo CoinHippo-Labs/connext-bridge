@@ -4,6 +4,7 @@ import preferences from './preferences'
 import announcement from './announcement'
 import chains from './chains'
 import assets from './assets'
+import tokens from './tokens'
 import ens from './ens'
 import chains_status from './chains-status'
 import routers_status from './routers-status'
@@ -13,9 +14,7 @@ import sdk from './sdk'
 import rpcs from './rpcs'
 import wallet from './wallet'
 
-import chains_status_sync from './chains-status-sync'
 import balances from './balances'
-import tokens from './tokens'
 import max_transfers from './max-transfers'
 
 export default combineReducers({
@@ -23,6 +22,7 @@ export default combineReducers({
   announcement,
   chains,
   assets,
+  tokens,
   ens,
   chains_status,
   routers_status,
@@ -32,8 +32,6 @@ export default combineReducers({
   rpcs,
   wallet,
 
-  chains_status_sync,
   balances,
-  tokens,
   max_transfers,
 })

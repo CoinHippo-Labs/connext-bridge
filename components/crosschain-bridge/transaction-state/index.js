@@ -21,8 +21,7 @@ import Modal from '../../modals/modal-confirm'
 import Copy from '../../copy'
 import Popover from '../../popover'
 
-import { balances } from '../../../lib/api/covalent'
-import { transactions, transactionFromSdk } from '../../../lib/api/subgraph'
+import { transactions } from '../../../lib/api/subgraph'
 import { domains, getENS } from '../../../lib/api/ens'
 import { chainTitle } from '../../../lib/object/chain'
 import { numberFormat, ellipseAddress } from '../../../lib/utils'
@@ -63,12 +62,12 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
       if (data?.transactionId && chains_data) {
         const { transactionId, sendingChainId, receivingChainId } = { ...data }
 
-        let sendingTx, receivingTx
+        let sendingTx, receivingTx, response
 
-        let response = await transactionFromSdk(sdk_data, sendingChainId, transactionId, chains_data, tokens_data)
+        response = await transactions(sdk_data, sendingChainId, transactionId, null, chains_data, tokens_data)
         sendingTx = response?.data?.[0]
 
-        response = await transactionFromSdk(sdk_data, receivingChainId, transactionId, chains_data, tokens_data)
+        response = await transactions(sdk_data, receivingChainId, transactionId, null, chains_data, tokens_data)
         receivingTx = response?.data?.[0]
 
         getDomain((receivingTx || sendingTx)?.router?.id)
@@ -101,14 +100,9 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
     if (chains_data && generalTx?.router?.id && !receivingTx && generalTx.receivingChainId) {
       const _network = chains_data.find(_network => _network?.chain_id === generalTx.receivingChainId)
 
-      const useRPC = ![100].includes(generalTx.receivingChainId)
+      const response = await getChainTokenRPC(generalTx.receivingChainId, { contract_address: constants.AddressZero, contract_decimals: _network?.provider_params?.[0]?.nativeCurrency?.decimals, contract_symbol: _network?.provider_params?.[0]?.nativeCurrency?.symbol }, generalTx.router.id)
 
-      const response = !useRPC ?
-        await balances(generalTx.receivingChainId, generalTx.router.id)
-        :
-        await getChainTokenRPC(generalTx.receivingChainId, { contract_address: constants.AddressZero, contract_decimals: _network?.provider_params?.[0]?.nativeCurrency?.decimals, contract_symbol: _network?.provider_params?.[0]?.nativeCurrency?.symbol }, generalTx.router.id)
-
-      const balanceData = _.head(((useRPC ? response : response?.data?.items) || [{ logo_url: _network?.image, contract_name: _network?.provider_params?.[0]?.nativeCurrency?.name, contract_ticker_symbol: _network?.provider_params?.[0]?.nativeCurrency?.symbol }]).map(_balance => { return { ..._balance, chain_data: _network, logo_url: _network?.image, contract_name: _network?.provider_params?.[0]?.nativeCurrency?.name } }).filter(_balance => _balance?.contract_ticker_symbol?.toLowerCase() === _network?.provider_params?.[0]?.nativeCurrency?.symbol?.toLowerCase()))
+      const balanceData = _.head((response || [{ logo_url: _network?.image, contract_name: _network?.provider_params?.[0]?.nativeCurrency?.name, contract_ticker_symbol: _network?.provider_params?.[0]?.nativeCurrency?.symbol }]).map(_balance => { return { ..._balance, chain_data: _network, logo_url: _network?.image, contract_name: _network?.provider_params?.[0]?.nativeCurrency?.name } }).filter(_balance => _balance?.contract_ticker_symbol?.toLowerCase() === _network?.provider_params?.[0]?.nativeCurrency?.symbol?.toLowerCase()))
     
       if (balanceData) {
         setRouterGasBalance(balanceData)

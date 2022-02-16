@@ -4,7 +4,7 @@ import { FiSearch } from 'react-icons/fi'
 
 import Networks from './networks'
 
-export default function Search({ id, updateId, from, to }) {
+export default function Search({ chain_id, updateChainId, from, to }) {
   const [inputSearch, setInputSearch] = useState('')
 
   return (
@@ -12,7 +12,7 @@ export default function Search({ id, updateId, from, to }) {
       <div className="relative">
         <input
           value={inputSearch}
-          onChange={event => setInputSearch(event.target.value)}
+          onChange={e => setInputSearch(e.target.value)}
           type="search"
           placeholder="Search..."
           className="w-full h-10 bg-transparent appearance-none border-gray-300 focus:border-indigo-500 dark:border-gray-700 focus:ring-indigo-600 dark:focus:ring-gray-600 rounded-3xl text-sm pl-10 pr-5"
@@ -22,11 +22,11 @@ export default function Search({ id, updateId, from, to }) {
         </div>
         <div className="w-full mx-auto py-2">
           <Networks
-            id={id}
+            chain_id={chain_id}
             inputSearch={inputSearch}
-            handleDropdownClick={_id => {
-              if (updateId) {
-                updateId(_id)
+            handleDropdownClick={_chain_id => {
+              if (updateChainId) {
+                updateChainId(_chain_id)
               }
             }}
             from={from}

@@ -24,12 +24,12 @@ const ABI = [
 ]
 
 export default function Faucets() {
-  const { chains, assets, wallet, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, wallet: state.wallet, preferences: state.preferences }), shallowEqual)
+  const { preferences, chains, assets, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, wallet: state.wallet }), shallowEqual)
+  const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { wallet_data } = { ...wallet }
   const { signer, chain_id, address } = { ...wallet_data }
-  const { theme } = { ...preferences }
 
   const [options, setOptions] = useState(null)
   const [collapse, setCollapse] = useState(true)
@@ -65,20 +65,14 @@ export default function Faucets() {
     setMintResponse(null)
   }, [options])
 
-  const chain = chains_data?.find(_chain => _chain?.chain_id === options?.chain_id)
-  const asset = assets_data?.find(_asset => _asset?.id === 'test')
-
   const mint = async () => {
-    setMintResponse(null)
     setMinting(true)
-
-    const contract_address = asset?.contracts?.find(_contract => _contract.chain_id === options?.chain_id)?.contract_address
-
-    const contract = new Contract(contract_address, ABI, signer)
+    setMintResponse(null)
 
     try {
+      const contract_address = asset?.contracts?.find(c => c.chain_id === options?.chain_id)?.contract_address
+      const contract = new Contract(contract_address, ABI, signer)
       const response = await contract.mint(options?.address, utils.parseEther(process.env.NEXT_PUBLIC_FAUCET_AMOUNT))
-
       setMintResponse({ status: 'success', message: 'Faucet Successful', ...response })
     } catch (error) {
       setMintResponse({ status: 'failed', message: error?.data?.message || error?.message })
@@ -87,8 +81,11 @@ export default function Faucets() {
     setMinting(false)
   }
 
+  const chain = chains_data?.find(c => c?.chain_id === options?.chain_id)
+  const asset = assets_data?.find(a => a?.id === 'test')
+
   return assets_data && (
-    <>
+    <div className="w-full max-w-lg bg-white dark:bg-black rounded-2xl flex flex-col items-center justify-center">
       <button
         onClick={() => setCollapse(!collapse)}
         className="w-full bg-transparent flex items-center justify-center text-gray-400 dark:text-gray-500 text-lg space-x-1 my-4"
@@ -190,6 +187,6 @@ export default function Faucets() {
           </Alert>
         </div>
       )}
-    </>
+    </div>
   )
 }

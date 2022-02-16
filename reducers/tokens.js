@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 import { TOKENS_DATA } from './types'
 
 export default function data(
@@ -10,7 +12,7 @@ export default function data(
     case TOKENS_DATA:
       return {
         ...state,
-        [`${TOKENS_DATA}`]: action.value && { ...state?.[`${TOKENS_DATA}`], ...action.value },
+        [`${TOKENS_DATA}`]: _.uniqBy(_.concat(action.value || [], state[`${TOKENS_DATA}`] || []), 'id'),
       }
     default:
       return state

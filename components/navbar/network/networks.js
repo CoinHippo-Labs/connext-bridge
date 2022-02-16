@@ -1,6 +1,7 @@
 import { useSelector, shallowEqual } from 'react-redux'
 
 import { Img } from 'react-image'
+import { Puff } from 'react-loader-spinner'
 import { IoRadioButtonOn } from 'react-icons/io5'
 
 import Wallet from '../../wallet'
@@ -8,9 +9,12 @@ import Wallet from '../../wallet'
 import { chainTitle } from '../../../lib/object/chain'
 
 export default function Networks({ handleDropdownClick }) {
-  const { chains, chains_status } = useSelector(state => ({ chains: state.chains, chains_status: state.chains_status }), shallowEqual)
+  const { preferences, chains, chains_status, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, chains_status: state.chains_status, wallet: state.wallet }), shallowEqual)
+  const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { chains_status_data } = { ...chains_status }
+  const { wallet_data } = { ...wallet }
+  const { chain_id } = { ...wallet_data }
 
   return (
     <>
@@ -37,13 +41,17 @@ export default function Networks({ handleDropdownClick }) {
               chainIdToConnect={item.chain_id}
               onChangeNetwork={handleDropdownClick}
               buttonDisconnectTitle={<>
-                <IoRadioButtonOn size={12} className={`min-w-max ${!chains_status_data || chains_status_data?.find(c => c?.id === item.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'}`} />
+                {chains_status_data ?
+                  <IoRadioButtonOn size={12} className={`min-w-max ${chains_status_data?.find(c => c?.chain_id === item.chain_id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'}`} />
+                  :
+                  <Puff color={theme === 'dark' ? '#60A5FA' : '#2563EB'} width="12" height="12" />
+                }
                 <Img
                   src={item.image}
                   alt=""
                   className="w-5 h-5 rounded-full"
                 />
-                <span className="leading-4 text-2xs font-medium text-left">{chainTitle(item)}</span>
+                <span className={`leading-4 text-2xs ${item.chain_id === chain_id ? 'font-semibold' : 'font-normal'}`}>{chainTitle(item)}</span>
               </>}
               buttonDisconnectClassName="dropdown-item w-1/2 flex items-center justify-start space-x-1 p-2"
             />
