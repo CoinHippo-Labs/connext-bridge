@@ -21,7 +21,7 @@ export default function Search({ asset_id, updateAssetId, chain_id, from, to, si
           <div className="absolute top-0 left-0 mt-3 ml-4">
             <FiSearch className="w-4 h-4 stroke-current" />
           </div>
-          <div className="whitespace-nowrap text-base font-semibold ml-4">
+          <div className="bg-gray-100 dark:bg-gray-800 rounded-xl whitespace-nowrap uppercase text-gray-700 dark:text-gray-300 text-sm font-medium ml-4 py-1 px-2">
             {side === 'from' ? 'Balances' : 'Max Transfers'}
           </div>
         </div>

@@ -31,7 +31,7 @@ export default function Networks({ chain_id, inputSearch, handleDropdownClick, f
                 alt=""
                 className="w-8 h-8 rounded-full"
               />
-              <span className="w-1/6 sm:w-2/6 text-base font-medium">{item.title}</span>
+              <span className="w-1/6 sm:w-2/6 text-gray-400 dark:text-gray-600 text-base">{item.title}</span>
             </div>
           </div>
           :

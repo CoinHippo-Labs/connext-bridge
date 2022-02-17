@@ -30,9 +30,10 @@ import { ENS_DATA } from '../../../reducers/types'
 
 BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
 
-export default function TransactionState({ data, defaultHidden = false, buttonTitle, buttonClassName, onClose, cancelDisabled, onFinish }) {
+export default function TransactionState({ defaultHidden = false, data, onClose, onFinish, cancelDisabled, buttonTitle, buttonClassName }) {
   const dispatch = useDispatch()
-  const { chains, assets, tokens, ens, wallet, sdk, rpcs, preferences } = useSelector(state => ({ chains: state.chains, assets: state.assets, tokens: state.tokens, ens: state.ens, wallet: state.wallet, sdk: state.sdk, rpcs: state.rpcs, preferences: state.preferences }), shallowEqual)
+  const { preferences, chains, assets, tokens, ens, wallet, sdk, rpcs } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, tokens: state.tokens, ens: state.ens, wallet: state.wallet, sdk: state.sdk, rpcs: state.rpcs }), shallowEqual)
+  const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { tokens_data } = { ...tokens }
@@ -41,7 +42,6 @@ export default function TransactionState({ data, defaultHidden = false, buttonTi
   const { provider, web3_provider, chain_id, address } = { ...wallet_data }
   const { sdk_data } = { ...sdk }
   const { rpcs_data } = { ...rpcs }
-  const { theme } = { ...preferences }
 
   const [hidden, setHidden] = useState(defaultHidden)
   const [transaction, setTransaction] = useState(null)

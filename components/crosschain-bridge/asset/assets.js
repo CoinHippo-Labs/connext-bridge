@@ -6,13 +6,35 @@ import { Img } from 'react-image'
 import { numberFormat } from '../../../lib/utils'
 
 export default function Assets({ asset_id, inputSearch, handleDropdownClick, chain_id, from, to, side }) {
-  const { chains, assets, balances, max_transfers } = useSelector(state => ({ chains: state.chains, assets: state.assets, balances: state.balances, max_transfers: state.max_transfers }), shallowEqual)
+  const { chains, assets, routers_status, routers_assets, balances } = useSelector(state => ({ chains: state.chains, assets: state.assets, routers_status: state.routers_status, routers_assets: state.routers_assets, balances: state.balances }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
+  const { routers_status_data } = { ...routers_status }
+  const { routers_assets_data } = { ...routers_assets }
   const { balances_data } = { ...balances }
-  const { max_transfers_data } = { ...max_transfers }
 
   const chain = chains_data?.find(c => c?.chain_id === chain_id)
+
+  const maxTransfers = routers_assets_data && _.orderBy(
+    Object.values(_.groupBy(routers_assets_data.flatMap(ra => ra?.asset_balances?.filter(ab => ab?.chain?.chain_id === chain?.chain_id) || []), 'assetId')).map(a => {
+      let assets_from_chains
+
+      if (a && routers_status_data) {
+        assets_from_chains = Object.fromEntries(chains_data?.filter(c => !c.disabled).map(c => {
+          const assets = a.filter(_a => routers_status_data?.findIndex(r => r?.routerAddress?.toLowerCase() === _a?.router?.id?.toLowerCase() && r?.supportedChains?.includes(c?.chain_id) && r?.supportedChains?.includes(chain?.chain_id)) > -1)
+
+          return [c.chain_id, _.maxBy(assets, 'amount')]
+        }).filter(([key, value]) => key !== chain?.chain_id && value))
+      }
+
+      return {
+        ..._.maxBy(a, 'amount_value'),
+        total_amount: _.sumBy(a, 'amount'),
+        total_amount_value: _.sumBy(a, 'amount_value'),
+        assets_from_chains,
+      }
+    }), ['value'], ['desc']
+  )
 
   const _assets = _.orderBy(assets_data?.filter(item => !item.menu_hidden).filter(item => !inputSearch || item).map(item => {
     return { ...item, scores: ['symbol', 'id'].map(field => item[field] && item[field].toLowerCase().includes(inputSearch.toLowerCase()) ? inputSearch.length > 1 ? (inputSearch.length / item[field].length) : .5 : -1) }
@@ -21,11 +43,9 @@ export default function Assets({ asset_id, inputSearch, handleDropdownClick, cha
   return (
     <div className="max-h-96 overflow-y-scroll">
       {_assets?.map((item, i) => {
-        const contract = item.contracts?.find(_contract => _contract?.chain_id === chain_id)
-        const asset = max_transfers_data?.[chain_id]?.[contract?.contract_address]
-
-        let balance = balances_data?.[chain_id]?.find(_contract => _contract?.contract_address === contract?.contract_address)
-        balance = balance || balances_data?.[chain_id]?.find(_contract => item?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase() && chain?.provider_params?.[0]?.nativeCurrency?.symbol?.toLowerCase() === _contract?.contract_ticker_symbol?.toLowerCase())
+        const contract = item.contracts?.find(c => c?.chain_id === chain_id)
+        const maxTransfer = maxTransfers?.find(t => t?.chain?.chain_id === chain_id && t?.contract_address === contract?.contract_address)
+        const balance = balances_data?.[chain_id]?.find(c => c?.contract_address === contract?.contract_address)
 
         return item.disabled ?
           <div
@@ -34,11 +54,11 @@ export default function Assets({ asset_id, inputSearch, handleDropdownClick, cha
             className="dropdown-item rounded-lg cursor-not-allowed flex items-center justify-start space-x-2 p-2"
           >
             <Img
-              src={item.image}
+              src={contract?.image || item.image}
               alt=""
               className="w-8 h-8 rounded-full"
             />
-            <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-base font-medium">{contract?.symbol || item.symbol}</span>
+            <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 text-base">{contract?.symbol || item.symbol}</span>
           </div>
           :
           <div
@@ -47,34 +67,32 @@ export default function Assets({ asset_id, inputSearch, handleDropdownClick, cha
             className={`dropdown-item ${item.id === asset_id ? 'bg-gray-100 dark:bg-black' : 'hover:bg-gray-50 dark:hover:bg-gray-800'} rounded-lg cursor-pointer flex items-center justify-start space-x-2 p-2`}
           >
             <Img
-              src={item.image}
+              src={contract?.image || item.image}
               alt=""
               className="w-8 h-8 rounded-full"
             />
-            <span className={`whitespace-nowrap ${side === 'from' && chain_id && !Number(balance?.balance) ? 'text-gray-300 dark:text-gray-600' : ''} text-base font-medium`}>{contract?.symbol || item.symbol}</span>
+            <span className={`whitespace-nowrap ${side === 'from' && chain_id && !Number(balance?.amount) ? 'text-gray-400 dark:text-gray-600' : ''} text-base ${item.id === asset_id ? 'font-semibold' : 'font-normal'}`}>{contract?.symbol || item.symbol}</span>
             <div className="w-full ml-auto">
               {side === 'from' ?
                 balance ?
-                  <div className={`flex items-center justify-end ${chain_id && !Number(balance?.balance) ? 'text-gray-300 dark:text-gray-600' : ''} space-x-1`}>
-                    <span className="font-mono">{numberFormat((balance.balance || 0) / Math.pow(10, balance.contract_decimals || 0), '0,0.00000000')}</span>
-                    <span className="font-semibold">{contract?.symbol || balance.contract_ticker_symbol}</span>
+                  <div className={`flex items-center justify-end font-mono ${chain_id && !Number(balance?.amount) ? 'text-gray-400 dark:text-gray-600' : ''} ${item.id === asset_id ? 'font-semibold' : 'font-normal'} space-x-1`}>
+                    <span>{numberFormat(balance.amount, balance.amount > 10000 ? '0,0' : balance.amount > 1000 ? '0,0.00' : '0,0.000000', true)}</span>
+                    <span>{contract?.symbol || balance.symbol}</span>
                   </div>
                   :
-                  balances_data?.[chain_id] ?
-                    <div className="text-gray-300 dark:text-gray-600 text-right">-</div>
-                    :
-                    null
+                  balances_data?.[chain_id] && (
+                    <div className="font-mono text-gray-400 dark:text-gray-600 text-right">n/a</div>
+                  )
                 :
-                contract && asset ?
-                  <div className="font-mono font-semibold text-right">{numberFormat(asset.amount / Math.pow(10, contract.contract_decimals), '0,0.00')}</div>
+                contract && maxTransfer ?
+                  <div className={`font-mono ${item.id === asset_id ? 'font-semibold' : 'font-normal'} text-right`}>{numberFormat(maxTransfer.amount, maxTransfer.amount > 10000 ? '0,0' : maxTransfer.amount > 1000 ? '0,0.00' : '0,0.000000', true)}</div>
                   :
-                  chain && _assets.length > 0 ?
-                    <div className="text-right">-</div>
-                    :
-                    null
+                  chain && _assets.length > 0 && (
+                    <div className="font-mono text-gray-400 dark:text-gray-600 text-right">n/a</div>
+                  )
               }
               {(item.id === from || item.id === to) && (
-                <div className="text-gray-400 dark:text-gray-500 italic text-right">
+                <div className="text-gray-400 dark:text-gray-500 text-right">
                   {_.uniq([item.id === from ? 'From' : 'To', item.id === to ? 'To' : 'From']).join(' & ')}
                 </div>
               )}

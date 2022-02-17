@@ -13,9 +13,7 @@ import routers_assets from './routers-assets'
 import sdk from './sdk'
 import rpcs from './rpcs'
 import wallet from './wallet'
-
 import balances from './balances'
-import max_transfers from './max-transfers'
 
 export default combineReducers({
   preferences,
@@ -31,7 +29,5 @@ export default combineReducers({
   sdk,
   rpcs,
   wallet,
-
   balances,
-  max_transfers,
 })

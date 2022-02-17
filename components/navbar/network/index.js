@@ -8,7 +8,7 @@ import { RiQuestionLine } from 'react-icons/ri'
 import Networks from './networks'
 
 export default function DropdownNetwork({ chain_id }) {
-  const { chains, preferences } = useSelector(state => ({ chains: state.chains, preferences: state.preferences }), shallowEqual)
+  const { preferences, chains } = useSelector(state => ({ preferences: state.preferences, chains: state.chains }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
 

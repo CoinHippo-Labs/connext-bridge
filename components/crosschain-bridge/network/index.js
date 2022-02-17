@@ -11,10 +11,10 @@ import Modal from '../../modals/modal-confirm'
 import { chainTitle } from '../../../lib/object/chain'
 
 export default function DropdownNetwork({ disabled, chain_id, onSelect, from, to, side = 'from' }) {
-  const { chains, chains_status, preferences } = useSelector(state => ({ chains: state.chains, chains_status: state.chains_status, preferences: state.preferences }), shallowEqual)
+  const { preferences, chains, chains_status } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, chains_status: state.chains_status }), shallowEqual)
+  const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { chains_status_data } = { ...chains_status }
-  const { theme } = { ...preferences }
 
   const [hidden, setHidden] = useState(true)
 
@@ -31,8 +31,10 @@ export default function DropdownNetwork({ disabled, chain_id, onSelect, from, to
   return (
     <Modal
       hidden={hidden}
+      disabled={disabled}
+      onClick={open => setHidden(!open)}
       buttonTitle={chain ?
-        <div className="w-48 min-w-max bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-3xl flex items-center justify-center text-lg space-x-1.5 py-2 px-4">
+        <div className="w-48 min-w-max bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-3xl shadow flex items-center justify-center text-lg space-x-1.5 py-2 px-4">
           {chains_status_data ?
             <IoRadioButtonOn size={16} className={`${chain?.disabled ? 'text-gray-400 dark:text-gray-600' : chains_status_data?.find(c => c?.id === chain.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
             :
@@ -48,12 +50,10 @@ export default function DropdownNetwork({ disabled, chain_id, onSelect, from, to
         </div>
         :
         chains_data ?
-          <div className="w-48 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-3xl uppercase text-gray-500 hover:text-gray-600 dark:text-gray-200 dark:hover:text-gray-100 text-lg font-medium py-2 px-4">Chain</div>
+          <div className="w-48 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-3xl shadow uppercase text-gray-500 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400 text-lg font-medium py-2 px-4">Chain</div>
           :
           <Puff color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="24" height="24" />
       }
-      disabled={disabled}
-      onClick={open => setHidden(!open)}
       buttonClassName={`${!chains_data ? 'w-48' : ''} h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
       title={<span className="capitalize">{side}</span>}
       body={<Search

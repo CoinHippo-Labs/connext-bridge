@@ -41,6 +41,3 @@ export const WALLET_RESET = 'wallet_reset'
 
 // balances
 export const BALANCES_DATA = 'balances_data'
-
-// max transfers
-export const MAX_TRANSFERS_DATA = 'max_transfers_data'

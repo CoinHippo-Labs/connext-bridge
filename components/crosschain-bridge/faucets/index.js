@@ -85,7 +85,7 @@ export default function Faucets() {
   const asset = assets_data?.find(a => a?.id === 'test')
 
   return assets_data && (
-    <div className="w-full max-w-lg bg-white dark:bg-black rounded-2xl flex flex-col items-center justify-center">
+    <div className="w-full max-w-lg bg-white dark:bg-black rounded-xl shadow-md flex flex-col items-center justify-center">
       <button
         onClick={() => setCollapse(!collapse)}
         className="w-full bg-transparent flex items-center justify-center text-gray-400 dark:text-gray-500 text-lg space-x-1 my-4"
@@ -101,24 +101,19 @@ export default function Faucets() {
         }
       </button>
       {!collapse && (
-        <div className="w-full sm:w-96 form mb-4 px-2">
+        <div className="w-full sm:w-10/12 form mb-3 px-2">
           {items.map((item, i) => (
             <div key={i} className="form-element">
               {item.label && (
-                <div className="form-label text-gray-600 dark:text-gray-400 font-medium">{item.label}</div>
+                <div className="form-label text-gray-400 dark:text-gray-600">{item.label}</div>
               )}
               {item.type === 'chains_select' ?
-                <div className="-mt-2">
+                <div className="-mt-2.5">
                   <Network
-                    side="chain"
                     disabled={minting}
                     chain_id={options?.[item.name]}
-                    onSelect={_chain_id => {
-                      setOptions({
-                        ...options,
-                        chain_id: _chain_id,
-                      })
-                    }}
+                    onSelect={_chain_id => setOptions({ ...options, chain_id: _chain_id })}
+                    side="chain"
                   />
                 </div>
                 :
@@ -128,7 +123,7 @@ export default function Faucets() {
                   placeholder={item.placeholder}
                   value={options?.[item.name]}
                   onChange={e => setOptions({ ...options, [`${item.name}`]: e.target.value })}
-                  className="form-input dark:border-0 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg"
+                  className="form-input h-10 dark:border-0 focus:ring-0 dark:focus:ring-0 rounded-xl font-semibold"
                 />
               }
             </div>
@@ -139,14 +134,14 @@ export default function Faucets() {
                 type="button"
                 disabled={minting}
                 onClick={() => setCollapse(!collapse)}
-                className="btn btn-default btn-rounded bg-white hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800 text-gray-900 dark:text-white"
+                className="btn btn-default btn-rounded bg-white hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800 text-black dark:text-white"
               >
                 Cancel
               </button>
               <button
                 disabled={minting}
                 onClick={() => mint()}
-                className="btn btn-default btn-rounded bg-indigo-500 hover:bg-indigo-600 flex items-center text-white space-x-1.5"
+                className="btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 flex items-center text-white space-x-1.5"
               >
                 {minting && (
                   <Puff color={theme === 'dark' ? '#F9FAFB' : '#F9FAFB'} width="16" height="16" />
@@ -164,11 +159,12 @@ export default function Faucets() {
         </div>
       )}
       {mintResponse && (
-        <div className="mx-2 sm:mx-8">
+        <div className="mx-2 sm:mx-4">
           <Alert
             color={`${mintResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : mintResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white mb-4 sm:mb-6`}
             icon={mintResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : mintResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
             rounded={true}
+            className="mx-0"
           >
             <div className="flex items-center justify-between space-x-1">
               <span className="font-mono leading-5 text-xs">{mintResponse.message}</span>
@@ -177,10 +173,10 @@ export default function Faucets() {
                   href={`${chain.explorer.url}${chain.explorer.transaction_path?.replace('{tx}', mintResponse.hash)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center font-semibold pr-1.5"
+                  className="flex items-center text-xs font-semibold pr-1.5"
                 >
-                  <span>View on {chain.explorer.name}</span>
-                  <TiArrowRight size={16} className="transform -rotate-45" />
+                  <span className="whitespace-nowrap">View on {chain.explorer.name}</span>
+                  <TiArrowRight size={16} className="transform -rotate-45 mt-0.5" />
                 </a>
               )}
             </div>

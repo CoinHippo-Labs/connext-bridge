@@ -1,14 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useSelector, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
 import { BiChevronDown, BiChevronUp } from 'react-icons/bi'
 import { BsCheckCircleFill } from 'react-icons/bs'
 
 export default function AdvancedOptions({ applied = false, disabled = false, initialOptions, updateOptions, useNomad }) {
-  const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
-  const { theme } = { ...preferences }
-
   const [options, setOptions] = useState(initialOptions)
   const [collapse, setCollapse] = useState(true)
 
@@ -63,15 +59,12 @@ export default function AdvancedOptions({ applied = false, disabled = false, ini
     <>
       <button
         onClick={() => setCollapse(!collapse)}
-        className="bg-transparent flex items-center text-gray-400 dark:text-gray-500 text-sm space-x-1 ml-auto"
+        className={`bg-transparent flex items-center ${applied ? 'text-green-400 dark:text-white font-medium' : 'text-gray-400 dark:text-gray-600'} text-sm space-x-1 ml-auto`}
       >
         {applied && (
-          <>
-            <BsCheckCircleFill size={16} className="text-green-500" />
-            <span />
-          </>
+          <BsCheckCircleFill size={16} className="mr-1" />
         )}
-        <span className={`${applied ? 'text-gray-600 dark:text-gray-300' : ''}`}>Advanced Options</span>
+        <span>Advanced Options</span>
         {collapse ?
           <BiChevronDown size={20} />
           :
@@ -83,7 +76,7 @@ export default function AdvancedOptions({ applied = false, disabled = false, ini
           {items.map((item, i) => (
             <div key={i} className="form-element">
               {item.label && (
-                <div className="form-label text-gray-600 dark:text-gray-400 font-medium">{item.label}</div>
+                <div className="form-label text-gray-400 dark:text-gray-600">{item.label}</div>
               )}
               {item.type === 'checkbox' ?
                 <div className="flex items-center space-x-2">
@@ -94,9 +87,9 @@ export default function AdvancedOptions({ applied = false, disabled = false, ini
                         value={option.value}
                         checked={options?.[item.name]}
                         onChange={e => setOptions({ ...options, [`${item.name}`]: e.target.checked })}
-                        className="form-checkbox w-4 h-4 dark:border-0 focus:ring-0 dark:focus:ring-gray-700 rounded-lg"
+                        className="form-checkbox w-4 h-4 dark:border-0 focus:ring-0 dark:focus:ring-0 rounded-lg"
                       />
-                      <span className="text-gray-500 dark:text-gray-500">{option.label}</span>
+                      <span className="text-gray-500">{option.label}</span>
                     </label>
                   ))}
                 </div>
@@ -106,20 +99,20 @@ export default function AdvancedOptions({ applied = false, disabled = false, ini
                   placeholder={item.placeholder}
                   value={options?.[item.name]}
                   onChange={e => setOptions({ ...options, [`${item.name}`]: e.target.value })}
-                  className="form-input dark:border-0 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg"
+                  className="form-input dark:border-0 focus:ring-0 dark:focus:ring-0 rounded-xl"
                 />
               }
             </div>
           ))}
           {!_.isEqual(options, initialOptions) && (
-            <div className="flex justify-end space-x-2 mb-2">
+            <div className="flex justify-end space-x-2 mb-1">
               <button
                 type="button"
                 onClick={() => {
                   setOptions(initialOptions)
                   setCollapse(!collapse)
                 }}
-                className="btn btn-default btn-rounded bg-white hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800 text-gray-900 dark:text-white"
+                className="btn btn-default btn-rounded bg-white hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800 text-black dark:text-white"
               >
                 Cancel
               </button>
@@ -131,7 +124,7 @@ export default function AdvancedOptions({ applied = false, disabled = false, ini
                   }
                   setCollapse(!collapse)
                 }}
-                className="btn btn-default btn-rounded bg-indigo-500 hover:bg-indigo-600 text-white"
+                className="btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 text-white"
               >
                 Apply
               </button>
