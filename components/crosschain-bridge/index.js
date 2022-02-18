@@ -294,19 +294,6 @@ export default function CrosschainBridge() {
 
   const getChainSynced = _chain_id => !chains_status_data || chains_status_data.find(c => c.chain_id === _chain_id)?.synced
 
-  const getDeployedPriceOracleContract = _chain_id => {
-    const record = contractDeployments?.[_chain_id?.toString()] || {}
-    const name = Object.keys(record)[0]
-
-    if (!name) {
-      return undefined
-    }
-
-    const contract = record[name]?.contracts?.ConnextPriceOracle
-
-    return contract
-  }
-
   const getDeployedMulticallContract = _chain_id => {
     const record = contractDeployments?.[_chain_id?.toString()] || {}
     const name = Object.keys(record)[0]

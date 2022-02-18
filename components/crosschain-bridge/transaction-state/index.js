@@ -601,7 +601,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
                   )}
                 </div>
                 :
-                <div className="flex flex-col space-y-2.5 my-1">
+                <div className="flex flex-col space-y-2.5">
                   <div className="skeleton w-40 h-6" />
                   <div className="skeleton w-24 h-6 mx-auto sm:ml-0" />
                 </div>
@@ -660,7 +660,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
                   )}
                 </>
                 :
-                <div className="flex flex-col items-center justify-center space-y-1.5 my-1 mx-auto">
+                <div className="flex flex-col items-center justify-center space-y-1.5 mx-auto">
                   <div className="skeleton w-24 h-7" />
                   <div className="skeleton w-28 h-4" />
                 </div>
@@ -793,7 +793,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
                   )}
                 </>
                 :
-                <div className="flex flex-col items-center justify-center space-y-1.5 my-1 mx-auto">
+                <div className="flex flex-col items-center justify-center space-y-1.5 mx-auto">
                   <div className="skeleton w-24 h-7" />
                   <div className="skeleton w-28 h-4" />
                 </div>
@@ -858,7 +858,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
                 :
                 <span className="font-mono text-gray-400 dark:text-gray-600 font-light">Unknown</span>
               :
-              <div className="flex flex-col space-y-2.5 my-1">
+              <div className="flex flex-col space-y-2.5">
                 <div className="skeleton w-40 h-6" />
                 {toChain && (
                   <div className="flex items-center justify-center sm:justify-end space-x-2.5 mt-1.5">

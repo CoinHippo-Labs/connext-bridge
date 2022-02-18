@@ -19,7 +19,7 @@ export default function Navigation() {
             {item.icon && (
               <span className="mb-0.5 mr-1.5">{item.icon}</span>
             )}
-            <span>{item.title}</span>
+            <span className="whitespace-nowrap">{item.title}</span>
             <TiArrowRight size={20} className="transform -rotate-45" />
           </a>
           :
@@ -28,7 +28,7 @@ export default function Navigation() {
               {item.icon && (
                 <span className="mb-0.5 mr-1.5">{item.icon}</span>
               )}
-              <span>{item.title}</span>
+              <span className="whitespace-nowrap">{item.title}</span>
             </a>
           </Link>
       })}

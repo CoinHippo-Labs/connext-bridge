@@ -20,7 +20,7 @@ export default function Logo() {
           </div>
           <div className="hidden sm:block lg:block xl:block">
             <div className="normal-case text-sm font-bold">{process.env.NEXT_PUBLIC_APP_NAME}</div>
-            <div className="font-mono text-gray-400 dark:text-gray-500 text-xs">{process.env.NEXT_PUBLIC_NETWORK}</div>
+            <div className="whitespace-nowrap font-mono text-gray-400 dark:text-gray-500 text-xs">{process.env.NEXT_PUBLIC_NETWORK}</div>
           </div>
         </a>
       </Link>
