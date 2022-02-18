@@ -603,7 +603,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
                 :
                 <div className="flex flex-col space-y-2.5 my-1">
                   <div className="skeleton w-40 h-6" />
-                  <div className="skeleton w-24 h-7 mx-auto sm:ml-0" />
+                  <div className="skeleton w-24 h-6 mx-auto sm:ml-0" />
                 </div>
             }
             <div className="flex flex-col items-center justify-center mx-auto">
@@ -993,7 +993,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
           setHidden(true)
         }}
         noButtons={true}
-        modalClassName="sm:max-w-3xl lg:max-w-4xl xl:max-w-5xl max-h-screen lg:max-h-full overflow-y-scroll px-4 sm:px-0"
+        modalClassName="sm:max-w-3xl lg:max-w-4xl max-h-screen lg:max-h-full overflow-y-scroll px-4 sm:px-0"
       />
     </>
   )
