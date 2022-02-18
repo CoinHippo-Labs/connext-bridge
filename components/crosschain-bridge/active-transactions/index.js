@@ -7,7 +7,7 @@ import { NxtpSdkEvents } from '@connext/nxtp-sdk'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
 import StackGrid from 'react-stack-grid'
-import { Bars, Rings, Oval } from 'react-loader-spinner'
+import { Bars, Puff, Oval } from 'react-loader-spinner'
 import HeadShake from 'react-reveal/HeadShake'
 import { TiArrowRight } from 'react-icons/ti'
 
@@ -77,11 +77,9 @@ export default function ActiveTransactions({ setOpen, trigger }) {
 
   useEffect(() => {
     const run = async () => setTimer(moment().unix())
-
     if (!timer) {
       run()
     }
-
     const interval = setInterval(() => run(), 0.5 * 1000)
     return () => clearInterval(interval)
   }, [timer])
@@ -145,7 +143,7 @@ export default function ActiveTransactions({ setOpen, trigger }) {
             {t?.status === NxtpSdkEvents.SenderTransactionPrepared ?
               <div className="flex items-center justify-center space-x-2">
                 <span className="text-blue-600 dark:text-white font-medium">Waiting for Router</span>
-                <Bars color={theme === 'dark' ? '#FFFFFF' : '#2563EB'} width="16" height="16" />
+                <Bars color={theme === 'dark' ? 'white' : '#2563EB'} width="16" height="16" />
               </div>
               :
               t?.status === NxtpSdkEvents.ReceiverTransactionPrepared ?
@@ -153,20 +151,18 @@ export default function ActiveTransactions({ setOpen, trigger }) {
                   <button
                     type="button"
                     onClick={() => onClick(t)}
-                    className="bg-blue-600 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-gray-100 hover:text-white text-xs space-x-1 mb-1 pl-3"
+                    className="bg-blue-600 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-gray-100 hover:text-white text-xs space-x-1 mb-1 py-1.5 pl-2.5 pr-1.5"
                   >
                     <span className="font-medium">Ready to</span>
-                    <span className="flex items-center font-bold">
-                      Claim
-                      <Rings color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="32" height="32" className="-ml-0.5" />
-                    </span>
+                    <span className="font-bold">Claim</span>
+                    <Puff color={theme === 'dark' ? 'white' : 'white'} width="16" height="16" />
                   </button>
                 </HeadShake>
                 :
                 t?.status === NxtpSdkEvents.ReceiverPrepareSigned ?
                   <div className="flex items-center justify-center space-x-2">
                     <span className="text-blue-600 dark:text-white font-medium">Waiting for Relayer</span>
-                    <Oval color={theme === 'dark' ? '#FFFFFF' : '#2563EB'} width="16" height="16" />
+                    <Oval color={theme === 'dark' ? 'white' : '#2563EB'} width="16" height="16" />
                   </div>
                   :
                   null
@@ -190,7 +186,6 @@ export default function ActiveTransactions({ setOpen, trigger }) {
           onClose={() => {
             setSwapData(null)
             setGetTrigger(moment().valueOf())
-
             if (setOpen) {
               setOpen(false)
             }
@@ -199,7 +194,7 @@ export default function ActiveTransactions({ setOpen, trigger }) {
         />
       )}
       {transactions?.data?.length > 0 && (
-        <div className="uppercase text-lg font-bold text-center lg:mt-2 mb-2">
+        <div className="uppercase text-green-500 dark:text-white text-sm font-semibold text-center lg:mt-2 mb-2">
           Active Transactions
         </div>
       )}

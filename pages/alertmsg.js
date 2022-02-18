@@ -5,7 +5,7 @@ import { announcement as getAnnouncement, setAnnouncement } from '../lib/api/bri
 
 import { ANNOUNCEMENT_DATA } from '../reducers/types'
 
-export default function Config() {
+export default function AlertMsg() {
   const dispatch = useDispatch()
   const { announcement } = useSelector(state => ({ announcement: state.announcement }), shallowEqual)
   const { announcement_data } = { ...announcement }
@@ -23,7 +23,6 @@ export default function Config() {
     setUpdating(true)
 
     await setAnnouncement({ data: announcementData?.trim().split('\n').join('<br>') })
-
     const response = await getAnnouncement()
 
     dispatch({
@@ -42,22 +41,22 @@ export default function Config() {
         <div className="form-label text-gray-600 dark:text-gray-400 font-medium">Announcement</div>
         <textarea
           type="text"
-          placeholder="Message / HTML"
-          rows="5"
           disabled={disabled}
+          rows="5"
+          placeholder="Message / HTML"
           value={announcementData}
           onChange={e => {
             if (!disabled) {
               setAnnountmentData(e.target.value)
             }
           }}
-          className="max-w-xl bg-white dark:bg-gray-900 border-0 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm"
+          className="max-w-xl bg-white dark:bg-gray-900 border-0 focus:ring-0 dark:focus:ring-0 rounded-xl text-sm"
         />
       </div>
       <button
         disabled={disabled}
         onClick={() => update()}
-        className="btn btn-default btn-rounded bg-indigo-500 hover:bg-indigo-600 text-white -mt-1"
+        className="btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 text-white -mt-1"
       >
         Save
       </button>

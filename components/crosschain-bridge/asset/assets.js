@@ -1,7 +1,11 @@
 import { useSelector, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
+import { constants } from 'ethers'
 import { Img } from 'react-image'
+import { TiArrowRight } from 'react-icons/ti'
+
+import Copy from '../../copy'
 
 import { numberFormat } from '../../../lib/utils'
 
@@ -63,7 +67,11 @@ export default function Assets({ asset_id, inputSearch, handleDropdownClick, cha
           :
           <div
             key={i}
-            onClick={() => handleDropdownClick(item.id)}
+            onClick={e => {
+              if (!e.target.className?.baseVal?.includes('copy') && !e.target.className?.includes('explorer')) {
+                handleDropdownClick(item.id)
+              }
+            }}
             className={`dropdown-item ${item.id === asset_id ? 'bg-gray-100 dark:bg-black' : 'hover:bg-gray-50 dark:hover:bg-gray-800'} rounded-lg cursor-pointer flex items-center justify-start space-x-2 p-2`}
           >
             <Img
@@ -72,6 +80,33 @@ export default function Assets({ asset_id, inputSearch, handleDropdownClick, cha
               className="w-8 h-8 rounded-full"
             />
             <span className={`whitespace-nowrap ${side === 'from' && chain_id && !Number(balance?.amount) ? 'text-gray-400 dark:text-gray-600' : ''} text-base ${item.id === asset_id ? 'font-semibold' : 'font-normal'}`}>{contract?.symbol || item.symbol}</span>
+            {contract?.contract_address && (
+              <span className="min-w-max flex items-center space-x-1">
+                <Copy
+                  size={16}
+                  text={contract.contract_address}
+                  className="copy"
+                />
+                {chain?.explorer?.url && (
+                  <a
+                    href={`${chain.explorer.url}${chain.explorer[`contract${contract.contract_address === constants.AddressZero ? '_0' : ''}_path`]?.replace('{address}', contract.contract_address)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 dark:text-white"
+                  >
+                    {chain.explorer.icon ?
+                      <Img
+                        src={chain.explorer.icon}
+                        alt=""
+                        className="explorer w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                      />
+                      :
+                      <TiArrowRight size={16} className="explorer transform -rotate-45" />
+                    }
+                  </a>
+                )}
+              </span>
+            )}
             <div className="w-full ml-auto">
               {side === 'from' ?
                 balance ?

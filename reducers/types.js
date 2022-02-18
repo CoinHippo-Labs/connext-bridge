@@ -34,10 +34,5 @@ export const RPCS_DATA = 'rpcs_data'
 export const WALLET_DATA = 'wallet_data'
 export const WALLET_RESET = 'wallet_reset'
 
-
-
-
-
-
 // balances
 export const BALANCES_DATA = 'balances_data'

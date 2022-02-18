@@ -22,7 +22,7 @@ export default function Index() {
   return (
     <>
       <CrossChainBridge />
-      <div className="bg-green-300 bg-green-600 bg-yellow-500 bg-red-300 bg-red-700 break-all mr-2" />
+      <div className="dark:bg-black dark:bg-blue-500 dark:bg-yellow-500 dark:bg-green-400 dark:bg-green-600 dark:bg-red-700 dark:bg-gray-700" />
     </>
   )
 }

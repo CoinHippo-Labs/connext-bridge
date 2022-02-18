@@ -1749,7 +1749,7 @@ export default function CrosschainBridge() {
                             cancelButtonClassName="hidden"
                             confirmButtonTitle={<span className="flex items-center justify-center space-x-1.5 py-2">
                               {startingSwap && (
-                                <Oval color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="20" height="20" />
+                                <Oval color={theme === 'dark' ? 'white' : '#F9FAFB'} width="20" height="20" />
                               )}
                               <span className="text-base">{startingSwap ? 'Sending' : 'Confirm'}</span>
                             </span>}
@@ -1806,7 +1806,7 @@ export default function CrosschainBridge() {
                                   >
                                     {estimatingAmount ?
                                       <>
-                                        <Oval color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
+                                        <Oval color={theme === 'dark' ? 'white' : '#F9FAFB'} width="24" height="24" />
                                         <span>Searching Routes</span>
                                       </>
                                       :
@@ -1830,7 +1830,7 @@ export default function CrosschainBridge() {
                                         >
                                           {tokenApproveResponse?.status === 'pending' ?
                                             <>
-                                              <Oval color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="24" height="24" />
+                                              <Oval color={theme === 'dark' ? 'white' : '#F9FAFB'} width="24" height="24" />
                                               <span>Approving</span>
                                             </>
                                             :
@@ -2127,7 +2127,7 @@ export default function CrosschainBridge() {
                                       cancelButtonClassName="hidden"
                                       confirmButtonTitle={<span className="flex items-center justify-center space-x-1.5 py-2">
                                         {startingSwap && (
-                                          <Oval color={theme === 'dark' ? '#FFFFFF' : '#F9FAFB'} width="20" height="20" />
+                                          <Oval color={theme === 'dark' ? 'white' : '#F9FAFB'} width="20" height="20" />
                                         )}
                                         <span className="text-base">Confirm</span>
                                       </span>}
@@ -2252,7 +2252,7 @@ export default function CrosschainBridge() {
                   content={<span className="flex flex-wrap items-center">
                     <span className="mr-1.5">{tokenApproveResponse.message}</span>
                     {tokenApproveResponse.status === 'pending' && (
-                      <ThreeDots color={theme === 'dark' ? '#FFFFFF' : '#FFFFFF'} width="16" height="16" className="mt-1 mr-1.5" />
+                      <ThreeDots color={theme === 'dark' ? 'white' : 'white'} width="16" height="16" className="mt-1 mr-1.5" />
                     )}
                     {fromChain?.explorer?.url && tokenApproveResponse.tx_hash && (
                       <a
