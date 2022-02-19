@@ -266,7 +266,7 @@
       "icon": "/logos/explorers/moonbeam.png",
       "block_path": "/block/{block}",
       "address_path": "/address/{address}",
-      "contract_path": "/tokens/{address}",
+      "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
@@ -300,7 +300,7 @@
       "icon": "/logos/explorers/moonriver.png",
       "block_path": "/block/{block}",
       "address_path": "/address/{address}",
-      "contract_path": "/tokens/{address}",
+      "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
