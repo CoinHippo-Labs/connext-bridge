@@ -47,48 +47,46 @@ import { numberFormat, ellipseAddress } from '../../lib/utils'
 
 import { BALANCES_DATA, TOKENS_DATA, ENS_DATA } from '../../reducers/types'
 
-const refresh_estimated_fees_second = Number(process.env.NEXT_PUBLIC_REFRESH_ESTIMATED_FEES_SECOND)
-const expiry_hours = Number(process.env.NEXT_PUBLIC_EXPIRY_HOURS)
-const bid_expires_second = Number(process.env.NEXT_PUBLIC_BID_EXPIRES_SECOND)
-const approve_response_countdown_second = 10
+const expiry_hours = 72
+const refresh_estimated_fees_seconds = 30
+const bid_interval_seconds = 6
+const approve_response_countdown_seconds = 10
+
+const check_balances = !['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK)
+const min_amount = Math.pow(10, -6)
+
+const protocols = [
+  { id: 'connext', value: null, title: 'Connext', image: '/logos/externals/connext/logo_with_title.png' },
+  { id: 'nomad', value: 'nomad', title: 'Nomad', image: '/logos/externals/nomad/logo.svg' },
+]
+const defaultInfiniteApproval = false
+const defaultAdvancedOptions = {
+  receiving_address: '',
+  contract_address: '',
+  call_data: '',
+  preferred_router: '',
+  initiator: '',
+}
 
 BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
 
-const minAmount = Math.pow(10, -6)
-
-const check_balances = true && !['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK)
-
 export default function CrosschainBridge() {
   const dispatch = useDispatch()
-  const { preferences, announcement, chains, assets, chains_status, routers_status, routers_assets, balances, tokens, ens, wallet, sdk, rpcs } = useSelector(state => ({ preferences: state.preferences, announcement: state.announcement, chains: state.chains, assets: state.assets, chains_status: state.chains_status, routers_status: state.routers_status, routers_assets: state.routers_assets, balances: state.balances, tokens: state.tokens, ens: state.ens, wallet: state.wallet, sdk: state.sdk, rpcs: state.rpcs }), shallowEqual)
+  const { preferences, announcement, chains, assets, tokens, ens, chains_status, routers_status, routers_assets, wallet, sdk, rpcs, balances } = useSelector(state => ({ preferences: state.preferences, announcement: state.announcement, chains: state.chains, assets: state.assets, tokens: state.tokens, ens: state.ens, chains_status: state.chains_status, routers_status: state.routers_status, routers_assets: state.routers_assets, sdk: state.sdk, rpcs: state.rpcs, wallet: state.wallet, balances: state.balances }), shallowEqual)
   const { theme } = { ...preferences }
   const { announcement_data } = { ...announcement }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
+  const { tokens_data } = { ...tokens }
+  const { ens_data } = { ...ens }
   const { chains_status_data } = { ...chains_status }
   const { routers_status_data } = { ...routers_status }
   const { routers_assets_data } = { ...routers_assets }
-  const { balances_data } = { ...balances }
-  const { tokens_data } = { ...tokens }
-  const { ens_data } = { ...ens }
-  const { wallet_data } = { ...wallet }
-  const { provider, web3_provider, signer, chain_id, address } = { ...wallet_data }
   const { sdk_data } = { ...sdk }
   const { rpcs_data } = { ...rpcs }
-
-  const protocols = [
-    { id: 'connext', value: null, title: 'Connext', image: '/logos/externals/connext/logo_with_title.png' },
-    { id: 'nomad', value: 'nomad', title: 'Nomad', image: '/logos/externals/nomad/logo.svg' },
-  ]
-
-  const defaultInfiniteApproval = false
-  const defaultAdvancedOptions = {
-    receiving_address: '',
-    contract_address: '',
-    call_data: '',
-    preferred_router: '',
-    initiator: '',
-  }
+  const { wallet_data } = { ...wallet }
+  const { provider, web3_provider, signer, chain_id, address } = { ...wallet_data }
+  const { balances_data } = { ...balances }
 
   const [controller, setController] = useState(new AbortController())
 
@@ -98,21 +96,19 @@ export default function CrosschainBridge() {
   const [advancedOptions, setAdvancedOptions] = useState(defaultAdvancedOptions)
 
   const [estimateTrigger, setEstimateTrigger] = useState(null)
+  const [fees, setFees] = useState(null)
+  const [estimatingFees, setEstimatingFees] = useState(null)
+  const [refreshEstimatedFeesSeconds, setRefreshEstimatedFeesSeconds] = useState(null)
 
   const [tokenApproved, setTokenApproved] = useState(null)
   const [tokenApproveResponse, setTokenApproveResponse] = useState(null)
   const [tokenApproveResponseCountDown, setTokenApproveResponseCountDown] = useState(null)
 
-  const [fees, setFees] = useState(null)
-  const [estimatingFees, setEstimatingFees] = useState(null)
-  const [refreshEstimatedFeesSecond, setRefreshEstimatedFeesSecond] = useState(null)
-
   const [transactionId, setTransactionId] = useState(getRandomBytes32())
   const [estimatedAmount, setEstimatedAmount] = useState(null)
   const [estimatingAmount, setEstimatingAmount] = useState(null)
   const [estimatedAmountResponse, setEstimatedAmountResponse] = useState(null)
-  const [bidExpiresSecond, setBidExpiresSecond] = useState(null)
-  const [numReceivedBid, setNumReceivedBid] = useState(null)
+  const [bidIntervalSeconds, setBidIntervalSeconds] = useState(null)
   const [confirmFeesCollapsed, setConfirmFeesCollapsed] = useState(null)
 
   const [startingSwap, setStartingSwap] = useState(null)
@@ -125,10 +121,9 @@ export default function CrosschainBridge() {
   // wallet
   useEffect(() => {
     if (chain_id && (!swapConfig.fromChainId || !swapConfig.toChainId) && swapConfig.toChainId !== chain_id) {
-      if (chains_data?.findIndex(_chain => !_chain?.disabled && _chain?.chain_id === chain_id) > -1) {
+      if (chains_data?.findIndex(c => !c?.disabled && c?.chain_id === chain_id) > -1) {
         setSwapConfig({ ...swapConfig, fromChainId: chain_id })
       }
-
       getChainBalances(chain_id)
     }
   }, [chain_id, chains_data])
@@ -140,14 +135,12 @@ export default function CrosschainBridge() {
     })
 
     if (address) {
-      // if (swapConfig.fromAssetId || swapConfig.toAssetId) {
-        if (swapConfig.fromChainId) {
-          getChainBalances(swapConfig.fromChainId)
-        }
-        if (swapConfig.toChainId) {
-          getChainBalances(swapConfig.toChainId)
-        }
-      // }
+      if (swapConfig.fromChainId) {
+        getChainBalances(swapConfig.fromChainId)
+      }
+      if (swapConfig.toChainId) {
+        getChainBalances(swapConfig.toChainId)
+      }
     }
     else {
       reset(true)
@@ -200,47 +193,46 @@ export default function CrosschainBridge() {
 
   // fees
   useEffect(() => {
-    if (typeof refreshEstimatedFeesSecond === 'number') {
-      if (refreshEstimatedFeesSecond === 0) {
+    if (typeof refreshEstimatedFeesSeconds === 'number') {
+      if (refreshEstimatedFeesSeconds === 0) {
         if (typeof swapConfig.amount !== 'number') {
           setEstimateTrigger(moment().valueOf())
         }
       }
       else { 
         const interval = setInterval(() => {
-          if (refreshEstimatedFeesSecond - 1 > -1) {
-            setRefreshEstimatedFeesSecond(refreshEstimatedFeesSecond - 1)
+          if (refreshEstimatedFeesSeconds - 1 > -1) {
+            setRefreshEstimatedFeesSeconds(refreshEstimatedFeesSeconds - 1)
           }
         }, 1000)
         return () => clearInterval(interval)
       }
     }
-  }, [refreshEstimatedFeesSecond])
+  }, [refreshEstimatedFeesSeconds])
 
   useEffect(() => {
     if (typeof estimatingFees === 'boolean' && !estimatingFees) {
-      setRefreshEstimatedFeesSecond(refresh_estimated_fees_second)
+      setRefreshEstimatedFeesSeconds(refresh_estimated_fees_seconds)
     }
   }, [estimatingFees])
   // fees
 
   // bid
   useEffect(() => {
-    if (typeof bidExpiresSecond === 'number') {
-      if (bidExpiresSecond === -1) {
-        setBidExpiresSecond(bid_expires_second)
-        setNumReceivedBid((numReceivedBid || 0) + 1)
+    if (typeof bidIntervalSeconds === 'number') {
+      if (bidIntervalSeconds === -1) {
+        setBidIntervalSeconds(bid_interval_seconds)
       }
       else {
         const interval = setInterval(() => {
-          if (bidExpiresSecond - 1 > -2) {
-            setBidExpiresSecond(bidExpiresSecond - 1)
+          if (bidIntervalSeconds - 1 > -2) {
+            setBidIntervalSeconds(bidIntervalSeconds - 1)
           }
         }, 1000)
         return () => clearInterval(interval)
       }
     }
-  }, [bidExpiresSecond])
+  }, [bidIntervalSeconds])
   // bid
 
   // approve
@@ -276,7 +268,7 @@ export default function CrosschainBridge() {
   useEffect(() => {
     if (['success'].includes(tokenApproveResponse?.status)) {
       if (!tokenApproveResponseCountDown) {
-        setTokenApproveResponseCountDown(approve_response_countdown_second)
+        setTokenApproveResponseCountDown(approve_response_countdown_seconds)
       }
     }
   }, [tokenApproveResponse])
@@ -546,7 +538,7 @@ export default function CrosschainBridge() {
     }
   }
 
-  const isBreakAll = message => ['code=', ' 0x'].findIndex(pattern => message?.includes(pattern)) > -1
+  const isBreakAll = message => ['code=', ' 0x'].findIndex(p => message?.includes(p)) > -1
 
   const getChainPrepareGasFee = async chain_id => {
     let gasFee
@@ -579,7 +571,7 @@ export default function CrosschainBridge() {
       if (fromContract && toContract) {      
         setEstimatedAmountResponse(null)
 
-        const prepareGasFee = fromContract?.is_native && await getChainPrepareGasFee(swapConfig.fromChainId)
+        const prepareGasFee = fromContract?.contract_address === constants.AddressZero && await getChainPrepareGasFee(swapConfig.fromChainId)
 
         if (typeof swapConfig.amount === 'number') {
           setTokenApproveResponse(null)
@@ -595,8 +587,7 @@ export default function CrosschainBridge() {
             if (!controller.signal.aborted) {
               setEstimatingAmount(true)
 
-              setBidExpiresSecond(bid_expires_second)
-              setNumReceivedBid(0)
+              setBidIntervalSeconds(bid_interval_seconds)
 
               try {
                 const response = await sdk_data.getTransferQuote({
@@ -648,8 +639,7 @@ export default function CrosschainBridge() {
 
                     setEstimatedAmount(response)
 
-                    setBidExpiresSecond(null)
-                    setNumReceivedBid(null)
+                    setBidIntervalSeconds(null)
                   }
                 }
               } catch (error) {
@@ -779,7 +769,7 @@ export default function CrosschainBridge() {
         mainnet.registerSigner(fromChainNomadId, signer)
       }
 
-      const response = fromContract?.is_native ?
+      const response = fromContract?.contract_address === constants.AddressZero ?
         await ((isTestnet ? dev : mainnet).sendNative(
           fromChainNomadId,
           toChainNomadId,
@@ -823,13 +813,12 @@ export default function CrosschainBridge() {
 
     setFees(null)
     setEstimatingFees(null)
-    setRefreshEstimatedFeesSecond(null)
+    setRefreshEstimatedFeesSeconds(null)
 
     setEstimatedAmount(null)
     setEstimatingAmount(null)
     setEstimatedAmountResponse(null)
-    setBidExpiresSecond(null)
-    setNumReceivedBid(null)
+    setBidIntervalSeconds(null)
 
     setStartingSwap(null)
     if (isReset) {
@@ -877,23 +866,23 @@ export default function CrosschainBridge() {
 
   const fromChainSynced = getChainSynced(swapConfig.fromChainId)
   const toChainSynced = getChainSynced(swapConfig.toChainId)
-  const unsyncedChains = [!fromChainSynced && fromChain, !toChainSynced && toChain].filter(_chain => _chain)
+  const unsyncedChains = [!fromChainSynced && fromChain, !toChainSynced && toChain].filter(c => c)
 
-  const fromAsset = assets_data?.find(_asset => _asset?.id === swapConfig.fromAssetId)
-  const toAsset = assets_data?.find(_asset => _asset?.id === swapConfig.toAssetId)
-  const fromContract = fromAsset?.contracts?.find(_contract => _contract?.chain_id === swapConfig.fromChainId)
-  const toContract = toAsset?.contracts?.find(_contract => _contract?.chain_id === swapConfig.toChainId)
+  const fromAsset = assets_data?.find(a => a?.id === swapConfig.fromAssetId)
+  const toAsset = assets_data?.find(a => a?.id === swapConfig.toAssetId)
+  const fromContract = fromAsset?.contracts?.find(c => c?.chain_id === swapConfig.fromChainId)
+  const toContract = toAsset?.contracts?.find(c => c?.chain_id === swapConfig.toChainId)
 
   const fromBalance = getChainBalance(swapConfig.fromChainId, 'from')
   const fromBalanceAmount = fromBalance?.amount || 0
   const toBalance = getChainBalance(swapConfig.toChainId, 'to')
 
-  const confirmFromChain = chains_data?.find(_chain => _chain?.chain_id === estimatedAmount?.bid?.sendingChainId)
-  const confirmToChain = chains_data?.find(_chain => _chain?.chain_id === estimatedAmount?.bid?.receivingChainId) 
-  const confirmFromAsset = assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract.chain_id === estimatedAmount?.bid?.sendingChainId && _contract.contract_address?.toLowerCase() === estimatedAmount?.bid?.sendingAssetId?.toLowerCase()))
-  const confirmToAsset = assets_data?.find(_asset => _asset?.contracts?.find(_contract => _contract.chain_id === estimatedAmount?.bid?.receivingChainId && _contract.contract_address?.toLowerCase() === estimatedAmount?.bid?.receivingAssetId?.toLowerCase()))
-  const confirmFromContract = confirmFromAsset?.contracts?.find(_contract => _contract?.chain_id === estimatedAmount?.bid?.sendingChainId)
-  const confirmToContract = confirmToAsset?.contracts?.find(_contract => _contract?.chain_id === estimatedAmount?.bid?.receivingChainId)
+  const confirmFromChain = chains_data?.find(c => c?.chain_id === estimatedAmount?.bid?.sendingChainId)
+  const confirmToChain = chains_data?.find(c => c?.chain_id === estimatedAmount?.bid?.receivingChainId) 
+  const confirmFromAsset = assets_data?.find(a => a?.contracts?.find(c => c.chain_id === estimatedAmount?.bid?.sendingChainId && c.contract_address?.toLowerCase() === estimatedAmount?.bid?.sendingAssetId?.toLowerCase()))
+  const confirmToAsset = assets_data?.find(a => a?.contracts?.find(c => c.chain_id === estimatedAmount?.bid?.receivingChainId && c.contract_address?.toLowerCase() === estimatedAmount?.bid?.receivingAssetId?.toLowerCase()))
+  const confirmFromContract = confirmFromAsset?.contracts?.find(c => c?.chain_id === estimatedAmount?.bid?.sendingChainId)
+  const confirmToContract = confirmToAsset?.contracts?.find(c => c?.chain_id === estimatedAmount?.bid?.receivingChainId)
   let receivingAddress = estimatedAmount?.bid?.receivingAddress
   const confirmAmount = confirmFromContract && estimatedAmount?.bid?.amount && BigNumber(estimatedAmount.bid.amount).shiftedBy(-confirmFromContract?.contract_decimals).toNumber()
   const confirmRelayerFee = confirmToContract && estimatedAmount && BigNumber(estimatedAmount.metaTxRelayerFee || '0').shiftedBy(-confirmToContract?.contract_decimals).toNumber()
@@ -910,7 +899,7 @@ export default function CrosschainBridge() {
   // const confirmFees = confirmToContract && estimatedAmount && BigNumber(estimatedAmount.totalFee || '0').shiftedBy(-confirmToContract?.contract_decimals).toNumber()
 
   let maxBalanceAmount = fromBalance?.amount || 0
-  maxBalanceAmount = maxBalanceAmount > minAmount ? maxBalanceAmount : 0
+  maxBalanceAmount = maxBalanceAmount > min_amount ? maxBalanceAmount : 0
   let maxTransfer = null
   let maxAmount = maxBalanceAmount
   if (swapConfig.fromAssetId && swapConfig.toAssetId) {
@@ -920,7 +909,7 @@ export default function CrosschainBridge() {
       maxAmount = maxTransfer.amount
     }
   }
-  maxAmount = maxAmount > minAmount ? maxAmount : 0
+  maxAmount = maxAmount > min_amount ? maxAmount : 0
   const isMaxLiquidity = maxAmount < maxBalanceAmount && typeof swapConfig.amount === 'number' && swapConfig.amount === maxAmount
   const isExceedMaxLiquidity = typeof maxTransfer?.amount === 'number' && typeof swapConfig.amount === 'number' && swapConfig.amount > maxTransfer.amount
 
@@ -941,8 +930,6 @@ export default function CrosschainBridge() {
       }
     } catch (error) {}
   }
-
-  const isNative = fromContract?.is_native
 
   const estimatedFees = typeof confirmFees === 'number' ? confirmFees : fees?.total//fees && ((fees.gas || 0) + (fees.relayer || 0) + (fees.router || 0))
   // hotfix
@@ -1397,26 +1384,23 @@ export default function CrosschainBridge() {
                       </div>
                       <div className={`w-48 sm:w-full order-3 sm:order-4 sm:col-span-${supportNomad ? 2 : 3} -mt-1.5 sm:-mt-5 mx-auto pt-3 sm:pt-2`}>
                         <div className="w-full h-4 flex items-center justify-end mx-auto">
-                          {/*isNative ?
-                            null
-                            :*/
-                            true && balances_data?.[swapConfig.fromChainId] ?
-                              <button
-                                onClick={() => {
-                                  setSwapConfig({
-                                    ...swapConfig,
-                                    amount: maxAmount,
-                                  })
-                                }}
-                                className={`text-gray-800 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100 text-sm font-bold space-x-1 mr-${isMaxLiquidity ? 0 : '4 pr-0.5'}`}
-                              >
-                                <span>Max</span>
-                                {isMaxLiquidity && (
-                                  <span className="text-gray-400 dark:text-gray-500 text-xs font-normal">(available liquidity)</span>
-                                )}
-                              </button>
-                              :
-                              <ThreeDots color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" className="mr-4 pr-0.5" />
+                          {balances_data?.[swapConfig.fromChainId] ?
+                            <button
+                              onClick={() => {
+                                setSwapConfig({
+                                  ...swapConfig,
+                                  amount: maxAmount,
+                                })
+                              }}
+                              className={`text-gray-800 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100 text-sm font-bold space-x-1 mr-${isMaxLiquidity ? 0 : '4 pr-0.5'}`}
+                            >
+                              <span>Max</span>
+                              {isMaxLiquidity && (
+                                <span className="text-gray-400 dark:text-gray-500 text-xs font-normal">(available liquidity)</span>
+                              )}
+                            </button>
+                            :
+                            <ThreeDots color={theme === 'dark' ? '#F9FAFB' : '#D1D5DB'} width="16" height="16" className="mr-4 pr-0.5" />
                           }
                         </div>
                       </div>
@@ -1450,7 +1434,7 @@ export default function CrosschainBridge() {
                               <span className="font-mono">{typeof estimatedFees === 'number' ? `${estimatedAmount ? '' : '~'}${numberFormat(estimatedFees, '0,0.000000')}` : 'N/A'}</span>
                               <span className="font-semibold">{toContract?.symbol || toAsset?.symbol}</span>
                               {!estimatedAmount && (
-                                <span className="font-mono lowercase text-gray-400 dark:text-gray-600">({refreshEstimatedFeesSecond}s)</span>
+                                <span className="font-mono lowercase text-gray-400 dark:text-gray-600">({refreshEstimatedFeesSeconds}s)</span>
                               )}
                             </span>
                           )}
@@ -1802,8 +1786,8 @@ export default function CrosschainBridge() {
                                     {swapConfig.fromAssetId === swapConfig.toAssetId && (
                                       <span className="font-bold">{fromContract?.symbol || fromAsset?.symbol}</span>
                                     )}
-                                    {estimatingAmount && typeof bidExpiresSecond === 'number' && (
-                                      <span className="text-gray-200 dark:text-gray-100 text-sm font-medium mt-0.5">{numReceivedBid ? '- Next bid in'/*`- Received ${numReceivedBid} Bid${numReceivedBid > 1 ? 's' : ''}`*/ : '- Next bid in'} ({bidExpiresSecond}s)</span>
+                                    {estimatingAmount && typeof bidIntervalSeconds === 'number' && (
+                                      <span className="text-gray-200 dark:text-gray-100 text-sm font-medium mt-0.5">- Next bid in ({bidIntervalSeconds}s)</span>
                                     )}
                                   </button>
                                   :
