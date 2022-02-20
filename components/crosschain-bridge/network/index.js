@@ -11,10 +11,12 @@ import Modal from '../../modals/modal-confirm'
 import { chainTitle } from '../../../lib/object/chain'
 
 export default function DropdownNetwork({ disabled, chain_id, onSelect, from, to, side = 'from' }) {
-  const { preferences, chains, chains_status } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, chains_status: state.chains_status }), shallowEqual)
+  const { preferences, chains, chains_status, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, chains_status: state.chains_status, wallet: state.wallet }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { chains_status_data } = { ...chains_status }
+  const { wallet_data } = { ...wallet }
+  const { address } = { ...wallet_data }
 
   const [hidden, setHidden] = useState(true)
 
@@ -38,7 +40,9 @@ export default function DropdownNetwork({ disabled, chain_id, onSelect, from, to
           {chains_status_data ?
             <IoRadioButtonOn size={16} className={`${chain?.disabled ? 'text-gray-400 dark:text-gray-600' : chains_status_data?.find(c => c?.id === chain.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
             :
-            <Puff color={theme === 'dark' ? '#60A5FA' : '#2563EB'} width="16" height="16" />
+            address && (
+              <Puff color={theme === 'dark' ? '#60A5FA' : '#2563EB'} width="16" height="16" />
+            )
           }
           <Img
             src={chain.image}

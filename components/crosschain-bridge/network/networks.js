@@ -6,10 +6,12 @@ import { Puff } from 'react-loader-spinner'
 import { IoRadioButtonOn } from 'react-icons/io5'
 
 export default function Networks({ chain_id, inputSearch, handleDropdownClick, from, to }) {
-  const { preferences, chains, chains_status } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, chains_status: state.chains_status }), shallowEqual)
+  const { preferences, chains, chains_status, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, chains_status: state.chains_status, wallet: state.wallet }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { chains_status_data } = { ...chains_status }
+  const { wallet_data } = { ...wallet }
+  const { address } = { ...wallet_data }
 
   const _chains = _.orderBy(chains_data?.filter(item => !item.menu_hidden).filter(item => !inputSearch || item).map(item => {
     return { ...item, scores: ['short_name', 'title', 'id'].map(field => item[field] && item[field].toLowerCase().includes(inputSearch.toLowerCase()) ? inputSearch.length > 1 ? (inputSearch.length / item[field].length) : .5 : -1) }
@@ -44,7 +46,9 @@ export default function Networks({ chain_id, inputSearch, handleDropdownClick, f
               {chains_status_data ?
                 <IoRadioButtonOn size={16} className={`w-4 ${chains_status_data?.find(c => c?.chain_id === item.chain_id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
                 :
-                <Puff color={theme === 'dark' ? '#60A5FA' : '#2563EB'} width="16" height="16" />
+                address && (
+                  <Puff color={theme === 'dark' ? '#60A5FA' : '#2563EB'} width="16" height="16" />
+                )
               }
               <Img
                 src={item.image}

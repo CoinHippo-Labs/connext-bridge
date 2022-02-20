@@ -1364,7 +1364,7 @@ export default function CrosschainBridge() {
                   useNomad={useNomad}
                 />
                 {isSupport() && (swapData || balances_data?.[swapConfig.fromChainId]) && (typeof swapConfig.amount === 'number' || (mustChangeChain && web3_provider)) ?
-                  mustChangeChain ?
+                  mustChangeChain && web3_provider ?
                     <Wallet
                       chainIdToConnect={swapConfig.fromChainId}
                       buttonDisconnectTitle={<>
