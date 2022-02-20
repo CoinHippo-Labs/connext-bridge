@@ -1001,15 +1001,6 @@ export default function CrosschainBridge() {
                       disabled={actionDisabled}
                       swapConfig={swapConfig}
                       onSelect={asset_id => {
-                        if (asset_id !== swapConfig.fromAssetId) {
-                          if (swapConfig.fromChainId) {
-                            getChainBalances(swapConfig.fromChainId)
-                          }
-                          if (swapConfig.toChainId) {
-                            getChainBalances(swapConfig.toChainId)
-                          }
-                        }
-
                         setSwapConfig({
                           ...swapConfig,
                           fromAssetId: asset_id,
@@ -1022,6 +1013,15 @@ export default function CrosschainBridge() {
                               asset_id, // swapConfig.toAssetId,
                           amount: asset_id !== swapConfig.fromAssetId && typeof swapConfig.amount === 'number' ? null : swapConfig.amount,
                         })
+
+                        if (asset_id !== swapConfig.fromAssetId) {
+                          if (swapConfig.fromChainId) {
+                            getChainBalances(swapConfig.fromChainId)
+                          }
+                          if (swapConfig.toChainId) {
+                            getChainBalances(swapConfig.toChainId)
+                          }
+                        }
                       }}
                       from={swapConfig.fromAssetId}
                       to={swapConfig.toAssetId}
@@ -1043,6 +1043,13 @@ export default function CrosschainBridge() {
                           amount: null,
                         })
                         setInfiniteApproval(defaultInfiniteApproval)
+
+                        if (swapConfig.fromChainId) {
+                          getChainBalances(swapConfig.fromChainId)
+                        }
+                        if (swapConfig.toChainId) {
+                          getChainBalances(swapConfig.toChainId)
+                        }
                       }}
                       className={`${actionDisabled ? 'cursor-not-allowed' : ''}`}
                     >
@@ -1077,15 +1084,6 @@ export default function CrosschainBridge() {
                       disabled={actionDisabled}
                       swapConfig={swapConfig}
                       onSelect={asset_id => {
-                        if (asset_id !== swapConfig.toAssetId) {
-                          if (swapConfig.fromChainId) {
-                            getChainBalances(swapConfig.fromChainId)
-                          }
-                          if (swapConfig.toChainId) {
-                            getChainBalances(swapConfig.toChainId)
-                          }
-                        }
-
                         setSwapConfig({
                           ...swapConfig,
                           fromAssetId: !swapConfig.fromAssetId ?
@@ -1098,6 +1096,15 @@ export default function CrosschainBridge() {
                           toAssetId: asset_id,
                           amount: asset_id !== swapConfig.toAssetId && typeof swapConfig.amount === 'number' ? null : swapConfig.amount,
                         })
+
+                        if (asset_id !== swapConfig.toAssetId) {
+                          if (swapConfig.fromChainId) {
+                            getChainBalances(swapConfig.fromChainId)
+                          }
+                          if (swapConfig.toChainId) {
+                            getChainBalances(swapConfig.toChainId)
+                          }
+                        }
                       }}
                       from={swapConfig.fromAssetId}
                       to={swapConfig.toAssetId}
