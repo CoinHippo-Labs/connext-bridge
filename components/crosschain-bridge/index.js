@@ -391,7 +391,6 @@ export default function CrosschainBridge() {
         for (let i = 0; i < balances.length; i ++) {
           const balance = balances[i]?.toString()
           const contract = contracts[i]
-
           if (balance && contract) {
             const _balance = BigNumber(balance).shiftedBy(-contract.contract_decimals).toNumber()
             assets.push({
@@ -834,17 +833,17 @@ export default function CrosschainBridge() {
   const unlimitAllowance = tokenApproved === true || (tokenApproved && tokenApproved?.toNumber() >= constants.MaxUint256)
   const allowanceComponent = (
     <>
-      <div className={`flex items-center ${!infiniteApproval ? 'text-gray-400 dark:text-gray-600' : 'text-blue-500 dark:text-white'} space-x-0.5`}>
-        {infiniteApproval ?
+      <div className={`flex items-center ${infiniteApproval || unlimitAllowance ? 'text-blue-500 dark:text-white' : 'text-gray-400 dark:text-gray-600'} space-x-0.5`}>
+        {infiniteApproval || unlimitAllowance ?
           <BiInfinite size={16} />
           :
           <BiLock size={16} />
         }
-        <span className="font-medium">{infiniteApproval ? 'Infinite' : 'Exact'}</span>
+        <span className="font-medium">{infiniteApproval || unlimitAllowance ? 'Infinite' : 'Exact'}</span>
       </div>
       <Switch
         disabled={actionDisabled || unlimitAllowance}
-        checked={infiniteApproval}
+        checked={infiniteApproval || unlimitAllowance}
         onChange={() => setInfiniteApproval(!infiniteApproval)}
         onColor={theme === 'dark' ? '#D1D5DB' : '#BFDBFE'}
         onHandleColor={theme === 'dark' ? '#FFFFFF' : '#3B82F6'}
@@ -990,8 +989,11 @@ export default function CrosschainBridge() {
                           toChainId,
                         })
 
-                        if (chain_id !== swapConfig.toChainId) {
-                          getChainBalances(chain_id)
+                        if (fromChainId) {
+                          getChainBalances(fromChainId)
+                        }
+                        if (toChainId) {
+                          getChainBalances(toChainId)
                         }
                       }}
                       from={swapConfig.fromChainId}
@@ -1072,8 +1074,11 @@ export default function CrosschainBridge() {
                           toChainId,
                         })
 
-                        if (chain_id !== swapConfig.fromChainId) {
-                          getChainBalances(chain_id)
+                        if (fromChainId) {
+                          getChainBalances(fromChainId)
+                        }
+                        if (toChainId) {
+                          getChainBalances(toChainId)
                         }
                       }}
                       from={swapConfig.fromChainId}
@@ -1318,7 +1323,7 @@ export default function CrosschainBridge() {
                     </div>
                   </div>
                 )}
-                {!useNomad && swapConfig.fromAssetId && fromContract?.contract_address !== constants.AddressZero && typeof swapConfig.amount === 'number' && (
+                {!useNomad && address && swapConfig.fromAssetId && fromContract?.contract_address !== constants.AddressZero && typeof swapConfig.amount === 'number' && (
                   <div className="grid grid-flow-row grid-cols-2 sm:grid-cols-5 gap-6 sm:mx-3">
                     <div className="sm:col-span-2 flex items-center justify-start space-x-2">
                       <span className="text-gray-400 dark:text-gray-600 text-base">Allowance</span>
