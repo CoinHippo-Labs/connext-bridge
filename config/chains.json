@@ -191,7 +191,7 @@
       {
         "chainId": "0xfa",
         "chainName": "Fantom Opera",
-        "rpcUrls": ["https://rpc.ftm.tools", "https://rpcapi.fantom.network"],
+        "rpcUrls": ["https://rpcapi.fantom.network"],
         "nativeCurrency": {
           "name": "Fantom",
           "symbol": "FTM",
