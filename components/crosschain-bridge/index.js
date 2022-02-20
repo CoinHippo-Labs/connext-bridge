@@ -506,7 +506,7 @@ export default function CrosschainBridge() {
 
     setTokenApproveResponse(null)
     try {
-      const tx_approve = await approve(signer, contract?.contract_address, getDeployedTransactionManagerContract(swapConfig.fromChainId)?.address, infiniteApproval ? constants.MaxUint256 : BigNumber(swapConfig.amount).shiftedBy(contract?.contract_decimals).toString())
+      const tx_approve = await approve(signer, contract?.contract_address, getDeployedTransactionManagerContract(swapConfig.fromChainId)?.address, infiniteApproval ? constants.MaxUint256 : BigNumber(swapConfig.amount).decimalPlaces(6, BigNumber.ROUND_CEIL).shiftedBy(contract?.contract_decimals).toString())
       const tx_hash = tx_approve?.hash
       setTokenApproveResponse({ status: 'pending', message: `Wait for ${contract?.symbol || asset?.symbol} Approval Confirmation`, tx_hash })
 
