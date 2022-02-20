@@ -7,7 +7,7 @@ import Web3 from 'web3'
 import { providers, constants, utils } from 'ethers'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
-import { TailSpin, Puff, ThreeDots, Bars, Triangle, Oval } from 'react-loader-spinner'
+import { TailSpin, Puff, Bars, Triangle, Oval } from 'react-loader-spinner'
 import Pulse from 'react-reveal/Pulse'
 import Flip from 'react-reveal/Flip'
 import LightSpeed from 'react-reveal/LightSpeed'
@@ -440,7 +440,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
           content={<span className="flex flex-wrap items-center">
             <span className="mr-1.5">{transferResponse.message}</span>
             {transferResponse.status === 'pending' && (
-              <ThreeDots color={theme === 'dark' ? 'white' : 'white'} width="16" height="16" className="mt-1 mr-1.5" />
+              <TailSpin color={theme === 'dark' ? 'white' : 'white'} width="16" height="16" className="mr-1.5" />
             )}
             {(canCancelSendingTx && transfering === 'cancel' ? generalTx?.sendingChain : generalTx?.receivingChain)?.explorer?.url && transferResponse.tx_hash && (
               <a

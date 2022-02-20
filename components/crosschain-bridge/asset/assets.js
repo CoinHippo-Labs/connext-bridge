@@ -68,7 +68,7 @@ export default function Assets({ asset_id, inputSearch, handleDropdownClick, cha
           <div
             key={i}
             onClick={e => {
-              if (!e.target.className?.baseVal?.includes('copy') && !e.target.className?.includes('explorer')) {
+              if (!e.target.className?.baseVal?.includes('copy') && (typeof e.target.className !== 'string' || !e.target.className?.includes('explorer'))) {
                 handleDropdownClick(item.id)
               }
             }}

@@ -15,7 +15,7 @@ export default function Search({ chain_id, updateChainId, from, to }) {
           onChange={e => setInputSearch(e.target.value)}
           type="search"
           placeholder="Search..."
-          className="w-full h-10 bg-transparent appearance-none border-gray-300 focus:border-indigo-500 dark:border-gray-700 focus:ring-indigo-600 dark:focus:ring-gray-600 rounded-3xl text-sm pl-10 pr-5"
+          className="w-full h-10 bg-transparent appearance-none border-gray-300 focus:border-blue-500 dark:border-gray-700 focus:ring-blue-600 dark:focus:ring-gray-600 rounded-3xl text-sm pl-10 pr-5"
         />
         <div className="absolute top-0 left-0 mt-3 ml-4">
           <FiSearch className="w-4 h-4 stroke-current" />
@@ -24,9 +24,9 @@ export default function Search({ chain_id, updateChainId, from, to }) {
           <Networks
             chain_id={chain_id}
             inputSearch={inputSearch}
-            handleDropdownClick={_chain_id => {
+            handleDropdownClick={chain_id => {
               if (updateChainId) {
-                updateChainId(_chain_id)
+                updateChainId(chain_id)
               }
             }}
             from={from}

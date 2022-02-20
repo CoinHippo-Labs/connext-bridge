@@ -121,7 +121,7 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, from, to
               }
             }}
             onWheel={e => e.target.blur()}
-            className={`w-48 bg-gray-50 focus:bg-gray-100 dark:bg-gray-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 dark:focus:ring-0 rounded-3xl font-mono text-lg font-medium text-right px-4`}
+            className={`w-48 bg-gray-50 focus:bg-gray-100 dark:bg-gray-800 dark:focus:bg-gray-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 dark:focus:ring-0 rounded-3xl font-mono text-lg font-medium text-right px-4`}
           />
       )}
     </div>
