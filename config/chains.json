@@ -81,7 +81,7 @@
       }
     ],
     "explorer": {
-      "name": "PolygonScan",
+      "name": "Polygonscan",
       "url": "https://polygonscan.com",
       "icon": "/logos/explorers/polygonscan.png",
       "block_path": "/block/{block}",

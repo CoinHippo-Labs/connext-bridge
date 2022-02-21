@@ -447,7 +447,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
                 href={`${(canCancelSendingTx && transfering === 'cancel' ? generalTx?.sendingChain : generalTx?.receivingChain).explorer.url}${(canCancelSendingTx && transfering === 'cancel' ? generalTx?.sendingChain : generalTx?.receivingChain).explorer.transaction_path?.replace('{tx}', transferResponse.tx_hash)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center font-semibold"
+                className="flex items-center font-semibold ml-1.5"
               >
                 <span>View on {(canCancelSendingTx && transfering === 'cancel' ? generalTx?.sendingChain : generalTx?.receivingChain).explorer.name}</span>
                 <TiArrowRight size={20} className="transform -rotate-45" />

@@ -40,7 +40,7 @@ import { domains, getENS } from '../../lib/api/ens'
 import { chainTitle } from '../../lib/object/chain'
 import { getApproved, approve } from '../../lib/object/contract'
 import { currency_symbol } from '../../lib/object/currency'
-import { numberFormat, ellipseAddress } from '../../lib/utils'
+import { numberFormat, ellipseAddress, sleep } from '../../lib/utils'
 
 import { BALANCES_DATA, ENS_DATA } from '../../reducers/types'
 
@@ -491,6 +491,9 @@ export default function CrosschainBridge() {
           approved = true
         }
         else {
+          if (is_after_approve) {
+            await sleep(5000)
+          }
           approved = await getApproved(signer, contract.contract_address, getDeployedTransactionManagerContract(swapConfig.fromChainId)?.address)
         }
       }
@@ -508,7 +511,6 @@ export default function CrosschainBridge() {
       const tx_approve = await approve(signer, contract?.contract_address, getDeployedTransactionManagerContract(swapConfig.fromChainId)?.address, infiniteApproval ? constants.MaxUint256 : BigNumber(swapConfig.amount).decimalPlaces(6, BigNumber.ROUND_CEIL).shiftedBy(contract?.contract_decimals).toString())
       const tx_hash = tx_approve?.hash
       setTokenApproveResponse({ status: 'pending', message: `Wait for ${contract?.symbol || asset?.symbol} Approval Confirmation`, tx_hash })
-
       await tx_approve.wait()
       const approved = await isTokenApproved(true)
       setTokenApproved(approved)
@@ -542,7 +544,7 @@ export default function CrosschainBridge() {
       const fromContract = fromAsset?.contracts?.find(c => c?.chain_id === swapConfig.fromChainId)
       const toContract = toAsset?.contracts?.find(c => c?.chain_id === swapConfig.toChainId)
 
-      if (fromContract && toContract) {      
+      if (fromContract && toContract) {
         setEstimatedAmountResponse(null)
         if (typeof swapConfig.amount === 'number') {
           setTokenApproveResponse(null)
@@ -896,7 +898,7 @@ export default function CrosschainBridge() {
                 href={`${fromChain.explorer.url}${fromChain.explorer.transaction_path?.replace('{tx}', tokenApproveResponse.tx_hash)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center font-semibold mr-1.5"
+                className="flex items-center font-semibold mx-1.5"
               >
                 <span>View on {fromChain.explorer.name}</span>
                 <TiArrowRight size={20} className="transform -rotate-45" />
