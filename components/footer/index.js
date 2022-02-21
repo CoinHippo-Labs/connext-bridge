@@ -86,7 +86,7 @@ export default function Footer() {
               rel="noopener noreferrer"
             >
               <Img
-                src="/logos/externals/ens.png"
+                src={`/logos/externals/ens/logo${theme === 'dark' ? '_white' : ''}.png`}
                 alt=""
                 className="w-4 h-4"
               />
