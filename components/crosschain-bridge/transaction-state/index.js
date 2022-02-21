@@ -414,7 +414,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
       rel="noopener noreferrer"
       className="underline text-blue-600 dark:text-white font-semibold"
     >
-      ConnextScan
+      {process.env.NEXT_PUBLIC_EXPLORER_NAME}
     </a>
   )
 
