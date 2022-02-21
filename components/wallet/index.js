@@ -3,8 +3,9 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import Web3Modal from 'web3modal'
 import WalletConnectProvider from '@walletconnect/web3-provider'
+import Portis from '@portis/web3'
+import WalletLink from 'walletlink'
 import { providers, utils } from 'ethers'
-import { Img } from 'react-image'
 import { IoWalletOutline } from 'react-icons/io5'
 
 import { WALLET_DATA, WALLET_RESET } from '../../reducers/types'
@@ -16,11 +17,11 @@ const providerOptions = {
       rpc: {
         1: `https://mainnet.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`,
         56: 'https://bsc-dataseed.binance.org',
-        137: 'https://rpc-mainnet.maticvigil.com',
+        137: 'https://polygon-rpc.com',
         42161: 'https://arb1.arbitrum.io/rpc',
         10: 'https://mainnet.optimism.io',
         43114: 'https://api.avax.network/ext/bc/C/rpc',
-        250: 'https://rpc.ftm.tools',
+        250: 'https://rpcapi.fantom.network',
         100: 'https://rpc.xdaichain.com',
         1284: 'https://rpc.api.moonbeam.network',
         1285: 'https://rpc.moonriver.moonbeam.network',
@@ -39,6 +40,20 @@ const providerOptions = {
       },
     },
   },
+  portis: process.env.NEXT_PUBLIC_PORTIS_ID && {
+    package: Portis,
+    options: {
+      id: process.env.NEXT_PUBLIC_PORTIS_ID,
+    },
+  },
+  walletlink: process.env.NEXT_PUBLIC_INFURA_ID && {
+    package: WalletLink,
+    options: {
+      infuraId: process.env.NEXT_PUBLIC_INFURA_ID,
+      appName: 'Coinbase Wallet',
+      appLogoUrl: '/logos/wallets/coinbase.svg',
+    },
+  },
 }
 
 const chainIdToNetwork = chain_id => {
@@ -48,9 +63,10 @@ const chainIdToNetwork = chain_id => {
     137: 'matic',
     42161: 'arbitrum',
     10: 'optimism',
-    // 43114: 'avax',
-    // 250: 'fantom',
+    43114: 'avalanche-fuji-mainnet',
+    250: 'fantom',
     100: 'xdai',
+    // 1284: 'moonbeam',
     // 1285: 'moonriver',
     // 122: 'fuse',
     3: 'ropsten',
@@ -93,7 +109,7 @@ export default function Wallet({ chainIdToConnect, main, hidden, disabled = fals
         providerOptions['custom-tally'] = {
           display: {
             name: 'Tally',
-            logo: '/logos/externals/tally/logo.svg',
+            logo: '/logos/wallets/tally.svg',
           },
           package: async () => {
             let provider = null
@@ -204,12 +220,6 @@ export default function Wallet({ chainIdToConnect, main, hidden, disabled = fals
           disconnect()
         }
         else {
-          // dispatch({
-          //   type: WALLET_DATA,
-          //   value: {
-          //     chain_id: Number(chainId),
-          //   },
-          // })
           connect()
         }
       }
@@ -286,11 +296,6 @@ export default function Wallet({ chainIdToConnect, main, hidden, disabled = fals
             <div className="flex items-center space-x-1.5">
               <span>Connect</span>
               <IoWalletOutline size={20} />
-              {/*<Img
-                src="/logos/wallets/metamask.png"
-                alt=""
-                className="w-4 h-4 -mr-1 mb-0.5"
-              />*/}
             </div>
           )}
         </button>
