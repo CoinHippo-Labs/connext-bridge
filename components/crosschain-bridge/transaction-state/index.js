@@ -347,26 +347,26 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
   )
 
   const fromAssetAmount = typeof fromAmount === 'number' && fromAmount > 0 && (
-    <div className={`min-w-max max-w-min bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center sm:justify-start space-x-2 mt-1.5 mx-auto ${finish ? 'sm:ml-0' : ''} py-1.5 px-3`}>
+    <div className={`min-w-max max-w-min bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center sm:justify-start space-x-2 mt-1.5 mx-auto ${finish ? 'sm:ml-0' : ''} py-1.5 px-2.5`}>
       <Img
         src={fromAsset.image}
         alt=""
-        className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
+        className="w-5 h-5 rounded-full"
       />
-      <span className="flex items-center font-mono text-base font-semibold">
+      <span className="flex items-center font-mono font-semibold">
         <span className="mr-1.5">{numberFormat(fromAmount, '0,0.000000', true)}</span>
         <span>{fromContract?.symbol || fromAsset?.symbol}</span>
       </span>
     </div>
   )
   const toAssetAmount = typeof toAmount === 'number' && toAmount > 0 && (
-    <div className={`min-w-max max-w-min bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center sm:justify-end space-x-2 mt-1.5 mx-auto ${finish ? 'sm:mr-0' : ''} py-1.5 px-3`}>
+    <div className={`min-w-max max-w-min bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center sm:justify-end space-x-2 mt-1.5 mx-auto ${finish ? 'sm:mr-0' : ''} py-1.5 px-2.5`}>
       <Img
         src={toAsset.image}
         alt=""
-        className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
+        className="w-5 h-5 rounded-full"
       />
-      <span className="flex items-center font-mono text-base font-semibold">
+      <span className="flex items-center font-mono font-semibold">
         <span className="mr-1.5">{numberFormat(toAmount, '0,0.000000', true)}</span>
         <span>{toContract?.symbol || toAsset?.symbol}</span>
       </span>
