@@ -29,7 +29,7 @@ xPollinate is ...
 ## Technology stacks
 - [Next.js](https://nextjs.org/)
 - [Connext SDK](https://github.com/connext/nxtp)
-- [Nomad SDk](https://github.com/nomad-xyz/nomad-monorepo)
+- [Nomad SDK](https://github.com/nomad-xyz/nomad-monorepo)
 - [web3.js](https://github.com/ChainSafe/web3.js)
 - [ethers.js](https://github.com/ethers-io/ethers.js)
 - [Web3Modal](https://github.com/Web3Modal/web3modal)
