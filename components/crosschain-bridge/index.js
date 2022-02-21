@@ -1055,8 +1055,8 @@ export default function CrosschainBridge() {
                       }}
                       className={`${actionDisabled ? 'cursor-not-allowed' : ''}`}
                     >
-                      <MdSwapVerticalCircle size={40} className="sm:hidden rounded-full shadow text-blue-400 hover:text-blue-600 dark:text-gray-800 dark:hover:text-white" />
-                      <MdSwapHorizontalCircle size={40} className="hidden sm:block rounded-full shadow text-blue-400 hover:text-blue-600 dark:text-gray-800 dark:hover:text-white" />
+                      <MdSwapVerticalCircle size={40} className="sm:hidden rounded-full shadow text-blue-400 hover:text-blue-600 dark:text-gray-700 dark:hover:text-white" />
+                      <MdSwapHorizontalCircle size={40} className="hidden sm:block rounded-full shadow text-blue-400 hover:text-blue-600 dark:text-gray-700 dark:hover:text-white" />
                     </button>
                   </div>
                   <div className="sm:col-span-2 flex flex-col items-center sm:items-end">

@@ -11,7 +11,7 @@ export default function Logo() {
     <div className="logo ml-2.5 mr-1 sm:mx-3">
       <Link href="/">
          <a className="w-full flex items-center">
-          <div className="sm:mr-3">
+          <div className="min-w-max sm:mr-3">
             <Img
               src={`/logos/logo${theme === 'dark' ? '_white' : ''}.png`}
               alt=""
@@ -19,7 +19,7 @@ export default function Logo() {
             />
           </div>
           <div className="hidden sm:block lg:block xl:block">
-            <div className="normal-case text-sm font-bold">{process.env.NEXT_PUBLIC_APP_NAME}</div>
+            <div className="normal-case text-base font-semibold">{process.env.NEXT_PUBLIC_APP_NAME}</div>
             <div className="whitespace-nowrap font-mono text-gray-400 dark:text-gray-500 text-xs">{process.env.NEXT_PUBLIC_NETWORK}</div>
           </div>
         </a>

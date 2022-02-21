@@ -303,7 +303,7 @@ export default function Navbar() {
                   rel="noopener noreferrer"
                   className="flex items-center uppercase text-blue-400 dark:text-blue-300 text-xs xl:text-sm font-medium mx-0 xl:mx-2"
                 >
-                  <span className="block xl:hidden">View TXs</span>
+                  <span className="block xl:hidden whitespace-nowrap">View TXs</span>
                   <span className="hidden xl:block">View Transactions</span>
                   <TiArrowRight size={20} className="transform -rotate-45 mt-0.5 sm:mt-0" />
                 </a>
@@ -316,7 +316,7 @@ export default function Navbar() {
                         <Img
                           src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${ens_data[address?.toLowerCase()].name}`}
                           alt=""
-                          className="w-8 h-8 rounded-full mr-2"
+                          className="w-6 h-6 rounded-full mr-2"
                         />
                       )}
                       <span className="text-gray-900 dark:text-white text-xs xl:text-sm font-semibold">

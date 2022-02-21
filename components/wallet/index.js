@@ -289,7 +289,7 @@ export default function Wallet({ chainIdToConnect, main, hidden, disabled = fals
         <button
           disabled={disabled}
           onClick={connect}
-          className={buttonConnectClassName || 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-3xl text-white font-semibold py-1.5 sm:py-2 px-3 sm:px-3.5'}
+          className={buttonConnectClassName || 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white font-semibold py-1.5 sm:py-2 pl-3 pr-2.5 sm:pl-3.5 sm:pr-3'}
           style={buttonConnectClassName?.includes('w-full') ? null : { width: 'max-content' }}
         >
           {buttonConnectTitle || (
