@@ -993,7 +993,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
           setHidden(true)
         }}
         noButtons={true}
-        modalClassName="sm:max-w-3xl lg:max-w-4xl max-h-screen lg:max-h-full overflow-y-scroll px-4 sm:px-0"
+        modalClassName="sm:max-w-3xl lg:max-w-4xl xl:max-w-5xl max-h-screen lg:max-h-full overflow-y-scroll px-4 sm:px-0"
       />
     </>
   )
