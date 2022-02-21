@@ -927,7 +927,7 @@ export default function CrosschainBridge() {
                 </div>
               </Alert>
             )}
-            {chains_status_data?.filter(c => !c.disabled && !c.synced).length > 0 && (
+            {chains_status_data?.filter(c => !c.disabled && !c.synced).filter(c => [swapConfig.fromChainId, swapConfig.toChainId].filter(_c => _c).length < 1 || [swapConfig.fromChainId, swapConfig.toChainId].includes(c.chain_id)).length > 0 && (
               <Alert
                 color="xl:max-w-lg bg-yellow-400 dark:bg-red-500 text-white text-left mx-auto"
                 icon={<TiWarning className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}

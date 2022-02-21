@@ -2,7 +2,10 @@ import { useSelector, shallowEqual } from 'react-redux'
 
 import moment from 'moment'
 import { Img } from 'react-image'
-import { FaHeart } from 'react-icons/fa'
+import { FaHeart, FaDiscord } from 'react-icons/fa'
+import { BsTwitter, BsTelegram, BsGithub } from 'react-icons/bs'
+
+import Popover from '../popover'
 
 import _package from '../../package.json'
 
@@ -26,7 +29,70 @@ export default function Footer() {
           )}
         </div>
       </span>
-      <span className="hidden lg:flex w-full lg:w-1/3 items-center justify-center text-gray-400">
+      <span className="hidden lg:flex w-full lg:w-1/3 items-center justify-center text-gray-400 space-x-2">
+        {process.env.NEXT_PUBLIC_TWITTER_USERNAME && (
+          <a
+            href={`https://twitter.com/${process.env.NEXT_PUBLIC_TWITTER_USERNAME}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <BsTwitter className="text-blue-400 dark:text-white text-base" />
+          </a>
+        )}
+        {process.env.NEXT_PUBLIC_TELEGRAM_USERNAME && (
+          <a
+            href={`https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_USERNAME}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <BsTelegram className="text-blue-500 dark:text-white text-base" />
+          </a>
+        )}
+        {process.env.NEXT_PUBLIC_DISCORD_URL && (
+          <a
+            href={process.env.NEXT_PUBLIC_DISCORD_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <FaDiscord className="text-blue-600 dark:text-white text-base" />
+          </a>
+        )}
+        {process.env.NEXT_PUBLIC_GITHUB_URL && (
+          <a
+            href={process.env.NEXT_PUBLIC_GITHUB_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <BsGithub className="text-black dark:text-white text-base" />
+          </a>
+        )}
+        {process.env.NEXT_PUBLIC_ENS_NAME && (
+          <Popover
+            placement="top"
+            title="ENS"
+            content={<a
+              href={`https://app.ens.domains/name/${process.env.NEXT_PUBLIC_ENS_NAME}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {process.env.NEXT_PUBLIC_ENS_NAME}
+            </a>}
+            titleClassName="py-0.5"
+            contentClassName="text-gray-400 dark:text-gray-200 font-medium py-1"
+          >
+            <a
+              href={`https://app.ens.domains/name/${process.env.NEXT_PUBLIC_ENS_NAME}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Img
+                src="/logos/externals/ens.png"
+                alt=""
+                className="w-4 h-4"
+              />
+            </a>
+          </Popover>
+        )}
       </span>
       <span className="w-full md:w-1/2 lg:w-1/3 flex items-center justify-center md:justify-end text-gray-400 space-x-1">
         <span>© {moment().format('YYYY')} made with</span>
