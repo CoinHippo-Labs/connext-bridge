@@ -221,7 +221,7 @@
       {
         "chainId": "0x64",
         "chainName": "Gnosis Chain",
-        "rpcUrls": ["https://rpc.xdaichain.com", "https://xdai.poanetwork.dev", "wss://rpc.xdaichain.com/wss", "wss://xdai.poanetwork.dev/wss", "https://dai.poa.network", "ws://xdai.poanetwork.dev:8546"],
+        "rpcUrls": ["https://rpc.gnosischain.com", "https://rpc.xdaichain.com", "https://xdai.poanetwork.dev", "wss://rpc.xdaichain.com/wss", "wss://xdai.poanetwork.dev/wss", "https://dai.poa.network", "ws://xdai.poanetwork.dev:8546"],
         "nativeCurrency": {
           "name": "xDAI",
           "symbol": "xDAI",

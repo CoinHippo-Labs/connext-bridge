@@ -843,7 +843,7 @@ export default function CrosschainBridge() {
       </div>
       <Switch
         disabled={actionDisabled || unlimitAllowance}
-        checked={infiniteApproval || unlimitAllowance}
+        checked={infiniteApproval || unlimitAllowance || false}
         onChange={() => setInfiniteApproval(!infiniteApproval)}
         onColor={theme === 'dark' ? '#D1D5DB' : '#BFDBFE'}
         onHandleColor={theme === 'dark' ? '#FFFFFF' : '#3B82F6'}
