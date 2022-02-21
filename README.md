@@ -39,7 +39,7 @@ xPollinate is ...
 ## Local Run
 - Install dependencies
   ```
-  npm install
+  npm install --force
   ```
 
 - Run on [localhost:3000](http://localhost:3000)
