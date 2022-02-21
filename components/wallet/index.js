@@ -273,7 +273,7 @@ export default function Wallet({ chainIdToConnect, main, hidden, disabled = fals
                 onChangeNetwork()
               }
             }}
-            className={buttonDisconnectClassName || 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl whitespace-nowrap font-semibold py-1.5 sm:py-2 px-3 sm:px-3.5'}
+            className={buttonDisconnectClassName || 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg whitespace-nowrap font-medium py-1 px-2'}
           >
             {buttonDisconnectTitle || 'Wrong Network'}
           </button>
@@ -281,7 +281,7 @@ export default function Wallet({ chainIdToConnect, main, hidden, disabled = fals
           <button
             disabled={disabled}
             onClick={disconnect}
-            className={buttonDisconnectClassName || 'bg-gray-100 hover:bg-gray-200 dark:bg-red-600 dark:hover:bg-red-700 rounded-xl font-semibold py-1.5 sm:py-2 px-3 sm:px-3.5'}
+            className={buttonDisconnectClassName || 'bg-gray-100 hover:bg-gray-200 dark:bg-red-600 dark:hover:bg-red-700 rounded-lg font-medium py-1 px-2'}
           >
             {buttonDisconnectTitle || 'Disconnect'}
           </button>
@@ -289,13 +289,13 @@ export default function Wallet({ chainIdToConnect, main, hidden, disabled = fals
         <button
           disabled={disabled}
           onClick={connect}
-          className={buttonConnectClassName || 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white font-semibold py-1.5 sm:py-2 pl-3 pr-2.5 sm:pl-3.5 sm:pr-3'}
+          className={buttonConnectClassName || 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-lg text-white font-medium py-1 px-2'}
           style={buttonConnectClassName?.includes('w-full') ? null : { width: 'max-content' }}
         >
           {buttonConnectTitle || (
             <div className="flex items-center space-x-1.5">
               <span>Connect</span>
-              <IoWalletOutline size={20} />
+              <IoWalletOutline size={18} />
             </div>
           )}
         </button>
