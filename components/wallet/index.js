@@ -273,7 +273,7 @@ export default function Wallet({ chainIdToConnect, main, hidden, disabled = fals
                 onChangeNetwork()
               }
             }}
-            className={buttonDisconnectClassName || 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-3xl whitespace-nowrap font-semibold py-1.5 sm:py-2 px-3 sm:px-3.5'}
+            className={buttonDisconnectClassName || 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl whitespace-nowrap font-semibold py-1.5 sm:py-2 px-3 sm:px-3.5'}
           >
             {buttonDisconnectTitle || 'Wrong Network'}
           </button>
@@ -281,7 +281,7 @@ export default function Wallet({ chainIdToConnect, main, hidden, disabled = fals
           <button
             disabled={disabled}
             onClick={disconnect}
-            className={buttonDisconnectClassName || 'bg-gray-100 hover:bg-gray-200 dark:bg-red-600 dark:hover:bg-red-700 rounded-3xl font-semibold py-1.5 sm:py-2 px-3 sm:px-3.5'}
+            className={buttonDisconnectClassName || 'bg-gray-100 hover:bg-gray-200 dark:bg-red-600 dark:hover:bg-red-700 rounded-xl font-semibold py-1.5 sm:py-2 px-3 sm:px-3.5'}
           >
             {buttonDisconnectTitle || 'Disconnect'}
           </button>
