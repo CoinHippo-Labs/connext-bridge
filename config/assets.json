@@ -415,59 +415,6 @@
     ]
   },
   {
-    "id": "miva",
-    "symbol": "MIVA",
-    "image": "/logos/assets/miva.png",
-    "is_staging": true,
-    "contracts": [
-      {
-        "contract_address": "0xc0b2983a17573660053beeed6fdb1053107cf387",
-        "chain_id": 137,
-        "contract_decimals": 18
-      },
-      {
-        "contract_address": "0x63e62989d9eb2d37dfdb1f93a22f063635b07d51",
-        "chain_id": 100,
-        "contract_decimals": 18
-      }
-    ]
-  },
-  {
-    "id": "magic",
-    "symbol": "MAGIC",
-    "image": "/logos/assets/magic.png",
-    "is_staging": true,
-    "contracts": [
-      {
-        "contract_address": "0xb0c7a3ba49c7a6eaba6cd4a96c55a1391070ac9a",
-        "chain_id": 1,
-        "contract_decimals": 18
-      },
-      {
-        "contract_address": "0x539bde0d7dbd336b79148aa742883198bbf60342",
-        "chain_id": 42161,
-        "contract_decimals": 18
-      }
-    ]
-  },
-  {
-    "id": "gth",
-    "symbol": "GTH",
-    "image": "/logos/assets/gth.png",
-    "contracts": [
-      {
-        "contract_address": "0xeb986da994e4a118d5956b02d8b7c3c7ce373674",
-        "chain_id": 1,
-        "contract_decimals": 18
-      },
-      {
-        "contract_address": "0xeb986da994e4a118d5956b02d8b7c3c7ce373674",
-        "chain_id": 56,
-        "contract_decimals": 18
-      }
-    ]
-  },
-  {
     "id": "fei",
     "symbol": "FEI",
     "image": "/logos/assets/fei.png",
@@ -495,6 +442,59 @@
       {
         "contract_address": "0xc382dc8501e526975579147ba6017376dedb78be",
         "chain_id": 43114,
+        "contract_decimals": 18
+      }
+    ]
+  },
+  {
+    "id": "gth",
+    "symbol": "GTH",
+    "image": "/logos/assets/gth.png",
+    "contracts": [
+      {
+        "contract_address": "0xeb986da994e4a118d5956b02d8b7c3c7ce373674",
+        "chain_id": 1,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0xeb986da994e4a118d5956b02d8b7c3c7ce373674",
+        "chain_id": 56,
+        "contract_decimals": 18
+      }
+    ]
+  },
+  {
+    "id": "magic",
+    "symbol": "MAGIC",
+    "image": "/logos/assets/magic.png",
+    "is_staging": true,
+    "contracts": [
+      {
+        "contract_address": "0xb0c7a3ba49c7a6eaba6cd4a96c55a1391070ac9a",
+        "chain_id": 1,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0x539bde0d7dbd336b79148aa742883198bbf60342",
+        "chain_id": 42161,
+        "contract_decimals": 18
+      }
+    ]
+  },
+  {
+    "id": "miva",
+    "symbol": "MIVA",
+    "image": "/logos/assets/miva.png",
+    "is_staging": true,
+    "contracts": [
+      {
+        "contract_address": "0xc0b2983a17573660053beeed6fdb1053107cf387",
+        "chain_id": 137,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0x63e62989d9eb2d37dfdb1f93a22f063635b07d51",
+        "chain_id": 100,
         "contract_decimals": 18
       }
     ]

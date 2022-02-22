@@ -93,66 +93,6 @@
     "image": "/logos/chains/mainnet/polygon.png"
   },
   {
-    "id": "arbitrum",
-    "title": "Arbitrum",
-    "short_name": "ARB",
-    "chain_id": 42161,
-    "provider_params": [
-      {
-        "chainId": "0xa4b1",
-        "chainName": "Arbitrum One",
-        "rpcUrls": ["https://arb1.arbitrum.io/rpc"],
-        "nativeCurrency": {
-          "name": "Arbitrum Ether",
-          "symbol": "tETH",
-          "decimals": 18
-        },
-        "blockExplorerUrls": ["https://arbiscan.io"]
-      }
-    ],
-    "explorer": {
-      "name": "Arbiscan",
-      "url": "https://arbiscan.io",
-      "icon": "/logos/explorers/arbiscan.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/mainnet/arbitrum.png"
-  },
-  {
-    "id": "optimism",
-    "title": "Optimism",
-    "short_name": "OPT",
-    "chain_id": 10,
-    "provider_params": [
-      {
-        "chainId": "0xa",
-        "chainName": "Optimism Mainnet",
-        "rpcUrls": ["https://mainnet.optimism.io"],
-        "nativeCurrency": {
-          "name": "Ether",
-          "symbol": "OETH",
-          "decimals": 18
-        },
-        "blockExplorerUrls": ["https://optimistic.etherscan.io"]
-      }
-    ],
-    "explorer": {
-      "name": "Etherscan",
-      "url": "https://optimistic.etherscan.io",
-      "icon": "/logos/explorers/optimism.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/mainnet/optimism.png"
-  },
-  {
     "id": "avalanche",
     "title": "Avalanche",
     "short_name": "AVAX",
@@ -241,6 +181,66 @@
       "transaction_path": "/tx/{tx}"
     },
     "image": "/logos/chains/mainnet/gnosis.png"
+  },
+  {
+    "id": "arbitrum",
+    "title": "Arbitrum",
+    "short_name": "ARB",
+    "chain_id": 42161,
+    "provider_params": [
+      {
+        "chainId": "0xa4b1",
+        "chainName": "Arbitrum One",
+        "rpcUrls": ["https://arb1.arbitrum.io/rpc"],
+        "nativeCurrency": {
+          "name": "Arbitrum Ether",
+          "symbol": "tETH",
+          "decimals": 18
+        },
+        "blockExplorerUrls": ["https://arbiscan.io"]
+      }
+    ],
+    "explorer": {
+      "name": "Arbiscan",
+      "url": "https://arbiscan.io",
+      "icon": "/logos/explorers/arbiscan.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/mainnet/arbitrum.png"
+  },
+  {
+    "id": "optimism",
+    "title": "Optimism",
+    "short_name": "OPT",
+    "chain_id": 10,
+    "provider_params": [
+      {
+        "chainId": "0xa",
+        "chainName": "Optimism Mainnet",
+        "rpcUrls": ["https://mainnet.optimism.io"],
+        "nativeCurrency": {
+          "name": "Ether",
+          "symbol": "OETH",
+          "decimals": 18
+        },
+        "blockExplorerUrls": ["https://optimistic.etherscan.io"]
+      }
+    ],
+    "explorer": {
+      "name": "Etherscan",
+      "url": "https://optimistic.etherscan.io",
+      "icon": "/logos/explorers/optimism.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/mainnet/optimism.png"
   },
   {
     "id": "moonbeam",
