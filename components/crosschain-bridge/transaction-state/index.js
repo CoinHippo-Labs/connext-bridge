@@ -220,10 +220,9 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
         setTransferResponse({ status: 'pending', message: 'Wait for Cancellation Confirmation', tx_hash: response?.hash, ...response })
       } catch (error) {
         setTransferResponse({ status: 'failed', message: error?.reason || error?.data?.message || error?.message })
+        setTransfering(false)
       }
     }
-
-    setTransfering(false)
   }
 
   const addTokenToMetaMask = async (chain_id, contract) => {
