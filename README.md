@@ -1,6 +1,7 @@
 # xPollinate | Connext Network
 
-xPollinate is ...
+xPollinate is a bridge app built on top of [Connext's nxtp protocol](https://github.com/connext/nxtp). The app supports assets transfer between Layer 2 systems and Ethereum Virtual Machine (EVM) compatible chains. 
+
 
 <br>
 
