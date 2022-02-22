@@ -120,7 +120,7 @@ export default function Navbar() {
         })
       }
     }
-  }, [chains_data, address])
+  }, [chains_data, chain_id, address])
 
   // chains-status
   useEffect(() => {
