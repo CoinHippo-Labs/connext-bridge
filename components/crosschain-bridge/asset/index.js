@@ -77,7 +77,9 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, from, to
                 {chains_status_data ?
                   <IoRadioButtonOn size={16} className={`${chain?.disabled ? 'text-gray-400 dark:text-gray-600' : chains_status_data?.find(c => c?.id === chain.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-500 dark:text-red-600'}`} />
                   :
-                  <Puff color={theme === 'dark' ? '#60A5FA' : '#2563EB'} width="16" height="16" />
+                  address && (
+                    <Puff color={theme === 'dark' ? '#60A5FA' : '#2563EB'} width="16" height="16" />
+                  )
                 }
                 <Img
                   src={chain.image}
