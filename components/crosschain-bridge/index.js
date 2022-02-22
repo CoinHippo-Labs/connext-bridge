@@ -248,7 +248,7 @@ export default function CrosschainBridge() {
   }, [chain_id, address, swapConfig])
 
   useEffect(() => {
-    if (tokenApproved === true || tokenApproved?.toNumber() >= constants.MaxUint256) {
+    if (tokenApproved === true || (tokenApproved && tokenApproved?.toNumber() >= constants.MaxUint256)) {
       setInfiniteApproval(true)
     }
   }, [tokenApproved])
@@ -832,7 +832,7 @@ export default function CrosschainBridge() {
   const nomadUrl = useNomad && (fromChain.optional_bridge_urls?.find(url => url?.includes('.nomad.')) || toChain.optional_bridge_urls?.find(url => url?.includes('.nomad.')))
 
   const mustApproveToken = isSupport() && fromContract && !(tokenApproved && (typeof tokenApproved === 'boolean' ? tokenApproved : tokenApproved.gte(BigNumber(swapConfig.amount).shiftedBy(fromContract.contract_decimals))))
-  const unlimitAllowance = tokenApproved === true || tokenApproved?.toNumber() >= constants.MaxUint256
+  const unlimitAllowance = tokenApproved === true || (tokenApproved && tokenApproved?.toNumber() >= constants.MaxUint256)
   const allowanceComponent = (
     <>
       <div className={`flex items-center ${infiniteApproval || unlimitAllowance ? 'text-blue-500 dark:text-white' : 'text-gray-400 dark:text-gray-600'} space-x-0.5`}>

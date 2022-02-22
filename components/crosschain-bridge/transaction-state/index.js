@@ -899,7 +899,9 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
                   <>
                     <Triangle color={theme === 'dark' ? 'white' : '#2563EB'} width="72" height="72" />
                     <div className="flex items-center space-x-1 ml-2">
-                      <span className="text-blue-600 dark:text-white font-light">{loaded ? 'Waiting for Router' : 'Loading'}</span>
+                      <span className="text-blue-600 dark:text-white font-light">
+                        {loaded ? transfering === 'fulfill' ? 'Claiming' : transfering === 'cancel' ? : 'Cancelling' : 'Waiting for Router' : 'Loading'}
+                      </span>
                       <Oval color={theme === 'dark' ? 'white' : '#2563EB'} width="14" height="14" />
                     </div>
                   </>
