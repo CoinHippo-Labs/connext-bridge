@@ -1239,7 +1239,7 @@ export default function CrosschainBridge() {
                     </div>
                     <div className="sm:col-span-3 flex items-center justify-center sm:justify-end">
                       <Asset
-                        disabled={actionDisabled}
+                        disabled={actionDisabled || !address}
                         swapConfig={swapConfig}
                         amountOnChange={amount => {
                           setSwapConfig({
