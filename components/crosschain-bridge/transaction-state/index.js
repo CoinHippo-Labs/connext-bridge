@@ -674,50 +674,57 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
                   className="w-6 h-6 mx-auto"
                 />
               </div>
-              {generalTx?.router?.id && (
-                ens_data?.[generalTx.router.id.toLowerCase()]?.name ?
-                  <>
-                    <div className="flex items-center justify-start sm:justify-center text-gray-400 dark:text-gray-600 text-xs font-medium space-x-1 mt-1.5">
-                      <MdOutlineRouter size={16} className="mb-0.5" />
-                      <a
-                        href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${generalTx.router.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <span className="text-blue-600 dark:text-white font-semibold">
-                          {ens_data[generalTx.router.id.toLowerCase()].name}
-                        </span>
-                      </a>
-                    </div>
-                    <div className="flex justify-center">
-                      <Copy
-                        text={generalTx.router.id}
-                        copyTitle={<span className="text-gray-400 dark:text-gray-600 text-xs font-normal">
-                          {ellipseAddress(generalTx.router.id, 6)}
-                        </span>}
-                      />
-                    </div>
-                  </>
-                  :
-                  <>
-                    <div className="flex items-center font-medium space-x-1 mt-2">
-                      <a
-                        href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${generalTx.router.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <span className="text-blue-600 dark:text-white text-xs font-medium">
-                          {ellipseAddress(generalTx.router.id, 6)}
-                        </span>
-                      </a>
-                      <Copy size={12} text={generalTx.router.id} />
-                    </div>
-                    <div className="flex items-center justify-center text-gray-400 dark:text-gray-600 text-xs font-medium space-x-1 mt-0.5">
-                      <MdOutlineRouter size={16} className="mb-0.5" />
-                      <span>Router</span>
-                    </div>
-                  </>
-              )}
+              {loaded ?
+                generalTx?.router?.id && (
+                  ens_data?.[generalTx.router.id.toLowerCase()]?.name ?
+                    <>
+                      <div className="flex items-center justify-start sm:justify-center text-gray-400 dark:text-gray-600 text-xs font-medium space-x-1 mt-1.5">
+                        <MdOutlineRouter size={16} className="mb-0.5" />
+                        <a
+                          href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${generalTx.router.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <span className="text-blue-600 dark:text-white font-semibold">
+                            {ens_data[generalTx.router.id.toLowerCase()].name}
+                          </span>
+                        </a>
+                      </div>
+                      <div className="flex justify-center">
+                        <Copy
+                          text={generalTx.router.id}
+                          copyTitle={<span className="text-gray-400 dark:text-gray-600 text-xs font-normal">
+                            {ellipseAddress(generalTx.router.id, 6)}
+                          </span>}
+                        />
+                      </div>
+                    </>
+                    :
+                    <>
+                      <div className="flex items-center font-medium space-x-1 mt-2">
+                        <a
+                          href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${generalTx.router.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <span className="text-blue-600 dark:text-white text-xs font-medium">
+                            {ellipseAddress(generalTx.router.id, 6)}
+                          </span>
+                        </a>
+                        <Copy size={12} text={generalTx.router.id} />
+                      </div>
+                      <div className="flex items-center justify-center text-gray-400 dark:text-gray-600 text-xs font-medium space-x-1 mt-0.5">
+                        <MdOutlineRouter size={16} className="mb-0.5" />
+                        <span>Router</span>
+                      </div>
+                    </>
+                )
+                :
+                <div className="flex flex-col items-center justify-center space-y-2 mt-2.5 mx-auto">
+                  <div className="skeleton w-24 h-4" />
+                  <div className="skeleton w-20 h-3.5" />
+                </div>
+              }
               {!finish && !['Prepared'].includes(receivingTx?.status) && ['Prepared'].includes(sendingTx?.status) && (
                 <LightSpeed left>
                   {fromAssetAmount}
