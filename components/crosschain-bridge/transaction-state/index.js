@@ -157,9 +157,9 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
       const chain = chains_data.find(c => c?.chain_id === generalTx.receivingChainId)
 
       const decimals = chain?.provider_params?.[0]?.nativeCurrency?.decimals
-      let _balance = await rpcs_data[generalTx.receivingChainId].getBalance(address)
+      let _balance = await rpcs_data[generalTx.receivingChainId].getBalance(generalTx.router.id)
       try {
-        _balance = BigNumber(_balance).shiftedBy(-(decimals || 18)).toNumber()
+        _balance = BigNumber(_balance.toString()).shiftedBy(-(decimals || 18)).toNumber()
       } catch (error) {}
 
       setRouterBalance(_balance)
