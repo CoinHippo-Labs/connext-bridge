@@ -701,7 +701,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
                     </>
                     :
                     <>
-                      <div className="flex items-center font-medium space-x-1 mt-2">
+                      <div className="flex items-center justify-center font-medium space-x-1 mt-2">
                         <a
                           href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/router/${generalTx.router.id}`}
                           target="_blank"
