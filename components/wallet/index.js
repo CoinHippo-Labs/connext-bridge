@@ -39,6 +39,9 @@ const providerOptions = {
         1287: 'https://rpc.api.moonbase.moonbeam.network',
       },
     },
+    display: {
+      description: 'Gnosis Safe is not supported.',
+    },
   },
   portis: process.env.NEXT_PUBLIC_PORTIS_ID && {
     package: Portis,
