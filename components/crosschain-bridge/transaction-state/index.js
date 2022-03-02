@@ -312,7 +312,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
       </span>
     </button>
   )
-  const cancelButton = ((false && ['Prepared'].includes(receivingTx?.status)) || canCancelSendingTx) && (
+  const cancelButton = canCancelSendingTx && (
     chain_id !== (canCancelSendingTx ? generalTx?.sendingChainId : generalTx?.receivingChainId) ?
       <Wallet
         chainIdToConnect={canCancelSendingTx ? generalTx?.sendingChainId : generalTx?.receivingChainId}
