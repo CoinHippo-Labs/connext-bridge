@@ -127,7 +127,7 @@ export default function Navbar() {
     const getChainStatus = async chain => {
       if (sdk_data && chain) {
         const response = await sdk_data.getSubgraphSyncStatus(chain.chain_id)
-console.log(response)
+
         dispatch({
           type: CHAINS_STATUS_DATA,
           value: response?.latestBlock > -1 && {
