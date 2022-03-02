@@ -335,5 +335,35 @@
       "transaction_path": "/tx/{tx}"
     },
     "image": "/logos/chains/mainnet/fuse.png"
+  },
+  {
+    "id": "milkomeda",
+    "title": "Milkomeda Cardano (C1)",
+    "short_name": "MMeda",
+    "chain_id": 2001,
+    "provider_params": [
+      {
+        "chainId": "0x7d1",
+        "chainName": "Milkomeda Cardano (C1)",
+        "rpcUrls": ["https://rpc.c1.milkomeda.com:8545"],
+        "nativeCurrency": {
+          "name": "MilkADA",
+          "symbol": "MilkADA",
+          "decimals": 18
+        },
+        "blockExplorerUrls": ["https://rpc.c1.milkomeda.com:4000"]
+      }
+    ],
+    "explorer": {
+      "name": "BlockScout",
+      "url": "https://rpc.c1.milkomeda.com:4000",
+      "icon": "/logos/explorers/blockscout.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/mainnet/milkomeda.png"
   }
 ]
