@@ -102,7 +102,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
         response = await transactions(sdk_data, receivingChainId, transactionId, null, chains_data, tokens_data)
         receivingTx = response?.data?.[0]
 
-        if (sdk_data && receivingTx && typeof receivingTx.amount === 'number' && typeof receivingTx.relayerFee !== 'number') {
+        if (sdk_data && receivingTx && receivingTx.amount && !receivingTx.relayerFee) {
           try {
             response = await sdk_data.getEstimateReceiverAmount({
               amount: receivingTx.amount,
