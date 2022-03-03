@@ -136,7 +136,7 @@ export default function CrosschainBridge() {
 
   // get query params
   useEffect(() => {
-    const query = paramsToObject(asPath?.substring(asPath.indexOf('?') + 1))
+    const query = paramsToObject(asPath?.indexOf('?') > -1 && asPath?.substring(asPath.indexOf('?') + 1))
     if (query && Object.keys(query).length > 0 && Object.keys(swapConfig).length < 1 && chains_data && assets_data) {
       if (query.sendingChainId && chains_data.findIndex(c => !c?.disabled && c.chain_id === Number(query.sendingChainId)) > -1) {
         swapConfig.fromChainId = Number(query.sendingChainId)
@@ -165,7 +165,7 @@ export default function CrosschainBridge() {
   // wallet
   useEffect(() => {
     if (asPath && chain_id && (!swapConfig.fromChainId || !swapConfig.toChainId) && swapConfig.toChainId !== chain_id) {
-      const query = paramsToObject(asPath.substring(asPath.indexOf('?') + 1))
+      const query = paramsToObject(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       if (!query?.sendingChainId && chains_data?.findIndex(c => !c?.disabled && c?.chain_id === chain_id) > -1) {
         setSwapConfig({ ...swapConfig, fromChainId: chain_id })
       }
