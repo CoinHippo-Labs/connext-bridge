@@ -92,7 +92,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
   }, [chainId, addTokenData])
 
   useEffect(() => {
-    const getData = async () => {
+    const getData = async is_interval => {
       if (data?.transactionId && chains_data) {
         const { transactionId, sendingChainId, receivingChainId } = { ...data }
         let sendingTx, receivingTx, response
@@ -130,33 +130,35 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
           }
         }
 
-        const evmAddresses = _.uniq([address, (receivingTx || sendingTx)?.router?.id, (receivingTx || sendingTx)?.user?.id, (receivingTx || sendingTx)?.sendingAddress, (receivingTx || sendingTx)?.receivingAddress].filter(id => id && !ens_data?.[id]))
-        if (evmAddresses.length > 0) {
-          let ensData
-          const addressChunk = _.chunk(evmAddresses, 25)
+        if (!is_interval) {
+          const evmAddresses = _.uniq([address, (receivingTx || sendingTx)?.router?.id, (receivingTx || sendingTx)?.user?.id, (receivingTx || sendingTx)?.sendingAddress, (receivingTx || sendingTx)?.receivingAddress].filter(id => id && !ens_data?.[id]))
+          if (evmAddresses.length > 0) {
+            let ensData
+            const addressChunk = _.chunk(evmAddresses, 25)
 
-          for (let i = 0; i < addressChunk.length; i++) {
-            const domainsResponse = await domains({ where: `{ resolvedAddress_in: [${addressChunk[i].map(id => `"${id?.toLowerCase()}"`).join(',')}] }` })
-            ensData = _.concat(ensData || [], domainsResponse?.data || [])
-          }
-
-          if (ensData?.length > 0) {
-            const ensResponses = {}
-            for (let i = 0; i < evmAddresses.length; i++) {
-              const evmAddress = evmAddresses[i]?.toLowerCase()
-              const resolvedAddresses = ensData.filter(d => d?.resolvedAddress?.id?.toLowerCase() === evmAddress)
-              if (resolvedAddresses.length > 1) {
-                ensResponses[evmAddress] = await getENS(evmAddress)
-              }
-              else if (resolvedAddresses.length < 1) {
-                ensData.push({ resolvedAddress: { id: evmAddress } })
-              }
+            for (let i = 0; i < addressChunk.length; i++) {
+              const domainsResponse = await domains({ where: `{ resolvedAddress_in: [${addressChunk[i].map(id => `"${id?.toLowerCase()}"`).join(',')}] }` })
+              ensData = _.concat(ensData || [], domainsResponse?.data || [])
             }
 
-            dispatch({
-              type: ENS_DATA,
-              value: Object.fromEntries(ensData.filter(d => !ensResponses?.[d?.resolvedAddress?.id?.toLowerCase()]?.reverseRecord || d?.name === ensResponses?.[d?.resolvedAddress?.id?.toLowerCase()].reverseRecord).map(d => [d?.resolvedAddress?.id?.toLowerCase(), { ...d }])),
-            })
+            if (ensData?.length > 0) {
+              const ensResponses = {}
+              for (let i = 0; i < evmAddresses.length; i++) {
+                const evmAddress = evmAddresses[i]?.toLowerCase()
+                const resolvedAddresses = ensData.filter(d => d?.resolvedAddress?.id?.toLowerCase() === evmAddress)
+                if (resolvedAddresses.length > 1) {
+                  ensResponses[evmAddress] = await getENS(evmAddress)
+                }
+                else if (resolvedAddresses.length < 1) {
+                  ensData.push({ resolvedAddress: { id: evmAddress } })
+                }
+              }
+
+              dispatch({
+                type: ENS_DATA,
+                value: Object.fromEntries(ensData.filter(d => !ensResponses?.[d?.resolvedAddress?.id?.toLowerCase()]?.reverseRecord || d?.name === ensResponses?.[d?.resolvedAddress?.id?.toLowerCase()].reverseRecord).map(d => [d?.resolvedAddress?.id?.toLowerCase(), { ...d }])),
+              })
+            }
           }
         }
       }
@@ -164,7 +166,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
 
     getData()
 
-    const interval = setInterval(() => getData(), 15 * 1000)
+    const interval = setInterval(() => getData(true), 15 * 1000)
     return () => clearInterval(interval)
   }, [data])
 
