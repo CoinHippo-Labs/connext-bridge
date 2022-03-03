@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
@@ -40,7 +41,7 @@ import { domains, getENS } from '../../lib/api/ens'
 import { chainTitle } from '../../lib/object/chain'
 import { getApproved, approve } from '../../lib/object/contract'
 import { currency_symbol } from '../../lib/object/currency'
-import { numberFormat, ellipseAddress, sleep } from '../../lib/utils'
+import { paramsToObject, numberFormat, ellipseAddress, sleep } from '../../lib/utils'
 
 import { BALANCES_DATA, ENS_DATA } from '../../reducers/types'
 
@@ -101,6 +102,9 @@ export default function CrosschainBridge() {
   const { provider, web3_provider, signer, chain_id, address } = { ...wallet_data }
   const { balances_data } = { ...balances }
 
+  const router = useRouter()
+  const { pathname, asPath } = { ...router }
+
   const [swapConfig, setSwapConfig] = useState({})
   const [bridgeProtocol, setBridgeProtocol] = useState(protocols[0]?.id)
   const [infiniteApproval, setInfiniteApproval] = useState(defaultInfiniteApproval)
@@ -130,15 +134,44 @@ export default function CrosschainBridge() {
   const [activeTransactionOpen, setActiveTransactionOpen] = useState(null)
   const [activeTransactionTrigger, setActiveTransactionTrigger] = useState(null)
 
+  // get query params
+  useEffect(() => {
+    const query = paramsToObject(asPath?.substring(asPath.indexOf('?') + 1))
+    if (query && Object.keys(query).length > 0 && Object.keys(swapConfig).length < 1 && chains_data && assets_data) {
+      if (query.sendingChainId && chains_data.findIndex(c => !c?.disabled && c.chain_id === Number(query.sendingChainId)) > -1) {
+        swapConfig.fromChainId = Number(query.sendingChainId)
+
+        if (query.sendingAssetId && assets_data.findIndex(a => a.contracts?.findIndex(c => c.chain_id === swapConfig.fromChainId && c.contract_address === query.sendingAssetId.toLowerCase()) > -1) > -1) {
+          swapConfig.fromAssetId = assets_data.find(a => a.contracts?.findIndex(c => c.chain_id === swapConfig.fromChainId && c.contract_address === query.sendingAssetId.toLowerCase()) > -1).id
+          swapConfig.toAssetId = swapConfig.fromAssetId
+        }
+      }
+      if (query.receivingChainId && Number(query.receivingChainId) !== swapConfig.fromChainId && chains_data.findIndex(c => !c?.disabled && c.chain_id === Number(query.receivingChainId)) > -1) {
+        swapConfig.toChainId = Number(query.receivingChainId)
+
+        if (!swapConfig.fromAssetId && query.receivingAssetId && assets_data.findIndex(a => a.contracts?.findIndex(c => c.chain_id === swapConfig.toChainId && c.contract_address === query.receivingAssetId.toLowerCase()) > -1) > -1) {
+          swapConfig.toAssetId = assets_data.find(a => a.contracts?.findIndex(c => c.chain_id === swapConfig.fromChainId && c.contract_address === query.receivingAssetId.toLowerCase()) > -1).id
+          swapConfig.fromAssetId = swapConfig.toAssetId
+        }
+      }
+      if (!isNaN(query.amount) && swapConfig.fromChainId && swapConfig.toChainId && swapConfig.fromAssetId && swapConfig.toAssetId) {
+        swapConfig.amount = Number(query.amount)
+      }
+
+      setSwapConfig(swapConfig)
+    }
+  }, [asPath, chains_data, assets_data])
+
   // wallet
   useEffect(() => {
-    if (chain_id && (!swapConfig.fromChainId || !swapConfig.toChainId) && swapConfig.toChainId !== chain_id) {
-      if (chains_data?.findIndex(c => !c?.disabled && c?.chain_id === chain_id) > -1) {
+    if (asPath && chain_id && (!swapConfig.fromChainId || !swapConfig.toChainId) && swapConfig.toChainId !== chain_id) {
+      const query = paramsToObject(asPath.substring(asPath.indexOf('?') + 1))
+      if (!query?.sendingChainId && chains_data?.findIndex(c => !c?.disabled && c?.chain_id === chain_id) > -1) {
         setSwapConfig({ ...swapConfig, fromChainId: chain_id })
       }
       getChainBalances(chain_id)
     }
-  }, [chain_id, chains_data])
+  }, [asPath && chain_id, chains_data])
 
   useEffect(() => {
     dispatch({
@@ -194,9 +227,42 @@ export default function CrosschainBridge() {
     }
   }, [estimateTrigger])
 
+  // set query params
   useEffect(() => {
+    if (swapConfig) {
+      const _query = {}
+
+      if (chains_data?.findIndex(c => !c?.disabled && c.chain_id === swapConfig.fromChainId) > -1) {
+        _query.sendingChainId = swapConfig.fromChainId
+
+        if (swapConfig.fromAssetId && assets_data?.findIndex(a => a.id === swapConfig.fromAssetId && a.contracts?.findIndex(c => c.chain_id === swapConfig.fromChainId) > -1) > -1) {
+          _query.sendingAssetId = assets_data.find(a => a.id === swapConfig.fromAssetId && a.contracts?.findIndex(c => c.chain_id === swapConfig.fromChainId) > -1).contracts.find(c => c.chain_id === swapConfig.fromChainId).contract_address
+        }
+      }
+      if (chains_data?.findIndex(c => !c?.disabled && c.chain_id === swapConfig.toChainId) > -1) {
+        _query.receivingChainId = swapConfig.toChainId
+
+        if (swapConfig.toAssetId && assets_data?.findIndex(a => a.id === swapConfig.toAssetId && a.contracts?.findIndex(c => c.chain_id === swapConfig.toChainId) > -1) > -1) {
+          _query.receivingAssetId = assets_data.find(a => a.id === swapConfig.toAssetId && a.contracts?.findIndex(c => c.chain_id === swapConfig.toChainId) > -1).contracts.find(c => c.chain_id === swapConfig.toChainId).contract_address
+        }
+      }
+      if (_query.sendingChainId && _query.sendingAssetId && swapConfig.amount) {
+        _query.amount = swapConfig.amount
+      }
+
+      if (Object.keys(_query).length > 0) {
+        router.push(`${pathname}?${new URLSearchParams(_query).toString()}`, undefined, { shallow: true })
+      }
+    }
+
     setEstimateTrigger(moment().valueOf())
   }, [address, swapConfig, advancedOptions])
+
+  useEffect(() => {
+    if (balances_data?.[swapConfig?.fromChainId] && swapConfig.amount && !estimatedAmount) {
+      setEstimateTrigger(moment().valueOf())
+    }
+  }, [balances_data])
 
   // fees
   useEffect(() => {
