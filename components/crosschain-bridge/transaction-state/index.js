@@ -102,6 +102,22 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
         response = await transactions(sdk_data, receivingChainId, transactionId, null, chains_data, tokens_data)
         receivingTx = response?.data?.[0]
 
+        if (sdk_data && receivingTx && typeof receivingTx.amount === 'number' && typeof receivingTx.relayerFee !== 'number') {
+          try {
+            response = await sdk_data.getEstimateReceiverAmount({
+              amount: receivingTx.amount,
+              sendingChainId: receivingTx.sendingChainId,
+              sendingAssetId: receivingTx.sendingAssetId,
+              receivingChainId: receivingTx.receivingChainId,
+              receivingAssetId: receivingTx.receivingAssetId,
+            })
+
+            if (response?.relayerFee) {
+              receivingTx.relayerFee = response.relayerFee
+            }
+          } catch (error) {}
+        }
+
         setTransaction({ transactionId, sendingChainId, receivingChainId, sendingTx, receivingTx })
 
         const finish = [sendingTx?.status, receivingTx?.status].includes('Cancelled') || ['Fulfilled'].includes(generalTx?.status)

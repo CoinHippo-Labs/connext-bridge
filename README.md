@@ -16,7 +16,7 @@ Connext Bridge is a bridge app built on top of [Connext's nxtp protocol](https:/
 - App: [https://bridge.connext.network](https://bridge.connext.network)
 - Explorer: [https://connextscan.io](https://connextscan.io)
 ### Testnet
-- App: [https://bridge-testnet.connext.network](https://bridge-testnet.connext.network)
+- App: [https://testnet.bridge.connext.network](https://testnet.bridge.connext.network)
 - Explorer: [https://testnet.connextscan.io](https://testnet.connextscan.io)
 ### Connext Protocol
 - Website: [https://connext.nextwork](https:/connext.nextwork)
