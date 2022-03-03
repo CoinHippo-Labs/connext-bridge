@@ -2,4 +2,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://xpollinate.io/sitemap.xml
+Sitemap: https://bridge.connext.network/sitemap.xml

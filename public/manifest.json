@@ -1,6 +1,6 @@
 {
-  "short_name": "xPollinate",
-  "name": "xPollinate",
+  "short_name": "Connext",
+  "name": "Connext Bridge",
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#050707",
@@ -24,10 +24,16 @@
       "density": "1.0"
     },
     {
-      "src": "/icons/android-chrome-72x72.png",
+      "src": "/icons/android-chrome-192x192.png",
       "type": "image/png",
-      "sizes": "72x72",
+      "sizes": "192x192",
+      "density": "4.0"
+    },
+    {
+      "src": "/icons/android-chrome-256x256.png",
+      "type": "image/png",
+      "sizes": "256x256",
       "density": "4.0"
     }
-  ] 
+  ]
 }

@@ -1,22 +1,22 @@
 {
-  "name": "connext-network-xpollinate",
+  "name": "connext-network-bridge",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "start": "next start",
     "build": "next build && next export",
-    "deploy": "aws s3 sync out/ s3://xpollinate.connext.network --acl public-read",
+    "deploy": "aws s3 sync out/ s3://bridge.connext.network --acl public-read",
     "dev-dev": "env-cmd -f .env.staging next dev",
     "build-dev": "env-cmd -f .env.staging next build && next export",
-    "deploy-dev": "aws s3 sync out/ s3://staging.xpollinate.connext.network --acl public-read",
+    "deploy-dev": "aws s3 sync out/ s3://staging.bridge.connext.network --acl public-read",
     "dev-testnet": "NODE_ENV=test next dev",
     "build-testnet": "NODE_ENV=test next build && next export",
-    "deploy-testnet": "aws s3 sync out/ s3://testnet.xpollinate.connext.network --acl public-read"
+    "deploy-testnet": "aws s3 sync out/ s3://testnet.bridge.connext.network --acl public-read"
   },
   "dependencies": {
-    "@connext/nxtp-sdk": "^0.1.25",
-    "@nomad-xyz/sdk": "^1.5.0",
+    "@connext/nxtp-sdk": "^0.1.26",
+    "@nomad-xyz/sdk": "^1.5.1",
     "@portis/web3": "^4.0.7",
     "@walletconnect/web3-provider": "^1.7.1",
     "bignumber.js": "^9.0.2",
