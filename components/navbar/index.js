@@ -290,7 +290,7 @@ export default function Navbar() {
   return (
     <>
       <div className="navbar border-b">
-        <div className="navbar-inner w-full flex items-center">
+        <div className="navbar-inner w-full flex xl:grid xl:grid-flow-row xl:grid-cols-3 items-center">
           <Logo />
           <DropdownNavigation />
           <Navigation />
@@ -303,8 +303,7 @@ export default function Navbar() {
                   rel="noopener noreferrer"
                   className="flex items-center uppercase text-blue-400 dark:text-blue-300 text-xs xl:text-sm font-medium mx-0 xl:mx-2"
                 >
-                  <span className="block xl:hidden whitespace-nowrap">View TXs</span>
-                  <span className="hidden xl:block">View Transactions</span>
+                  <span>Transactions</span>
                   <TiArrowRight size={20} className="transform -rotate-45 mt-0.5 sm:mt-0" />
                 </a>
                 <div className="hidden sm:block mx-2">
