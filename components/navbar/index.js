@@ -7,6 +7,8 @@ import { providers } from 'ethers'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
 import { Grid } from 'react-loader-spinner'
+import Linkify from 'react-linkify'
+import parse from 'html-react-parser'
 import { FiMenu, FiMoon, FiSun } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
 
@@ -353,11 +355,17 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-      {!chains_status_data && address && (
+      {((!chains_status_data && address) || process.env.NEXT_PUBLIC_STATUS_TITLE) && (
         <div className="w-full h-8 xl:h-10 bg-gray-100 dark:bg-gray-900 overflow-x-auto flex items-center py-2 px-2 sm:px-4">
           <span className="flex flex-wrap items-center font-mono text-blue-600 dark:text-blue-400 text-2xs xl:text-sm space-x-1.5 xl:space-x-2 mx-auto">
-            <Grid color={theme === 'dark' ? '#60A5FA' : '#2563EB'} width="16" height="16" />
-            <span>Checking Subgraph Status</span>
+            {!chains_status_data && address ?
+              <>
+                <Grid color={theme === 'dark' ? '#60A5FA' : '#2563EB'} width="16" height="16" />
+                <span>Checking Subgraph Status</span>
+              </>
+              :
+              <Linkify>{parse(process.env.NEXT_PUBLIC_STATUS_TITLE)}</Linkify>
+            }
           </span>
         </div>
       )}

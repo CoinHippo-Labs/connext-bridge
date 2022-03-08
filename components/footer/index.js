@@ -18,12 +18,20 @@ export default function Footer() {
       <span className="w-full md:w-1/2 lg:w-1/3 flex items-center justify-center md:justify-start text-gray-400">
         <div className="flex items-center text-gray-600 dark:text-white font-medium space-x-1.5">
           <span>Built with</span>
-          <Img
-            src="/logos/externals/connext/logo.png"
-            alt=""
-            className="w-4 h-4 rounded-full"
-          />
-          <span>Connext Protocol</span>
+          <a
+            title="build cross chain apps"
+            href={process.env.NEXT_PUBLIC_PROTOCOL_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center space-x-1.5"
+          >
+            <Img
+              src="/logos/externals/connext/logo.png"
+              alt=""
+              className="w-4 h-4 rounded-full"
+            />
+            <span>Connext Protocol</span>
+          </a>
           {_package?.dependencies?.['@connext/nxtp-sdk'] && (
             <span className="font-mono text-gray-400 dark:text-gray-600 font-light">(SDK v{_package.dependencies['@connext/nxtp-sdk'].replace('^', '')})</span>
           )}

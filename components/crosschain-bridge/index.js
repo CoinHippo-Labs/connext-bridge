@@ -42,6 +42,7 @@ import { chainTitle } from '../../lib/object/chain'
 import { getApproved, approve } from '../../lib/object/contract'
 import { currency_symbol } from '../../lib/object/currency'
 import { paramsToObject, numberFormat, ellipseAddress, sleep } from '../../lib/utils'
+import meta from '../../lib/meta'
 
 import { BALANCES_DATA, ENS_DATA } from '../../reducers/types'
 
@@ -110,7 +111,7 @@ export default function CrosschainBridge() {
   const [infiniteApproval, setInfiniteApproval] = useState(defaultInfiniteApproval)
   const [advancedOptions, setAdvancedOptions] = useState(defaultAdvancedOptions)
 
-  const [controller, setController] = useState(new AbortController())
+  const [controller, setController] = useState(null)
   const [estimateTrigger, setEstimateTrigger] = useState(null)
   const [fees, setFees] = useState(null)
   const [estimatingFees, setEstimatingFees] = useState(null)
@@ -136,6 +137,8 @@ export default function CrosschainBridge() {
 
   // get query params
   useEffect(() => {
+    let changed = false
+
     const query = paramsToObject(asPath?.indexOf('?') > -1 && asPath?.substring(asPath.indexOf('?') + 1))
     if (query && Object.keys(query).length > 0 && Object.keys(swapConfig).length < 1 && chains_data && assets_data) {
       if (query.sendingChainId && chains_data.findIndex(c => !c?.disabled && c.chain_id === Number(query.sendingChainId)) > -1) {
@@ -145,6 +148,8 @@ export default function CrosschainBridge() {
           swapConfig.fromAssetId = assets_data.find(a => a.contracts?.findIndex(c => c.chain_id === swapConfig.fromChainId && c.contract_address === query.sendingAssetId.toLowerCase()) > -1).id
           swapConfig.toAssetId = swapConfig.fromAssetId
         }
+      
+        changed = true
       }
       if (query.receivingChainId && Number(query.receivingChainId) !== swapConfig.fromChainId && chains_data.findIndex(c => !c?.disabled && c.chain_id === Number(query.receivingChainId)) > -1) {
         swapConfig.toChainId = Number(query.receivingChainId)
@@ -153,11 +158,43 @@ export default function CrosschainBridge() {
           swapConfig.toAssetId = assets_data.find(a => a.contracts?.findIndex(c => c.chain_id === swapConfig.fromChainId && c.contract_address === query.receivingAssetId.toLowerCase()) > -1).id
           swapConfig.fromAssetId = swapConfig.toAssetId
         }
+      
+        changed = true
       }
       if (!isNaN(query.amount) && swapConfig.fromChainId && swapConfig.toChainId && swapConfig.fromAssetId && swapConfig.toAssetId) {
         swapConfig.amount = Number(query.amount)
+        changed = true
       }
+    }
 
+    const path = !asPath ? '/' : asPath.toLowerCase()
+    if (path.includes('from-') && path.includes('to-')) {
+      const paths = path.replace('/', '').split('-')
+      const fromChainId = paths[paths.indexOf('from') + 1]
+      const toChainId = paths[paths.indexOf('to') + 1]
+      const fromChain = chains_data?.find(c => c.id === fromChainId)
+      const toChain = chains_data?.find(c => c.id === toChainId)
+      const assetId = paths[0] !== 'from' ? paths[0] : null
+      const asset = assets_data?.find(a => a.id === assetId || a.symbol?.toLowerCase() === assetId)
+      const fromContract = asset?.contracts?.find(c => c?.chain_id === fromChain?.chain_id)
+      const toContract = asset?.contracts?.find(c => c?.chain_id === toChain?.chain_id)
+
+      if (fromChain) {
+        swapConfig.fromChainId = fromChain.chain_id
+        changed = true
+      }
+      if (toChain) {
+        swapConfig.toChainId = toChain.chain_id
+        changed = true
+      }
+      if (asset) {
+        swapConfig.fromAssetId = asset.id
+        swapConfig.toAssetId = asset.id
+        changed = true
+      }
+    }
+
+    if (changed) {
       setSwapConfig(swapConfig)
     }
   }, [asPath, chains_data, assets_data])
@@ -166,7 +203,7 @@ export default function CrosschainBridge() {
   useEffect(() => {
     if (asPath && chain_id && (!swapConfig.fromChainId || !swapConfig.toChainId) && swapConfig.toChainId !== chain_id) {
       const query = paramsToObject(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-      if (!query?.sendingChainId && chains_data?.findIndex(c => !c?.disabled && c?.chain_id === chain_id) > -1) {
+      if (!query?.sendingChainId && !asPath?.includes('from-') && chains_data?.findIndex(c => !c?.disabled && c?.chain_id === chain_id) > -1) {
         setSwapConfig({ ...swapConfig, fromChainId: chain_id })
       }
       getChainBalances(chain_id)
@@ -251,7 +288,22 @@ export default function CrosschainBridge() {
       }
 
       if (Object.keys(_query).length > 0) {
-        router.push(`${pathname}?${new URLSearchParams(_query).toString()}`, undefined, { shallow: true })
+        const fromChain = chains_data?.find(c => c?.chain_id === swapConfig.fromChainId)
+        const toChain = chains_data?.find(c => c?.chain_id === swapConfig.toChainId)
+        const fromAsset = assets_data?.find(a => a?.id === swapConfig.fromAssetId)
+        const toAsset = assets_data?.find(a => a?.id === swapConfig.toAssetId)
+
+        if (fromChain && toChain) {
+          delete _query.sendingChainId
+          delete _query.receivingChainId
+
+          if (fromAsset || toAsset) {
+            delete _query.sendingAssetId
+            delete _query.receivingAssetId
+          }
+        }
+
+        router.push(`/${fromChain && toChain ? `${fromAsset || toAsset ? `${(fromAsset || toAsset).symbol}-` : ''}from-${fromChain.id}-to-${toChain.id}` : ''}${Object.keys(_query).length > 0 ? `?${new URLSearchParams(_query).toString()}` : ''}`, undefined, { shallow: true })
       }
     }
 
@@ -772,6 +824,8 @@ export default function CrosschainBridge() {
 
   const isBreakAll = message => ['code=', ' 0x'].findIndex(p => message?.includes(p)) > -1
 
+  const headMeta = meta(asPath, null, chains_data, assets_data)
+
   const fromChain = chains_data?.find(c => c?.chain_id === swapConfig.fromChainId)
   const toChain = chains_data?.find(c => c?.chain_id === swapConfig.toChainId)
   const fromAsset = assets_data?.find(a => a?.id === swapConfig.fromAssetId)
@@ -899,6 +953,7 @@ export default function CrosschainBridge() {
 
   const mustApproveToken = isSupport() && fromContract && !(tokenApproved && (typeof tokenApproved === 'boolean' ? tokenApproved : tokenApproved.gte(BigNumber(swapConfig.amount).shiftedBy(fromContract.contract_decimals))))
   const unlimitAllowance = tokenApproved === true || (tokenApproved && tokenApproved?.toNumber() >= constants.MaxUint256)
+  const actionDisabled = tokenApproveResponse?.status === 'pending' || startingSwap
   const allowanceComponent = (
     <>
       <div className={`flex items-center ${infiniteApproval || unlimitAllowance ? 'text-blue-500 dark:text-white' : 'text-gray-400 dark:text-gray-600'} space-x-0.5`}>
@@ -936,7 +991,6 @@ export default function CrosschainBridge() {
   const receivingAddress = useNomad || !estimatedAmount?.bid?.receivingAddress ? advancedOptions?.receiving_address || address : estimatedAmount.bid.receivingAddress
   const mustChangeChain = swapConfig.fromChainId && chain_id !== swapConfig.fromChainId && !swapData && !activeTransactionOpen
   const isWalletConnect = provider?.constructor?.name === 'WalletConnectProvider'
-  const actionDisabled = tokenApproveResponse?.status === 'pending' || startingSwap
 
   return (
     <>
@@ -983,7 +1037,7 @@ export default function CrosschainBridge() {
             {announcement_data?.data && (
               <Alert
                 color="xl:max-w-lg bg-yellow-400 dark:bg-blue-600 text-white text-left mx-auto"
-                icon={<HiSpeakerphone className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                icon={<HiSpeakerphone className="w-4 xl:w-6 h-4 xl:h-6 stroke-current mr-3" />}
                 closeDisabled={true}
                 rounded={true}
                 className="items-start"
@@ -1022,13 +1076,18 @@ export default function CrosschainBridge() {
           <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6 my-6">
             <div className="w-full max-w-lg space-y-2">
               <div className="flex items-center justify-between space-x-2">
-                <h1 className="uppercase text-base sm:text-lg font-semibold">Cross-Chain Transfer</h1>
+                <div>
+                  <h1 className="uppercase text-base sm:text-lg font-semibold">Cross-Chain Transfer</h1>
+                  {asPath?.includes('from-') && asPath?.includes('to-') && headMeta?.title && (
+                    <h2 className="text-gray-400 dark:text-gray-600 text-xs sm:text-sm">{headMeta.title}</h2>
+                  )}
+                </div>
                 {toChain && (
                   <a
                     href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${toChain.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-gray-50 hover:bg-gray-100 dark:bg-black dark:hover:bg-gray-900 cursor-pointer rounded-xl flex items-center text-blue-600 dark:text-white py-1.5 px-2.5"
+                    className="min-w-max bg-gray-50 hover:bg-gray-100 dark:bg-black dark:hover:bg-gray-900 cursor-pointer rounded-xl flex items-center text-blue-600 dark:text-white py-1.5 px-2.5"
                   >
                     <Img
                       src={toChain.image}

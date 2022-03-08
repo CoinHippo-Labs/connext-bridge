@@ -12,8 +12,10 @@ import { THEME } from '../../reducers/types'
 
 export default function Layout({ children }) {
   const dispatch = useDispatch()
-  const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
+  const { preferences, chains, assets } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets }), shallowEqual)
   const { theme } = { ...preferences }
+  const { chains_data } = { ...chains }
+  const { assets_data } = { ...assets }
 
   const router = useRouter()
   const { asPath } = { ...router }
@@ -29,7 +31,7 @@ export default function Layout({ children }) {
     }
   }, [theme])
 
-  const headMeta = meta(asPath)
+  const headMeta = meta(asPath, null, chains_data, assets_data)
 
   return (
     <>
@@ -65,7 +67,7 @@ export default function Layout({ children }) {
         className={`antialiased disable-scrollbars font-sans text-sm ${theme}`}
       >
         <div className="wrapper">
-          <div className="main w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-white" style={{ minHeight: 'calc(100vh - 44px)' }}>
+          <div className="main w-full bg-gray-50 dark:bg-black text-gray-900 dark:text-white" style={{ minHeight: 'calc(100vh - 44px)', backgroundImage: `url("/images/background${theme === 'light' ? '_white' : ''}.png")`, backgroundSize: 'cover' }}>
             <Navbar />
             <div className="w-full px-2 sm:px-4">
               {children}
