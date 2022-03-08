@@ -1079,7 +1079,7 @@ export default function CrosschainBridge() {
                 <div>
                   <h1 className="uppercase text-base sm:text-lg font-semibold">Cross-Chain Transfer</h1>
                   {asPath?.includes('from-') && asPath?.includes('to-') && headMeta?.title && (
-                    <h2 className="text-gray-400 dark:text-gray-600 text-xs sm:text-sm">{headMeta.title}</h2>
+                    <h2 className="text-gray-400 dark:text-gray-600 text-xs sm:text-sm">{headMeta.title.replace(' with connext', '')}</h2>
                   )}
                 </div>
                 {toChain && (
