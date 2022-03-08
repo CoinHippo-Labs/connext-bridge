@@ -33,10 +33,10 @@ export default function AlertMsg() {
     setUpdating(false)
   }
 
-  const disabled = updating || !announcement_data
+  const disabled = updating
 
   return (
-    <div className="form">
+    <div className="form mt-2">
       <div className="form-element">
         <div className="form-label text-gray-600 dark:text-gray-400 font-medium">Announcement</div>
         <textarea
