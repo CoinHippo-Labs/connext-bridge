@@ -82,11 +82,11 @@ export default function Assets({ asset_id, inputSearch, handleDropdownClick, cha
             <span className={`whitespace-nowrap ${side === 'from' && chain_id && !Number(balance?.amount) ? 'text-gray-400 dark:text-gray-600' : ''} text-base ${item.id === asset_id ? 'font-semibold' : 'font-normal'}`}>{contract?.symbol || item.symbol}</span>
             {contract?.contract_address && (
               <span className="min-w-max flex items-center space-x-1">
-                <Copy
+                {/*<Copy
                   size={16}
                   text={contract.contract_address}
                   className="copy"
-                />
+                />*/}
                 {chain?.explorer?.url && (
                   <a
                     href={`${chain.explorer.url}${chain.explorer[`contract${contract.contract_address === constants.AddressZero ? '_0' : ''}_path`]?.replace('{address}', contract.contract_address)}`}
