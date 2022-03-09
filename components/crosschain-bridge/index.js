@@ -167,7 +167,8 @@ export default function CrosschainBridge() {
       }
     }
 
-    const path = !asPath ? '/' : asPath.toLowerCase()
+    let path = !asPath ? '/' : asPath.toLowerCase()
+    path = path.includes('?') ? path.substring(0, path.indexOf('?')) : path
     if (path.includes('from-') && path.includes('to-')) {
       const paths = path.replace('/', '').split('-')
       const fromChainId = paths[paths.indexOf('from') + 1]
