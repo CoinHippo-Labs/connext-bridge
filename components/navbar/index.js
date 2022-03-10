@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
@@ -11,6 +11,7 @@ import Linkify from 'react-linkify'
 import parse from 'html-react-parser'
 import { FiMenu, FiMoon, FiSun } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
+import { MdClose } from 'react-icons/md'
 
 import Logo from './logo'
 import DropdownNavigation from './navigation/dropdown'
@@ -42,6 +43,8 @@ export default function Navbar() {
   const { rpcs_data } = { ...rpcs }
   const { wallet_data } = { ...wallet }
   const { web3_provider, signer, chain_id, address, default_chain_id } = { ...wallet_data }
+
+  const [hiddenStatus, setHiddenStatus] = useState(false)
 
   // annoucement
   useEffect(() => {
@@ -355,7 +358,7 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-      {((!chains_status_data && address) || process.env.NEXT_PUBLIC_STATUS_TITLE) && (
+      {((!chains_status_data && address) || (!hiddenStatus && process.env.NEXT_PUBLIC_STATUS_TITLE)) && (
         <div className="w-full h-8 xl:h-10 bg-gray-100 dark:bg-gray-900 overflow-x-auto flex items-center py-2 px-2 sm:px-4">
           <span className="flex flex-wrap items-center font-mono text-blue-600 dark:text-blue-400 text-2xs xl:text-sm space-x-1.5 xl:space-x-2 mx-auto">
             {!chains_status_data && address ?
@@ -364,7 +367,15 @@ export default function Navbar() {
                 <span>Checking Subgraph Status</span>
               </>
               :
-              <Linkify>{parse(process.env.NEXT_PUBLIC_STATUS_TITLE)}</Linkify>
+              <>
+                <Linkify>{parse(process.env.NEXT_PUBLIC_STATUS_TITLE)}</Linkify>
+                <button
+                  onClick={() => setHiddenStatus(true)}
+                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-full mt-0.5 p-1"
+                >
+                  <MdClose size={12} />
+                </button>
+              </>
             }
           </span>
         </div>
