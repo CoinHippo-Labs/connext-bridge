@@ -194,7 +194,7 @@
         "rpcUrls": ["https://arb1.arbitrum.io/rpc"],
         "nativeCurrency": {
           "name": "Arbitrum Ether",
-          "symbol": "tETH",
+          "symbol": "aETH",
           "decimals": 18
         },
         "blockExplorerUrls": ["https://arbiscan.io"]
