@@ -1011,7 +1011,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
             </div>
           )}
         </div>}
-        cancelDisabled={false && (cancelDisabled || actionDisabled) && !finish}
+        cancelDisabled={/*false && */(cancelDisabled || actionDisabled) && !finish}
         onClose={() => {
           if (onClose) {
             onClose()
