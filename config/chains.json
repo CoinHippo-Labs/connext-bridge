@@ -344,7 +344,7 @@
     "is_staging": true,
     "provider_params": [
       {
-        "chainId": "0x7d1",
+        "chainId": "0x07d1",
         "chainName": "Milkomeda Cardano (C1)",
         "rpcUrls": ["https://rpc.c1.milkomeda.com:8545"],
         "nativeCurrency": {
