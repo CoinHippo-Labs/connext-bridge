@@ -27,6 +27,8 @@ const providerOptions = {
         1285: 'https://rpc.api.moonriver.moonbeam.network',
         122: 'https://rpc.fuse.io',
         2001: 'https://rpc.c1.milkomeda.com:8545',
+        288: 'https://mainnet.boba.network',
+        1666600000: 'https://api.harmony.one',
         3: `https://ropsten.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`,
         4: `https://rinkey.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`,
         5: `https://goerli.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`,
@@ -74,6 +76,8 @@ const chainIdToNetwork = chain_id => {
     // 1285: 'moonriver',
     // 122: 'fuse',
     // 2001: 'milkomeda',
+    // 288: 'boba',
+    // 1666600000: 'harmony-one',
     3: 'ropsten',
     4: 'rinkeby',
     5: 'goerli',
@@ -110,39 +114,39 @@ export default function Wallet({ chainIdToConnect, main, hidden, disabled = fals
         })
       }
 
-      if (window.ethereum) {
-        providerOptions['custom-tally'] = {
-          display: {
-            name: 'Tally',
-            logo: '/logos/wallets/tally.svg',
-          },
-          package: async () => {
-            let provider = null
-            if (typeof window.ethereum !== 'undefined') {
-              provider = window.ethereum
-              try {
-                await provider.request({ method: 'eth_requestAccounts' })
-              } catch (error) {
-                throw new Error('User Rejected')
-              }
-            } else if (window.web3) {
-              provider = window.web3.currentProvider
-            } else if (window.celo) {
-              provider = window.celo
-            } else {
-              throw new Error('No Web3 Provider found')
-            }
-            return provider
-          },
-          connector: async (ProviderPackage, options) => {
-            const provider = new ProviderPackage(options)
-            try {
-              await provider.enable()
-            } catch (error) {}
-            return provider
-          },
-        }
-      }
+      // if (window.ethereum) {
+      //   providerOptions['custom-tally'] = {
+      //     display: {
+      //       name: 'Tally',
+      //       logo: '/logos/wallets/tally.svg',
+      //     },
+      //     package: async () => {
+      //       let provider = null
+      //       if (typeof window.ethereum !== 'undefined') {
+      //         provider = window.ethereum
+      //         try {
+      //           await provider.request({ method: 'eth_requestAccounts' })
+      //         } catch (error) {
+      //           throw new Error('User Rejected')
+      //         }
+      //       } else if (window.web3) {
+      //         provider = window.web3.currentProvider
+      //       } else if (window.celo) {
+      //         provider = window.celo
+      //       } else {
+      //         throw new Error('No Web3 Provider found')
+      //       }
+      //       return provider
+      //     },
+      //     connector: async (ProviderPackage, options) => {
+      //       const provider = new ProviderPackage(options)
+      //       try {
+      //         await provider.enable()
+      //       } catch (error) {}
+      //       return provider
+      //     },
+      //   }
+      // }
 
       if (window.clover) {
         providerOptions['custom-clover'] = {
