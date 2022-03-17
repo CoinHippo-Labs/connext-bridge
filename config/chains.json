@@ -408,7 +408,7 @@
       {
         "chainId": "0x63564c40",
         "chainName": "Harmony One",
-        "rpcUrls": ["https://rpc.s0.t.hmny.io", "https://api.harmony.one"],
+        "rpcUrls": ["https://api.harmony.one"],
         "nativeCurrency": {
           "name": "One",
           "symbol": "ONE",
