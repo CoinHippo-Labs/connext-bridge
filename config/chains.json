@@ -366,5 +366,67 @@
       "transaction_path": "/tx/{tx}"
     },
     "image": "/logos/chains/mainnet/milkomeda.png"
+  },
+  {
+    "id": "boba",
+    "title": "Boba L2",
+    "short_name": "Boba",
+    "chain_id": 288,
+    "is_staging": true,
+    "provider_params": [
+      {
+        "chainId": "0x120",
+        "chainName": "Boba L2",
+        "rpcUrls": ["https://mainnet.boba.network"],
+        "nativeCurrency": {
+          "name": "Ethereum",
+          "symbol": "ETH",
+          "decimals": 18
+        },
+        "blockExplorerUrls": ["https://blockexplorer.boba.network"]
+      }
+    ],
+    "explorer": {
+      "name": "BlockScout",
+      "url": "https://blockexplorer.boba.network",
+      "icon": "/logos/explorers/blockscout.png",
+      "block_path": "/blocks/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/tokens/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/mainnet/boba.png"
+  },
+  {
+    "id": "harmony",
+    "title": "Harmony One",
+    "short_name": "HOne",
+    "chain_id": 1666600000,
+    "is_staging": true,
+    "provider_params": [
+      {
+        "chainId": "0x63564c40",
+        "chainName": "Harmony One",
+        "rpcUrls": ["https://api.harmony.one"],
+        "nativeCurrency": {
+          "name": "One",
+          "symbol": "ONE",
+          "decimals": 18
+        },
+        "blockExplorerUrls": ["https://explorer.harmony.one"]
+      }
+    ],
+    "explorer": {
+      "name": "Harmony",
+      "url": "https://explorer.harmony.one",
+      "icon": "/logos/explorers/harmony.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/address/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/mainnet/harmony.png"
   }
 ]
