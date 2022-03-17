@@ -295,11 +295,15 @@ export default function Navbar() {
   return (
     <>
       <div className="navbar border-b">
-        <div className="navbar-inner w-full flex xl:grid xl:grid-flow-row xl:grid-cols-3 items-center">
-          <Logo />
-          <DropdownNavigation />
-          <Navigation />
-          <div className="flex items-center ml-auto">
+        <div className="navbar-inner w-full flex xl:grid xl:grid-flow-row xl:grid-cols-9 items-center">
+          <div className={`xl:col-span-${web3_provider && address ? 2 : 3}`}>
+            <Logo />
+          </div>
+          <div className={`xl:col-span-${web3_provider && address ? 4 : 3}`}>
+            <DropdownNavigation />
+            <Navigation />
+          </div>
+          <div className="xl:col-span-3 flex items-center ml-auto">
             {web3_provider && address && (
               <>
                 <a
