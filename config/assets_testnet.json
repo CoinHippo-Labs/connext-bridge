@@ -47,6 +47,11 @@
         "contract_address": "0x7195845bfa648c04c1571979dc1bcf240af60aeb",
         "chain_id": 1287,
         "contract_decimals": 18
+      },
+      {
+        "contract_address": "0x6a67ab6261a6d48cc5e2250a4a50bbbe10173861",
+        "chain_id": 2221,
+        "contract_decimals": 18
       }
     ],
     "nomad_support": [

@@ -275,5 +275,35 @@
     "nomad": {
       "id": "moonbasealpha"
     }
+  },
+  {
+    "id": "kava",
+    "title": "Kava Alphanet",
+    "short_name": "KAVA",
+    "chain_id": 2221,
+    "provider_params": [
+      {
+        "chainId": "0x8ad",
+        "chainName": "Kava Alphanet",
+        "rpcUrls": ["https://evm.evm-alpha.kava.io"],
+        "nativeCurrency": {
+          "name": "Kava",
+          "symbol": "KAVA",
+          "decimals": 18
+        },
+        "blockExplorerUrls": ["https://explorer.evm-alpha.kava.io"]
+      },
+    ],
+    "explorer": {
+      "name": "Kava",
+      "url": "https://explorer.evm-alpha.kava.io",
+      "icon": "/logos/explorers/kava.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/testnet/kava.png"
   }
 ]

@@ -387,9 +387,9 @@
       }
     ],
     "explorer": {
-      "name": "BlockScout",
+      "name": "Boba",
       "url": "https://blockexplorer.boba.network",
-      "icon": "/logos/explorers/blockscout.png",
+      "icon": "/logos/explorers/boba.png",
       "block_path": "/blocks/{block}",
       "address_path": "/address/{address}",
       "contract_path": "/tokens/{address}",
