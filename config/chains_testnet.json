@@ -279,7 +279,7 @@
   {
     "id": "kava",
     "title": "Kava Alphanet",
-    "short_name": "KAVA",
+    "short_name": "KAVAA",
     "chain_id": 2221,
     "provider_params": [
       {
