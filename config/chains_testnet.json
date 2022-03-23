@@ -292,7 +292,7 @@
           "decimals": 18
         },
         "blockExplorerUrls": ["https://explorer.evm-alpha.kava.io"]
-      },
+      }
     ],
     "explorer": {
       "name": "Kava",
