@@ -34,7 +34,7 @@
   },
   {
     "id": "binance",
-    "title": "BNB Chain",
+    "title": "BNB Chain (BSC)",
     "short_name": "BNB",
     "chain_id": 56,
     "provider_params": [
