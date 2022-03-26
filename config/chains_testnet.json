@@ -98,7 +98,7 @@
       {
         "chainId": "0x2a",
         "chainName": "Ethereum Testnet Kovan",
-        "rpcUrls": ["https://kovan.poa.network", "ws://kovan.poa.network:8546"],
+        "rpcUrls": ["https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"],
         "nativeCurrency": {
           "name": "Kovan Ether",
           "symbol": "KOV",
@@ -131,7 +131,7 @@
       {
         "chainId": "0x61",
         "chainName": "BNB Chain Testnet",
-        "rpcUrls": ["https://data-seed-prebsc-1-s1.binance.org:8545", "https://data-seed-prebsc-1-s2.binance.org:8545", "https://data-seed-prebsc-1-s3.binance.org:8545", "https://data-seed-prebsc-2-s2.binance.org:8545", "https://data-seed-prebsc-2-s3.binance.org:8545"],
+        "rpcUrls": ["https://data-seed-prebsc-1-s1.binance.org:8545", "https://data-seed-prebsc-2-s1.binance.org:8545", "https://data-seed-prebsc-1-s2.binance.org:8545", "https://data-seed-prebsc-2-s2.binance.org:8545", "https://data-seed-prebsc-1-s3.binance.org:8545", "https://data-seed-prebsc-2-s3.binance.org:8545"],
         "nativeCurrency": {
           "name": "BNB Token",
           "symbol": "BNB",
@@ -161,7 +161,7 @@
       {
         "chainId": "0x13881",
         "chainName": "Matic Testnet Mumbai",
-        "rpcUrls": ["https://rpc-mumbai.matic.today", "wss://ws-mumbai.matic.today"],
+        "rpcUrls": ["https://matic-mumbai.chainstacklabs.com", "https://rpc-mumbai.matic.today", "https://rpc-mumbai.maticvigil.com", "wss://ws-matic-mumbai.chainstacklabs.com", "wss://rpc-mumbai.matic.today", "wss://rpc-mumbai.maticvigil.com/ws"],
         "nativeCurrency": {
           "name": "Matic",
           "symbol": "MATIC",
