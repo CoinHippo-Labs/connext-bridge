@@ -251,7 +251,7 @@
       {
         "chainId": "0x507",
         "chainName": "Moonbase Alpha",
-        "rpcUrls": ["https://rpc.api.moonbase.moonbeam.network", "https://moonbeam-alpha.api.onfinality.io/public"],
+        "rpcUrls": ["https://rpc.api.moonbase.moonbeam.network"],
         "nativeCurrency": {
           "name": "Dev",
           "symbol": "DEV",
