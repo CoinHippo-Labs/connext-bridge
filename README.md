@@ -26,7 +26,7 @@ Connext Bridge is a bridge app built on top of [Connext's nxtp protocol](https:/
 
 ## Data provider / APIs
 - [Connext Subgraph](https://github.com/connext/nxtp/tree/main/packages/subgraph)
-- [Connextscan API](https://github.com/CoinHippo-Labs/connext-network-explorer-lambda)
+- [Connextscan API](https://github.com/CoinHippo-Labs/connextscan-lambda)
 
 ## Technology stacks
 - [Next.js](https://nextjs.org/)
