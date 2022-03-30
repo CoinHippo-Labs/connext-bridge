@@ -939,12 +939,12 @@ export default function CrosschainBridge() {
   const minAmount = estimatedFees || fees?.prepareGasFee || min_amount
   const maxBalanceAmount = fromBalanceAmount > minAmount ? fromBalanceAmount : 0
   const maxTransfer = maxTransfers?.find(t => t?.chain?.chain_id === swapConfig.toChainId && t?.contract_address === toContract?.contract_address)
-  let maxAmount = maxTransfer && maxTransfer.amount < maxBalanceAmount ? maxTransfer.amount > minAmount ? maxTransfer.amount : 0 : maxBalanceAmount
+  let maxAmount = maxTransfer && maxTransfer.amount < maxBalanceAmount ? maxTransfer.amount > minAmount ? maxTransfer.amount : 0 : 0
   if (maxAmount) {
     maxAmount = maxAmount - (fees?.prepareGasFee || 0)
     maxAmount = BigNumber(maxAmount).decimalPlaces(6, BigNumber.ROUND_FLOOR).toNumber()
   }
-  const isExceedMaxLiquidity = typeof maxTransfer?.amount === 'number' && typeof swapConfig.amount === 'number' && swapConfig.amount > maxTransfer.amount
+  const isExceedMaxLiquidity = typeof maxTransfer?.amount !== 'number' || (typeof swapConfig.amount === 'number' && swapConfig.amount > maxTransfer.amount)
 
   const supportNomad = swapConfig.fromChainId && swapConfig.toChainId &&
     fromAsset?.nomad_support?.findIndex(p => p?.from_chain_id === swapConfig.fromChainId && p?.to_chain_id === swapConfig.toChainId) > -1 &&
