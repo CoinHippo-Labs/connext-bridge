@@ -50,7 +50,7 @@ export default function DropdownNetwork({ disabled, chain_id, onSelect, from, to
             className="w-6 h-6 rounded-full"
           />
           <span className="sm:hidden font-semibold">{chain.title}</span>
-          <span className="hidden sm:block font-semibold">{chainTitle(chain)}</span>
+          <span className="hidden sm:block text-base font-semibold">{chainTitle(chain)}</span>
         </div>
         :
         chains_data ?
