@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
+import HeadShake from 'react-reveal/HeadShake'
 import { TiArrowRight } from 'react-icons/ti'
+import { FaHandPointLeft } from 'react-icons/fa'
 
 import { navigations } from '../../../lib/menus'
 
@@ -20,7 +22,13 @@ export default function Navigation() {
               <span className="mb-0.5 mr-1.5">{item.icon}</span>
             )}
             <span className="whitespace-nowrap">{item.title}</span>
-            <TiArrowRight size={20} className="transform -rotate-45" />
+            {item.id === 'feedback' ?
+              <HeadShake duration={1500} forever>
+                <FaHandPointLeft size={20} className="mb-0.5 ml-2" />
+              </HeadShake>
+              :
+              <TiArrowRight size={20} className="transform -rotate-45" />
+            }
           </a>
           :
           <Link key={i} href={item.path}>
