@@ -7,8 +7,10 @@ import { ANNOUNCEMENT_DATA } from '../reducers/types'
 
 export default function AlertMsg() {
   const dispatch = useDispatch()
-  const { announcement } = useSelector(state => ({ announcement: state.announcement }), shallowEqual)
+  const { announcement, wallet } = useSelector(state => ({ announcement: state.announcement, wallet: state.wallet }), shallowEqual)
   const { announcement_data } = { ...announcement }
+  const { wallet_data } = { ...wallet }
+  const { address } = { ...wallet_data }
 
   const [updating, setUpdating] = useState(null)
   const [announcementData, setAnnountmentData] = useState(null)
@@ -22,7 +24,7 @@ export default function AlertMsg() {
   const update = async () => {
     setUpdating(true)
 
-    await setAnnouncement({ data: announcementData?.trim().split('\n').join('<br>') })
+    await setAnnouncement({ data: announcementData?.trim().split('\n').join('<br>') }, address && { username: new URL(process.env.NEXT_PUBLIC_SITE_URL)?.hostname, password: address })
     const response = await getAnnouncement()
 
     dispatch({
