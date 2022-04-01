@@ -457,5 +457,36 @@
       "transaction_path": "/tx/{tx}"
     },
     "image": "/logos/chains/mainnet/gather.png"
+  },
+  {
+    "id": "cronos",
+    "title": "Cronos",
+    "short_name": "CRO",
+    "chain_id": 25,
+    "is_staging": true,
+    "provider_params": [
+      {
+        "chainId": "0x19",
+        "chainName": "Cronos",
+        "rpcUrls": ["https://evm.cronos.org"],
+        "nativeCurrency": {
+          "name": "Cronos",
+          "symbol": "CRO",
+          "decimals": 18
+        },
+        "blockExplorerUrls": ["https://cronoscan.com"]
+      }
+    ],
+    "explorer": {
+      "name": "Cronoscan",
+      "url": "https://cronoscan.com",
+      "icon": "/logos/explorers/cronoscan.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/mainnet/cronos.png"
   }
 ]
