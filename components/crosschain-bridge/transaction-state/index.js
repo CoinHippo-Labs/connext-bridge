@@ -964,7 +964,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
                   )}
                 </div>
                 {addReceivingTokenToMetaMaskButton}
-                {process.env.NEXT_PUBLIC_FEEDBACK_URL && (
+                {/*process.env.NEXT_PUBLIC_FEEDBACK_URL && (
                   <a
                     href={process.env.NEXT_PUBLIC_FEEDBACK_URL}
                     target="_blank"
@@ -973,7 +973,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
                   >
                     help us improve {process.env.NEXT_PUBLIC_APP_NAME}
                   </a>
-                )}
+                )*/}
               </div>
             )}
             <div className="sm:order-1 flex flex-col items-center justify-center">
