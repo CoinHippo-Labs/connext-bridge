@@ -110,6 +110,10 @@ export default function Navbar() {
           providers: chain?.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')) || [],
         }
 
+        if ([42161].includes(chain?.chain_id)) {
+          chainConfig[chain?.chain_id].gelatoOracle = false;
+        }
+
         rpcs[chain?.chain_id] = new providers.FallbackProvider(chain?.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')).map(rpc => new providers.JsonRpcProvider(rpc)) || [])
       }
 
