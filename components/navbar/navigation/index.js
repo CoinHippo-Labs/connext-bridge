@@ -13,7 +13,7 @@ export default function Navigation() {
 
   return (
     <div className="hidden lg:flex items-center space-x-0 lg:space-x-2 mx-auto">
-      {navigations.map((item, i) => {
+      {navigations.filter(item => item?.path).map((item, i) => {
         const className = `bg-transparent hover:bg-gray-50 dark:hover:bg-gray-900 rounded-xl flex items-center uppercase text-xs lg:text-sm ${pathname === item.path ? 'text-black hover:text-gray-800 dark:text-gray-200 dark:hover:text-white font-bold' : 'text-blue-400 hover:text-blue-600 dark:text-gray-200 dark:hover:text-white font-medium'} p-2`
 
         return item.external ?

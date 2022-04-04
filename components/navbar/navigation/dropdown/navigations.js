@@ -11,7 +11,7 @@ export default function Navigations({ handleDropdownClick }) {
 
   return (
     <div className="flex flex-wrap">
-      {navigations.map((item, i) => {
+      {navigations.filter(item => item?.path).map((item, i) => {
         const className = `dropdown-item w-full bg-transparent flex items-center uppercase ${pathname === item.path ? 'text-black dark:text-white font-bold' : 'text-blue-600 dark:text-white font-medium'} p-3`
 
         return item.external ?
