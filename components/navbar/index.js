@@ -3,7 +3,7 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
 import { NxtpSdk } from '@connext/nxtp-sdk'
-import { providers } from 'ethers'
+import { providers, Wallet as EthersWallet } from 'ethers'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
 import { Grid } from 'react-loader-spinner'
@@ -95,7 +95,7 @@ export default function Navbar() {
 
   // sdk & rpcs
   useEffect(async () => {
-    if (chains_data && signer) {
+    if (chains_data) {
       const chainConfig = ['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) ?
         { 1: { providers: ['https://rpc.ankr.com/eth', 'https://cloudflare-eth.com'] } }
         :
@@ -115,7 +115,7 @@ export default function Navbar() {
 
       dispatch({
         type: SDK_DATA,
-        value: await NxtpSdk.create({ chainConfig, signer, skipPolling: false }),
+        value: await NxtpSdk.create({ chainConfig, signer: signer || EthersWallet.createRandom(), skipPolling: false }),
       })
 
       if (!rpcs_data) {
