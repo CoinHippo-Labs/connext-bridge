@@ -184,7 +184,7 @@ export default function Navbar() {
   useEffect(() => {
     const getAssetBalances = async chain => {
       if (chain && !chain.disabled) {
-        const response = await assetBalances({ chain_id: chain.chain_id })
+        const response = await assetBalances(sdk_data, chain.chain_id)
         const data = response?.data?.map(a => { return { ...a, chain } })
 
         dispatch({
@@ -208,7 +208,7 @@ export default function Navbar() {
     }
 
     const getData = async () => {
-      if (chains_data) {
+      if (sdk_data && chains_data) {
         chains_data.forEach(c => getAssetBalances(c))
       }
     }
@@ -219,7 +219,7 @@ export default function Navbar() {
     return () => {
       clearInterval(interval)
     }
-  }, [chains_data])
+  }, [chains_data, sdk_data])
 
   // ens
   useEffect(async () => {

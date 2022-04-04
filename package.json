@@ -1,5 +1,5 @@
 {
-  "name": "connext-network-bridge",
+  "name": "connext-bridge",
   "version": "0.0.1",
   "private": true,
   "scripts": {
