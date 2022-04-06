@@ -49,12 +49,14 @@
       {
         "contract_address": "0x8e70cd5b4ff3f62659049e74b6649c6603a0e594",
         "chain_id": 1284,
-        "contract_decimals": 6
+        "contract_decimals": 6,
+        "symbol": "madUSDT"
       },
       {
         "contract_address": "0xb44a9b6905af7c801311e8f4e76932ee959c663c",
         "chain_id": 1285,
-        "contract_decimals": 6
+        "contract_decimals": 6,
+        "symbol": "madUSDT"
       },
       {
         "contract_address": "0xfadbbf8ce7d5b7041be672561bba99f79c532e10",
@@ -64,7 +66,8 @@
       {
         "contract_address": "0xab58da63dfdd6b97eaab3c94165ef6f43d951fb2",
         "chain_id": 2001,
-        "contract_decimals": 6
+        "contract_decimals": 6,
+        "symbol": "madUSDT"
       },
       {
         "contract_address": "0x5de1677344d3cb0d7d465c10b72a8f60699c062d",
@@ -138,12 +141,14 @@
       {
         "contract_address": "0x8f552a71efe5eefc207bf75485b356a0b3f01ec9",
         "chain_id": 1284,
-        "contract_decimals": 6
+        "contract_decimals": 6,
+        "symbol": "madUSDC"
       },
       {
         "contract_address": "0xe3f5a90f9cb311505cd691a46596599aa1a0ad7d",
         "chain_id": 1285,
-        "contract_decimals": 6
+        "contract_decimals": 6,
+        "symbol": "madUSDC"
       },
       {
         "contract_address": "0x620fd5fa44be6af63715ef4e65ddfa0387ad13f5",
@@ -153,7 +158,8 @@
       {
         "contract_address": "0x5a955fddf055f2de3281d99718f5f1531744b102",
         "chain_id": 2001,
-        "contract_decimals": 6
+        "contract_decimals": 6,
+        "symbol": "madUSDC"
       },
       {
         "contract_address": "0x66a2a913e447d6b4bf33efbec43aaef87890fbbc",
@@ -229,12 +235,14 @@
       {
         "contract_address": "0xc234a67a4f840e61ade794be47de455361b52413",
         "chain_id": 1284,
-        "contract_decimals": 18
+        "contract_decimals": 18,
+        "symbol": "madDAI"
       },
       {
         "contract_address": "0x80a16016cc4a2e6a2caca8a4a498b1699ff0f844",
         "chain_id": 1285,
-        "contract_decimals": 18
+        "contract_decimals": 18,
+        "symbol": "madDAI"
       },
       {
         "contract_address": "0x94ba7a27c7a95863d1bdc7645ac2951e0cca06ba",
@@ -244,7 +252,8 @@
       {
         "contract_address": "0x41eafc40cd5cb904157a10158f73ff2824dc1339",
         "chain_id": 2001,
-        "contract_decimals": 18
+        "contract_decimals": 18,
+        "symbol": "madDAI"
       },
       {
         "contract_address": "0xf74195bb8a5cf652411867c5c2c5b8c2a402be35",
@@ -321,12 +330,13 @@
         "contract_address": "0x30d2a9f5fdf90ace8c17952cbb4ee48a55d916a7",
         "chain_id": 1284,
         "contract_decimals": 18,
-        "symbol": "WETH"
+        "symbol": "madWETH"
       },
       {
         "contract_address": "0x639a647fbe20b6c8ac19e48e2de44ea792c62c5c",
         "chain_id": 1285,
-        "contract_decimals": 18
+        "contract_decimals": 18,
+        "symbol": "madWETH"
       },
       {
         "contract_address": "0xa722c13135930332eb3d749b2f0906559d2c5b99",
@@ -338,7 +348,7 @@
         "contract_address": "0x5950f9b6ef36f3127ea66799e64d0ea1f5fdb9d1",
         "chain_id": 2001,
         "contract_decimals": 18,
-        "symbol": "WETH"
+        "symbol": "madWETH"
       },
       {
         "contract_address": "0x0000000000000000000000000000000000000000",
@@ -411,12 +421,14 @@
       {
         "contract_address": "0x1dc78acda13a8bc4408b207c9e48cdbc096d95e0",
         "chain_id": 1284,
-        "contract_decimals": 8
+        "contract_decimals": 8,
+        "symbol": "madWBTC"
       },
       {
         "contract_address": "0x6ab6d61428fde76768d7b45d8bfeec19c6ef91a8",
         "chain_id": 1285,
-        "contract_decimals": 8
+        "contract_decimals": 8,
+        "symbol": "madWBTC"
       },
       {
         "contract_address": "0x33284f95ccb7b948d9d352e1439561cf83d8d00d",
@@ -426,7 +438,8 @@
       {
         "contract_address": "0x48aeb7584ba26d3791f06fba360db435b3d7a174",
         "chain_id": 2001,
-        "contract_decimals": 8
+        "contract_decimals": 8,
+        "symbol": "madWBTC"
       },
       {
         "contract_address": "0xdc0486f8bf31df57a952bcd3c1d3e166e3d9ec8b",
