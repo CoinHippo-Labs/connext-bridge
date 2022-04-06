@@ -12,7 +12,7 @@ import Pulse from 'react-reveal/Pulse'
 import Flip from 'react-reveal/Flip'
 import LightSpeed from 'react-reveal/LightSpeed'
 import { MdOutlineRouter } from 'react-icons/md'
-import { TiArrowRight } from 'react-icons/ti'
+import { TiArrowRight, TiWarning } from 'react-icons/ti'
 import { FaCheckCircle, FaRegCheckCircle, FaClock, FaTimesCircle, FaQuestion } from 'react-icons/fa'
 import { BsFillCheckCircleFill, BsFillXCircleFill } from 'react-icons/bs'
 
@@ -102,7 +102,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
         response = await transactions(sdk_data, receivingChainId, transactionId, null, chains_data, tokens_data)
         receivingTx = response?.data?.[0]
 
-        if (sdk_data && receivingTx && receivingTx.amount && !receivingTx.relayerFee) {
+        if (sdk_data && receivingTx && receivingTx.amount/* && !receivingTx.relayerFee*/) {
           try {
             response = await sdk_data.getEstimateReceiverAmount({
               amount: receivingTx.amount,
@@ -112,8 +112,11 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
               receivingAssetId: receivingTx.receivingAssetId,
             })
 
-            if (response?.relayerFee) {
+            if (response?.relayerFee && !receivingTx.relayerFee) {
               receivingTx.relayerFee = response.relayerFee
+            }
+            if (response?.receiverAmount) {
+              receivingTx.estimateReceiverAmount = response.receiverAmount
             }
           } catch (error) {}
         }
@@ -307,6 +310,8 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
   const fromAmount = sendingTx?.amount && fromContract?.contract_decimals && BigNumber(sendingTx.amount).shiftedBy(-fromContract.contract_decimals).toNumber()
   const toAmount = receivingTx?.amount && toContract?.contract_decimals && BigNumber(receivingTx.amount).shiftedBy(-toContract.contract_decimals).toNumber()
   const toRelayerFee = receivingTx?.relayerFee && toContract?.contract_decimals && BigNumber(receivingTx.relayerFee).shiftedBy(-toContract.contract_decimals).toNumber()
+  const toEstimateAmount = receivingTx?.estimateReceiverAmount && toContract?.contract_decimals && BigNumber(receivingTx.estimateReceiverAmount).shiftedBy(-toContract.contract_decimals).toNumber()
+  const isAmountDiff = typeof toAmount === 'number' && typeof toEstimateAmount === 'number' && toAmount < (1 - Number(process.env.NEXT_PUBLIC_WARN_AMOUNT_DIFF_PERCENT)) * toEstimateAmount
 
   const loaded = data?.transactionId && transaction?.transactionId === data.transactionId && generalTx
   const finish = [sendingTx?.status, receivingTx?.status].includes('Cancelled') || ['Fulfilled'].includes(generalTx?.status)
@@ -918,6 +923,12 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
                           </Pulse>
                       )}
                       {cancelButton}
+                      {isAmountDiff && (
+                        <div className="flex items-center justify-center text-yellow-500 dark:text-yellow-400 text-xs space-x-1.5">
+                          <TiWarning size={16} />
+                          <span>The amount to be received is less than {numberFormat((1 - Number(process.env.NEXT_PUBLIC_WARN_AMOUNT_DIFF_PERCENT)) * 100, '0,0.00')}% of the estimation.</span>
+                        </div>
+                      )}
                     </>
                   :
                   <>
