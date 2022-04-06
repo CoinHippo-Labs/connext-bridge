@@ -48,3 +48,6 @@ Connext Bridge is a bridge app built on top of [Connext's nxtp protocol](https:/
   ```
   npm run dev
   ```
+
+## Setup your own Bridge Dapp
+We recommend you to use the code from [Bridge | CoinHippo](https://github.com/CoinHippo-Labs/connext-bridge) instead. This is because most UI components and app structures are identical. Besides, the repo has been designed to be built as a starter framework to be easily used with fewer dependencies while still can take advantage of [Connext's nxtp protocol](https://github.com/connext/nxtp).
