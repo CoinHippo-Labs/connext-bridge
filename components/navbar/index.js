@@ -300,10 +300,10 @@ export default function Navbar() {
     <>
       <div className="navbar border-b">
         <div className="navbar-inner w-full flex xl:grid xl:grid-flow-row xl:grid-cols-9 items-center">
-          <div className={`xl:col-span-${web3_provider && address ? 2 : 3}`}>
+          <div className={`xl:col-span-${web3_provider && address ? 3 : 3}`}>
             <Logo />
           </div>
-          <div className={`xl:col-span-${web3_provider && address ? 4 : 3}`}>
+          <div className={`xl:col-span-${web3_provider && address ? 3 : 3} flex justify-center`}>
             <DropdownNavigation />
             <Navigation />
           </div>
