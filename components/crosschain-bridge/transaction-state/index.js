@@ -102,10 +102,10 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
         response = await transactions(sdk_data, receivingChainId, transactionId, null, chains_data, tokens_data)
         receivingTx = response?.data?.[0]
 
-        if (sdk_data && receivingTx && receivingTx.amount/* && !receivingTx.relayerFee*/) {
+        if (sdk_data && sendingTx?.amount/* && !receivingTx.relayerFee*/) {
           try {
             response = await sdk_data.getEstimateReceiverAmount({
-              amount: receivingTx.amount,
+              amount: sendingTx.amount,
               sendingChainId: receivingTx.sendingChainId,
               sendingAssetId: receivingTx.sendingAssetId,
               receivingChainId: receivingTx.receivingChainId,
@@ -396,7 +396,7 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
   )
   const toRelayerFeeAmount = typeof toRelayerFee === 'number' && toRelayerFee > 0 && (
     <div className="flex items-center space-x-2">
-      <span className="text-sm font-semibold">Relayer Fee:</span>
+      <span className="whitespace-nowrap text-sm font-semibold">Relayer Fee:</span>
       <div className="min-w-max max-w-min bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center sm:justify-end space-x-2 mx-auto py-1 px-2.5">
         <Img
           src={toAsset.image}
@@ -923,12 +923,12 @@ export default function TransactionState({ defaultHidden = false, data, onClose,
                           </Pulse>
                       )}
                       {cancelButton}
-                      {isAmountDiff && (
+                      {/*isAmountDiff && (
                         <div className="flex items-center justify-center text-yellow-500 dark:text-yellow-400 text-xs space-x-1.5">
                           <TiWarning size={16} />
                           <span>The amount to be received is less than {numberFormat((1 - Number(process.env.NEXT_PUBLIC_WARN_AMOUNT_DIFF_PERCENT)) * 100, '0,0.00')}% of the estimation.</span>
                         </div>
-                      )}
+                      )*/}
                     </>
                   :
                   <>
