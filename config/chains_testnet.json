@@ -160,7 +160,7 @@
     "provider_params": [
       {
         "chainId": "0x13881",
-        "chainName": "Matic Testnet Mumbai",
+        "chainName": "Polygon Mumbai",
         "rpcUrls": ["https://matic-mumbai.chainstacklabs.com", "https://rpc-mumbai.matic.today", "https://rpc-mumbai.maticvigil.com", "wss://ws-matic-mumbai.chainstacklabs.com", "wss://rpc-mumbai.matic.today", "wss://rpc-mumbai.maticvigil.com/ws"],
         "nativeCurrency": {
           "name": "Matic",
