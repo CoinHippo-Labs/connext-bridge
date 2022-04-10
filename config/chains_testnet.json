@@ -167,7 +167,7 @@
           "symbol": "MATIC",
           "decimals": 18
         },
-        "blockExplorerUrls": ["https://explorer-mumbai.maticvigil.com"]
+        "blockExplorerUrls": ["https://mumbai.polygonscan.com"]
       }
     ],
     "explorer": {
