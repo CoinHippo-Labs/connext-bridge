@@ -10,14 +10,14 @@ import ERC20 from '@connext/nxtp-contracts/artifacts/contracts/interfaces/IERC20
 import contractDeployments from '@connext/nxtp-contracts/deployments.json'
 import { dev, mainnet } from '@nomad-xyz/sdk'
 import Web3 from 'web3'
-import { constants, Contract } from 'ethers'
+import { constants, Contract, utils } from 'ethers'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
 import { TailSpin, Triangle } from 'react-loader-spinner'
 import Switch from 'react-switch'
 import Linkify from 'react-linkify'
 import parse from 'html-react-parser'
-import { MdSwapVerticalCircle, MdSwapHorizontalCircle, MdClose } from 'react-icons/md'
+import { MdSwapVerticalCircle, MdSwapHorizontalCircle, MdClose, MdLocalGasStation } from 'react-icons/md'
 import { BsQuestionCircle } from 'react-icons/bs'
 import { BiMessageError, BiMessageDots, BiMessageCheck, BiMessageDetail, BiChevronRight, BiChevronUp, BiInfinite, BiLock, BiArrowFromTop, BiUpArrowAlt, BiRefresh } from 'react-icons/bi'
 import { FaCheckCircle, FaClock, FaTimesCircle } from 'react-icons/fa'
@@ -44,7 +44,7 @@ import { currency_symbol } from '../../lib/object/currency'
 import { paramsToObject, numberFormat, ellipseAddress, sleep } from '../../lib/utils'
 import meta from '../../lib/meta'
 
-import { BALANCES_DATA, ENS_DATA } from '../../reducers/types'
+import { ENS_DATA, BALANCES_DATA, GAS_PRICES_DATA } from '../../reducers/types'
 
 const expiry_hours = 72
 const refresh_estimated_fees_seconds = 30
@@ -87,7 +87,7 @@ BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_
 
 export default function CrosschainBridge() {
   const dispatch = useDispatch()
-  const { preferences, announcement, chains, assets, tokens, ens, chains_status, routers_status, routers_assets, wallet, sdk, rpcs, balances } = useSelector(state => ({ preferences: state.preferences, announcement: state.announcement, chains: state.chains, assets: state.assets, tokens: state.tokens, ens: state.ens, chains_status: state.chains_status, routers_status: state.routers_status, routers_assets: state.routers_assets, sdk: state.sdk, rpcs: state.rpcs, wallet: state.wallet, balances: state.balances }), shallowEqual)
+  const { preferences, announcement, chains, assets, tokens, ens, chains_status, routers_status, routers_assets, wallet, sdk, rpcs, balances, gas_prices } = useSelector(state => ({ preferences: state.preferences, announcement: state.announcement, chains: state.chains, assets: state.assets, tokens: state.tokens, ens: state.ens, chains_status: state.chains_status, routers_status: state.routers_status, routers_assets: state.routers_assets, sdk: state.sdk, rpcs: state.rpcs, wallet: state.wallet, balances: state.balances, gas_prices: state.gas_prices }), shallowEqual)
   const { theme } = { ...preferences }
   const { announcement_data } = { ...announcement }
   const { chains_data } = { ...chains }
@@ -102,6 +102,7 @@ export default function CrosschainBridge() {
   const { wallet_data } = { ...wallet }
   const { provider, web3_provider, signer, chain_id, address } = { ...wallet_data }
   const { balances_data } = { ...balances }
+  const { gas_prices_data } = { ...gas_prices }
 
   const router = useRouter()
   const { pathname, asPath } = { ...router }
@@ -246,6 +247,20 @@ export default function CrosschainBridge() {
     getData()
 
     const interval = setInterval(() => getData(), 0.25 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [rpcs_data])
+
+  // gas prices
+  useEffect(() => {
+    const getData = () => {
+      if (chains_data) {
+        chains_data.filter(c => !c?.disabled).forEach(c => getChainGasPriceRPC(c.chain_id));
+      }
+    }
+
+    getData()
+
+    const interval = setInterval(() => getData(), 0.1 * 60 * 1000)
     return () => clearInterval(interval)
   }, [rpcs_data])
 
@@ -584,6 +599,25 @@ export default function CrosschainBridge() {
     const chain = chains_data?.find(c => c?.chain_id === chain_id)
     const asset = assets_data?.find(a => a?.id === swapConfig[`${side}AssetId`])
     return balances_data?.[chain_id]?.find(c => c?.contract_address === asset?.contracts?.find(_c => _c?.chain_id === chain_id)?.contract_address)
+  }
+
+  const getChainGasPriceRPC = async chain_id => {
+    if (rpcs_data?.[chain_id]) {
+      const provider = rpcs_data[chain_id]
+      const gasPrice = await provider.getGasPrice();
+
+      if (gasPrice) {
+        dispatch({
+          type: GAS_PRICES_DATA,
+          value: {
+            [`${chain_id}`]: {
+              gas_price: numberFormat(utils.formatUnits(gasPrice, 'gwei'), '0,0'),
+              updated_at: moment().valueOf(),
+            },
+          },
+        })
+      }
+    }
   }
 
   const isSupport = () => {
@@ -1103,7 +1137,41 @@ export default function CrosschainBridge() {
               <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md space-y-8 sm:space-y-6 p-8 sm:p-6">
                 <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6">
                   <div className="sm:col-span-2 flex flex-col items-center sm:items-start">
-                    <span className="w-48 text-gray-400 dark:text-gray-600 text-lg font-medium text-center sm:ml-0">From</span>
+                    <div className="w-48 flex items-center justify-center space-x-1.5">
+                      <span className="text-gray-400 dark:text-gray-600 text-lg font-medium text-center">From</span>
+                      {gas_prices_data?.[fromChain?.chain_id]?.gas_price && (
+                        <Popover
+                          placement="bottom"
+                          title={fromChain.title}
+                          content={<div className="flex flex-col">
+                            <div className="flex items-center space-x-1">
+                              <span className="text-gray-600 dark:text-gray-400">Gas Price:</span>
+                              <span className="font-semibold">
+                                {gas_prices_data[fromChain.chain_id].gas_price} Gwei
+                              </span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <span className="text-gray-600 dark:text-gray-400">Updated at:</span>
+                              <span className="font-semibold">
+                                {Number(moment().diff(moment(gas_prices_data[fromChain.chain_id].updated_at), 'second')) > 59 ?
+                                  moment(gas_prices_data[fromChain.chain_id].updated_at).fromNow()
+                                  :
+                                  <>{moment().diff(moment(gas_prices_data[fromChain.chain_id].updated_at), 'second')}s ago</>
+                                }
+                              </span>
+                            </div>
+                          </div>}
+                          titleClassName="normal-case py-1"
+                        >
+                          <div className="flex items-center text-gray-400 dark:text-white space-x-1">
+                            <MdLocalGasStation size={20} />
+                            <span className="normal-case font-medium">
+                              {gas_prices_data[fromChain.chain_id].gas_price} Gwei
+                            </span>
+                          </div>
+                        </Popover>
+                      )}
+                    </div>
                     <Network
                       disabled={actionDisabled}
                       chain_id={swapConfig.fromChainId}
@@ -1188,7 +1256,41 @@ export default function CrosschainBridge() {
                     </button>
                   </div>
                   <div className="sm:col-span-2 flex flex-col items-center sm:items-end">
-                    <span className="w-48 text-gray-400 dark:text-gray-600 text-lg font-medium text-center sm:mr-0">To</span>
+                    <div className="w-48 flex items-center justify-center space-x-1.5">
+                      <span className="text-gray-400 dark:text-gray-600 text-lg font-medium text-center">To</span>
+                      {gas_prices_data?.[toChain?.chain_id]?.gas_price && (
+                        <Popover
+                          placement="bottom"
+                          title={toChain.title}
+                          content={<div className="flex flex-col">
+                            <div className="flex items-center space-x-1">
+                              <span className="text-gray-600 dark:text-gray-400">Gas Price:</span>
+                              <span className="font-semibold">
+                                {gas_prices_data[toChain.chain_id].gas_price} Gwei
+                              </span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <span className="text-gray-600 dark:text-gray-400">Updated at:</span>
+                              <span className="font-semibold">
+                                {Number(moment().diff(moment(gas_prices_data[toChain.chain_id].updated_at), 'second')) > 59 ?
+                                  moment(gas_prices_data[toChain.chain_id].updated_at).fromNow()
+                                  :
+                                  <>{moment().diff(moment(gas_prices_data[toChain.chain_id].updated_at), 'second')}s ago</>
+                                }
+                              </span>
+                            </div>
+                          </div>}
+                          titleClassName="normal-case py-1"
+                        >
+                          <div className="flex items-center text-gray-400 dark:text-white space-x-1">
+                            <MdLocalGasStation size={20} />
+                            <span className="normal-case font-medium">
+                              {gas_prices_data[toChain.chain_id].gas_price} Gwei
+                            </span>
+                          </div>
+                        </Popover>
+                      )}
+                    </div>
                     <Network
                       disabled={actionDisabled}
                       chain_id={swapConfig.toChainId}

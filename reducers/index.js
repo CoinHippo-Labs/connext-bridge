@@ -14,6 +14,7 @@ import sdk from './sdk'
 import rpcs from './rpcs'
 import wallet from './wallet'
 import balances from './balances'
+import gas_prices from './gas-prices'
 
 export default combineReducers({
   preferences,
@@ -30,4 +31,5 @@ export default combineReducers({
   rpcs,
   wallet,
   balances,
+  gas_prices,
 })

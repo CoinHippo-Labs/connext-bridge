@@ -36,3 +36,6 @@ export const WALLET_RESET = 'wallet_reset'
 
 // balances
 export const BALANCES_DATA = 'balances_data'
+
+// balances
+export const GAS_PRICES_DATA = 'gas_prices_data'
