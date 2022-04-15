@@ -131,7 +131,7 @@
       {
         "chainId": "0x61",
         "chainName": "BNB Chain Testnet",
-        "rpcUrls": ["https://data-seed-prebsc-1-s1.binance.org:8545", "https://data-seed-prebsc-2-s1.binance.org:8545", "https://data-seed-prebsc-1-s2.binance.org:8545", "https://data-seed-prebsc-2-s2.binance.org:8545", "https://data-seed-prebsc-1-s3.binance.org:8545", "https://data-seed-prebsc-2-s3.binance.org:8545"],
+        "rpcUrls": ["https://data-seed-prebsc-1-s1.binance.org:8545", "https://data-seed-prebsc-2-s1.binance.org:8545", "https://data-seed-prebsc-1-s2.binance.org:8545"],
         "nativeCurrency": {
           "name": "BNB Token",
           "symbol": "BNB",
@@ -161,7 +161,7 @@
       {
         "chainId": "0x13881",
         "chainName": "Polygon Mumbai",
-        "rpcUrls": ["https://matic-mumbai.chainstacklabs.com", "https://rpc-mumbai.matic.today", "https://rpc-mumbai.maticvigil.com", "wss://ws-matic-mumbai.chainstacklabs.com", "wss://rpc-mumbai.matic.today", "wss://rpc-mumbai.maticvigil.com/ws"],
+        "rpcUrls": ["https://rpc-mumbai.matic.today", "https://matic-mumbai.chainstacklabs.com", "https://rpc-mumbai.maticvigil.com"],
         "nativeCurrency": {
           "name": "Matic",
           "symbol": "MATIC",
