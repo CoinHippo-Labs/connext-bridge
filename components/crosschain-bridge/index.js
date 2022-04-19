@@ -1094,7 +1094,7 @@ export default function CrosschainBridge() {
               >
                 <div className="block leading-4 text-xs xl:text-base font-medium">
                   <span className="mr-1.5">
-                    Transfers to and from <span className="font-semibold">{chains_status_data?.filter(c => !c.disabled && !c.synced).map(c => c?.short_name).join(', ')}</span> may be delayed temporarily. Funds are always safe! If you have active transactions, check their status
+                    Transfers to and from <span className="font-semibold">{chains_status_data?.filter(c => !c.disabled && !c.synced).map(c => c?.title).join(', ')}</span> may be delayed temporarily. Funds are always safe! If you have active transactions, check their status
                   </span>
                   <a
                     href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}${address ? `/address/${address}` : '/status'}`}
