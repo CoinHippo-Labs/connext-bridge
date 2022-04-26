@@ -161,7 +161,7 @@
       {
         "chainId": "0x64",
         "chainName": "Gnosis Chain",
-        "rpcUrls": ["https://rpc.gnosischain.com", "https://rpc.ankr.com/gnosis"],
+        "rpcUrls": ["https://rpc.gnosischain.com"],
         "nativeCurrency": {
           "name": "xDAI",
           "symbol": "xDAI",
