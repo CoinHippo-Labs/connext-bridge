@@ -574,6 +574,23 @@
     ]
   },
   {
+    "id": "boba",
+    "symbol": "BOBA",
+    "image": "/logos/assets/boba.png",
+    "contracts": [
+      {
+        "contract_address": "0x42bbfa2e77757c645eeaad1655e0911a7553efbc",
+        "chain_id": 1,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0xa18bf3994c0cc6e3b63ac420308e5383f53120d7",
+        "chain_id": 288,
+        "contract_decimals": 18
+      }
+    ]
+  },
+  {
     "id": "magic",
     "symbol": "MAGIC",
     "image": "/logos/assets/magic.png",
