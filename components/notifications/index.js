@@ -1,11 +1,9 @@
-import PropTypes from 'prop-types'
 import { useState, useEffect } from 'react'
+import { FiX } from 'react-icons/fi'
 
 import Portal from '../portal'
 
-import { FiX } from 'react-icons/fi'
-
-const Notifications = ({
+export default const Notifications({
   visible = true,
   outerClassNames,
   innerClassNames,
@@ -20,10 +18,8 @@ const Notifications = ({
   const [open, setOpen] = useState(visible)
 
   const show = () => setOpen(true)
-
   const hide = () => {
     setOpen(false)
-
     if (onClose) {
       onClose()
     }
@@ -59,16 +55,3 @@ const Notifications = ({
     </>
   )
 }
-
-Notifications.propTypes = {
-  visible: PropTypes.bool,
-  outerClassNames: PropTypes.string,
-  innerClassNames: PropTypes.string,
-  animation: PropTypes.string,
-  btnTitle: PropTypes.string,
-  btnClassNames: PropTypes.string,
-  icon: PropTypes.any,
-  content: PropTypes.any,
-}
-
-export default Notifications

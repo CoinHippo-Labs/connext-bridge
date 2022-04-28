@@ -17,8 +17,8 @@
     border-color: color(theme('colors.black') tint(5%));
     .navbar-search {
       input {
-        background: color(theme('colors.gray.900') tint(5%));
-        border-color: color(theme('colors.gray.900') tint(5%));
+        background: color(theme('colors.black') tint(5%));
+        border-color: color(theme('colors.black') tint(5%));
       }
     }
   }

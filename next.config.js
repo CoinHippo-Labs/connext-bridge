@@ -13,7 +13,6 @@ module.exports = {
       querystring: false,
       assert: false,
     }
-
     return config
   },
 }

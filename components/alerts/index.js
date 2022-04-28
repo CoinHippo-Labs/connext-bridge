@@ -1,9 +1,7 @@
-import PropTypes from 'prop-types'
 import { useState } from 'react'
-
 import { FiX } from 'react-icons/fi'
 
-const Alert = ({
+export default const Alert({
   size = 'default',
   color,
   outlined = false,
@@ -13,12 +11,11 @@ const Alert = ({
   icon = null,
   closeDisabled = false,
   children,
-  className,
+  className = '',
 }) => {
   const [hidden, setHidden] = useState(false)
 
   let css = []
-
   css.push(color)
   if (outlined) css.push(`border border-current`)
   if (raised) css.push('shadow')
@@ -52,14 +49,3 @@ const Alert = ({
     </div>
   )
 }
-
-Alert.propTypes = {
-  color: PropTypes.string,
-  outlined: PropTypes.bool,
-  raised: PropTypes.bool,
-  rounded: PropTypes.bool,
-  icon: PropTypes.any,
-  children: PropTypes.any,
-}
-
-export default Alert

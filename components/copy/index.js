@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react'
-
-import PropTypes from 'prop-types'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
-import { BsCheckCircleFill } from 'react-icons/bs'
-import { MdContentCopy } from 'react-icons/md'
+import { HiCheckCircle } from 'react-icons/hi'
+import { BiCopy } from 'react-icons/bi'
 
-const Copy = ({ text, copyTitle, size = 16, onCopy, className = '' }) => {
+export default function Copy({ value, title, size = 16, onCopy, className = '' }) {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -14,15 +12,17 @@ const Copy = ({ text, copyTitle, size = 16, onCopy, className = '' }) => {
   }, [copied, setCopied])
 
   return copied ?
-    <div className={`${copyTitle ? 'min-w-max' : ''} flex items-center space-x-1`}>
-      {copyTitle && (
-        <span className="text-gray-400 dark:text-gray-600 font-medium">{copyTitle}</span>
+    <div className={`${title ? 'min-w-max' : ''} flex items-center space-x-1`}>
+      {title && (
+        <span className="font-medium">
+          {title}
+        </span>
       )}
-      <BsCheckCircleFill size={size} className={`text-green-400 dark:text-white ${className}`} />
+      <HiCheckCircle size={size} className={`text-green-300 dark:text-green-500 ${className}`} />
     </div>
     :
     <CopyToClipboard
-      text={text}
+      text={value}
       onCopy={() => {
         setCopied(true)
         if (onCopy) {
@@ -30,20 +30,13 @@ const Copy = ({ text, copyTitle, size = 16, onCopy, className = '' }) => {
         }
       }}
     >
-      <div className={`${copyTitle ? 'min-w-max' : ''} flex items-center space-x-1`}>
-        {copyTitle && (
-          <span className="cursor-pointer text-gray-400 dark:text-gray-600 font-medium">{copyTitle}</span>
+      <div className={`${title ? 'min-w-max' : ''} flex items-center space-x-1`}>
+        {title && (
+          <span className="font-medium">
+            {title}
+          </span>
         )}
-        <MdContentCopy size={size} className={`cursor-pointer ${className.includes('text-') ? '' : 'text-gray-300 hover:text-gray-400 dark:text-gray-600 dark:hover:text-gray-500'} ${className}`} />
+        <BiCopy size={size} className={`cursor-pointer text-gray-300 hover:text-gray-400 dark:text-gray-700 dark:hover:text-gray-600 ${className}`} />
       </div>
     </CopyToClipboard>
 }
-
-Copy.propTypes = {
-  text: PropTypes.string,
-  copyTitle: PropTypes.any,
-  size: PropTypes.number,
-  className:PropTypes.string,
-}
-
-export default Copy

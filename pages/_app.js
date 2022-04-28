@@ -1,23 +1,22 @@
 import Head from 'next/head'
 import Router from 'next/router'
 import { Provider } from 'react-redux'
-
 import NProgress from 'nprogress'
 
 import { useStore } from '../store'
 import Layout from '../layouts'
-
-import '../styles/global.css'
-import '../styles/tailwind.css'
+import '../styles/globals.css'
 import '../styles/animate.css'
 import '../styles/layout.css'
-import '../styles/components/navbar.css'
-import '../styles/components/nprogress.css'
-import '../styles/components/skeleton.css'
+import '../styles/tailwind.css'
 import '../styles/components/button.css'
 import '../styles/components/dropdown.css'
-import '../styles/components/modals.css'
 import '../styles/components/forms.css'
+import '../styles/components/modals.css'
+import '../styles/components/navbar.css'
+import '../styles/components/notifications.css'
+import '../styles/components/nprogress.css'
+import '../styles/components/skeleton.css'
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css'
 
 Router.events.on('routeChangeStart', () => NProgress.start())
@@ -41,9 +40,9 @@ export default function App({ Component, pageProps }) {
       <Provider store={store}>
         <Layout>
           <div id="portal" />
-          <div id="modal-network" />
-          <div id="modal-asset" />
-          <Component {...pageProps} />
+          <div id="modal-chains" />
+          <div id="modal-assets" />
+          <Component { ...pageProps } />
         </Layout>
       </Provider>
     </>

@@ -1,18 +1,16 @@
-import { THEME } from './types'
+import { RPCS } from './types'
 
 export default function data(
   state = {
-    [`${THEME}`]: 'dark',
+    [`${RPCS}`]: null,
   },
   action
 ) {
   switch (action.type) {
-    case THEME:
-      localStorage.setItem(THEME, action.value)
-
+    case RPCS:
       return {
         ...state,
-        [`${THEME}`]: action.value,
+        [`${RPCS}`]: action.value,
       }
     default:
       return state
