@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 
 export default function Portal({ children, selector }) {
   const [mounted, setMounted] = useState(false)
+
   const ref = useRef()
 
   useEffect(() => {

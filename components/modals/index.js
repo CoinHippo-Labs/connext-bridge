@@ -31,6 +31,7 @@ export default function Modal({
   const { theme } = { ...preferences }
 
   const [open, setOpen] = useState(false)
+
   const modalRef = useRef(null)
 
   const show = () => {
