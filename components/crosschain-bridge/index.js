@@ -607,11 +607,15 @@ export default function CrosschainBridge() {
       const gasPrice = await provider.getGasPrice();
 
       if (gasPrice) {
+        let gasPriceGwei = Number(utils.formatUnits(gasPrice, 'gwei'));
+        if (gasPriceGwei < 0.000001) {
+          gasPriceGwei = 0
+        }
         dispatch({
           type: GAS_PRICES_DATA,
           value: {
             [`${chain_id}`]: {
-              gas_price: numberFormat(utils.formatUnits(gasPrice, 'gwei'), '0,0'),
+              gas_price: numberFormat(gasPriceGwei, '0,0'),
               updated_at: moment().valueOf(),
             },
           },
@@ -924,7 +928,6 @@ export default function CrosschainBridge() {
       if (a && routers_status_data) {
         assets_from_chains = Object.fromEntries(chains_data?.filter(c => !c.disabled).map(c => {
           const assets = a.filter(_a => routers_status_data?.findIndex(r => r?.routerAddress?.toLowerCase() === _a?.router?.id?.toLowerCase() && r?.supportedChains?.includes(c?.chain_id) && r?.supportedChains?.includes(toChain?.chain_id)) > -1)
-
           return [c.chain_id, _.maxBy(assets, 'amount')]
         }).filter(([key, value]) => key !== toChain?.chain_id && value))
       }
@@ -937,6 +940,7 @@ export default function CrosschainBridge() {
       }
     }), ['value'], ['desc']
   )
+
   const fromBalance = getChainBalance(swapConfig.fromChainId, 'from')
   const toBalance = getChainBalance(swapConfig.toChainId, 'to')
   const fromBalanceAmount = fromBalance?.amount || 0
@@ -1170,7 +1174,7 @@ export default function CrosschainBridge() {
                           <div className="flex items-center text-gray-400 dark:text-white space-x-1">
                             <MdLocalGasStation size={20} />
                             <span className="normal-case font-medium">
-                              {gas_prices_data[fromChain.chain_id].gas_price < 0.0000001 ? 0 : gas_prices_data[fromChain.chain_id].gas_price} Gwei
+                              {gas_prices_data[fromChain.chain_id].gas_price} Gwei
                             </span>
                           </div>
                         </Popover>
@@ -1289,7 +1293,7 @@ export default function CrosschainBridge() {
                           <div className="flex items-center text-gray-400 dark:text-white space-x-1">
                             <MdLocalGasStation size={20} />
                             <span className="normal-case font-medium">
-                              {gas_prices_data[toChain.chain_id].gas_price < 0.0000001 ? 0 : gas_prices_data[toChain.chain_id].gas_price} Gwei
+                              {gas_prices_data[toChain.chain_id].gas_price} Gwei
                             </span>
                           </div>
                         </Popover>
