@@ -9,7 +9,7 @@ import Copy from '../../copy'
 
 import { numberFormat } from '../../../lib/utils'
 
-export default function Assets({ asset_id, inputSearch, handleDropdownClick, chain_id, from, to, side }) {
+export default function Assets({ asset_id, inputSearch, handleDropdownClick, from_chain_id, chain_id, from, to, side }) {
   const { chains, assets, routers_status, routers_assets, balances } = useSelector(state => ({ chains: state.chains, assets: state.assets, routers_status: state.routers_status, routers_assets: state.routers_assets, balances: state.balances }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
@@ -26,7 +26,6 @@ export default function Assets({ asset_id, inputSearch, handleDropdownClick, cha
       if (a && routers_status_data) {
         assets_from_chains = Object.fromEntries(chains_data?.filter(c => !c.disabled).map(c => {
           const assets = a.filter(_a => routers_status_data?.findIndex(r => r?.routerAddress?.toLowerCase() === _a?.router?.id?.toLowerCase() && r?.supportedChains?.includes(c?.chain_id) && r?.supportedChains?.includes(chain?.chain_id)) > -1)
-
           return [c.chain_id, _.maxBy(assets, 'amount')]
         }).filter(([key, value]) => key !== chain?.chain_id && value))
       }
@@ -35,6 +34,7 @@ export default function Assets({ asset_id, inputSearch, handleDropdownClick, cha
         ..._.maxBy(a, 'amount_value'),
         total_amount: _.sumBy(a, 'amount'),
         total_amount_value: _.sumBy(a, 'amount_value'),
+        ...assets_from_chains?.[from_chain_id],
         assets_from_chains,
       }
     }), ['value'], ['desc']

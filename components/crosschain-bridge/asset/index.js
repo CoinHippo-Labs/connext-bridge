@@ -93,6 +93,7 @@ export default function DropdownAsset({ disabled, swapConfig, onSelect, from, to
           body={<Search
             asset_id={asset?.id}
             updateAssetId={_asset_id => handleDropdownClick(_asset_id)}
+            from_chain_id={fromChainId}
             chain_id={chain?.chain_id}
             from={from}
             to={to}

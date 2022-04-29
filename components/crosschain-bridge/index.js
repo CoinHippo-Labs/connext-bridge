@@ -973,6 +973,10 @@ export default function CrosschainBridge() {
   const minAmount = estimatedFees || fees?.prepareGasFee || min_amount
   const maxBalanceAmount = fromBalanceAmount > minAmount ? fromBalanceAmount : 0
   const maxTransfer = maxTransfers?.find(t => t?.chain?.chain_id === swapConfig.toChainId && t?.contract_address === toContract?.contract_address)
+  if (maxTransfer?.assets_from_chains?.[swapConfig.fromChainId]) {
+    maxTransfer.amount = maxTransfer.assets_from_chains[swapConfig.fromChainId].amount
+    maxTransfer.amount_value = maxTransfer.assets_from_chains[swapConfig.fromChainId].amount_value
+  }
   let maxAmount = maxTransfer ? maxTransfer.amount < maxBalanceAmount ? maxTransfer.amount > minAmount ? maxTransfer.amount : 0 : maxBalanceAmount : 0
   if (maxAmount) {
     maxAmount = maxAmount - (fees?.prepareGasFee || 0)
@@ -1166,7 +1170,7 @@ export default function CrosschainBridge() {
                           <div className="flex items-center text-gray-400 dark:text-white space-x-1">
                             <MdLocalGasStation size={20} />
                             <span className="normal-case font-medium">
-                              {gas_prices_data[fromChain.chain_id].gas_price} Gwei
+                              {gas_prices_data[fromChain.chain_id].gas_price < 0.0000001 ? 0 : gas_prices_data[fromChain.chain_id].gas_price} Gwei
                             </span>
                           </div>
                         </Popover>
@@ -1285,7 +1289,7 @@ export default function CrosschainBridge() {
                           <div className="flex items-center text-gray-400 dark:text-white space-x-1">
                             <MdLocalGasStation size={20} />
                             <span className="normal-case font-medium">
-                              {gas_prices_data[toChain.chain_id].gas_price} Gwei
+                              {gas_prices_data[toChain.chain_id].gas_price < 0.0000001 ? 0 : gas_prices_data[toChain.chain_id].gas_price} Gwei
                             </span>
                           </div>
                         </Popover>

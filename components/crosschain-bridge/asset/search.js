@@ -4,7 +4,7 @@ import { FiSearch } from 'react-icons/fi'
 
 import Assets from './assets'
 
-export default function Search({ asset_id, updateAssetId, chain_id, from, to, side }) {
+export default function Search({ asset_id, updateAssetId, from_chain_id, chain_id, from, to, side }) {
   const [inputSearch, setInputSearch] = useState('')
 
   return (
@@ -34,6 +34,7 @@ export default function Search({ asset_id, updateAssetId, chain_id, from, to, si
                 updateAssetId(asset_id)
               }
             }}
+            from_chain_id={from_chain_id}
             chain_id={chain_id}
             from={from}
             to={to}
