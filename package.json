@@ -15,7 +15,7 @@
     "deploy-testnet": "aws s3 sync out/ s3://testnet.bridge.connext.network --acl public-read"
   },
   "dependencies": {
-    "@connext/nxtp-sdk": "^0.1.35",
+    "@connext/nxtp-sdk": "^0.1.36",
     "@nomad-xyz/sdk": "^1.5.1",
     "@portis/web3": "^4.0.7",
     "@walletconnect/web3-provider": "^1.7.1",

@@ -364,7 +364,10 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
-    "image": "/logos/chains/mainnet/milkomeda.png"
+    "image": "/logos/chains/mainnet/milkomeda.png",
+    "nomad": {
+      "id": "milkomeda"
+    }
   },
   {
     "id": "boba",
@@ -514,6 +517,9 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
-    "image": "/logos/chains/mainnet/evmos.png"
+    "image": "/logos/chains/mainnet/evmos.png",
+    "nomad": {
+      "id": "evmos"
+    }
   }
 ]

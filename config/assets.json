@@ -95,6 +95,14 @@
       {
         "from_chain_id": 1,
         "to_chain_id": 1284
+      },
+      {
+        "from_chain_id": 1,
+        "to_chain_id": 2001
+      },
+      {
+        "from_chain_id": 1,
+        "to_chain_id": 9001
       }
     ]
   },
@@ -193,6 +201,14 @@
       {
         "from_chain_id": 1,
         "to_chain_id": 1284
+      },
+      {
+        "from_chain_id": 1,
+        "to_chain_id": 2001
+      },
+      {
+        "from_chain_id": 1,
+        "to_chain_id": 9001
       }
     ]
   },
@@ -293,6 +309,14 @@
       {
         "from_chain_id": 1,
         "to_chain_id": 1284
+      },
+      {
+        "from_chain_id": 1,
+        "to_chain_id": 2001
+      },
+      {
+        "from_chain_id": 1,
+        "to_chain_id": 9001
       }
     ]
   },
@@ -390,6 +414,14 @@
       {
         "from_chain_id": 1,
         "to_chain_id": 1284
+      },
+      {
+        "from_chain_id": 1,
+        "to_chain_id": 2001
+      },
+      {
+        "from_chain_id": 1,
+        "to_chain_id": 9001
       }
     ]
   },
