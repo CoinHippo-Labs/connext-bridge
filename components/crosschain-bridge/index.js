@@ -927,7 +927,7 @@ export default function CrosschainBridge() {
 
       if (a && routers_status_data) {
         assets_from_chains = Object.fromEntries(chains_data?.filter(c => !c.disabled).map(c => {
-          const assets = a.filter(_a => routers_status_data?.findIndex(r => r?.routerAddress?.toLowerCase() === _a?.router?.id?.toLowerCase() && r?.supportedChains?.includes(c?.chain_id) && r?.supportedChains?.includes(toChain?.chain_id)) > -1)
+          const assets = a.filter(_a => routers_status_data?.findIndex(r => r?.routerAddress?.toLowerCase() === _a?.router?.id?.toLowerCase() && r?.supportedChains?.includes(c?.chain_id) && r?.supportedChains?.includes(toChain?.chain_id) && r?.supportedChains?.includes(fromChain?.chain_id)) > -1)
           return [c.chain_id, _.maxBy(assets, 'amount')]
         }).filter(([key, value]) => key !== toChain?.chain_id && value))
       }
@@ -976,10 +976,13 @@ export default function CrosschainBridge() {
 
   const minAmount = estimatedFees || fees?.prepareGasFee || min_amount
   const maxBalanceAmount = fromBalanceAmount > minAmount ? fromBalanceAmount : 0
-  const maxTransfer = maxTransfers?.find(t => t?.chain?.chain_id === swapConfig.toChainId && t?.contract_address === toContract?.contract_address)
+  let maxTransfer = maxTransfers?.find(t => t?.chain?.chain_id === swapConfig.toChainId && t?.contract_address === toContract?.contract_address)
   if (maxTransfer?.assets_from_chains?.[swapConfig.fromChainId]) {
     maxTransfer.amount = maxTransfer.assets_from_chains[swapConfig.fromChainId].amount
     maxTransfer.amount_value = maxTransfer.assets_from_chains[swapConfig.fromChainId].amount_value
+  }
+  else if (swapConfig.fromChainId) {
+    maxTransfer = null;
   }
   let maxAmount = maxTransfer ? maxTransfer.amount < maxBalanceAmount ? maxTransfer.amount > minAmount ? maxTransfer.amount : 0 : maxBalanceAmount : 0
   if (maxAmount) {

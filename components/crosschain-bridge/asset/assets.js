@@ -25,7 +25,7 @@ export default function Assets({ asset_id, inputSearch, handleDropdownClick, fro
 
       if (a && routers_status_data) {
         assets_from_chains = Object.fromEntries(chains_data?.filter(c => !c.disabled).map(c => {
-          const assets = a.filter(_a => routers_status_data?.findIndex(r => r?.routerAddress?.toLowerCase() === _a?.router?.id?.toLowerCase() && r?.supportedChains?.includes(c?.chain_id) && r?.supportedChains?.includes(chain?.chain_id)) > -1)
+          const assets = a.filter(_a => routers_status_data?.findIndex(r => r?.routerAddress?.toLowerCase() === _a?.router?.id?.toLowerCase() && r?.supportedChains?.includes(c?.chain_id) && r?.supportedChains?.includes(chain?.chain_id) && r?.supportedChains?.includes(from_chain_id)) > -1)
           return [c.chain_id, _.maxBy(assets, 'amount')]
         }).filter(([key, value]) => key !== chain?.chain_id && value))
       }
@@ -48,7 +48,10 @@ export default function Assets({ asset_id, inputSearch, handleDropdownClick, fro
     <div className="max-h-96 overflow-y-scroll">
       {_assets?.map((item, i) => {
         const contract = item.contracts?.find(c => c?.chain_id === chain_id)
-        const maxTransfer = maxTransfers?.find(t => t?.chain?.chain_id === chain_id && t?.contract_address === contract?.contract_address)
+        let maxTransfer = maxTransfers?.find(t => t?.chain?.chain_id === chain_id && t?.contract_address === contract?.contract_address)
+        if (!maxTransfer?.assets_from_chains?.[from_chain_id]) {
+          maxTransfer = null
+        }
         const balance = balances_data?.[chain_id]?.find(c => c?.contract_address === contract?.contract_address)
 
         return item.disabled ?
