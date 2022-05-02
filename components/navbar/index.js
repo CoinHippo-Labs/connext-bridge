@@ -73,7 +73,7 @@ export default function Navbar() {
   // assets
   useEffect(() => {
     const getData = async () => {
-      const response = await assets()
+      const response = await getAssets()
       if (response) {
         dispatch({
           type: ASSETS_DATA,
@@ -146,7 +146,7 @@ export default function Navbar() {
           type: SDK,
           value: await NxtpSdk.create({
             chains: chains_config,
-            signerAddress, address || Wallet.createRandom().address,
+            signerAddress: address || Wallet.createRandom().address,
             logLevel: 'info',
             network: process.env.NEXT_PUBLIC_ENVIRONMENT,
           }),
@@ -170,7 +170,7 @@ export default function Navbar() {
         dispatch({
           type: CHAINS_STATUS_DATA,
           value: response?.latestBlock > -1 && {
-            ...chain: chain_data,
+            chain: chain_data,
             ...response,
           },
         })
@@ -191,7 +191,7 @@ export default function Navbar() {
   // routers status
   useEffect(() => {
     const getData = async () => {
-      if (sdk_data) {
+      if (sdk) {
         const response = await sdk.getRouterStatus(process.env.NEXT_PUBLIC_APP_NAME)
         if (response) {
           dispatch({

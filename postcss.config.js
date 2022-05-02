@@ -5,6 +5,7 @@ module.exports = {
     'autoprefixer',
     'postcss-import',
     'postcss-nested',
+    'postcss-color-function',
     'postcss-flexbugs-fixes',
     [
       'postcss-preset-env',

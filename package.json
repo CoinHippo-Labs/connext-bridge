@@ -26,7 +26,7 @@
   "homepage": "https://github.com/CoinHippo-Labs/connext-bridge#readme",
   "dependencies": {
     "@coinbase/wallet-sdk": "^3.0.8",
-    "@connext/nxtp-sdk": "^0.2.0-alpha.6",
+    "@connext/nxtp-sdk": "^0.2.0-alpha.8",
     "@portis/web3": "^4.0.7",
     "@redux-devtools/extension": "^3.2.2",
     "@walletconnect/web3-provider": "^1.7.8",
@@ -34,6 +34,7 @@
     "config-yml": "^0.10.3",
     "env-cmd": "^10.1.0",
     "ethers": "^5.6.4",
+    "graphql": "^16.4.0",
     "html-react-parser": "^1.4.12",
     "lodash": "^4.17.21",
     "moment": "^2.29.3",
@@ -61,10 +62,9 @@
     "web3modal": "^1.9.7"
   },
   "devDependencies": {
-    "@tailwindcss/forms": "^0.5.0",
-    "@tailwindcss/typography": "^0.5.2",
     "autoprefixer": "^10.4.5",
     "postcss": "^8.4.12",
+    "postcss-color-function": "^4.1.0",
     "tailwindcss": "^3.0.24"
   }
 }
