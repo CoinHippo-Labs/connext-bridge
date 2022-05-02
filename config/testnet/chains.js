@@ -75,7 +75,7 @@
     },
     "subgraphs": {
       "runtime": [
-        ""
+        "https://api.thegraph.com/subgraphs/name/connext/nxtp-amarok-runtime-v0-rinkeby"
       ],
       "analytics": [
         ""
@@ -159,7 +159,7 @@
     },
     "subgraphs": {
       "runtime": [
-        ""
+        "https://api.thegraph.com/subgraphs/name/connext/nxtp-amarok-runtime-v0-kovan"
       ],
       "analytics": [
         ""
@@ -333,6 +333,7 @@
   {
     "id": "moonbase",
     "chain_id": 1287,
+    "domain_id": 5000,
     "name": "Moonbase Alpha",
     "short_name": "MBASE",
     "image": "/logos/chains/moonbase.png",

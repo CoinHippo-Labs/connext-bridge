@@ -2,7 +2,7 @@
   {
     "id": "usdt",
     "symbol": "USDT",
-    "title": "Tether",
+    "name": "Tether",
     "image": "/logos/assets/usdt.png",
     "coingecko_id": "tether",
     "is_stablecoin": true,
@@ -97,7 +97,7 @@
   {
     "id": "usdc",
     "symbol": "USDC",
-    "title": "USD Coin"
+    "name": "USD Coin",
     "image": "/logos/assets/usdc.png",
     "coingecko_id": "usd-coin",
     "is_stablecoin": true,
@@ -191,7 +191,7 @@
   {
     "id": "dai",
     "symbol": "DAI",
-    "title": "Dai",
+    "name": "Dai",
     "image": "/logos/assets/dai.png",
     "coingecko_id": "dai",
     "is_stablecoin": true,
@@ -287,7 +287,7 @@
   {
     "id": "eth",
     "symbol": "ETH",
-    "title": "Ethereum",
+    "name": "Ethereum",
     "image": "/logos/assets/eth.png",
     "coingecko_id": "ethereum",
     "contracts": [
@@ -380,7 +380,7 @@
   {
     "id": "wbtc",
     "symbol": "WBTC",
-    "title": "Wrapped Bitcoin",
+    "name": "Wrapped Bitcoin",
     "image": "/logos/assets/wbtc.png",
     "coingecko_id": "wrapped-bitcoin",
     "contracts": [
@@ -471,7 +471,7 @@
   {
     "id": "grt",
     "symbol": "GRT",
-    "title": "The Graph",
+    "name": "The Graph",
     "image": "/logos/assets/grt.png",
     "coingecko_id": "the-graph",
     "contracts": [
@@ -511,7 +511,7 @@
   {
     "id": "gno",
     "symbol": "GNO",
-    "title": "Gnosis",
+    "name": "Gnosis",
     "image": "/logos/assets/gno.png",
     "coingecko_id": "gnosis",
     "contracts": [
@@ -540,7 +540,7 @@
   {
     "id": "fei",
     "symbol": "FEI",
-    "title": "Fei USD",
+    "name": "Fei USD",
     "image": "/logos/assets/fei.png",
     "coingecko_id": "fei-usd",
     "is_stablecoin": true,
@@ -575,7 +575,7 @@
   {
     "id": "gth",
     "symbol": "GTH",
-    "title": "Gather",
+    "name": "Gather",
     "image": "/logos/assets/gth.png",
     "coingecko_id": "gather",
     "contracts": [
@@ -599,7 +599,7 @@
   {
     "id": "boba",
     "symbol": "BOBA",
-    "title": "Boba",
+    "name": "Boba",
     "image": "/logos/assets/boba.png",
     "coingecko_id": "boba-network",
     "contracts": [
@@ -618,7 +618,7 @@
   {
     "id": "magic",
     "symbol": "MAGIC",
-    "title": "MAGIC",
+    "name": "MAGIC",
     "image": "/logos/assets/magic.png",
     "coingecko_id": "magic",
     "contracts": [
@@ -637,7 +637,7 @@
   {
     "id": "miva",
     "symbol": "MIVA",
-    "title": "Minerva Wallet",
+    "name": "Minerva Wallet",
     "image": "/logos/assets/miva.png",
     "coingecko_id": "minerva-wallet",
     "contracts": [
@@ -656,7 +656,7 @@
   {
     "id": "fraction",
     "symbol": "FRACTION",
-    "title": "Fraction",
+    "name": "Fraction",
     "coingecko_id": "fraction",
     "contracts": [
       {

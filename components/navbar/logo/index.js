@@ -32,7 +32,7 @@ export default function Logo() {
           <div className="normal-case text-base font-semibold">
             {process.env.NEXT_PUBLIC_APP_NAME}
           </div>
-          <div className="max-w-min bg-blue-500 dark:bg-blue-800 rounded whitespace-nowrap text-white px-1.5 mt-0.5">
+          <div className="max-w-min bg-blue-600 rounded whitespace-nowrap text-white pb-0.5 px-1.5 mt-0.5">
             {process.env.NEXT_PUBLIC_ENVIRONMENT}
           </div>
         </div>

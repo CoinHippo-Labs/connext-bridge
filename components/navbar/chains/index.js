@@ -59,7 +59,7 @@ export default function DropdownChains({ chain_id }) {
         ref={dropdownRef} 
         className={`dropdown ${hidden ? '' : 'open'} absolute top-0 right-3 mt-12`}
       >
-        <div className="dropdown-content w-64 bottom-start">
+        <div className="dropdown-content w-72 bottom-start">
           <Items onClick={onClick} />
         </div>
       </div>

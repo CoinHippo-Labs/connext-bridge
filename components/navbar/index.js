@@ -113,7 +113,7 @@ export default function Navbar() {
           if (updated) {
             dispatch({
               type: ASSETS_DATA,
-              value: assets_data,
+              value: _.cloneDeep(assets_data),
             })
           }
         }
@@ -129,28 +129,36 @@ export default function Navbar() {
   // sdk & rpcs
   useEffect(() => {
     const init = async () => {
-      if (chains_data) {
-        const chains_config = ['testnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT) ?
-          { 1: { providers: ['https://rpc.ankr.com/eth'] } } : {}
-        const rpcs_config = {}
+      if (chains_data && assets_data?.findIndex(a => a.price) < 0) {
+        const chains_config = {}, rpcs_config = {}
         for (let i = 0; i < chains_data.length; i++) {
           const chain_data = chains_data[i]
           const chain_id = chain_data?.chain_id
-          chains_config[chain_id] = {
-            providers: chain_data?.provider_params?.[0]?.rpcUrls?.filter(url => url) || [],
+          const domain_id = chain_data?.domain_id
+          const rpc_urls = chain_data?.provider_params?.[0]?.rpcUrls?.filter(url => url) || []
+          chains_config[domain_id] = {
+            providers: rpc_urls,
+            assets: assets_data.filter(a => a?.contracts?.findIndex(c => c?.chain_id === chain_id) > -1).map(a => {
+              const contract = a.contracts.find(c => c?.chain_id === chain_id)
+              const name = contract.symbol || a.symbol || a.name
+              const address = contract.contract_address
+              return { name, address }
+            }),
           }
-          rpcs_config[chain_id] = new providers.FallbackProvider(chains_config[chain_id].map(url => new providers.JsonRpcProvider(url)))
+          rpcs_config[chain_id] = new providers.FallbackProvider(rpc_urls.map(url => new providers.JsonRpcProvider(url)))
         }
 
-        dispatch({
-          type: SDK,
-          value: await NxtpSdk.create({
-            chains: chains_config,
-            signerAddress: address || Wallet.createRandom().address,
-            logLevel: 'info',
-            network: process.env.NEXT_PUBLIC_ENVIRONMENT,
-          }),
-        })
+        if (!sdk) {
+          dispatch({
+            type: SDK,
+            value: NxtpSdk.create({
+              chains: chains_config,
+              signerAddress: address || Wallet.createRandom().address,
+              logLevel: 'info',
+              network: process.env.NEXT_PUBLIC_ENVIRONMENT,
+            }),
+          })
+        }
         if (!rpcs) {
           dispatch({
             type: RPCS,
@@ -160,7 +168,7 @@ export default function Navbar() {
       }
     }
     init()
-  }, [chains_data, chain_id, address])
+  }, [chains_data, assets_data, chain_id, address])
 
   // chains status
   useEffect(() => {
