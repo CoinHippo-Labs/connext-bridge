@@ -15,6 +15,7 @@ node_modules
 # production
 /build
 package-lock.json
+yarn.lock
 *.zip*
 
 # misc
