@@ -30,14 +30,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -72,14 +64,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        "https://api.thegraph.com/subgraphs/name/connext/nxtp-amarok-runtime-v0-rinkeby"
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -114,14 +98,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -156,14 +132,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        "https://api.thegraph.com/subgraphs/name/connext/nxtp-amarok-runtime-v0-kovan"
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -197,14 +165,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -238,14 +198,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -279,14 +231,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -320,14 +264,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -362,14 +298,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -403,14 +331,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   }
 ]

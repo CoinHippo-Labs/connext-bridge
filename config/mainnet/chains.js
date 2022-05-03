@@ -31,14 +31,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -72,14 +64,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -113,14 +97,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -154,14 +130,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -195,14 +163,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -237,14 +197,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -278,14 +230,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -319,14 +263,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -361,14 +297,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -402,14 +330,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -443,14 +363,6 @@
       "contract_path": "/tokens/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -485,14 +397,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -526,14 +430,6 @@
       "contract_path": "/tokens/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -567,14 +463,6 @@
       "contract_path": "/address/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -608,14 +496,6 @@
       "contract_path": "/address/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -649,14 +529,6 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   },
   {
@@ -690,14 +562,6 @@
       "contract_path": "/address/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    },
-    "subgraphs": {
-      "runtime": [
-        ""
-      ],
-      "analytics": [
-        ""
-      ]
     }
   }
 ]
