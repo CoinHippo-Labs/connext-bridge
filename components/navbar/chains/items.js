@@ -1,8 +1,8 @@
-import Image from 'next/image'
 import { useSelector, shallowEqual } from 'react-redux'
 import { Puff } from 'react-loader-spinner'
 import { IoRadioButtonOn } from 'react-icons/io5'
 
+import Image from '../../image'
 import Wallet from '../../wallet'
 import { chainName } from '../../../lib/object/chain'
 

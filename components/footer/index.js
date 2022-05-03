@@ -1,9 +1,9 @@
-import Image from 'next/image'
 import { useSelector, shallowEqual } from 'react-redux'
 import moment from 'moment'
 import { FaHeart, FaDiscord } from 'react-icons/fa'
 import { BsTwitter, BsTelegram, BsGithub } from 'react-icons/bs'
 
+import Image from '../image'
 import _package from '../../package.json'
 
 export default function Footer() {

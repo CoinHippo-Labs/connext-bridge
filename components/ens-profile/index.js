@@ -7,7 +7,7 @@ import { ens as getEns } from '../../lib/api/ens'
 import { ellipse } from '../../lib/utils'
 import { ENS_DATA } from '../../reducers/types'
 
-export default function ensProfile({ address, backup_component }) {
+export default function ensProfile({ address, fallback }) {
   const dispatch = useDispatch()
   const { ens } = useSelector(state => ({ ens: state.ens }), shallowEqual)
   const { ens_data } = { ...ens }
@@ -54,5 +54,5 @@ export default function ensProfile({ address, backup_component }) {
       />
     </div>
     :
-    backup_component
+    fallback
 }

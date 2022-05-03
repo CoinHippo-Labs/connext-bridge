@@ -1,4 +1,4 @@
-import Image from 'next/image'
+import Image from '../../image'
 
 export default function Logo() {
   return (

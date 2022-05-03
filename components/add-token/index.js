@@ -1,8 +1,8 @@
-import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import Web3 from 'web3'
 
+import Image from '../image'
 import { CHAIN_ID } from '../../reducers/types'
 
 export default ({ token_data }) => {

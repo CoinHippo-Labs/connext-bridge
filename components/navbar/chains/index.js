@@ -1,9 +1,9 @@
-import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import { Puff } from 'react-loader-spinner'
 import { RiQuestionLine } from 'react-icons/ri'
 
+import Image from '../../image'
 import Items from './items'
 import { loader_color } from '../../../lib/utils'
 
