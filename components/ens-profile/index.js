@@ -1,16 +1,36 @@
-import { useSelector, shallowEqual } from 'react-redux'
+import { useEffect } from 'react'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { Img } from 'react-image'
 
 import Copy from '../copy'
+import { ens as getEns } from '../../lib/api/ens'
 import { ellipse } from '../../lib/utils'
+import { ENS_DATA } from '../../reducers/types'
 
-export default function ensProfile({ address }) {
+export default function ensProfile({ address, backup_component }) {
+  const dispatch = useDispatch()
   const { ens } = useSelector(state => ({ ens: state.ens }), shallowEqual)
   const { ens_data } = { ...ens }
 
+  useEffect(() => {
+    const getData = async () => {
+      if (address) {
+        const addresses = [address.toLowerCase()].filter(a => a && !ens_data?.[a])
+        const ens_data = await getEns(addresses)
+        if (ens_data) {
+          dispatch({
+            type: ENS_DATA,
+            value: ens_data,
+          })
+        }
+      }
+    }
+    getData()
+  }, [address])
+
   address = address?.toLowerCase()
 
-  return ens_data?.[address]?.name && (
+  return ens_data?.[address]?.name ?
     <div className="flex items-center">
       <Img
         src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${ens_data[address].name}`}
@@ -33,5 +53,6 @@ export default function ensProfile({ address }) {
         size={18}
       />
     </div>
-  )
+    :
+    backup_component
 }

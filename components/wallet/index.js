@@ -141,12 +141,16 @@ export default function Wallet({
               provider = window.clover
               try {
                 await provider.request({ method: 'eth_requestAccounts' })
-              } catch (error) throw new Error('User Rejected')
+              } catch (error) {
+                throw new Error('User Rejected')
+              }
             } else if (typeof window.ethereum !== 'undefined') {
               provider = window.ethereum
               try {
                 await provider.request({ method: 'eth_requestAccounts' })
-              } catch (error) throw new Error('User Rejected')
+              } catch (error) {
+                throw new Error('User Rejected')
+              }
             } else if (window.web3) {
               provider = window.web3.currentProvider
             } else if (window.celo) {
@@ -183,10 +187,13 @@ export default function Wallet({
     }
   }, [web3Modal])
 
-  useEffect(async () => {
-    if (web3Modal) {
-      await web3Modal.updateTheme(theme)
+  useEffect(() => {
+    const update = async () => {
+      if (web3Modal) {
+        await web3Modal.updateTheme(theme)
+      }
     }
+    update()
   }, [theme])
 
   const connect = useCallback(async () => {
@@ -296,7 +303,7 @@ export default function Wallet({
           >
             {children || (
               <div className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg whitespace-nowrap font-medium py-1 px-2">
-                Wrong Network
+                Switch Network
               </div>
             )}
           </button>
