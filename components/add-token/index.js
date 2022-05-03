@@ -7,9 +7,9 @@ import { CHAIN_ID } from '../../reducers/types'
 
 export default ({ token_data }) => {
   const dispatch = useDispatch()
-  const { preferences, chains } = useSelector(state => ({ preferences: state.preferences, chains: state.chains }), shallowEqual)
-  const { chain_id } = { ...preferences }
+  const { chains, _chain_id } = useSelector(state => ({ chains: state.chains, _chain_id: state.chain_id }), shallowEqual)
   const { chains_data } = { ...chains }
+  const { chain_id } = { ..._chain_id }
 
   const [web3, setWeb3] = useState(null)
   const [chainId, setChainId] = useState(null)

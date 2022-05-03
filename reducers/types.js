@@ -1,6 +1,5 @@
 // preferences
 export const THEME = 'theme'
-export const CHAIN_ID = 'chain_id'
 
 // announcement
 export const ANNOUNCEMENT_DATA = 'announcement_data'
@@ -30,6 +29,7 @@ export const RPCS = 'rpcs'
 // wallet
 export const WALLET_DATA = 'wallet_data'
 export const WALLET_RESET = 'wallet_reset'
+export const CHAIN_ID = 'chain_id'
 
 // balances
 export const BALANCES_DATA = 'balances_data'

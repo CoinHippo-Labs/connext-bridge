@@ -11,6 +11,7 @@ import asset_balances from './asset-balances'
 import dev from './dev'
 import rpc_providers from './rpc-providers'
 import wallet from './wallet'
+import chain_id from './chain-id'
 import balances from './balances'
 
 export default combineReducers({
@@ -25,5 +26,6 @@ export default combineReducers({
   dev,
   rpc_providers,
   wallet,
+  chain_id,
   balances,
 })
