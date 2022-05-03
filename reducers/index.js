@@ -6,10 +6,8 @@ import chains from './chains'
 import assets from './assets'
 import ens from './ens'
 import chains_status from './chains-status'
-import routers_status from './routers-status'
 import gas_prices from './gas-prices'
 import asset_balances from './asset-balances'
-import routers_assets from './routers-assets'
 import dev from './dev'
 import rpc_providers from './rpc-providers'
 import wallet from './wallet'
@@ -22,10 +20,8 @@ export default combineReducers({
   assets,
   ens,
   chains_status,
-  routers_status,
   gas_prices,
   asset_balances,
-  routers_assets,
   dev,
   rpc_providers,
   wallet,

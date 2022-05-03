@@ -1,5 +1,6 @@
 // preferences
 export const THEME = 'theme'
+export const CHAIN_ID = 'chain_id'
 
 // announcement
 export const ANNOUNCEMENT_DATA = 'announcement_data'
@@ -15,12 +16,10 @@ export const ENS_DATA = 'ens_data'
 
 // status
 export const CHAINS_STATUS_DATA = 'chains_status_data'
-export const ROUTERS_STATUS_DATA = 'routers_status_data'
 export const GAS_PRICES_DATA = 'gas_prices_data'
 
 // asset balances
 export const ASSET_BALANCES_DATA = 'asset_balances_data'
-export const ROUTERS_ASSETS_DATA = 'routers_assets_data'
 
 // sdk
 export const SDK = 'sdk'

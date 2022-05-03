@@ -22,7 +22,7 @@ import { ens as getEns } from '../../lib/api/ens'
 import { coin } from '../../lib/api/coingecko'
 import { assetBalances } from '../../lib/api/subgraph'
 import { ellipse, loader_color } from '../../lib/utils'
-import { ANNOUNCEMENT_DATA, CHAINS_DATA, ASSETS_DATA, ENS_DATA, CHAINS_STATUS_DATA, ROUTERS_STATUS_DATA, ASSET_BALANCES_DATA, ROUTERS_ASSETS_DATA, SDK, RPCS } from '../../reducers/types'
+import { ANNOUNCEMENT_DATA, CHAINS_DATA, ASSETS_DATA, ENS_DATA, CHAINS_STATUS_DATA, ASSET_BALANCES_DATA, SDK, RPCS } from '../../reducers/types'
 
 export default function Navbar() {
   const dispatch = useDispatch()
@@ -196,26 +196,6 @@ export default function Navbar() {
     }
   }, [sdk])
 
-  // routers status
-  useEffect(() => {
-    const getData = async () => {
-      if (sdk) {
-        const response = await sdk.getRouterStatus(process.env.NEXT_PUBLIC_APP_NAME)
-        if (response) {
-          dispatch({
-            type: ROUTERS_STATUS_DATA,
-            value: response.filter(r => r?.supportedChains?.findIndex(id => chains_data?.findIndex(c => c?.chain_id === id) > -1) > -1),
-          })
-        }
-      }
-    }
-    getData()
-    const interval = setInterval(() => getData(), 0.5 * 60 * 1000)
-    return () => {
-      clearInterval(interval)
-    }
-  }, [sdk])
-
   // assets balances
   useEffect(() => {
     const getAssetBalances = async chain_data => {
@@ -259,43 +239,6 @@ export default function Navbar() {
     }
     getData()
   }, [chains_data, asset_balances_data])
-
-  // routers assets
-  useEffect(() => {
-    if (assets_data && asset_balances_data) {
-      const routers_assets = Object.entries(_.groupBy(Object.values(asset_balances_data).flatMap(a => a || []), 'router.id')).map(([k, v]) => {
-        return {
-          router_id: k,
-          asset_balances: v?.map(a => {
-            let asset_data = assets_data.find(_a => _a?.contracts?.findIndex(c => c?.chain_id === a?.chain_data?.chain_id && c?.contract_address?.toLowerCase() === a?.contract_address?.toLowerCase()) > -1)
-            asset_data = asset_data && { ...asset_data, ...asset_data.contracts.find(c => c?.chain_id === asset_data.chain_data?.chain_id) }
-            if (asset_data) {
-              delete asset_data.contracts
-            }
-            return {
-              ...a,
-              asset_data,
-            }
-          }).map(a => {
-            return {
-              ...a,
-              amount: utils.formatUnits(BigNumber.from(a?.amount || '0'), a?.asset_data?.contract_decimals || 0).toNumber(),
-            }
-          }).map(a => {
-            const price = a?.asset_data?.price
-            return {
-              ...a,
-              amount_value: a.amount * (price || 0),
-            }
-          }),
-        }
-      })
-      dispatch({
-        type: ROUTERS_ASSETS_DATA,
-        value: routers,
-      })
-    }
-  }, [assets_data, asset_balances_data])
 
   return (
     <>
