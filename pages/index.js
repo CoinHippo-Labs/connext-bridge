@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router'
 
+import Bridge from '../components/bridge'
 import { is_route_exist } from '../lib/routes'
 
 export default () => {
@@ -16,6 +17,6 @@ export default () => {
     )
   }
   return (
-    <div />
+    <Bridge />
   )
 }
