@@ -37,7 +37,8 @@
     }
   }
   .form-select {
-    @apply w-full h-9 block appearance-none text-xs xl:text-base p-2;
+    @apply w-full h-9 block appearance-none text-xs xl:text-base py-2 px-3;
+    line-height: normal;
     &.form-select-valid {
       @apply border border-green-500;
     }
