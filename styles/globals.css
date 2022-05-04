@@ -194,3 +194,7 @@ input[type=number] {
     animation-duration: 0.1s !important;
   }
 }
+
+.min-h-screen {
+  min-height: calc(100vh - 168px) !important;
+}
