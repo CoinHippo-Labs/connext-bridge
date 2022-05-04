@@ -21,7 +21,7 @@
   }
   .form-input,
   .form-textarea {
-    @apply w-full h-9 block text-xs xl:text-base py-2 px-3;
+    @apply w-full block text-xs xl:text-base py-2 px-3;
     &.form-input-valid {
       @apply border border-green-500;
     }
@@ -36,9 +36,25 @@
       }
     }
   }
+  .form-input {
+    @apply h-9;
+  }
   .form-select {
     @apply w-full h-9 block appearance-none text-xs xl:text-base py-2 px-3;
     line-height: normal;
+    background-image:
+      linear-gradient(45deg, transparent 50%, gray 50%),
+      linear-gradient(135deg, gray 50%, transparent 50%),
+      linear-gradient(to right, transparent, transparent);
+    background-position:
+      calc(100% - 20px) 1em,
+      calc(100% - 15px) 1em,
+      calc(100% - 2.5em) 0.5em;
+    background-size:
+      5px 5px,
+      5px 5px,
+      1px 1.5em;
+    background-repeat: no-repeat;
     &.form-select-valid {
       @apply border border-green-500;
     }

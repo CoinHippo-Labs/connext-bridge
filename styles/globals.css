@@ -198,3 +198,9 @@ input[type=number] {
 .min-h-screen {
   min-height: calc(100vh - 168px) !important;
 }
+
+a {
+  .underline {
+    text-decoration-line: underline;
+  }
+}

@@ -254,7 +254,7 @@ export default function Navbar() {
           <Navigations address={web3_provider && address} />
           <div className="flex items-center">
             {web3_provider && address && (
-              <div className="flex flex-col space-y-0.5 mx-2">
+              <div className="hidden sm:flex flex-col space-y-0.5 mx-2">
                 <EnsProfile
                   address={address}
                   fallback={address && (

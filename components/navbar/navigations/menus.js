@@ -1,6 +1,7 @@
-import { RiFileSearchLine, RiFileCodeLine, RiQuestionAnswerLine } from 'react-icons/ri'
+import { HiOutlineDocumentSearch } from 'react-icons/hi'
+import { RiQuestionAnswerLine } from 'react-icons/ri'
 import { BsGithub } from 'react-icons/bs'
-import { BiCommentDetail } from 'react-icons/bi'
+import { BiBook, BiCommentDetail } from 'react-icons/bi'
 
 export default [
   {
@@ -8,14 +9,14 @@ export default [
     title: 'Explorer',
     path: process.env.NEXT_PUBLIC_EXPLORER_URL,
     external: true,
-    icon: <RiFileSearchLine size={20} className="stroke-current" />,
+    icon: <HiOutlineDocumentSearch size={20} className="stroke-current" />,
   },
   {
     id: 'doc',
     title: 'Doc',
     path: process.env.NEXT_PUBLIC_DOC_URL,
     external: true,
-    icon: <RiFileCodeLine size={20} className="stroke-current" />,
+    icon: <BiBook size={20} className="stroke-current" />,
   },
   {
     id: 'github',
