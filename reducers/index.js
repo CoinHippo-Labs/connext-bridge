@@ -6,7 +6,6 @@ import chains from './chains'
 import assets from './assets'
 import ens from './ens'
 import chains_status from './chains-status'
-import gas_prices from './gas-prices'
 import asset_balances from './asset-balances'
 import dev from './dev'
 import rpc_providers from './rpc-providers'
@@ -21,7 +20,6 @@ export default combineReducers({
   assets,
   ens,
   chains_status,
-  gas_prices,
   asset_balances,
   dev,
   rpc_providers,

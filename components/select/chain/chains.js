@@ -57,7 +57,7 @@ export default ({ value, inputSearch, onSelect, source, destination }) => {
             <span className={`whitespace-nowrap text-base ${selected ? 'font-bold' : 'font-normal'}`}>
               {c.name}
             </span>
-            {([source, destination].includes(c.id) && (
+            {[source, destination].includes(c.id) && (
               <div className="flex items-center space-x-2 ml-auto">
                 {_.uniq([c.id === source ? 's' : 'd', c.id === to ? 'd' : 's']).map((o, i) => (
                   <div key={i} className="bg-blue-600 rounded-lg uppercase text-base p-2">

@@ -12,8 +12,8 @@ export default [
     icon: <HiOutlineDocumentSearch size={20} className="stroke-current" />,
   },
   {
-    id: 'doc',
-    title: 'Doc',
+    id: 'document',
+    title: 'Document',
     path: process.env.NEXT_PUBLIC_DOC_URL,
     external: true,
     icon: <BiBook size={20} className="stroke-current" />,

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { FiX } from 'react-icons/fi'
 
-export default const Alert({
+export default ({
   size = 'default',
   color,
   outlined = false,

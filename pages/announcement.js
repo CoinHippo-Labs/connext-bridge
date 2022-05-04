@@ -1,4 +1,4 @@
-import Announcement from '../components/announcement'
+import Announcement from '../components/announcement/set'
 
 export default () => {
   return (

@@ -15,7 +15,6 @@ export const ENS_DATA = 'ens_data'
 
 // status
 export const CHAINS_STATUS_DATA = 'chains_status_data'
-export const GAS_PRICES_DATA = 'gas_prices_data'
 
 // asset balances
 export const ASSET_BALANCES_DATA = 'asset_balances_data'

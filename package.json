@@ -62,6 +62,7 @@
     "web3modal": "^1.9.7"
   },
   "devDependencies": {
+    "@popperjs/core": "^2.11.5",
     "autoprefixer": "^10.4.5",
     "events": "^3.3.0",
     "https-browserify": "^1.0.0",

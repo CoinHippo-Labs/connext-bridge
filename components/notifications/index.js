@@ -3,7 +3,7 @@ import { FiX } from 'react-icons/fi'
 
 import Portal from '../portal'
 
-export default const Notifications({
+export default ({
   visible = true,
   outerClassNames,
   innerClassNames,

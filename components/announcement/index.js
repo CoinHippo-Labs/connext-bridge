@@ -1,73 +1,25 @@
-import { useState, useEffect } from 'react'
-import { useSelector, useDispatch, shallowEqual } from 'react-redux'
+import { useSelector, shallowEqual } from 'react-redux'
+import Linkify from 'react-linkify'
+import parse from 'html-react-parser'
+import { HiSpeakerphone } from 'react-icons/hi'
 
-import { announcement as getAnnouncement, setAnnouncement } from '../../lib/api/config'
-import { ANNOUNCEMENT_DATA } from '../../reducers/types'
+import Alert from '../alerts'
 
 export default () => {
-  const dispatch = useDispatch()
-  const { announcement, wallet } = useSelector(state => ({ announcement: state.announcement, wallet: state.wallet }), shallowEqual)
+  const { announcement } = useSelector(state => ({ announcement: state.announcement }), shallowEqual)
   const { announcement_data } = { ...announcement }
-  const { wallet_data } = { ...wallet }
-  const { address } = { ...wallet_data }
 
-  const [updating, setUpdating] = useState(null)
-  const [data, setData] = useState('')
-
-  useEffect(() => {
-    if (announcement_data) {
-      setData(announcement_data)
-    }
-  }, [announcement_data])
-
-  const update = async () => {
-    setUpdating(true)
-    await setAnnouncement(
-      {
-        data: announcementData?.trim().split('\n').join('<br>'),
-      },
-      address && {
-        username: new URL(process.env.NEXT_PUBLIC_SITE_URL)?.hostname,
-        password: address,
-      }
-    )
-    const response = await getAnnouncement()
-    dispatch({
-      type: ANNOUNCEMENT_DATA,
-      value: response,
-    })
-    setUpdating(false)
-  }
-
-  const disabled = updating
-
-  return (
-    <div className="form space-y-1 my-4">
-      <div className="form-element space-y-1">
-        <div className="form-label text-lg font-semibold">
-          Announcement
-        </div>
-        <textarea
-          type="text"
-          disabled={disabled}
-          rows="5"
-          placeholder="Message / HTML"
-          value={data}
-          onChange={e => {
-            if (!disabled) {
-              setData(e.target.value)
-            }
-          }}
-          className="form-textarea max-w-xl text-sm"
-        />
+  return announcement_data && (
+    <Alert
+      color="xl:max-w-lg bg-blue-600 text-white text-left mx-auto"
+      icon={<HiSpeakerphone className="w-4 xl:w-6 h-4 xl:h-6 stroke-current mr-3" />}
+      closeDisabled={true}
+      rounded={true}
+      className="items-start"
+    >
+      <div className="block leading-4 text-xs xl:text-base font-medium mr-1.5">
+        <Linkify>{parse(announcement_data)}</Linkify>
       </div>
-      <button
-        disabled={disabled}
-        onClick={() => update()}
-        className="btn btn-default btn-rounded bg-blue-600 hover:bg-blue-500 text-white -mt-1"
-      >
-        Update
-      </button>
-    </div>
+    </Alert>
   )
 }
