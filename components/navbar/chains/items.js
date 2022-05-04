@@ -5,6 +5,7 @@ import { IoRadioButtonOn } from 'react-icons/io5'
 import Image from '../../image'
 import Wallet from '../../wallet'
 import { chainName } from '../../../lib/object/chain'
+import { loader_color } from '../../../lib/utils'
 
 export default function Items({ onClick }) {
   const { preferences, chains, chains_status, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, chains_status: state.chains_status, wallet: state.wallet }), shallowEqual)
@@ -51,8 +52,9 @@ export default function Items({ onClick }) {
               key={i}
               connectChainId={c.chain_id}
               onSwitch={onClick}
+              className="dropdown-item w-1/2"
             >
-              <div className="dropdown-item w-1/2 flex items-center justify-start space-x-1 p-2">
+              <div className="flex items-center justify-start space-x-1 p-2">
                 {item}
               </div>
             </Wallet>

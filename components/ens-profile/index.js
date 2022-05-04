@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
-import { Img } from 'react-image'
 
+import Image from '../image'
 import Copy from '../copy'
 import { ens as getEns } from '../../lib/api/ens'
 import { ellipse } from '../../lib/utils'
@@ -31,11 +31,13 @@ export default function ensProfile({ address, fallback }) {
   address = address?.toLowerCase()
 
   return ens_data?.[address]?.name ?
-    <div className="flex items-center">
-      <Img
+    <div className="flex items-center space-x-2">
+      <Image
         src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${ens_data[address].name}`}
         alt=""
-        className="w-6 h-6 rounded-full mr-2"
+        width={24}
+        height={24}
+        className="rounded-full"
       />
       <Copy
         value={ens_data[address].name}

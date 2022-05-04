@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import { NxtpSdk } from '@connext/nxtp-sdk'
-import { Bignumber, Wallet, providers, utils } from 'ethers'
+import { Bignumber, Wallet as EthersWallet, providers, utils } from 'ethers'
 import { Grid } from 'react-loader-spinner'
 import Linkify from 'react-linkify'
 import parse from 'html-react-parser'
@@ -12,14 +12,13 @@ import Logo from './logo'
 import DropdownNavigations from './navigations/dropdown'
 import Navigations from './navigations'
 import EnsProfile from '../ens-profile'
-import Wallet as WalletComponent from '../wallet'
+import Wallet from '../wallet'
 import Chains from './chains'
 import Theme from './theme'
 import Copy from '../copy'
 import { announcement as getAnnouncement, chains as getChains, assets as getAssets } from '../../lib/api/config'
 import { tokens as getTokens } from '../../lib/api/tokens'
 import { ens as getEns } from '../../lib/api/ens'
-import { coin } from '../../lib/api/coingecko'
 import { assetBalances } from '../../lib/api/subgraph'
 import { ellipse, loader_color } from '../../lib/utils'
 import { ANNOUNCEMENT_DATA, CHAINS_DATA, ASSETS_DATA, ENS_DATA, CHAINS_STATUS_DATA, ASSET_BALANCES_DATA, SDK, RPCS } from '../../reducers/types'
@@ -63,7 +62,7 @@ export default function Navbar() {
       if (response) {
         dispatch({
           type: CHAINS_DATA,
-          value: response.evm,
+          value: response,
         })
       }
     }
@@ -133,19 +132,23 @@ export default function Navbar() {
         const chains_config = {}, rpcs_config = {}
         for (let i = 0; i < chains_data.length; i++) {
           const chain_data = chains_data[i]
-          const chain_id = chain_data?.chain_id
-          const domain_id = chain_data?.domain_id
-          const rpc_urls = chain_data?.provider_params?.[0]?.rpcUrls?.filter(url => url) || []
-          chains_config[domain_id] = {
-            providers: rpc_urls,
-            assets: assets_data.filter(a => a?.contracts?.findIndex(c => c?.chain_id === chain_id) > -1).map(a => {
-              const contract = a.contracts.find(c => c?.chain_id === chain_id)
-              const name = contract.symbol || a.symbol || a.name
-              const address = contract.contract_address
-              return { name, address }
-            }),
+          if (!chain_data?.disabled) {
+            const chain_id = chain_data?.chain_id
+            const domain_id = chain_data?.domain_id
+            const rpc_urls = chain_data?.provider_params?.[0]?.rpcUrls?.filter(url => url) || []
+            if (domain_id) {
+              chains_config[domain_id] = {
+                providers: rpc_urls,
+                assets: assets_data.filter(a => a?.contracts?.findIndex(c => c?.chain_id === chain_id) > -1).map(a => {
+                  const contract = a.contracts.find(c => c?.chain_id === chain_id)
+                  const name = contract.symbol || a.symbol || a.name
+                  const address = contract.contract_address
+                  return { name, address }
+                }),
+              }
+            }
+            rpcs_config[chain_id] = new providers.FallbackProvider(rpc_urls.map(url => new providers.JsonRpcProvider(url)))
           }
-          rpcs_config[chain_id] = new providers.FallbackProvider(rpc_urls.map(url => new providers.JsonRpcProvider(url)))
         }
 
         if (!sdk) {
@@ -153,7 +156,7 @@ export default function Navbar() {
             type: SDK,
             value: NxtpSdk.create({
               chains: chains_config,
-              signerAddress: address || Wallet.createRandom().address,
+              signerAddress: address || EthersWallet.createRandom().address,
               logLevel: 'info',
               network: process.env.NEXT_PUBLIC_ENVIRONMENT,
             }),
@@ -174,14 +177,14 @@ export default function Navbar() {
   useEffect(() => {
     const getChainStatus = async chain_data => {
       if (chain_data) {
-        const response = await sdk.getSubgraphSyncStatus(chain_data.chain_id)
-        dispatch({
-          type: CHAINS_STATUS_DATA,
-          value: response?.latestBlock > -1 && {
-            chain: chain_data,
-            ...response,
-          },
-        })
+        // const response = await sdk.getSubgraphSyncStatus(chain_data.chain_id)
+        // dispatch({
+        //   type: CHAINS_STATUS_DATA,
+        //   value: response?.latestBlock > -1 && {
+        //     chain: chain_data,
+        //     ...response,
+        //   },
+        // })
       }
     }
     const getData = async () => {
@@ -201,12 +204,12 @@ export default function Navbar() {
     const getAssetBalances = async chain_data => {
       if (chain_data && !chain_data.disabled) {
         const { chain_id } = chain_data
-        const response = await assetBalances(sdk, chain_id)
-        const data = response?.data?.map(a => { return { ...a, chain_data } })
-        dispatch({
-          type: ASSET_BALANCES_DATA,
-          value: { [`${chain_id}`]: data },
-        })
+        // const response = await assetBalances(sdk, chain_id)
+        // const data = response?.data?.map(a => { return { ...a, chain_data } })
+        // dispatch({
+        //   type: ASSET_BALANCES_DATA,
+        //   value: { [`${chain_id}`]: data },
+        // })
       }
     }
     const getData = async () => {
@@ -251,22 +254,23 @@ export default function Navbar() {
           <Navigations address={web3_provider && address} />
           <div className="flex items-center">
             {web3_provider && address && (
-              <div className="flex flex-col space-y-0.5">
-                <EnsProfile address={address} />
-                <Copy
-                  value={address}
-                  title={<span
-                    title={address}
-                    className="text-sm xl:text-base"
-                  >
-                    <span className="xl:hidden">
-                      {ellipse(address, 12)}
-                    </span>
-                    <span className="hidden xl:block">
-                      {ellipse(address, 16)}
-                    </span>
-                  </span>}
-                  size={18}
+              <div className="flex flex-col space-y-0.5 mx-2">
+                <EnsProfile
+                  address={address}
+                  fallback={address && (
+                    <Copy
+                      value={address}
+                      title={<span className="text-sm text-gray-400 dark:text-gray-200">
+                        <span className="xl:hidden">
+                          {ellipse(address, 6)}
+                        </span>
+                        <span className="hidden xl:block">
+                          {ellipse(address, 8)}
+                        </span>
+                      </span>}
+                      size={18}
+                    />
+                  )}
                 />
               </div>
             )}
@@ -277,7 +281,7 @@ export default function Navbar() {
               />
             </div>
             {web3_provider && (
-              <Chains />
+              <Chains chain_id={chain_id} />
             )}
             <Theme />
           </div>

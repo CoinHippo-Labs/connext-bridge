@@ -1,6 +1,7 @@
 [
   {
     "id": "ropsten",
+    "disabled": true,
     "chain_id": 3,
     "name": "Ropsten",
     "short_name": "ROP",
@@ -16,7 +17,7 @@
         "nativeCurrency": {
           "name": "Ropsten Ether",
           "symbol": "ROP",
-          "decimals: 18"
+          "decimals": 18
         },
         "blockExplorerUrls": ["https://ropsten.etherscan.io"]
       }
@@ -50,7 +51,7 @@
         "nativeCurrency": {
           "name": "Rinkeby Ether",
           "symbol": "RIN",
-          "decimals: 18"
+          "decimals": 18
         },
         "blockExplorerUrls": ["https://rinkeby.etherscan.io"]
       }
@@ -84,7 +85,7 @@
         "nativeCurrency": {
           "name": "Görli Ether",
           "symbol": "GOR",
-          "decimals: 18"
+          "decimals": 18
         },
         "blockExplorerUrls": ["https://goerli.etherscan.io"]
       }
@@ -118,7 +119,7 @@
         "nativeCurrency": {
           "name": "Kovan Ether",
           "symbol": "KOV",
-          "decimals: 18"
+          "decimals": 18
         },
         "blockExplorerUrls": ["https://kovan.etherscan.io"]
       }
@@ -136,6 +137,7 @@
   },
   {
     "id": "binance",
+    "disabled": true,
     "chain_id": 97,
     "name": "BNB Chain",
     "short_name": "BNB",
@@ -147,11 +149,11 @@
       {
         "chainId": "0x61",
         "chainName": "BNB Chain Testnet",
-        "rpcUrls": ["https://data-seed-prebsc-1-s1.binance.org:8545', 'https://data-seed-prebsc-2-s1.binance.org:8545', 'https://data-seed-prebsc-1-s2.binance.org:8545"],
+        "rpcUrls": ["https://data-seed-prebsc-1-s1.binance.org:8545", "https://data-seed-prebsc-2-s1.binance.org:8545", "https://data-seed-prebsc-1-s2.binance.org:8545"],
         "nativeCurrency": {
           "name": "BNB Token",
           "symbol": "BNB",
-          "decimals: 18"
+          "decimals": 18
         },
         "blockExplorerUrls": ["https://testnet.bscscan.com"]
       }
@@ -169,6 +171,7 @@
   },
   {
     "id": "mumbai",
+    "disabled": true,
     "chain_id": 80001,
     "name": "Polygon Mumbai",
     "short_name": "MUM",
@@ -180,11 +183,11 @@
       {
         "chainId": "0x13881",
         "chainName": "Polygon Mumbai",
-        "rpcUrls": ["https://rpc-mumbai.matic.today', 'https://matic-mumbai.chainstacklabs.com', 'https://rpc-mumbai.maticvigil.com"],
+        "rpcUrls": ["https://rpc-mumbai.matic.today", "https://matic-mumbai.chainstacklabs.com", "https://rpc-mumbai.maticvigil.com"],
         "nativeCurrency": {
           "name": "Matic",
           "symbol": "MATIC",
-          "decimals: 18"
+          "decimals": 18
         },
         "blockExplorerUrls": ["https://mumbai.polygonscan.com"]
       }
@@ -202,6 +205,7 @@
   },
   {
     "id": "arbitrum",
+    "disabled": true,
     "chain_id": 421611,
     "name": "Arbitrum Rinkeby",
     "short_name": "ARB",
@@ -217,7 +221,7 @@
         "nativeCurrency": {
           "name": "Arbitrum Ether",
           "symbol": "aETH",
-          "decimals: 18"
+          "decimals": 18
         },
         "blockExplorerUrls": ["https://rinkeby-explorer.arbitrum.io/#/"]
       }
@@ -235,6 +239,7 @@
   },
   {
     "id": "optimism",
+    "disabled": true,
     "chain_id": 69,
     "name": "Optimism Kovan",
     "short_name": "OPT",
@@ -250,7 +255,7 @@
         "nativeCurrency": {
           "name": "Ether",
           "symbol": "ETH",
-          "decimals: 18"
+          "decimals": 18
         },
         "blockExplorerUrls": ["https://kovan-optimistic.etherscan.io"]
       }
@@ -268,6 +273,7 @@
   },
   {
     "id": "moonbase",
+    "disabled": true,
     "chain_id": 1287,
     "domain_id": 5000,
     "name": "Moonbase Alpha",
@@ -284,7 +290,7 @@
         "nativeCurrency": {
           "name": "Dev",
           "symbol": "DEV",
-          "decimals: 18"
+          "decimals": 18
         },
         "blockExplorerUrls": ["https://moonbase.moonscan.io"]
       }
@@ -302,6 +308,7 @@
   },
   {
     "id": "kava",
+    "disabled": true,
     "chain_id": 2221,
     "name": "Kava Alphanet",
     "short_name": "KAVA",
@@ -317,7 +324,7 @@
         "nativeCurrency": {
           "name": "Kava",
           "symbol": "KAVA",
-          "decimals: 18"
+          "decimals": 18
         },
         "blockExplorerUrls": ["https://explorer.evm-alpha.kava.io"]
       }

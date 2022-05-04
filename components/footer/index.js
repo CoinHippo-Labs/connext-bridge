@@ -47,14 +47,14 @@ export default function Footer() {
           </span>
         )}
       </div>
-      <div className="hidden lg:flex w-full lg:w-1/3 flex-wrap items-center justify-center">
+      <div className="hidden lg:flex w-full lg:w-1/3 flex-wrap items-center justify-center space-x-2">
         {process.env.NEXT_PUBLIC_TWITTER_USERNAME && (
           <a
             href={`https://twitter.com/${process.env.NEXT_PUBLIC_TWITTER_USERNAME}`}
             target="_blank"
             rel="noopener noreferrer"
           >
-            <BsTwitter className="text-blue-400 dark:text-white text-base" />
+            <BsTwitter size={20} className="text-blue-400 dark:text-white" />
           </a>
         )}
         {process.env.NEXT_PUBLIC_TELEGRAM_USERNAME && (
@@ -63,7 +63,7 @@ export default function Footer() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <BsTelegram className="text-blue-500 dark:text-white text-base" />
+            <BsTelegram size={20} className="text-blue-500 dark:text-white" />
           </a>
         )}
         {process.env.NEXT_PUBLIC_DISCORD_URL && (
@@ -72,7 +72,7 @@ export default function Footer() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <FaDiscord className="text-blue-600 dark:text-white text-base" />
+            <FaDiscord size={20} className="text-blue-600 dark:text-white" />
           </a>
         )}
         {process.env.NEXT_PUBLIC_GITHUB_URL && (
@@ -81,7 +81,7 @@ export default function Footer() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <BsGithub className="text-black dark:text-white text-base" />
+            <BsGithub size={20} className="text-black dark:text-white" />
           </a>
         )}
         {process.env.NEXT_PUBLIC_ENS_NAME && (
@@ -95,16 +95,16 @@ export default function Footer() {
                 <Image
                   src="/logos/externals/ens/logo.png"
                   alt=""
-                  width={16}
-                  height={16}
+                  width={20}
+                  height={20}
                 />
               </div>
               <div className="hidden dark:flex items-center">
                 <Image
                   src="/logos/externals/ens/logo_white.png"
                   alt=""
-                  width={16}
-                  height={16}
+                  width={20}
+                  height={20}
                 />
               </div>
             </div>
