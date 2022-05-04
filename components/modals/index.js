@@ -95,7 +95,7 @@ export default function Modal({
                   </div>
                 </div>
                 {!noButtons && (
-                  <div className={`border-t border-gray-200 dark:border-gray-700 border-solid rounded-b flex items-center justify-end space-x-${cancelButtonClassName?.includes('hidden') ? 0 : 2} p-4`}>
+                  <div className={`border-t border-gray-200 dark:border-gray-800 border-solid rounded-b flex items-center justify-end space-x-${cancelButtonClassName?.includes('hidden') ? 0 : 2} py-4 px-6`}>
                     <button
                       type="button"
                       disabled={cancelDisabled}

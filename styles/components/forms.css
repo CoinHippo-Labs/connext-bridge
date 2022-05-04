@@ -21,23 +21,23 @@
   }
   .form-input,
   .form-textarea {
-    @apply text-xs block w-full;
+    @apply w-full h-9 block text-xs xl:text-base py-2 px-3;
     &.form-input-valid {
       @apply border border-green-500;
     }
     &.form-input-invalid {
       @apply border border-red-500;
     }
-    @apply bg-gray-50 border-gray-50;
+    @apply bg-slate-50 border-slate-50;
     [data-background="dark"] & {
-      @apply bg-gray-800 border-gray-800 text-white;
+      @apply bg-slate-800 border-slate-800 text-white;
       &::placeholder {
         color: #6B7280;/*theme('colors.white');*/
       }
     }
   }
   .form-select {
-    @apply text-sm block w-full;
+    @apply w-full h-9 block appearance-none text-xs xl:text-base p-2;
     &.form-select-valid {
       @apply border border-green-500;
     }
@@ -45,7 +45,7 @@
       @apply border border-red-500;
     }
     [data-background="dark"] & {
-      @apply bg-gray-800 border-gray-700 text-white;
+      @apply bg-slate-800 border-slate-700 text-white;
     }
   }
   .form-radio {
@@ -63,13 +63,13 @@
     }
   }
   .form-hint {
-    @apply text-xs text-gray-500 whitespace-nowrap;
+    @apply text-sm text-slate-500 whitespace-nowrap;
   }
   .form-error {
-    @apply text-xs text-red-500 whitespace-nowrap;
+    @apply text-sm text-red-500 whitespace-nowrap;
   }
   .form-success {
-    @apply text-xs text-green-500 whitespace-nowrap;
+    @apply text-sm text-green-500 whitespace-nowrap;
   }
 }
 .form-icon {
