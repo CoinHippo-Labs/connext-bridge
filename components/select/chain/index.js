@@ -47,7 +47,7 @@ export default ({
           {chains_status_data ?
             <IoRadioButtonOn size={16} className={`${chain_data?.disabled ? 'text-gray-400 dark:text-gray-600' : chains_status_data?.find(c => c?.id === chain_data?.id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'}`} />
             :
-            address && (
+            address && chain_data && (
               <Puff color={loader_color(theme)} width="16" height="16" />
             )
           }
@@ -68,7 +68,7 @@ export default ({
         <Puff color={loader_color(theme)} width="24" height="24" />
       }
       buttonClassName={`w-48 min-w-max h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
-      title={<span className="flex items-center space-x-2">
+      title={<span className="flex items-center space-x-1">
         <span className="capitalize">
           {origin}
         </span>

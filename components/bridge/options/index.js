@@ -73,6 +73,7 @@ export default ({
                   </option>
                 ))}
               </select>
+              :
               f.type === 'textarea' ?
                 <textarea
                   type="text"

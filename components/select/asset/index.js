@@ -61,7 +61,7 @@ export default ({
       }
       buttonClassName={`w-48 min-w-max h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
       title={<div className="flex items-center justify-between">
-        <span className="flex items-center space-x-2">
+        <span className="flex items-center space-x-1">
           <span className="capitalize">
             {origin}
           </span>

@@ -30,8 +30,7 @@ import { params_to_obj, number_format, ellipse, sleep } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
 const FEE_ESTIMATE_COOLDOWN = Number(process.env.NEXT_PUBLIC_FEE_ESTIMATE_COOLDOWN) || 30
-
-const defaultOptions = {
+const DEFAULT_OPTIONS = {
   to: '',
   callData: '',
 }
@@ -52,7 +51,7 @@ export default () => {
   const { asPath } = { ...router }
 
   const [bridge, setBridge] = useState({})
-  const [options, setOptions] = useState(defaultOptions)
+  const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [controller, setController] = useState(null)
 
   const [fee, setFee] = useState(null)
@@ -338,7 +337,7 @@ export default () => {
       })
       setXcall(null)
     }
-    setOptions(defaultOptions)
+    setOptions(DEFAULT_OPTIONS)
 
     setFee(null)
     setFeeEstimating(null)
@@ -389,7 +388,7 @@ export default () => {
                 sendingAssetId: source_contract_data?.contract_address,
                 receivingChainId: destination_chain_data?.chain_id,
                 receivingAssetId: destination_contract_data?.contract_address,
-                amount: utils.formatUnits(BigNumber.from(amount.toString()), decimals),
+                amount: utils.formatUnits(BigNumber.from(amount.toString()), -decimals),
               })
               if (!controller.signal.aborted) {
                 const { relayerFee, routerFee } = { ...response }
@@ -516,7 +515,7 @@ export default () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <span className="font-semibold">
+                <span className="whitespace-nowrap font-semibold">
                   View on {source_chain_data.explorer.name}
                 </span>
               </a>
@@ -528,7 +527,7 @@ export default () => {
         <div className="hidden lg:block col-span-0 lg:col-span-2" />
         <div className="col-span-1 lg:col-span-4">
           <div className="mt-8">
-            {Announcement}
+            <Announcement />
           </div>
           <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6 my-6">
             <div className="w-full max-w-lg space-y-2">
