@@ -5,7 +5,6 @@ import announcement from './announcement'
 import chains from './chains'
 import assets from './assets'
 import ens from './ens'
-import chains_status from './chains-status'
 import asset_balances from './asset-balances'
 import dev from './dev'
 import rpc_providers from './rpc-providers'
@@ -19,7 +18,6 @@ export default combineReducers({
   chains,
   assets,
   ens,
-  chains_status,
   asset_balances,
   dev,
   rpc_providers,

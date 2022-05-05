@@ -6,7 +6,11 @@ import { MdLocalGasStation } from 'react-icons/md'
 
 import { number_format, loader_color } from '../../lib/utils'
 
-export default ({ chainId, className = '' }) => {
+export default ({
+  chainId,
+  dummy,
+  className = '',
+}) => {
   const { rpc_providers } = useSelector(state => ({ rpc_providers: state.rpc_providers }), shallowEqual)
   const { rpcs } = { ...rpc_providers }
 
@@ -36,7 +40,7 @@ export default ({ chainId, className = '' }) => {
     }
   }, [chainId, rpcs])
 
-  return chainId && (
+  return chainId ?
     <div className={`flex items-center justify-center text-blue-400 dark:text-blue-500 space-x-1 ${className}`}>
       <MdLocalGasStation size={20} />
       {typeof gasPrice === 'number' ?
@@ -55,5 +59,8 @@ export default ({ chainId, className = '' }) => {
           <RotatingSquare color={loader_color('light')} width="16" height="16" />
       }
     </div>
-  )
+    :
+    dummy && (
+      <div className="h-5" />
+    )
 }

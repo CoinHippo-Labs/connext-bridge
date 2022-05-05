@@ -1,17 +1,13 @@
 import { useSelector, shallowEqual } from 'react-redux'
-import { Puff } from 'react-loader-spinner'
-import { IoRadioButtonOn } from 'react-icons/io5'
 
 import Image from '../../image'
 import Wallet from '../../wallet'
 import { chainName } from '../../../lib/object/chain'
-import { loader_color } from '../../../lib/utils'
 
 export default function Items({ onClick }) {
-  const { preferences, chains, chains_status, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, chains_status: state.chains_status, wallet: state.wallet }), shallowEqual)
+  const { preferences, chains, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, wallet: state.wallet }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
-  const { chains_status_data } = { ...chains_status }
   const { wallet_data } = { ...wallet }
   const { chain_id } = { ...wallet_data }
 
@@ -22,11 +18,6 @@ export default function Items({ onClick }) {
         {chains_data?.filter(c => !c.menu_hidden).map((c, i) => {
           const item = (
             <>
-              {c.disabled || chains_status_data ?
-                <IoRadioButtonOn size={12} className={`min-w-max ${c.disabled ? 'text-gray-400 dark:text-gray-600' : chains_status_data?.find(_c => _c?.chain_id === c.chain_id)?.synced ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'}`} />
-                :
-                <Puff color={loader_color(theme)} width="12" height="12" />
-              }
               <Image
                 src={c.image}
                 alt=""

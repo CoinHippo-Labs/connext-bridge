@@ -4,9 +4,11 @@ import { RotatingSquare } from 'react-loader-spinner'
 import { number_format, loader_color } from '../../lib/utils'
 
 export default ({ chainId, asset, className = '' }) => {
-  const { preferences, assets, balances } = useSelector(state => ({ preferences: state.preferences, assets: state.assets, balances: state.balances }), shallowEqual)
+  const { preferences, assets, wallet, balances } = useSelector(state => ({ preferences: state.preferences, assets: state.assets, wallet: state.wallet, balances: state.balances }), shallowEqual)
   const { theme } = { ...preferences }
   const { assets_data } = { ...assets }
+  const { wallet_data } = { ...wallet }
+  const { web3_provider } = { ...wallet_data }
   const { balances_data } = { ...balances }
 
   const asset_data = assets_data?.find(a => a?.id === asset)
@@ -30,7 +32,9 @@ export default ({ chainId, asset, className = '' }) => {
         typeof amount === 'string' ?
           <span>n/a</span>
           :
-          <RotatingSquare color={loader_color(theme)} width="16" height="16" />
+          web3_provider && (
+            <RotatingSquare color={loader_color(theme)} width="16" height="16" />
+          )
       }
     </div>
   )

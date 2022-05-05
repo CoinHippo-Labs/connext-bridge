@@ -585,7 +585,10 @@ export default () => {
                       <span className="text-slate-400 dark:text-white text-lg font-semibold text-center">
                         Source
                       </span>
-                      <GasPrice chainId={source_chain_data?.chain_id} />
+                      <GasPrice
+                        chainId={source_chain_data?.chain_id}
+                        dummy={source_chain || destination_chain}
+                      />
                     </div>
                     <SelectChain
                       disabled={disabled}
@@ -654,7 +657,10 @@ export default () => {
                       <span className="text-slate-400 dark:text-white text-lg font-semibold text-center">
                         Destination
                       </span>
-                      <GasPrice chainId={destination_chain_data?.chain_id} />
+                      <GasPrice
+                        chainId={destination_chain_data?.chain_id}
+                        dummy={source_chain || destination_chain}
+                      />
                     </div>
                     <SelectChain
                       disabled={disabled}

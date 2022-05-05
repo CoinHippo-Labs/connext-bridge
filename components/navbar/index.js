@@ -3,7 +3,6 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import { NxtpSdk } from '@connext/nxtp-sdk'
 import { Bignumber, Wallet as EthersWallet, providers, utils } from 'ethers'
-import { Grid } from 'react-loader-spinner'
 import Linkify from 'react-linkify'
 import parse from 'html-react-parser'
 import { MdClose } from 'react-icons/md'
@@ -20,17 +19,16 @@ import { announcement as getAnnouncement, chains as getChains, assets as getAsse
 import { tokens as getTokens } from '../../lib/api/tokens'
 import { ens as getEns } from '../../lib/api/ens'
 import { assetBalances } from '../../lib/api/subgraph'
-import { ellipse, loader_color } from '../../lib/utils'
-import { ANNOUNCEMENT_DATA, CHAINS_DATA, ASSETS_DATA, ENS_DATA, CHAINS_STATUS_DATA, ASSET_BALANCES_DATA, SDK, RPCS } from '../../reducers/types'
+import { ellipse } from '../../lib/utils'
+import { ANNOUNCEMENT_DATA, CHAINS_DATA, ASSETS_DATA, ENS_DATA, ASSET_BALANCES_DATA, SDK, RPCS } from '../../reducers/types'
 
 export default function Navbar() {
   const dispatch = useDispatch()
-  const { preferences, chains, assets, ens, chains_status, asset_balances, dev, rpc_providers, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, ens: state.ens, chains_status: state.chains_status, asset_balances: state.asset_balances, dev: state.dev, rpc_providers: state.rpc_providers, wallet: state.wallet }), shallowEqual)
+  const { preferences, chains, assets, ens, asset_balances, dev, rpc_providers, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, ens: state.ens, asset_balances: state.asset_balances, dev: state.dev, rpc_providers: state.rpc_providers, wallet: state.wallet }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { ens_data } = { ...ens }
-  const { chains_status_data } = { ...chains_status }
   const { asset_balances_data } = { ...asset_balances }
   const { sdk } = { ...dev }
   const { rpcs } = { ...rpc_providers }
@@ -173,32 +171,6 @@ export default function Navbar() {
     init()
   }, [chains_data, assets_data, chain_id, address])
 
-  // chains status
-  useEffect(() => {
-    const getChainStatus = async chain_data => {
-      if (chain_data) {
-        // const response = await sdk.getSubgraphSyncStatus(chain_data.chain_id)
-        // dispatch({
-        //   type: CHAINS_STATUS_DATA,
-        //   value: response?.latestBlock > -1 && {
-        //     chain: chain_data,
-        //     ...response,
-        //   },
-        // })
-      }
-    }
-    const getData = async () => {
-      if (sdk && chains_data) {
-        chains_data.filter(c => !c?.disabled).forEach(c => getChainStatus(c))
-      }
-    }
-    setTimeout(() => getData(), 3 * 1000)
-    const interval = setInterval(() => getData(), 5 * 60 * 1000)
-    return () => {
-      clearInterval(interval)
-    }
-  }, [sdk])
-
   // assets balances
   useEffect(() => {
     const getAssetBalances = async chain_data => {
@@ -287,25 +259,16 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-      {((!chains_status_data && address) || (!hiddenStatus && process.env.NEXT_PUBLIC_STATUS_TITLE)) && (
+      {!hiddenStatus && process.env.NEXT_PUBLIC_STATUS_TITLE && (
         <div className="w-full bg-slate-100 dark:bg-slate-900 overflow-x-auto flex items-center py-2 sm:py-3 px-2 sm:px-4">
           <span className="flex flex-wrap items-center font-mono text-blue-500 dark:text-white text-2xs xl:text-sm space-x-1.5 xl:space-x-2 mx-auto">
-            {!chains_status_data && address ?
-              <>
-                <Grid color={loader_color(theme)} width="16" height="16" />
-                <span>Checking Subgraph Status</span>
-              </>
-              :
-              <>
-                <Linkify>{parse(process.env.NEXT_PUBLIC_STATUS_TITLE)}</Linkify>
-                <button
-                  onClick={() => setHiddenStatus(true)}
-                  className="hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full mt-0.5 p-1"
-                >
-                  <MdClose size={12} />
-                </button>
-              </>
-            }
+            <Linkify>{parse(process.env.NEXT_PUBLIC_STATUS_TITLE)}</Linkify>
+            <button
+              onClick={() => setHiddenStatus(true)}
+              className="hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full mt-0.5 p-1"
+            >
+              <MdClose size={12} />
+            </button>
           </span>
         </div>
       )}
