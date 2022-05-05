@@ -105,8 +105,6 @@ export default function Wallet({
   hidden = false,
   disabled = false, 
   connectChainId,
-  connectButton,
-  disconnectButton,
   onSwitch,
   children,
   className = '',

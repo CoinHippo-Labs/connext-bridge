@@ -96,12 +96,12 @@ export default ({
         ))}
       </div>}
       onCancel={() => reset()}
-      confirmButtonTitle="Apply"
       onConfirm={() => {
         if (onChange) {
           onChange(data)
         }
       }}
+      confirmButtonTitle="Apply"
       onClose={() => reset()}
       noButtons={!hasChanged}
     />
