@@ -34,19 +34,19 @@ export default ({
     },
   ]
 
-  const hasChanged = _.isEqual(data, initialData)
+  const hasChanged = !_.isEqual(data, initialData)
 
   return (
     <Modal
       disabled={disabled}
       buttonTitle={<div className="bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg p-2">
         {applied ?
-          <MdSettingsSuggest size={20} className="text-blue-600 hover:text-blue-500 dark:text-white dark:hover:text-slate-100" />
+          <MdSettingsSuggest size={20} className="text-green-600 hover:text-green-500 dark:text-white dark:hover:text-slate-100 mb-0.5" />
           :
-          <RiSettings3Line size={20} className="text-slate-400 hover:text-slate-500 dark:text-slate-500 dark:hover:text-slate-200" />
+          <RiSettings3Line size={20} className="text-slate-400 hover:text-slate-500 dark:text-slate-400 dark:hover:text-slate-200" />
         }
       </div>}
-      buttonClassName={`min-w-max ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
+      buttonClassName={`min-w-max ${disabled ? 'cursor-not-allowed' : ''} ${applied ? 'ring-2 ring-green-500 dark:ring-white' : ''} rounded-lg shadow flex items-center justify-center`}
       title="Options"
       body={<div className="form mt-2">
         {fields.map((f, i) => (

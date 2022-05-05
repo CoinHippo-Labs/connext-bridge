@@ -34,13 +34,13 @@ export default ({ value, inputSearch, onSelect, chain }) => {
     <div className="max-h-96 overflow-y-scroll">
       {assets_data_sorted?.map((a, i) => {
         const selected = a.id === value
-        const className = `dropdown-item ${a.disabled ? 'cursor-not-allowed' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer'} rounded-lg flex items-center justify-start space-x-2 p-2`
+        const className = `dropdown-item ${a.disabled ? 'cursor-not-allowed' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer'} rounded-lg flex items-center justify-between p-2`
         const contract_data = a.contracts?.find(c => c?.chain_id === chain_id)
         const image = contract_data?.image || a.image
         const balance = balances_data?.[chain_id]?.find(b => b?.contract_address?.toLowerCase() === contract_data?.contract_address?.toLowerCase())
         const amount = balance && Number(balance.amount)
         const item = (
-          <>
+          <div className="flex items-center space-x-2">
             {image && (
               <Image
                 src={image}
@@ -53,7 +53,7 @@ export default ({ value, inputSearch, onSelect, chain }) => {
             <span className={`whitespace-nowrap text-base ${selected ? 'font-bold' : 'font-normal'}`}>
               {contract_data?.symbol || a.symbol || a.name}
             </span>
-          </>
+          </div>
         )
         const balance_component = balances_data?.[chain_id] && (
           <div className={`${chain_id && !amount ? 'text-gray-400 dark:text-gray-500' : ''} ${selected ? 'font-semibold' : 'font-normal'} ml-auto`}>

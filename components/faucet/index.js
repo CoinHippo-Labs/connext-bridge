@@ -85,7 +85,7 @@ export default () => {
   const hasAllFields = fields.length === fields.filter(f => data?.[f.name]).length
 
   return asset_data && (
-    <div className="w-full max-w-lg rounded-lg shadow dark:shadow-slate-400 flex flex-col items-center justify-center">
+    <div className="w-full max-w-lg flex flex-col items-center justify-center">
       <button
         onClick={() => setCollapse(!collapse)}
         className="w-full flex items-center justify-center text-base font-semibold space-x-1.5 py-4"
