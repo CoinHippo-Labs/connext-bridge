@@ -67,11 +67,11 @@ export default () => {
     setMintResponse(null)
     try {
       const asset_data = assets_data?.find(a => a?.id === TOKEN_ID)
-      const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_id)?.contract_address
+      const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_id)
       const contract_address = contract_data?.contract_address
       const decimals = contract_data?.contract_decimals || 18
       const contract = new Contract(contract_address, ABI, signer)
-      const response = await contract.mint(data?.address, utils.formatUnits(FAUCET_AMOUNT, -decimals))
+      const response = await contract.mint(data?.address, utils.parseUnits(FAUCET_AMOUNT.toString(), decimals))
       setMintResponse({ status: 'success', message: 'Faucet Successful', ...response })
     } catch (error) {
       setMintResponse({ status: 'failed', message: error?.data?.message || error?.message })
@@ -83,6 +83,7 @@ export default () => {
   const asset_data = assets_data?.find(a => a?.id === TOKEN_ID)
 
   const hasAllFields = fields.length === fields.filter(f => data?.[f.name]).length
+  const disabled = minting
 
   return asset_data && (
     <div className="w-full max-w-lg flex flex-col items-center justify-center">
@@ -116,7 +117,7 @@ export default () => {
               {f.type === 'select-chain' ?
                 <div className="-mt-2">
                   <SelectChain
-                    disabled={minting}
+                    disabled={disabled}
                     value={data?.[f.name]}
                     onSelect={c => setData({ ...data, [`${f.name}`]: c })}
                   />
@@ -124,7 +125,7 @@ export default () => {
                 :
                 <input
                   type={f.type}
-                  disabled={minting}
+                  disabled={disabled}
                   placeholder={f.placeholder}
                   value={data?.[f.name]}
                   onChange={e => setData({ ...data, [`${f.name}`]: e.target.value })}
@@ -136,7 +137,7 @@ export default () => {
           {signer && hasAllFields && (
             <div className="flex justify-end space-x-2 mb-2">
               <button
-                disabled={minting}
+                disabled={disabled}
                 onClick={() => {
                   setCollapse(!collapse)
                   setData({
@@ -145,14 +146,14 @@ export default () => {
                     chain: chains_data?.find(c => c?.chain_id === chain_id)?.id,
                   })
                 }}
-                className="bg-transparent hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg font-semibold py-2 px-3"
+                className={`bg-transparent hover:bg-slate-100 dark:hover:bg-slate-900 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg font-semibold py-2 px-3`}
               >
                 Cancel
               </button>
               <button
-                disabled={minting}
+                disabled={disabled}
                 onClick={() => mint()}
-                className="bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center text-white font-semibold space-x-1.5 py-2 px-3"
+                className={`bg-blue-600 hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
               >
                 {minting && (
                   <RotatingSquare color="white" width="16" height="16" />
@@ -191,7 +192,7 @@ export default () => {
                   className="pr-1.5"
                 >
                   <span className="whitespace-nowrap text-xs font-semibold">
-                    View on {chain.explorer.name}
+                    View on {chain_data.explorer.name}
                   </span>
                 </a>
               )}

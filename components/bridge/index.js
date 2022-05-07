@@ -1,16 +1,14 @@
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
-import { getDeployedTransactionManagerContract } from '@connext/nxtp-sdk'
 import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, Contract, constants, utils } from 'ethers'
 import { TailSpin, Oval } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
-import { FaCheckCircle, FaClock, FaTimesCircle } from 'react-icons/fa'
 import { TiArrowRight } from 'react-icons/ti'
-import { MdSwapHorizontalCircle } from 'react-icons/md'
-import { BiMessageError, BiMessageCheck, BiMessageDetail, BiRefresh } from 'react-icons/bi'
+import { MdSwapHorizontalCircle, MdRefresh } from 'react-icons/md'
+import { BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
 
 import Announcement from '../announcement'
 import Options from './options'
@@ -24,11 +22,9 @@ import Image from '../image'
 import EnsProfile from '../ens-profile'
 import Wallet from '../wallet'
 import Alert from '../alerts'
-import Notification from '../notifications'
 import Modal from '../modals'
 import Popover from '../popover'
 import Copy from '../copy'
-import { getApproved, approve } from '../../lib/approve'
 import meta from '../../lib/meta'
 import { chainName } from '../../lib/object/chain'
 import { currency_symbol } from '../../lib/object/currency'
@@ -65,10 +61,6 @@ export default () => {
   const [feeEstimating, setFeeEstimating] = useState(null)
   const [feeEstimateCooldown, setFeeEstimateCooldown] = useState(null)
   const [estimateTrigger, setEstimateTrigger] = useState(null)
-
-  const [contractApproved, setContractApproved] = useState(null)
-  const [approving, setApproving] = useState(null)
-  const [approveResponse, setApproveResponse] = useState(null)
 
   const [xcall, setXcall] = useState(null)
   const [calling, setCalling] = useState(null)
@@ -176,7 +168,7 @@ export default () => {
   // update balances
   useEffect(() => {
     const getData = () => {
-      if (address && !xcall && !calling && !['pending'].includes(approveResponse?.status)) {
+      if (address && !xcall && !calling) {
         const { source_chain, destination_chain } = { ...bridge }
         getBalances(source_chain)
         getBalances(destination_chain)
@@ -188,15 +180,6 @@ export default () => {
       clearInterval(interval)
     }
   }, [rpcs])
-
-  // update approved
-  useEffect(() => {
-    const getData = async () => {
-      setApproveResponse(null)
-      setContractApproved(await checkApproved())
-    }
-    getData()
-  }, [chain_id, address, bridge])
 
   // fee estimate cooldown
   useEffect(() => {
@@ -292,45 +275,6 @@ export default () => {
       !(destination_chain && destination_asset_data.contracts?.findIndex(c => c?.chain_id === chains_data?.find(_c => _c?.id === destination_chain)?.chain_id) < 0)
   }
 
-  const checkApproved = async origin => {
-    let approved = false
-    const { asset } = { ...bridge }
-    if (address && chain_id && asset && checkSupport() && (origin === 'approve' || !approveResponse)) {
-      const asset_data = assets_data?.find(a => a?.id === asset)
-      const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_id)
-      if (contract_data?.contract_address) {
-        if (contract_data.contract_address === constants.AddressZero) {
-          approved = true
-        }
-        else {
-          if (origin === 'approve') {
-            await sleep(3000)
-          }
-          approved = await getApproved(signer, contract_data.contract_address, getDeployedTransactionManagerContract(chain_id)?.address)
-        }
-      }
-    }
-    return approved
-  }
-
-  const approveContract = async () => {
-    const { asset } = { ...bridge }
-    const asset_data = assets_data?.find(a => a?.id === asset)
-    const contract_data = asset?.contracts?.find(c => c?.chain_id === chain_id)
-    const symbol = contract_data?.symbol || asset_data?.symbol
-    setApproveResponse(null)
-    try {
-      const tx_approve = await approve(signer, contract_data?.contract_address, getDeployedTransactionManagerContract(chain_id)?.address, constants.MaxUint256)
-      const tx_hash = tx_approve?.hash
-      setApproveResponse({ status: 'pending', message: `Wait for ${symbol} Approval Confirmation`, tx_hash })
-      await tx_approve.wait()
-      setContractApproved(await checkApproved('approve'))
-      setApproveResponse({ status: 'success', message: `${symbol} Approval Transaction Confirmed`, tx_hash })
-    } catch (error) {
-      setApproveResponse({ status: 'failed', message: error?.data?.message || error?.message })
-    }
-  }
-
   const reset = async origin => {
     const reset_bridge = origin !== 'address' || (address && xcall?.xcalledCaller?.toLowerCase() !== address.toLowerCase())
     if (reset_bridge) {
@@ -347,17 +291,12 @@ export default () => {
     setFeeEstimateCooldown(null)
     setEstimateTrigger(null)
 
-    setApproving(null)
-    setApproveResponse(null)
-
     setCalling(null)
     setXcallResponse(null)
 
     const { source_chain, destination_chain } = { ...bridge }
     getBalances(source_chain)
     getBalances(destination_chain)
-
-    setContractApproved(await checkApproved())
   }
 
   const estimate = async controller => {
@@ -371,7 +310,6 @@ export default () => {
       const destination_contract_data = destination_asset_data?.contracts?.find(c => c?.chain_id === destination_chain_data?.chain_id)
 
       if (source_contract_data && destination_contract_data) {
-        setApproveResponse(null)
         if (sdk && !controller.signal.aborted) {
           setFeeEstimating(true)
           setXcall(null)
@@ -384,7 +322,7 @@ export default () => {
               sendingAssetId: source_contract_data?.contract_address,
               receivingChainId: destination_chain_data?.chain_id,
               receivingAssetId: destination_contract_data?.contract_address,
-              amount: utils.formatUnits(BigNumber.from(amount?.toString() || '0'), -decimals),
+              amount: utils.parseUnits(amount?.toString() || '0', decimals),
             })
             if (!controller.signal.aborted) {
               const { relayerFee, routerFee } = { ...response }
@@ -400,7 +338,6 @@ export default () => {
             setFeeEstimating(false)
           }
         }
-        setContractApproved(await checkApproved())
       }
     }
   }
@@ -415,6 +352,16 @@ export default () => {
         const source_contract_data = source_asset_data?.contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
         const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
         const { to, callData } = { ...options }
+        console.log({
+          params: {
+            to: to || address,
+            callData: callData || undefined,
+            originDomain: source_chain_data?.domain_id,
+            destinationDomain: destination_chain_data?.domain_id,
+          },
+          transactingAssetId: source_contract_data?.contract_address,
+          amount,
+        })
         const response = await sdk.xcall({
           params: {
             to: to || address,
@@ -430,7 +377,6 @@ export default () => {
       } catch (error) {
         setXcallResponse({ status: 'failed', message: error?.data?.message || error?.message })
       }
-      setTokenApproved(await checkApproved())
     }
     setCalling(false)
   }
@@ -469,607 +415,543 @@ export default () => {
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
   const recipient_address = options?.to || address
 
-  const not_approved = checkSupport() && source_contract_data && !(contractApproved && (
-    typeof contractApproved === 'boolean' ?
-      contractApproved :
-      contractApproved.gte(BigNumber.from(utils.formatUnits(BigNumber.from(amount?.toString() || '0'), source_contract_data.contract_decimals)))
-  ))
-
-  const disabled = ['pending'].includes(approveResponse?.status) || calling
+  const disabled = calling
 
   return (
-    <>
-      {approveResponse && (
-        <Notification
-          hideButton={true}
-          outerClassNames="w-full h-auto z-50 transform fixed top-0 left-0 p-0"
-          innerClassNames={`${approveResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-600' : approveResponse.status === 'success' ? 'bg-green-500 dark:bg-green-600' : 'bg-blue-600 dark:bg-blue-700'} text-white`}
-          animation="animate__animated animate__fadeInDown"
-          icon={approveResponse.status === 'failed' ?
-            <FaTimesCircle className="w-4 h-4 stroke-current mr-2" />
-            :
-            approveResponse.status === 'success' ?
-              <FaCheckCircle className="w-4 h-4 stroke-current mr-2" />
-              :
-              <FaClock className="w-4 h-4 stroke-current mr-2" />
-          }
-          content={<div className="flex flex-wrap items-center space-x-1.5">
-            <span>
-              {approveResponse.message}
-            </span>
-            {approveResponse.status === 'pending' && (
-              <TailSpin color="white" width="16" height="16" />
-            )}
-            {source_chain_data?.explorer?.url && approveResponse.tx_hash && (
-              <a
-                href={`${source_chain_data.explorer.url}${source_chain_data.explorer.transaction_path?.replace('{tx}', approveResponse.tx_hash)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span className="whitespace-nowrap font-semibold">
-                  View on {source_chain_data.explorer.name}
-                </span>
-              </a>
-            )}
-          </div>}
-        />
-      )}
-      <div className="grid grid-flow-row grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
-        <div className="hidden lg:block col-span-0 lg:col-span-2" />
-        <div className="col-span-1 lg:col-span-4">
-          <div className="mt-8">
-            <Announcement />
-          </div>
-          <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6 my-6">
-            <div className="w-full max-w-lg space-y-4">
-              <div className="flex items-center justify-between space-x-2">
-                <div className="space-y-1">
-                  <h1 className="text-base sm:text-lg font-bold">
-                    Cross-Chain Transfer
-                  </h1>
-                  {asPath?.includes('from-') && asPath.includes('to-') && headMeta?.title && (
-                    <h2 className="text-slate-400 dark:text-slate-500 text-xs sm:text-sm font-medium">
-                      {headMeta.title.replace(' with Connext', '')}
-                    </h2>
-                  )}
-                </div>
-                <div className="flex items-center space-x-2">
-                  {destination_chain_data && (
-                    <a
-                      href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${destination_chain_data.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="min-w-max bg-slate-50 hover:bg-slate-100 dark:bg-black dark:hover:bg-slate-900 cursor-pointer rounded-lg shadow flex items-center text-blue-600 dark:text-white space-x-2 py-1.5 px-2"
-                    >
-                      {destination_chain_data.image && (
-                        <Image
-                          src={destination_chain_data.image}
-                          alt=""
-                          width={20}
-                          height={20}
-                          className="rounded-full"
-                        />
-                      )}
-                      <div className="flex items-center">
-                        <span className="text-base font-semibold">
-                          Liquidity
-                        </span>
-                        <TiArrowRight size={20} className="transform -rotate-45 -mr-1" />
-                      </div>
-                    </a>
-                  )}
-                  <Options
-                    disabled={disabled}
-                    applied={!_.isEqual(options, DEFAULT_OPTIONS)}
-                    initialData={options}
-                    onChange={o => setOptions(o)}
-                  />
-                </div>
+    <div className="grid grid-flow-row grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
+      <div className="hidden lg:block col-span-0 lg:col-span-2" />
+      <div className="col-span-1 lg:col-span-4">
+        <div className="mt-8">
+          <Announcement />
+        </div>
+        <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6 my-6">
+          <div className="w-full max-w-lg space-y-4">
+            <div className="flex items-center justify-between space-x-2">
+              <div className="space-y-1">
+                <h1 className="text-base sm:text-lg font-bold">
+                  Cross-Chain Transfer
+                </h1>
+                {asPath?.includes('from-') && asPath.includes('to-') && headMeta?.title && (
+                  <h2 className="text-slate-400 dark:text-slate-500 text-xs sm:text-sm font-medium">
+                    {headMeta.title.replace(' with Connext', '')}
+                  </h2>
+                )}
               </div>
-              <div className="rounded-2xl shadow dark:shadow-slate-500 space-y-6 p-6">
-                <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6">
-                  <div className="sm:col-span-2 flex flex-col items-center sm:items-start">
-                    <div className="w-48 flex sm:flex-col items-center justify-center space-x-1.5">
-                      <span className="text-slate-400 dark:text-white text-lg font-semibold text-center">
-                        Source
+              <div className="flex items-center space-x-2">
+                {destination_chain_data && (
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${destination_chain_data.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="min-w-max bg-slate-50 hover:bg-slate-100 dark:bg-black dark:hover:bg-slate-900 cursor-pointer rounded-lg shadow flex items-center text-blue-600 dark:text-white space-x-2 py-1.5 px-2"
+                  >
+                    {destination_chain_data.image && (
+                      <Image
+                        src={destination_chain_data.image}
+                        alt=""
+                        width={20}
+                        height={20}
+                        className="rounded-full"
+                      />
+                    )}
+                    <div className="flex items-center">
+                      <span className="text-base font-semibold">
+                        Liquidity
                       </span>
-                      <GasPrice
-                        chainId={source_chain_data?.chain_id}
-                        dummy={source_chain || destination_chain}
-                      />
+                      <TiArrowRight size={20} className="transform -rotate-45 -mr-1" />
                     </div>
-                    <SelectChain
-                      disabled={disabled}
-                      value={source_chain}
-                      onSelect={c => {
-                        const _source_chain = c
-                        const _destination_chain = c === destination_chain ? source_chain : destination_chain
-                        setBridge({
-                          ...bridge,
-                          source_chain: _source_chain,
-                          destination_chain: _destination_chain,
-                        })
-                        getBalances(_source_chain)
-                        getBalances(_destination_chain)
-                      }}
-                      source={source_chain}
-                      destination={destination_chain}
-                      origin="source"
-                    />
-                    <SelectAsset
-                      disabled={disabled}
-                      value={asset}
-                      onSelect={a => {
-                        setBridge({
-                          ...bridge,
-                          asset: a,
-                        })
-                        if (a !== asset) {
-                          getBalances(source_chain)
-                          getBalances(destination_chain)
-                        }
-                      }}
-                      chain={source_chain}
-                      origin="source"
-                    />
-                    <div className="w-48 flex items-center justify-center">
-                      <Balance
-                        chainId={source_chain_data?.chain_id}
-                        asset={asset}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <button
-                      disabled={disabled}
-                      onClick={() => {
-                        setBridge({
-                          ...bridge,
-                          source_chain: destination_chain,
-                          destination_chain: source_chain,
-                          amount: null,
-                        })
-                        getBalances(source_chain)
-                        getBalances(destination_chain)
-                      }}
-                      className={`${disabled ? 'cursor-not-allowed' : ''}`}
-                    >
-                      <MdSwapHorizontalCircle
-                        size={40}
-                        className="transform -rotate-90 sm:-rotate-0 rounded-full shadow dark:shadow-slate-500 text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
-                      />
-                    </button>
-                  </div>
-                  <div className="sm:col-span-2 flex flex-col items-center sm:items-end">
-                    <div className="w-48 flex sm:flex-col items-center justify-center space-x-1.5">
-                      <span className="text-slate-400 dark:text-white text-lg font-semibold text-center">
-                        Destination
-                      </span>
-                      <GasPrice
-                        chainId={destination_chain_data?.chain_id}
-                        dummy={source_chain || destination_chain}
-                      />
-                    </div>
-                    <SelectChain
-                      disabled={disabled}
-                      value={destination_chain}
-                      onSelect={c => {
-                        const _source_chain = c === source_chain ? destination_chain : source_chain
-                        const _destination_chain = c
-                        setBridge({
-                          ...bridge,
-                          source_chain: _source_chain,
-                          destination_chain: _destination_chain,
-                        })
-                        getBalances(_source_chain)
-                        getBalances(_destination_chain)
-                      }}
-                      source={source_chain}
-                      destination={destination_chain}
-                      origin="destination"
-                    />
-                    <SelectAsset
-                      disabled={disabled}
-                      value={asset}
-                      onSelect={a => {
-                        setBridge({
-                          ...bridge,
-                          asset: a,
-                        })
-                        if (a !== asset) {
-                          getBalances(source_chain)
-                          getBalances(destination_chain)
-                        }
-                      }}
-                      chain={destination_chain}
-                      origin="destination"
-                    />
-                    <div className="w-48 flex items-center justify-center">
-                      <Balance
-                        chainId={destination_chain_data?.chain_id}
-                        asset={asset}
-                      />
-                    </div>
-                  </div>
-                </div>
-                {asset && (
-                  <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6 sm:ml-3">
-                    <div className="sm:col-span-2 flex items-center justify-center sm:justify-start space-x-2.5">
-                      <span className="text-slate-400 dark:text-white text-lg font-semibold">
-                        Amount
-                      </span>
-                      {address && checkSupport() && source_balance && (
-                        <Popover
-                          placement="bottom"
-                          title={<div className="flex items-center justify-between space-x-1">
-                            <span className="font-bold">
-                              {source_symbol}
-                            </span>
-                            <span className="font-semibold">
-                              Transfers size
-                            </span>
-                          </div>}
-                          content={<div className="flex flex-col space-y-1">
-                            <div className="flex items-center justify-between space-x-2.5">
-                              <span className="font-medium">
-                                Balance:
-                              </span>
-                              <span className="font-semibold">
-                                {typeof source_amount === 'number' ?
-                                  number_format(source_amount, source_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
-                                }
-                              </span>
-                            </div>
-                            <div className="flex items-start justify-between space-x-2.5 pb-1">
-                              <span className="font-medium">
-                                Liquidity:
-                              </span>
-                              <span className="font-semibold">
-                                {typeof liquidity_amount === 'number' ?
-                                  number_format(liquidity_amount, liquidity_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
-                                }
-                              </span>
-                            </div>
-                            <div className="border-t flex items-center justify-between space-x-2.5 pt-2">
-                              <span className="font-semibold">
-                                Min:
-                              </span>
-                              <span className="font-semibold">
-                                {typeof min_amount === 'number' ?
-                                  number_format(min_amount, min_amount > 10 ? '0,0.00' : '0,0.000000', true) : 'n/a'
-                                }
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between space-x-2.5">
-                              <span className="font-semibold">
-                                Max:
-                              </span>
-                              <span className="font-semibold">
-                                {typeof max_amount === 'number' ?
-                                  number_format(max_amount, max_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
-                                }
-                              </span>
-                            </div>
-                          </div>}
-                          titleClassName="normal-case py-1.5"
-                        >
-                          <button
-                            disabled={disabled}
-                            onClick={() => {
-                              setBridge({
-                                ...bridge,
-                                amount: max_amount,
-                              })
-                            }}
-                            className="bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-base font-semibold py-0.5 px-2.5"
-                          >
-                            Max
-                          </button>
-                        </Popover>
-                      )}
-                    </div>
-                    <div className="sm:col-span-3 flex items-center justify-center sm:justify-end">
-                      <DebounceInput
-                        debounceTimeout={300}
-                        size="small"
-                        type="number"
-                        placeholder="0.00"
-                        disabled={disabled || !address}
-                        value={typeof amount === 'number' && amount >= 0 ? amount : ''}
-                        onChange={e => {
-                          const _amount = e.target.value < 0 ? 0 : e.target.value
-                          setBridge({
-                            ...bridge,
-                            amount: _amount && !isNaN(_amount) ? Number(_amount) : _amount,
-                          })
-                        }}
-                        onWheel={e => e.target.blur()}
-                        className={`w-48 bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl font-mono text-lg font-semibold text-right py-2 px-3`}
-                      />
-                    </div>
-                  </div>
+                  </a>
                 )}
-                {checkSupport() && web3_provider && (feeEstimating || fee) && (
-                  <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6 sm:mx-3">
-                    <div className="sm:col-span-2 flex items-center justify-center sm:justify-start space-x-2">
-                      <span className="text-slate-400 dark:text-white text-lg font-semibold">
-                        Fee
-                      </span>
-                      {feeEstimateCooldown && (
-                        <div className="bg-slate-50 dark:bg-slate-900 p-2">
-                          {feeEstimateCooldown}s
-                        </div>
-                      )}
-                    </div>
-                    <div className="sm:col-span-3 flex items-center justify-center sm:justify-end">
-                      {feeEstimating ?
-                        <div className="flex items-center space-x-1.5">
-                          <span className="text-slate-400 dark:text-white text-base font-medium">
-                            estimating
-                          </span>
-                          <Oval color={loader_color(theme)} width="24" height="24" />
-                        </div>
-                        :
-                        <div className="flex flex-col items-center sm:items-end">
-                          <div className="text-sm font-medium">
-                            (Relayer: {number_format(relayer_fee, '0,0.000000', true)} + Router: {number_format(router_fee, '0,0.000000', true)})
-                          </div>
-                          <div className="text-lg font-semibold mt-1">
-                            {number_format(total_fee, '0,0.000000', true)} {fee_native_token?.symbol}
-                          </div>
-                          {typeof fee_native_token?.price === 'number' && (
-                            <div className="font-mono text-red-500 text-xs font-semibold">
-                              ({currency_symbol}{number_format(total_fee * fee_native_token.price, '0,0.00')})
-                            </div>
-                          )}
-                        </div>
-                      }
-                    </div>
-                  </div>
-                )}
-                {checkSupport() && (xcall || source_balance) && (typeof amount === 'number' || (web3_provider && wrong_chain)) ?
-                  web3_provider && wrong_chain ?
-                    <Wallet
-                      connectChainId={source_chain_data?.chain_id}
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
-                    >
-                      <span className="mr-1.5 sm:mr-2">
-                        {is_walletconnect ? 'Reconnect' : 'Switch'} to
-                      </span>
-                      {source_chain_data?.image && (
-                        <Image
-                          src={source_chain_data.image}
-                          alt=""
-                          width={32}
-                          height={32}
-                          className="rounded-full"
-                        />
-                      )}
-                      <span className="font-semibold">
-                        {source_chain_data?.name}
-                      </span>
-                    </Wallet>
-                    :
-                    false && !xcall && (amount > liquidity_amount || amount > source_amount) ?
-                      <Alert
-                        color="bg-red-400 dark:bg-red-500 text-white text-base"
-                        icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
-                        closeDisabled={true}
-                        rounded={true}
-                      >
-                        <span>
-                          {amount > liquidity_amount ?
-                            'Amount is higher than the available transfer size.'
-                            :
-                            'Insufficient Funds'
-                          }
-                        </span>
-                      </Alert>
-                      :
-                      !xcall && !xcallResponse ?
-                        not_approved ?
-                          (typeof contractApproved === 'boolean' || contractApproved) && (
-                            <button
-                              disabled={disabled}
-                              onClick={() => approveContract()}
-                              className={`w-full ${disabled ? 'bg-blue-400 dark:bg-blue-500 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'} rounded-xl flex items-center justify-center text-white text-base sm:text-lg space-x-2 py-3 sm:py-4 px-2 sm:px-3`}
-                            >
-                              {approveResponse?.status === 'pending' ?
-                                <>
-                                  <TailSpin color="white" width="24" height="24" />
-                                  <span>Approving</span>
-                                </>
-                                :
-                                <span>Approve</span>
-                              }
-                              <span className="font-semibold">
-                                {source_symbol}
-                              </span>
-                            </button>
-                          )
-                          :
-                          <Modal
-                            onClick={() => setApproveResponse(null)}
-                            buttonTitle="Transfers"
-                            buttonClassName="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg py-3 sm:py-4 px-2 sm:px-3"
-                            title="Transfer Confirmation"
-                            body={<div className="flex flex-col space-y-4 -mb-2">
-                              <div className="flex items-center space-x-6 mx-auto pt-2 pb-1">
-                                <div className="flex flex-col items-center space-y-1">
-                                  {source_chain_data?.image && (
-                                    <Image
-                                      src={source_chain_data?.image}
-                                      alt=""
-                                      width={40}
-                                      height={40}
-                                      className="rounded-full"
-                                    />
-                                  )}
-                                  <span className="text-slate-400 dark:text-white font-semibold">
-                                    {chainName(source_chain_data)}
-                                  </span>
-                                </div>
-                                <div className="flex flex-col items-center space-y-1">
-                                  <Image
-                                    src={`/logos/externals/connext/logo${theme === 'dark' ? '_white' : ''}.png`}
-                                    alt=""
-                                    width={40}
-                                    height={40}
-                                    className="rounded-full"
-                                  />
-                                  <div className="h-4" />
-                                </div>
-                                <div className="flex flex-col items-center space-y-1">
-                                  {destination_chain_data?.image && (
-                                    <Image
-                                      src={destination_chain_data?.image}
-                                      alt=""
-                                      width={40}
-                                      height={40}
-                                      className="rounded-full"
-                                    />
-                                  )}
-                                  <span className="text-slate-400 dark:text-white font-semibold">
-                                    {chainName(destination_chain_data)}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                                <div className="flex items-center text-gray-400 dark:text-white text-lg md:text-sm lg:text-base">
-                                  Recipient Address
-                                  <span className="hidden sm:block">:</span>
-                                </div>
-                                <EnsProfile
-                                  address={recipient_address}
-                                  fallback={recipient_address && (
-                                    <Copy
-                                      value={recipient_address}
-                                      title={<span className="text-sm text-gray-400 dark:text-gray-200">
-                                        <span className="xl:hidden">
-                                          {ellipse(recipient_address, 8)}
-                                        </span>
-                                        <span className="hidden xl:block">
-                                          {ellipse(recipient_address, 12)}
-                                        </span>
-                                      </span>}
-                                      size={18}
-                                    />
-                                  )}
-                                />
-                              </div>
-                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                                <div className="flex items-center text-gray-400 dark:text-white text-lg md:text-sm lg:text-base">
-                                  Amount
-                                  <span className="hidden sm:block">:</span>
-                                </div>
-                                <div className="sm:text-right">
-                                  <div className="text-lg space-x-1.5">
-                                    <span className="font-bold">
-                                      {number_format(amount, '0,0.000000', true)}
-                                    </span>
-                                    <span className="font-semibold">
-                                      {source_symbol}
-                                    </span>
-                                  </div>
-                                  {amount && typeof source_asset_data?.price === 'number' && (
-                                    <div className="font-mono text-blue-500 sm:text-right">
-                                      ({currency_symbol}{number_format(amount * source_asset_data.price, '0,0.00')})
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                                <div className="flex items-center text-gray-400 dark:text-white text-lg md:text-sm lg:text-base">
-                                  Fees
-                                  <span className="hidden sm:block">:</span>
-                                </div>
-                                <div className="sm:text-right">
-                                  <div className="text-lg space-x-1.5">
-                                    <span className="font-bold">
-                                      {number_format(total_fee, '0,0.000000', true)}
-                                    </span>
-                                    <span className="font-semibold">
-                                      {fee_native_token?.symbol}
-                                    </span>
-                                  </div>
-                                  {total_fee && typeof fee_native_token?.price === 'number' && (
-                                    <div className="font-mono text-blue-500 sm:text-right">
-                                      ({currency_symbol}{number_format(total_fee * fee_native_token.price, '0,0.00')})
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>}
-                            cancelButtonClassName="hidden"
-                            confirmDisabled={calling}
-                            onConfirm={() => call()}
-                            onConfirmHide={false}
-                            confirmButtonTitle={<span className="flex items-center justify-center space-x-1.5 py-2">
-                              {calling && (
-                                <TailSpin color="white" width="20" height="20" />
-                              )}
-                              <span>
-                                {calling ? 'xCalling' : 'Confirm'}
-                              </span>
-                            </span>}
-                            confirmButtonClassName="w-full btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white text-base sm:text-lg text-center"
-                          />
-                        :
-                        !xcall && xcallResponse ?
-                          <Alert
-                            color={`${xcallResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : xcallResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
-                            icon={xcallResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : xcallResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
-                            closeDisabled={true}
-                            rounded={true}
-                          >
-                            <div className="flex items-center justify-between space-x-2">
-                              <span className="break-words">
-                                {xcallResponse.message}
-                              </span>
-                              <button
-                                onClick={() => setEstimateTrigger(moment().valueOf())}
-                                className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                              >
-                                <BiRefresh size={20} />
-                              </button>
-                            </div>
-                          </Alert>
-                          :
-                          xcall && (
-                            <TransferStatus
-                              data={xcall}
-                              onClose={() => reset()}
-                            />
-                          )
-                  :
-                  web3_provider ?
-                    <button
-                      disabled={true}
-                      className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
-                    >
-                      Transfer
-                    </button>
-                    :
-                    <Wallet
-                      connectChainId={source_chain_data?.chain_id}
-                      buttonConnectTitle="Connect Wallet"
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
-                    >
-                      <span>
-                        Connect Wallet
-                      </span>
-                    </Wallet>
-                }
+                <Options
+                  disabled={disabled}
+                  applied={!_.isEqual(options, DEFAULT_OPTIONS)}
+                  initialData={options}
+                  onChange={o => setOptions(o)}
+                />
               </div>
             </div>
-            {['testnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT) && (
-              <Faucet />
-            )}
+            <div className="rounded-2xl shadow dark:shadow-slate-500 space-y-6 p-6">
+              <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6">
+                <div className="sm:col-span-2 flex flex-col items-center sm:items-start">
+                  <div className="w-48 flex sm:flex-col items-center justify-center space-x-1.5">
+                    <span className="text-slate-400 dark:text-white text-lg font-semibold text-center">
+                      Source
+                    </span>
+                    <GasPrice
+                      chainId={source_chain_data?.chain_id}
+                      dummy={source_chain || destination_chain}
+                    />
+                  </div>
+                  <SelectChain
+                    disabled={disabled}
+                    value={source_chain}
+                    onSelect={c => {
+                      const _source_chain = c
+                      const _destination_chain = c === destination_chain ? source_chain : destination_chain
+                      setBridge({
+                        ...bridge,
+                        source_chain: _source_chain,
+                        destination_chain: _destination_chain,
+                      })
+                      getBalances(_source_chain)
+                      getBalances(_destination_chain)
+                    }}
+                    source={source_chain}
+                    destination={destination_chain}
+                    origin="source"
+                  />
+                  <SelectAsset
+                    disabled={disabled}
+                    value={asset}
+                    onSelect={a => {
+                      setBridge({
+                        ...bridge,
+                        asset: a,
+                      })
+                      if (a !== asset) {
+                        getBalances(source_chain)
+                        getBalances(destination_chain)
+                      }
+                    }}
+                    chain={source_chain}
+                    origin="source"
+                  />
+                  <div className="w-48 flex items-center justify-center">
+                    <Balance
+                      chainId={source_chain_data?.chain_id}
+                      asset={asset}
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center justify-center">
+                  <button
+                    disabled={disabled}
+                    onClick={() => {
+                      setBridge({
+                        ...bridge,
+                        source_chain: destination_chain,
+                        destination_chain: source_chain,
+                        amount: null,
+                      })
+                      getBalances(source_chain)
+                      getBalances(destination_chain)
+                    }}
+                    className={`${disabled ? 'cursor-not-allowed' : ''}`}
+                  >
+                    <MdSwapHorizontalCircle
+                      size={40}
+                      className="transform -rotate-90 sm:-rotate-0 rounded-full shadow dark:shadow-slate-500 text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
+                    />
+                  </button>
+                </div>
+                <div className="sm:col-span-2 flex flex-col items-center sm:items-end">
+                  <div className="w-48 flex sm:flex-col items-center justify-center space-x-1.5">
+                    <span className="text-slate-400 dark:text-white text-lg font-semibold text-center">
+                      Destination
+                    </span>
+                    <GasPrice
+                      chainId={destination_chain_data?.chain_id}
+                      dummy={source_chain || destination_chain}
+                    />
+                  </div>
+                  <SelectChain
+                    disabled={disabled}
+                    value={destination_chain}
+                    onSelect={c => {
+                      const _source_chain = c === source_chain ? destination_chain : source_chain
+                      const _destination_chain = c
+                      setBridge({
+                        ...bridge,
+                        source_chain: _source_chain,
+                        destination_chain: _destination_chain,
+                      })
+                      getBalances(_source_chain)
+                      getBalances(_destination_chain)
+                    }}
+                    source={source_chain}
+                    destination={destination_chain}
+                    origin="destination"
+                  />
+                  <SelectAsset
+                    disabled={disabled}
+                    value={asset}
+                    onSelect={a => {
+                      setBridge({
+                        ...bridge,
+                        asset: a,
+                      })
+                      if (a !== asset) {
+                        getBalances(source_chain)
+                        getBalances(destination_chain)
+                      }
+                    }}
+                    chain={destination_chain}
+                    origin="destination"
+                  />
+                  <div className="w-48 flex items-center justify-center">
+                    <Balance
+                      chainId={destination_chain_data?.chain_id}
+                      asset={asset}
+                    />
+                  </div>
+                </div>
+              </div>
+              {asset && (
+                <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6 sm:ml-3">
+                  <div className="sm:col-span-2 flex items-center justify-center sm:justify-start space-x-2.5">
+                    <span className="text-slate-400 dark:text-white text-lg font-semibold">
+                      Amount
+                    </span>
+                    {address && checkSupport() && source_balance && (
+                      <Popover
+                        placement="bottom"
+                        title={<div className="flex items-center justify-between space-x-1">
+                          <span className="font-bold">
+                            {source_symbol}
+                          </span>
+                          <span className="font-semibold">
+                            Transfers size
+                          </span>
+                        </div>}
+                        content={<div className="flex flex-col space-y-1">
+                          <div className="flex items-center justify-between space-x-2.5">
+                            <span className="font-medium">
+                              Balance:
+                            </span>
+                            <span className="font-semibold">
+                              {typeof source_amount === 'number' ?
+                                number_format(source_amount, source_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
+                              }
+                            </span>
+                          </div>
+                          <div className="flex items-start justify-between space-x-2.5 pb-1">
+                            <span className="font-medium">
+                              Liquidity:
+                            </span>
+                            <span className="font-semibold">
+                              {typeof liquidity_amount === 'number' ?
+                                number_format(liquidity_amount, liquidity_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
+                              }
+                            </span>
+                          </div>
+                          <div className="border-t flex items-center justify-between space-x-2.5 pt-2">
+                            <span className="font-semibold">
+                              Min:
+                            </span>
+                            <span className="font-semibold">
+                              {typeof min_amount === 'number' ?
+                                number_format(min_amount, min_amount > 10 ? '0,0.00' : '0,0.000000', true) : 'n/a'
+                              }
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between space-x-2.5">
+                            <span className="font-semibold">
+                              Max:
+                            </span>
+                            <span className="font-semibold">
+                              {typeof max_amount === 'number' ?
+                                number_format(max_amount, max_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
+                              }
+                            </span>
+                          </div>
+                        </div>}
+                        titleClassName="normal-case py-1.5"
+                      >
+                        <button
+                          disabled={disabled}
+                          onClick={() => {
+                            setBridge({
+                              ...bridge,
+                              amount: max_amount,
+                            })
+                          }}
+                          className="bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-base font-semibold py-0.5 px-2.5"
+                        >
+                          Max
+                        </button>
+                      </Popover>
+                    )}
+                  </div>
+                  <div className="sm:col-span-3 flex items-center justify-center sm:justify-end">
+                    <DebounceInput
+                      debounceTimeout={300}
+                      size="small"
+                      type="number"
+                      placeholder="0.00"
+                      disabled={disabled || !address}
+                      value={typeof amount === 'number' && amount >= 0 ? amount : ''}
+                      onChange={e => {
+                        const _amount = e.target.value < 0 ? 0 : e.target.value
+                        setBridge({
+                          ...bridge,
+                          amount: _amount && !isNaN(_amount) ? Number(_amount) : _amount,
+                        })
+                      }}
+                      onWheel={e => e.target.blur()}
+                      className={`w-48 bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl font-mono text-lg font-semibold text-right py-2 px-3`}
+                    />
+                  </div>
+                </div>
+              )}
+              {checkSupport() && web3_provider && (feeEstimating || fee) && (
+                <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6 sm:mx-3">
+                  <div className="sm:col-span-2 flex items-center justify-center sm:justify-start space-x-2">
+                    <span className="text-slate-400 dark:text-white text-lg font-semibold">
+                      Fee
+                    </span>
+                    {feeEstimateCooldown && (
+                      <div className="bg-slate-50 dark:bg-slate-900 p-2">
+                        {feeEstimateCooldown}s
+                      </div>
+                    )}
+                  </div>
+                  <div className="sm:col-span-3 flex items-center justify-center sm:justify-end">
+                    {feeEstimating ?
+                      <div className="flex items-center space-x-1.5">
+                        <span className="text-slate-400 dark:text-white text-base font-medium">
+                          estimating
+                        </span>
+                        <Oval color={loader_color(theme)} width="24" height="24" />
+                      </div>
+                      :
+                      <div className="flex flex-col items-center sm:items-end">
+                        <div className="text-sm font-medium">
+                          (Relayer: {number_format(relayer_fee, '0,0.000000', true)} + Router: {number_format(router_fee, '0,0.000000', true)})
+                        </div>
+                        <div className="text-lg font-semibold mt-1">
+                          {number_format(total_fee, '0,0.000000', true)} {fee_native_token?.symbol}
+                        </div>
+                        {typeof fee_native_token?.price === 'number' && (
+                          <div className="font-mono text-red-500 text-xs font-semibold">
+                            ({currency_symbol}{number_format(total_fee * fee_native_token.price, '0,0.00')})
+                          </div>
+                        )}
+                      </div>
+                    }
+                  </div>
+                </div>
+              )}
+              {checkSupport() && (xcall || source_balance) && (typeof amount === 'number' || (web3_provider && wrong_chain)) ?
+                web3_provider && wrong_chain ?
+                  <Wallet
+                    connectChainId={source_chain_data?.chain_id}
+                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                  >
+                    <span className="mr-1.5 sm:mr-2">
+                      {is_walletconnect ? 'Reconnect' : 'Switch'} to
+                    </span>
+                    {source_chain_data?.image && (
+                      <Image
+                        src={source_chain_data.image}
+                        alt=""
+                        width={32}
+                        height={32}
+                        className="rounded-full"
+                      />
+                    )}
+                    <span className="font-semibold">
+                      {source_chain_data?.name}
+                    </span>
+                  </Wallet>
+                  :
+                  false && !xcall && (amount > liquidity_amount || amount > source_amount) ?
+                    <Alert
+                      color="bg-red-400 dark:bg-red-500 text-white text-base"
+                      icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                      closeDisabled={true}
+                      rounded={true}
+                    >
+                      <span>
+                        {amount > liquidity_amount ?
+                          'Amount is higher than the available transfer size.'
+                          :
+                          'Insufficient Funds'
+                        }
+                      </span>
+                    </Alert>
+                    :
+                    !xcall && !xcallResponse ?
+                      <Modal
+                        buttonTitle="Transfers"
+                        buttonClassName="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg py-3 sm:py-4 px-2 sm:px-3"
+                        title="Transfer Confirmation"
+                        body={<div className="flex flex-col space-y-4 -mb-2">
+                          <div className="flex items-center space-x-6 mx-auto pt-2 pb-1">
+                            <div className="flex flex-col items-center space-y-1">
+                              {source_chain_data?.image && (
+                                <Image
+                                  src={source_chain_data?.image}
+                                  alt=""
+                                  width={40}
+                                  height={40}
+                                  className="rounded-full"
+                                />
+                              )}
+                              <span className="text-slate-400 dark:text-white font-semibold">
+                                {chainName(source_chain_data)}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-center space-y-1">
+                              <Image
+                                src={`/logos/externals/connext/logo${theme === 'dark' ? '_white' : ''}.png`}
+                                alt=""
+                                width={40}
+                                height={40}
+                                className="rounded-full"
+                              />
+                              <div className="h-4" />
+                            </div>
+                            <div className="flex flex-col items-center space-y-1">
+                              {destination_chain_data?.image && (
+                                <Image
+                                  src={destination_chain_data?.image}
+                                  alt=""
+                                  width={40}
+                                  height={40}
+                                  className="rounded-full"
+                                />
+                              )}
+                              <span className="text-slate-400 dark:text-white font-semibold">
+                                {chainName(destination_chain_data)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
+                            <div className="flex items-center text-gray-400 dark:text-white text-lg md:text-sm lg:text-base">
+                              Recipient Address
+                              <span className="hidden sm:block">:</span>
+                            </div>
+                            <EnsProfile
+                              address={recipient_address}
+                              fallback={recipient_address && (
+                                <Copy
+                                  value={recipient_address}
+                                  title={<span className="text-sm text-gray-400 dark:text-gray-200">
+                                    <span className="xl:hidden">
+                                      {ellipse(recipient_address, 8)}
+                                    </span>
+                                    <span className="hidden xl:block">
+                                      {ellipse(recipient_address, 12)}
+                                    </span>
+                                  </span>}
+                                  size={18}
+                                />
+                              )}
+                            />
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
+                            <div className="flex items-center text-gray-400 dark:text-white text-lg md:text-sm lg:text-base">
+                              Amount
+                              <span className="hidden sm:block">:</span>
+                            </div>
+                            <div className="sm:text-right">
+                              <div className="text-lg space-x-1.5">
+                                <span className="font-bold">
+                                  {number_format(amount, '0,0.000000', true)}
+                                </span>
+                                <span className="font-semibold">
+                                  {source_symbol}
+                                </span>
+                              </div>
+                              {amount && typeof source_asset_data?.price === 'number' && (
+                                <div className="font-mono text-blue-500 sm:text-right">
+                                  ({currency_symbol}{number_format(amount * source_asset_data.price, '0,0.00')})
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
+                            <div className="flex items-center text-gray-400 dark:text-white text-lg md:text-sm lg:text-base">
+                              Fees
+                              <span className="hidden sm:block">:</span>
+                            </div>
+                            <div className="sm:text-right">
+                              <div className="text-lg space-x-1.5">
+                                <span className="font-bold">
+                                  {number_format(total_fee, '0,0.000000', true)}
+                                </span>
+                                <span className="font-semibold">
+                                  {fee_native_token?.symbol}
+                                </span>
+                              </div>
+                              {total_fee && typeof fee_native_token?.price === 'number' && (
+                                <div className="font-mono text-blue-500 sm:text-right">
+                                  ({currency_symbol}{number_format(total_fee * fee_native_token.price, '0,0.00')})
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>}
+                        cancelDisabled={disabled}
+                        cancelButtonClassName="hidden"
+                        confirmDisabled={calling}
+                        onConfirm={() => call()}
+                        onConfirmHide={false}
+                        confirmButtonTitle={<span className="flex items-center justify-center space-x-1.5 py-2">
+                          {calling && (
+                            <TailSpin color="white" width="20" height="20" />
+                          )}
+                          <span>
+                            {calling ? 'xCalling' : 'Confirm'}
+                          </span>
+                        </span>}
+                        confirmButtonClassName="w-full btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white text-base sm:text-lg text-center"
+                      />
+                      :
+                      !xcall && xcallResponse ?
+                        <Alert
+                          color={`${xcallResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : xcallResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                          icon={xcallResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : xcallResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                          closeDisabled={true}
+                          rounded={true}
+                        >
+                          <div className="flex items-center justify-between space-x-2">
+                            <span className="break-words">
+                              {xcallResponse.message}
+                            </span>
+                            <button
+                              onClick={() => setEstimateTrigger(moment().valueOf())}
+                              className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
+                            >
+                              <MdRefresh size={20} />
+                            </button>
+                          </div>
+                        </Alert>
+                        :
+                        xcall && (
+                          <TransferStatus
+                            data={xcall}
+                            onClose={() => reset()}
+                          />
+                        )
+                :
+                web3_provider ?
+                  <button
+                    disabled={true}
+                    className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
+                  >
+                    Transfer
+                  </button>
+                  :
+                  <Wallet
+                    connectChainId={source_chain_data?.chain_id}
+                    buttonConnectTitle="Connect Wallet"
+                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                  >
+                    <span>
+                      Connect Wallet
+                    </span>
+                  </Wallet>
+              }
+            </div>
           </div>
-        </div>
-        <div className="col-span-1 lg:col-span-2 mb-4">
+          {['testnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT) && (
+            <Faucet />
+          )}
         </div>
       </div>
-    </>
+      <div className="col-span-1 lg:col-span-2 mb-4">
+      </div>
+    </div>
   )
 }

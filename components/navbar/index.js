@@ -150,14 +150,15 @@ export default function Navbar() {
         }
 
         if (!sdk) {
+          const _signer = signer || EthersWallet.createRandom()
           dispatch({
             type: SDK,
-            value: NxtpSdk.create({
+            value: await NxtpSdk.create({
               chains: chains_config,
-              signerAddress: address || EthersWallet.createRandom().address,
+              signerAddress: _signer.address,
               logLevel: 'info',
               network: process.env.NEXT_PUBLIC_ENVIRONMENT,
-            }),
+            }, _signer),
           })
         }
         if (!rpcs) {
@@ -170,6 +171,14 @@ export default function Navbar() {
     }
     init()
   }, [chains_data, assets_data, chain_id, address])
+
+  // change signer
+  useEffect(() => {
+    if (sdk) {
+      const _signer = signer || EthersWallet.createRandom()
+      sdk.changeInjectedSigner(_signer)
+    }
+  }, [signer])
 
   // assets balances
   useEffect(() => {
