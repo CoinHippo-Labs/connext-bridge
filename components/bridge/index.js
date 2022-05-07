@@ -362,6 +362,7 @@ export default () => {
       const source_asset_data = assets_data?.find(a => a?.id === asset)
       const source_contract_data = source_asset_data?.contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
       const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
+      const decimals = source_contract_data?.contract_decimals || 18
       const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
       const { to, callData } = { ...options }
       const xcallParams = {
@@ -372,14 +373,14 @@ export default () => {
           destinationDomain: destination_chain_data?.domain_id?.toString(),
         },
         transactingAssetId: source_contract_data?.contract_address,
-        amount,
+        amount: utils.parseUnits(amount?.toString() || '0', decimals),
       }
       let failed = false
-      const approve_req = await sdk.approveIfNeeded(xcallParams.params.originDomain, xcallParams.transactingAssetId, xcallParams.amount, true)
-      if (approve_req) {
+      const approve_request = await sdk.approveIfNeeded(xcallParams.params.originDomain, xcallParams.transactingAssetId, xcallParams.amount, true)
+      if (approve_request) {
         setApproving(true)
         try {
-          const approve_response = await signer.sendTransaction(approve_req)
+          const approve_response = await signer.sendTransaction(approve_request)
           const tx_hash = approve_response?.hash
           setApproveResponse({ status: 'pending', message: `Wait for ${source_symbol} approval`, tx_hash })
           const approve_receipt = await signer.provider.waitForTransaction(tx_hash)
@@ -398,11 +399,11 @@ export default () => {
         setApproving(false)
       }
       if (!failed) {
-        const xcall_req = await sdk.xcall(xcallParams)
-        if (xcall_req) {
+        const xcall_request = await sdk.xcall(xcallParams)
+        if (xcall_request) {
           try {
-            const xcall_response = await signer.sendTransaction(xcall_req)
-            const tx_hash = approve_response?.hash
+            const xcall_response = await signer.sendTransaction(xcall_request)
+            const tx_hash = xcall_response?.hash
             const xcall_receipt = await signer.provider.waitForTransaction(tx_hash)
             setXcall(xcall_receipt)
             setXcallResponse(xcall_receipt?.status ?
@@ -934,7 +935,7 @@ export default () => {
                             <TailSpin color="white" width="20" height="20" />
                           )}
                           <span>
-                            {calling ? 'xCalling' : 'Confirm'}
+                            {calling ? approving ? 'Approving' : 'xCalling' : 'Confirm'}
                           </span>
                         </span>}
                         confirmButtonClassName="w-full btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white text-base sm:text-lg text-center"
