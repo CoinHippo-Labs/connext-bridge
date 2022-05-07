@@ -16,11 +16,11 @@ export const ENS_DATA = 'ens_data'
 // asset balances
 export const ASSET_BALANCES_DATA = 'asset_balances_data'
 
-// sdk
-export const SDK = 'sdk'
-
 // rpc
 export const RPCS = 'rpcs'
+
+// sdk
+export const SDK = 'sdk'
 
 // wallet
 export const WALLET_DATA = 'wallet_data'

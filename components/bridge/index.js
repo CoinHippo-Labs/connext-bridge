@@ -39,13 +39,13 @@ const DEFAULT_OPTIONS = {
 
 export default () => {
   const dispatch = useDispatch()
-  const { preferences, chains, assets, asset_balances, dev, rpc_providers, wallet, balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, asset_balances: state.asset_balances, dev: state.dev, rpc_providers: state.rpc_providers, wallet: state.wallet, balances: state.balances }), shallowEqual)
+  const { preferences, chains, assets, asset_balances, rpc_providers, dev, wallet, balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, asset_balances: state.asset_balances, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { asset_balances_data } = { ...asset_balances }
-  const { sdk } = { ...dev }
   const { rpcs } = { ...rpc_providers }
+  const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
   const { chain_id, provider, web3_provider, address, signer } = { ...wallet_data }
   const { balances_data } = { ...balances }
@@ -61,6 +61,9 @@ export default () => {
   const [feeEstimating, setFeeEstimating] = useState(null)
   const [feeEstimateCooldown, setFeeEstimateCooldown] = useState(null)
   const [estimateTrigger, setEstimateTrigger] = useState(null)
+
+  const [approving, setApproving] = useState(null)
+  const [approveResponse, setApproveResponse] = useState(null)
 
   const [xcall, setXcall] = useState(null)
   const [calling, setCalling] = useState(null)
@@ -168,7 +171,7 @@ export default () => {
   // update balances
   useEffect(() => {
     const getData = () => {
-      if (address && !xcall && !calling) {
+      if (address && !xcall && !calling && !['pending'].includes(approveResponse?.status)) {
         const { source_chain, destination_chain } = { ...bridge }
         getBalances(source_chain)
         getBalances(destination_chain)
@@ -232,6 +235,11 @@ export default () => {
     }
   }, [estimateTrigger])
 
+  // remove approve response
+  useEffect(() => {
+    setApproveResponse(null)
+  }, [chain_id, address, bridge])
+
   const getBalances = chain => {
     const getBalance = async (chain_id, contract) => {
       let balance
@@ -291,6 +299,9 @@ export default () => {
     setFeeEstimateCooldown(null)
     setEstimateTrigger(null)
 
+    setApproving(null)
+    setApproveResponse(null)
+
     setCalling(null)
     setXcallResponse(null)
 
@@ -312,6 +323,7 @@ export default () => {
       if (source_contract_data && destination_contract_data) {
         if (sdk && !controller.signal.aborted) {
           setFeeEstimating(true)
+          setApproveResponse(null)
           setXcall(null)
           setCalling(false)
           setXcallResponse(null)
@@ -345,26 +357,70 @@ export default () => {
   const call = async () => {
     setCalling(true)
     if (sdk) {
-      try {
-        const { source_chain, destination_chain, asset, amount } = { ...bridge }
-        const source_chain_data = chains_data?.find(c => c?.id === source_chain)
-        const source_asset_data = assets_data?.find(a => a?.id === asset)
-        const source_contract_data = source_asset_data?.contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
-        const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
-        const { to, callData } = { ...options }
-        const response = await sdk.xcall({
-          params: {
-            to: to || address,
-            originDomain: source_chain_data?.domain_id,
-            destinationDomain: destination_chain_data?.domain_id,
-          },
-          transactingAssetId: source_contract_data?.contract_address,
-          amount,
-        })
-        setXcall(response)
-        setXcallResponse(null)
-      } catch (error) {
-        setXcallResponse({ status: 'failed', message: error?.data?.message || error?.message })
+      const { source_chain, destination_chain, asset, amount } = { ...bridge }
+      const source_chain_data = chains_data?.find(c => c?.id === source_chain)
+      const source_asset_data = assets_data?.find(a => a?.id === asset)
+      const source_contract_data = source_asset_data?.contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
+      const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
+      const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
+      const { to, callData } = { ...options }
+      const xcallParams = {
+        params: {
+          to: to || address,
+          callData: callData || '',
+          originDomain: source_chain_data?.domain_id?.toString(),
+          destinationDomain: destination_chain_data?.domain_id?.toString(),
+        },
+        transactingAssetId: source_contract_data?.contract_address,
+        amount,
+      }
+      let failed = false
+      const approve_req = await sdk.approveIfNeeded(xcallParams.params.originDomain, xcallParams.transactingAssetId, xcallParams.amount, true)
+      if (approve_req) {
+        setApproving(true)
+        try {
+          const approve_response = await signer.sendTransaction(approve_req)
+          const tx_hash = approve_response?.hash
+          setApproveResponse({ status: 'pending', message: `Wait for ${source_symbol} approval`, tx_hash })
+          const approve_receipt = await signer.provider.waitForTransaction(tx_hash)
+          setApproveResponse(approve_receipt?.status ?
+            null : {
+              status: 'failed',
+              message: `Failed to approve ${source_symbol}`,
+              tx_hash,
+            }
+          )
+          failed = !approve_receipt?.status
+        } catch (error) {
+          setApproveResponse({ status: 'failed', message: error?.data?.message || error?.message })
+          failed = true
+        }
+        setApproving(false)
+      }
+      if (!failed) {
+        const xcall_req = await sdk.xcall(xcallParams)
+        if (xcall_req) {
+          try {
+            const xcall_response = await signer.sendTransaction(xcall_req)
+            const tx_hash = approve_response?.hash
+            const xcall_receipt = await signer.provider.waitForTransaction(tx_hash)
+            setXcall(xcall_receipt)
+            setXcallResponse(xcall_receipt?.status ?
+              null : {
+                status: 'failed',
+                message: `Failed to xcall ${source_symbol}`,
+                tx_hash,
+              }
+            )
+            failed = !xcall_receipt?.status
+          } catch (error) {
+            setXcallResponse({ status: 'failed', message: error?.data?.message || error?.message })
+            failed = true
+          }
+        }
+      }
+      if (failed) {
+        setXcall(null)
       }
     }
     setCalling(false)
@@ -404,7 +460,7 @@ export default () => {
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
   const recipient_address = options?.to || address
 
-  const disabled = calling
+  const disabled = ['pending'].includes(approveResponse?.status) || calling
 
   return (
     <div className="grid grid-flow-row grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
@@ -904,12 +960,32 @@ export default () => {
                           </div>
                         </Alert>
                         :
-                        xcall && (
-                          <TransferStatus
-                            data={xcall}
-                            onClose={() => reset()}
-                          />
-                        )
+                        !xcall && approveResponse ?
+                          <Alert
+                            color={`${approveResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : approveResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                            icon={approveResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : approveResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                            closeDisabled={true}
+                            rounded={true}
+                          >
+                            <div className="flex items-center justify-between space-x-2">
+                              <span className="break-words">
+                                {approveResponse.message}
+                              </span>
+                              <button
+                                onClick={() => setEstimateTrigger(moment().valueOf())}
+                                className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
+                              >
+                                <MdRefresh size={20} />
+                              </button>
+                            </div>
+                          </Alert>
+                          :
+                          xcall && (
+                            <TransferStatus
+                              data={xcall}
+                              onClose={() => reset()}
+                            />
+                          )
                 :
                 web3_provider ?
                   <button

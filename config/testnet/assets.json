@@ -11,6 +11,11 @@
         "contract_decimals": 18
       },
       {
+        "contract_address": "0xD426e23A6a9524101CDC017e01dDc3262B7aA65D",
+        "chain_id": 5,
+        "contract_decimals": 18
+      },
+      {
         "contract_address": "0xB5AabB55385bfBe31D627E2A717a7B189ddA4F8F",
         "chain_id": 42,
         "contract_decimals": 18
