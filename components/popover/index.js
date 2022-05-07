@@ -1,7 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
 import { usePopper } from 'react-popper'
 
-export default function Popover({ placement, title, content, children, className = '', titleClassName = '', contentClassName = '' }) {
+export default ({
+  placement,
+  disabled = false,
+  onClick,
+  title,
+  content,
+  children,
+  className = '',
+  titleClassName = '',
+  contentClassName = '',
+}) => {
   const [hidden, setHidden] = useState(true)
 
   const buttonRef = useRef(null)
@@ -52,13 +62,17 @@ export default function Popover({ placement, title, content, children, className
     }
   }, [hidden, popoverRef, buttonRef])
 
-  const onClick = () => setHidden(!hidden)
-
   return (
     <div className="flex">
       <button
         ref={buttonRef}
-        onClick={onClick}
+        disabled={disabled}
+        onClick={() => {
+          setHidden(!hidden)
+          if (onClick) {
+            onClick()
+          }
+        }}
         className={`btn btn-rounded ${className}`}
       >
         {children}

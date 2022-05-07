@@ -352,20 +352,9 @@ export default () => {
         const source_contract_data = source_asset_data?.contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
         const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
         const { to, callData } = { ...options }
-        console.log({
-          params: {
-            to: to || address,
-            callData: callData || undefined,
-            originDomain: source_chain_data?.domain_id,
-            destinationDomain: destination_chain_data?.domain_id,
-          },
-          transactingAssetId: source_contract_data?.contract_address,
-          amount,
-        })
         const response = await sdk.xcall({
           params: {
             to: to || address,
-            callData: callData || undefined,
             originDomain: source_chain_data?.domain_id,
             destinationDomain: destination_chain_data?.domain_id,
           },
@@ -605,6 +594,13 @@ export default () => {
                     {address && checkSupport() && source_balance && (
                       <Popover
                         placement="bottom"
+                        disabled={disabled}
+                        onClick={() => {
+                          setBridge({
+                            ...bridge,
+                            amount: max_amount,
+                          })
+                        }}
                         title={<div className="flex items-center justify-between space-x-1">
                           <span className="font-bold">
                             {source_symbol}
@@ -655,20 +651,10 @@ export default () => {
                             </span>
                           </div>
                         </div>}
+                        className="bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-base font-semibold py-0.5 px-2.5"
                         titleClassName="normal-case py-1.5"
                       >
-                        <button
-                          disabled={disabled}
-                          onClick={() => {
-                            setBridge({
-                              ...bridge,
-                              amount: max_amount,
-                            })
-                          }}
-                          className="bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-base font-semibold py-0.5 px-2.5"
-                        >
-                          Max
-                        </button>
+                        Max
                       </Popover>
                     )}
                   </div>
@@ -772,7 +758,7 @@ export default () => {
                     :
                     !xcall && !xcallResponse ?
                       <Modal
-                        buttonTitle="Transfers"
+                        buttonTitle="Transfer"
                         buttonClassName="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg py-3 sm:py-4 px-2 sm:px-3"
                         title="Transfer Confirmation"
                         body={<div className="flex flex-col space-y-4 -mb-2">
@@ -817,7 +803,7 @@ export default () => {
                             </div>
                           </div>
                           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                            <div className="flex items-center text-gray-400 dark:text-white text-lg md:text-sm lg:text-base">
+                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base">
                               Recipient Address
                               <span className="hidden sm:block">:</span>
                             </div>
@@ -826,7 +812,7 @@ export default () => {
                               fallback={recipient_address && (
                                 <Copy
                                   value={recipient_address}
-                                  title={<span className="text-sm text-gray-400 dark:text-gray-200">
+                                  title={<span className="text-sm text-slate-400 dark:text-slate-200">
                                     <span className="xl:hidden">
                                       {ellipse(recipient_address, 8)}
                                     </span>
@@ -840,7 +826,7 @@ export default () => {
                             />
                           </div>
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                            <div className="flex items-center text-gray-400 dark:text-white text-lg md:text-sm lg:text-base">
+                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base">
                               Amount
                               <span className="hidden sm:block">:</span>
                             </div>
@@ -861,7 +847,7 @@ export default () => {
                             </div>
                           </div>
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                            <div className="flex items-center text-gray-400 dark:text-white text-lg md:text-sm lg:text-base">
+                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base">
                               Fees
                               <span className="hidden sm:block">:</span>
                             </div>
