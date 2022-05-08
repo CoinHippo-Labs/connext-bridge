@@ -37,7 +37,7 @@ const providerOptions = {
         5: `https://goerli.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`,
         42: `https://kovan.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`,
         97: 'https://data-seed-prebsc-1-s1.binance.org:8545',
-        80001: 'https://rpc-mumbai.maticvigil.com',
+        80001: 'https://rpc-mumbai.matic.today',
         421611: 'https://rinkeby.arbitrum.io/rpc',
         69: 'https://kovan.optimism.io',
         43113: 'https://api.avax-test.network/ext/bc/C/rpc',
