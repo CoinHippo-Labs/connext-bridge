@@ -232,13 +232,15 @@ export default function Navbar() {
   return (
     <>
       <div className="navbar">
-        <div className="navbar-inner w-full sm:h-20 flex items-center justify-between">
+        <div className="navbar-inner w-full sm:h-20 flex xl:grid xl:grid-flow-row xl:grid-cols-3 items-center justify-between gap-4">
           <div className="flex items-center">
             <Logo />
             <DropdownNavigations address={web3_provider && address} />
           </div>
-          <Navigations address={web3_provider && address} />
-          <div className="flex items-center">
+          <div className="flex items-center justify-center">
+            <Navigations address={web3_provider && address} />
+          </div>
+          <div className="flex items-center justify-end">
             {web3_provider && address && (
               <div className="hidden sm:flex flex-col space-y-0.5 mx-2">
                 <EnsProfile
