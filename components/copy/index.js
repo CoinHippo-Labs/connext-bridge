@@ -36,7 +36,7 @@ export default function Copy({ value, title, size = 16, onCopy, className = '' }
             {title}
           </span>
         )}
-        <BiCopy size={size} className={`cursor-pointer text-gray-300 hover:text-gray-400 dark:text-gray-700 dark:hover:text-gray-600 ${className}`} />
+        <BiCopy size={size} className={`cursor-pointer text-slate-300 hover:text-slate-400 dark:text-slate-700 dark:hover:text-slate-600 ${className}`} />
       </div>
     </CopyToClipboard>
 }

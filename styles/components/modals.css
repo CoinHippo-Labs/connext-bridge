@@ -60,13 +60,13 @@
 [data-background="light"] {
   &.modal {
     .modal-header {
-      @apply bg-white text-gray-900 border-gray-200;
+      @apply bg-white text-slate-900 border-slate-200;
     }
     .modal-footer {
-      @apply bg-white text-gray-900 border-gray-200;
+      @apply bg-white text-slate-900 border-slate-200;
     }
     .modal-content {
-      @apply bg-white text-gray-900;
+      @apply bg-white text-slate-900;
     }
   }
 }
@@ -74,13 +74,13 @@
 [data-background="dark"] {
   &.modal {
     .modal-header {
-      @apply bg-gray-800 text-white border-gray-700;
+      @apply bg-slate-900 text-white border-slate-800;
     }
     .modal-footer {
-      @apply bg-gray-800 text-white border-gray-700;
+      @apply bg-slate-900 text-white border-slate-800;
     }
     .modal-content {
-      @apply bg-gray-800 text-white;
+      @apply bg-slate-900 text-white;
     }
   }
 }

@@ -110,7 +110,7 @@ export default () => {
           {fields.map((f, i) => (
             <div key={i} className="form-element">
               {f.label && (
-                <div className="form-label text-gray-600 dark:text-gray-400 font-medium">
+                <div className="form-label text-slate-600 dark:text-slate-400 font-medium">
                   {f.label}
                 </div>
               )}

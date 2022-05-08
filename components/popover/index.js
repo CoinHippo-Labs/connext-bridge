@@ -79,10 +79,10 @@ export default ({
       </button>
       <div ref={popoverRef} { ...attributes.popper } style={styles.popper}>
         <div
-          className={`${hidden ? 'hidden' : 'block'} w-auto bg-white dark:bg-black rounded-lg shadow-lg border-0 border-gray-200 dark:border-gray-900 z-10 no-underline break-words text-sm font-normal`}
+          className={`${hidden ? 'hidden' : 'block'} w-auto bg-white dark:bg-black rounded-lg shadow-lg border-0 border-slate-200 dark:border-slate-900 z-10 no-underline break-words text-sm font-normal`}
           style={styles.offset}
         >
-          <div className={`bg-gray-100 dark:bg-black rounded-t-lg border-b border-solid border-gray-200 dark:border-gray-900 uppercase font-semibold mb-0 p-2 ${titleClassName}`}>
+          <div className={`bg-slate-100 dark:bg-black rounded-t-lg border-b border-solid border-slate-200 dark:border-slate-900 uppercase font-semibold mb-0 p-2 ${titleClassName}`}>
             {title}
           </div>
           <div className={`p-2 ${contentClassName}`}>

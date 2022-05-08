@@ -1,10 +1,10 @@
 [data-navbar="light"] {
   .navbar,.footer {
-    @apply text-gray-900;
-    @apply bg-white border-gray-100;
+    @apply text-slate-900;
+    @apply bg-white border-slate-100;
     .navbar-search {
       input {
-      @apply bg-gray-100 border-gray-100;
+      @apply bg-slate-100 border-slate-100;
       }
     }
   }

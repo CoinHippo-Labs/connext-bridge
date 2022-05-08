@@ -42,7 +42,7 @@ export default function Footer() {
           <span>Connext Protocol</span>
         </a>
         {_package?.dependencies?.['@connext/nxtp-sdk'] && (
-          <span className="text-gray-400 dark:text-white font-semibold">
+          <span className="text-slate-400 dark:text-white font-semibold">
             (SDK v{_package.dependencies['@connext/nxtp-sdk'].replace('^', '')})
           </span>
         )}
@@ -111,7 +111,7 @@ export default function Footer() {
           </a>
         )}
       </div>
-      <div className="w-full md:w-1/2 lg:w-1/3 min-w-max flex items-center justify-center md:justify-end text-gray-400 dark:text-white space-x-1">
+      <div className="w-full md:w-1/2 lg:w-1/3 min-w-max flex items-center justify-center md:justify-end text-slate-400 dark:text-white space-x-1">
         <span>© {moment().format('YYYY')} made with</span>
         <FaHeart className="text-red-400 text-xl pr-0.5" />
         <span>

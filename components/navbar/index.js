@@ -246,7 +246,7 @@ export default function Navbar() {
                   fallback={address && (
                     <Copy
                       value={address}
-                      title={<span className="text-sm text-gray-400 dark:text-gray-200">
+                      title={<span className="text-sm text-slate-400 dark:text-slate-200">
                         <span className="xl:hidden">
                           {ellipse(address, 6)}
                         </span>
@@ -279,7 +279,7 @@ export default function Navbar() {
             <Linkify>{parse(process.env.NEXT_PUBLIC_STATUS_TITLE)}</Linkify>
             <button
               onClick={() => setHiddenStatus(true)}
-              className="hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full mt-0.5 p-1"
+              className="hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full mt-0.5 p-1"
             >
               <MdClose size={12} />
             </button>

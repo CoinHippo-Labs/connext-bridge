@@ -17,7 +17,8 @@ export default function Navigations({ address }) {
           case 'explorer':
             if (address) {
               m.title = 'My Transfers'
-              m.path = `${m.path}/address/${address}`
+              const address_path = '/address/'
+              m.path = `${m.path}${!m.path?.includes(address_path) ? `${address_path}${address}` : ''}`
             }
             break
           default:
@@ -34,7 +35,7 @@ export default function Navigations({ address }) {
             <FaHandPointLeft size={20} />
           </HeadShake> : m.external ?
           <TiArrowRight size={20} className="transform -rotate-45" /> : null
-        const className = `bg-transparent hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg ${m.disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase text-xs ${!m.external && pathname === m.path ? 'font-bold' : 'font-medium'} space-x-1.5 py-2.5 px-3`
+        const className = `bg-transparent hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg ${m.disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase text-xs ${!m.external && pathname === m.path ? 'font-bold' : 'font-medium'} space-x-1.5 py-2.5 px-3`
         return m.external ?
           <a
             key={i}

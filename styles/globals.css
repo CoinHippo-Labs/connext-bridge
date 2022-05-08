@@ -81,10 +81,10 @@ body {
 }
 
 [data-background="light"] {
-  @apply text-gray-900;
+  @apply text-slate-900;
   code,
   pre {
-    @apply bg-gray-100;
+    @apply bg-slate-100;
   }
 }
 
@@ -92,7 +92,7 @@ body {
   @apply text-white;
   code,
   pre {
-    @apply bg-gray-800;
+    @apply bg-slate-800;
   }
 }
 .link {
@@ -133,7 +133,7 @@ body {
 }
 
 .recharts-cartesian-axis-tick-value {
-  @apply fill-current text-gray-900 dark:text-white text-3xs sm:text-sm md:text-sm lg:text-sm xl:text-sm font-medium;
+  @apply fill-current text-slate-900 dark:text-white text-3xs sm:text-sm md:text-sm lg:text-sm xl:text-sm font-medium;
 }
 
 .mobile-hidden-x .recharts-cartesian-axis-tick-value {

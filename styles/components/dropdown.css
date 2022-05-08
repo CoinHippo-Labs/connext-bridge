@@ -90,23 +90,23 @@
 [data-background="light"] {
   .dropdown {
     .dropdown-title {
-      @apply bg-white text-gray-900;
+      @apply bg-white text-slate-900;
     }
     .dropdown-content {
       @apply bg-white;
       &.inside {
-        @apply bg-gray-50;
+        @apply bg-slate-50;
         .dropdown-item {
-          @apply bg-gray-50;
+          @apply bg-slate-50;
           &:hover {
-            @apply bg-gray-100;
+            @apply bg-slate-100;
           }
         }
       }
       .dropdown-item {
-        @apply bg-white text-gray-900;
+        @apply bg-white text-slate-900;
         &:hover {
-          @apply bg-gray-50;
+          @apply bg-slate-50;
         }
       }
     }
@@ -116,23 +116,23 @@
 [data-background="dark"] {
   .dropdown {
     .dropdown-title {
-      @apply bg-gray-900 text-white;
+      @apply bg-slate-900 text-white;
     }
     .dropdown-content {
-      @apply bg-gray-900 text-white;
+      @apply bg-slate-900 text-white;
       &.inside {
         @apply bg-black;
         .dropdown-item {
           @apply bg-black;
           &:hover {
-            @apply bg-gray-900;
+            @apply bg-slate-900;
           }
         }
       }
       .dropdown-item {
-        @apply bg-gray-900 text-white;
+        @apply bg-slate-900 text-white;
         &:hover {
-          @apply bg-gray-800 text-white;
+          @apply bg-slate-800 text-white;
         }
       }
     }

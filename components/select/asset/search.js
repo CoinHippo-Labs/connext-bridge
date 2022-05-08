@@ -14,7 +14,7 @@ export default ({ value, onSelect, chain }) => {
           onChange={e => setInputSearch(e.target.value)}
           type="search"
           placeholder="Search"
-          className="w-full h-10 bg-transparent appearance-none border border-gray-200 dark:border-gray-800 rounded-xl text-sm pl-10 pr-5"
+          className="w-full h-10 bg-transparent appearance-none border border-slate-200 dark:border-slate-800 rounded-xl text-sm pl-10 pr-5"
         />
         <div className="absolute top-0 left-0 mt-3 ml-4">
           <FiSearch className="w-4 h-4 stroke-current" />

@@ -2,7 +2,7 @@
 
 [data-background="light"] {
   .recharts-responsive-container {
-    @apply text-gray-900;
+    @apply text-slate-900;
   }
 }
 

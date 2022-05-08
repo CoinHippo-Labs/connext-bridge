@@ -235,11 +235,6 @@ export default () => {
     }
   }, [estimateTrigger])
 
-  // remove approve response
-  useEffect(() => {
-    setApproveResponse(null)
-  }, [chain_id, address, bridge])
-
   const getBalances = chain => {
     const getBalance = async (chain_id, contract) => {
       let balance
@@ -368,7 +363,7 @@ export default () => {
       const xcallParams = {
         params: {
           to: to || address,
-          callData: callData || '',
+          callData: callData || undefined,
           originDomain: source_chain_data?.domain_id?.toString(),
           destinationDomain: destination_chain_data?.domain_id?.toString(),
         },
@@ -461,7 +456,7 @@ export default () => {
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
   const recipient_address = options?.to || address
 
-  const disabled = ['pending'].includes(approveResponse?.status) || calling
+  const disabled = calling
 
   return (
     <div className="grid grid-flow-row grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
@@ -721,7 +716,7 @@ export default () => {
                       size="small"
                       type="number"
                       placeholder="0.00"
-                      disabled={disabled || !address}
+                      disabled={disabled}
                       value={typeof amount === 'number' && amount >= 0 ? amount : ''}
                       onChange={e => {
                         const _amount = e.target.value < 0 ? 0 : e.target.value
@@ -903,27 +898,29 @@ export default () => {
                               )}
                             </div>
                           </div>
-                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base">
-                              Fees
-                              <span className="hidden sm:block">:</span>
-                            </div>
-                            <div className="sm:text-right">
-                              <div className="text-lg space-x-1.5">
-                                <span className="font-bold">
-                                  {number_format(total_fee, '0,0.000000', true)}
-                                </span>
-                                <span className="font-semibold">
-                                  {fee_native_token?.symbol}
-                                </span>
+                          {fee && (
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
+                              <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base">
+                                Fees
+                                <span className="hidden sm:block">:</span>
                               </div>
-                              {total_fee && typeof fee_native_token?.price === 'number' && (
-                                <div className="font-mono text-blue-500 sm:text-right">
-                                  ({currency_symbol}{number_format(total_fee * fee_native_token.price, '0,0.00')})
+                              <div className="sm:text-right">
+                                <div className="text-lg space-x-1.5">
+                                  <span className="font-bold">
+                                    {number_format(total_fee, '0,0.000000', true)}
+                                  </span>
+                                  <span className="font-semibold">
+                                    {fee_native_token?.symbol}
+                                  </span>
                                 </div>
-                              )}
+                                {total_fee && typeof fee_native_token?.price === 'number' && (
+                                  <div className="font-mono text-blue-500 sm:text-right">
+                                    ({currency_symbol}{number_format(total_fee * fee_native_token.price, '0,0.00')})
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </div>}
                         cancelDisabled={disabled}
                         cancelButtonClassName="hidden"
@@ -941,36 +938,17 @@ export default () => {
                         confirmButtonClassName="w-full btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white text-base sm:text-lg text-center"
                       />
                       :
-                      !xcall && xcallResponse ?
-                        <Alert
-                          color={`${xcallResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : xcallResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
-                          icon={xcallResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : xcallResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
-                          closeDisabled={true}
-                          rounded={true}
-                        >
-                          <div className="flex items-center justify-between space-x-2">
-                            <span className="break-words">
-                              {xcallResponse.message}
-                            </span>
-                            <button
-                              onClick={() => setEstimateTrigger(moment().valueOf())}
-                              className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                            >
-                              <MdRefresh size={20} />
-                            </button>
-                          </div>
-                        </Alert>
-                        :
-                        !xcall && approveResponse ?
+                      !xcall && (xcallResponse || approveResponse) ?
+                        [xcallResponse || approveResponse].map((r, i) => (
                           <Alert
-                            color={`${approveResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : approveResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
-                            icon={approveResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : approveResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                            color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                            icon={r.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : r.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
                             closeDisabled={true}
                             rounded={true}
                           >
                             <div className="flex items-center justify-between space-x-2">
                               <span className="break-words">
-                                {approveResponse.message}
+                                {r.message}
                               </span>
                               <button
                                 onClick={() => setEstimateTrigger(moment().valueOf())}
@@ -980,18 +958,19 @@ export default () => {
                               </button>
                             </div>
                           </Alert>
-                          :
-                          xcall && (
-                            <TransferStatus
-                              data={xcall}
-                              onClose={() => reset()}
-                            />
-                          )
+                        ))
+                        :
+                        xcall && (
+                          <TransferStatus
+                            data={xcall}
+                            onClose={() => reset()}
+                          />
+                        )
                 :
                 web3_provider ?
                   <button
                     disabled={true}
-                    className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
+                    className="w-full bg-slate-100 dark:bg-slate-900 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
                   >
                     Transfer
                   </button>

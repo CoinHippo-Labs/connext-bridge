@@ -1,5 +1,5 @@
 .skeleton {
-  @apply bg-gray-100 dark:bg-gray-800 rounded;
+  @apply bg-slate-100 dark:bg-slate-800 rounded;
 
   position: relative;
   overflow: hidden;

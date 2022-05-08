@@ -56,7 +56,7 @@ export default ({ value, inputSearch, onSelect, chain }) => {
           </div>
         )
         const balance_component = balances_data?.[chain_id] && (
-          <div className={`${chain_id && !amount ? 'text-gray-400 dark:text-gray-500' : ''} ${selected ? 'font-semibold' : 'font-normal'} ml-auto`}>
+          <div className={`${chain_id && !amount ? 'text-slate-400 dark:text-slate-500' : ''} ${selected ? 'font-semibold' : 'font-normal'} ml-auto`}>
             {typeof amount === 'number' ?
               number_format(amount, amount > 10000 ? '0,0' : amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
             }
