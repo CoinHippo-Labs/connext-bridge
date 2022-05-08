@@ -17,7 +17,12 @@ export default function Items({ onClick, address }) {
           case 'explorer':
             if (address) {
               m.title = 'My Transfers'
-              m.path = `${m.path}/address/${address}`
+              const address_path = '/address/'
+              m.path = `${m.path}${!m.path?.includes(address_path) ? `${address_path}${address}` : ''}`
+            }
+            else {
+              m.title = 'Explorer'
+              m.path = process.env.NEXT_PUBLIC_EXPLORER_URL
             }
             break
           default:
@@ -26,7 +31,9 @@ export default function Items({ onClick, address }) {
         const item = (
           <>
             {m.icon}
-            <span className="text-xs">{m.title}</span>
+            <span className="text-xs">
+              {m.title}
+            </span>
           </>
         )
         const right_icon = m.emphasize ?

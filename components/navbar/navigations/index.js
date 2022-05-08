@@ -9,7 +9,7 @@ import menus from './menus'
 export default function Navigations({ address }) {
   const router = useRouter()
   const { pathname } = { ...router }
-
+console.log(address)
   return (
     <div className="hidden xl:flex items-center space-x-0 xl:space-x-2 mx-auto">
       {menus.filter(m => m?.path).map((m, i) => {
@@ -20,6 +20,10 @@ export default function Navigations({ address }) {
               const address_path = '/address/'
               m.path = `${m.path}${!m.path?.includes(address_path) ? `${address_path}${address}` : ''}`
             }
+            else {
+              m.title = 'Explorer'
+              m.path = process.env.NEXT_PUBLIC_EXPLORER_URL
+            }
             break
           default:
             break
@@ -27,7 +31,9 @@ export default function Navigations({ address }) {
         const item = (
           <>
             {m.icon}
-            <span className="whitespace-nowrap">{m.title}</span>
+            <span className="whitespace-nowrap">
+              {m.title}
+            </span>
           </>
         )
         const right_icon = m.emphasize ?
