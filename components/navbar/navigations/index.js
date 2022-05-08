@@ -41,7 +41,7 @@ export default function Navigations({ address }) {
             <FaHandPointLeft size={20} />
           </HeadShake> : m.external ?
           <TiArrowRight size={20} className="transform -rotate-45" /> : null
-        const className = `bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg ${m.disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase text-xs ${!m.external && pathname === m.path ? 'font-bold' : 'font-medium hover:font-bold'} space-x-1.5 py-2.5 px-3`
+        const className = `bg-transparent hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg ${m.disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase text-blue-600 dark:text-white text-xs ${!m.external && pathname === m.path ? 'font-bold' : 'font-medium hover:font-bold'} space-x-1.5 py-2.5 px-3`
         return m.external ?
           <a
             key={i}

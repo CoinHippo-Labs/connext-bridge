@@ -314,7 +314,7 @@ export default function Wallet({
             className={className}
           >
             {children || (
-              <div className="bg-slate-100 hover:bg-slate-200 dark:bg-red-600 dark:hover:bg-red-700 rounded-lg whitespace-nowrap font-medium py-1 px-2">
+              <div className="bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 rounded-lg whitespace-nowrap text-white font-medium py-1 px-2">
                 Disconnect
               </div>
             )}

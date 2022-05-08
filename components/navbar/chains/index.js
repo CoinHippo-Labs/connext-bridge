@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import { Puff } from 'react-loader-spinner'
-import { RiQuestionLine } from 'react-icons/ri'
+import { RiRefreshFill } from 'react-icons/ri'
 
 import Image from '../../image'
 import Items from './items'
@@ -50,7 +50,7 @@ export default function DropdownChains({ chain_id }) {
             <span className="font-bold">{chain_data.short_name}</span>
           :
           chains_data ?
-            <RiQuestionLine size={20} />
+            <RiRefreshFill size={20} className="transform hover:rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out" />
             :
             <Puff color={loader_color(theme)} width="24" height="24" />
         }
