@@ -7,7 +7,7 @@ import { BigNumber, Contract, constants, utils } from 'ethers'
 import { TailSpin, Oval } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
-import { MdSwapHorizontalCircle, MdRefresh } from 'react-icons/md'
+import { MdRefresh } from 'react-icons/md'
 import { BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
 
 import Announcement from '../announcement'
@@ -28,7 +28,7 @@ import Copy from '../copy'
 import meta from '../../lib/meta'
 import { chainName } from '../../lib/object/chain'
 import { currency_symbol } from '../../lib/object/currency'
-import { params_to_obj, number_format, ellipse, loader_color, sleep } from '../../lib/utils'
+import { params_to_obj, number_format, ellipse, loader_color } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
 const FEE_ESTIMATE_COOLDOWN = Number(process.env.NEXT_PUBLIC_FEE_ESTIMATE_COOLDOWN) || 30
@@ -577,11 +577,13 @@ export default () => {
                       getBalances(source_chain)
                       getBalances(destination_chain)
                     }}
-                    className={`${disabled ? 'cursor-not-allowed' : ''}`}
+                    className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-500 dark:hover:shadow-white flex items-center justify-center p-2.5`}
                   >
-                    <MdSwapHorizontalCircle
-                      size={40}
-                      className="transform -rotate-90 sm:-rotate-0 rounded-full shadow dark:shadow-slate-500 text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
+                    <Image
+                      src="/logos/logo.png"
+                      alt=""
+                      width={32}
+                      height={32}
                     />
                   </button>
                 </div>
@@ -950,12 +952,14 @@ export default () => {
                               <span className="break-words">
                                 {r.message}
                               </span>
-                              <button
-                                onClick={() => setEstimateTrigger(moment().valueOf())}
-                                className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                              >
-                                <MdRefresh size={20} />
-                              </button>
+                              {r.status === 'failed' && (
+                                <button
+                                  onClick={() => setEstimateTrigger(moment().valueOf())}
+                                  className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
+                                >
+                                  <MdRefresh size={20} />
+                                </button>
+                              )}
                             </div>
                           </Alert>
                         ))
@@ -992,8 +996,7 @@ export default () => {
           )}
         </div>
       </div>
-      <div className="col-span-1 lg:col-span-2 mb-4">
-      </div>
+      <div className="col-span-1 lg:col-span-2 mb-4" />
     </div>
   )
 }
