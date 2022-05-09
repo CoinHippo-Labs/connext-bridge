@@ -224,7 +224,7 @@ export default () => {
   // estimate trigger
   useEffect(() => {
     let _controller
-    if (estimateTrigger) {
+    if (estimateTrigger && !calling && !approving) {
       controller?.abort()
       _controller = new AbortController()
       setController(_controller)

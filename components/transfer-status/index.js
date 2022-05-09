@@ -32,7 +32,7 @@ export default ({
       onClick={() => setHidden(false)}
       buttonTitle="Status"
       buttonClassName={buttonClassName}
-      title={null}
+      title="Transfer Status"
       body={null}
       onClose={() => {
         if (onClose) {
