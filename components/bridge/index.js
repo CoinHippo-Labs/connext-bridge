@@ -363,15 +363,16 @@ export default () => {
       const xcallParams = {
         params: {
           to: to || address,
-          callData: callData || undefined,
+          callData: callData || '0x',
           originDomain: source_chain_data?.domain_id?.toString(),
           destinationDomain: destination_chain_data?.domain_id?.toString(),
         },
         transactingAssetId: source_contract_data?.contract_address,
         amount: utils.parseUnits(amount?.toString() || '0', decimals),
+        relayerFee: '0',
       }
       let failed = false
-      const approve_request = await sdk.approveIfNeeded(xcallParams.params.originDomain, xcallParams.transactingAssetId, xcallParams.amount, true)
+      const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(xcallParams.params.originDomain, xcallParams.transactingAssetId, xcallParams.amount, true)
       if (approve_request) {
         setApproving(true)
         try {
@@ -394,7 +395,7 @@ export default () => {
         setApproving(false)
       }
       if (!failed) {
-        const xcall_request = await sdk.xcall(xcallParams)
+        const xcall_request = await sdk.nxtpSdkBase.xcall(xcallParams)
         if (xcall_request) {
           try {
             const xcall_response = await signer.sendTransaction(xcall_request)
@@ -456,7 +457,7 @@ export default () => {
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
   const recipient_address = options?.to || address
 
-  const disabled = calling
+  const disabled = calling || approving
 
   return (
     <div className="grid grid-flow-row grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
@@ -926,11 +927,11 @@ export default () => {
                         </div>}
                         cancelDisabled={disabled}
                         cancelButtonClassName="hidden"
-                        confirmDisabled={calling}
+                        confirmDisabled={disabled}
                         onConfirm={() => call()}
                         onConfirmHide={false}
                         confirmButtonTitle={<span className="flex items-center justify-center space-x-1.5 py-2">
-                          {calling && (
+                          {(calling || approving) && (
                             <TailSpin color="white" width="20" height="20" />
                           )}
                           <span>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { NxtpSdkBase } from '@connext/nxtp-sdk'
+import { create } from '@connext/nxtp-sdk'
 import { Bignumber, Wallet as EthersWallet, providers, utils } from 'ethers'
 import Linkify from 'react-linkify'
 import parse from 'html-react-parser'
@@ -18,7 +18,6 @@ import Copy from '../copy'
 import { announcement as getAnnouncement, chains as getChains, assets as getAssets } from '../../lib/api/config'
 import { tokens as getTokens } from '../../lib/api/tokens'
 import { ens as getEns } from '../../lib/api/ens'
-import { assetBalances } from '../../lib/api/subgraph'
 import { ellipse } from '../../lib/utils'
 import { ANNOUNCEMENT_DATA, CHAINS_DATA, ASSETS_DATA, ENS_DATA, ASSET_BALANCES_DATA, SDK, RPCS } from '../../reducers/types'
 
@@ -173,7 +172,7 @@ export default function Navbar() {
         }
         dispatch({
           type: SDK,
-          value: await NxtpSdkBase.create({
+          value: await create({
             chains: chains_config,
             signerAddress: address || EthersWallet.createRandom().address,
             logLevel: 'info',
