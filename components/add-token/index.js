@@ -43,9 +43,7 @@ export default ({ token_data }) => {
                 signer,
               },
             })
-          } catch (error) {
-            console.log(error)
-          }
+          } catch (error) {}
         }
       } catch (error) {}
     }
