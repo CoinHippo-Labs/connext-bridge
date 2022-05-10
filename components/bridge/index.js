@@ -369,7 +369,7 @@ export default () => {
           destinationDomain: destination_chain_data?.domain_id?.toString(),
         },
         transactingAssetId: source_contract_data?.contract_address,
-        amount: utils.parseUnits(amount?.toString() || '0', decimals),
+        amount: utils.parseUnits(amount?.toString() || '0', decimals).toString(),
         relayerFee: '0',
       }
       let failed = false
