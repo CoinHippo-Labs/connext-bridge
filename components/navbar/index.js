@@ -186,22 +186,29 @@ export default function Navbar() {
 
   // assets balances
   useEffect(() => {
-    const getAssetBalances = async chain_data => {
-      if (chain_data && !chain_data.disabled) {
-        const { chain_id } = chain_data
-        // const response = await assetBalances(sdk, chain_id)
-        // const data = response?.data?.map(a => { return { ...a, chain_data } })
-        // dispatch({
-        //   type: ASSET_BALANCES_DATA,
-        //   value: { [`${chain_id}`]: data },
-        // })
-      }
-    }
     const getData = async () => {
       if (sdk && chains_data &&
         assets_data && assets_data.findIndex(a => !a.price) < 0
       ) {
-        chains_data.forEach(c => getAssetBalances(c))
+        const response = await sdk.nxtpSdkUtils.getRoutersData()
+        if (response || !is_interval) {
+          const data = _.groupBy(response?.map(l => {
+            const chain_data = chains_data?.find(c => c?.domain_id?.toString() === l?.domain)
+            const asset_data = assets_data?.find(a => a?.contracts?.findIndex(c => c?.chain_id === chain_data?.chain_id && equals_ignore_case(c?.contract_address, l?.adopted)) > -1)
+            return {
+              ...l,
+              chain_id: chain_data?.chain_id,
+              chain_data,
+              contract_address: l?.adopted,
+              asset_data,
+              amount: BigInt(Number(l?.balance) || 0).toString(),
+            }
+          }) || [], 'chain_id')
+          dispatch({
+            type: ASSET_BALANCES_DATA,
+            value: data,
+          })
+        }
       }
     }
     getData()
@@ -215,7 +222,7 @@ export default function Navbar() {
   useEffect(() => {
     const getData = async () => {
       if (chains_data && asset_balances_data && chains_data.filter(c => !c?.disabled).length <= Object.keys(asset_balances_data).length) {
-        const addresses = _.uniq(Object.values(asset_balances_data).flatMap(a => a || []).map(a => a?.router?.id).filter(a => a && !ens_data?.[a]))
+        const addresses = _.uniq(Object.values(asset_balances_data).flatMap(a => a || []).map(a => a?.router_address).filter(a => a && !ens_data?.[a]))
         const ens_data = await getEns(addresses)
         if (ens_data) {
           dispatch({

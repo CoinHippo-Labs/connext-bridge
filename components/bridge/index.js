@@ -394,6 +394,7 @@ export default () => {
       } catch (error) {
         setApproveResponse({ status: 'failed', message: error?.data?.message || error?.message })
         failed = true
+        setApproving(false)
       }
       if (!failed) {
         try {
