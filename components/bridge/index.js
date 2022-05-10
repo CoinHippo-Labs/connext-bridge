@@ -447,7 +447,7 @@ export default () => {
   const total_fee = fee && (relayer_fee + router_fee)
   const fee_native_token = source_chain_data?.provider_params?.[0]?.nativeCurrency
 
-  let liquidity_amount = asset_balances_data?.find(a => equals_ignore_case(a?.asset?.id, destination_contract_data?.contract_address))?.amount
+  let liquidity_amount = asset_balances_data?.[destination_chain_data?.chain_id]?.find(a => equals_ignore_case(a?.asset_data?.id, destination_contract_data?.contract_address))?.amount
   liquidity_amount = liquidity_amount && utils.formatUnits(BigNumber.from(liquidity_amount), destination_contract_data?.contract_decimals || 18)
   const min_amount = fee ? total_fee : 0.000001
   const max_amount = typeof liquidity_amount === 'number' ?
