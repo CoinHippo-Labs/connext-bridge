@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import _ from 'lodash'
+import Switch from 'react-switch'
 import { RiSettings3Line } from 'react-icons/ri'
 import { MdSettingsSuggest } from 'react-icons/md'
 
@@ -25,6 +26,11 @@ export default ({
       name: 'to',
       type: 'text',
       placeholder: 'target contract or recipient address',
+    },
+    {
+      label: 'Infinite Approval',
+      name: 'infiniteApprove',
+      type: 'switch',
     },
     {
       label: 'Call Data',
@@ -74,28 +80,39 @@ export default ({
                 ))}
               </select>
               :
-              f.type === 'textarea' ?
-                <textarea
-                  type="text"
-                  rows="5"
-                  placeholder={f.placeholder}
-                  value={data?.[f.name]}
-                  onChange={e => setData({ ...data, [`${f.name}`]: e.target.value })}
-                  className="form-textarea border-0 focus:ring-0 rounded-lg"
+              f.type === 'switch' ?
+                <Switch
+                  checked={typeof data?.[f.name] === 'boolean' ? data[f.name] : false}
+                  onChange={() => setData({ ...data, [`${f.name}`]: !data?.[f.name] })}
+                  onColor="#3b82f6"
+                  onHandleColor="#f8fafc"
+                  offColor="#64748b"
+                  offHandleColor="#f8fafc"
                 />
                 :
-                <input
-                  type={f.type}
-                  placeholder={f.placeholder}
-                  value={data?.[f.name]}
-                  onChange={e => setData({ ...data, [`${f.name}`]: e.target.value })}
-                  className="form-input border-0 focus:ring-0 rounded-lg"
-                />
+                f.type === 'textarea' ?
+                  <textarea
+                    type="text"
+                    rows="5"
+                    placeholder={f.placeholder}
+                    value={data?.[f.name]}
+                    onChange={e => setData({ ...data, [`${f.name}`]: e.target.value })}
+                    className="form-textarea border-0 focus:ring-0 rounded-lg"
+                  />
+                  :
+                  <input
+                    type={f.type}
+                    placeholder={f.placeholder}
+                    value={data?.[f.name]}
+                    onChange={e => setData({ ...data, [`${f.name}`]: e.target.value })}
+                    className="form-input border-0 focus:ring-0 rounded-lg"
+                  />
             }
           </div>
         ))}
       </div>}
       onCancel={() => reset()}
+      confirmDisabled={!hasChanged}
       onConfirm={() => {
         if (onChange) {
           onChange(data)
@@ -103,7 +120,6 @@ export default ({
       }}
       confirmButtonTitle="Apply"
       onClose={() => reset()}
-      noButtons={!hasChanged}
     />
   )
 }

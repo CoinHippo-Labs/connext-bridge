@@ -34,6 +34,7 @@ import { BALANCES_DATA } from '../../reducers/types'
 const FEE_ESTIMATE_COOLDOWN = Number(process.env.NEXT_PUBLIC_FEE_ESTIMATE_COOLDOWN) || 30
 const DEFAULT_OPTIONS = {
   to: '',
+  infiniteApprove: true,
   callData: '',
 }
 
@@ -359,7 +360,7 @@ export default () => {
       const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
       const decimals = source_contract_data?.contract_decimals || 18
       const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
-      const { to, callData } = { ...options }
+      const { to, infiniteApprove, callData } = { ...options }
       const xcallParams = {
         params: {
           to: to || address,
@@ -372,7 +373,7 @@ export default () => {
         relayerFee: '0',
       }
       let failed = false
-      const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(xcallParams.params.originDomain, xcallParams.transactingAssetId, xcallParams.amount, true)
+      const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(xcallParams.params.originDomain, xcallParams.transactingAssetId, xcallParams.amount, infiniteApprove)
       if (approve_request) {
         setApproving(true)
         try {
