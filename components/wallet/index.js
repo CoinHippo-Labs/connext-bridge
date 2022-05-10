@@ -290,7 +290,7 @@ export default function Wallet({
   return !hidden && (
     <>
       {web3_provider ?
-        !mainController && connectChainId ?
+        !mainController && connectChainId && connectChainId !== chain_id ?
           <button
             disabled={disabled}
             onClick={() => {
