@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import Web3 from 'web3'
+import { providers } from 'ethers'
 
 import Image from '../image'
-import { CHAIN_ID } from '../../reducers/types'
+import { WALLET_DATA, CHAIN_ID } from '../../reducers/types'
 
 export default ({ token_data }) => {
   const dispatch = useDispatch()
-  const { chains, _chain_id } = useSelector(state => ({ chains: state.chains, _chain_id: state.chain_id }), shallowEqual)
+  const { chains, wallet, _chain_id } = useSelector(state => ({ chains: state.chains, wallet: state.wallet, _chain_id: state.chain_id }), shallowEqual)
   const { chains_data } = { ...chains }
+  const { wallet_data } = { ...wallet }
+  const { provider } = { ...wallet_data }
   const { chain_id } = { ..._chain_id }
 
   const [web3, setWeb3] = useState(null)
@@ -29,7 +32,20 @@ export default ({ token_data }) => {
               type: CHAIN_ID,
               value: chainId,
             })
-          } catch (error) {}
+
+            const web3Provider = new providers.Web3Provider(provider)
+            const signer = web3Provider.getSigner()
+            dispatch({
+              type: WALLET_DATA,
+              value: {
+                chain_id: chainId,
+                web3_provider: web3Provider,
+                signer,
+              },
+            })
+          } catch (error) {
+            console.log(error)
+          }
         }
       } catch (error) {}
     }
