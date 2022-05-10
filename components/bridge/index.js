@@ -373,10 +373,10 @@ export default () => {
         relayerFee: '0',
       }
       let failed = false
-      const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(xcallParams.params.originDomain, xcallParams.transactingAssetId, xcallParams.amount, infiniteApprove)
-      if (approve_request) {
-        setApproving(true)
-        try {
+      try {
+        const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(xcallParams.params.originDomain, xcallParams.transactingAssetId, xcallParams.amount, infiniteApprove)
+        if (approve_request) {
+          setApproving(true)
           const approve_response = await signer.sendTransaction(approve_request)
           const tx_hash = approve_response?.hash
           setApproveResponse({ status: 'pending', message: `Wait for ${source_symbol} approval`, tx_hash })
@@ -389,16 +389,16 @@ export default () => {
             }
           )
           failed = !approve_receipt?.status
-        } catch (error) {
-          setApproveResponse({ status: 'failed', message: error?.data?.message || error?.message })
-          failed = true
+          setApproving(false)
         }
-        setApproving(false)
+      } catch (error) {
+        setApproveResponse({ status: 'failed', message: error?.data?.message || error?.message })
+        failed = true
       }
       if (!failed) {
-        const xcall_request = await sdk.nxtpSdkBase.xcall(xcallParams)
-        if (xcall_request) {
-          try {
+        try {
+          const xcall_request = await sdk.nxtpSdkBase.xcall(xcallParams)
+          if (xcall_request) {
             const xcall_response = await signer.sendTransaction(xcall_request)
             const tx_hash = xcall_response?.hash
             const xcall_receipt = await signer.provider.waitForTransaction(tx_hash)
@@ -411,10 +411,10 @@ export default () => {
               }
             )
             failed = !xcall_receipt?.status
-          } catch (error) {
-            setXcallResponse({ status: 'failed', message: error?.data?.message || error?.message })
-            failed = true
           }
+        } catch (error) {
+          setXcallResponse({ status: 'failed', message: error?.data?.message || error?.message })
+          failed = true
         }
       }
       if (failed) {
