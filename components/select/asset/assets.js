@@ -2,7 +2,7 @@ import { Image } from 'react-image'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 
-import { number_format } from '../../../lib/utils'
+import { number_format, equals_ignore_case } from '../../../lib/utils'
 
 export default ({ value, inputSearch, onSelect, chain }) => {
   const { chains, assets, balances } = useSelector(state => ({ chains: state.chains, assets: state.assets, balances: state.balances }), shallowEqual)
@@ -37,7 +37,7 @@ export default ({ value, inputSearch, onSelect, chain }) => {
         const className = `dropdown-item ${a.disabled ? 'cursor-not-allowed' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer'} rounded-lg flex items-center justify-between p-2`
         const contract_data = a.contracts?.find(c => c?.chain_id === chain_id)
         const image = contract_data?.image || a.image
-        const balance = balances_data?.[chain_id]?.find(b => b?.contract_address?.toLowerCase() === contract_data?.contract_address?.toLowerCase())
+        const balance = balances_data?.[chain_id]?.find(b => equals_ignore_case(b?.contract_address, contract_data?.contract_address))
         const amount = balance && Number(balance.amount)
         const item = (
           <div className="flex items-center space-x-2">

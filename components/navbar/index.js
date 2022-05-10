@@ -18,7 +18,7 @@ import Copy from '../copy'
 import { announcement as getAnnouncement, chains as getChains, assets as getAssets } from '../../lib/api/config'
 import { tokens as getTokens } from '../../lib/api/tokens'
 import { ens as getEns } from '../../lib/api/ens'
-import { ellipse } from '../../lib/utils'
+import { ellipse, equals_ignore_case } from '../../lib/utils'
 import { ANNOUNCEMENT_DATA, CHAINS_DATA, ASSETS_DATA, ENS_DATA, ASSET_BALANCES_DATA, SDK, RPCS } from '../../reducers/types'
 
 export default function Navbar() {
@@ -94,7 +94,7 @@ export default function Navbar() {
               if (addresses.length > 0) {
                 const response = await getTokens({ chain_id, addresses })
                 response?.forEach(t => {
-                  const asset_index = assets_data.findIndex(a => a?.id && a.contracts?.findIndex(c => c?.chain_id === t?.chain_id && c.contract_address?.toLowerCase() === t?.contract_address?.toLowerCase()) > -1)
+                  const asset_index = assets_data.findIndex(a => a?.id && a.contracts?.findIndex(c => c?.chain_id === t?.chain_id && equals_ignore_case(c.contract_address, t?.contract_address)) > -1)
                   if (asset_index > -1) {
                     const asset = assets_data[asset_index]
                     asset.price = t?.price || asset.price

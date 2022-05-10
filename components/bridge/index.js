@@ -28,7 +28,7 @@ import Copy from '../copy'
 import meta from '../../lib/meta'
 import { chainName } from '../../lib/object/chain'
 import { currency_symbol } from '../../lib/object/currency'
-import { params_to_obj, number_format, ellipse, loader_color } from '../../lib/utils'
+import { params_to_obj, number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
 const FEE_ESTIMATE_COOLDOWN = Number(process.env.NEXT_PUBLIC_FEE_ESTIMATE_COOLDOWN) || 30
@@ -83,7 +83,7 @@ export default () => {
       const source_chain_data = chains_data?.find(c => c?.id === source_chain)
       const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
       const asset = paths[0] !== 'from' ? paths[0] : null
-      const asset_data = assets_data?.find(a => a?.id === asset || a?.symbol?.toLowerCase() === asset)
+      const asset_data = assets_data?.find(a => a?.id === asset || equals_ignore_case(a?.symbol, asset))
       if (source_chain_data) {
         bridge.source_chain = source_chain
         updated = true
@@ -434,10 +434,10 @@ export default () => {
   const destination_asset_data = assets_data?.find(a => a?.id === asset)
   const destination_contract_data = destination_asset_data?.contracts?.find(c => c?.chain_id === destination_chain_data?.chain_id)  
 
-  const source_balance = balances_data?.[source_chain_data?.chain_id]?.find(b => b?.contract_address?.toLowerCase() === source_contract_data?.contract_address?.toLowerCase())
+  const source_balance = balances_data?.[source_chain_data?.chain_id]?.find(b => equals_ignore_case(b?.contract_address, source_contract_data?.contract_address))
   const source_amount = source_balance && Number(source_balance.amount)
   const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
-  const destination_balance = balances_data?.[destination_chain_data?.chain_id]?.find(b => b?.contract_address?.toLowerCase() === destination_contract_data?.contract_address?.toLowerCase())
+  const destination_balance = balances_data?.[destination_chain_data?.chain_id]?.find(b => equals_ignore_case(b?.contract_address, destination_contract_data?.contract_address))
   const destination_amount = destination_balance && Number(destination_balance.amount)
   const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol
 
@@ -446,7 +446,7 @@ export default () => {
   const total_fee = fee && (relayer_fee + router_fee)
   const fee_native_token = source_chain_data?.provider_params?.[0]?.nativeCurrency
 
-  let liquidity_amount = asset_balances_data?.find(a => a?.asset?.id?.toLowerCase() === destination_contract_data?.contract_address?.toLowerCase())?.amount
+  let liquidity_amount = asset_balances_data?.find(a => equals_ignore_case(a?.asset?.id, destination_contract_data?.contract_address))?.amount
   liquidity_amount = liquidity_amount && utils.formatUnits(BigNumber.from(liquidity_amount), destination_contract_data?.contract_decimals || 18)
   const min_amount = fee ? total_fee : 0.000001
   const max_amount = typeof liquidity_amount === 'number' ?
