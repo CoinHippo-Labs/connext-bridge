@@ -177,6 +177,7 @@ export default function Navbar() {
             signerAddress: address || EthersWallet.createRandom().address,
             logLevel: 'info',
             network: process.env.NEXT_PUBLIC_ENVIRONMENT,
+            environment: 'staging',
           }),
         })
       }

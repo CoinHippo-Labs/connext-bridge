@@ -227,7 +227,7 @@ export default () => {
   // estimate trigger
   useEffect(() => {
     let _controller
-    if (estimateTrigger && !calling && !approving) {
+    if (estimateTrigger && !calling && !approving && !xcallResponse && !approveResponse) {
       controller?.abort()
       _controller = new AbortController()
       setController(_controller)
@@ -377,6 +377,7 @@ export default () => {
         relayerFee: '0',
       }
       let failed = false
+console.log('signer address', await signer?.getAddress())
       try {
         const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(xcallParams.params.originDomain, xcallParams.transactingAssetId, xcallParams.amount, infiniteApprove)
         if (approve_request) {
@@ -411,7 +412,7 @@ export default () => {
             failed = !xcall_receipt?.status
             setXcallResponse({
               status: failed ? 'failed' : 'success',
-              message: failed ? `Failed to xcall ${source_symbol}` : `xCall ${source_symbol} successful`,
+              message: failed ? `Failed to xcall ${source_symbol}` : `${source_symbol} transfer detected, waiting for execution.`,
               tx_hash,
             })
           }
@@ -948,15 +949,15 @@ export default () => {
                         [xcallResponse || approveResponse].map((r, i) => (
                           <Alert
                             key={i}
-                            color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                            color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? xcallResponse ? 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
                             icon={r.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : r.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
                             closeDisabled={true}
                             rounded={true}
                             className="rounded-xl p-4.5"
                           >
                             <div className="flex items-center justify-between space-x-2">
-                              <span className="break-words">
-                                {r.message}
+                              <span className="break-all">
+                                {ellipse(r.message, 128)}
                               </span>
                               <div className="flex items-center space-x-2">
                                 {r.status === 'failed' && r.message && (
@@ -977,7 +978,7 @@ export default () => {
                                   r.status === 'success' ?
                                     <button
                                       onClick={() => reset()}
-                                      className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                                      className={`${xcallResponse ? 'bg-yellow-500 dark:bg-yellow-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
                                     >
                                       <MdClose size={20} />
                                     </button>
