@@ -7,7 +7,7 @@ import { BigNumber, Contract, constants, utils } from 'ethers'
 import { TailSpin, Oval } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
-import { MdRefresh } from 'react-icons/md'
+import { MdRefresh, MdClose } from 'react-icons/md'
 import { BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
 
 import Announcement from '../announcement'
@@ -16,7 +16,7 @@ import GasPrice from '../gas-price'
 import SelectChain from '../select/chain'
 import SelectAsset from '../select/asset'
 import Balance from '../balance'
-import TransferStatus from '../transfer-status'
+import LatestTransfers from '../latest-transfers'
 import Faucet from '../faucet'
 import Image from '../image'
 import EnsProfile from '../ens-profile'
@@ -69,6 +69,8 @@ export default () => {
   const [xcall, setXcall] = useState(null)
   const [calling, setCalling] = useState(null)
   const [xcallResponse, setXcallResponse] = useState(null)
+
+  const [transfersTrigger, setTransfersTrigger] = useState(null)
 
   // get bridge from path
   useEffect(() => {
@@ -301,6 +303,8 @@ export default () => {
     setCalling(null)
     setXcallResponse(null)
 
+    setTransfersTrigger(moment().valueOf())
+
     const { source_chain, destination_chain } = { ...bridge }
     getBalances(source_chain)
     getBalances(destination_chain)
@@ -404,14 +408,12 @@ export default () => {
             const tx_hash = xcall_response?.hash
             const xcall_receipt = await signer.provider.waitForTransaction(tx_hash)
             setXcall(xcall_receipt)
-            setXcallResponse(xcall_receipt?.status ?
-              null : {
-                status: 'failed',
-                message: `Failed to xcall ${source_symbol}`,
-                tx_hash,
-              }
-            )
             failed = !xcall_receipt?.status
+            setXcallResponse({
+              status: failed ? 'failed' : 'success',
+              message: failed ? `Failed to xcall ${source_symbol}` : `xCall ${source_symbol} successful`,
+              tx_hash,
+            })
           }
         } catch (error) {
           setXcallResponse({ status: 'failed', message: error?.data?.message || error?.message })
@@ -440,6 +442,7 @@ export default () => {
   const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
   const destination_balance = balances_data?.[destination_chain_data?.chain_id]?.find(b => equals_ignore_case(b?.contract_address, destination_contract_data?.contract_address))
   const destination_amount = destination_balance && Number(destination_balance.amount)
+  const destination_decimals = destination_contract_data?.contract_decimals || 18
   const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol
 
   const relayer_fee = fee && (fee.relayer || 0)
@@ -447,13 +450,9 @@ export default () => {
   const total_fee = fee && (relayer_fee + router_fee)
   const fee_native_token = source_chain_data?.provider_params?.[0]?.nativeCurrency
 
-  let liquidity_amount = asset_balances_data?.[destination_chain_data?.chain_id]?.find(a => equals_ignore_case(a?.asset_data?.id, destination_contract_data?.contract_address))?.amount
-  liquidity_amount = liquidity_amount && utils.formatUnits(BigNumber.from(liquidity_amount), destination_contract_data?.contract_decimals || 18)
-  const min_amount = fee ? total_fee : 0.000001
-  const max_amount = typeof liquidity_amount === 'number' ?
-    liquidity_amount > source_amount ?
-      source_amount : liquidity_amount
-      : source_amount
+  const liquidity_amount = _.sum(asset_balances_data?.[destination_chain_data?.chain_id]?.filter(a => equals_ignore_case(a?.adopted, destination_contract_data?.contract_address))?.map(a => Number(utils.formatUnits(BigNumber.from(a?.amount || '0'), destination_decimals))) || [])
+  const min_amount = fee ? total_fee : 0
+  const max_amount = liquidity_amount > source_amount ? source_amount : liquidity_amount
 
   const wrong_chain = source_chain_data && chain_id !== source_chain_data.chain_id && !xcall
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
@@ -797,12 +796,13 @@ export default () => {
                     </span>
                   </Wallet>
                   :
-                  false && !xcall && (amount > liquidity_amount || amount > source_amount) ?
+                  !xcall && (amount > liquidity_amount || amount > source_amount) ?
                     <Alert
                       color="bg-red-400 dark:bg-red-500 text-white text-base"
                       icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
                       closeDisabled={true}
                       rounded={true}
+                      className="rounded-xl p-4.5"
                     >
                       <span>
                         {amount > liquidity_amount ?
@@ -869,7 +869,7 @@ export default () => {
                               fallback={recipient_address && (
                                 <Copy
                                   value={recipient_address}
-                                  title={<span className="text-sm text-slate-400 dark:text-slate-200">
+                                  title={<span className="text-slate-400 dark:text-slate-200 text-sm">
                                     <span className="xl:hidden">
                                       {ellipse(recipient_address, 8)}
                                     </span>
@@ -883,7 +883,7 @@ export default () => {
                             />
                           </div>
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base">
+                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
                               Amount
                               <span className="hidden sm:block">:</span>
                             </div>
@@ -943,36 +943,51 @@ export default () => {
                         confirmButtonClassName="w-full btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white text-base sm:text-lg text-center"
                       />
                       :
-                      !xcall && (xcallResponse || approveResponse) ?
+                      (xcallResponse || (!xcall && approveResponse)) && (
                         [xcallResponse || approveResponse].map((r, i) => (
                           <Alert
+                            key={i}
                             color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
                             icon={r.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : r.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
                             closeDisabled={true}
                             rounded={true}
+                            className="rounded-xl p-4.5"
                           >
                             <div className="flex items-center justify-between space-x-2">
                               <span className="break-words">
                                 {r.message}
                               </span>
-                              {r.status === 'failed' && (
-                                <button
-                                  onClick={() => setEstimateTrigger(moment().valueOf())}
-                                  className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                                >
-                                  <MdRefresh size={20} />
-                                </button>
-                              )}
+                              <div className="flex items-center space-x-2">
+                                {r.status === 'failed' && r.message && (
+                                  <Copy
+                                    value={r.message}
+                                    size={24}
+                                    className="cursor-pointer text-slate-200 hover:text-white"
+                                  />
+                                )}
+                                {r.status === 'failed' ?
+                                  <button
+                                    onClick={() => setEstimateTrigger(moment().valueOf())}
+                                    className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
+                                  >
+                                    <MdRefresh size={20} />
+                                  </button>
+                                  :
+                                  r.status === 'success' ?
+                                    <button
+                                      onClick={() => reset()}
+                                      className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                                    >
+                                      <MdClose size={20} />
+                                    </button>
+                                    :
+                                    null
+                                }
+                              </div>
                             </div>
                           </Alert>
                         ))
-                        :
-                        xcall && (
-                          <TransferStatus
-                            data={xcall}
-                            onClose={() => reset()}
-                          />
-                        )
+                      )
                 :
                 web3_provider ?
                   <button
@@ -999,7 +1014,11 @@ export default () => {
           )}
         </div>
       </div>
-      <div className="col-span-1 lg:col-span-2 mb-4" />
+      <div className="col-span-1 lg:col-span-2">
+        <LatestTransfers
+          trigger={transfersTrigger}
+        />
+      </div>
     </div>
   )
 }

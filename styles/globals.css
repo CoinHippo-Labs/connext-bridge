@@ -172,6 +172,10 @@ body {
   font-size: .5rem;
 }
 
+.p-4\.5 {
+  padding: 1.125rem !important;
+}
+
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
