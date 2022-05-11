@@ -149,7 +149,7 @@ export default ({ data }) => {
           }
         </div>
         <LightSpeed left>
-          <div className="flex flex-col items-end">
+          <div className="flex flex-col items-end" style={{ minWidth: '4rem' }}>
             {destination_amount ?
               <span className="font-mono font-bold">
                 {number_format(destination_amount, '0,0.000000', true)}
@@ -179,7 +179,7 @@ export default ({ data }) => {
           </div>
         </LightSpeed>
       </div>
-      {to && to !== address && (
+      {to && !equals_ignore_case(to, address) && (
         <div className="flex items-center justify-between space-x-2">
           <span className="text-sm font-semibold">
             To:
