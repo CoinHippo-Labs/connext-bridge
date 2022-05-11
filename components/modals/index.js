@@ -14,6 +14,7 @@ export default function Modal({
   title,
   icon,
   body,
+  noCancelOnClickOutside = false,
   cancelDisabled = false,
   onCancel,
   cancelButtonTitle,
@@ -57,8 +58,10 @@ export default function Modal({
         }
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    if (!noCancelOnClickOutside) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
   }, [modalRef, open, cancelDisabled])
 
   useEffect(() => {

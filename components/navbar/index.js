@@ -182,7 +182,26 @@ export default function Navbar() {
       }
     }
     init()
-  }, [chains_data, assets_data, address])
+  }, [chains_data, assets_data])
+
+  // sdk
+  useEffect(() => {
+    const update = async () => {
+      if (sdk && address) {
+        if (sdk.nxtpSdkBase) {
+          await sdk.nxtpSdkBase.changeSignerAddress(address)
+        }
+        if (sdk.nxtpSdkRouter) {
+          await sdk.nxtpSdkRouter.changeSignerAddress(address)
+        }
+        dispatch({
+          type: SDK,
+          value: sdk,
+        })
+      }
+    }
+    update()
+  }, [address])
 
   // assets balances
   useEffect(() => {

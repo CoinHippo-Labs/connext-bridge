@@ -22,7 +22,7 @@ export default ({ trigger }) => {
     const getData = async () => {
       if (sdk && address) {
         try {
-          const response = await sdk.nxtpSdkUtils.getTransfersByUser({ user: address })
+          const response = await sdk.nxtpSdkUtils.getTransfersByUser({ userAddress: address })
           setTransfers(_.orderBy(response || [], ['xcall_timestamp'], ['desc']))
         } catch (error) {
           setTransfers(null)
