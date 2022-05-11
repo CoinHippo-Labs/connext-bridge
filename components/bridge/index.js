@@ -641,100 +641,98 @@ export default () => {
                   </div>
                 </div>
               </div>
-              {asset && (
-                <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6 sm:ml-3">
-                  <div className="sm:col-span-2 flex items-center justify-center sm:justify-start space-x-2.5">
-                    <span className="text-slate-400 dark:text-white text-lg font-semibold">
-                      Amount
-                    </span>
-                    {address && checkSupport() && source_balance && (
-                      <Popover
-                        placement="bottom"
-                        disabled={disabled}
-                        onClick={() => {
-                          setBridge({
-                            ...bridge,
-                            amount: max_amount,
-                          })
-                        }}
-                        title={<div className="flex items-center justify-between space-x-1">
-                          <span className="font-bold">
-                            {source_symbol}
-                          </span>
-                          <span className="font-semibold">
-                            Transfers size
-                          </span>
-                        </div>}
-                        content={<div className="flex flex-col space-y-1">
-                          <div className="flex items-center justify-between space-x-2.5">
-                            <span className="font-medium">
-                              Balance:
-                            </span>
-                            <span className="font-semibold">
-                              {typeof source_amount === 'number' ?
-                                number_format(source_amount, source_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
-                              }
-                            </span>
-                          </div>
-                          <div className="flex items-start justify-between space-x-2.5 pb-1">
-                            <span className="font-medium">
-                              Liquidity:
-                            </span>
-                            <span className="font-semibold">
-                              {typeof liquidity_amount === 'number' ?
-                                number_format(liquidity_amount, liquidity_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
-                              }
-                            </span>
-                          </div>
-                          <div className="border-t flex items-center justify-between space-x-2.5 pt-2">
-                            <span className="font-semibold">
-                              Min:
-                            </span>
-                            <span className="font-semibold">
-                              {typeof min_amount === 'number' ?
-                                number_format(min_amount, min_amount > 10 ? '0,0.00' : '0,0.000000', true) : 'n/a'
-                              }
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between space-x-2.5">
-                            <span className="font-semibold">
-                              Max:
-                            </span>
-                            <span className="font-semibold">
-                              {typeof max_amount === 'number' ?
-                                number_format(max_amount, max_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
-                              }
-                            </span>
-                          </div>
-                        </div>}
-                        className="bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-base font-semibold py-0.5 px-2.5"
-                        titleClassName="normal-case py-1.5"
-                      >
-                        Max
-                      </Popover>
-                    )}
-                  </div>
-                  <div className="sm:col-span-3 flex items-center justify-center sm:justify-end">
-                    <DebounceInput
-                      debounceTimeout={300}
-                      size="small"
-                      type="number"
-                      placeholder="0.00"
+              <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6 sm:ml-3">
+                <div className="sm:col-span-2 flex items-center justify-center sm:justify-start space-x-2.5">
+                  <span className="text-slate-400 dark:text-white text-lg font-semibold">
+                    Amount
+                  </span>
+                  {address && checkSupport() && source_balance && (
+                    <Popover
+                      placement="bottom"
                       disabled={disabled}
-                      value={typeof amount === 'number' && amount >= 0 ? amount : ''}
-                      onChange={e => {
-                        const _amount = e.target.value < 0 ? 0 : e.target.value
+                      onClick={() => {
                         setBridge({
                           ...bridge,
-                          amount: _amount && !isNaN(_amount) ? Number(_amount) : _amount,
+                          amount: max_amount,
                         })
                       }}
-                      onWheel={e => e.target.blur()}
-                      className={`w-48 bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl font-mono text-lg font-semibold text-right py-2 px-3`}
-                    />
-                  </div>
+                      title={<div className="flex items-center justify-between space-x-1">
+                        <span className="font-bold">
+                          {source_symbol}
+                        </span>
+                        <span className="font-semibold">
+                          Transfers size
+                        </span>
+                      </div>}
+                      content={<div className="flex flex-col space-y-1">
+                        <div className="flex items-center justify-between space-x-2.5">
+                          <span className="font-medium">
+                            Balance:
+                          </span>
+                          <span className="font-semibold">
+                            {typeof source_amount === 'number' ?
+                              number_format(source_amount, source_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
+                            }
+                          </span>
+                        </div>
+                        <div className="flex items-start justify-between space-x-2.5 pb-1">
+                          <span className="font-medium">
+                            Liquidity:
+                          </span>
+                          <span className="font-semibold">
+                            {typeof liquidity_amount === 'number' ?
+                              number_format(liquidity_amount, liquidity_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
+                            }
+                          </span>
+                        </div>
+                        <div className="border-t flex items-center justify-between space-x-2.5 pt-2">
+                          <span className="font-semibold">
+                            Min:
+                          </span>
+                          <span className="font-semibold">
+                            {typeof min_amount === 'number' ?
+                              number_format(min_amount, min_amount > 10 ? '0,0.00' : '0,0.000000', true) : 'n/a'
+                            }
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between space-x-2.5">
+                          <span className="font-semibold">
+                            Max:
+                          </span>
+                          <span className="font-semibold">
+                            {typeof max_amount === 'number' ?
+                              number_format(max_amount, max_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
+                            }
+                          </span>
+                        </div>
+                      </div>}
+                      className="bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-base font-semibold py-0.5 px-2.5"
+                      titleClassName="normal-case py-1.5"
+                    >
+                      Max
+                    </Popover>
+                  )}
                 </div>
-              )}
+                <div className="sm:col-span-3 flex items-center justify-center sm:justify-end">
+                  <DebounceInput
+                    debounceTimeout={300}
+                    size="small"
+                    type="number"
+                    placeholder="0.00"
+                    disabled={disabled || !asset}
+                    value={typeof amount === 'number' && amount >= 0 ? amount : ''}
+                    onChange={e => {
+                      const _amount = e.target.value < 0 ? 0 : e.target.value
+                      setBridge({
+                        ...bridge,
+                        amount: _amount && !isNaN(_amount) ? Number(_amount) : _amount,
+                      })
+                    }}
+                    onWheel={e => e.target.blur()}
+                    className={`w-48 bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl font-mono text-lg font-semibold text-right py-2 px-3`}
+                  />
+                </div>
+              </div>
               {checkSupport() && web3_provider && (feeEstimating || fee) && (
                 <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6 sm:mx-3">
                   <div className="sm:col-span-2 flex items-center justify-center sm:justify-start space-x-2">
@@ -796,7 +794,7 @@ export default () => {
                     </span>
                   </Wallet>
                   :
-                  !xcall && (amount > liquidity_amount || amount > source_amount) ?
+                  !xcall && (amount > liquidity_amount || amount > source_amount || amount < min_amount || amount <= 0) ?
                     <Alert
                       color="bg-red-400 dark:bg-red-500 text-white text-base"
                       icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
@@ -806,9 +804,12 @@ export default () => {
                     >
                       <span>
                         {amount > liquidity_amount ?
-                          'Amount is higher than the available transfer size.'
-                          :
-                          'Insufficient Funds'
+                          'Amount is higher than the available transfer size.' :
+                          amount > source_amount ?
+                            'Insufficient Funds' :
+                            amount < min_amount ?
+                              'The transfer amount cannot be less than the transfer fee.' :
+                              amount <= 0 ? 'The transfer amount cannot be equal or less than 0.' : ''
                         }
                       </span>
                     </Alert>
