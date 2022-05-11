@@ -377,7 +377,6 @@ export default () => {
         relayerFee: '0',
       }
       let failed = false
-console.log('signer address', await signer?.getAddress())
       try {
         const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(xcallParams.params.originDomain, xcallParams.transactingAssetId, xcallParams.amount, infiniteApprove)
         if (approve_request) {
