@@ -28,7 +28,7 @@ import Copy from '../copy'
 import meta from '../../lib/meta'
 import { chainName } from '../../lib/object/chain'
 import { currency_symbol } from '../../lib/object/currency'
-import { params_to_obj, number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
+import { params_to_obj, number_format, ellipse, equals_ignore_case, loader_color, sleep } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
 const FEE_ESTIMATE_COOLDOWN = Number(process.env.NEXT_PUBLIC_FEE_ESTIMATE_COOLDOWN) || 30
@@ -137,6 +137,8 @@ export default () => {
       router.push(`/${source_chain && destination_chain ? `${asset ? `${asset.toUpperCase()}-` : ''}from-${source_chain}-to-${destination_chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
     }
     setEstimateTrigger(moment().valueOf())
+    setApproveResponse(null)
+    setXcallResponse(null)
   }, [address, bridge])
 
   // update balances
@@ -425,6 +427,10 @@ export default () => {
       }
     }
     setCalling(false)
+    if (sdk && address) {
+      await sleep(2 * 1000)
+      setTransfersTrigger(moment().valueOf())
+    }
   }
 
   const headMeta = meta(asPath, null, chains_data, assets_data)
