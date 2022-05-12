@@ -136,7 +136,7 @@ export default ({ data }) => {
           </div>
         </LightSpeed>
         <div className="flex flex-col items-center">
-          {status === XTransferStatus.Executed ?
+          {status === XTransferStatus.Completed ?
             <a
               href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', execute_transaction_hash)}`}
               target="_blank"
