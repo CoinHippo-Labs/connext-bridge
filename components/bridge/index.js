@@ -1010,7 +1010,7 @@ export default () => {
               }
             </div>
           </div>
-          {['testnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT) && (
+          {['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) && (
             <Faucet />
           )}
         </div>

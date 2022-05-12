@@ -33,7 +33,7 @@ export default function Logo() {
             {process.env.NEXT_PUBLIC_APP_NAME}
           </div>
           <div className="max-w-min bg-blue-600 rounded whitespace-nowrap text-white pb-0.5 px-1.5 mt-0.5">
-            {process.env.NEXT_PUBLIC_ENVIRONMENT}
+            {process.env.NEXT_PUBLIC_NETWORK}
           </div>
         </div>
       </a>
