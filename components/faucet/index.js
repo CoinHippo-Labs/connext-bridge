@@ -6,6 +6,8 @@ import { RotatingSquare } from 'react-loader-spinner'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiChevronDown, BiChevronUp } from 'react-icons/bi'
 
 import SelectChain from '../select/chain'
+import Wallet from '../wallet'
+import Image from '../image'
 import Alert from '../alerts'
 import { number_format } from '../../lib/utils'
 
@@ -26,7 +28,7 @@ export default () => {
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { wallet_data } = { ...wallet }
-  const { chain_id, address, signer } = { ...wallet_data }
+  const { chain_id, provider, address, signer } = { ...wallet_data }
 
   const [collapse, setCollapse] = useState(true)
   const [data, setData] = useState(null)
@@ -83,6 +85,7 @@ export default () => {
   const asset_data = assets_data?.find(a => a?.id === TOKEN_ID)
 
   const hasAllFields = fields.length === fields.filter(f => data?.[f.name]).length
+  const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
   const disabled = minting
 
   return asset_data && (
@@ -150,24 +153,47 @@ export default () => {
               >
                 Cancel
               </button>
-              <button
-                disabled={disabled}
-                onClick={() => mint()}
-                className={`bg-blue-600 hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
-              >
-                {minting && (
-                  <RotatingSquare color="white" width="16" height="16" />
-                )}
-                <span>
-                  Faucet
-                </span>
-                <span className="font-bold">
-                  {number_format(FAUCET_AMOUNT, '0,0.00')}
-                </span>
-                <span>
-                  {asset_data.symbol}
-                </span>
-              </button>
+              {chain_data?.chain_id !== chain_id ?
+                <Wallet
+                  connectChainId={chain_data?.chain_id}
+                  className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
+                >
+                  <span className="mr-1 sm:mr-1.5">
+                    {is_walletconnect ? 'Reconnect' : 'Switch'} to
+                  </span>
+                  {chain_data?.image && (
+                    <Image
+                      src={chain_data.image}
+                      alt=""
+                      width={24}
+                      height={24}
+                      className="rounded-full"
+                    />
+                  )}
+                  <span className="font-semibold">
+                    {chain_data?.name}
+                  </span>
+                </Wallet>
+                :
+                <button
+                  disabled={disabled}
+                  onClick={() => mint()}
+                  className={`bg-blue-600 hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
+                >
+                  {minting && (
+                    <RotatingSquare color="white" width="16" height="16" />
+                  )}
+                  <span>
+                    Faucet
+                  </span>
+                  <span className="font-bold">
+                    {number_format(FAUCET_AMOUNT, '0,0.00')}
+                  </span>
+                  <span>
+                    {asset_data.symbol}
+                  </span>
+                </button>
+              }
             </div>
           )}
         </div>
