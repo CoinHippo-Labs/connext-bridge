@@ -138,6 +138,7 @@ export default () => {
     }
     setEstimateTrigger(moment().valueOf())
     setApproveResponse(null)
+    setXcall(null)
     setXcallResponse(null)
   }, [address, bridge])
 
@@ -241,25 +242,26 @@ export default () => {
   }, [estimateTrigger])
 
   const getBalances = chain => {
-    const getBalance = async (chain_id, contract) => {
+    const getBalance = async (chain_id, contract_data) => {
+      const contract_address = contract_data?.contract_address 
+      const decimals = contract_data?.contract_decimals || 18
+      const rpc = rpcs?.[chain_id]
       let balance
-      if (rpcs?.[chain_id] && contract?.contract_address) {
-        const rpc = rpcs[chain_id]
-        const contract_address = contract.contract_address
+      if (rpc && contract_address) {
         if (contract_address === constants.AddressZero) {
           balance = await rpc.getBalance(address)
         }
         else {
-          const c = new Contract(contract_address, ['function balanceOf(address owner) view returns (uint256)'], rpc)
-          balance = await c.balanceOf(address)
+          const contract = new Contract(contract_address, ['function balanceOf(address owner) view returns (uint256)'], rpc)
+          balance = await contract.balanceOf(address)
         }
       }
       dispatch({
         type: BALANCES_DATA,
         value: {
           [`${chain_id}`]: [{
-            ...contract,
-            amount: balance ? Number(utils.formatUnits(balance, contract?.contract_decimals || 18)) : null,
+            ...contract_data,
+            amount: balance ? Number(utils.formatUnits(balance, decimals)) : null,
           }],
         },
       })
@@ -284,7 +286,7 @@ export default () => {
   }
 
   const reset = async origin => {
-    const reset_bridge = origin !== 'address' || (address && xcall?.xcalledCaller?.toLowerCase() !== address.toLowerCase())
+    const reset_bridge = origin !== 'address'
     if (reset_bridge) {
       setBridge({
         ...bridge,
@@ -358,6 +360,7 @@ export default () => {
 
   const call = async () => {
     setCalling(true)
+    let success = false
     if (sdk) {
       const { source_chain, destination_chain, asset, amount } = { ...bridge }
       const source_chain_data = chains_data?.find(c => c?.id === source_chain)
@@ -416,6 +419,7 @@ export default () => {
               message: failed ? `Failed to xcall ${source_symbol}` : `${source_symbol} transfer detected, waiting for execution.`,
               tx_hash,
             })
+            success = true
           }
         } catch (error) {
           setXcallResponse({ status: 'failed', message: error?.data?.message || error?.message })
@@ -427,7 +431,7 @@ export default () => {
       }
     }
     setCalling(false)
-    if (sdk && address) {
+    if (sdk && address && success) {
       await sleep(2 * 1000)
       setTransfersTrigger(moment().valueOf())
     }

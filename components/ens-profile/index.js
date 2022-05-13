@@ -7,7 +7,11 @@ import { ens as getEns } from '../../lib/api/ens'
 import { ellipse } from '../../lib/utils'
 import { ENS_DATA } from '../../reducers/types'
 
-export default function ensProfile({ address, fallback }) {
+export default ({
+  address,
+  no_copy = false,
+  fallback,
+}) => {
   const dispatch = useDispatch()
   const { ens } = useSelector(state => ({ ens: state.ens }), shallowEqual)
   const { ens_data } = { ...ens }
@@ -30,7 +34,21 @@ export default function ensProfile({ address, fallback }) {
 
   address = address?.toLowerCase()
 
-  return ens_data?.[address]?.name ?
+  const ens_name = ens_data?.[address]?.name && (
+    <span
+      title={ens_data[address].name}
+      className="normal-case text-black dark:text-white text-base font-semibold"
+    >
+      <span className="xl:hidden">
+        {ellipse(ens_data[address].name, 12)}
+      </span>
+      <span className="hidden xl:block">
+        {ellipse(ens_data[address].name, 16)}
+      </span>
+    </span>
+  )
+
+  return ens_name ?
     <div className="flex items-center space-x-2">
       <Image
         src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${ens_data[address].name}`}
@@ -39,21 +57,15 @@ export default function ensProfile({ address, fallback }) {
         height={24}
         className="rounded-full"
       />
-      <Copy
-        value={ens_data[address].name}
-        title={<span
-          title={ens_data[address].name}
-          className="normal-case text-black dark:text-white text-base font-semibold"
-        >
-          <span className="xl:hidden">
-            {ellipse(ens_data[address].name, 12)}
-          </span>
-          <span className="hidden xl:block">
-            {ellipse(ens_data[address].name, 16)}
-          </span>
-        </span>}
-        size={18}
-      />
+      {no_copy ?
+        ens_name
+        :
+        <Copy
+          value={ens_data[address].name}
+          title={ens_name}
+          size={18}
+        />
+      }
     </div>
     :
     fallback
