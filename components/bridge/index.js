@@ -3,11 +3,12 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
+import { XTransferStatus } from '@connext/nxtp-utils'
 import { BigNumber, Contract, constants, utils } from 'ethers'
-import { TailSpin, Oval } from 'react-loader-spinner'
+import { TailSpin, Oval, Watch } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
-import { MdRefresh, MdClose } from 'react-icons/md'
+import { MdClose } from 'react-icons/md'
 import { BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
 
 import Announcement from '../announcement'
@@ -241,6 +242,45 @@ export default () => {
     }
   }, [estimateTrigger])
 
+  // check transfer status
+  useEffect(() => {
+    const update = async () => {
+      if (sdk && address && xcall) {
+        if (!xcall.transfer_id && xcall.transactionHash) {
+          try {
+            const response = await sdk.nxtpSdkUtils.getTransfersByUser({ userAddress: address })
+            const transfer = response?.find(t => equals_ignore_case(t?.xcall_transaction_hash, xcall.transactionHash))
+            if ([XTransferStatus.Executed, XTransferStatus.Completed].includes(transfer?.status)) {
+              setApproveResponse(null)
+              setXcall(null)
+              setXcallResponse(null)
+            }
+            else if (transfer?.transfer_id) {
+              setXcall({
+                ...xcall,
+                transfer_id: transfer.transfer_id,
+              })
+            }
+          } catch (error) {}
+        }
+        else if (xcall.transfer_id) {
+          const response = await sdk.nxtpSdkUtils.getTransferById(xcall.transfer_id)
+          const transfer = response?.find(t => equals_ignore_case(t?.transfer_id, xcall.transfer_id))
+          if ([XTransferStatus.Executed, XTransferStatus.Completed].includes(transfer?.status)) {
+            setApproveResponse(null)
+            setXcall(null)
+            setXcallResponse(null)
+          }
+        }
+      }
+    }
+    update()
+    const interval = setInterval(() => update(), 0.25 * 60 * 1000)
+    return () => {
+      clearInterval(interval)
+    }
+  }, [sdk, address, xcall])
+
   const getBalances = chain => {
     const getBalance = async (chain_id, contract_data) => {
       const contract_address = contract_data?.contract_address 
@@ -416,7 +456,7 @@ export default () => {
             failed = !xcall_receipt?.status
             setXcallResponse({
               status: failed ? 'failed' : 'success',
-              message: failed ? `Failed to xcall ${source_symbol}` : `${source_symbol} transfer detected, waiting for execution.`,
+              message: failed ? 'Failed to send transaction' : `${source_symbol} transfer detected, waiting for execution.`,
               tx_hash,
             })
             success = true
@@ -958,8 +998,16 @@ export default () => {
                         [xcallResponse || approveResponse].map((r, i) => (
                           <Alert
                             key={i}
-                            color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? xcallResponse ? 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
-                            icon={r.status === 'failed' ? <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : r.status === 'success' ? <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> : <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                            color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? xcallResponse ? 'bg-yellow-400 dark:bg-blue-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                            icon={r.status === 'failed' ?
+                              <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
+                              r.status === 'success' ?
+                                xcallResponse ?
+                                  <div className="mr-3">
+                                    <Watch color="white" width="20" height="20" />
+                                  </div> : <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
+                                <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />
+                            }
                             closeDisabled={true}
                             rounded={true}
                             className="rounded-xl p-4.5"
@@ -978,16 +1026,16 @@ export default () => {
                                 )}
                                 {r.status === 'failed' ?
                                   <button
-                                    onClick={() => setEstimateTrigger(moment().valueOf())}
+                                    onClick={() => reset()}
                                     className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                                   >
-                                    <MdRefresh size={20} />
+                                    <MdClose size={20} />
                                   </button>
                                   :
                                   r.status === 'success' ?
                                     <button
                                       onClick={() => reset()}
-                                      className={`${xcallResponse ? 'bg-yellow-500 dark:bg-yellow-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
+                                      className={`${xcallResponse ? 'bg-yellow-500 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
                                     >
                                       <MdClose size={20} />
                                     </button>
