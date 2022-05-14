@@ -2,7 +2,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import moment from 'moment'
 import { BigNumber, utils } from 'ethers'
 import { XTransferStatus } from '@connext/nxtp-utils'
-import { Bars, Rings } from 'react-loader-spinner'
+import { Bars, RotatingSquare } from 'react-loader-spinner'
 import LightSpeed from 'react-reveal/LightSpeed'
 import { TiArrowRight } from 'react-icons/ti'
 import { HiCheckCircle } from 'react-icons/hi'
@@ -50,12 +50,14 @@ export default ({ data }) => {
   const destination_asset_image = destination_contract_data?.image || destination_asset_data?.image
   const destination_amount = destination_transacting_amount && Number(utils.formatUnits(BigNumber.from(destination_transacting_amount.toString()), destination_decimals))
 
+  const pending = ![XTransferStatus.Executed, XTransferStatus.Completed].includes(status)
+
   return data && (
-    <div className="rounded-lg shadow dark:shadow-slate-500 p-4">
+    <div className={`rounded-xl ${pending ? 'border-2 border-blue-500 shadow shadow-blue-500' : 'border border-green-500 shadow shadow-green-500'} p-4`}>
       <div className="flex items-center justify-between space-x-2">
         <Copy
           value={transfer_id}
-          title={<span className="text-slate-400 dark:text-white text-sm">
+          title={<span className="text-slate-700 dark:text-slate-300 text-sm font-bold">
             <span className="sm:hidden">
               {ellipse(transfer_id, 12)}
             </span>
@@ -112,7 +114,7 @@ export default ({ data }) => {
                 {number_format(source_amount, '0,0.000000', true)}
               </span>
               :
-              <Rings color={loader_color(theme)} width="20" height="20" />
+              <RotatingSquare color={loader_color(theme)} width="20" height="20" />
             }
             <div className="flex items-center justify-center space-x-1">
               {source_asset_image && (
@@ -136,7 +138,7 @@ export default ({ data }) => {
           </div>
         </LightSpeed>
         <div className="flex flex-col items-center">
-          {[XTransferStatus.Executed, XTransferStatus.Completed].includes(status) ?
+          {!pending ?
             <a
               href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', execute_transaction_hash)}`}
               target="_blank"
@@ -145,7 +147,7 @@ export default ({ data }) => {
               <HiCheckCircle size={36} className="rounded-full shadow dark:shadow-white text-green-400 dark:text-white" />
             </a>
             :
-            <Bars color={loader_color(theme)} width="32" height="32" />
+            <Bars color={loader_color('light')} width="32" height="32" />
           }
         </div>
         <LightSpeed left>
@@ -155,7 +157,7 @@ export default ({ data }) => {
                 {number_format(destination_amount, '0,0.000000', true)}
               </span>
               :
-              <Rings color={loader_color(theme)} width="20" height="20" />
+              <RotatingSquare color={loader_color(theme)} width="20" height="20" />
             }
             <div className="flex items-center justify-center space-x-1">
               {destination_asset_image && (

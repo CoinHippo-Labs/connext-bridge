@@ -517,7 +517,7 @@ export default () => {
         <div className="mt-8">
           <Announcement />
         </div>
-        <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6 my-6">
+        <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6 my-6 mx-4">
           <div className="w-full max-w-lg space-y-4">
             <div className="flex items-center justify-between space-x-2">
               <div className="space-y-1">
@@ -563,7 +563,7 @@ export default () => {
                 />
               </div>
             </div>
-            <div className="rounded-2xl shadow dark:shadow-slate-500 space-y-6 p-6">
+            <div className="rounded-3xl shadow dark:shadow-slate-500 space-y-6 pt-8 pb-6 px-6">
               <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6">
                 <div className="sm:col-span-2 flex flex-col items-center sm:items-start">
                   <div className="w-48 flex sm:flex-col items-center justify-center space-x-1.5">
