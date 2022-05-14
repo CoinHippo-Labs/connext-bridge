@@ -2,7 +2,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import moment from 'moment'
 import { BigNumber, utils } from 'ethers'
 import { XTransferStatus } from '@connext/nxtp-utils'
-import { Bars, Puff } from 'react-loader-spinner'
+import { Bars, Rings } from 'react-loader-spinner'
 import LightSpeed from 'react-reveal/LightSpeed'
 import { TiArrowRight } from 'react-icons/ti'
 import { HiCheckCircle } from 'react-icons/hi'
@@ -112,7 +112,7 @@ export default ({ data }) => {
                 {number_format(source_amount, '0,0.000000', true)}
               </span>
               :
-              <Puff color={loader_color(theme)} width="20" height="20" />
+              <Rings color={loader_color(theme)} width="20" height="20" />
             }
             <div className="flex items-center justify-center space-x-1">
               {source_asset_image && (
@@ -155,7 +155,7 @@ export default ({ data }) => {
                 {number_format(destination_amount, '0,0.000000', true)}
               </span>
               :
-              <Puff color={loader_color(theme)} width="20" height="20" />
+              <Rings color={loader_color(theme)} width="20" height="20" />
             }
             <div className="flex items-center justify-center space-x-1">
               {destination_asset_image && (

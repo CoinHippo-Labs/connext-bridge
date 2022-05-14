@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
+import { XTransferStatus } from '@connext/nxtp-utils'
 import StackGrid from 'react-stack-grid'
 import { TiArrowRight } from 'react-icons/ti'
+import { BiChevronDown, BiChevronUp } from 'react-icons/bi'
 
 import TransferStatus from '../transfer-status'
+import { equals_ignore_case } from '../../lib/utils'
 
 const NUM_TRANSFER_DISPLAY = 3
 
@@ -16,6 +19,7 @@ export default ({ trigger }) => {
   const { address } = { ...wallet_data }
 
   const [transfers, setTransfers] = useState(null)
+  const [collapse, setCollapse] = useState(null)
   const [timer, setTimer] = useState(null)
 
   useEffect(() => {
@@ -23,6 +27,9 @@ export default ({ trigger }) => {
       if (sdk && address) {
         try {
           const response = await sdk.nxtpSdkUtils.getTransfersByUser({ userAddress: address })
+          if (response?.findIndex(t => transfers?.findIndex(_t => _t?.transfer_id) < 0 && ![XTransferStatus.Executed, XTransferStatus.Completed].includes(t?.status)) > -1) {
+            setCollapse(false)
+          }
           setTransfers(_.orderBy(response || [], ['xcall_timestamp'], ['desc']))
         } catch (error) {
           setTransfers(null)
@@ -58,32 +65,45 @@ export default ({ trigger }) => {
 
   return transfers?.length > 0 && (
     <div className="lg:max-w-xs lg:ml-auto">
-      <div className="uppercase text-sm font-bold text-center mb-2">
-        Latest Transfers
-      </div>
-      <StackGrid
-        columnWidth={252}
-        gutterWidth={16}
-        gutterHeight={16}
-        className="hidden sm:block max-w-xl mx-auto"
+      <button
+        onClick={() => setCollapse(!collapse)}
+        className={`w-full flex items-center justify-center ${collapse ? 'text-slate-300 hover:text-slate-800 dark:text-slate-700 hover:dark:text-slate-200 font-semibold' : 'font-bold'} space-x-1 mb-2.5`}
       >
-        {transfersComponent}
-      </StackGrid>
-      <div className="block sm:hidden space-y-3">
-        {transfersComponent}
-      </div>
-      {address && transfers.length > NUM_TRANSFER_DISPLAY && (
-        <a
-          href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${address}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center text-blue-500 dark:text-white mt-2"
-        >
-          <span className="font-semibold">
-            See more
-          </span>
-          <TiArrowRight size={18} className="transform -rotate-45 mt-0.5" />
-        </a>
+        <span className="text-sm">
+          Latest Transfers
+        </span>
+        {collapse ?
+          <BiChevronDown size={18} /> :
+          <BiChevronUp size={18} />
+        }
+      </button>
+      {!collapse && (
+        <>
+          <StackGrid
+            columnWidth={252}
+            gutterWidth={16}
+            gutterHeight={16}
+            className="hidden sm:block max-w-xl mx-auto"
+          >
+            {transfersComponent}
+          </StackGrid>
+          <div className="block sm:hidden space-y-3">
+            {transfersComponent}
+          </div>
+          {address && transfers.length > NUM_TRANSFER_DISPLAY && (
+            <a
+              href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center text-blue-500 dark:text-white mt-2.5"
+            >
+              <span className="font-semibold">
+                See more
+              </span>
+              <TiArrowRight size={18} className="transform -rotate-45 mt-0.5" />
+            </a>
+          )}
+        </>
       )}
     </div>
   )
