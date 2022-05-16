@@ -41,14 +41,14 @@ export default ({ data }) => {
   const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
   const source_decimals = source_contract_data?.contract_decimals || 18
   const source_asset_image = source_contract_data?.image || source_asset_data?.image
-  const source_amount = origin_transacting_amount && Number(utils.formatUnits(BigNumber.from(origin_transacting_amount.toString()), source_decimals))
+  const source_amount = origin_transacting_amount && Number(utils.formatUnits(BigNumber.from(BigInt(origin_transacting_amount).toString()), source_decimals))
   const destination_chain_data = chains_data?.find(c => c?.chain_id === Number(destination_chain))
   const destination_asset_data = assets_data?.find(a => a?.contracts?.findIndex(c => c?.chain_id === destination_chain_data?.chain_id && equals_ignore_case(c?.contract_address, destination_transacting_asset)) > -1)
   const destination_contract_data = destination_asset_data?.contracts?.find(c => c?.chain_id === destination_chain_data?.chain_id)
   const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol
   const destination_decimals = destination_contract_data?.contract_decimals || 18
   const destination_asset_image = destination_contract_data?.image || destination_asset_data?.image
-  const destination_amount = destination_transacting_amount && Number(utils.formatUnits(BigNumber.from(destination_transacting_amount.toString()), destination_decimals))
+  const destination_amount = destination_transacting_amount && Number(utils.formatUnits(BigNumber.from(BigInt(destination_transacting_amount).toString()), destination_decimals))
 
   const pending = ![XTransferStatus.Executed, XTransferStatus.Completed].includes(status)
 
