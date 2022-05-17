@@ -37,6 +37,13 @@ export default function App({ Component, pageProps }) {
         <meta name="msapplication-TileColor" content="#050707" />
         <meta name="msapplication-TileImage" content="/icons/mstile-150x150.png" />
         <meta name="theme-color" content="#050707" />
+        {['mainnet'].includes(process.env.NEXT_PUBLIC_NETWORK) && (
+          <script
+            defer
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon='{"token": "9d39c3893da043b496b4e2608df54643"}'
+          />
+        )}
       </Head>
       <Provider store={store}>
         <Layout>
