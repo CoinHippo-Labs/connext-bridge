@@ -5,6 +5,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import { XTransferStatus } from '@connext/nxtp-utils'
 import { BigNumber, Contract, constants, utils } from 'ethers'
+import Switch from 'react-switch'
 import { TailSpin, Oval, Watch } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
@@ -977,6 +978,20 @@ export default () => {
                               </div>
                             </div>
                           )}
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
+                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
+                              Infinite Approval
+                              <span className="hidden sm:block">:</span>
+                            </div>
+                            <Switch
+                              checked={typeof options?.infiniteApprove === 'boolean' ? options.infiniteApprove : false}
+                              onChange={() => setOptions({ ...options, infiniteApprove: !options?.infiniteApprove })}
+                              onColor="#3b82f6"
+                              onHandleColor="#f8fafc"
+                              offColor="#64748b"
+                              offHandleColor="#f8fafc"
+                            />
+                          </div>
                         </div>}
                         cancelDisabled={disabled}
                         cancelButtonClassName="hidden"
