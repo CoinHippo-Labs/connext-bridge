@@ -38,11 +38,35 @@ export default function App({ Component, pageProps }) {
         <meta name="msapplication-TileImage" content="/icons/mstile-150x150.png" />
         <meta name="theme-color" content="#050707" />
         {['mainnet'].includes(process.env.NEXT_PUBLIC_NETWORK) && (
-          <script
-            defer
-            src="https://static.cloudflareinsights.com/beacon.min.js"
-            data-cf-beacon='{"token": "9d39c3893da043b496b4e2608df54643"}'
-          />
+          <>
+            <script
+              defer
+              src="https://static.cloudflareinsights.com/beacon.min.js"
+              data-cf-beacon='{"token": "9d39c3893da043b496b4e2608df54643"}'
+            />
+            <script
+              defer
+              data-domain="connext.network"
+              src="https://plausible.io/js/plausible.js"
+            />
+            <script>
+              dangerouslySetInnerHTML={{
+                __html: `
+                  var _paq = window._paq = window._paq || [];
+                  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+                  _paq.push(['trackPageView']);
+                  _paq.push(['enableLinkTracking']);
+                  (function() {
+                    var u="https://connextnetwork.matomo.cloud/";
+                    _paq.push(['setTrackerUrl', u+'matomo.php']);
+                    _paq.push(['setSiteId', '1']);
+                    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+                    g.async=true; g.src='//cdn.matomo.cloud/connextnetwork.matomo.cloud/matomo.js'; s.parentNode.insertBefore(g,s);
+                  })();
+                `,
+              }}
+            </script>
+          </>
         )}
       </Head>
       <Provider store={store}>
