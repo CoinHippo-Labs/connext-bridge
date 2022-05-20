@@ -53,7 +53,9 @@ export default function App({ Component, pageProps }) {
               dangerouslySetInnerHTML={{
                 __html: `
                   var _paq = window._paq = window._paq || [];
-                  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+                  /* tracker methods like "setCustomDimension" should be called before "trackPageView" /
+                  _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
+                  _paq.push(["setCookieDomain", ".connext.network"]);
                   _paq.push(['trackPageView']);
                   _paq.push(['enableLinkTracking']);
                   (function() {
