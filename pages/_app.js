@@ -49,7 +49,7 @@ export default function App({ Component, pageProps }) {
               data-domain="connext.network"
               src="https://plausible.io/js/plausible.js"
             />
-            <script>
+            <script
               dangerouslySetInnerHTML={{
                 __html: `
                   var _paq = window._paq = window._paq || [];
@@ -65,7 +65,7 @@ export default function App({ Component, pageProps }) {
                   })();
                 `,
               }}
-            </script>
+            />
           </>
         )}
       </Head>
