@@ -32,7 +32,7 @@ export default function Navbar() {
   const { rpcs } = { ...rpc_providers }
   const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
-  const { default_chain_id, chain_id, web3_provider, address, signer } = { ...wallet_data }
+  const { default_chain_id, chain_id, provider, web3_provider, address, signer } = { ...wallet_data }
 
   const [hiddenStatus, setHiddenStatus] = useState(false)
 
@@ -202,7 +202,7 @@ export default function Navbar() {
       }
     }
     update()
-  }, [address])
+  }, [provider, web3_provider, address, signer])
 
   // assets balances
   useEffect(() => {
