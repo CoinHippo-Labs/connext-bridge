@@ -251,7 +251,7 @@ export default () => {
           try {
             const response = await sdk.nxtpSdkUtils.getTransfersByUser({ userAddress: address })
             const transfer = response?.find(t => equals_ignore_case(t?.xcall_transaction_hash, xcall.transactionHash))
-            if ([XTransferStatus.Executed, XTransferStatus.Completed].includes(transfer?.status)) {
+            if ([XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(transfer?.status)) {
               setApproveResponse(null)
               setXcall(null)
               setXcallResponse(null)
@@ -267,7 +267,7 @@ export default () => {
         else if (xcall.transfer_id) {
           const response = await sdk.nxtpSdkUtils.getTransferById(xcall.transfer_id)
           const transfer = response?.find(t => equals_ignore_case(t?.transfer_id, xcall.transfer_id))
-          if ([XTransferStatus.Executed, XTransferStatus.Completed].includes(transfer?.status)) {
+          if ([XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(transfer?.status)) {
             setApproveResponse(null)
             setXcall(null)
             setXcallResponse(null)
@@ -417,6 +417,8 @@ export default () => {
           callData: callData || '0x',
           originDomain: source_chain_data?.domain_id?.toString(),
           destinationDomain: destination_chain_data?.domain_id?.toString(),
+          callback: address,
+          recovery: address,
         },
         transactingAssetId: source_contract_data?.contract_address,
         amount: utils.parseUnits(amount?.toString() || '0', decimals).toString(),

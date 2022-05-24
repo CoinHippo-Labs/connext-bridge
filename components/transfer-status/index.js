@@ -50,7 +50,7 @@ export default ({ data }) => {
   const destination_asset_image = destination_contract_data?.image || destination_asset_data?.image
   const destination_amount = destination_transacting_amount && Number(utils.formatUnits(BigNumber.from(BigInt(destination_transacting_amount).toString()), destination_decimals))
 
-  const pending = ![XTransferStatus.Executed, XTransferStatus.Completed].includes(status)
+  const pending = ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(status)
 
   return data && (
     <div className={`rounded-xl ${pending ? 'border-2 border-blue-500 shadow shadow-blue-500' : 'border border-green-500 shadow shadow-green-500'} p-4`}>

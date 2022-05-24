@@ -27,7 +27,7 @@ export default ({ trigger }) => {
       if (sdk && address) {
         try {
           const response = await sdk.nxtpSdkUtils.getTransfersByUser({ userAddress: address })
-          if (response?.findIndex(t => transfers?.findIndex(_t => _t?.transfer_id) < 0 && ![XTransferStatus.Executed, XTransferStatus.Completed].includes(t?.status)) > -1) {
+          if (response?.findIndex(t => transfers?.findIndex(_t => _t?.transfer_id) < 0 && ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(t?.status)) > -1) {
             setCollapse(false)
           }
           setTransfers(_.orderBy(response || [], ['xcall_timestamp'], ['desc']))
