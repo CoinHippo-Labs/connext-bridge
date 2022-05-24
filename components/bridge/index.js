@@ -995,8 +995,8 @@ export default () => {
                           {amount > liquidity_amount && (
                             <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2">
                               <BiMessageEdit size={20} className="mt-0.5" />
-                              <span className="text-xs font-medium">
-                                Instant liquidity not available, transfer will complete in 30-60 minutes
+                              <span className="font-medium">
+                                Transfers may take up to a maximum of 30-60 mins
                               </span>
                             </div>
                           )}
