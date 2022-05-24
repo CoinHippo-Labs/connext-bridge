@@ -417,7 +417,7 @@ export default () => {
           callData: callData || '0x',
           originDomain: source_chain_data?.domain_id?.toString(),
           destinationDomain: destination_chain_data?.domain_id?.toString(),
-          callback: address,
+          callback: constants.AddressZero,
           recovery: address,
         },
         transactingAssetId: source_contract_data?.contract_address,
