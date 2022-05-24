@@ -10,7 +10,7 @@ import { TailSpin, Oval, Watch } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
-import { BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
+import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit } from 'react-icons/bi'
 
 import Announcement from '../announcement'
 import Options from './options'
@@ -505,7 +505,7 @@ export default () => {
 
   const liquidity_amount = _.sum(asset_balances_data?.[destination_chain_data?.chain_id]?.filter(a => equals_ignore_case(a?.adopted, destination_contract_data?.contract_address))?.map(a => Number(utils.formatUnits(BigNumber.from(a?.amount || '0'), destination_decimals))) || [])
   const min_amount = fee ? total_fee : 0
-  const max_amount = liquidity_amount > source_amount ? source_amount : liquidity_amount
+  const max_amount = source_amount
 
   const wrong_chain = source_chain_data && chain_id !== source_chain_data.chain_id && !xcall
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
@@ -847,7 +847,7 @@ export default () => {
                     </span>
                   </Wallet>
                   :
-                  !xcall && (amount > liquidity_amount || amount > source_amount || amount < min_amount || amount <= 0) ?
+                  !xcall && (amount > source_amount || amount < min_amount || amount <= 0) ?
                     <Alert
                       color="bg-red-400 dark:bg-red-500 text-white text-base"
                       icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
@@ -856,13 +856,11 @@ export default () => {
                       className="rounded-xl p-4.5"
                     >
                       <span>
-                        {amount > liquidity_amount ?
-                          'Amount is higher than the available transfer size.' :
-                          amount > source_amount ?
-                            'Insufficient Funds' :
-                            amount < min_amount ?
-                              'The transfer amount cannot be less than the transfer fee.' :
-                              amount <= 0 ? 'The transfer amount cannot be equal or less than 0.' : ''
+                        {amount > source_amount ?
+                          'Insufficient Funds' :
+                          amount < min_amount ?
+                            'The transfer amount cannot be less than the transfer fee.' :
+                            amount <= 0 ? 'The transfer amount cannot be equal or less than 0.' : ''
                         }
                       </span>
                     </Alert>
@@ -994,6 +992,14 @@ export default () => {
                               offHandleColor="#f8fafc"
                             />
                           </div>
+                          {amount > liquidity_amount && (
+                            <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2">
+                              <BiMessageEdit size={20} className="mt-0.5" />
+                              <span className="text-xs font-medium">
+                                Instant liquidity not available, transfer will complete in 30-60 minutes
+                              </span>
+                            </div>
+                          )}
                         </div>}
                         cancelDisabled={disabled}
                         cancelButtonClassName="hidden"
