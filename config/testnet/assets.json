@@ -6,17 +6,17 @@
     "is_stablecoin": true,
     "contracts": [
       {
-        "contract_address": "0xB7b1d3cC52E658922b2aF00c5729001ceA98142C",
+        "contract_address": "0x3FFc03F05D1869f493c7dbf913E636C6280e0ff9",
         "chain_id": 4,
         "contract_decimals": 18
       },
       {
-        "contract_address": "0xD426e23A6a9524101CDC017e01dDc3262B7aA65D",
+        "contract_address": "0x3FFc03F05D1869f493c7dbf913E636C6280e0ff9",
         "chain_id": 5,
         "contract_decimals": 18
       },
       {
-        "contract_address": "0xB5AabB55385bfBe31D627E2A717a7B189ddA4F8F",
+        "contract_address": "0x3FFc03F05D1869f493c7dbf913E636C6280e0ff9",
         "chain_id": 42,
         "contract_decimals": 18
       }
