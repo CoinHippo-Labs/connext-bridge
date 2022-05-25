@@ -24,7 +24,7 @@ export default () => {
     setUpdating(true)
     await setAnnouncement(
       {
-        data: announcementData?.trim().split('\n').join('<br>'),
+        data: data?.trim().split('\n').join('<br>'),
       },
       address && {
         username: new URL(process.env.NEXT_PUBLIC_SITE_URL)?.hostname,
