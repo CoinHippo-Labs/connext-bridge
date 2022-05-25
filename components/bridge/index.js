@@ -781,7 +781,12 @@ export default () => {
                     disabled={disabled || !asset}
                     value={typeof amount === 'number' && amount >= 0 ? amount : ''}
                     onChange={e => {
-                      const _amount = e.target.value < 0 ? 0 : e.target.value
+                      const regex = /^[0-9.\b]+$/
+                      let _amount
+                      if (e.target.value === '' || regex.test(e.target.value)) {
+                        _amount = e.target.value
+                      }
+                      _amount = _amount < 0 ? 0 : _amount
                       setBridge({
                         ...bridge,
                         amount: _amount && !isNaN(_amount) ? Number(_amount) : _amount,
