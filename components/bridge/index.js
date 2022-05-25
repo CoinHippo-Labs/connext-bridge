@@ -4,7 +4,7 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { XTransferStatus } from '@connext/nxtp-utils'
-import { BigNumber, Contract, constants, utils } from 'ethers'
+import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
 import Switch from 'react-switch'
 import { TailSpin, Oval, Watch } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
@@ -34,6 +34,7 @@ import { params_to_obj, number_format, ellipse, equals_ignore_case, loader_color
 import { BALANCES_DATA } from '../../reducers/types'
 
 const FEE_ESTIMATE_COOLDOWN = Number(process.env.NEXT_PUBLIC_FEE_ESTIMATE_COOLDOWN) || 30
+const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT) || 1
 const DEFAULT_OPTIONS = {
   to: '',
   infiniteApprove: true,
@@ -452,6 +453,11 @@ export default () => {
         try {
           const xcall_request = await sdk.nxtpSdkBase.xcall(xcallParams)
           if (xcall_request) {
+            let gas_limit = await signer.estimateGas(xcall_request)
+            if (gas_limit) {
+              gas_limit = FixedNumber.fromString(gas_limit.toString()).mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())).round(0).toString().replace('.0', '');
+              xcall_request.gasLimit = gas_limit
+            }
             const xcall_response = await signer.sendTransaction(xcall_request)
             const tx_hash = xcall_response?.hash
             const xcall_receipt = await signer.provider.waitForTransaction(tx_hash)
