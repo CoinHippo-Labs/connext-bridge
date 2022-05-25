@@ -249,21 +249,26 @@ export default () => {
     const update = async () => {
       if (sdk && address && xcall) {
         if (!xcall.transfer_id && xcall.transactionHash) {
+          let transfer
+          try {
+            const response = await sdk.nxtpSdkUtils.getTransferByTransactionHash(xcall.transactionHash)
+            transfer = response?.find(t => equals_ignore_case(t?.xcall_transaction_hash, xcall.transactionHash))
+          } catch (error) {}
           try {
             const response = await sdk.nxtpSdkUtils.getTransfersByUser({ userAddress: address })
-            const transfer = response?.find(t => equals_ignore_case(t?.xcall_transaction_hash, xcall.transactionHash))
-            if ([XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(transfer?.status)) {
-              setApproveResponse(null)
-              setXcall(null)
-              setXcallResponse(null)
-            }
-            else if (transfer?.transfer_id) {
-              setXcall({
-                ...xcall,
-                transfer_id: transfer.transfer_id,
-              })
-            }
+            transfer = response?.find(t => equals_ignore_case(t?.xcall_transaction_hash, xcall.transactionHash))
           } catch (error) {}
+          if ([XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(transfer?.status)) {
+            setApproveResponse(null)
+            setXcall(null)
+            setXcallResponse(null)
+          }
+          else if (transfer?.transfer_id) {
+            setXcall({
+              ...xcall,
+              transfer_id: transfer.transfer_id,
+            })
+          }
         }
         else if (xcall.transfer_id) {
           const response = await sdk.nxtpSdkUtils.getTransferById(xcall.transfer_id)
