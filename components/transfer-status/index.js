@@ -26,23 +26,26 @@ export default ({ data }) => {
     transfer_id,
     status,
     origin_chain,
+    origin_domain,
     origin_transacting_asset,
     origin_transacting_amount,
     destination_chain,
+    destination_domain,
     destination_transacting_asset,
     destination_transacting_amount,
     execute_transaction_hash,
     to,
+    force_slow,
     xcall_timestamp,
   } = { ...data }
-  const source_chain_data = chains_data?.find(c => c?.chain_id === Number(origin_chain))
+  const source_chain_data = chains_data?.find(c => c?.chain_id === Number(origin_chain) || c?.domain_id === Number(origin_domain))
   const source_asset_data = assets_data?.find(a => a?.contracts?.findIndex(c => c?.chain_id === source_chain_data?.chain_id && equals_ignore_case(c?.contract_address, origin_transacting_asset)) > -1)
   const source_contract_data = source_asset_data?.contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
   const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
   const source_decimals = source_contract_data?.contract_decimals || 18
   const source_asset_image = source_contract_data?.image || source_asset_data?.image
   const source_amount = origin_transacting_amount && Number(utils.formatUnits(BigNumber.from(BigInt(origin_transacting_amount).toString()), source_decimals))
-  const destination_chain_data = chains_data?.find(c => c?.chain_id === Number(destination_chain))
+  const destination_chain_data = chains_data?.find(c => c?.chain_id === Number(destination_chain) || c?.domain_id === Number(destination_domain))
   const destination_asset_data = assets_data?.find(a => a?.contracts?.findIndex(c => c?.chain_id === destination_chain_data?.chain_id && equals_ignore_case(c?.contract_address, destination_transacting_asset)) > -1)
   const destination_contract_data = destination_asset_data?.contracts?.find(c => c?.chain_id === destination_chain_data?.chain_id)
   const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol
@@ -206,7 +209,16 @@ export default ({ data }) => {
         </div>
       )}
       {xcall_timestamp && (
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-between">
+          <span>
+            {force_slow && (
+              <div className={`rounded-lg border ${status === XTransferStatus.CompletedSlow ? 'border-green-500 dark:border-green-300 text-green-500 dark:text-green-300' : 'border-blue-500 dark:border-blue-300 text-blue-500 dark:text-blue-300'} flex items-center space-x-1 py-0.5 px-1.5`}>
+                <span className="uppercase text-xs font-bold">
+                  Slow
+                </span>
+              </div>
+            )}
+          </span>
           <span
             title={moment(xcall_timestamp * 1000).format('MMM D, YYYY h:mm:ss A')}
             className="text-slate-400 dark:text-slate-400 text-xs"
