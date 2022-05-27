@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import { create } from '@connext/nxtp-sdk'
-import { Bignumber, Wallet as EthersWallet, providers, utils } from 'ethers'
+import { Bignumber, providers, utils } from 'ethers'
 import Linkify from 'react-linkify'
 import parse from 'html-react-parser'
 import { MdClose } from 'react-icons/md'
@@ -174,7 +174,7 @@ export default function Navbar() {
           type: SDK,
           value: await create({
             chains: chains_config,
-            signerAddress: address || EthersWallet.createRandom().address,
+            signerAddress: address,
             logLevel: 'info',
             network: process.env.NEXT_PUBLIC_NETWORK,
             environment: process.env.NEXT_PUBLIC_ENVIRONMENT,
