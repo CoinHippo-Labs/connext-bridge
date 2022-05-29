@@ -60,7 +60,7 @@ export default ({ data }) => {
       <div className="flex items-center justify-between space-x-2">
         <Copy
           value={transfer_id}
-          title={<span className="text-slate-700 dark:text-slate-300 text-sm font-bold">
+          title={<span className="cursor-pointer text-slate-700 dark:text-slate-300 text-sm font-bold">
             <span className="sm:hidden">
               {ellipse(transfer_id, 12)}
             </span>
@@ -147,7 +147,7 @@ export default ({ data }) => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <HiCheckCircle size={36} className="rounded-full shadow dark:shadow-white text-green-400 dark:text-white" />
+              <HiCheckCircle size={36} className="rounded-full shadow dark:shadow-white text-green-400 dark:text-green-200" />
             </a>
             :
             <Bars color={loader_color('light')} width="32" height="32" />

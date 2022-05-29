@@ -327,9 +327,9 @@ export default () => {
     const { source_chain, destination_chain, asset } = { ...bridge }
     const source_asset_data = assets_data?.find(a => a?.id === asset)
     const destination_asset_data = assets_data?.find(a => a?.id === asset)
-    return source_asset_data && destination_asset_data &&
-      !(source_chain && source_asset_data.contracts?.findIndex(c => c?.chain_id === chains_data?.find(_c => _c?.id === source_chain)?.chain_id) < 0) &&
-      !(destination_chain && destination_asset_data.contracts?.findIndex(c => c?.chain_id === chains_data?.find(_c => _c?.id === destination_chain)?.chain_id) < 0)
+    return source_chain && destination_chain && source_asset_data && destination_asset_data &&
+      !(source_asset_data.contracts?.findIndex(c => c?.chain_id === chains_data?.find(_c => _c?.id === source_chain)?.chain_id) < 0) &&
+      !(destination_asset_data.contracts?.findIndex(c => c?.chain_id === chains_data?.find(_c => _c?.id === destination_chain)?.chain_id) < 0)
   }
 
   const reset = async origin => {
@@ -577,7 +577,7 @@ export default () => {
                 />
               </div>
             </div>
-            <div className="rounded-3xl shadow dark:shadow-slate-500 space-y-6 pt-8 pb-6 px-6">
+            <div className={`${checkSupport() && amount ? 'border-2 border-blue-200 dark:border-blue-800 shadow-xl dark:shadow-blue-600' : 'shadow dark:shadow-slate-400'} rounded-2xl space-y-6 pt-8 pb-6 px-6`}>
               <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6">
                 <div className="sm:col-span-2 flex flex-col items-center sm:items-start">
                   <div className="w-48 flex sm:flex-col items-center justify-center space-x-1.5">
