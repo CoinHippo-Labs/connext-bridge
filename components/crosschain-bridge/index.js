@@ -1627,7 +1627,7 @@ export default function CrosschainBridge() {
                         closeDisabled={true}
                         rounded={true}
                       >
-                        <span>Amount is higher than the available transfer size.</span>
+                        <span>Not enough bridge liquidity to complete transfer. Use a smaller amount.</span>
                       </Alert>
                       :
                       !swapData && swapConfig.amount < estimatedFees ?
