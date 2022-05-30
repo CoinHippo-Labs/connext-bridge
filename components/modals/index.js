@@ -4,7 +4,7 @@ import { FiX } from 'react-icons/fi'
 
 import Portal from '../portal'
 
-export default function Modal({
+export default ({
   id = 'portal',
   hidden,
   disabled,
@@ -27,7 +27,7 @@ export default function Modal({
   onClose,
   noButtons,
   modalClassName = '',
-}) {
+}) => {
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
   const { theme } = { ...preferences }
 

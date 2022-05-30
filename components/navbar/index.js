@@ -21,7 +21,7 @@ import { ens as getEns } from '../../lib/api/ens'
 import { ellipse, equals_ignore_case } from '../../lib/utils'
 import { ANNOUNCEMENT_DATA, CHAINS_DATA, ASSETS_DATA, ENS_DATA, ASSET_BALANCES_DATA, SDK, RPCS } from '../../reducers/types'
 
-export default function Navbar() {
+export default () => {
   const dispatch = useDispatch()
   const { preferences, chains, assets, ens, asset_balances, rpc_providers, dev, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, ens: state.ens, asset_balances: state.asset_balances, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet }), shallowEqual)
   const { theme } = { ...preferences }

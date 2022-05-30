@@ -1,6 +1,6 @@
 import Layout from './layout'
 
-export default function Layouts({ children }) {
+export default ({ children }) => {
   return (
     <Layout>
       {children}

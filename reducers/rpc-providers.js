@@ -1,11 +1,11 @@
 import { RPCS } from './types'
 
-export default function data(
+export default (
   state = {
     [`${RPCS}`]: null,
   },
   action
-) {
+) => {
   switch (action.type) {
     case RPCS:
       return {

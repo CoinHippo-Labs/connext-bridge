@@ -3,7 +3,7 @@ import { FiMenu } from 'react-icons/fi'
 
 import Items from './items'
 
-export default function DropdownNavigations() {
+export default () => {
   const [hidden, setHidden] = useState(true)
 
   const buttonRef = useRef(null)

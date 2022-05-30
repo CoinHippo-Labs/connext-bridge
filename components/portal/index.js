@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 
-export default function Portal({ children, selector }) {
+export default ({ children, selector }) => {
   const [mounted, setMounted] = useState(false)
 
   const ref = useRef()

@@ -1,11 +1,11 @@
 import { SDK } from './types'
 
-export default function data(
+export default (
   state = {
     [`${SDK}`]: null,
   },
   action
-) {
+) => {
   switch (action.type) {
     case SDK:
       return {

@@ -6,15 +6,24 @@ import { TiArrowRight } from 'react-icons/ti'
 
 import menus from './menus'
 
-export default function Navigations({ address }) {
+export default ({ address }) => {
   const router = useRouter()
-  const { pathname } = { ...router }
+  const { pathname, query } = { ...router }
+  const { bridge } = { ...query }
 
   return (
     <div className="hidden xl:flex items-center space-x-0 xl:space-x-2 mx-auto">
       {menus.filter(m => m?.path).map((m, i) => {
         switch (m.id) {
-          case 'explorer':
+          case 'bridge':
+            if (pathname === '/[bridge]' && bridge) {
+              m.path = `${pathname.replace('[bridge]', bridge)}`
+            }
+            else {
+              m.path = '/'
+            }
+            break
+          case 'explore':
             if (address) {
               m.title = 'My Transfers'
               const address_path = '/address/'
@@ -41,7 +50,7 @@ export default function Navigations({ address }) {
             <FaHandPointLeft size={20} />
           </HeadShake> : m.external ?
           <TiArrowRight size={20} className="transform -rotate-45" /> : null
-        const className = `bg-transparent hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg ${m.disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase text-blue-600 dark:text-white text-xs ${!m.external && pathname === m.path ? 'font-bold' : 'font-medium hover:font-bold'} space-x-1.5 py-2.5 px-3`
+        const className = `bg-transparent hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg ${m.disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase text-blue-600 dark:text-white text-xs ${!m.external && (pathname === m.path || m.others_paths?.includes(pathname)) ? 'font-extrabold' : 'font-medium hover:font-bold'} space-x-1.5 py-2.5 px-3`
         return m.external ?
           <a
             key={i}

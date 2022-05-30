@@ -1,29 +1,42 @@
+import { CgArrowRightR } from 'react-icons/cg'
+import { RiCoinsLine, RiQuestionAnswerLine } from 'react-icons/ri'
+import { MdSwapHoriz } from 'react-icons/md'
 import { HiOutlineDocumentSearch } from 'react-icons/hi'
-import { RiQuestionAnswerLine } from 'react-icons/ri'
-import { BsGithub } from 'react-icons/bs'
 import { BiBook, BiCommentDetail } from 'react-icons/bi'
 
 export default [
   {
-    id: 'explorer',
-    title: 'Explorer',
+    id: 'bridge',
+    title: 'Bridge',
+    path: '/',
+    others_paths: ['/[bridge]'],
+    icon: <CgArrowRightR size={20} className="stroke-current" />,
+  },
+  {
+    id: 'pool',
+    title: 'Pool',
+    // path: '/pool',
+    icon: <RiCoinsLine size={20} className="stroke-current" />,
+  },
+  {
+    id: 'swap',
+    title: 'Swap',
+    // path: '/swap',
+    icon: <MdSwapHoriz size={20} className="stroke-current" />,
+  },
+  {
+    id: 'explore',
+    title: 'Explore',
     path: process.env.NEXT_PUBLIC_EXPLORER_URL,
     external: true,
     icon: <HiOutlineDocumentSearch size={20} className="stroke-current" />,
   },
   {
-    id: 'document',
-    title: 'Document',
+    id: 'doc',
+    title: 'Doc',
     path: process.env.NEXT_PUBLIC_DOC_URL,
     external: true,
     icon: <BiBook size={20} className="stroke-current" />,
-  },
-  {
-    id: 'github',
-    title: 'Github',
-    path: process.env.NEXT_PUBLIC_GITHUB_URL,
-    external: true,
-    icon: <BsGithub size={20} className="stroke-current" />,
   },
   {
     id: 'support',

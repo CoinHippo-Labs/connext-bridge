@@ -6,7 +6,7 @@ import { BsTwitter, BsTelegram, BsGithub } from 'react-icons/bs'
 import Image from '../image'
 import _package from '../../package.json'
 
-export default function Footer() {
+export default () => {
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
   const { theme } = { ...preferences }
 

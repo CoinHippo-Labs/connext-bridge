@@ -1,11 +1,11 @@
 import { CHAIN_ID } from './types'
 
-export default function data(
+export default (
   state = {
     [`${CHAIN_ID}`]: null,
   },
   action
-) {
+) => {
   switch (action.type) {
     case CHAIN_ID:
       return {

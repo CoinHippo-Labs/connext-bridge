@@ -1,6 +1,6 @@
 import Image from '../../image'
 
-export default function Logo() {
+export default () => {
   return (
     <div className="logo ml-3 mr-1 sm:mr-3">
       <a

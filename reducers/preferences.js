@@ -1,11 +1,11 @@
 import { THEME } from './types'
 
-export default function data(
+export default (
   state = {
     [`${THEME}`]: 'dark',
   },
   action
-) {
+) => {
   switch (action.type) {
     case THEME:
       localStorage.setItem(THEME, action.value)

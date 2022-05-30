@@ -8,7 +8,7 @@ import Footer from '../../components/footer'
 import meta from '../../lib/meta'
 import { THEME } from '../../reducers/types'
 
-export default function Layout({ children }) {
+export default ({ children }) => {
   const dispatch = useDispatch()
   const { preferences, chains, assets } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets }), shallowEqual)
   const { theme } = { ...preferences }

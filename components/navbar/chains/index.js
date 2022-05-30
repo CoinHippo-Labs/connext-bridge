@@ -7,7 +7,7 @@ import Image from '../../image'
 import Items from './items'
 import { loader_color } from '../../../lib/utils'
 
-export default function DropdownChains({ chain_id }) {
+export default ({ chain_id }) => {
   const { preferences, chains } = useSelector(state => ({ preferences: state.preferences, chains: state.chains }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }

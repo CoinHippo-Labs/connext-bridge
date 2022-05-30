@@ -3,7 +3,7 @@ import { FiMoon, FiSun } from 'react-icons/fi'
 
 import { THEME } from '../../../reducers/types'
 
-export default function Theme() {
+export default () => {
   const dispatch = useDispatch()
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
   const { theme } = { ...preferences }

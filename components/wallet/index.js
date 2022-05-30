@@ -100,7 +100,7 @@ const getNetwork = chain_id => {
 
 let web3Modal
 
-export default function Wallet({
+export default ({
   mainController = false,
   hidden = false,
   disabled = false, 
@@ -108,7 +108,7 @@ export default function Wallet({
   onSwitch,
   children,
   className = '',
-}) {
+}) => {
   const dispatch = useDispatch()
   const { preferences, chains, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, wallet: state.wallet }), shallowEqual)
   const { theme } = { ...preferences }

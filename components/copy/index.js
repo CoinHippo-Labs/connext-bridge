@@ -3,7 +3,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { HiCheckCircle } from 'react-icons/hi'
 import { BiCopy } from 'react-icons/bi'
 
-export default function Copy({ value, title, size = 16, onCopy, className = '' }) {
+export default ({ value, title, size = 16, onCopy, className = '' }) => {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
