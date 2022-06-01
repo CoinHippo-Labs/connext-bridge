@@ -9,7 +9,7 @@ import menus from './menus'
 export default ({ address }) => {
   const router = useRouter()
   const { pathname, query } = { ...router }
-  const { bridge } = { ...query }
+  const { bridge, pool, swap } = { ...query }
 
   return (
     <div className="hidden xl:flex items-center space-x-0 xl:space-x-2 mx-auto">
@@ -21,6 +21,22 @@ export default ({ address }) => {
             }
             else {
               m.path = '/'
+            }
+            break
+          case 'pool':
+            if (pathname === '/[pool]' && pool) {
+              m.path = `${pathname.replace('[pool]', pool)}`
+            }
+            else {
+              m.path = '/pool'
+            }
+            break
+          case 'swap':
+            if (pathname === '/[swap]' && swap) {
+              m.path = `${pathname.replace('[swap]', swap)}`
+            }
+            else {
+              m.path = '/swap'
             }
             break
           case 'explore':

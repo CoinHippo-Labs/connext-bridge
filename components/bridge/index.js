@@ -130,7 +130,7 @@ export default () => {
       }
       if (params.source_chain && params.asset && amount) {
         params.amount = amount
-      }      
+      }
     }
     if (Object.keys(params).length > 0) {
       const { source_chain, destination_chain, asset, amount } = { ...params }
