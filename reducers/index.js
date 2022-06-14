@@ -6,6 +6,7 @@ import chains from './chains'
 import assets from './assets'
 import ens from './ens'
 import asset_balances from './asset-balances'
+import pools from './pools'
 import rpc_providers from './rpc-providers'
 import dev from './dev'
 import wallet from './wallet'
@@ -19,6 +20,7 @@ export default combineReducers({
   assets,
   ens,
   asset_balances,
+  pools,
   rpc_providers,
   dev,
   wallet,

@@ -23,16 +23,16 @@ export default ({ address }) => {
               m.path = '/'
             }
             break
-          case 'pool':
-            if (pathname === '/[pool]' && pool) {
+          case 'pools':
+            if (pathname === '/pool/[pool]' && pool) {
               m.path = `${pathname.replace('[pool]', pool)}`
             }
             else {
-              m.path = '/pool'
+              m.path = '/pools'
             }
             break
           case 'swap':
-            if (pathname === '/[swap]' && swap) {
+            if (pathname === '/swap/[swap]' && swap) {
               m.path = `${pathname.replace('[swap]', swap)}`
             }
             else {

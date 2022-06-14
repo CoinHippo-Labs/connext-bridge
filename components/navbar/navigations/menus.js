@@ -13,9 +13,9 @@ export default [
     icon: <CgArrowRightR size={20} className="stroke-current" />,
   },
   {
-    id: 'pool',
-    title: 'Pool',
-    // path: '/pool',
+    id: 'pools',
+    title: 'Pools',
+    // path: '/pools',
     others_paths: ['/pool/[pool]'],
     icon: <RiCoinsLine size={20} className="stroke-current" />,
   },

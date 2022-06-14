@@ -16,6 +16,9 @@ export const ENS_DATA = 'ens_data'
 // asset balances
 export const ASSET_BALANCES_DATA = 'asset_balances_data'
 
+// asset balances
+export const POOLS_DATA = 'pools_data'
+
 // rpc
 export const RPCS = 'rpcs'
 
