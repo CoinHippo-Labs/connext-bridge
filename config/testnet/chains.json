@@ -2,7 +2,7 @@
   {
     "id": "rinkeby",
     "chain_id": 4,
-    "domain_id": 1111,
+    "domain_id": "1111",
     "name": "Rinkeby",
     "short_name": "RIN",
     "image": "/logos/chains/rinkeby.png",
@@ -36,7 +36,7 @@
   {
     "id": "gorli",
     "chain_id": 5,
-    "domain_id": 3331,
+    "domain_id": "3331",
     "name": "Görli",
     "short_name": "GOR",
     "image": "/logos/chains/gorli.png",
@@ -70,7 +70,7 @@
   {
     "id": "kovan",
     "chain_id": 42,
-    "domain_id": 2221,
+    "domain_id": "2221",
     "name": "Kovan",
     "short_name": "KOV",
     "image": "/logos/chains/kovan.png",

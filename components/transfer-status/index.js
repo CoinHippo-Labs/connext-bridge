@@ -38,14 +38,14 @@ export default ({ data }) => {
     force_slow,
     xcall_timestamp,
   } = { ...data }
-  const source_chain_data = chains_data?.find(c => c?.chain_id === Number(origin_chain) || c?.domain_id === Number(origin_domain))
+  const source_chain_data = chains_data?.find(c => c?.chain_id === Number(origin_chain) || c?.domain_id === origin_domain)
   const source_asset_data = assets_data?.find(a => a?.contracts?.findIndex(c => c?.chain_id === source_chain_data?.chain_id && equals_ignore_case(c?.contract_address, origin_transacting_asset)) > -1)
   const source_contract_data = source_asset_data?.contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
   const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
   const source_decimals = source_contract_data?.contract_decimals || 18
   const source_asset_image = source_contract_data?.image || source_asset_data?.image
   const source_amount = ['number', 'string'].includes(typeof origin_transacting_amount) && Number(utils.formatUnits(BigNumber.from(BigInt(origin_transacting_amount).toString()), source_decimals))
-  const destination_chain_data = chains_data?.find(c => c?.chain_id === Number(destination_chain) || c?.domain_id === Number(destination_domain))
+  const destination_chain_data = chains_data?.find(c => c?.chain_id === Number(destination_chain) || c?.domain_id === destination_domain)
   const destination_asset_data = assets_data?.find(a => a?.contracts?.findIndex(c => c?.chain_id === destination_chain_data?.chain_id && equals_ignore_case(c?.contract_address, destination_transacting_asset)) > -1)
   const destination_contract_data = destination_asset_data?.contracts?.find(c => c?.chain_id === destination_chain_data?.chain_id)
   const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol

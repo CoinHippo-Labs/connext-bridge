@@ -19,7 +19,7 @@ import { announcement as getAnnouncement, chains as getChains, assets as getAsse
 import { tokens as getTokens } from '../../lib/api/tokens'
 import { ens as getEns } from '../../lib/api/ens'
 import { ellipse, equals_ignore_case } from '../../lib/utils'
-import { ANNOUNCEMENT_DATA, CHAINS_DATA, ASSETS_DATA, ENS_DATA, ASSET_BALANCES_DATA, SDK, RPCS } from '../../reducers/types'
+import { ANNOUNCEMENT_DATA, CHAINS_DATA, ASSETS_DATA, ENS_DATA, ASSET_BALANCES_DATA, POOLS_DATA, SDK, RPCS } from '../../reducers/types'
 
 export default () => {
   const dispatch = useDispatch()
@@ -210,25 +210,67 @@ export default () => {
       if (sdk && chains_data &&
         assets_data && assets_data.findIndex(a => !a.price) < 0
       ) {
-        const response = await sdk.nxtpSdkUtils.getRoutersData()
-        if (response || !is_interval) {
-          const data = _.groupBy(response?.map(l => {
-            const chain_data = chains_data?.find(c => c?.domain_id?.toString() === l?.domain)
-            const asset_data = assets_data?.find(a => a?.contracts?.findIndex(c => c?.chain_id === chain_data?.chain_id && equals_ignore_case(c?.contract_address, l?.adopted)) > -1)
-            return {
-              ...l,
-              chain_id: chain_data?.chain_id,
-              chain_data,
-              contract_address: l?.adopted,
-              asset_data,
-              amount: BigInt(Number(l?.balance) || 0).toString(),
-            }
-          }) || [], 'chain_id')
-          dispatch({
-            type: ASSET_BALANCES_DATA,
-            value: data,
-          })
-        }
+        try {
+          const response = await sdk.nxtpSdkUtils.getRoutersData()
+          if (response) {
+            const data = _.groupBy(response.map(l => {
+              const chain_data = chains_data.find(c => c?.domain_id === l?.domain)
+              const asset_data = assets_data.find(a => a?.contracts?.findIndex(c => c?.chain_id === chain_data?.chain_id && equals_ignore_case(c?.contract_address, l?.adopted)) > -1)
+              return {
+                ...l,
+                chain_id: chain_data?.chain_id,
+                chain_data,
+                contract_address: l?.adopted,
+                asset_data,
+                amount: BigInt(Number(l?.balance) || 0).toString(),
+              }
+            }), 'chain_id')
+            dispatch({
+              type: ASSET_BALANCES_DATA,
+              value: data,
+            })
+          }
+        } catch (error) {}
+      }
+    }
+    getData()
+    const interval = setInterval(() => getData(), 1 * 60 * 1000)
+    return () => {
+      clearInterval(interval)
+    }
+  }, [sdk, chains_data, assets_data])
+
+  // pools
+  useEffect(() => {
+    const getChainData = async chain_data => {
+      if (sdk && chain_data) {
+        try {
+          const { chain_id, domain_id } = { ...chain_data }
+          const response = await sdk.nxtpSdkUtils.getPools(domain_id)
+          if (response) {
+            const data = _.groupBy(response.map(p => {
+              const { symbol } = { ...p }
+              const asset_data = assets_data.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === chain_data?.chain_id && equals_ignore_case(c?.symbol, symbol)) > -1)
+              return {
+                ...p,
+                chain_id,
+                chain_data,
+                asset_data,
+              }
+            }), 'chain_id')
+            dispatch({
+              type: POOLS_DATA,
+              value: data,
+            })
+          }
+        } catch (error) {}
+      }
+    }
+    const getData = async () => {
+      if (sdk && chains_data &&
+        assets_data && assets_data.findIndex(a => !a.price) < 0
+      ) {
+        chains_data.forEach(c => getChainData(c))
       }
     }
     getData()

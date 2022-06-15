@@ -2,7 +2,7 @@
   {
     "id": "ethereum",
     "chain_id": 1,
-    "domain_id": 6648936,
+    "domain_id": "6648936",
     "name": "Ethereum",
     "short_name": "ETH",
     "image": "/logos/chains/ethereum.png",
@@ -168,7 +168,7 @@
   {
     "id": "gnosis",
     "chain_id": 100,
-    "domain_id": 2019844457,
+    "domain_id": "2019844457",
     "name": "Gnosis",
     "short_name": "GNO",
     "image": "/logos/chains/gnosis.png",
@@ -268,7 +268,7 @@
   {
     "id": "moonbeam",
     "chain_id": 1284,
-    "domain_id": 1650811245,
+    "domain_id": "1650811245",
     "name": "Moonbeam",
     "short_name": "MBEAM",
     "image": "/logos/chains/moonbeam.png",
@@ -368,7 +368,7 @@
   {
     "id": "milkomeda",
     "chain_id": 2001,
-    "domain_id": 25393,
+    "domain_id": "25393",
     "name": "Milkomeda",
     "short_name": "MMEDA",
     "image": "/logos/chains/milkomeda.png",

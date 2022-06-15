@@ -421,8 +421,8 @@ export default () => {
         params: {
           to: to || address,
           callData: callData || '0x',
-          originDomain: source_chain_data?.domain_id?.toString(),
-          destinationDomain: destination_chain_data?.domain_id?.toString(),
+          originDomain: source_chain_data?.domain_id,
+          destinationDomain: destination_chain_data?.domain_id,
           callback: constants.AddressZero,
           recovery: address,
         },

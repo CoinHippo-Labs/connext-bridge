@@ -28,10 +28,11 @@ const ACTIONS = ['add', 'remove']
 
 export default () => {
   const dispatch = useDispatch()
-  const { preferences, chains, assets, rpc_providers, dev, wallet, balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances }), shallowEqual)
+  const { preferences, chains, assets, _pools, rpc_providers, dev, wallet, balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, _pools: state.pools, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
+  const { pools_data } = { ..._pools }
   const { rpcs } = { ...rpc_providers }
   const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
@@ -51,6 +52,7 @@ export default () => {
   const [calling, setCalling] = useState(null)
   const [callResponse, setCallResponse] = useState(null)
 
+  const [pools, setPools] = useState(null)
   const [poolsTrigger, setPoolsTrigger] = useState(null)
 
   // get pool from path
@@ -80,6 +82,7 @@ export default () => {
     }
     if (updated) {
       setPool(pool)
+      setPoolsTrigger(moment().valueOf())
     }
   }, [asPath, chains_data, assets_data])
 
@@ -153,6 +156,30 @@ export default () => {
       clearInterval(interval)
     }
   }, [rpcs])
+
+  // get pools
+  useEffect(() => {
+    const getData = async () => {
+      if (sdk && address && pool?.chain) {
+        try {
+          const { chain } = { ...pool }
+          const chain_data = chains_data.find(c => c?.id === chain)
+          const { domain_id } = { ...chain_data }
+          const response = await sdk.nxtpSdkUtils.getUserPools(domain_id)
+          setPools(response?.map(p => {
+            const { symbol } = { ...p }
+            const asset_data = assets_data.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === chain_data?.chain_id && equals_ignore_case(c?.symbol, symbol)) > -1)
+            return {
+              ...p,
+              chain_data,
+              asset_data,
+            }
+          }) || pools || [])
+        } catch (error) {}
+      }
+    }
+    getData()
+  }, [sdk, address, poolsTrigger])
 
   const getBalances = chain => {
     const getBalance = async (chain_id, contract_data) => {
@@ -291,6 +318,7 @@ export default () => {
   const { chain, asset, amount } = { ...pool }
   const chain_data = chains_data?.find(c => c?.id === chain)
   const asset_data = assets_data?.find(a => a?.id === asset)
+  const poolData = pools?.find(p => p?.chain_data?.id === chain && p?.asset_data?.id === asset)
   const native_contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
   const nomad_contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)  
 
