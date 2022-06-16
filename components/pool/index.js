@@ -1,30 +1,18 @@
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
-import { TailSpin, Oval, Watch } from 'react-loader-spinner'
-import { DebounceInput } from 'react-debounce-input'
-import { MdClose } from 'react-icons/md'
-import { BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
+import { RiArrowLeftCircleFill } from 'react-icons/ri'
 
 import Announcement from '../announcement'
-import GasPrice from '../gas-price'
-import SelectChain from '../select/chain'
-import SelectAsset from '../select/asset'
-import Balance from '../balance'
-import Image from '../image'
-import Wallet from '../wallet'
-import Alert from '../alerts'
-import Copy from '../copy'
+import Info from './info'
+import Liquidity from './liquidity'
 import { currency_symbol } from '../../lib/object/currency'
-import { params_to_obj, number_format, ellipse, equals_ignore_case, loader_color, sleep } from '../../lib/utils'
+import { params_to_obj, number_format, ellipse, equals_ignore_case, sleep } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
-
-const DEFAULT_POOL_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_POOL_SLIPPAGE_PERCENTAGE) || 0.5
-const DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES = Number(process.env.NEXT_PUBLIC_DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES) || 60
-const ACTIONS = ['add', 'remove']
 
 export default () => {
   const dispatch = useDispatch()
@@ -48,7 +36,6 @@ export default () => {
   const [approving, setApproving] = useState(null)
   const [approveResponse, setApproveResponse] = useState(null)
 
-  const [action, setAction] = useState(_.head(ACTIONS))
   const [calling, setCalling] = useState(null)
   const [callResponse, setCallResponse] = useState(null)
 
@@ -342,8 +329,26 @@ export default () => {
       <div className="mt-8">
         <Announcement />
       </div>
-      <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6 my-6 mx-4">
-        
+      <div className="w-full flex flex-col space-y-4 sm:space-y-6 my-6 mx-4">
+        <div className="flex items-center space-x-3">
+          <Link href="/pools">
+            <a className="text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white">
+              <RiArrowLeftCircleFill size={36} />
+            </a>
+          </Link>
+          <h1 className="text-2xl font-bold">
+            Manage Pool
+          </h1>
+        </div>
+        <div className="h-208 grid grid-flow-row grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6">
+          <div className="lg:col-span-2">
+            <Info
+              data={poolData}
+              onSelect={p => setPool(p)}
+            />
+          </div>
+          <Liquidity />
+        </div>
       </div>
     </div>
   )

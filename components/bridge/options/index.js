@@ -70,7 +70,10 @@ export default ({
       title="Options"
       body={<div className="form mt-2">
         {fields.map((f, i) => (
-          <div key={i} className="form-element">
+          <div
+            key={i}
+            className="form-element"
+          >
             {f.label && (
               <div className="form-label text-slate-600 dark:text-slate-400 font-medium">
                 {f.label}
@@ -201,7 +204,7 @@ export default ({
                           if (e.target.value === '' || regex.test(e.target.value)) {
                             value = e.target.value
                           }
-                          value = ['slippage'].includes(f.name) && (value < 0 || value > 100) ? 0.1 : value
+                          value = ['slippage'].includes(f.name) && (value < 0 || value > 100) ? 0.5 : value
                           console.log('[Options]', {
                             ...data,
                             [`${f.name}`]: value && !isNaN(value) ? Number(value) : value,
@@ -229,7 +232,7 @@ export default ({
                                   [`${f.name}`]: p,
                                 })
                               }}
-                              className={`${data?.[f.name] === p ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 hover:dark:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white py-1 px-2`}
+                              className={`${data?.[f.name] === p ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white py-1 px-2`}
                             >
                               {p} {f.postfix}
                             </div>

@@ -40,7 +40,7 @@ const DEFAULT_OPTIONS = {
   to: '',
   infiniteApprove: true,
   callData: '',
-  slippage: 0.1,
+  slippage: 0.5,
   forceSlow: false,
 }
 
@@ -1054,7 +1054,7 @@ export default () => {
                                   if (e.target.value === '' || regex.test(e.target.value)) {
                                     value = e.target.value
                                   }
-                                  value = value < 0 || value > 100 ? 0.1 : value
+                                  value = value < 0 || value > 100 ? 0.5 : value
                                   console.log('[Transfer Confirmation]', {
                                     bridge,
                                     fee,
@@ -1091,7 +1091,7 @@ export default () => {
                                         slippage: s,
                                       })
                                     }}
-                                    className={`${options?.slippage === s ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 hover:dark:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white text-xs py-0.5 px-1.5`}
+                                    className={`${options?.slippage === s ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white text-xs py-0.5 px-1.5`}
                                   >
                                     {s} %
                                   </div>
