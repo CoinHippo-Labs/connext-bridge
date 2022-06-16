@@ -11,6 +11,7 @@ import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit } from 'react-icons/bi'
+import { GiPartyPopper } from 'react-icons/gi'
 
 import Announcement from '../announcement'
 import Options from './options'
@@ -39,6 +40,7 @@ const DEFAULT_OPTIONS = {
   to: '',
   infiniteApprove: true,
   callData: '',
+  slippage: 0.1,
   forceSlow: false,
 }
 
@@ -424,7 +426,7 @@ export default () => {
       const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
       const decimals = source_contract_data?.contract_decimals || 18
       const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
-      const { to, infiniteApprove, callData, forceSlow } = { ...options }
+      const { to, infiniteApprove, callData, slippage, forceSlow } = { ...options }
       const xcallParams = {
         params: {
           to: to || address,
@@ -1036,6 +1038,69 @@ export default () => {
                           </div>
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
                             <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
+                              % Slippage
+                              <span className="hidden sm:block">:</span>
+                            </div>
+                            <div className="flex flex-col items-end space-y-1.5">
+                              <DebounceInput
+                                debounceTimeout={300}
+                                size="small"
+                                type="number"
+                                placeholder="0.00"
+                                value={typeof options?.slippage === 'number' && options.slippage >= 0 ? options.slippage : ''}
+                                onChange={e => {
+                                  const regex = /^[0-9.\b]+$/
+                                  let value
+                                  if (e.target.value === '' || regex.test(e.target.value)) {
+                                    value = e.target.value
+                                  }
+                                  value = value < 0 || value > 100 ? 0.1 : value
+                                  console.log('[Transfer Confirmation]', {
+                                    bridge,
+                                    fee,
+                                    options: {
+                                      ...options,
+                                      to: recipient_address,
+                                      slippage: value && !isNaN(value) ? Number(value) : value,
+                                    },
+                                  })
+                                  setOptions({
+                                    ...options,
+                                    slippage: value && !isNaN(value) ? Number(value) : value,
+                                  })
+                                }}
+                                onWheel={e => e.target.blur()}
+                                className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1.5 px-2.5`}
+                              />
+                              <div className="flex items-center space-x-1.5">
+                                {[0.1, 0.5, 1.0].map((s, i) => (
+                                  <div
+                                    key={i}
+                                    onClick={() => {
+                                      console.log('[Transfer Confirmation]', {
+                                        bridge,
+                                        fee,
+                                        options: {
+                                          ...options,
+                                          to: recipient_address,
+                                          slippage: s,
+                                        },
+                                      })
+                                      setOptions({
+                                        ...options,
+                                        slippage: s,
+                                      })
+                                    }}
+                                    className={`${options?.slippage === s ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 hover:dark:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white text-xs py-0.5 px-1.5`}
+                                  >
+                                    {s} %
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
+                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
                               Bridge Path
                               <span className="hidden sm:block">:</span>
                             </div>
@@ -1043,7 +1108,7 @@ export default () => {
                               {options.forceSlow ?
                                 <Popover
                                   placement="top"
-                                  title="Slow Path"
+                                  title="Slow Path (Nomad)"
                                   content="Use bridge only (wait 30-60 mins, no fees)"
                                   titleClassName="normal-case font-semibold py-1.5"
                                 >
@@ -1091,11 +1156,27 @@ export default () => {
                           </div>
                           {amount > liquidity_amount && (
                             <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2">
-                              <BiMessageEdit size={20} className="mt-0.5" />
+                              <BiMessageEdit size={20} className="min-w-max mt-0.5" />
                               <span className="font-medium">
-                                Insufficient router liquidity. Funds must transfer through the bridge directly. (wait time est. 35-60 mins)
+                                Insufficient router liquidity. Funds must transfer through the bridge directly. (wait time est. 30-60 mins)
                               </span>
                             </div>
+                          )}
+                          {amount < liquidity_amount && (
+                            options?.forceSlow ?
+                              <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2">
+                                <BiMessageDetail size={20} className="min-w-max mt-0.5" />
+                                <span className="font-medium">
+                                  Use bridge only (wait 30-60 mins, no fees)
+                                </span>
+                              </div>
+                              :
+                              <div className="flex items-center text-blue-500 dark:text-green-500 space-x-2">
+                                <GiPartyPopper size={20} className="min-w-max mt-0.5" />
+                                <span className="font-medium">
+                                  Fast liquidity available! Transfer will likely complete within 3 minutes!
+                                </span>
+                              </div>
                           )}
                         </div>}
                         cancelDisabled={disabled}

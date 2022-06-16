@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import _ from 'lodash'
 import Switch from 'react-switch'
+import { DebounceInput } from 'react-debounce-input'
 import { RiSettings3Line } from 'react-icons/ri'
 import { MdSettingsSuggest } from 'react-icons/md'
 
@@ -32,6 +33,14 @@ export default ({
       label: 'Infinite Approval',
       name: 'infiniteApprove',
       type: 'switch',
+    },
+    {
+      label: '% Slippage',
+      name: 'slippage',
+      type: 'number',
+      placeholder: '0.00',
+      presets: [0.1, 0.5, 1.0],
+      postfix: '%',
     },
     {
       label: 'Bridge Path',
@@ -119,7 +128,7 @@ export default ({
                     {data?.forceSlow ?
                       <Popover
                         placement="top"
-                        title="Slow Path"
+                        title="Slow Path (Nomad)"
                         content="Use bridge only (wait 30-60 mins, no fees)"
                         titleClassName="normal-case font-semibold py-1.5"
                       >
@@ -178,22 +187,73 @@ export default ({
                     className="form-textarea border-0 focus:ring-0 rounded-lg"
                   />
                   :
-                  <input
-                    type={f.type}
-                    placeholder={f.placeholder}
-                    value={data?.[f.name]}
-                    onChange={e => {
-                      console.log('[Options]', {
-                        ...data,
-                        [`${f.name}`]: e.target.value,
-                      })
-                      setData({
-                        ...data,
-                        [`${f.name}`]: e.target.value,
-                      })
-                    }}
-                    className="form-input border-0 focus:ring-0 rounded-lg"
-                  />
+                  f.type === 'number' ?
+                    <div className="flex items-center space-x-3">
+                      <DebounceInput
+                        debounceTimeout={300}
+                        size={f.size || 'small'}
+                        type={f.type}
+                        placeholder={f.placeholder}
+                        value={typeof data?.[f.name] === 'number' && data[f.name] >= 0 ? data[f.name] : ''}
+                        onChange={e => {
+                          const regex = /^[0-9.\b]+$/
+                          let value
+                          if (e.target.value === '' || regex.test(e.target.value)) {
+                            value = e.target.value
+                          }
+                          value = ['slippage'].includes(f.name) && (value < 0 || value > 100) ? 0.1 : value
+                          console.log('[Options]', {
+                            ...data,
+                            [`${f.name}`]: value && !isNaN(value) ? Number(value) : value,
+                          })
+                          setData({
+                            ...data,
+                            [`${f.name}`]: value && !isNaN(value) ? Number(value) : value,
+                          })
+                        }}
+                        onWheel={e => e.target.blur()}
+                        className={`w-20 bg-slate-50 dark:bg-slate-800 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
+                      />
+                      {f?.presets.length > 0 && (
+                        <div className="flex items-center space-x-2.5">
+                          {f.presets.map((p, i) => (
+                            <div
+                              key={i}
+                              onClick={() => {
+                                console.log('[Options]', {
+                                  ...data,
+                                  [`${f.name}`]: p,
+                                })
+                                setData({
+                                  ...data,
+                                  [`${f.name}`]: p,
+                                })
+                              }}
+                              className={`${data?.[f.name] === p ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 hover:dark:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white py-1 px-2`}
+                            >
+                              {p} {f.postfix}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    :
+                    <input
+                      type={f.type}
+                      placeholder={f.placeholder}
+                      value={data?.[f.name]}
+                      onChange={e => {
+                        console.log('[Options]', {
+                          ...data,
+                          [`${f.name}`]: e.target.value,
+                        })
+                        setData({
+                          ...data,
+                          [`${f.name}`]: e.target.value,
+                        })
+                      }}
+                      className="form-input border-0 focus:ring-0 rounded-lg"
+                    />
             }
           </div>
         ))}
