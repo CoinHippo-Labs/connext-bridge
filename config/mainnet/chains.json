@@ -31,7 +31,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   },
   {
     "id": "binance",
@@ -64,7 +65,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   },
   {
     "id": "polygon",
@@ -97,7 +99,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   },
   {
     "id": "avalanche",
@@ -130,7 +133,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   },
   {
     "id": "fantom",
@@ -163,7 +167,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   },
   {
     "id": "gnosis",
@@ -179,13 +184,13 @@
       {
         "chainId": "0x64",
         "chainName": "Gnosis",
-        "rpcUrls": ["https://rpc.gnosischain.com"],
+        "rpcUrls": ["https://rpc.ankr.com/gnosis"],
         "nativeCurrency": {
           "name": "xDAI",
           "symbol": "xDAI",
           "decimals": 18
         },
-        "blockExplorerUrls": ["https://blockscout.com/poa/xdai/"]
+        "blockExplorerUrls": ["https://blockscout.com/xdai/mainnet/"]
       }
     ],
     "explorer": {
@@ -197,7 +202,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   },
   {
     "id": "arbitrum",
@@ -230,7 +236,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "optimistic_rollups"
   },
   {
     "id": "optimism",
@@ -263,7 +270,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "optimistic_rollups"
   },
   {
     "id": "moonbeam",
@@ -297,7 +305,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   },
   {
     "id": "moonriver",
@@ -330,7 +339,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   },
   {
     "id": "fuse",
@@ -363,7 +373,8 @@
       "contract_path": "/tokens/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   },
   {
     "id": "milkomeda",
@@ -397,7 +408,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   },
   {
     "id": "boba",
@@ -430,7 +442,8 @@
       "contract_path": "/tokens/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   },
   {
     "id": "harmony",
@@ -463,7 +476,8 @@
       "contract_path": "/address/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   },
   {
     "id": "gather",
@@ -496,7 +510,8 @@
       "contract_path": "/address/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   },
   {
     "id": "cronos",
@@ -529,7 +544,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   },
   {
     "id": "evmos",
@@ -562,6 +578,7 @@
       "contract_path": "/address/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   }
 ]

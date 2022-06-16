@@ -92,7 +92,8 @@
         "chain_id": 9001,
         "contract_decimals": 6
       }
-    ]
+    ],
+    "preset": true
   },
   {
     "id": "usdc",
@@ -186,7 +187,8 @@
         "chain_id": 9001,
         "contract_decimals": 6
       }
-    ]
+    ],
+    "preset": true
   },
   {
     "id": "dai",
@@ -282,7 +284,8 @@
         "chain_id": 9001,
         "contract_decimals": 18
       }
-    ]
+    ],
+    "preset": true
   },
   {
     "id": "eth",
@@ -375,7 +378,8 @@
         "contract_decimals": 18,
         "symbol": "WETH"
       }
-    ]
+    ],
+    "preset": true
   },
   {
     "id": "wbtc",
@@ -466,7 +470,8 @@
         "chain_id": 9001,
         "contract_decimals": 8
       }
-    ]
+    ],
+    "preset": true
   },
   {
     "id": "grt",

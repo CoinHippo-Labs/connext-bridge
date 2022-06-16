@@ -39,6 +39,7 @@ const DEFAULT_OPTIONS = {
   to: '',
   infiniteApprove: true,
   callData: '',
+  forceSlow: false,
 }
 
 export default () => {
@@ -139,6 +140,12 @@ export default () => {
       delete params.asset
       router.push(`/${source_chain && destination_chain ? `${asset ? `${asset.toUpperCase()}-` : ''}from-${source_chain}-to-${destination_chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
     }
+    const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
+    const liquidity_amount = _.sum(asset_balances_data?.[destination_chain_data?.chain_id]?.filter(a => equals_ignore_case(a?.adopted, destination_contract_data?.contract_address))?.map(a => Number(utils.formatUnits(BigNumber.from(a?.amount || '0'), destination_decimals))) || [])
+    setOptions({
+      ...DEFAULT_OPTIONS,
+      forceSlow: destination_chain_data && asset_balances_data ? amount > liquidity_amount : false,
+    })
     setEstimateTrigger(moment().valueOf())
     setApproveResponse(null)
     setXcall(null)
@@ -387,6 +394,7 @@ export default () => {
               receivingAssetId: destination_contract_data?.contract_address,
               amount: utils.parseUnits(amount?.toString() || '0', decimals),
             })
+            console.log('[Estimate Fees]', response)
             if (!controller.signal.aborted) {
               const { relayerFee, routerFee } = { ...response }
               const native_token = source_chain_data?.provider_params?.[0]?.nativeCurrency
@@ -416,7 +424,7 @@ export default () => {
       const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
       const decimals = source_contract_data?.contract_decimals || 18
       const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
-      const { to, infiniteApprove, callData } = { ...options }
+      const { to, infiniteApprove, callData, forceSlow } = { ...options }
       const xcallParams = {
         params: {
           to: to || address,
@@ -425,6 +433,7 @@ export default () => {
           destinationDomain: destination_chain_data?.domain_id,
           callback: constants.AddressZero,
           recovery: address,
+          forceSlow: forceSlow || false,
         },
         transactingAssetId: source_contract_data?.contract_address,
         amount: utils.parseUnits(amount?.toString() || '0', decimals).toString(),
@@ -571,7 +580,10 @@ export default () => {
                 )}
                 <Options
                   disabled={disabled}
-                  applied={!_.isEqual(options, DEFAULT_OPTIONS)}
+                  applied={!_.isEqual(
+                    Object.fromEntries(Object.entries(options).filter(([k, v]) => ![].includes(k))),
+                    Object.fromEntries(Object.entries(DEFAULT_OPTIONS).filter(([k, v]) => ![].includes(k))),
+                  )}
                   initialData={options}
                   onChange={o => setOptions(o)}
                 />
@@ -1001,18 +1013,87 @@ export default () => {
                             </div>
                             <Switch
                               checked={typeof options?.infiniteApprove === 'boolean' ? options.infiniteApprove : false}
-                              onChange={() => setOptions({ ...options, infiniteApprove: !options?.infiniteApprove })}
+                              onChange={() => {
+                                console.log('[Transfer Confirmation]', {
+                                  bridge,
+                                  fee,
+                                  options: {
+                                    ...options,
+                                    to: recipient_address,
+                                    infiniteApprove: !options?.infiniteApprove,
+                                  },
+                                })
+                                setOptions({
+                                  ...options,
+                                  infiniteApprove: !options?.infiniteApprove,
+                                })}
+                              }
                               onColor="#3b82f6"
                               onHandleColor="#f8fafc"
                               offColor="#64748b"
                               offHandleColor="#f8fafc"
                             />
                           </div>
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
+                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
+                              Bridge Path
+                              <span className="hidden sm:block">:</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              {options.forceSlow ?
+                                <Popover
+                                  placement="top"
+                                  title="Slow Path"
+                                  content="Use bridge only (wait 30-60 mins, no fees)"
+                                  titleClassName="normal-case font-semibold py-1.5"
+                                >
+                                  <span className="uppercase font-bold">
+                                    Slow
+                                  </span>
+                                </Popover>
+                                :
+                                <Popover
+                                  placement="top"
+                                  title="Fast Path"
+                                  content="Connext Router (+ Nomad) (less than 3 mins, .05% fees)"
+                                  titleClassName="normal-case font-semibold py-1.5"
+                                >
+                                  <span className="uppercase font-bold">
+                                    Fast
+                                  </span>
+                                </Popover>
+                              }
+                              <Switch
+                                checked={typeof options?.forceSlow === 'boolean' ? options.forceSlow : false}
+                                onChange={() => {
+                                  console.log('[Transfer Confirmation]', {
+                                    bridge,
+                                    fee,
+                                    options: {
+                                      ...options,
+                                      to: recipient_address,
+                                      forceSlow: !options?.forceSlow,
+                                    },
+                                  })
+                                  setOptions({
+                                    ...options,
+                                    forceSlow: !options?.forceSlow,
+                                  })
+                                }}
+                                checkedIcon={false}
+                                uncheckedIcon={false}
+                                onColor="#3b82f6"
+                                onHandleColor="#f8fafc"
+                                offColor="#22c55e"
+                                offHandleColor="#f8fafc"
+                              />
+                            </div>
+                          </div>
                           {amount > liquidity_amount && (
                             <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2">
                               <BiMessageEdit size={20} className="mt-0.5" />
                               <span className="font-medium">
-                                Transfers may take up to a maximum of 30-60 mins
+                                Insufficient router liquidity. Funds must transfer through the bridge directly. (wait time est. 35-60 mins)
                               </span>
                             </div>
                           )}

@@ -31,7 +31,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   },
   {
     "id": "gorli",
@@ -65,7 +66,8 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   },
   {
     "id": "kovan",
@@ -99,6 +101,7 @@
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
-    }
+    },
+    "group" : "evm"
   }
 ]
