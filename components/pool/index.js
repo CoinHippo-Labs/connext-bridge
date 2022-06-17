@@ -231,77 +231,6 @@ export default () => {
     getBalances(chain)
   }
 
-  const call = async () => {
-    setCalling(true)
-    let success = false
-    if (sdk) {
-      const { chain, asset, amount } = { ...pool }
-      const chain_data = chains_data?.find(c => c?.id === chain)
-      const asset_data = assets_data?.find(a => a?.id === asset)
-      const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
-      const symbol = contract_data?.symbol || asset_data?.symbol
-      const decimals = contract_data?.contract_decimals || 18
-      const callParams = {
-      
-      }
-      let failed = false
-      // try {
-      //   const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(xcallParams.params.originDomain, xcallParams.transactingAssetId, xcallParams.amount, infiniteApprove)
-      //   if (approve_request) {
-      //     setApproving(true)
-      //     const approve_response = await signer.sendTransaction(approve_request)
-      //     const tx_hash = approve_response?.hash
-      //     setApproveResponse({ status: 'pending', message: `Wait for ${source_symbol} approval`, tx_hash })
-      //     const approve_receipt = await signer.provider.waitForTransaction(tx_hash)
-      //     setApproveResponse(approve_receipt?.status ?
-      //       null : {
-      //         status: 'failed',
-      //         message: `Failed to approve ${source_symbol}`,
-      //         tx_hash,
-      //       }
-      //     )
-      //     failed = !approve_receipt?.status
-      //     setApproving(false)
-      //   }
-      // } catch (error) {
-      //   setApproveResponse({ status: 'failed', message: error?.data?.message || error?.message })
-      //   failed = true
-      //   setApproving(false)
-      // }
-      if (!failed) {
-        // try {
-        //   const xcall_request = await sdk.nxtpSdkBase.xcall(xcallParams)
-        //   if (xcall_request) {
-        //     let gas_limit = await signer.estimateGas(xcall_request)
-        //     if (gas_limit) {
-        //       gas_limit = FixedNumber.fromString(gas_limit.toString()).mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())).round(0).toString().replace('.0', '');
-        //       xcall_request.gasLimit = gas_limit
-        //     }
-        //     const xcall_response = await signer.sendTransaction(xcall_request)
-        //     const tx_hash = xcall_response?.hash
-        //     const xcall_receipt = await signer.provider.waitForTransaction(tx_hash)
-        //     setXcall(xcall_receipt)
-        //     failed = !xcall_receipt?.status
-        //     setXcallResponse({
-        //       status: failed ? 'failed' : 'success',
-        //       message: failed ? 'Failed to send transaction' : `${source_symbol} transfer detected, waiting for execution.`,
-        //       tx_hash,
-        //     })
-        //     success = true
-        //   }
-        // } catch (error) {
-        //   setXcallResponse({ status: 'failed', message: error?.data?.message || error?.message })
-        //   failed = true
-        // }
-      }
-    }
-    setCalling(false)
-    if (sdk && address && success) {
-      await sleep(2 * 1000)
-      setPoolsTrigger(moment().valueOf())
-    }
-  }
-
   const { chain, asset, amount } = { ...pool }
   const chain_data = chains_data?.find(c => c?.id === chain)
   const asset_data = assets_data?.find(a => a?.id === asset)
@@ -340,14 +269,16 @@ export default () => {
             Manage Pool
           </h1>
         </div>
-        <div className="h-208 grid grid-flow-row grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6">
+        <div className={`${poolData ? '' : 'h-188'} grid grid-flow-row grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6`}>
           <div className="lg:col-span-2">
             <Info
-              data={poolData}
+              data={poolData || {}}
               onSelect={p => setPool(p)}
             />
           </div>
-          <Liquidity />
+          <Liquidity
+            data={poolData || {}}
+          />
         </div>
       </div>
     </div>

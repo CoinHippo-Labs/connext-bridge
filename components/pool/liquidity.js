@@ -13,7 +13,7 @@ import Image from '../image'
 import Wallet from '../wallet'
 import Alert from '../alerts'
 import Copy from '../copy'
-import { loader_color } from '../../lib/utils'
+import { number_format, ellipse, loader_color } from '../../lib/utils'
 
 const DEFAULT_POOL_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_POOL_SLIPPAGE_PERCENTAGE) || 0.5
 const DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES = Number(process.env.NEXT_PUBLIC_DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES) || 60
@@ -31,6 +31,7 @@ export default ({
   const [action, setAction] = useState(_.head(ACTIONS))
   const [amountX, setAmountX] = useState(null)
   const [amountY, setAmountY] = useState(null)
+  const [amount, setAmount] = useState(null)
   const [options, setOptions] = useState({
     slippage: DEFAULT_POOL_SLIPPAGE_PERCENTAGE,
     deadline: DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES,
@@ -42,6 +43,27 @@ export default ({
 
   const [calling, setCalling] = useState(null)
   const [callResponse, setCallResponse] = useState(null)
+
+  const reset = async origin => {
+    // const reset_pool = origin !== 'address'
+    // if (reset_pool) {
+    //   setPool({
+    //     ...pool,
+    //     amount: null,
+    //   })
+    // }
+
+    setApproving(null)
+    setApproveResponse(null)
+
+    setCalling(null)
+    setCallResponse(null)
+
+    // setPoolsTrigger(moment().valueOf())
+
+    // const { chain } = { ...pool }
+    // getBalances(chain)
+  }
 
   const call = async () => {
     setCalling(true)
@@ -117,7 +139,7 @@ export default ({
   const disabled = calling || approving
 
   return (
-    <div className="min-h-max border-2 border-blue-400 dark:border-blue-600 rounded-2xl space-y-3 p-6">
+    <div className="border-2 border-blue-400 dark:border-blue-600 rounded-2xl space-y-3 p-6">
       <div className="flex items-center justify-between space-x-3">
         <div className="flex items-center space-x-0.5">
           {ACTIONS.map((a, i) => (
@@ -178,7 +200,7 @@ export default ({
             <div className="w-full flex items-center justify-center">
               <BiPlus size={24} />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-2">
               {data?.asset_data && (
                 <div className="flex items-center justify-between">
                   <Balance
@@ -313,30 +335,228 @@ export default ({
             )}
           </div>
           <div className="flex items-end">
-            {web3_provider ?
-              <button
-                disabled={disabled || !amountX || !amountY}
-                onClick={() => call()}
-                className={`w-full ${disabled || !amountX || !amountY ? 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
-              >
-                Supply
-              </button>
+            {callResponse || approveResponse ?
+              [callResponse || approveResponse].map((r, i) => (
+                <Alert
+                  key={i}
+                  color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? callResponse ? 'bg-yellow-400 dark:bg-blue-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                  icon={r.status === 'failed' ?
+                    <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
+                    r.status === 'success' ?
+                      callResponse ?
+                        <div className="mr-3">
+                          <Watch color="white" width="20" height="20" />
+                        </div> : <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
+                      <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />
+                  }
+                  closeDisabled={true}
+                  rounded={true}
+                  className="rounded-xl p-4.5"
+                >
+                  <div className="flex items-center justify-between space-x-2">
+                    <span className="break-all">
+                      {ellipse(r.message, 128)}
+                    </span>
+                    <div className="flex items-center space-x-2">
+                      {r.status === 'failed' && r.message && (
+                        <Copy
+                          value={r.message}
+                          size={24}
+                          className="cursor-pointer text-slate-200 hover:text-white"
+                        />
+                      )}
+                      {r.status === 'failed' ?
+                        <button
+                          onClick={() => reset()}
+                          className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
+                        >
+                          <MdClose size={20} />
+                        </button>
+                        :
+                        r.status === 'success' ?
+                          <button
+                            onClick={() => reset()}
+                            className={`${xcallResponse ? 'bg-yellow-500 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
+                          >
+                            <MdClose size={20} />
+                          </button>
+                          :
+                          null
+                      }
+                    </div>
+                  </div>
+                </Alert>
+              ))
               :
-              <Wallet
-                connectChainId={data?.chain_data?.chain_id}
-                buttonConnectTitle="Connect Wallet"
-                className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
-              >
-                <span>
-                  Connect Wallet
-                </span>
-              </Wallet>
+              web3_provider ?
+                <button
+                  disabled={disabled || !amountX || !amountY}
+                  onClick={() => call()}
+                  className={`w-full ${disabled || !amountX || !amountY ? 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
+                >
+                  Supply
+                </button>
+                :
+                <Wallet
+                  connectChainId={data?.chain_data?.chain_id}
+                  buttonConnectTitle="Connect Wallet"
+                  className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center sm:space-x-2 py-3 px-2 sm:px-3"
+                >
+                  <span>
+                    Connect Wallet
+                  </span>
+                </Wallet>
             }
           </div>
         </>
         :
-        <>
-        </>
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <div className="text-slate-400 dark:text-slate-500 font-semibold">
+              Your Pool Tokens
+            </div>
+            <DebounceInput
+              debounceTimeout={300}
+              size="small"
+              type="number"
+              placeholder="0.00"
+              disabled={disabled || !data}
+              value={typeof amount === 'number' && amount >= 0 ? amount : ''}
+              onChange={e => {
+                const regex = /^[0-9.\b]+$/
+                let value
+                if (e.target.value === '' || regex.test(e.target.value)) {
+                  value = e.target.value
+                }
+                value = value < 0 ? 0 : value
+                setAmount(value && !isNaN(value) ? Number(value) : value)
+              }}
+              onWheel={e => e.target.blur()}
+              className={`w-full bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled || !data ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl font-mono text-lg font-semibold text-right py-2 px-3`}
+            />
+            <div className="flex items-center justify-end space-x-2.5">
+              {[0.25, 0.5, 0.75, 1.0].map((p, i) => (
+                <div
+                  key={i}
+                  onClick={() => setAmount(p * data?.value)}
+                  className={`${disabled || !data?.asset_data?.id ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === data?.value ? 'bg-slate-200 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-semibold'} rounded-lg shadow dark:shadow-slate-500 py-0.5 px-2`}
+                >
+                  {p * 100} %
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="bg-slate-50 dark:bg-slate-900 rounded-lg space-y-5 py-6 px-4">
+            <div className="flex items-center justify-between space-x-3">
+              {web3_provider ?
+                data ?
+                  <span className="text-base">
+                    {number_format(data.amountX || 0, '0,0.000000', true)}
+                  </span>
+                  :
+                  <TailSpin color={loader_color(theme)} width="24" height="24" />
+                :
+                <span className="text-base">
+                  -
+                </span>
+              }
+              <div className="text-base font-bold">
+                {data?.asset_data?.symbol}
+              </div>
+            </div>
+            <div className="flex items-center justify-between space-x-3">
+              {web3_provider ?
+                data ?
+                  <span className="text-base">
+                    {number_format(data.amountY || 0, '0,0.000000', true)}
+                  </span>
+                  :
+                  <TailSpin color={loader_color(theme)} width="24" height="24" />
+                :
+                <span className="text-base">
+                  -
+                </span>
+              }
+              <div className="text-base font-bold">
+                {data?.asset_data?.symbol}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-end">
+            {callResponse || approveResponse ?
+              [callResponse || approveResponse].map((r, i) => (
+                <Alert
+                  key={i}
+                  color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? callResponse ? 'bg-yellow-400 dark:bg-blue-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                  icon={r.status === 'failed' ?
+                    <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
+                    r.status === 'success' ?
+                      callResponse ?
+                        <div className="mr-3">
+                          <Watch color="white" width="20" height="20" />
+                        </div> : <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
+                      <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />
+                  }
+                  closeDisabled={true}
+                  rounded={true}
+                  className="rounded-xl p-4.5"
+                >
+                  <div className="flex items-center justify-between space-x-2">
+                    <span className="break-all">
+                      {ellipse(r.message, 128)}
+                    </span>
+                    <div className="flex items-center space-x-2">
+                      {r.status === 'failed' && r.message && (
+                        <Copy
+                          value={r.message}
+                          size={24}
+                          className="cursor-pointer text-slate-200 hover:text-white"
+                        />
+                      )}
+                      {r.status === 'failed' ?
+                        <button
+                          onClick={() => reset()}
+                          className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
+                        >
+                          <MdClose size={20} />
+                        </button>
+                        :
+                        r.status === 'success' ?
+                          <button
+                            onClick={() => reset()}
+                            className={`${xcallResponse ? 'bg-yellow-500 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
+                          >
+                            <MdClose size={20} />
+                          </button>
+                          :
+                          null
+                      }
+                    </div>
+                  </div>
+                </Alert>
+              ))
+              :
+              web3_provider ?
+                <button
+                  disabled={disabled || !amount}
+                  onClick={() => call()}
+                  className={`w-full ${disabled || !amount ? 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
+                >
+                  Remove
+                </button>
+                :
+                <Wallet
+                  connectChainId={data?.chain_data?.chain_id}
+                  buttonConnectTitle="Connect Wallet"
+                  className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center sm:space-x-2 py-3 px-2 sm:px-3"
+                >
+                  <span>
+                    Connect Wallet
+                  </span>
+                </Wallet>
+            }
+          </div>
+        </div>
       }
     </div>
   )
