@@ -14,6 +14,7 @@ import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit } from '
 import { GiPartyPopper } from 'react-icons/gi'
 
 import Announcement from '../announcement'
+import PoweredBy from '../powered-by'
 import Options from './options'
 import GasPrice from '../gas-price'
 import SelectChain from '../select/chain'
@@ -1272,6 +1273,7 @@ export default () => {
           {['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) && (
             <Faucet />
           )}
+          <PoweredBy />
         </div>
       </div>
       <div className="col-span-1 lg:col-span-2">
