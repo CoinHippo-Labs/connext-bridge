@@ -5,10 +5,6 @@
     "domain_id": "6648936",
     "name": "Ethereum",
     "short_name": "ETH",
-    "image": "/logos/chains/ethereum.png",
-    "website": "https://ethereum.org",
-    "coingecko_id": "ethereum",
-    "color": "#c0c2c3",
     "provider_params": [
       {
         "chainId": "0x1",
@@ -32,6 +28,10 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
+    "image": "/logos/chains/ethereum.png",
+    "color": "#c0c2c3",
+    "website": "https://ethereum.org",
+    "coingecko_id": "ethereum",
     "group" : "evm"
   },
   {
@@ -39,10 +39,6 @@
     "chain_id": 56,
     "name": "BNB Chain",
     "short_name": "BNB",
-    "image": "/logos/chains/binance.png",
-    "website": "https://bnbchain.world",
-    "coingecko_id": "binancecoin",
-    "color": "#e8b30b",
     "provider_params": [
       {
         "chainId": "0x38",
@@ -66,6 +62,10 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
+    "image": "/logos/chains/binance.png",
+    "color": "#e8b30b",
+    "website": "https://bnbchain.world",
+    "coingecko_id": "binancecoin",
     "group" : "evm"
   },
   {
@@ -73,10 +73,6 @@
     "chain_id": 137,
     "name": "Polygon",
     "short_name": "MATIC",
-    "image": "/logos/chains/polygon.png",
-    "website": "https://polygon.technology",
-    "coingecko_id": "matic-network",
-    "color": "#8247e5",
     "provider_params": [
       {
         "chainId": "0x89",
@@ -100,6 +96,10 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
+    "image": "/logos/chains/polygon.png",
+    "color": "#8247e5",
+    "website": "https://polygon.technology",
+    "coingecko_id": "matic-network",
     "group" : "evm"
   },
   {
@@ -107,10 +107,6 @@
     "chain_id": 43114,
     "name": "Avalanche",
     "short_name": "AVAX",
-    "image": "/logos/chains/avalanche.png",
-    "website": "https://avax.network",
-    "coingecko_id": "avalanche-2",
-    "color": "#e84143",
     "provider_params": [
       {
         "chainId": "0xa86a",
@@ -134,120 +130,17 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
+    "image": "/logos/chains/avalanche.png",
+    "color": "#e84143",
+    "website": "https://avax.network",
+    "coingecko_id": "avalanche-2",
     "group" : "evm"
-  },
-  {
-    "id": "fantom",
-    "chain_id": 250,
-    "name": "Fantom",
-    "short_name": "FTM",
-    "image": "/logos/chains/fantom.png",
-    "website": "https://fantom.foundation",
-    "coingecko_id": "fantom",
-    "color": "#1869ff",
-    "provider_params": [
-      {
-        "chainId": "0xfa",
-        "chainName": "Fantom",
-        "rpcUrls": ["https://rpc.ftm.tools", "https://rpc.ankr.com/fantom", "https://rpcapi.fantom.network"],
-        "nativeCurrency": {
-          "name": "Fantom",
-          "symbol": "FTM",
-          "decimals": 18
-        },
-        "blockExplorerUrls": ["https://ftmscan.com"]
-      }
-    ],
-    "explorer": {
-      "name": "FTMScan",
-      "url": "https://ftmscan.com",
-      "icon": "/logos/explorers/ftmscan.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "group" : "evm"
-  },
-  {
-    "id": "gnosis",
-    "chain_id": 100,
-    "domain_id": "2019844457",
-    "name": "Gnosis",
-    "short_name": "GNO",
-    "image": "/logos/chains/gnosis.png",
-    "website": "https://gnosischain.com",
-    "coingecko_id": "gnosis",
-    "color": "#48a9a6",
-    "provider_params": [
-      {
-        "chainId": "0x64",
-        "chainName": "Gnosis",
-        "rpcUrls": ["https://rpc.ankr.com/gnosis"],
-        "nativeCurrency": {
-          "name": "xDAI",
-          "symbol": "xDAI",
-          "decimals": 18
-        },
-        "blockExplorerUrls": ["https://blockscout.com/xdai/mainnet/"]
-      }
-    ],
-    "explorer": {
-      "name": "BlockScout",
-      "url": "https://blockscout.com/xdai/mainnet",
-      "icon": "/logos/explorers/blockscout.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "group" : "evm"
-  },
-  {
-    "id": "arbitrum",
-    "chain_id": 42161,
-    "name": "Arbitrum",
-    "short_name": "ARB",
-    "image": "/logos/chains/arbitrum.png",
-    "website": "https://arbitrum.io",
-    "coingecko_id": "ethereum",
-    "color": "#28a0f0",
-    "provider_params": [
-      {
-        "chainId": "0xa4b1",
-        "chainName": "Arbitrum",
-        "rpcUrls": ["https://arb1.arbitrum.io/rpc", "https://rpc.ankr.com/arbitrum"],
-        "nativeCurrency": {
-          "name": "Arbitrum Ether",
-          "symbol": "aETH",
-          "decimals": 18
-        },
-        "blockExplorerUrls": ["https://arbiscan.io"]
-      }
-    ],
-    "explorer": {
-      "name": "Arbiscan",
-      "url": "https://arbiscan.io",
-      "icon": "/logos/explorers/arbiscan.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "group" : "optimistic_rollups"
   },
   {
     "id": "optimism",
     "chain_id": 10,
     "name": "Optimism",
     "short_name": "OPT",
-    "image": "/logos/chains/optimism.png",
-    "website": "https://optimism.io",
-    "coingecko_id": "ethereum",
-    "color": "#dc2626",
     "provider_params": [
       {
         "chainId": "0xa",
@@ -271,7 +164,114 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
+    "image": "/logos/chains/optimism.png",
+    "color": "#dc2626",
+    "website": "https://optimism.io",
+    "coingecko_id": "optimism",
     "group" : "optimistic_rollups"
+  },
+  {
+    "id": "arbitrum",
+    "chain_id": 42161,
+    "name": "Arbitrum",
+    "short_name": "ARB",
+    "provider_params": [
+      {
+        "chainId": "0xa4b1",
+        "chainName": "Arbitrum",
+        "rpcUrls": ["https://arb1.arbitrum.io/rpc", "https://rpc.ankr.com/arbitrum"],
+        "nativeCurrency": {
+          "name": "Arbitrum Ether",
+          "symbol": "aETH",
+          "decimals": 18
+        },
+        "blockExplorerUrls": ["https://arbiscan.io"]
+      }
+    ],
+    "explorer": {
+      "name": "Arbiscan",
+      "url": "https://arbiscan.io",
+      "icon": "/logos/explorers/arbiscan.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/arbitrum.png",
+    "color": "#28a0f0",
+    "website": "https://arbitrum.io",
+    "coingecko_id": "arbitrum",
+    "group" : "optimistic_rollups"
+  },
+  {
+    "id": "fantom",
+    "chain_id": 250,
+    "name": "Fantom",
+    "short_name": "FTM",
+    "provider_params": [
+      {
+        "chainId": "0xfa",
+        "chainName": "Fantom",
+        "rpcUrls": ["https://rpc.ftm.tools", "https://rpc.ankr.com/fantom", "https://rpcapi.fantom.network"],
+        "nativeCurrency": {
+          "name": "Fantom",
+          "symbol": "FTM",
+          "decimals": 18
+        },
+        "blockExplorerUrls": ["https://ftmscan.com"]
+      }
+    ],
+    "explorer": {
+      "name": "FTMScan",
+      "url": "https://ftmscan.com",
+      "icon": "/logos/explorers/ftmscan.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/fantom.png",
+    "color": "#1869ff",
+    "website": "https://fantom.foundation",
+    "coingecko_id": "fantom",
+    "group" : "evm"
+  },
+  {
+    "id": "gnosis",
+    "chain_id": 100,
+    "domain_id": "2019844457",
+    "name": "Gnosis",
+    "short_name": "GNO",
+    "provider_params": [
+      {
+        "chainId": "0x64",
+        "chainName": "Gnosis",
+        "rpcUrls": ["https://rpc.ankr.com/gnosis"],
+        "nativeCurrency": {
+          "name": "xDAI",
+          "symbol": "xDAI",
+          "decimals": 18
+        },
+        "blockExplorerUrls": ["https://blockscout.com/xdai/mainnet/"]
+      }
+    ],
+    "explorer": {
+      "name": "BlockScout",
+      "url": "https://blockscout.com/xdai/mainnet",
+      "icon": "/logos/explorers/blockscout.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/gnosis.png",
+    "color": "#48a9a6",
+    "website": "https://gnosischain.com",
+    "coingecko_id": "gnosis",
+    "group" : "evm"
   },
   {
     "id": "moonbeam",
@@ -279,10 +279,6 @@
     "domain_id": "1650811245",
     "name": "Moonbeam",
     "short_name": "MBEAM",
-    "image": "/logos/chains/moonbeam.png",
-    "website": "https://moonbeam.network",
-    "coingecko_id": "moonbeam",
-    "color": "#53cbc8",
     "provider_params": [
       {
         "chainId": "0x504",
@@ -306,6 +302,10 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
+    "image": "/logos/chains/moonbeam.png",
+    "color": "#53cbc8",
+    "website": "https://moonbeam.network",
+    "coingecko_id": "moonbeam",
     "group" : "evm"
   },
   {
@@ -313,10 +313,6 @@
     "chain_id": 1285,
     "name": "Moonriver",
     "short_name": "MOVR",
-    "image": "/logos/chains/moonriver.png",
-    "website": "https://moonbeam.network/networks/moonriver",
-    "coingecko_id": "moonriver",
-    "color": "#e6af07",
     "provider_params": [
       {
         "chainId": "0x505",
@@ -340,6 +336,10 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
+    "image": "/logos/chains/moonriver.png",
+    "color": "#e6af07",
+    "website": "https://moonbeam.network/networks/moonriver",
+    "coingecko_id": "moonriver",
     "group" : "evm"
   },
   {
@@ -347,10 +347,6 @@
     "chain_id": 122,
     "name": "Fuse",
     "short_name": "FUSE",
-    "image": "/logos/chains/fuse.png",
-    "website": "https://fuse.io",
-    "coingecko_id": "fuse-network-token",
-    "color": "#fde047",
     "provider_params": [
       {
         "chainId": "0x7a",
@@ -374,109 +370,10 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
-    "group" : "evm"
-  },
-  {
-    "id": "milkomeda",
-    "chain_id": 2001,
-    "domain_id": "25393",
-    "name": "Milkomeda",
-    "short_name": "MMEDA",
-    "image": "/logos/chains/milkomeda.png",
-    "website": "https://milkomeda.com",
-    "coingecko_id": "cardano",
-    "color": "#a4b2d8",
-    "provider_params": [
-      {
-        "chainId": "0x7d1",
-        "chainName": "Milkomeda",
-        "rpcUrls": ["https://rpc.c1.milkomeda.com:8545"],
-        "nativeCurrency": {
-          "name": "MilkADA",
-          "symbol": "mADA",
-          "decimals": 18
-        },
-        "blockExplorerUrls": ["https://rpc.c1.milkomeda.com:4000"]
-      }
-    ],
-    "explorer": {
-      "name": "BlockScout",
-      "url": "https://rpc.c1.milkomeda.com:4000",
-      "icon": "/logos/explorers/blockscout.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "group" : "evm"
-  },
-  {
-    "id": "boba",
-    "chain_id": 288,
-    "name": "Boba",
-    "short_name": "BOBA",
-    "image": "/logos/chains/boba.png",
-    "website": "https://boba.network",
-    "coingecko_id": "boba-network",
-    "color": "#cbff00",
-    "provider_params": [
-      {
-        "chainId": "0x120",
-        "chainName": "Boba",
-        "rpcUrls": ["https://mainnet.boba.network"],
-        "nativeCurrency": {
-          "name": "Ethereum",
-          "symbol": "ETH",
-          "decimals": 18
-        },
-        "blockExplorerUrls": ["https://blockexplorer.boba.network"]
-      }
-    ],
-    "explorer": {
-      "name": "Boba",
-      "url": "https://blockexplorer.boba.network",
-      "icon": "/logos/explorers/boba.png",
-      "block_path": "/blocks/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/tokens/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "group" : "evm"
-  },
-  {
-    "id": "harmony",
-    "chain_id": 1666600000,
-    "name": "Harmony",
-    "short_name": "HONE",
-    "image": "/logos/chains/harmony.png",
-    "website": "https://harmony.one",
-    "coingecko_id": "harmony",
-    "color": "#42decd",
-    "provider_params": [
-      {
-        "chainId": "0x120",
-        "chainName": "Harmony",
-        "rpcUrls": ["https://api.harmony.one", "https://rpc.ankr.com/harmony"],
-        "nativeCurrency": {
-          "name": "One",
-          "symbol": "ONE",
-          "decimals": 18
-        },
-        "blockExplorerUrls": ["https://explorer.harmony.one"]
-      }
-    ],
-    "explorer": {
-      "name": "Harmony",
-      "url": "https://explorer.harmony.one",
-      "icon": "/logos/explorers/harmony.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/address/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
+    "image": "/logos/chains/fuse.png",
+    "color": "#fde047",
+    "website": "https://fuse.io",
+    "coingecko_id": "fuse-network-token",
     "group" : "evm"
   },
   {
@@ -484,10 +381,6 @@
     "chain_id": 192837465,
     "name": "Gather",
     "short_name": "GTH",
-    "image": "/logos/chains/gather.png",
-    "website": "https://gather.network",
-    "coingecko_id": "gather",
-    "color": "#3c4fe0",
     "provider_params": [
       {
         "chainId": "0xb7e7759",
@@ -511,6 +404,45 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
+    "image": "/logos/chains/gather.png",
+    "color": "#3c4fe0",
+    "website": "https://gather.network",
+    "coingecko_id": "gather",
+    "group" : "evm"
+  },
+  {
+    "id": "milkomeda",
+    "chain_id": 2001,
+    "domain_id": "25393",
+    "name": "Milkomeda",
+    "short_name": "MMEDA",
+    "provider_params": [
+      {
+        "chainId": "0x7d1",
+        "chainName": "Milkomeda",
+        "rpcUrls": ["https://rpc.c1.milkomeda.com:8545"],
+        "nativeCurrency": {
+          "name": "MilkADA",
+          "symbol": "mADA",
+          "decimals": 18
+        },
+        "blockExplorerUrls": ["https://rpc.c1.milkomeda.com:4000"]
+      }
+    ],
+    "explorer": {
+      "name": "BlockScout",
+      "url": "https://rpc.c1.milkomeda.com:4000",
+      "icon": "/logos/explorers/blockscout.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/milkomeda.png",
+    "color": "#a4b2d8",
+    "website": "https://milkomeda.com",
+    "coingecko_id": "cardano",
     "group" : "evm"
   },
   {
@@ -518,10 +450,6 @@
     "chain_id": 25,
     "name": "Cronos",
     "short_name": "CRO",
-    "image": "/logos/chains/cronos.png",
-    "website": "https://crypto.com",
-    "coingecko_id": "crypto-com-chain",
-    "color": "#012d74",
     "provider_params": [
       {
         "chainId": "0x19",
@@ -545,6 +473,10 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
+    "image": "/logos/chains/cronos.png",
+    "color": "#012d74",
+    "website": "https://crypto.com",
+    "coingecko_id": "crypto-com-chain",
     "group" : "evm"
   },
   {
@@ -552,10 +484,6 @@
     "chain_id": 9001,
     "name": "Evmos",
     "short_name": "EVMOS",
-    "image": "/logos/chains/evmos.png",
-    "website": "https://evmos.org",
-    "coingecko_id": "evmos",
-    "color": "#1f1577",
     "provider_params": [
       {
         "chainId": "0x2329",
@@ -579,6 +507,78 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
+    "image": "/logos/chains/evmos.png",
+    "color": "#1f1577",
+    "website": "https://evmos.org",
+    "coingecko_id": "evmos",
+    "group" : "evm"
+  },
+  {
+    "id": "boba",
+    "chain_id": 288,
+    "name": "Boba",
+    "short_name": "BOBA",
+    "provider_params": [
+      {
+        "chainId": "0x120",
+        "chainName": "Boba",
+        "rpcUrls": ["https://mainnet.boba.network"],
+        "nativeCurrency": {
+          "name": "Ethereum",
+          "symbol": "ETH",
+          "decimals": 18
+        },
+        "blockExplorerUrls": ["https://blockexplorer.boba.network"]
+      }
+    ],
+    "explorer": {
+      "name": "Boba",
+      "url": "https://blockexplorer.boba.network",
+      "icon": "/logos/explorers/boba.png",
+      "block_path": "/blocks/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/tokens/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/boba.png",
+    "color": "#cbff00",
+    "website": "https://boba.network",
+    "coingecko_id": "boba-network",
+    "group" : "evm"
+  },
+  {
+    "id": "harmony",
+    "chain_id": 1666600000,
+    "name": "Harmony",
+    "short_name": "HONE",
+    "provider_params": [
+      {
+        "chainId": "0x120",
+        "chainName": "Harmony",
+        "rpcUrls": ["https://api.harmony.one", "https://rpc.ankr.com/harmony"],
+        "nativeCurrency": {
+          "name": "One",
+          "symbol": "ONE",
+          "decimals": 18
+        },
+        "blockExplorerUrls": ["https://explorer.harmony.one"]
+      }
+    ],
+    "explorer": {
+      "name": "Harmony",
+      "url": "https://explorer.harmony.one",
+      "icon": "/logos/explorers/harmony.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/address/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/harmony.png",
+    "color": "#42decd",
+    "website": "https://harmony.one",
+    "coingecko_id": "harmony",
     "group" : "evm"
   }
 ]

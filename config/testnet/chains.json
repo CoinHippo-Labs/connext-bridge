@@ -5,10 +5,6 @@
     "domain_id": "1111",
     "name": "Rinkeby",
     "short_name": "RIN",
-    "image": "/logos/chains/rinkeby.png",
-    "website": "https://rinkeby.io",
-    "coingecko_id": "ethereum",
-    "color": "#c0c2c3",
     "provider_params": [
       {
         "chainId": "0x4",
@@ -32,6 +28,10 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
+    "image": "/logos/chains/rinkeby.png",
+    "color": "#c0c2c3",
+    "website": "https://rinkeby.io",
+    "coingecko_id": "ethereum",
     "group" : "evm"
   },
   {
@@ -40,10 +40,6 @@
     "domain_id": "3331",
     "name": "Görli",
     "short_name": "GOR",
-    "image": "/logos/chains/gorli.png",
-    "website": "https://goerli.net",
-    "coingecko_id": "ethereum",
-    "color": "#c0c2c3",
     "provider_params": [
       {
         "chainId": "0x5",
@@ -67,6 +63,10 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
+    "image": "/logos/chains/gorli.png",
+    "color": "#c0c2c3",
+    "website": "https://goerli.net",
+    "coingecko_id": "ethereum",
     "group" : "evm"
   }
 ]
