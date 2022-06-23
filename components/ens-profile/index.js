@@ -20,17 +20,25 @@ export default ({
     const getData = async () => {
       if (address) {
         const addresses = [address.toLowerCase()].filter(a => a && !ens_data?.[a])
-        const ens_data = await getEns(addresses)
-        if (ens_data) {
+        if (addresses.length > 0) {
+          let _ens_data = await getEns(addresses)
+          addresses.forEach(a => {
+            if (!_ens_data?.[a]) {
+              _ens_data = {
+                ..._ens_data,
+                [`${a}`]: {},
+              }
+            }
+          })
           dispatch({
             type: ENS_DATA,
-            value: ens_data,
+            value: { ..._ens_data },
           })
         }
       }
     }
     getData()
-  }, [address])
+  }, [address, ens_data])
 
   address = address?.toLowerCase()
 
