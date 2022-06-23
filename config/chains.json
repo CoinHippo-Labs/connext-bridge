@@ -400,36 +400,6 @@
     "image": "/logos/chains/mainnet/boba.png"
   },
   {
-    "id": "harmony",
-    "title": "Harmony One",
-    "short_name": "HONE",
-    "chain_id": 1666600000,
-    "provider_params": [
-      {
-        "chainId": "0x63564c40",
-        "chainName": "Harmony One",
-        "rpcUrls": ["https://api.harmony.one", "https://rpc.ankr.com/harmony"],
-        "nativeCurrency": {
-          "name": "One",
-          "symbol": "ONE",
-          "decimals": 18
-        },
-        "blockExplorerUrls": ["https://explorer.harmony.one"]
-      }
-    ],
-    "explorer": {
-      "name": "Harmony",
-      "url": "https://explorer.harmony.one",
-      "icon": "/logos/explorers/harmony.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/address/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/mainnet/harmony.png"
-  },
-  {
     "id": "gather",
     "title": "Gather Network",
     "short_name": "GTH",
