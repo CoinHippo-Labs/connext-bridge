@@ -546,39 +546,5 @@
     "website": "https://boba.network",
     "coingecko_id": "boba-network",
     "group" : "evm"
-  },
-  {
-    "id": "harmony",
-    "chain_id": 1666600000,
-    "name": "Harmony",
-    "short_name": "HONE",
-    "provider_params": [
-      {
-        "chainId": "0x120",
-        "chainName": "Harmony",
-        "rpcUrls": ["https://api.harmony.one", "https://rpc.ankr.com/harmony"],
-        "nativeCurrency": {
-          "name": "One",
-          "symbol": "ONE",
-          "decimals": 18
-        },
-        "blockExplorerUrls": ["https://explorer.harmony.one"]
-      }
-    ],
-    "explorer": {
-      "name": "Harmony",
-      "url": "https://explorer.harmony.one",
-      "icon": "/logos/explorers/harmony.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/address/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/harmony.png",
-    "color": "#42decd",
-    "website": "https://harmony.one",
-    "coingecko_id": "harmony",
-    "group" : "evm"
   }
 ]
