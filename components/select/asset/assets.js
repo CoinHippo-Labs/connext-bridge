@@ -8,7 +8,7 @@ export default ({
   value,
   inputSearch,
   onSelect,
-  chain.
+  chain,
 }) => {
   const { chains, assets, balances } = useSelector(state => ({ chains: state.chains, assets: state.assets, balances: state.balances }), shallowEqual)
   const { chains_data } = { ...chains }
