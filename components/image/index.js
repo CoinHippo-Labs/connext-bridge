@@ -5,7 +5,7 @@ const loader = ({ src, width, quality }) => `${process.env.NEXT_PUBLIC_IMAGE_OPT
 export default ({ ...rest }) => {
   return (
     <Image
-      {...rest}
+      { ...rest }
       loader={loader}
     />
   )

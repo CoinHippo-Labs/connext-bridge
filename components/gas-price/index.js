@@ -54,8 +54,9 @@ export default ({
         </>
         :
         typeof gasPrice === 'string' ?
-          <span>-</span>
-          :
+          <span>
+            -
+          </span> :
           <RotatingSquare color={loader_color('light')} width="16" height="16" />
       }
     </div>

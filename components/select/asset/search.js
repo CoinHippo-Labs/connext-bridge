@@ -3,7 +3,11 @@ import { FiSearch } from 'react-icons/fi'
 
 import Assets from './assets'
 
-export default ({ value, onSelect, chain }) => {
+export default ({
+  value,
+  onSelect,
+  chain,
+}) => {
   const [inputSearch, setInputSearch] = useState('')
 
   return (

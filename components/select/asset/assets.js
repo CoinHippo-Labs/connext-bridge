@@ -4,7 +4,12 @@ import _ from 'lodash'
 import Image from '../../image'
 import { number_format, equals_ignore_case } from '../../../lib/utils'
 
-export default ({ value, inputSearch, onSelect, chain }) => {
+export default ({
+  value,
+  inputSearch,
+  onSelect,
+  chain.
+}) => {
   const { chains, assets, balances } = useSelector(state => ({ chains: state.chains, assets: state.assets, balances: state.balances }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }

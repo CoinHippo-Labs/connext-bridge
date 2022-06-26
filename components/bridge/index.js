@@ -449,7 +449,11 @@ export default () => {
           setApproving(true)
           const approve_response = await signer.sendTransaction(approve_request)
           const tx_hash = approve_response?.hash
-          setApproveResponse({ status: 'pending', message: `Wait for ${source_symbol} approval`, tx_hash })
+          setApproveResponse({
+            status: 'pending',
+            message: `Wait for ${source_symbol} approval`,
+            tx_hash,
+          })
           const approve_receipt = await signer.provider.waitForTransaction(tx_hash)
           setApproveResponse(approve_receipt?.status ?
             null : {

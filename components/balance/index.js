@@ -3,7 +3,11 @@ import { RotatingSquare } from 'react-loader-spinner'
 
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
 
-export default ({ chainId, asset, className = '' }) => {
+export default ({
+  chainId,
+  asset,
+  className = '',
+}) => {
   const { preferences, assets, wallet, balances } = useSelector(state => ({ preferences: state.preferences, assets: state.assets, wallet: state.wallet, balances: state.balances }), shallowEqual)
   const { theme } = { ...preferences }
   const { assets_data } = { ...assets }
@@ -27,11 +31,11 @@ export default ({ chainId, asset, className = '' }) => {
           <span className="font-semibold">
             {symbol}
           </span>
-        </>
-        :
+        </> :
         typeof amount === 'string' ?
-          <span>n/a</span>
-          :
+          <span>
+            n/a
+          </span> :
           web3_provider && (
             <RotatingSquare color={loader_color(theme)} width="16" height="16" />
           )

@@ -108,8 +108,7 @@ export default () => {
           Faucet
         </span>
         {collapse ?
-          <BiChevronDown size={18} />
-          :
+          <BiChevronDown size={18} /> :
           <BiChevronUp size={18} />
         }
       </button>

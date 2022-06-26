@@ -18,7 +18,9 @@ export default () => {
       className="items-start"
     >
       <div className="block leading-4 text-xs xl:text-base font-medium mr-1.5">
-        <Linkify>{parse(announcement_data)}</Linkify>
+        <Linkify>
+          {parse(announcement_data)}
+        </Linkify>
       </div>
     </Alert>
   )
