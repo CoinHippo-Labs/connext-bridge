@@ -667,7 +667,27 @@
     "contracts": [
       {
         "contract_address": "0xbd80cfa9d93a87d1bb895f810ea348e496611cd4",
+        "chain_id": 56,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0xbd80cfa9d93a87d1bb895f810ea348e496611cd4",
         "chain_id": 137,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0x2bf2ba13735160624a0feae98f6ac8f70885ea61",
+        "chain_id": 42161,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0xbd80cfa9d93a87d1bb895f810ea348e496611cd4",
+        "chain_id": 10,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0xbd80cfa9d93a87d1bb895f810ea348e496611cd4",
+        "chain_id": 43114,
         "contract_decimals": 18
       },
       {
