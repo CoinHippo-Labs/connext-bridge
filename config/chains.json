@@ -247,7 +247,6 @@
     "title": "Moonbeam",
     "short_name": "MBEAM",
     "chain_id": 1284,
-    "disabled": true,
     "provider_params": [
       {
         "chainId": "0x504",
@@ -282,7 +281,6 @@
     "title": "Moonriver",
     "short_name": "MOVR",
     "chain_id": 1285,
-    "disabled": true,
     "provider_params": [
       {
         "chainId": "0x505",
