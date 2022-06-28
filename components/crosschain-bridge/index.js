@@ -1089,7 +1089,7 @@ export default function CrosschainBridge() {
                 className="items-start"
               >
                 <div className="block leading-4 text-xs xl:text-base font-medium">
-                  <span className="mr-1.5">
+                  <span className="mr-1.5" style={{ wordBreak: 'break-word' }}>
                     <Linkify>{parse(announcement_data?.data)}</Linkify>
                   </span>
                 </div>
