@@ -71,7 +71,7 @@
       {
         "chainId": "0x89",
         "chainName": "Matic Mainnet",
-        "rpcUrls": ["https://polygon-rpc.com", "https://rpc.ankr.com/polygon"],
+        "rpcUrls": ["https://rpc.ankr.com/polygon"],
         "nativeCurrency": {
           "name": "Matic",
           "symbol": "MATIC",
