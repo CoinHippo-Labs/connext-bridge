@@ -10,7 +10,7 @@ import { TailSpin, Oval, Watch } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
-import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit } from 'react-icons/bi'
+import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit, BiEditAlt, BiCheckCircle } from 'react-icons/bi'
 import { GiPartyPopper } from 'react-icons/gi'
 
 import Announcement from '../announcement'
@@ -35,13 +35,15 @@ import { currency_symbol } from '../../lib/object/currency'
 import { params_to_obj, number_format, ellipse, equals_ignore_case, loader_color, sleep } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
+const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT) || 0.05
 const FEE_ESTIMATE_COOLDOWN = Number(process.env.NEXT_PUBLIC_FEE_ESTIMATE_COOLDOWN) || 30
 const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT) || 1
+const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE) || 3
 const DEFAULT_OPTIONS = {
   to: '',
-  infiniteApprove: true,
+  infiniteApprove: false,
   callData: '',
-  slippage: 0.5,
+  slippage: DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE,
   forceSlow: false,
 }
 
@@ -64,6 +66,7 @@ export default () => {
   const [bridge, setBridge] = useState({})
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [controller, setController] = useState(null)
+  const [slippageEditing, setSlippageEditing] = useState(false)
 
   const [fee, setFee] = useState(null)
   const [feeEstimating, setFeeEstimating] = useState(null)
@@ -207,12 +210,9 @@ export default () => {
   useEffect(() => {
     if (typeof feeEstimateCooldown === 'number') {
       if (feeEstimateCooldown === 0) {
-        const { amount } = { ...bridge }
-        if (typeof amount !== 'number') {
-          setEstimateTrigger(moment().valueOf())
-        }
+        setEstimateTrigger(moment().valueOf())
       }
-      else {
+      else if (fee) {
         const interval = setInterval(() => {
           const _feeEstimateCooldown = feeEstimateCooldown - 1
           if (_feeEstimateCooldown > -1) {
@@ -222,14 +222,14 @@ export default () => {
         return () => clearInterval(interval)
       }
     }
-  }, [feeEstimateCooldown])
+  }, [fee, feeEstimateCooldown])
 
   // reset fee estimate cooldown
   useEffect(() => {
     if (typeof feeEstimating === 'boolean' && !feeEstimating) {
       setFeeEstimateCooldown(FEE_ESTIMATE_COOLDOWN)
     }
-  }, [feeEstimating])
+  }, [fee, feeEstimating])
 
   // trigger estimate
   useEffect(() => {
@@ -381,38 +381,33 @@ export default () => {
       const destination_asset_data = assets_data?.find(a => a?.id === asset)
       const destination_contract_data = destination_asset_data?.contracts?.find(c => c?.chain_id === destination_chain_data?.chain_id)
 
-      if (source_contract_data && destination_contract_data) {
+      setFeeEstimating(true)
+      if (source_contract_data && destination_contract_data && !isNaN(amount)) {
         if (sdk && !controller.signal.aborted) {
-          setFeeEstimating(true)
           setApproveResponse(null)
           setXcall(null)
           setCalling(false)
           setXcallResponse(null)
           try {
-            const decimals = source_contract_data?.contract_decimals || 18
-            const response = await sdk.estimateFee({
-              sendingChainId: source_chain_data?.chain_id,
-              sendingAssetId: source_contract_data?.contract_address,
-              receivingChainId: destination_chain_data?.chain_id,
-              receivingAssetId: destination_contract_data?.contract_address,
-              amount: utils.parseUnits(amount?.toString() || '0', decimals),
+            const native_token = source_chain_data?.provider_params?.[0]?.nativeCurrency
+            const decimals = native_token?.decimals || 18
+            const routerFee = amount * ROUTER_FEE_PERCENT / 100
+            const relayerFee = null
+            console.log('[Estimate Fees]', {
+              routerFee,
+              relayerFee,
             })
-            console.log('[Estimate Fees]', response)
-            if (!controller.signal.aborted) {
-              const { relayerFee, routerFee } = { ...response }
-              const native_token = source_chain_data?.provider_params?.[0]?.nativeCurrency
-              const decimals = native_token?.decimals || 18
-              setFee({
-                relayer: Number(utils.formatUnits(BigNumber.from(relayerFee || '0'), decimals)),
-                router: Number(utils.formatUnits(BigNumber.from(routerFee || '0'), decimals)),
-              })
-            }
+            setFee({
+              router: routerFee,
+              relayer: relayerFee && Number(utils.formatUnits(BigNumber.from(relayerFee || '0'), decimals)),
+            })
           } catch (error) {}
-          if (!controller.signal.aborted) {
-            setFeeEstimating(false)
-          }
         }
       }
+      else {
+        setFee(null)
+      }
+      setFeeEstimating(false)
     }
   }
 
@@ -476,7 +471,9 @@ export default () => {
           if (xcall_request) {
             let gas_limit = await signer.estimateGas(xcall_request)
             if (gas_limit) {
-              gas_limit = FixedNumber.fromString(gas_limit.toString()).mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())).round(0).toString().replace('.0', '');
+              gas_limit = FixedNumber.fromString(gas_limit.toString())
+                .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
+                .round(0).toString().replace('.0', '')
               xcall_request.gasLimit = gas_limit
             }
             const xcall_response = await signer.sendTransaction(xcall_request)
@@ -528,7 +525,7 @@ export default () => {
   const relayer_fee = fee && (fee.relayer || 0)
   const router_fee = fee && (fee.router || 0)
   const total_fee = fee && (relayer_fee + router_fee)
-  const fee_native_token = source_chain_data?.provider_params?.[0]?.nativeCurrency
+  const source_gas_native_token = source_chain_data?.provider_params?.[0]?.nativeCurrency
 
   const liquidity_amount = _.sum(asset_balances_data?.[destination_chain_data?.chain_id]?.filter(a => equals_ignore_case(a?.adopted, destination_contract_data?.contract_address))?.map(a => Number(utils.formatUnits(BigNumber.from(a?.amount || '0'), destination_decimals))) || [])
   const min_amount = fee ? total_fee : 0
@@ -588,15 +585,15 @@ export default () => {
                 <Options
                   disabled={disabled}
                   applied={!_.isEqual(
-                    Object.fromEntries(Object.entries(options).filter(([k, v]) => ![].includes(k))),
-                    Object.fromEntries(Object.entries(DEFAULT_OPTIONS).filter(([k, v]) => ![].includes(k))),
+                    Object.fromEntries(Object.entries(options).filter(([k, v]) => !['slippage'].includes(k))),
+                    Object.fromEntries(Object.entries(DEFAULT_OPTIONS).filter(([k, v]) => !['slippage'].includes(k))),
                   )}
                   initialData={options}
                   onChange={o => setOptions(o)}
                 />
               </div>
             </div>
-            <div className={`${checkSupport() && amount ? 'border-2 border-blue-200 dark:border-blue-800 shadow-xl dark:shadow-blue-600' : 'shadow dark:shadow-slate-400'} rounded-2xl space-y-6 pt-8 pb-6 px-6`}>
+            <div className={`${checkSupport() && amount ? 'border-2 border-blue-400 dark:border-blue-800 shadow-xl shadow-blue-200 dark:shadow-blue-600' : 'shadow dark:shadow-slate-400'} rounded-2xl space-y-6 pt-8 pb-6 px-6`}>
               <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6">
                 <div className="sm:col-span-2 flex flex-col items-center sm:items-start">
                   <div className="w-48 flex sm:flex-col items-center justify-center space-x-1.5">
@@ -822,16 +819,16 @@ export default () => {
                 </div>
               </div>
               {checkSupport() && web3_provider && (feeEstimating || fee) && (
-                <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6 sm:mx-3">
-                  <div className="sm:col-span-2 flex items-center justify-center sm:justify-start space-x-2">
+                <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-2 sm:gap-6 sm:mx-3">
+                  <div className="sm:col-span-2 flex items-center sm:items-start justify-center sm:justify-start space-x-2.5">
                     <span className="text-slate-400 dark:text-white text-lg font-semibold">
                       Fee
                     </span>
-                    {feeEstimateCooldown && (
-                      <div className="bg-slate-50 dark:bg-slate-900 p-2">
+                    {/*feeEstimateCooldown > 0 && (
+                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg font-medium py-1 px-2">
                         {feeEstimateCooldown}s
                       </div>
-                    )}
+                    )*/}
                   </div>
                   <div className="sm:col-span-3 flex items-center justify-center sm:justify-end">
                     {feeEstimating ?
@@ -842,16 +839,34 @@ export default () => {
                         <Oval color={loader_color(theme)} width="24" height="24" />
                       </div>
                       :
-                      <div className="flex flex-col items-center sm:items-end">
-                        <div className="text-sm font-medium">
-                          (Relayer: {number_format(relayer_fee, '0,0.000000', true)} + Router: {number_format(router_fee, '0,0.000000', true)})
+                      <div className="flex flex-col items-center sm:items-end space-y-1">
+                        <div className="w-full flex items-center justify-between space-x-8">
+                          <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm">
+                            Bridge Fee:
+                          </span>
+                          <span className="whitespace-nowrap text-sm font-bold">
+                            {number_format(router_fee, '0,0.000000', true)} {source_symbol}
+                          </span>
                         </div>
-                        <div className="text-lg font-semibold mt-1">
-                          {number_format(total_fee, '0,0.000000', true)} {fee_native_token?.symbol}
+                        <div className="w-full flex items-center justify-between space-x-8">
+                          <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm">
+                            Relayer Fee:
+                          </span>
+                          <span className="whitespace-nowrap text-sm font-bold">
+                            {number_format(relayer_fee, '0,0.000000', true)} {source_symbol}
+                          </span>
                         </div>
-                        {typeof fee_native_token?.price === 'number' && (
+                        <div className="w-full flex items-center justify-between space-x-8">
+                          <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm">
+                            Total:
+                          </span>
+                          <span className="whitespace-nowrap text-lg font-bold">
+                            {number_format(total_fee, '0,0.000000', true)} {source_symbol}
+                          </span>
+                        </div>
+                        {typeof source_asset_data?.price === 'number' && (
                           <div className="font-mono text-red-500 text-xs font-semibold">
-                            ({currency_symbol}{number_format(total_fee * fee_native_token.price, '0,0.00')})
+                            ({currency_symbol}{number_format(total_fee * source_asset_data.price, '0,0.000000')})
                           </div>
                         )}
                       </div>
@@ -892,7 +907,7 @@ export default () => {
                     >
                       <span>
                         {amount > source_amount ?
-                          'Insufficient Funds' :
+                          'Insufficient Balance' :
                           amount < min_amount ?
                             'The transfer amount cannot be less than the transfer fee.' :
                             amount <= 0 ? 'The transfer amount cannot be equal or less than 0.' : ''
@@ -902,6 +917,9 @@ export default () => {
                     :
                     !xcall && !xcallResponse ?
                       <Modal
+                        onClick={() => {
+                          setSlippageEditing(false)
+                        }}
                         buttonTitle="Transfer"
                         buttonClassName="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg py-3 sm:py-4 px-2 sm:px-3"
                         title="Transfer Confirmation"
@@ -1002,12 +1020,12 @@ export default () => {
                                     {number_format(total_fee, '0,0.000000', true)}
                                   </span>
                                   <span className="font-semibold">
-                                    {fee_native_token?.symbol}
+                                    {source_symbol}
                                   </span>
                                 </div>
-                                {total_fee && typeof fee_native_token?.price === 'number' && (
-                                  <div className="font-mono text-blue-500 sm:text-right">
-                                    ({currency_symbol}{number_format(total_fee * fee_native_token.price, '0,0.00')})
+                                {total_fee && typeof source_asset_data?.price === 'number' && (
+                                  <div className="font-mono text-red-500 sm:text-right">
+                                    ({currency_symbol}{number_format(total_fee * source_asset_data.price, '0,0.000000')})
                                   </div>
                                 )}
                               </div>
@@ -1043,65 +1061,90 @@ export default () => {
                           </div>
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
                             <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
-                              % Slippage
+                              Slippage Tolerance
                               <span className="hidden sm:block">:</span>
                             </div>
                             <div className="flex flex-col items-end space-y-1.5">
-                              <DebounceInput
-                                debounceTimeout={300}
-                                size="small"
-                                type="number"
-                                placeholder="0.00"
-                                value={typeof options?.slippage === 'number' && options.slippage >= 0 ? options.slippage : ''}
-                                onChange={e => {
-                                  const regex = /^[0-9.\b]+$/
-                                  let value
-                                  if (e.target.value === '' || regex.test(e.target.value)) {
-                                    value = e.target.value
-                                  }
-                                  value = value < 0 || value > 100 ? 0.5 : value
-                                  console.log('[Transfer Confirmation]', {
-                                    bridge,
-                                    fee,
-                                    options: {
-                                      ...options,
-                                      to: recipient_address,
-                                      slippage: value && !isNaN(value) ? Number(value) : value,
-                                    },
-                                  })
-                                  setOptions({
-                                    ...options,
-                                    slippage: value && !isNaN(value) ? Number(value) : value,
-                                  })
-                                }}
-                                onWheel={e => e.target.blur()}
-                                className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1.5 px-2.5`}
-                              />
-                              <div className="flex items-center space-x-1.5">
-                                {[0.1, 0.5, 1.0].map((s, i) => (
-                                  <div
-                                    key={i}
-                                    onClick={() => {
-                                      console.log('[Transfer Confirmation]', {
-                                        bridge,
-                                        fee,
-                                        options: {
+                              {slippageEditing ?
+                                <>
+                                  <div className="flex items-center space-x-1">
+                                    <DebounceInput
+                                      debounceTimeout={300}
+                                      size="small"
+                                      type="number"
+                                      placeholder="0.00"
+                                      value={typeof options?.slippage === 'number' && options.slippage >= 0 ? options.slippage : ''}
+                                      onChange={e => {
+                                        const regex = /^[0-9.\b]+$/
+                                        let value
+                                        if (e.target.value === '' || regex.test(e.target.value)) {
+                                          value = e.target.value
+                                        }
+                                        value = value <= 0 || value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
+                                        console.log('[Transfer Confirmation]', {
+                                          bridge,
+                                          fee,
+                                          options: {
+                                            ...options,
+                                            to: recipient_address,
+                                            slippage: value && !isNaN(value) ? Number(value) : value,
+                                          },
+                                        })
+                                        setOptions({
                                           ...options,
-                                          to: recipient_address,
-                                          slippage: s,
-                                        },
-                                      })
-                                      setOptions({
-                                        ...options,
-                                        slippage: s,
-                                      })
-                                    }}
-                                    className={`${options?.slippage === s ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white text-xs py-0.5 px-1.5`}
-                                  >
-                                    {s} %
+                                          slippage: value && !isNaN(value) ? Number(value) : value,
+                                        })
+                                      }}
+                                      onWheel={e => e.target.blur()}
+                                      className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1.5 px-2.5`}
+                                    />
+                                    <button
+                                      onClick={() => setSlippageEditing(false)}
+                                      className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
+                                    >
+                                      <BiCheckCircle size={20} />
+                                    </button>
                                   </div>
-                                ))}
-                              </div>
+                                  <div className="flex items-center space-x-1.5">
+                                    {[3.0, 2.0, 1.0].map((s, i) => (
+                                      <div
+                                        key={i}
+                                        onClick={() => {
+                                          console.log('[Transfer Confirmation]', {
+                                            bridge,
+                                            fee,
+                                            options: {
+                                              ...options,
+                                              to: recipient_address,
+                                              slippage: s,
+                                            },
+                                          })
+                                          setOptions({
+                                            ...options,
+                                            slippage: s,
+                                          })
+                                          setSlippageEditing(false)
+                                        }}
+                                        className={`${options?.slippage === s ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white text-xs py-0.5 px-1.5`}
+                                      >
+                                        {s} %
+                                      </div>
+                                    ))}
+                                  </div>
+                                </>
+                                :
+                                <div className="flex items-center space-x-1">
+                                  <span className="text-lg font-semibold">
+                                    {number_format(options?.slippage, '0,0.00')}%
+                                  </span>
+                                  <button
+                                    onClick={() => setSlippageEditing(true)}
+                                    className="hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
+                                  >
+                                    <BiEditAlt size={20} />
+                                  </button>
+                                </div>
+                              }
                             </div>
                           </div>
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
@@ -1134,7 +1177,7 @@ export default () => {
                                 </Popover>
                               }
                               <Switch
-                                checked={typeof options?.forceSlow === 'boolean' ? options.forceSlow : false}
+                                checked={!(typeof options?.forceSlow === 'boolean' ? options.forceSlow : false)}
                                 onChange={() => {
                                   console.log('[Transfer Confirmation]', {
                                     bridge,
@@ -1154,7 +1197,7 @@ export default () => {
                                 uncheckedIcon={false}
                                 onColor="#3b82f6"
                                 onHandleColor="#f8fafc"
-                                offColor="#22c55e"
+                                offColor="#64748b"
                                 offHandleColor="#f8fafc"
                               />
                             </div>

@@ -50,7 +50,7 @@ export default () => {
     let path = !asPath ? '/' : asPath.toLowerCase()
     path = path.includes('?') ? path.substring(0, path.indexOf('?')) : path
     if (path.includes('on-')) {
-      const paths = path.replace('/', '').split('-')
+      const paths = _.slice(path.replace('/', '').split('-'), 1)
       const chain = paths[paths.indexOf('on') + 1]
       const chain_data = chains_data?.find(c => c?.id === chain)
       const asset = paths[0] !== 'on' ? paths[0] : null
@@ -260,7 +260,7 @@ export default () => {
         <div className="mt-8">
           <Announcement />
         </div>
-        <div className="w-full flex flex-col space-y-4 sm:space-y-6 my-6 mx-4">
+        <div className="w-full flex flex-col space-y-4 my-6 mx-4">
           <div className="flex items-center space-x-3">
             <Link href="/pools">
               <a className="text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white">

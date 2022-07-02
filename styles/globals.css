@@ -248,3 +248,19 @@ a {
     text-decoration-line: underline;
   }
 }
+
+.dark .dark\:bg-slate-900,
+.dark .dark\:bg-slate-800,
+.dark .dark\:bg-slate-700 {
+  --tw-bg-opacity: .75 !important;
+}
+
+.modal {
+  div {
+    .dark\:bg-slate-900,
+    .dark\:bg-slate-800,
+    .dark\:bg-slate-700 {
+      --tw-bg-opacity: 1 !important;
+    }
+  }
+}

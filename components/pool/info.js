@@ -18,7 +18,7 @@ export default ({
   const { pools_data } = { ..._pools }
 
   return (
-    <div className="min-h-full border-2 border-blue-400 dark:border-blue-600 rounded-2xl p-6">
+    <div className="min-h-full border border-blue-400 dark:border-blue-800 rounded-2xl shadow-lg shadow-blue-200 dark:shadow-blue-600 p-6">
       {pools_data || data ?
         <div className="flex flex-col space-y-8 lg:space-y-20 my-auto">
           <div className="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-6">
@@ -38,9 +38,9 @@ export default ({
             <SelectChain
               disabled={disabled}
               value={data?.chain_data?.id}
-              onSelect={a => onSelect({
+              onSelect={c => onSelect({
                 ...data,
-                chain: a,
+                chain: c,
               })}
               origin=""
             />

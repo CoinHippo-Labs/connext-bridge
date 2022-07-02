@@ -8,6 +8,8 @@ import { MdSettingsSuggest } from 'react-icons/md'
 import Modal from '../../modals'
 import Popover from '../../popover'
 
+const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE) || 3
+
 export default ({
   disabled = false,
   applied = false,
@@ -34,14 +36,14 @@ export default ({
       name: 'infiniteApprove',
       type: 'switch',
     },
-    {
-      label: '% Slippage',
-      name: 'slippage',
-      type: 'number',
-      placeholder: '0.00',
-      presets: [0.1, 0.5, 1.0],
-      postfix: '%',
-    },
+    // {
+    //   label: 'Slippage Tolerance',
+    //   name: 'slippage',
+    //   type: 'number',
+    //   placeholder: '0.00',
+    //   presets: [3.0, 2.0, 1.0],
+    //   postfix: '%',
+    // },
     {
       label: 'Bridge Path',
       name: 'forceSlow',
@@ -110,7 +112,7 @@ export default ({
                 f.name === 'forceSlow' ?
                   <div className="flex items-center space-x-2">
                     <Switch
-                      checked={typeof data?.[f.name] === 'boolean' ? data[f.name] : false}
+                      checked={!(typeof data?.[f.name] === 'boolean' ? data[f.name] : false)}
                       onChange={e => {
                         console.log('[Options]', {
                           ...data,
@@ -125,7 +127,7 @@ export default ({
                       uncheckedIcon={false}
                       onColor="#3b82f6"
                       onHandleColor="#f8fafc"
-                      offColor="#22c55e"
+                      offColor="#64748b"
                       offHandleColor="#f8fafc"
                     />
                     {data?.forceSlow ?
@@ -204,7 +206,7 @@ export default ({
                           if (e.target.value === '' || regex.test(e.target.value)) {
                             value = e.target.value
                           }
-                          value = ['slippage'].includes(f.name) && (value < 0 || value > 100) ? 0.5 : value
+                          value = ['slippage'].includes(f.name) && (value <= 0 || value > 100) ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
                           console.log('[Options]', {
                             ...data,
                             [`${f.name}`]: value && !isNaN(value) ? Number(value) : value,

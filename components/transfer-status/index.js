@@ -56,7 +56,7 @@ export default ({ data }) => {
   const pending = ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(status)
 
   return data && (
-    <div className={`rounded-xl ${pending ? 'border-2 border-blue-500 shadow shadow-blue-500' : 'border border-green-500 shadow shadow-green-500'} p-4`}>
+    <div className={`max-w-xs sm:max-w-none rounded-xl ${pending ? 'border-2 border-blue-500 shadow shadow-blue-500' : 'border-2 border-green-500 shadow shadow-green-500'} mx-auto p-4`}>
       <div className="flex items-center justify-between space-x-2">
         <Copy
           value={transfer_id}

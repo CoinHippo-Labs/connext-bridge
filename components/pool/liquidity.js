@@ -15,9 +15,15 @@ import Alert from '../alerts'
 import Copy from '../copy'
 import { number_format, ellipse, loader_color } from '../../lib/utils'
 
-const DEFAULT_POOL_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_POOL_SLIPPAGE_PERCENTAGE) || 0.5
+const DEFAULT_POOL_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_POOL_SLIPPAGE_PERCENTAGE) || 3
 const DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES = Number(process.env.NEXT_PUBLIC_DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES) || 60
 const ACTIONS = ['add', 'remove']
+
+const DEFAULT_OPTIONS = {
+  infiniteApprove: false,
+  slippage: DEFAULT_POOL_SLIPPAGE_PERCENTAGE,
+  deadline: DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES,
+}
 
 export default ({
   data,
@@ -32,10 +38,7 @@ export default ({
   const [amountX, setAmountX] = useState(null)
   const [amountY, setAmountY] = useState(null)
   const [amount, setAmount] = useState(null)
-  const [options, setOptions] = useState({
-    slippage: DEFAULT_POOL_SLIPPAGE_PERCENTAGE,
-    deadline: DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES,
-  })
+  const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [openOptions, setOpenOptions] = useState(false)
 
   const [approving, setApproving] = useState(null)
@@ -106,32 +109,34 @@ export default ({
       //   failed = true
       //   setApproving(false)
       // }
-      if (!failed) {
-        // try {
-        //   const xcall_request = await sdk.nxtpSdkBase.xcall(xcallParams)
-        //   if (xcall_request) {
-        //     let gas_limit = await signer.estimateGas(xcall_request)
-        //     if (gas_limit) {
-        //       gas_limit = FixedNumber.fromString(gas_limit.toString()).mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())).round(0).toString().replace('.0', '');
-        //       xcall_request.gasLimit = gas_limit
-        //     }
-        //     const xcall_response = await signer.sendTransaction(xcall_request)
-        //     const tx_hash = xcall_response?.hash
-        //     const xcall_receipt = await signer.provider.waitForTransaction(tx_hash)
-        //     setXcall(xcall_receipt)
-        //     failed = !xcall_receipt?.status
-        //     setXcallResponse({
-        //       status: failed ? 'failed' : 'success',
-        //       message: failed ? 'Failed to send transaction' : `${source_symbol} transfer detected, waiting for execution.`,
-        //       tx_hash,
-        //     })
-        //     success = true
-        //   }
-        // } catch (error) {
-        //   setXcallResponse({ status: 'failed', message: error?.data?.message || error?.message })
-        //   failed = true
-        // }
-      }
+      // if (!failed) {
+      //   try {
+      //     const xcall_request = await sdk.nxtpSdkBase.xcall(xcallParams)
+      //     if (xcall_request) {
+      //       let gas_limit = await signer.estimateGas(xcall_request)
+      //       if (gas_limit) {
+      //         gas_limit = FixedNumber.fromString(gas_limit.toString())
+      //           .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
+      //           .round(0).toString().replace('.0', '')
+      //         xcall_request.gasLimit = gas_limit
+      //       }
+      //       const xcall_response = await signer.sendTransaction(xcall_request)
+      //       const tx_hash = xcall_response?.hash
+      //       const xcall_receipt = await signer.provider.waitForTransaction(tx_hash)
+      //       setXcall(xcall_receipt)
+      //       failed = !xcall_receipt?.status
+      //       setXcallResponse({
+      //         status: failed ? 'failed' : 'success',
+      //         message: failed ? 'Failed to send transaction' : `${source_symbol} transfer detected, waiting for execution.`,
+      //         tx_hash,
+      //       })
+      //       success = true
+      //     }
+      //   } catch (error) {
+      //     setXcallResponse({ status: 'failed', message: error?.data?.message || error?.message })
+      //     failed = true
+      //   }
+      // }
     }
     setCalling(false)
     if (sdk && address && success) {
@@ -143,7 +148,7 @@ export default ({
   const disabled = calling || approving
 
   return (
-    <div className="border-2 border-blue-400 dark:border-blue-600 rounded-2xl space-y-3 p-6">
+    <div className="border border-blue-400 dark:border-blue-800 rounded-2xl shadow-lg shadow-blue-200 dark:shadow-blue-600 space-y-3 p-6">
       <div className="flex items-center justify-between space-x-3">
         <div className="flex items-center space-x-0.5">
           {ACTIONS.map((a, i) => (
@@ -264,14 +269,14 @@ export default ({
               <div className="form">
                 <div className="form-element">
                   <div className="form-label text-slate-600 dark:text-slate-400 font-medium">
-                    % Slippage Tolerance
+                    Slippage Tolerance Tolerance
                   </div>
                   <div className="flex items-center space-x-3">
                     <DebounceInput
                       debounceTimeout={300}
                       size="small"
                       type="number"
-                      placeholder="% Slippage Tolerance"
+                      placeholder="Slippage Tolerance Tolerance"
                       value={typeof options?.slippage === 'number' && options.slippage >= 0 ? options.slippage : ''}
                       onChange={e => {
                         const regex = /^[0-9.\b]+$/
@@ -279,7 +284,7 @@ export default ({
                         if (e.target.value === '' || regex.test(e.target.value)) {
                           value = e.target.value
                         }
-                        value = value < 0 || value > 100 ? DEFAULT_POOL_SLIPPAGE_PERCENTAGE : value
+                        value = value <= 0 || value > 100 ? DEFAULT_POOL_SLIPPAGE_PERCENTAGE : value
                         setOptions({
                           ...options,
                           slippage: value && !isNaN(value) ? Number(value) : value,
@@ -289,7 +294,7 @@ export default ({
                       className={`w-20 bg-slate-50 dark:bg-slate-800 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
                     />
                     <div className="flex items-center space-x-2.5">
-                      {[0.1, 0.5, 1.0].map((p, i) => (
+                      {[3.0, 2.0, 1.0].map((p, i) => (
                         <div
                           key={i}
                           onClick={() => setOptions({
