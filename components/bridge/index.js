@@ -841,7 +841,7 @@ export default () => {
                       </div>
                       :
                       <div className="flex flex-col items-center sm:items-end space-y-1">
-                        {!forceSlow && (
+                        {!options?.forceSlow && (
                           <>
                             <div className="w-full flex items-center justify-between space-x-8">
                               <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm">
@@ -862,7 +862,7 @@ export default () => {
                           </>
                         )}
                         <div className="w-full flex items-center justify-between space-x-8">
-                          {!forceSlow && (
+                          {!options?.forceSlow && (
                             <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm">
                               Total:
                             </span>
