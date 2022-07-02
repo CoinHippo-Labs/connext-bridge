@@ -389,10 +389,11 @@ export default () => {
           setCalling(false)
           setXcallResponse(null)
           try {
+            const { to, infiniteApprove, callData, slippage, forceSlow } = { ...options }
             const native_token = source_chain_data?.provider_params?.[0]?.nativeCurrency
             const decimals = native_token?.decimals || 18
-            const routerFee = amount * ROUTER_FEE_PERCENT / 100
-            const relayerFee = null
+            const routerFee = forceSlow ? 0 : amount * ROUTER_FEE_PERCENT / 100
+            const relayerFee = forceSlow ? 0 : null
             console.log('[Estimate Fees]', {
               routerFee,
               relayerFee,
@@ -522,8 +523,8 @@ export default () => {
   const destination_decimals = destination_contract_data?.contract_decimals || 18
   const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol
 
-  const relayer_fee = fee && (fee.relayer || 0)
-  const router_fee = fee && (fee.router || 0)
+  const relayer_fee = fee && (options.forceSlow ? 0 : fee.relayer || 0)
+  const router_fee = fee && (options.forceSlow ? 0 : fee.router || 0)
   const total_fee = fee && (relayer_fee + router_fee)
   const source_gas_native_token = source_chain_data?.provider_params?.[0]?.nativeCurrency
 
@@ -840,31 +841,42 @@ export default () => {
                       </div>
                       :
                       <div className="flex flex-col items-center sm:items-end space-y-1">
+                        {!forceSlow && (
+                          <>
+                            <div className="w-full flex items-center justify-between space-x-8">
+                              <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm">
+                                Bridge Fee:
+                              </span>
+                              <span className="whitespace-nowrap text-sm font-bold">
+                                {number_format(router_fee, '0,0.000000', true)} {source_symbol}
+                              </span>
+                            </div>
+                            <div className="w-full flex items-center justify-between space-x-8">
+                              <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm">
+                                Relayer Fee:
+                              </span>
+                              <span className="whitespace-nowrap text-sm font-bold">
+                                {number_format(relayer_fee, '0,0.000000', true)} {source_symbol}
+                              </span>
+                            </div>
+                          </>
+                        )}
                         <div className="w-full flex items-center justify-between space-x-8">
-                          <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm">
-                            Bridge Fee:
-                          </span>
-                          <span className="whitespace-nowrap text-sm font-bold">
-                            {number_format(router_fee, '0,0.000000', true)} {source_symbol}
-                          </span>
-                        </div>
-                        <div className="w-full flex items-center justify-between space-x-8">
-                          <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm">
-                            Relayer Fee:
-                          </span>
-                          <span className="whitespace-nowrap text-sm font-bold">
-                            {number_format(relayer_fee, '0,0.000000', true)} {source_symbol}
-                          </span>
-                        </div>
-                        <div className="w-full flex items-center justify-between space-x-8">
-                          <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm">
-                            Total:
-                          </span>
+                          {!forceSlow && (
+                            <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm">
+                              Total:
+                            </span>
+                          )}
                           <span className="whitespace-nowrap text-lg font-bold">
-                            {number_format(total_fee, '0,0.000000', true)} {source_symbol}
+                            {total_fee ?
+                              <>
+                                {number_format(total_fee, '0,0.000000', true)} {source_symbol}
+                              </> :
+                              'no fees'
+                            }
                           </span>
                         </div>
-                        {typeof source_asset_data?.price === 'number' && (
+                        {total_fee && typeof source_asset_data?.price === 'number' && (
                           <div className="font-mono text-red-500 text-xs font-semibold">
                             ({currency_symbol}{number_format(total_fee * source_asset_data.price, '0,0.000000')})
                           </div>
@@ -1016,12 +1028,19 @@ export default () => {
                               </div>
                               <div className="sm:text-right">
                                 <div className="text-lg space-x-1.5">
-                                  <span className="font-bold">
-                                    {number_format(total_fee, '0,0.000000', true)}
-                                  </span>
-                                  <span className="font-semibold">
-                                    {source_symbol}
-                                  </span>
+                                  {total_fee ?
+                                    <>
+                                      <span className="font-bold">
+                                        {number_format(total_fee, '0,0.000000', true)}
+                                      </span>
+                                      <span className="font-semibold">
+                                        {source_symbol}
+                                      </span>
+                                    </> :
+                                    <span className="font-bold">
+                                      no fees
+                                    </span>
+                                  }
                                 </div>
                                 {total_fee && typeof source_asset_data?.price === 'number' && (
                                   <div className="font-mono text-red-500 sm:text-right">
