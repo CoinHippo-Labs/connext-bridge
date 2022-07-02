@@ -876,7 +876,7 @@ export default () => {
                             }
                           </span>
                         </div>
-                        {total_fee && typeof source_asset_data?.price === 'number' && (
+                        {total_fee > 0 && typeof source_asset_data?.price === 'number' && (
                           <div className="font-mono text-red-500 text-xs font-semibold">
                             ({currency_symbol}{number_format(total_fee * source_asset_data.price, '0,0.000000')})
                           </div>
@@ -1042,7 +1042,7 @@ export default () => {
                                     </span>
                                   }
                                 </div>
-                                {total_fee && typeof source_asset_data?.price === 'number' && (
+                                {total_fee > 0 && typeof source_asset_data?.price === 'number' && (
                                   <div className="font-mono text-red-500 sm:text-right">
                                     ({currency_symbol}{number_format(total_fee * source_asset_data.price, '0,0.000000')})
                                   </div>
