@@ -819,7 +819,7 @@ export default () => {
                   />
                 </div>
               </div>
-              {checkSupport() && web3_provider && (feeEstimating || fee) && (
+              {checkSupport() && (web3_provider || amount) && (feeEstimating || fee) && (
                 <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-2 sm:gap-6 sm:mx-3">
                   <div className="sm:col-span-2 flex items-center sm:items-start justify-center sm:justify-start space-x-2.5">
                     <span className="text-slate-400 dark:text-white text-lg font-semibold">
@@ -847,7 +847,7 @@ export default () => {
                               <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm">
                                 Bridge Fee:
                               </span>
-                              <span className="whitespace-nowrap text-sm font-bold">
+                              <span className="whitespace-nowrap text-sm font-semibold">
                                 {number_format(router_fee, '0,0.000000', true)} {source_symbol}
                               </span>
                             </div>
@@ -855,7 +855,7 @@ export default () => {
                               <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm">
                                 Relayer Fee:
                               </span>
-                              <span className="whitespace-nowrap text-sm font-bold">
+                              <span className="whitespace-nowrap text-sm font-semibold">
                                 {number_format(relayer_fee, '0,0.000000', true)} {source_symbol}
                               </span>
                             </div>
