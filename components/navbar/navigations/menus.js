@@ -1,5 +1,5 @@
 import { CgArrowRightR } from 'react-icons/cg'
-import { RiCoinsLine, RiQuestionAnswerLine } from 'react-icons/ri'
+import { RiCopperCoinLine, RiQuestionAnswerLine } from 'react-icons/ri'
 import { MdSwapHoriz } from 'react-icons/md'
 import { HiOutlineDocumentSearch } from 'react-icons/hi'
 import { BiBook, BiCommentDetail } from 'react-icons/bi'
@@ -17,7 +17,7 @@ export default [
     title: 'Pools',
     path: '/pools',
     others_paths: ['/pool/[pool]'],
-    icon: <RiCoinsLine size={20} className="stroke-current" />,
+    icon: <RiCopperCoinLine size={20} className="stroke-current" />,
   },
   {
     id: 'swap',
