@@ -93,6 +93,7 @@
         "contract_decimals": 6
       }
     ],
+    "color": "#23A47B",
     "preset": true
   },
   {
@@ -188,6 +189,7 @@
         "contract_decimals": 6
       }
     ],
+    "color": "#2675C8",
     "preset": true
   },
   {
@@ -285,6 +287,7 @@
         "contract_decimals": 18
       }
     ],
+    "color": "#FCAD19",
     "preset": true
   },
   {
@@ -379,6 +382,7 @@
         "symbol": "WETH"
       }
     ],
+    "color": "#2E3130",
     "preset": true
   },
   {
@@ -471,6 +475,7 @@
         "contract_decimals": 8
       }
     ],
+    "color": "#EB9240",
     "preset": true
   },
   {
@@ -511,7 +516,8 @@
         "chain_id": 122,
         "contract_decimals": 18
       }
-    ]
+    ],
+    "color": "#5040BA"
   },
   {
     "id": "gno",
@@ -540,7 +546,8 @@
         "chain_id": 100,
         "contract_decimals": 18
       }
-    ]
+    ],
+    "color": "#06101C"
   },
   {
     "id": "fei",
@@ -575,7 +582,8 @@
         "chain_id": 43114,
         "contract_decimals": 18
       }
-    ]
+    ],
+    "color": "#219A6F"
   },
   {
     "id": "gth",
@@ -599,7 +607,8 @@
         "chain_id": 192837465,
         "contract_decimals": 18
       }
-    ]
+    ],
+    "color": "#384FE3"
   },
   {
     "id": "boba",
@@ -618,7 +627,8 @@
         "chain_id": 288,
         "contract_decimals": 18
       }
-    ]
+    ],
+    "color": "#D1F14C"
   },
   {
     "id": "magic",
@@ -637,7 +647,8 @@
         "chain_id": 42161,
         "contract_decimals": 18
       }
-    ]
+    ],
+    "color": "#ED494B"
   },
   {
     "id": "miva",
@@ -656,7 +667,8 @@
         "chain_id": 100,
         "contract_decimals": 18
       }
-    ]
+    ],
+    "color": "#6440D5"
   },
   {
     "id": "fraction",
@@ -695,6 +707,7 @@
         "chain_id": 100,
         "contract_decimals": 18
       }
-    ]
+    ],
+    "color": "#000000"
   }
 ]

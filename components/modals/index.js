@@ -11,6 +11,7 @@ export default ({
   onClick,
   buttonTitle,
   buttonClassName,
+  buttonStyle = {},
   title,
   icon,
   body,
@@ -77,6 +78,7 @@ export default ({
         disabled={disabled}
         onClick={show}
         className={buttonClassName || 'btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 text-white'}
+        style={buttonStyle}
       >
         {buttonTitle}
       </button>

@@ -19,6 +19,7 @@ import Options from './options'
 import GasPrice from '../gas-price'
 import SelectChain from '../select/chain'
 import SelectAsset from '../select/asset'
+import SelectBridgeAsset from '../select/asset/bridge'
 import Balance from '../balance'
 import LatestTransfers from '../latest-transfers'
 import Faucet from '../faucet'
@@ -595,36 +596,139 @@ export default () => {
               </div>
             </div>
             <div className={`${checkSupport() && amount ? 'border-2 border-blue-400 dark:border-blue-800 shadow-xl shadow-blue-200 dark:shadow-blue-600' : 'shadow dark:shadow-slate-400'} rounded-2xl space-y-6 pt-8 pb-6 px-6`}>
-              <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6">
-                <div className="sm:col-span-2 flex flex-col items-center sm:items-start">
-                  <div className="w-48 flex sm:flex-col items-center justify-center space-x-1.5">
-                    <span className="text-slate-400 dark:text-white text-lg font-semibold text-center">
-                      Source
-                    </span>
-                    <GasPrice
-                      chainId={source_chain_data?.chain_id}
-                      dummy={source_chain || destination_chain}
+              <div className="space-y-2">
+                <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6">
+                  <div className="sm:col-span-2 flex flex-col items-center sm:items-start">
+                    <div className="w-48 flex sm:flex-col items-center justify-center space-x-1.5">
+                      <span className="text-slate-400 dark:text-white text-lg font-semibold text-center">
+                        Source
+                      </span>
+                      <GasPrice
+                        chainId={source_chain_data?.chain_id}
+                        dummy={source_chain || destination_chain}
+                      />
+                    </div>
+                    <SelectChain
+                      disabled={disabled}
+                      value={source_chain}
+                      onSelect={c => {
+                        const _source_chain = c
+                        const _destination_chain = c === destination_chain ? source_chain : destination_chain
+                        setBridge({
+                          ...bridge,
+                          source_chain: _source_chain,
+                          destination_chain: _destination_chain,
+                        })
+                        getBalances(_source_chain)
+                        getBalances(_destination_chain)
+                      }}
+                      source={source_chain}
+                      destination={destination_chain}
+                      origin="source"
                     />
+                    {/*<SelectAsset
+                      disabled={disabled}
+                      value={asset}
+                      onSelect={a => {
+                        setBridge({
+                          ...bridge,
+                          asset: a,
+                        })
+                        if (a !== asset) {
+                          getBalances(source_chain)
+                          getBalances(destination_chain)
+                        }
+                      }}
+                      chain={source_chain}
+                      origin="source"
+                    />
+                    <div className="w-48 flex items-center justify-center">
+                      <Balance
+                        chainId={source_chain_data?.chain_id}
+                        asset={asset}
+                      />
+                    </div>*/}
                   </div>
-                  <SelectChain
-                    disabled={disabled}
-                    value={source_chain}
-                    onSelect={c => {
-                      const _source_chain = c
-                      const _destination_chain = c === destination_chain ? source_chain : destination_chain
-                      setBridge({
-                        ...bridge,
-                        source_chain: _source_chain,
-                        destination_chain: _destination_chain,
-                      })
-                      getBalances(_source_chain)
-                      getBalances(_destination_chain)
-                    }}
-                    source={source_chain}
-                    destination={destination_chain}
-                    origin="source"
-                  />
-                  <SelectAsset
+                  <div className="flex items-center justify-center">
+                    <button
+                      disabled={disabled}
+                      onClick={() => {
+                        setBridge({
+                          ...bridge,
+                          source_chain: destination_chain,
+                          destination_chain: source_chain,
+                          amount: null,
+                        })
+                        getBalances(source_chain)
+                        getBalances(destination_chain)
+                      }}
+                      className={`transform hover:rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-500 dark:hover:shadow-white flex items-center justify-center p-2.5`}
+                    >
+                      <Image
+                        src="/logos/logo.png"
+                        alt=""
+                        width={32}
+                        height={32}
+                      />
+                    </button>
+                  </div>
+                  <div className="sm:col-span-2 flex flex-col items-center sm:items-end">
+                    <div className="w-48 flex sm:flex-col items-center justify-center space-x-1.5">
+                      <span className="text-slate-400 dark:text-white text-lg font-semibold text-center">
+                        Destination
+                      </span>
+                      <GasPrice
+                        chainId={destination_chain_data?.chain_id}
+                        dummy={source_chain || destination_chain}
+                      />
+                    </div>
+                    <SelectChain
+                      disabled={disabled}
+                      value={destination_chain}
+                      onSelect={c => {
+                        const _source_chain = c === source_chain ? destination_chain : source_chain
+                        const _destination_chain = c
+                        setBridge({
+                          ...bridge,
+                          source_chain: _source_chain,
+                          destination_chain: _destination_chain,
+                        })
+                        getBalances(_source_chain)
+                        getBalances(_destination_chain)
+                      }}
+                      source={source_chain}
+                      destination={destination_chain}
+                      origin="destination"
+                    />
+                    {/*<SelectAsset
+                      disabled={disabled}
+                      value={asset}
+                      onSelect={a => {
+                        setBridge({
+                          ...bridge,
+                          asset: a,
+                        })
+                        if (a !== asset) {
+                          getBalances(source_chain)
+                          getBalances(destination_chain)
+                        }
+                      }}
+                      chain={destination_chain}
+                      origin="destination"
+                    />
+                    <div className="w-48 flex items-center justify-center">
+                      <Balance
+                        chainId={destination_chain_data?.chain_id}
+                        asset={asset}
+                      />
+                    </div>*/}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-slate-400 dark:text-white text-lg font-semibold sm:ml-3">
+                    Asset
+                  </div>
+                  <SelectBridgeAsset
                     disabled={disabled}
                     value={asset}
                     onSelect={a => {
@@ -637,89 +741,9 @@ export default () => {
                         getBalances(destination_chain)
                       }
                     }}
-                    chain={source_chain}
-                    origin="source"
+                    source_chain={source_chain}
+                    destination_chain={destination_chain}
                   />
-                  <div className="w-48 flex items-center justify-center">
-                    <Balance
-                      chainId={source_chain_data?.chain_id}
-                      asset={asset}
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center justify-center">
-                  <button
-                    disabled={disabled}
-                    onClick={() => {
-                      setBridge({
-                        ...bridge,
-                        source_chain: destination_chain,
-                        destination_chain: source_chain,
-                        amount: null,
-                      })
-                      getBalances(source_chain)
-                      getBalances(destination_chain)
-                    }}
-                    className={`transform hover:rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-500 dark:hover:shadow-white flex items-center justify-center p-2.5`}
-                  >
-                    <Image
-                      src="/logos/logo.png"
-                      alt=""
-                      width={32}
-                      height={32}
-                    />
-                  </button>
-                </div>
-                <div className="sm:col-span-2 flex flex-col items-center sm:items-end">
-                  <div className="w-48 flex sm:flex-col items-center justify-center space-x-1.5">
-                    <span className="text-slate-400 dark:text-white text-lg font-semibold text-center">
-                      Destination
-                    </span>
-                    <GasPrice
-                      chainId={destination_chain_data?.chain_id}
-                      dummy={source_chain || destination_chain}
-                    />
-                  </div>
-                  <SelectChain
-                    disabled={disabled}
-                    value={destination_chain}
-                    onSelect={c => {
-                      const _source_chain = c === source_chain ? destination_chain : source_chain
-                      const _destination_chain = c
-                      setBridge({
-                        ...bridge,
-                        source_chain: _source_chain,
-                        destination_chain: _destination_chain,
-                      })
-                      getBalances(_source_chain)
-                      getBalances(_destination_chain)
-                    }}
-                    source={source_chain}
-                    destination={destination_chain}
-                    origin="destination"
-                  />
-                  <SelectAsset
-                    disabled={disabled}
-                    value={asset}
-                    onSelect={a => {
-                      setBridge({
-                        ...bridge,
-                        asset: a,
-                      })
-                      if (a !== asset) {
-                        getBalances(source_chain)
-                        getBalances(destination_chain)
-                      }
-                    }}
-                    chain={destination_chain}
-                    origin="destination"
-                  />
-                  <div className="w-48 flex items-center justify-center">
-                    <Balance
-                      chainId={destination_chain_data?.chain_id}
-                      asset={asset}
-                    />
-                  </div>
                 </div>
               </div>
               <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6 sm:ml-3">
