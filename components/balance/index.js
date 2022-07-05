@@ -26,9 +26,9 @@ export default ({
       {typeof amount === 'number' ?
         <>
           <span className="font-bold">
-            {number_format(amount, amount > 10000 ? '0,0' : amount > 1000 ? '0,0.00' : '0,0.000000', true)}
+            {number_format(amount, amount > 10000 ? '0,0' : amount > 100 ? '0,0.00' : '0,0.000000', true)}
           </span>
-          <span className="font-semibold">
+          <span className="hidden sm:block font-semibold">
             {symbol}
           </span>
         </> :

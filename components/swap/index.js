@@ -356,10 +356,10 @@ export default () => {
   return (
     <div className="mb-4">
       <div className="flex justify-center">
-        <div className="mt-8">
+        <div className="mt-4 sm:mt-8">
           <Announcement />
         </div>
-        <div className="w-full flex flex-col space-y-4 m-4">
+        <div className="w-full flex flex-col space-y-4 my-2 sm:my-4 mx-1 sm:mx-4">
           <h1 className="text-2xl font-bold">
             Swap
           </h1>
@@ -383,7 +383,7 @@ export default () => {
                   )}
                 </div>
                 <div className="flex flex-col sm:flex-row items-center sm:justify-between space-y-2 sm:space-y-0 sm:space-x-4">
-                  <div className="flex flex-col sm:flex-row items-center sm:space-x-4">
+                  <div className="w-full flex items-center justify-between sm:justify-start space-x-2 sm:space-x-4">
                     <SelectChain
                       disabled={disabled}
                       value={chain_data?.id}
@@ -426,7 +426,7 @@ export default () => {
                       origin=""
                     />
                   </div>
-                  <div className="flex items-center justify-between space-x-3">
+                  <div className="w-full flex items-center justify-between space-x-3">
                     <DebounceInput
                       debounceTimeout={300}
                       size="small"
@@ -516,7 +516,7 @@ export default () => {
                   )}
                 </div>
                 <div className="flex flex-col sm:flex-row items-center sm:justify-between space-y-2 sm:space-y-0 sm:space-x-4">
-                  <div className="flex flex-col sm:flex-row items-center sm:space-x-4">
+                  <div className="w-full flex items-center justify-between sm:justify-start space-x-2 sm:space-x-4">
                     <div className="w-48 sm:h-16 min-w-max flex items-center justify-center space-x-1.5 py-2 px-3">
                       {chain_data?.image && (
                         <Image
@@ -556,7 +556,7 @@ export default () => {
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between space-x-3">
+                  <div className="w-full flex items-center justify-between space-x-3">
                     <DebounceInput
                       debounceTimeout={300}
                       size="small"

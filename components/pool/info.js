@@ -18,10 +18,10 @@ export default ({
   const { pools_data } = { ..._pools }
 
   return (
-    <div className="min-h-full border border-blue-400 dark:border-blue-800 rounded-2xl shadow-lg shadow-blue-200 dark:shadow-blue-600 p-6">
+    <div className="sm:min-h-full border border-blue-400 dark:border-blue-800 rounded-2xl shadow-lg shadow-blue-200 dark:shadow-blue-600 p-6">
       {pools_data || data ?
         <div className="flex flex-col space-y-8 lg:space-y-20 my-auto">
-          <div className="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-6">
+          <div className="flex items-center space-x-4 sm:space-x-6">
             <SelectAsset
               disabled={disabled}
               value={data?.asset_data?.id}
@@ -32,7 +32,7 @@ export default ({
               chain={data?.chain_data?.id}
               origin=""
             />
-            <div className="uppercase font-semibold">
+            <div className="uppercase text-xs sm:text-sm font-semibold">
               on
             </div>
             <SelectChain

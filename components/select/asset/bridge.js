@@ -67,15 +67,28 @@ export default ({
               </div>
               <div className="w-full min-w-max flex items-center justify-center space-x-1.5">
                 {image && (
-                  <Image
-                    src={image}
-                    alt=""
-                    width={24}
-                    height={24}
-                    className="rounded-full"
-                  />
+                  <div>
+                    <div className="hidden sm:flex">
+                      <Image
+                        src={image}
+                        alt=""
+                        width={24}
+                        height={24}
+                        className="rounded-full"
+                      />
+                    </div>
+                    <div className="flex sm:hidden">
+                      <Image
+                        src={image}
+                        alt=""
+                        width={18}
+                        height={18}
+                        className="rounded-full"
+                      />
+                    </div>
+                  </div>
                 )}
-                <span className="text-sm sm:text-base font-semibold">
+                <span className="text-xs sm:text-base font-semibold">
                   {asset_data ? asset_data.symbol : 'Select Token'}
                 </span>
               </div>

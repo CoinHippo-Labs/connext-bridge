@@ -43,24 +43,37 @@ export default ({
       disabled={disabled}
       onClick={open => setHidden(!open)}
       buttonTitle={assets_data ?
-        <div className="w-48 min-w-max bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-xl shadow dark:shadow-slate-500 flex items-center justify-center space-x-1.5 py-2 px-3">
+        <div className="w-32 sm:w-48 min-w-max bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-xl shadow dark:shadow-slate-500 flex items-center justify-center space-x-1 sm:space-x-1.5 py-1.5 sm:py-2 px-2 sm:px-3">
           {image && (
-            <Image
-              src={image}
-              alt=""
-              width={24}
-              height={24}
-              className="rounded-full"
-            />
+            <>
+              <div className="flex sm:hidden">
+                <Image
+                  src={image}
+                  alt=""
+                  width={18}
+                  height={18}
+                  className="rounded-full"
+                />
+              </div>
+              <div className="hidden sm:flex">
+                <Image
+                  src={image}
+                  alt=""
+                  width={24}
+                  height={24}
+                  className="rounded-full"
+                />
+              </div>
+            </>
           )}
-          <span className="text-sm sm:text-base font-semibold">
+          <span className="text-xs sm:text-base font-semibold">
             {asset_data ? contract_data?.symbol || asset_data.symbol : 'Token'}
           </span>
         </div>
         :
         <Puff color={loader_color(theme)} width="24" height="24" />
       }
-      buttonClassName={`w-48 min-w-max h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
+      buttonClassName={`w-32 sm:w-48 min-w-max h-10 sm:h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
       title={<div className="flex items-center justify-between">
         <span className="flex items-center space-x-1">
           <span className="capitalize">

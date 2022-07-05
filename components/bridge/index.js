@@ -543,10 +543,10 @@ export default () => {
     <div className="grid grid-flow-row grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
       <div className="hidden lg:block col-span-0 lg:col-span-2" />
       <div className="col-span-1 lg:col-span-4">
-        <div className="mt-8">
+        <div className="mt-4 sm:mt-8">
           <Announcement />
         </div>
-        <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6 my-6 mx-4">
+        <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6 my-4 sm:my-6 mx-1 sm:mx-4">
           <div className="w-full max-w-lg space-y-4">
             <div className="flex items-center justify-between space-x-2">
               <div className="space-y-1">
@@ -595,18 +595,18 @@ export default () => {
                 />
               </div>
             </div>
-            <div className={`${checkSupport() && amount ? 'border-2 border-blue-400 dark:border-blue-800 shadow-xl shadow-blue-200 dark:shadow-blue-600' : 'shadow dark:shadow-slate-400'} rounded-2xl space-y-6 pt-8 pb-6 px-6`}>
+            <div className={`${checkSupport() && amount > 0 ? 'border-2 border-blue-400 dark:border-blue-800 shadow-xl shadow-blue-200 dark:shadow-blue-600' : 'shadow dark:shadow-slate-400'} rounded-2xl space-y-6 pt-4 sm:pt-8 pb-3 sm:pb-6 px-3 sm:px-6`}>
               <div className="space-y-2">
-                <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6">
-                  <div className="sm:col-span-2 flex flex-col items-center sm:items-start">
-                    <div className="w-48 flex sm:flex-col items-center justify-center space-x-1.5">
+                <div className="grid grid-flow-row grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
+                  <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start">
+                    <div className="w-32 sm:w-48 flex sm:flex-col items-center justify-center space-x-1.5">
                       <span className="text-slate-400 dark:text-white text-lg font-semibold text-center">
                         Source
                       </span>
-                      <GasPrice
+                      {/*<GasPrice
                         chainId={source_chain_data?.chain_id}
                         dummy={source_chain || destination_chain}
-                      />
+                      />*/}
                     </div>
                     <SelectChain
                       disabled={disabled}
@@ -642,7 +642,7 @@ export default () => {
                       chain={source_chain}
                       origin="source"
                     />
-                    <div className="w-48 flex items-center justify-center">
+                    <div className="w-32 sm:w-48 flex items-center justify-center">
                       <Balance
                         chainId={source_chain_data?.chain_id}
                         asset={asset}
@@ -664,23 +664,33 @@ export default () => {
                       }}
                       className={`transform hover:rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-500 dark:hover:shadow-white flex items-center justify-center p-2.5`}
                     >
-                      <Image
-                        src="/logos/logo.png"
-                        alt=""
-                        width={32}
-                        height={32}
-                      />
+                      <div className="flex sm:hidden">
+                        <Image
+                          src="/logos/logo.png"
+                          alt=""
+                          width={24}
+                          height={24}
+                        />
+                      </div>
+                      <div className="hidden sm:flex">
+                        <Image
+                          src="/logos/logo.png"
+                          alt=""
+                          width={32}
+                          height={32}
+                        />
+                      </div>
                     </button>
                   </div>
-                  <div className="sm:col-span-2 flex flex-col items-center sm:items-end">
-                    <div className="w-48 flex sm:flex-col items-center justify-center space-x-1.5">
+                  <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end">
+                    <div className="w-32 sm:w-48 flex sm:flex-col items-center justify-center space-x-1.5">
                       <span className="text-slate-400 dark:text-white text-lg font-semibold text-center">
                         Destination
                       </span>
-                      <GasPrice
+                      {/*<GasPrice
                         chainId={destination_chain_data?.chain_id}
                         dummy={source_chain || destination_chain}
-                      />
+                      />*/}
                     </div>
                     <SelectChain
                       disabled={disabled}
@@ -716,7 +726,7 @@ export default () => {
                       chain={destination_chain}
                       origin="destination"
                     />
-                    <div className="w-48 flex items-center justify-center">
+                    <div className="w-32 sm:w-48 flex items-center justify-center">
                       <Balance
                         chainId={destination_chain_data?.chain_id}
                         asset={asset}
