@@ -113,7 +113,7 @@ export default ({ data }) => {
         <LightSpeed left>
           <div className="flex flex-col">
             {source_amount ?
-              <span className="font-mono font-bold">
+              <span className="font-bold">
                 {number_format(source_amount, '0,0.000000', true)}
               </span>
               :
@@ -156,7 +156,7 @@ export default ({ data }) => {
         <LightSpeed left>
           <div className="flex flex-col items-end" style={{ minWidth: '4rem' }}>
             {destination_amount ?
-              <span className="font-mono font-bold">
+              <span className="font-bold">
                 {number_format(destination_amount, '0,0.000000', true)}
               </span>
               :

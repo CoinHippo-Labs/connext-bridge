@@ -31,11 +31,6 @@ export default ({
       type: 'text',
       placeholder: 'target contract or recipient address',
     },
-    {
-      label: 'Infinite Approval',
-      name: 'infiniteApprove',
-      type: 'switch',
-    },
     // {
     //   label: 'Slippage Tolerance',
     //   name: 'slippage',
@@ -44,6 +39,11 @@ export default ({
     //   presets: [3.0, 2.0, 1.0],
     //   postfix: '%',
     // },
+    {
+      label: 'Infinite Approval',
+      name: 'infiniteApprove',
+      type: 'switch',
+    },
     {
       label: 'Bridge Path',
       name: 'forceSlow',
@@ -234,7 +234,7 @@ export default ({
                                   [`${f.name}`]: p,
                                 })
                               }}
-                              className={`${data?.[f.name] === p ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white py-1 px-2`}
+                              className={`${data?.[f.name] === p ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-semibold'} rounded-lg cursor-pointer py-1 px-2`}
                             >
                               {p} {f.postfix}
                             </div>

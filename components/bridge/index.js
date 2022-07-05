@@ -390,7 +390,7 @@ export default () => {
           setCalling(false)
           setXcallResponse(null)
           try {
-            const { to, infiniteApprove, callData, slippage, forceSlow } = { ...options }
+            const { forceSlow } = { ...options }
             const native_token = source_chain_data?.provider_params?.[0]?.nativeCurrency
             const decimals = native_token?.decimals || 18
             const routerFee = forceSlow ? 0 : amount * ROUTER_FEE_PERCENT / 100
@@ -554,7 +554,7 @@ export default () => {
                   Cross-Chain Transfer
                 </h1>
                 {asPath?.includes('from-') && asPath.includes('to-') && headMeta?.title && (
-                  <h2 className="text-slate-400 dark:text-slate-500 text-xs sm:text-sm font-medium">
+                  <h2 className="text-slate-400 dark:text-slate-500 text-xs sm:text-sm">
                     {headMeta.title.replace(' with Connext', '')}
                   </h2>
                 )}
@@ -746,9 +746,9 @@ export default () => {
                   />
                 </div>
               </div>
-              <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6 sm:ml-3">
-                <div className="sm:col-span-2 flex items-center justify-center sm:justify-start space-x-2.5">
-                  <span className="text-slate-400 dark:text-white text-lg font-semibold">
+              <div className="grid grid-flow-row grid-cols-5 sm:grid-cols-5 gap-6 sm:ml-3">
+                <div className="col-span-2 sm:col-span-2 flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
+                  <span className="text-slate-400 dark:text-white text-sm sm:text-lg sm:font-semibold">
                     Amount
                   </span>
                   {address && checkSupport() && source_balance && (
@@ -811,14 +811,14 @@ export default () => {
                           </span>
                         </div>
                       </div>}
-                      className="bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-base font-semibold py-0.5 px-2.5"
+                      className="bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-base font-semibold py-0.5 px-2 sm:px-2.5"
                       titleClassName="normal-case py-1.5"
                     >
                       Max
                     </Popover>
                   )}
                 </div>
-                <div className="sm:col-span-3 flex items-center justify-center sm:justify-end">
+                <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end">
                   <DebounceInput
                     debounceTimeout={300}
                     size="small"
@@ -839,75 +839,223 @@ export default () => {
                       })
                     }}
                     onWheel={e => e.target.blur()}
-                    className={`w-48 bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl font-mono text-lg font-semibold text-right py-2 px-3`}
+                    className={`w-36 sm:w-48 bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
                   />
                 </div>
               </div>
-              {checkSupport() && (web3_provider || amount) && (feeEstimating || fee) && (
-                <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-2 sm:gap-6 sm:mx-3">
-                  <div className="sm:col-span-2 flex items-center sm:items-start justify-center sm:justify-start space-x-2.5">
-                    <span className="text-slate-400 dark:text-white text-lg font-semibold">
-                      Fee
-                    </span>
-                    {/*feeEstimateCooldown > 0 && (
-                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg font-medium py-1 px-2">
-                        {feeEstimateCooldown}s
-                      </div>
-                    )*/}
+              {checkSupport() && (web3_provider || amount) && (
+                <div className="space-y-2.5 sm:ml-3">
+                  <div className="flex items-center justify-between space-x-1">
+                    <div className="text-slate-400 dark:text-white">
+                      Slippage Tolerance
+                    </div>
+                    <div className="flex flex-col sm:items-end space-y-1.5">
+                      {slippageEditing ?
+                        <>
+                          <div className="flex items-center space-x-1">
+                            <DebounceInput
+                              debounceTimeout={300}
+                              size="small"
+                              type="number"
+                              placeholder="0.00"
+                              value={typeof options?.slippage === 'number' && options.slippage >= 0 ? options.slippage : ''}
+                              onChange={e => {
+                                const regex = /^[0-9.\b]+$/
+                                let value
+                                if (e.target.value === '' || regex.test(e.target.value)) {
+                                  value = e.target.value
+                                }
+                                value = value <= 0 || value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
+                                console.log('[Transfer Confirmation]', {
+                                  bridge,
+                                  fee,
+                                  options: {
+                                    ...options,
+                                    to: recipient_address,
+                                    slippage: value && !isNaN(value) ? Number(value) : value,
+                                  },
+                                })
+                                setOptions({
+                                  ...options,
+                                  slippage: value && !isNaN(value) ? Number(value) : value,
+                                })
+                              }}
+                              onWheel={e => e.target.blur()}
+                              className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1.5 px-2.5`}
+                            />
+                            <button
+                              onClick={() => setSlippageEditing(false)}
+                              className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
+                            >
+                              <BiCheckCircle size={20} />
+                            </button>
+                          </div>
+                          <div className="flex items-center space-x-1.5">
+                            {[3.0, 2.0, 1.0].map((s, i) => (
+                              <div
+                                key={i}
+                                onClick={() => {
+                                  console.log('[Transfer Confirmation]', {
+                                    bridge,
+                                    fee,
+                                    options: {
+                                      ...options,
+                                      to: recipient_address,
+                                      slippage: s,
+                                    },
+                                  })
+                                  setOptions({
+                                    ...options,
+                                    slippage: s,
+                                  })
+                                  setSlippageEditing(false)
+                                }}
+                                className={`${options?.slippage === s ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-semibold'} rounded-lg cursor-pointer text-xs py-0.5 px-1.5`}
+                              >
+                                {s} %
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                        :
+                        <div className="flex items-center space-x-1">
+                          <span className="font-semibold">
+                            {number_format(options?.slippage, '0,0.00')}%
+                          </span>
+                          <button
+                            onClick={() => setSlippageEditing(true)}
+                            className="hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
+                          >
+                            <BiEditAlt size={16} />
+                          </button>
+                        </div>
+                      }
+                    </div>
                   </div>
-                  <div className="sm:col-span-3 flex items-center justify-center sm:justify-end">
-                    {feeEstimating ?
-                      <div className="flex items-center space-x-1.5">
-                        <span className="text-slate-400 dark:text-white text-base font-medium">
-                          estimating
+                  <div className="flex items-center justify-between space-x-2">
+                    <div className="text-slate-400 dark:text-white">
+                      Infinite Approval
+                    </div>
+                    <Switch
+                      checked={typeof options?.infiniteApprove === 'boolean' ? options.infiniteApprove : false}
+                      onChange={() => {
+                        console.log('[Transfer Confirmation]', {
+                          bridge,
+                          fee,
+                          options: {
+                            ...options,
+                            to: recipient_address,
+                            infiniteApprove: !options?.infiniteApprove,
+                          },
+                        })
+                        setOptions({
+                          ...options,
+                          infiniteApprove: !options?.infiniteApprove,
+                        })}
+                      }
+                      onColor="#3b82f6"
+                      onHandleColor="#f8fafc"
+                      offColor="#64748b"
+                      offHandleColor="#f8fafc"
+                      width={48}
+                      height={24}
+                    />
+                  </div>
+                  {(feeEstimating || fee) && (
+                    <div className="grid grid-flow-row grid-cols-5 sm:grid-cols-5 gap-2 sm:gap-6">
+                      <div className="col-span-2 sm:col-span-2 flex items-start sm:items-start justify-start sm:justify-start space-x-2.5">
+                        <span className="text-slate-400 dark:text-white">
+                          Fee
                         </span>
-                        <Oval color={loader_color(theme)} width="24" height="24" />
+                        {/*feeEstimateCooldown > 0 && (
+                          <div className="bg-slate-50 dark:bg-slate-800 rounded-lg font-medium py-1 px-2">
+                            {feeEstimateCooldown}s
+                          </div>
+                        )*/}
                       </div>
-                      :
-                      <div className="flex flex-col items-center sm:items-end space-y-1">
-                        {!options?.forceSlow && (
-                          <>
-                            <div className="w-full flex items-center justify-between space-x-8">
-                              <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm">
-                                Bridge Fee:
-                              </span>
-                              <span className="whitespace-nowrap text-sm font-semibold">
-                                {number_format(router_fee, '0,0.000000', true)} {source_symbol}
-                              </span>
-                            </div>
-                            <div className="w-full flex items-center justify-between space-x-8">
-                              <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm">
-                                Relayer Fee:
-                              </span>
-                              <span className="whitespace-nowrap text-sm font-semibold">
-                                {number_format(relayer_fee, '0,0.000000', true)} {source_symbol}
-                              </span>
-                            </div>
-                          </>
-                        )}
-                        <div className="w-full flex items-center justify-between space-x-8">
-                          {!options?.forceSlow && (
-                            <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm">
-                              Total:
+                      <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end">
+                        {feeEstimating ?
+                          <div className="flex items-center space-x-1.5">
+                            <span className="text-slate-400 dark:text-white font-medium">
+                              estimating
                             </span>
-                          )}
-                          <span className="whitespace-nowrap text-lg font-bold">
-                            {total_fee ?
+                            <Oval color={loader_color(theme)} width="20" height="20" />
+                          </div>
+                          :
+                          <div className="flex flex-col items-end sm:items-end space-y-1">
+                            {!options?.forceSlow && (
                               <>
-                                {number_format(total_fee, '0,0.000000', true)} {source_symbol}
-                              </> :
-                              'no fees'
-                            }
+                                <div className="w-full flex items-center justify-between space-x-8">
+                                  <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-xs">
+                                    Bridge Fee:
+                                  </span>
+                                  <span className="whitespace-nowrap text-xs font-semibold">
+                                    {number_format(router_fee, '0,0.000000', true)} {source_symbol}
+                                  </span>
+                                </div>
+                                <div className="w-full flex items-center justify-between space-x-8">
+                                  <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-xs">
+                                    Relayer Fee:
+                                  </span>
+                                  <span className="whitespace-nowrap text-xs font-semibold">
+                                    {number_format(relayer_fee, '0,0.000000', true)} {source_symbol}
+                                  </span>
+                                </div>
+                              </>
+                            )}
+                            <div className="w-full flex items-center justify-between space-x-8">
+                              {!options?.forceSlow && (
+                                <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-xs">
+                                  Total:
+                                </span>
+                              )}
+                              <span className="whitespace-nowrap text-sm font-bold">
+                                {total_fee ?
+                                  <>
+                                    {number_format(total_fee, '0,0.000000', true)} {source_symbol}
+                                  </> :
+                                  'no fees'
+                                }
+                              </span>
+                            </div>
+                            {total_fee > 0 && typeof source_asset_data?.price === 'number' && (
+                              <div className="font-mono text-red-500 text-xs font-semibold">
+                                ({currency_symbol}{number_format(total_fee * source_asset_data.price, '0,0.000000')})
+                              </div>
+                            )}
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  )}
+                  {amount > 0 && (
+                    <>
+                      {asset_balances_data && amount > liquidity_amount && (
+                        <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2">
+                          <BiMessageEdit size={20} className="min-w-max" />
+                          <span className="text-xs">
+                            Insufficient router liquidity. Funds must transfer through the bridge directly. (wait time est. 30-60 mins)
                           </span>
                         </div>
-                        {total_fee > 0 && typeof source_asset_data?.price === 'number' && (
-                          <div className="font-mono text-red-500 text-xs font-semibold">
-                            ({currency_symbol}{number_format(total_fee * source_asset_data.price, '0,0.000000')})
+                      )}
+                      {amount < liquidity_amount && (
+                        options?.forceSlow ?
+                          <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2">
+                            <BiMessageDetail size={20} className="min-w-max" />
+                            <span className="text-xs">
+                              Use bridge only (wait 30-60 mins, no fees)
+                            </span>
                           </div>
-                        )}
-                      </div>
-                    }
-                  </div>
+                          :
+                          <div className="flex items-center text-blue-500 dark:text-green-500 space-x-2">
+                            <GiPartyPopper size={20} className="min-w-max" />
+                            <span className="text-xs">
+                              Fast liquidity available! Transfer will likely complete within 3 minutes!
+                            </span>
+                          </div>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
               {checkSupport() && (xcall || source_balance) && (typeof amount === 'number' || (web3_provider && wrong_chain)) ?
@@ -952,7 +1100,24 @@ export default () => {
                     </Alert>
                     :
                     !xcall && !xcallResponse ?
-                      <Modal
+                      <button
+                        disabled={disabled}
+                        onClick={() => {
+                          setSlippageEditing(false)
+                          call()
+                        }}
+                        className={`w-full ${disabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'} rounded-xl flex items-center justify-center text-white text-base sm:text-lg py-3 sm:py-4 px-2 sm:px-3`}
+                      >
+                        <span className="flex items-center justify-center space-x-1.5">
+                          {(calling || approving) && (
+                            <TailSpin color="white" width="20" height="20" />
+                          )}
+                          <span>
+                            {calling ? approving ? 'Approving' : 'xCalling' : 'Transfer'}
+                          </span>
+                        </span>
+                      </button>
+                      /*<Modal
                         onClick={() => {
                           setSlippageEditing(false)
                         }}
@@ -1044,64 +1209,6 @@ export default () => {
                               )}
                             </div>
                           </div>
-                          {fee && (
-                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                              <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base">
-                                Fees
-                                <span className="hidden sm:block">:</span>
-                              </div>
-                              <div className="sm:text-right">
-                                <div className="text-lg space-x-1.5">
-                                  {total_fee ?
-                                    <>
-                                      <span className="font-bold">
-                                        {number_format(total_fee, '0,0.000000', true)}
-                                      </span>
-                                      <span className="font-semibold">
-                                        {source_symbol}
-                                      </span>
-                                    </> :
-                                    <span className="font-bold">
-                                      no fees
-                                    </span>
-                                  }
-                                </div>
-                                {total_fee > 0 && typeof source_asset_data?.price === 'number' && (
-                                  <div className="font-mono text-red-500 sm:text-right">
-                                    ({currency_symbol}{number_format(total_fee * source_asset_data.price, '0,0.000000')})
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
-                              Infinite Approval
-                              <span className="hidden sm:block">:</span>
-                            </div>
-                            <Switch
-                              checked={typeof options?.infiniteApprove === 'boolean' ? options.infiniteApprove : false}
-                              onChange={() => {
-                                console.log('[Transfer Confirmation]', {
-                                  bridge,
-                                  fee,
-                                  options: {
-                                    ...options,
-                                    to: recipient_address,
-                                    infiniteApprove: !options?.infiniteApprove,
-                                  },
-                                })
-                                setOptions({
-                                  ...options,
-                                  infiniteApprove: !options?.infiniteApprove,
-                                })}
-                              }
-                              onColor="#3b82f6"
-                              onHandleColor="#f8fafc"
-                              offColor="#64748b"
-                              offHandleColor="#f8fafc"
-                            />
-                          </div>
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
                             <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
                               Slippage Tolerance
@@ -1192,6 +1299,34 @@ export default () => {
                           </div>
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
                             <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
+                              Infinite Approval
+                              <span className="hidden sm:block">:</span>
+                            </div>
+                            <Switch
+                              checked={typeof options?.infiniteApprove === 'boolean' ? options.infiniteApprove : false}
+                              onChange={() => {
+                                console.log('[Transfer Confirmation]', {
+                                  bridge,
+                                  fee,
+                                  options: {
+                                    ...options,
+                                    to: recipient_address,
+                                    infiniteApprove: !options?.infiniteApprove,
+                                  },
+                                })
+                                setOptions({
+                                  ...options,
+                                  infiniteApprove: !options?.infiniteApprove,
+                                })}
+                              }
+                              onColor="#3b82f6"
+                              onHandleColor="#f8fafc"
+                              offColor="#64748b"
+                              offHandleColor="#f8fafc"
+                            />
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
+                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
                               Bridge Path
                               <span className="hidden sm:block">:</span>
                             </div>
@@ -1245,6 +1380,36 @@ export default () => {
                               />
                             </div>
                           </div>
+                          {fee && (
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
+                              <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base">
+                                Fees
+                                <span className="hidden sm:block">:</span>
+                              </div>
+                              <div className="sm:text-right">
+                                <div className="text-lg space-x-1.5">
+                                  {total_fee ?
+                                    <>
+                                      <span className="font-bold">
+                                        {number_format(total_fee, '0,0.000000', true)}
+                                      </span>
+                                      <span className="font-semibold">
+                                        {source_symbol}
+                                      </span>
+                                    </> :
+                                    <span className="font-bold">
+                                      no fees
+                                    </span>
+                                  }
+                                </div>
+                                {total_fee > 0 && typeof source_asset_data?.price === 'number' && (
+                                  <div className="font-mono text-red-500 sm:text-right">
+                                    ({currency_symbol}{number_format(total_fee * source_asset_data.price, '0,0.000000')})
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
                           {amount > liquidity_amount && (
                             <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2">
                               <BiMessageEdit size={20} className="min-w-max mt-0.5" />
@@ -1284,7 +1449,7 @@ export default () => {
                           </span>
                         </span>}
                         confirmButtonClassName="w-full btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white text-base sm:text-lg text-center"
-                      />
+                      />*/
                       :
                       (xcallResponse || (!xcall && approveResponse)) && (
                         [xcallResponse || approveResponse].map((r, i) => (

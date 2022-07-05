@@ -348,7 +348,9 @@ export default () => {
       {!hiddenStatus && process.env.NEXT_PUBLIC_STATUS_TITLE && (
         <div className="w-full bg-slate-100 dark:bg-slate-900 overflow-x-auto flex items-center py-2 sm:py-3 px-2 sm:px-4">
           <span className="flex flex-wrap items-center font-mono text-blue-500 dark:text-white text-2xs xl:text-sm space-x-1.5 xl:space-x-2 mx-auto">
-            <Linkify>{parse(process.env.NEXT_PUBLIC_STATUS_TITLE)}</Linkify>
+            <Linkify>
+              {parse(process.env.NEXT_PUBLIC_STATUS_TITLE)}
+            </Linkify>
             <button
               onClick={() => setHiddenStatus(true)}
               className="hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full mt-0.5 p-1"

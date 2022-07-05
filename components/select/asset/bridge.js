@@ -148,6 +148,7 @@ export default ({
         <Search
           value={value}
           onSelect={id => onClick(id)}
+          chain={source_chain}
         />
       )}
     />
