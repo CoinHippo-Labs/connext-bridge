@@ -394,14 +394,14 @@ export default () => {
             const native_token = source_chain_data?.provider_params?.[0]?.nativeCurrency
             const decimals = native_token?.decimals || 18
             const routerFee = forceSlow ? 0 : amount * ROUTER_FEE_PERCENT / 100
-            const relayerFee = forceSlow ? 0 : null
+            const gasFee = forceSlow ? 0 : null
             console.log('[Estimate Fees]', {
               routerFee,
-              relayerFee,
+              gasFee,
             })
             setFee({
               router: routerFee,
-              relayer: relayerFee && Number(utils.formatUnits(BigNumber.from(relayerFee || '0'), decimals)),
+              gas: gasFee && Number(utils.formatUnits(BigNumber.from(gasFee || '0'), decimals)),
             })
           } catch (error) {}
         }
@@ -524,9 +524,9 @@ export default () => {
   const destination_decimals = destination_contract_data?.contract_decimals || 18
   const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol
 
-  const relayer_fee = fee && (options.forceSlow ? 0 : fee.relayer || 0)
+  const gas_fee = fee && (options.forceSlow ? 0 : fee.gas || 0)
   const router_fee = fee && (options.forceSlow ? 0 : fee.router || 0)
-  const total_fee = fee && (relayer_fee + router_fee)
+  const total_fee = fee && (gas_fee + router_fee)
   const source_gas_native_token = source_chain_data?.provider_params?.[0]?.nativeCurrency
 
   const liquidity_amount = _.sum(asset_balances_data?.[destination_chain_data?.chain_id]?.filter(a => equals_ignore_case(a?.adopted, destination_contract_data?.contract_address))?.map(a => Number(utils.formatUnits(BigNumber.from(a?.amount || '0'), destination_decimals))) || [])
@@ -965,7 +965,7 @@ export default () => {
                     <div className="grid grid-flow-row grid-cols-5 sm:grid-cols-5 gap-2 sm:gap-6">
                       <div className="col-span-2 sm:col-span-2 flex items-start sm:items-start justify-start sm:justify-start space-x-2.5">
                         <span className="text-slate-400 dark:text-white">
-                          Fee
+                          Fees
                         </span>
                         {/*feeEstimateCooldown > 0 && (
                           <div className="bg-slate-50 dark:bg-slate-800 rounded-lg font-medium py-1 px-2">
@@ -995,10 +995,10 @@ export default () => {
                                 </div>
                                 <div className="w-full flex items-center justify-between space-x-8">
                                   <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-xs">
-                                    Relayer Fee:
+                                    Gas Fee:
                                   </span>
                                   <span className="whitespace-nowrap text-xs font-semibold">
-                                    {number_format(relayer_fee, '0,0.000000', true)} {source_symbol}
+                                    {number_format(gas_fee, '0,0.000000', true)} {source_symbol}
                                   </span>
                                 </div>
                               </>
