@@ -217,6 +217,7 @@ export default ({
                           })
                         }}
                         onWheel={e => e.target.blur()}
+                        onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                         className={`w-20 bg-slate-50 dark:bg-slate-800 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
                       />
                       {f?.presets.length > 0 && (

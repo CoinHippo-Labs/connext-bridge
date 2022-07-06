@@ -849,6 +849,7 @@ export default () => {
                       })
                     }}
                     onWheel={e => e.target.blur()}
+                    onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                     className={`w-36 sm:w-48 bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
                   />
                 </div>
@@ -891,6 +892,7 @@ export default () => {
                                 })
                               }}
                               onWheel={e => e.target.blur()}
+                              onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                               className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1.5 px-2.5`}
                             />
                             <button
@@ -1256,6 +1258,7 @@ export default () => {
                                         })
                                       }}
                                       onWheel={e => e.target.blur()}
+                                      onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                                       className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1.5 px-2.5`}
                                     />
                                     <button

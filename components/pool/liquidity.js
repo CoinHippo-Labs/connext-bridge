@@ -196,6 +196,7 @@ export default ({
                     setAmountX(value && !isNaN(value) ? Number(value) : value)
                   }}
                   onWheel={e => e.target.blur()}
+                  onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                   className={`w-full bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
                 />
                 <div
@@ -239,6 +240,7 @@ export default ({
                     setAmountY(value && !isNaN(value) ? Number(value) : value)
                   }}
                   onWheel={e => e.target.blur()}
+                  onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                   className={`w-full bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
                 />
                 <div
@@ -291,6 +293,7 @@ export default ({
                         })
                       }}
                       onWheel={e => e.target.blur()}
+                      onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                       className={`w-20 bg-slate-50 dark:bg-slate-800 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
                     />
                     <div className="flex items-center space-x-2.5">
@@ -333,6 +336,7 @@ export default ({
                         })
                       }}
                       onWheel={e => e.target.blur()}
+                      onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                       className={`w-20 bg-slate-50 dark:bg-slate-800 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
                     />
                     <span className="font-semibold">
@@ -441,6 +445,7 @@ export default ({
                 setAmount(value && !isNaN(value) ? Number(value) : value)
               }}
               onWheel={e => e.target.blur()}
+              onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
               className={`w-full bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled || !data ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
             />
             <div className="flex items-center justify-end space-x-2.5">
