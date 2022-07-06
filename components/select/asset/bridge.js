@@ -18,10 +18,12 @@ export default ({
   source_chain,
   destination_chain,
 }) => {
-  const { preferences, chains, assets } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets }), shallowEqual)
+  const { preferences, chains, assets, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, wallet: state.wallet }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
+  const { wallet_data } = { ...wallet }
+  const { web3_provider } = { ...wallet_data }
 
   const [hidden, setHidden] = useState(true)
 
@@ -53,7 +55,7 @@ export default ({
           {assets_data ?
             <>
               <div className="space-y-1 mx-auto">
-                {source_contract_data && (
+                {web3_provider && source_contract_data && (
                   <>
                     <div className="text-slate-400 dark:text-slate-600 text-xs font-medium">
                       Balance
@@ -93,7 +95,7 @@ export default ({
                 </span>
               </div>
               <div className="space-y-1 mx-auto">
-                {destination_contract_data && (
+                {web3_provider && destination_contract_data && (
                   <>
                     <div className="text-slate-400 dark:text-slate-600 text-xs font-medium">
                       Balance

@@ -75,10 +75,12 @@ export default () => {
   const [estimateTrigger, setEstimateTrigger] = useState(null)
 
   const [approving, setApproving] = useState(null)
+  const [approveProcessing, setApproveProcessing] = useState(null)
   const [approveResponse, setApproveResponse] = useState(null)
 
   const [xcall, setXcall] = useState(null)
   const [calling, setCalling] = useState(null)
+  const [callProcessing, setCallProcessing] = useState(null)
   const [xcallResponse, setXcallResponse] = useState(null)
 
   const [transfersTrigger, setTransfersTrigger] = useState(null)
@@ -360,9 +362,11 @@ export default () => {
     setEstimateTrigger(null)
 
     setApproving(null)
+    setApproveProcessing(null)
     setApproveResponse(null)
 
     setCalling(null)
+    setCallProcessing(null)
     setXcallResponse(null)
 
     setTransfersTrigger(moment().valueOf())
@@ -387,6 +391,7 @@ export default () => {
         if (sdk && !controller.signal.aborted) {
           setApproveResponse(null)
           setXcall(null)
+          setCallProcessing(false)
           setCalling(false)
           setXcallResponse(null)
           try {
@@ -414,6 +419,7 @@ export default () => {
   }
 
   const call = async () => {
+    setApproving(null)
     setCalling(true)
     let success = false
     if (sdk) {
@@ -451,6 +457,7 @@ export default () => {
             message: `Wait for ${source_symbol} approval`,
             tx_hash,
           })
+          setApproveProcessing(true)
           const approve_receipt = await signer.provider.waitForTransaction(tx_hash)
           setApproveResponse(approve_receipt?.status ?
             null : {
@@ -460,11 +467,13 @@ export default () => {
             }
           )
           failed = !approve_receipt?.status
+          setApproveProcessing(false)
           setApproving(false)
         }
       } catch (error) {
         setApproveResponse({ status: 'failed', message: error?.data?.message || error?.message })
         failed = true
+        setApproveProcessing(false)
         setApproving(false)
       }
       if (!failed) {
@@ -478,6 +487,7 @@ export default () => {
                 .round(0).toString().replace('.0', '')
               xcall_request.gasLimit = gas_limit
             }
+            setCallProcessing(true)
             const xcall_response = await signer.sendTransaction(xcall_request)
             const tx_hash = xcall_response?.hash
             const xcall_receipt = await signer.provider.waitForTransaction(tx_hash)
@@ -499,6 +509,7 @@ export default () => {
         setXcall(null)
       }
     }
+    setCallProcessing(false)
     setCalling(false)
     if (sdk && address && success) {
       await sleep(2 * 1000)
@@ -855,129 +866,137 @@ export default () => {
                 </div>
               </div>
               {checkSupport() && (web3_provider || amount) && (
-                <div className="space-y-2.5 sm:ml-3">
-                  <div className="flex items-center justify-between space-x-1">
-                    <div className="text-slate-400 dark:text-white">
-                      Slippage Tolerance
+                <>
+                  <div className="space-y-2">
+                    <div className="text-slate-400 dark:text-slate-600 font-medium sm:mx-3">
+                      Transfer Details
                     </div>
-                    <div className="flex flex-col sm:items-end space-y-1.5">
-                      {slippageEditing ?
-                        <>
-                          <div className="flex items-center space-x-1">
-                            <DebounceInput
-                              debounceTimeout={300}
-                              size="small"
-                              type="number"
-                              placeholder="0.00"
-                              value={typeof options?.slippage === 'number' && options.slippage >= 0 ? options.slippage : ''}
-                              onChange={e => {
-                                const regex = /^[0-9.\b]+$/
-                                let value
-                                if (e.target.value === '' || regex.test(e.target.value)) {
-                                  value = e.target.value
-                                }
-                                value = value <= 0 || value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
-                                console.log('[Transfer Confirmation]', {
-                                  bridge,
-                                  fee,
-                                  options: {
-                                    ...options,
-                                    to: recipient_address,
-                                    slippage: value && !isNaN(value) ? Number(value) : value,
-                                  },
-                                })
-                                setOptions({
-                                  ...options,
-                                  slippage: value && !isNaN(value) ? Number(value) : value,
-                                })
-                              }}
-                              onWheel={e => e.target.blur()}
-                              onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                              className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1.5 px-2.5`}
-                            />
-                            <button
-                              onClick={() => setSlippageEditing(false)}
-                              className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
-                            >
-                              <BiCheckCircle size={20} />
-                            </button>
-                          </div>
-                          <div className="flex items-center space-x-1.5">
-                            {[3.0, 2.0, 1.0].map((s, i) => (
-                              <div
-                                key={i}
-                                onClick={() => {
-                                  console.log('[Transfer Confirmation]', {
-                                    bridge,
-                                    fee,
-                                    options: {
-                                      ...options,
-                                      to: recipient_address,
-                                      slippage: s,
-                                    },
-                                  })
-                                  setOptions({
-                                    ...options,
-                                    slippage: s,
-                                  })
-                                  setSlippageEditing(false)
-                                }}
-                                className={`${options?.slippage === s ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-semibold'} rounded-lg cursor-pointer text-xs py-0.5 px-1.5`}
-                              >
-                                {s} %
-                              </div>
-                            ))}
-                          </div>
-                        </>
-                        :
-                        <div className="flex items-center space-x-1">
-                          <span className="font-semibold">
-                            {number_format(options?.slippage, '0,0.00')}%
-                          </span>
-                          <button
-                            onClick={() => setSlippageEditing(true)}
-                            className="hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
-                          >
-                            <BiEditAlt size={16} />
-                          </button>
+                    <div className="w-full h-0.25 bg-slate-100 dark:bg-slate-700 sm:px-1" />
+                    <div className="space-y-2.5 sm:mx-3">
+                      <div className="flex items-center justify-between space-x-1">
+                        <div className="text-slate-600 dark:text-white font-medium">
+                          Slippage Tolerance
                         </div>
-                      }
+                        <div className="flex flex-col sm:items-end space-y-1.5">
+                          {slippageEditing ?
+                            <>
+                              <div className="flex items-center space-x-1">
+                                <DebounceInput
+                                  debounceTimeout={300}
+                                  size="small"
+                                  type="number"
+                                  placeholder="0.00"
+                                  value={typeof options?.slippage === 'number' && options.slippage >= 0 ? options.slippage : ''}
+                                  onChange={e => {
+                                    const regex = /^[0-9.\b]+$/
+                                    let value
+                                    if (e.target.value === '' || regex.test(e.target.value)) {
+                                      value = e.target.value
+                                    }
+                                    value = value <= 0 || value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
+                                    console.log('[Transfer Confirmation]', {
+                                      bridge,
+                                      fee,
+                                      options: {
+                                        ...options,
+                                        to: recipient_address,
+                                        slippage: value && !isNaN(value) ? Number(value) : value,
+                                      },
+                                    })
+                                    setOptions({
+                                      ...options,
+                                      slippage: value && !isNaN(value) ? Number(value) : value,
+                                    })
+                                  }}
+                                  onWheel={e => e.target.blur()}
+                                  onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                                  className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1.5 px-2.5`}
+                                />
+                                <button
+                                  onClick={() => setSlippageEditing(false)}
+                                  className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
+                                >
+                                  <BiCheckCircle size={20} />
+                                </button>
+                              </div>
+                              <div className="flex items-center space-x-1.5">
+                                {[3.0, 2.0, 1.0].map((s, i) => (
+                                  <div
+                                    key={i}
+                                    onClick={() => {
+                                      console.log('[Transfer Confirmation]', {
+                                        bridge,
+                                        fee,
+                                        options: {
+                                          ...options,
+                                          to: recipient_address,
+                                          slippage: s,
+                                        },
+                                      })
+                                      setOptions({
+                                        ...options,
+                                        slippage: s,
+                                      })
+                                      setSlippageEditing(false)
+                                    }}
+                                    className={`${options?.slippage === s ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-semibold'} rounded-lg cursor-pointer text-xs py-0.5 px-1.5`}
+                                  >
+                                    {s} %
+                                  </div>
+                                ))}
+                              </div>
+                            </>
+                            :
+                            <div className="flex items-center space-x-1">
+                              <span className="font-semibold">
+                                {number_format(options?.slippage, '0,0.00')}%
+                              </span>
+                              <button
+                                onClick={() => setSlippageEditing(true)}
+                                className="hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
+                              >
+                                <BiEditAlt size={16} />
+                              </button>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between space-x-2">
+                        <div className="text-slate-600 dark:text-white font-medium">
+                          Infinite Approval
+                        </div>
+                        <Switch
+                          checked={typeof options?.infiniteApprove === 'boolean' ? options.infiniteApprove : false}
+                          onChange={() => {
+                            console.log('[Transfer Confirmation]', {
+                              bridge,
+                              fee,
+                              options: {
+                                ...options,
+                                to: recipient_address,
+                                infiniteApprove: !options?.infiniteApprove,
+                              },
+                            })
+                            setOptions({
+                              ...options,
+                              infiniteApprove: !options?.infiniteApprove,
+                            })}
+                          }
+                          onColor="#3b82f6"
+                          onHandleColor="#f8fafc"
+                          offColor="#64748b"
+                          offHandleColor="#f8fafc"
+                          width={48}
+                          height={24}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center justify-between space-x-2">
-                    <div className="text-slate-400 dark:text-white">
-                      Infinite Approval
-                    </div>
-                    <Switch
-                      checked={typeof options?.infiniteApprove === 'boolean' ? options.infiniteApprove : false}
-                      onChange={() => {
-                        console.log('[Transfer Confirmation]', {
-                          bridge,
-                          fee,
-                          options: {
-                            ...options,
-                            to: recipient_address,
-                            infiniteApprove: !options?.infiniteApprove,
-                          },
-                        })
-                        setOptions({
-                          ...options,
-                          infiniteApprove: !options?.infiniteApprove,
-                        })}
-                      }
-                      onColor="#3b82f6"
-                      onHandleColor="#f8fafc"
-                      offColor="#64748b"
-                      offHandleColor="#f8fafc"
-                      width={48}
-                      height={24}
-                    />
                   </div>
                   {(feeEstimating || fee) && (
-                    <div className="grid grid-flow-row grid-cols-5 sm:grid-cols-5 gap-2 sm:gap-6">
-                      <div className="col-span-2 sm:col-span-2 flex items-start sm:items-start justify-start sm:justify-start space-x-2.5">
-                        <span className="text-slate-400 dark:text-white">
-                          Fees
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2 sm:mx-3">
+                        <span className="text-slate-400 dark:text-slate-600 font-medium">
+                          Fees Breakdown
                         </span>
                         {/*feeEstimateCooldown > 0 && (
                           <div className="bg-slate-50 dark:bg-slate-800 rounded-lg font-medium py-1 px-2">
@@ -985,90 +1004,89 @@ export default () => {
                           </div>
                         )*/}
                       </div>
-                      <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end">
-                        {feeEstimating ?
-                          <div className="flex items-center space-x-1.5">
-                            <span className="text-slate-400 dark:text-white font-medium">
-                              estimating
-                            </span>
-                            <Oval color={loader_color(theme)} width="20" height="20" />
-                          </div>
-                          :
-                          <div className="flex flex-col items-end sm:items-end space-y-1">
-                            {!options?.forceSlow && (
-                              <>
-                                <div className="w-full flex items-center justify-between space-x-8">
-                                  <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-xs">
-                                    Bridge Fee:
-                                  </span>
-                                  <span className="whitespace-nowrap text-xs font-semibold">
-                                    {number_format(router_fee, '0,0.000000', true)} {source_symbol}
-                                  </span>
-                                </div>
-                                <div className="w-full flex items-center justify-between space-x-8">
-                                  <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-xs">
-                                    Gas Fee:
-                                  </span>
-                                  <span className="whitespace-nowrap text-xs font-semibold">
-                                    {number_format(gas_fee, '0,0.000000', true)} {source_symbol}
-                                  </span>
-                                </div>
-                              </>
-                            )}
-                            <div className="w-full flex items-center justify-between space-x-8">
-                              {!options?.forceSlow && (
-                                <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-xs">
-                                  Total:
-                                </span>
-                              )}
-                              <span className="whitespace-nowrap text-sm font-bold">
-                                {total_fee ?
-                                  <>
-                                    {number_format(total_fee, '0,0.000000', true)} {source_symbol}
-                                  </> :
-                                  'no fees'
-                                }
+                      <div className="w-full h-0.25 bg-slate-100 dark:bg-slate-700 sm:px-1" />
+                      <div className="space-y-2.5 sm:mx-3">
+                        {!options?.forceSlow && (
+                          <>
+                            <div className="flex items-center justify-between space-x-1">
+                              <div className="text-slate-600 dark:text-white font-medium">
+                                Bridge Fee
+                              </div>
+                              <span className="whitespace-nowrap text-xs font-semibold">
+                                {number_format(router_fee, '0,0.000000', true)} {source_symbol}
                               </span>
                             </div>
+                            <div className="flex items-center justify-between space-x-1">
+                              <div className="text-slate-600 dark:text-white font-medium">
+                                Gas Fee
+                              </div>
+                              {feeEstimating ?
+                                <div className="flex items-center space-x-1.5">
+                                  <span className="text-slate-600 dark:text-white font-medium">
+                                    estimating
+                                  </span>
+                                  <Oval color={loader_color(theme)} width="20" height="20" />
+                                </div>
+                                :
+                                <span className="whitespace-nowrap text-xs font-semibold">
+                                  {number_format(gas_fee, '0,0.000000', true)} {source_symbol}
+                                </span>
+                              }
+                            </div>
+                          </>
+                        )}
+                        <div className="flex items-start justify-between space-x-1">
+                          <div className="text-slate-600 dark:text-white font-medium">
+                            Total
+                          </div>
+                          <div className="space-y-1">
+                            <span className="whitespace-nowrap text-sm font-bold">
+                              {total_fee ?
+                                <>
+                                  {number_format(total_fee, '0,0.000000', true)} {source_symbol}
+                                </> :
+                                'no fees'
+                              }
+                            </span>
                             {total_fee > 0 && typeof source_asset_data?.price === 'number' && (
-                              <div className="font-mono text-red-500 text-xs font-semibold">
+                              <div className="font-mono text-red-500 text-xs font-semibold text-right">
                                 ({currency_symbol}{number_format(total_fee * source_asset_data.price, '0,0.000000')})
                               </div>
                             )}
                           </div>
-                        }
+                        </div>
                       </div>
                     </div>
                   )}
                   {amount > 0 && (
                     <>
                       {asset_balances_data && amount > liquidity_amount && (
-                        <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2">
+                        <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2 sm:mx-3">
                           <BiMessageEdit size={20} className="min-w-max" />
-                          <span className="text-xs">
+                          <span className="text-sm">
                             Insufficient router liquidity. Funds must transfer through the bridge directly. (wait time est. 30-60 mins)
                           </span>
                         </div>
                       )}
                       {amount < liquidity_amount && (
                         options?.forceSlow ?
-                          <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2">
+                          <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2 sm:mx-3">
                             <BiMessageDetail size={20} className="min-w-max" />
-                            <span className="text-xs">
+                            <span className="text-sm">
                               Use bridge only (wait 30-60 mins, no fees)
                             </span>
                           </div>
                           :
-                          <div className="flex items-center text-blue-500 dark:text-green-500 space-x-2">
+                          <div className="flex items-center text-blue-500 dark:text-green-500 space-x-2 sm:mx-3">
                             <GiPartyPopper size={20} className="min-w-max" />
-                            <span className="text-xs">
+                            <span className="text-sm">
                               Fast liquidity available! Transfer will likely complete within 3 minutes!
                             </span>
                           </div>
                       )}
                     </>
                   )}
-                </div>
+                </>
               )}
               {checkSupport() && (xcall || source_balance) && (typeof amount === 'number' || (web3_provider && wrong_chain)) ?
                 web3_provider && wrong_chain ?
@@ -1125,7 +1143,18 @@ export default () => {
                             <TailSpin color="white" width="20" height="20" />
                           )}
                           <span>
-                            {calling ? approving ? 'Approving' : 'xCalling' : 'Transfer'}
+                            {calling ?
+                              approving ?
+                                approveProcessing ?
+                                  'Approving' :
+                                  'Please Approve' :
+                                callProcessing ?
+                                  'xCalling' :
+                                  typeof approving === 'boolean' ?
+                                    'Please Confirm' :
+                                    'Checking Approval' :
+                              'Transfer'
+                            }
                           </span>
                         </span>
                       </button>
@@ -1458,7 +1487,18 @@ export default () => {
                             <TailSpin color="white" width="20" height="20" />
                           )}
                           <span>
-                            {calling ? approving ? 'Approving' : 'xCalling' : 'Confirm'}
+                            {calling ?
+                              approving ?
+                                approveProcessing ?
+                                  'Approving' :
+                                  'Please Approve' :
+                                callProcessing ?
+                                  'xCalling' :
+                                  typeof approving === 'boolean' ?
+                                    'Please Confirm' :
+                                    'Checking Approval' :
+                              'Confirm'
+                            }
                           </span>
                         </span>}
                         confirmButtonClassName="w-full btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white text-base sm:text-lg text-center"
