@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
-import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
 import Switch from 'react-switch'
@@ -71,7 +70,7 @@ export default () => {
     let path = !asPath ? '/' : asPath.toLowerCase()
     path = path.includes('?') ? path.substring(0, path.indexOf('?')) : path
     if (path.includes('on-')) {
-      const paths = _.slice(path.replace('/', '').split('-'), 1)
+      const paths = path.replace('/swap', '').split('-')
       const chain = paths[paths.indexOf('on') + 1]
       const chain_data = chains_data?.find(c => c?.id === chain)
       const asset = paths[0] !== 'on' ? paths[0] : null

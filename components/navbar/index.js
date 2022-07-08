@@ -153,20 +153,33 @@ export default () => {
     const init = async () => {
       if (chains_data && assets_data?.findIndex(a => !a.price) < 0) {
         const chains_config = {}
-        for (let i = 0; i < chains_data.length; i++) {
-          const chain_data = chains_data[i]
-          if (!chain_data?.disabled) {
-            const chain_id = chain_data?.chain_id
-            const domain_id = chain_data?.domain_id
-            const rpc_urls = chain_data?.provider_params?.[0]?.rpcUrls?.filter(url => url) || []
+        for (const chain_data of chains_data) {
+          const {
+            chain_id,
+            domain_id,
+            provider_params,
+            disabled,
+          } = { ...chain_data }
+          if (!disabled) {
+            const rpc_urls = provider_params?.[0]?.rpcUrls?.filter(url => url) || []
             if (domain_id) {
               chains_config[domain_id] = {
                 providers: rpc_urls,
                 assets: assets_data.filter(a => a?.contracts?.findIndex(c => c?.chain_id === chain_id) > -1).map(a => {
-                  const contract = a.contracts.find(c => c?.chain_id === chain_id)
-                  const name = contract.symbol || a.symbol || a.name
-                  const address = contract.contract_address
-                  return { name, address }
+                  const {
+                    name,
+                    contracts,
+                  } = { ...a }
+                  const contract_data = contracts.find(c => c?.chain_id === chain_id)
+                  const {
+                    contract_address,
+                  } = { ...contract_data }
+                  const symbol = contract_data?.symbol || a?.symbol
+                  return {
+                    name: name || symbol,
+                    address: contract_address,
+                    symbol,
+                  }
                 }),
               }
             }
@@ -246,9 +259,43 @@ export default () => {
   useEffect(() => {
     const getChainData = async chain_data => {
       if (sdk && chain_data) {
-        try {
-          const { chain_id, domain_id } = { ...chain_data }
-          const response = await sdk.nxtpSdkUtils.getPools(domain_id)
+        const {
+          chain_id,
+          domain_id,
+        } = { ...chain_data }
+
+        const data = []
+        for (const asset_data of assets_data) {
+          const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_id)
+          const {
+            contract_address,
+          } = { ...contract_data }
+          try {
+            const response = await sdk.nxtpSdkPool.getPool(domain_id, contract_address)
+console.log(response)
+            if (response) {
+              const _response = await sdk.nxtpSdkPool.getPoolStats(domain_id, contract_address)
+console.log(_response)
+              data.push({
+                ...response,
+                ..._response,
+                chain_id,
+                chain_data,
+                asset_data,
+                contract_data,
+              })
+            }
+          } catch (error) {
+            console.log(error)
+          }
+        }
+        dispatch({
+          type: POOLS_DATA,
+          value: data,
+        })
+
+        /*try {
+          const response = await sdk.nxtpSdkPool.getPools(domain_id)
           if (response) {
             const data = _.groupBy(response.map(p => {
               const { symbol } = { ...p }
@@ -265,7 +312,7 @@ export default () => {
               value: data,
             })
           }
-        } catch (error) {}
+        } catch (error) {}*/
       }
     }
     const getData = async () => {

@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
-import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
 import { RiArrowLeftCircleFill } from 'react-icons/ri'
@@ -50,7 +49,7 @@ export default () => {
     let path = !asPath ? '/' : asPath.toLowerCase()
     path = path.includes('?') ? path.substring(0, path.indexOf('?')) : path
     if (path.includes('on-')) {
-      const paths = _.slice(path.replace('/', '').split('-'), 1)
+      const paths = path.replace('/pool/', '').split('-')
       const chain = paths[paths.indexOf('on') + 1]
       const chain_data = chains_data?.find(c => c?.id === chain)
       const asset = paths[0] !== 'on' ? paths[0] : null
@@ -153,7 +152,8 @@ export default () => {
           const { chain } = { ...pool }
           const chain_data = chains_data.find(c => c?.id === chain)
           const { domain_id } = { ...chain_data }
-          const response = await sdk.nxtpSdkUtils.getUserPools(domain_id)
+          const response = await sdk.nxtpSdkPool.getUserPools(domain_id, address)
+console.log(response)
           setPools(response?.map(p => {
             const { symbol } = { ...p }
             const asset_data = assets_data.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === chain_data?.chain_id && equals_ignore_case(c?.symbol, symbol)) > -1)
@@ -163,7 +163,9 @@ export default () => {
               asset_data,
             }
           }) || pools || [])
-        } catch (error) {}
+        } catch (error) {
+          console.log(error)
+        }
       }
     }
     getData()
@@ -262,11 +264,11 @@ export default () => {
         </div>
         <div className="w-full flex flex-col space-y-4 my-6 my-4 sm:my-6 mx-1 sm:mx-4">
           <div className="flex items-center space-x-3">
-            <Link href="/pools">
+            {/*<Link href="/pools">
               <a className="text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white">
                 <RiArrowLeftCircleFill size={36} />
               </a>
-            </Link>
+            </Link>*/}
             <h1 className="text-2xl font-bold">
               Manage Pool
             </h1>
@@ -274,6 +276,7 @@ export default () => {
           <div className={`${poolData || {} ? '' : 'h-188'} grid grid-flow-row grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6`}>
             <div className="lg:col-span-2">
               <Info
+                pool={pool}
                 data={poolData || {}}
                 onSelect={p => setPool(p)}
               />

@@ -7,6 +7,7 @@ import { currency_symbol } from '../../lib/object/currency'
 import { number_format, loader_color } from '../../lib/utils'
 
 export default ({
+  pool,
   data,
   disabled = false,
   onSelect,
@@ -26,7 +27,7 @@ export default ({
               disabled={disabled}
               value={data?.asset_data?.id}
               onSelect={a => onSelect({
-                ...data,
+                ...pool,
                 asset: a,
               })}
               chain={data?.chain_data?.id}
@@ -39,7 +40,7 @@ export default ({
               disabled={disabled}
               value={data?.chain_data?.id}
               onSelect={c => onSelect({
-                ...data,
+                ...pool,
                 chain: c,
               })}
               origin=""

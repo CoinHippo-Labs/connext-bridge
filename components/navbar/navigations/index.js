@@ -45,7 +45,7 @@ export default ({ address }) => {
               m.path = `${m.path}${!m.path?.includes(address_path) ? `${address_path}${address}` : ''}`
             }
             else {
-              m.title = 'Explorer'
+              m.title = 'Explore'
               m.path = process.env.NEXT_PUBLIC_EXPLORER_URL
             }
             break
