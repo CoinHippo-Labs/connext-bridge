@@ -54,7 +54,7 @@ export default ({
         <>
           {assets_data ?
             <>
-              <div className="space-y-1 mx-auto">
+              {/*<div className="space-y-1 mx-auto">
                 {web3_provider && source_contract_data && (
                   <>
                     <div className="text-slate-400 dark:text-slate-600 text-xs font-medium">
@@ -66,11 +66,20 @@ export default ({
                     />
                   </>
                 )}
-              </div>
-              <div className="w-full min-w-max flex items-center justify-center space-x-1.5">
+              </div>*/}
+              <div className="sm:col-span-3 w-full min-w-max flex items-center justify-center space-x-1.5">
                 {image && (
                   <div>
                     <div className="hidden sm:flex">
+                      <Image
+                        src={image}
+                        alt=""
+                        width={28}
+                        height={28}
+                        className="rounded-full"
+                      />
+                    </div>
+                    <div className="flex sm:hidden">
                       <Image
                         src={image}
                         alt=""
@@ -79,22 +88,13 @@ export default ({
                         className="rounded-full"
                       />
                     </div>
-                    <div className="flex sm:hidden">
-                      <Image
-                        src={image}
-                        alt=""
-                        width={18}
-                        height={18}
-                        className="rounded-full"
-                      />
-                    </div>
                   </div>
                 )}
-                <span className="text-xs sm:text-base font-semibold">
+                <span className="text-sm sm:text-lg font-semibold">
                   {asset_data ? asset_data.symbol : 'Select Token'}
                 </span>
               </div>
-              <div className="space-y-1 mx-auto">
+              {/*<div className="space-y-1 mx-auto">
                 {web3_provider && destination_contract_data && (
                   <>
                     <div className="text-slate-400 dark:text-slate-600 text-xs font-medium">
@@ -106,10 +106,10 @@ export default ({
                     />
                   </>
                 )}
-              </div>
+              </div>*/}
             </>
             :
-            <div className="sm:col-span-5 w-full flex items-center justify-center">
+            <div className="sm:col-span-3 w-full flex items-center justify-center">
               <Puff color={loader_color(theme)} width="24" height="24" />
             </div>
           }
