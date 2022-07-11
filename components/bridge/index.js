@@ -440,10 +440,10 @@ export default () => {
           callback: constants.AddressZero,
           recovery: address,
           forceSlow: forceSlow || false,
+          relayerFee: '0',
         },
         transactingAssetId: source_contract_data?.contract_address,
         amount: utils.parseUnits(amount?.toString() || '0', decimals).toString(),
-        relayerFee: '0',
       }
       let failed = false
       try {
