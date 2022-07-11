@@ -153,7 +153,7 @@ export default () => {
           const chain_data = chains_data.find(c => c?.id === chain)
           const { domain_id } = { ...chain_data }
           const response = await sdk.nxtpSdkPool.getUserPools(domain_id, address)
-console.log(response)
+// console.log(response)
           setPools(response?.map(p => {
             const { symbol } = { ...p }
             const asset_data = assets_data.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === chain_data?.chain_id && equals_ignore_case(c?.symbol, symbol)) > -1)

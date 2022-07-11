@@ -272,10 +272,10 @@ export default () => {
           } = { ...contract_data }
           try {
             const response = await sdk.nxtpSdkPool.getPool(domain_id, contract_address)
-console.log(response)
+// console.log(response)
             if (response) {
               const _response = await sdk.nxtpSdkPool.getPoolStats(domain_id, contract_address)
-console.log(_response)
+// console.log(_response)
               data.push({
                 ...response,
                 ..._response,
