@@ -35,6 +35,7 @@ export default () => {
   const { default_chain_id, chain_id, provider, web3_provider, address, signer } = { ...wallet_data }
 
   const [hiddenStatus, setHiddenStatus] = useState(false)
+  const [currentAddress, setCurrentAddress] = useState(null)
 
   // annoucement
   useEffect(() => {
@@ -203,13 +204,14 @@ export default () => {
   // sdk
   useEffect(() => {
     const update = async () => {
-      if (sdk && address) {
+      if (sdk && address && !equals_ignore_case(address, currentAddress)) {
         if (sdk.nxtpSdkBase) {
           await sdk.nxtpSdkBase.changeSignerAddress(address)
         }
         if (sdk.nxtpSdkRouter) {
           await sdk.nxtpSdkRouter.changeSignerAddress(address)
         }
+        setCurrentAddress(address)
         dispatch({
           type: SDK,
           value: sdk,
@@ -217,7 +219,7 @@ export default () => {
       }
     }
     update()
-  }, [provider, web3_provider, address, signer])
+  }, [sdk, provider, web3_provider, address, signer, currentAddress])
 
   // assets balances
   useEffect(() => {

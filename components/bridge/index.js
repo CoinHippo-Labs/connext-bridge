@@ -46,6 +46,7 @@ const DEFAULT_OPTIONS = {
   callData: '',
   slippage: DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE,
   forceSlow: false,
+  receiveLocal: false,
 }
 
 export default () => {
@@ -430,17 +431,20 @@ export default () => {
       const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
       const decimals = source_contract_data?.contract_decimals || 18
       const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
-      const { to, infiniteApprove, callData, slippage, forceSlow } = { ...options }
+      const { to, infiniteApprove, callData, slippage, forceSlow, receiveLocal } = { ...options }
       const xcallParams = {
         params: {
           to: to || address,
           callData: callData || '0x',
           originDomain: source_chain_data?.domain_id,
           destinationDomain: destination_chain_data?.domain_id,
+          agent: to || address,
           callback: constants.AddressZero,
           recovery: address,
           forceSlow: forceSlow || false,
+          receiveLocal: receiveLocal || false,
           relayerFee: '0',
+          slippageTol: ((100 - (!receiveLocal && slippage ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)) * 100).toString(),
         },
         transactingAssetId: source_contract_data?.contract_address,
         amount: utils.parseUnits(amount?.toString() || '0', decimals).toString(),
@@ -886,94 +890,96 @@ export default () => {
                     </div>
                     <div className="w-full h-0.25 bg-slate-100 dark:bg-slate-700 sm:px-1" />
                     <div className="space-y-2.5 sm:mx-3">
-                      <div className="flex items-center justify-between space-x-1">
-                        <div className="text-slate-600 dark:text-white font-medium">
-                          Slippage Tolerance
-                        </div>
-                        <div className="flex flex-col sm:items-end space-y-1.5">
-                          {slippageEditing ?
-                            <>
-                              <div className="flex items-center space-x-1">
-                                <DebounceInput
-                                  debounceTimeout={300}
-                                  size="small"
-                                  type="number"
-                                  placeholder="0.00"
-                                  value={typeof options?.slippage === 'number' && options.slippage >= 0 ? options.slippage : ''}
-                                  onChange={e => {
-                                    const regex = /^[0-9.\b]+$/
-                                    let value
-                                    if (e.target.value === '' || regex.test(e.target.value)) {
-                                      value = e.target.value
-                                    }
-                                    value = value <= 0 || value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
-                                    console.log('[Transfer Confirmation]', {
-                                      bridge,
-                                      fee,
-                                      options: {
-                                        ...options,
-                                        to: recipient_address,
-                                        slippage: value && !isNaN(value) ? Number(value) : value,
-                                      },
-                                    })
-                                    setOptions({
-                                      ...options,
-                                      slippage: value && !isNaN(value) ? Number(value) : value,
-                                    })
-                                  }}
-                                  onWheel={e => e.target.blur()}
-                                  onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                                  className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1.5 px-2.5`}
-                                />
-                                <button
-                                  onClick={() => setSlippageEditing(false)}
-                                  className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
-                                >
-                                  <BiCheckCircle size={20} />
-                                </button>
-                              </div>
-                              <div className="flex items-center space-x-1.5">
-                                {[3.0, 2.0, 1.0].map((s, i) => (
-                                  <div
-                                    key={i}
-                                    onClick={() => {
+                      {!options?.receiveLocal && (
+                        <div className="flex items-center justify-between space-x-1">
+                          <div className="text-slate-600 dark:text-white font-medium">
+                            Slippage Tolerance
+                          </div>
+                          <div className="flex flex-col sm:items-end space-y-1.5">
+                            {slippageEditing ?
+                              <>
+                                <div className="flex items-center space-x-1">
+                                  <DebounceInput
+                                    debounceTimeout={300}
+                                    size="small"
+                                    type="number"
+                                    placeholder="0.00"
+                                    value={typeof options?.slippage === 'number' && options.slippage >= 0 ? options.slippage : ''}
+                                    onChange={e => {
+                                      const regex = /^[0-9.\b]+$/
+                                      let value
+                                      if (e.target.value === '' || regex.test(e.target.value)) {
+                                        value = e.target.value
+                                      }
+                                      value = value <= 0 || value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
                                       console.log('[Transfer Confirmation]', {
                                         bridge,
                                         fee,
                                         options: {
                                           ...options,
                                           to: recipient_address,
-                                          slippage: s,
+                                          slippage: value && !isNaN(value) ? Number(value) : value,
                                         },
                                       })
                                       setOptions({
                                         ...options,
-                                        slippage: s,
+                                        slippage: value && !isNaN(value) ? Number(value) : value,
                                       })
-                                      setSlippageEditing(false)
                                     }}
-                                    className={`${options?.slippage === s ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-semibold'} rounded-lg cursor-pointer text-xs py-0.5 px-1.5`}
+                                    onWheel={e => e.target.blur()}
+                                    onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                                    className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1.5 px-2.5`}
+                                  />
+                                  <button
+                                    onClick={() => setSlippageEditing(false)}
+                                    className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
                                   >
-                                    {s} %
-                                  </div>
-                                ))}
+                                    <BiCheckCircle size={20} />
+                                  </button>
+                                </div>
+                                <div className="flex items-center space-x-1.5">
+                                  {[3.0, 2.0, 1.0].map((s, i) => (
+                                    <div
+                                      key={i}
+                                      onClick={() => {
+                                        console.log('[Transfer Confirmation]', {
+                                          bridge,
+                                          fee,
+                                          options: {
+                                            ...options,
+                                            to: recipient_address,
+                                            slippage: s,
+                                          },
+                                        })
+                                        setOptions({
+                                          ...options,
+                                          slippage: s,
+                                        })
+                                        setSlippageEditing(false)
+                                      }}
+                                      className={`${options?.slippage === s ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-semibold'} rounded-lg cursor-pointer text-xs py-0.5 px-1.5`}
+                                    >
+                                      {s} %
+                                    </div>
+                                  ))}
+                                </div>
+                              </>
+                              :
+                              <div className="flex items-center space-x-1">
+                                <span className="font-semibold">
+                                  {number_format(options?.slippage, '0,0.00')}%
+                                </span>
+                                <button
+                                  onClick={() => setSlippageEditing(true)}
+                                  className="hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
+                                >
+                                  <BiEditAlt size={16} />
+                                </button>
                               </div>
-                            </>
-                            :
-                            <div className="flex items-center space-x-1">
-                              <span className="font-semibold">
-                                {number_format(options?.slippage, '0,0.00')}%
-                              </span>
-                              <button
-                                onClick={() => setSlippageEditing(true)}
-                                className="hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
-                              >
-                                <BiEditAlt size={16} />
-                              </button>
-                            </div>
-                          }
+                            }
+                          </div>
                         </div>
-                      </div>
+                      )}
                       <div className="flex items-center justify-between space-x-2">
                         <div className="text-slate-600 dark:text-white font-medium">
                           Infinite Approval
@@ -1263,95 +1269,97 @@ export default () => {
                               )}
                             </div>
                           </div>
-                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
-                              Slippage Tolerance
-                              <span className="hidden sm:block">:</span>
-                            </div>
-                            <div className="flex flex-col items-end space-y-1.5">
-                              {slippageEditing ?
-                                <>
-                                  <div className="flex items-center space-x-1">
-                                    <DebounceInput
-                                      debounceTimeout={300}
-                                      size="small"
-                                      type="number"
-                                      placeholder="0.00"
-                                      value={typeof options?.slippage === 'number' && options.slippage >= 0 ? options.slippage : ''}
-                                      onChange={e => {
-                                        const regex = /^[0-9.\b]+$/
-                                        let value
-                                        if (e.target.value === '' || regex.test(e.target.value)) {
-                                          value = e.target.value
-                                        }
-                                        value = value <= 0 || value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
-                                        console.log('[Transfer Confirmation]', {
-                                          bridge,
-                                          fee,
-                                          options: {
-                                            ...options,
-                                            to: recipient_address,
-                                            slippage: value && !isNaN(value) ? Number(value) : value,
-                                          },
-                                        })
-                                        setOptions({
-                                          ...options,
-                                          slippage: value && !isNaN(value) ? Number(value) : value,
-                                        })
-                                      }}
-                                      onWheel={e => e.target.blur()}
-                                      onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                                      className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1.5 px-2.5`}
-                                    />
-                                    <button
-                                      onClick={() => setSlippageEditing(false)}
-                                      className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
-                                    >
-                                      <BiCheckCircle size={20} />
-                                    </button>
-                                  </div>
-                                  <div className="flex items-center space-x-1.5">
-                                    {[3.0, 2.0, 1.0].map((s, i) => (
-                                      <div
-                                        key={i}
-                                        onClick={() => {
+                          {!options?.receiveLocal && (
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
+                              <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
+                                Slippage Tolerance
+                                <span className="hidden sm:block">:</span>
+                              </div>
+                              <div className="flex flex-col items-end space-y-1.5">
+                                {slippageEditing ?
+                                  <>
+                                    <div className="flex items-center space-x-1">
+                                      <DebounceInput
+                                        debounceTimeout={300}
+                                        size="small"
+                                        type="number"
+                                        placeholder="0.00"
+                                        value={typeof options?.slippage === 'number' && options.slippage >= 0 ? options.slippage : ''}
+                                        onChange={e => {
+                                          const regex = /^[0-9.\b]+$/
+                                          let value
+                                          if (e.target.value === '' || regex.test(e.target.value)) {
+                                            value = e.target.value
+                                          }
+                                          value = value <= 0 || value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
                                           console.log('[Transfer Confirmation]', {
                                             bridge,
                                             fee,
                                             options: {
                                               ...options,
                                               to: recipient_address,
-                                              slippage: s,
+                                              slippage: value && !isNaN(value) ? Number(value) : value,
                                             },
                                           })
                                           setOptions({
                                             ...options,
-                                            slippage: s,
+                                            slippage: value && !isNaN(value) ? Number(value) : value,
                                           })
-                                          setSlippageEditing(false)
                                         }}
-                                        className={`${options?.slippage === s ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white text-xs py-0.5 px-1.5`}
+                                        onWheel={e => e.target.blur()}
+                                        onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                                        className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1.5 px-2.5`}
+                                      />
+                                      <button
+                                        onClick={() => setSlippageEditing(false)}
+                                        className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
                                       >
-                                        {s} %
-                                      </div>
-                                    ))}
+                                        <BiCheckCircle size={20} />
+                                      </button>
+                                    </div>
+                                    <div className="flex items-center space-x-1.5">
+                                      {[3.0, 2.0, 1.0].map((s, i) => (
+                                        <div
+                                          key={i}
+                                          onClick={() => {
+                                            console.log('[Transfer Confirmation]', {
+                                              bridge,
+                                              fee,
+                                              options: {
+                                                ...options,
+                                                to: recipient_address,
+                                                slippage: s,
+                                              },
+                                            })
+                                            setOptions({
+                                              ...options,
+                                              slippage: s,
+                                            })
+                                            setSlippageEditing(false)
+                                          }}
+                                          className={`${options?.slippage === s ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white text-xs py-0.5 px-1.5`}
+                                        >
+                                          {s} %
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </>
+                                  :
+                                  <div className="flex items-center space-x-1">
+                                    <span className="text-lg font-semibold">
+                                      {number_format(options?.slippage, '0,0.00')}%
+                                    </span>
+                                    <button
+                                      onClick={() => setSlippageEditing(true)}
+                                      className="hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
+                                    >
+                                      <BiEditAlt size={20} />
+                                    </button>
                                   </div>
-                                </>
-                                :
-                                <div className="flex items-center space-x-1">
-                                  <span className="text-lg font-semibold">
-                                    {number_format(options?.slippage, '0,0.00')}%
-                                  </span>
-                                  <button
-                                    onClick={() => setSlippageEditing(true)}
-                                    className="hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
-                                  >
-                                    <BiEditAlt size={20} />
-                                  </button>
-                                </div>
-                              }
+                                }
+                              </div>
                             </div>
-                          </div>
+                          )}
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
                             <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
                               Infinite Approval

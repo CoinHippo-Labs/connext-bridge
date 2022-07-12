@@ -50,6 +50,11 @@ export default ({
       type: 'switch',
     },
     {
+      label: 'Receive Local',
+      name: 'receiveLocal',
+      type: 'switch',
+    },
+    {
       label: 'Call Data',
       name: 'callData',
       type: 'textarea',
