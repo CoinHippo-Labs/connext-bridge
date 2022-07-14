@@ -616,7 +616,7 @@ export default () => {
                   <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start">
                     <div className="w-32 sm:w-48 flex sm:flex-col items-center justify-center space-x-1.5">
                       <span className="text-slate-400 dark:text-white text-lg font-semibold text-center">
-                        Source
+                        Origin
                       </span>
                       {/*<GasPrice
                         chainId={source_chain_data?.chain_id}
@@ -639,7 +639,7 @@ export default () => {
                       }}
                       source={source_chain}
                       destination={destination_chain}
-                      origin="source"
+                      origin="origin"
                     />
                     {/*<SelectAsset
                       disabled={disabled}
@@ -655,7 +655,7 @@ export default () => {
                         }
                       }}
                       chain={source_chain}
-                      origin="source"
+                      origin="origin"
                     />
                     <div className="w-32 sm:w-48 flex items-center justify-center">
                       <Balance
