@@ -7,7 +7,6 @@ import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
 import { RiArrowLeftCircleFill } from 'react-icons/ri'
 
 import Announcement from '../announcement'
-import PoweredBy from '../powered-by'
 import Info from './info'
 import Liquidity from './liquidity'
 import { currency_symbol } from '../../lib/object/currency'
@@ -287,7 +286,6 @@ export default () => {
           </div>
         </div>
       </div>
-      <PoweredBy />
     </div>
   )
 }

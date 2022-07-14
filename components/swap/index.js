@@ -12,7 +12,6 @@ import { MdSwapVert, MdClose } from 'react-icons/md'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit, BiEditAlt, BiCheckCircle } from 'react-icons/bi'
 
 import Announcement from '../announcement'
-import PoweredBy from '../powered-by'
 import SelectChain from '../select/chain'
 import SelectAsset from '../select/asset'
 import Info from './info'
@@ -951,7 +950,6 @@ export default () => {
           </div>
         </div>
       </div>
-      <PoweredBy />
     </div>
   )
 }

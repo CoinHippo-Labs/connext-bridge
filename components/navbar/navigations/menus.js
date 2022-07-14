@@ -15,14 +15,14 @@ export default [
   {
     id: 'pools',
     title: 'Pools',
-    path: '/pools',
+    // path: '/pools',
     others_paths: ['/pool/[pool]'],
     icon: <RiCopperCoinLine size={20} className="stroke-current" />,
   },
   {
     id: 'swap',
     title: 'Swap',
-    path: '/swap',
+    // path: '/swap',
     others_paths: ['/swap/[swap]'],
     icon: <MdSwapHoriz size={20} className="stroke-current" />,
   },
