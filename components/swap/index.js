@@ -54,9 +54,11 @@ export default () => {
   const [slippageEditing, setSlippageEditing] = useState(false)
 
   const [approving, setApproving] = useState(null)
+  const [approveProcessing, setApproveProcessing] = useState(null)
   const [approveResponse, setApproveResponse] = useState(null)
 
   const [calling, setCalling] = useState(null)
+  const [callProcessing, setCallProcessing] = useState(null)
   const [callResponse, setCallResponse] = useState(null)
 
   const [pair, setPair] = useState(null)
@@ -234,9 +236,11 @@ export default () => {
     setOptions(DEFAULT_OPTIONS)
 
     setApproving(null)
+    setApproveProcessing(null)
     setApproveResponse(null)
 
     setCalling(null)
+    setCallProcessing(null)
     setCallResponse(null)
 
     setPairTrigger(moment().valueOf())
@@ -246,6 +250,7 @@ export default () => {
   }
 
   const call = async () => {
+    setApproving(null)
     setCalling(true)
     let success = false
     if (sdk) {
@@ -277,6 +282,7 @@ export default () => {
       //       message: `Wait for ${source_symbol} approval`,
       //       tx_hash,
       //     })
+      //     setApproveProcessing(true)
       //     const approve_receipt = await signer.provider.waitForTransaction(tx_hash)
       //     setApproveResponse(approve_receipt?.status ?
       //       null : {
@@ -286,11 +292,13 @@ export default () => {
       //       }
       //     )
       //     failed = !approve_receipt?.status
+      //     setApproveProcessing(false)
       //     setApproving(false)
       //   }
       // } catch (error) {
       //   setApproveResponse({ status: 'failed', message: error?.data?.message || error?.message })
       //   failed = true
+      //   setApproveProcessing(false)
       //   setApproving(false)
       // }
       // if (!failed) {
@@ -306,6 +314,7 @@ export default () => {
       //       }
       //       const xcall_response = await signer.sendTransaction(xcall_request)
       //       const tx_hash = xcall_response?.hash
+      //       setCallProcessing(true)
       //       const xcall_receipt = await signer.provider.waitForTransaction(tx_hash)
       //       setXcall(xcall_receipt)
       //       failed = !xcall_receipt?.status
@@ -322,6 +331,7 @@ export default () => {
       //   }
       // }
     }
+    setCallProcessing(false)
     setCalling(false)
     if (sdk && address && success) {
       await sleep(2 * 1000)
@@ -868,7 +878,18 @@ export default () => {
                             <TailSpin color="white" width="20" height="20" />
                           )}
                           <span>
-                            {calling ? approving ? 'Approving' : 'Swapping' : 'Confirm'}
+                            {calling ?
+                              approving ?
+                                approveProcessing ?
+                                  'Approving' :
+                                  'Please Approve' :
+                                callProcessing ?
+                                  'Swapping' :
+                                  typeof approving === 'boolean' ?
+                                    'Please Confirm' :
+                                    'Checking Approval' :
+                              'Confirm'
+                            }
                           </span>
                         </span>}
                         confirmButtonClassName="w-full btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white text-base sm:text-lg text-center"

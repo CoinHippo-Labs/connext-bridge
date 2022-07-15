@@ -33,9 +33,11 @@ export default () => {
   const [controller, setController] = useState(null)
 
   const [approving, setApproving] = useState(null)
+  const [approveProcessing, setApproveProcessing] = useState(null)
   const [approveResponse, setApproveResponse] = useState(null)
 
   const [calling, setCalling] = useState(null)
+  const [callProcessing, setCallProcessing] = useState(null)
   const [callResponse, setCallResponse] = useState(null)
 
   const [pools, setPools] = useState(null)
@@ -222,9 +224,11 @@ export default () => {
     }
 
     setApproving(null)
+    setApproveProcessing(null)
     setApproveResponse(null)
 
     setCalling(null)
+    setCallProcessing(null)
     setCallResponse(null)
 
     setPoolsTrigger(moment().valueOf())

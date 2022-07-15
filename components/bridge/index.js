@@ -474,6 +474,9 @@ export default () => {
           setApproveProcessing(false)
           setApproving(false)
         }
+        else {
+          setApproving(false)
+        }
       } catch (error) {
         setApproveResponse({ status: 'failed', message: error?.data?.message || error?.message })
         failed = true
@@ -491,9 +494,9 @@ export default () => {
                 .round(0).toString().replace('.0', '')
               xcall_request.gasLimit = gas_limit
             }
-            setCallProcessing(true)
             const xcall_response = await signer.sendTransaction(xcall_request)
             const tx_hash = xcall_response?.hash
+            setCallProcessing(true)
             const xcall_receipt = await signer.provider.waitForTransaction(tx_hash)
             setXcall(xcall_receipt)
             failed = !xcall_receipt?.status
