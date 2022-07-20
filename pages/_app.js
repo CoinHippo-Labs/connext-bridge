@@ -35,6 +35,16 @@ export default ({ Component, pageProps }) => {
         <meta name="msapplication-TileColor" content="#050707" />
         <meta name="msapplication-TileImage" content="/icons/mstile-150x150.png" />
         <meta name="theme-color" content="#050707" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              var _mtm = window._mtm = window._mtm || [];
+              _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
+              var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+              g.async=true; g.src='https://cdn.matomo.cloud/connextnetwork.matomo.cloud/container_eMNAaOFI.js'; s.parentNode.insertBefore(g,s);
+            `,
+          }}
+        />
       </Head>
       <Provider store={store}>
         <Layout>
