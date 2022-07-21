@@ -196,6 +196,13 @@ export default () => {
             environment: process.env.NEXT_PUBLIC_ENVIRONMENT,
           }),
         })
+        console.log('[SDK config]', {
+          chains: chains_config,
+          // signerAddress: address,
+          logLevel: 'info',
+          network: process.env.NEXT_PUBLIC_NETWORK,
+          environment: process.env.NEXT_PUBLIC_ENVIRONMENT,
+        })
       }
     }
     init()
@@ -211,6 +218,7 @@ export default () => {
         if (sdk.nxtpSdkRouter) {
           await sdk.nxtpSdkRouter.changeSignerAddress(address)
         }
+        console.log('[Signer address]', address)
         setCurrentAddress(address)
         dispatch({
           type: SDK,
