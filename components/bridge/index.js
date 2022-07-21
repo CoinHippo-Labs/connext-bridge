@@ -400,14 +400,22 @@ export default () => {
             const native_token = source_chain_data?.provider_params?.[0]?.nativeCurrency
             const decimals = native_token?.decimals || 18
             const routerFee = forceSlow ? 0 : amount * ROUTER_FEE_PERCENT / 100
-            const gasFee = forceSlow ? 0 : null
+            const params = {
+              originDomain: source_chain_data?.domain_id,
+              destinationDomain: destination_chain_data?.domain_id,
+              isHighPriority: !forceSlow,
+            }
+            const response = forceSlow ? 0 : await sdk.nxtpSdkBase.estimateRelayerFee(params)
+            const gasFee = response && Number(utils.formatUnits(response.toString(), decimals))
             console.log('[Estimate Fees]', {
+              options,
+              params,
               routerFee,
               gasFee,
             })
             setFee({
               router: routerFee,
-              gas: gasFee && Number(utils.formatUnits(BigNumber.from(gasFee || '0'), decimals)),
+              gas: gasFee,
             })
           } catch (error) {}
         }
@@ -544,11 +552,11 @@ export default () => {
 
   const gas_fee = fee && (options.forceSlow ? 0 : fee.gas || 0)
   const router_fee = fee && (options.forceSlow ? 0 : fee.router || 0)
-  const total_fee = fee && (gas_fee + router_fee)
+  // const total_fee = fee && (gas_fee + router_fee)
   const source_gas_native_token = source_chain_data?.provider_params?.[0]?.nativeCurrency
 
   const liquidity_amount = _.sum(asset_balances_data?.[destination_chain_data?.chain_id]?.filter(a => equals_ignore_case(a?.adopted, destination_contract_data?.contract_address))?.map(a => Number(utils.formatUnits(BigNumber.from(a?.amount || '0'), destination_decimals))) || [])
-  const min_amount = fee ? total_fee : 0
+  const min_amount = 0
   const max_amount = source_amount
 
   const wrong_chain = source_chain_data && chain_id !== source_chain_data.chain_id && !xcall
@@ -820,7 +828,7 @@ export default () => {
                             </span>
                           </div>
                           <div className="border-t flex items-center justify-between space-x-2.5 pt-2">
-                            <span className="font-semibold">
+                            {/*<span className="font-semibold">
                               Min:
                             </span>
                             <span className="font-semibold">
@@ -829,7 +837,7 @@ export default () => {
                               }
                             </span>
                           </div>
-                          <div className="flex items-center justify-between space-x-2.5">
+                          <div className="flex items-center justify-between space-x-2.5">*/}
                             <span className="font-semibold">
                               Max:
                             </span>
@@ -1051,13 +1059,13 @@ export default () => {
                                 </div>
                                 :
                                 <span className="whitespace-nowrap text-xs font-semibold">
-                                  {number_format(gas_fee, '0,0.000000', true)} {source_symbol}
+                                  {number_format(gas_fee, '0,0.000000', true)} {source_gas_native_token?.symbol}
                                 </span>
                               }
                             </div>
                           </>
                         )}
-                        <div className="flex items-start justify-between space-x-1">
+                        {/*<div className="flex items-start justify-between space-x-1">
                           <div className="text-slate-600 dark:text-white font-medium">
                             Total
                           </div>
@@ -1076,7 +1084,7 @@ export default () => {
                               </div>
                             )}
                           </div>
-                        </div>
+                        </div>*/}
                       </div>
                     </div>
                   )}
@@ -1449,15 +1457,15 @@ export default () => {
                           {fee && (
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
                               <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base">
-                                Fees
+                                Bridge Fee
                                 <span className="hidden sm:block">:</span>
                               </div>
                               <div className="sm:text-right">
                                 <div className="text-lg space-x-1.5">
-                                  {total_fee ?
+                                  {router_fee ?
                                     <>
                                       <span className="font-bold">
-                                        {number_format(total_fee, '0,0.000000', true)}
+                                        {number_format(router_fee, '0,0.000000', true)}
                                       </span>
                                       <span className="font-semibold">
                                         {source_symbol}
@@ -1468,9 +1476,9 @@ export default () => {
                                     </span>
                                   }
                                 </div>
-                                {total_fee > 0 && typeof source_asset_data?.price === 'number' && (
+                                {router_fee > 0 && typeof source_asset_data?.price === 'number' && (
                                   <div className="font-mono text-red-500 sm:text-right">
-                                    ({currency_symbol}{number_format(total_fee * source_asset_data.price, '0,0.000000')})
+                                    ({currency_symbol}{number_format(router_fee * source_asset_data.price, '0,0.000000')})
                                   </div>
                                 )}
                               </div>
