@@ -439,6 +439,7 @@ export default () => {
       const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
       const decimals = source_contract_data?.contract_decimals || 18
       const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
+      const { gas } = { ...fee }
       const { to, infiniteApprove, callData, slippage, forceSlow, receiveLocal } = { ...options }
       const xcallParams = {
         params: {
@@ -451,7 +452,7 @@ export default () => {
           recovery: address,
           forceSlow: forceSlow || false,
           receiveLocal: receiveLocal || false,
-          relayerFee: '0',
+          relayerFee: !forceSlow && gas ? utils.parseUnits(gas.toString(), 'ether').toString() : '0',
           slippageTol: ((100 - (!receiveLocal && slippage ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)) * 100).toString(),
         },
         transactingAssetId: source_contract_data?.contract_address,

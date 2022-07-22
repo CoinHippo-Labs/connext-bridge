@@ -154,7 +154,6 @@ export default () => {
           const chain_data = chains_data.find(c => c?.id === chain)
           const { domain_id } = { ...chain_data }
           const response = await sdk.nxtpSdkPool.getUserPools(domain_id, address)
-// console.log(response)
           setPools(response?.map(p => {
             const { symbol } = { ...p }
             const asset_data = assets_data.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === chain_data?.chain_id && equals_ignore_case(c?.symbol, symbol)) > -1)
@@ -164,9 +163,7 @@ export default () => {
               asset_data,
             }
           }) || pools || [])
-        } catch (error) {
-          console.log(error)
-        }
+        } catch (error) {}
       }
     }
     getData()
@@ -276,16 +273,16 @@ export default () => {
               Manage Pool
             </h1>
           </div>
-          <div className={`${poolData || {} ? '' : 'h-188'} grid grid-flow-row grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6`}>
+          <div className={`${poolData ? '' : 'h-188'} grid grid-flow-row grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6`}>
             <div className="lg:col-span-2">
               <Info
                 pool={pool}
-                data={poolData || {}}
+                data={poolData}
                 onSelect={p => setPool(p)}
               />
             </div>
             <Liquidity
-              data={poolData || {}}
+              data={poolData}
             />
           </div>
         </div>

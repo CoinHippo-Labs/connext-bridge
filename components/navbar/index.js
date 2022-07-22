@@ -295,9 +295,7 @@ export default () => {
                 contract_data,
               })
             }
-          } catch (error) {
-            console.log(error)
-          }
+          } catch (error) {}
         }
         dispatch({
           type: POOLS_DATA,

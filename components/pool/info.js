@@ -18,6 +18,11 @@ export default ({
   const { assets_data } = { ...assets }
   const { pools_data } = { ..._pools }
 
+  const {
+    chain,
+    asset,
+  } = { ...pool }
+
   return (
     <div className="sm:min-h-full border border-blue-400 dark:border-blue-800 rounded-2xl shadow-lg shadow-blue-200 dark:shadow-blue-600 p-6">
       {pools_data || data ?
@@ -25,12 +30,12 @@ export default ({
           <div className="flex items-center space-x-4 sm:space-x-6">
             <SelectAsset
               disabled={disabled}
-              value={data?.asset_data?.id}
+              value={asset}
               onSelect={a => onSelect({
                 ...pool,
                 asset: a,
               })}
-              chain={data?.chain_data?.id}
+              chain={chain}
               origin=""
             />
             <div className="uppercase text-xs sm:text-sm font-semibold">
@@ -38,7 +43,7 @@ export default ({
             </div>
             <SelectChain
               disabled={disabled}
-              value={data?.chain_data?.id}
+              value={chain}
               onSelect={c => onSelect({
                 ...pool,
                 chain: c,
