@@ -88,12 +88,18 @@ export default () => {
         let updated_ids = is_interval ? [] : assets_data.filter(a => a?.price).map(a => a.id)
         if (updated_ids.length < assets_data.length) {
           let updated = false
-          for (let i = 0; i < chains_data.length; i++) {
-            const { chain_id } = { ...chains_data[i] }
+          for (const chains_data of chains_data) {
+            const {
+              chain_id,
+            } = { ...chain_data }
             if (chain_id) {
-              const addresses = assets_data.filter(a => !updated_ids.includes(a?.id) && a?.contracts?.findIndex(c => c?.chain_id === chain_id && c.contract_address) > -1).map(a => a.contracts.find(c => c?.chain_id === chain_id).contract_address)
+              const addresses = assets_data.filter(a => !updated_ids.includes(a?.id) && a?.contracts?.findIndex(c => c?.chain_id === chain_id && c.contract_address) > -1)
+                .map(a => a.contracts.find(c => c?.chain_id === chain_id).contract_address)
               if (addresses.length > 0) {
-                const response = await getTokens({ chain_id, addresses })
+                const response = await getTokens({
+                  chain_id,
+                  addresses,
+                })
                 if (Array.isArray(response)) {
                   response.forEach(t => {
                     const asset_index = assets_data.findIndex(a => a?.id && a.contracts?.findIndex(c => c?.chain_id === t?.chain_id && equals_ignore_case(c.contract_address, t?.contract_address)) > -1)
@@ -130,11 +136,14 @@ export default () => {
     const init = async => {
       if (chains_data) {
         const _rpcs = {}
-        for (let i = 0; i < chains_data.length; i++) {
-          const chain_data = chains_data[i]
-          if (!chain_data?.disabled) {
-            const chain_id = chain_data?.chain_id
-            const rpc_urls = chain_data?.provider_params?.[0]?.rpcUrls?.filter(url => url) || []
+        for (const chain_data of chains_data) {
+          const {
+            disabled,
+            chain_id,
+            provider_params,
+          } = { ...chain_data }
+          if (!disabled) {
+            const rpc_urls = provider_params?.[0]?.rpcUrls?.filter(url => url) || []
             _rpcs[chain_id] = new providers.FallbackProvider(rpc_urls.map(url => new providers.JsonRpcProvider(url)))
           }
         }
@@ -186,23 +195,18 @@ export default () => {
             }
           }
         }
-        dispatch({
-          type: SDK,
-          value: await create({
-            chains: chains_config,
-            // signerAddress: address,
-            logLevel: 'info',
-            network: process.env.NEXT_PUBLIC_NETWORK,
-            environment: process.env.NEXT_PUBLIC_ENVIRONMENT,
-          }),
-        })
-        console.log('[SDK config]', {
+        const config = {
           chains: chains_config,
           // signerAddress: address,
           logLevel: 'info',
           network: process.env.NEXT_PUBLIC_NETWORK,
           environment: process.env.NEXT_PUBLIC_ENVIRONMENT,
+        }
+        dispatch({
+          type: SDK,
+          value: await create(config),
         })
+        console.log('[SDK config]', config)
       }
     }
     init()
@@ -218,12 +222,12 @@ export default () => {
         if (sdk.nxtpSdkRouter) {
           await sdk.nxtpSdkRouter.changeSignerAddress(address)
         }
-        console.log('[Signer address]', address)
         setCurrentAddress(address)
         dispatch({
           type: SDK,
           value: sdk,
         })
+        console.log('[Signer address]', address)
       }
     }
     update()
@@ -239,15 +243,23 @@ export default () => {
           const response = await sdk.nxtpSdkUtils.getRoutersData()
           if (response) {
             const data = _.groupBy(response.map(l => {
-              const chain_data = chains_data.find(c => c?.domain_id === l?.domain)
-              const asset_data = assets_data.find(a => a?.contracts?.findIndex(c => c?.chain_id === chain_data?.chain_id && equals_ignore_case(c?.contract_address, l?.adopted)) > -1)
+              const {
+                domain,
+                adopted,
+                balance,
+              } = { ...l }
+              const chain_data = chains_data.find(c => c?.domain_id === domain)
+              const {
+                chain_id,
+              } = { ...chain_data }
+              const asset_data = assets_data.find(a => a?.contracts?.findIndex(c => c?.chain_id === chain_id && equals_ignore_case(c?.contract_address, adopted)) > -1)
               return {
                 ...l,
-                chain_id: chain_data?.chain_id,
+                chain_id,
                 chain_data,
-                contract_address: l?.adopted,
+                contract_address: adopted,
                 asset_data,
-                amount: BigInt(Number(l?.balance) || 0).toString(),
+                amount: BigInt(Number(balance) || 0).toString(),
               }
             }), 'chain_id')
             dispatch({
@@ -273,7 +285,6 @@ export default () => {
           chain_id,
           domain_id,
         } = { ...chain_data }
-
         const data = []
         for (const asset_data of assets_data) {
           const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_id)
@@ -281,46 +292,22 @@ export default () => {
             contract_address,
           } = { ...contract_data }
           try {
-            const response = await sdk.nxtpSdkPool.getPool(domain_id, contract_address)
-// console.log(response)
-            if (response) {
-              const _response = await sdk.nxtpSdkPool.getPoolStats(domain_id, contract_address)
-// console.log(_response)
-              data.push({
-                ...response,
-                ..._response,
-                chain_id,
-                chain_data,
-                asset_data,
-                contract_data,
-              })
-            }
+            const pool = await sdk.nxtpSdkPool.getPool(domain_id, contract_address)
+            const stats = pool && await sdk.nxtpSdkPool.getPoolStats(domain_id, contract_address)
+            data.push({
+              ...pool,
+              ...stats,
+              chain_id,
+              chain_data,
+              asset_data,
+              contract_data,
+            })
           } catch (error) {}
         }
         dispatch({
           type: POOLS_DATA,
           value: data,
         })
-
-        /*try {
-          const response = await sdk.nxtpSdkPool.getPools(domain_id)
-          if (response) {
-            const data = _.groupBy(response.map(p => {
-              const { symbol } = { ...p }
-              const asset_data = assets_data.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === chain_data?.chain_id && equals_ignore_case(c?.symbol, symbol)) > -1)
-              return {
-                ...p,
-                chain_id,
-                chain_data,
-                asset_data,
-              }
-            }), 'chain_id')
-            dispatch({
-              type: POOLS_DATA,
-              value: data,
-            })
-          }
-        } catch (error) {}*/
       }
     }
     const getData = async () => {

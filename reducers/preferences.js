@@ -4,7 +4,7 @@ export default (
   state = {
     [`${THEME}`]: 'dark',
   },
-  action
+  action,
 ) => {
   switch (action.type) {
     case THEME:

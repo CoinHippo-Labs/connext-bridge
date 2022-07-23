@@ -115,8 +115,7 @@ export default ({ data }) => {
             {source_amount ?
               <span className="font-bold">
                 {number_format(source_amount, '0,0.000000', true)}
-              </span>
-              :
+              </span> :
               <RotatingSquare color={loader_color(theme)} width="20" height="20" />
             }
             <div className="flex items-center justify-center space-x-1">
@@ -148,8 +147,7 @@ export default ({ data }) => {
               rel="noopener noreferrer"
             >
               <HiCheckCircle size={36} className="rounded-full shadow dark:shadow-white text-green-400 dark:text-green-200" />
-            </a>
-            :
+            </a> :
             <Bars color={loader_color('light')} width="32" height="32" />
           }
         </div>
@@ -158,8 +156,7 @@ export default ({ data }) => {
             {destination_amount ?
               <span className="font-bold">
                 {number_format(destination_amount, '0,0.000000', true)}
-              </span>
-              :
+              </span> :
               <RotatingSquare color={loader_color(theme)} width="20" height="20" />
             }
             <div className="flex items-center justify-center space-x-1">

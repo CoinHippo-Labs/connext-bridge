@@ -237,7 +237,10 @@ export default () => {
   const { chain, asset, amount } = { ...pool }
   const chain_data = chains_data?.find(c => c?.id === chain)
   const asset_data = assets_data?.find(a => a?.id === asset)
-  const poolData = pools?.find(p => p?.chain_data?.id === chain && p?.asset_data?.id === asset)
+  const poolData = {
+    ...pool,
+    ...pools?.find(p => p?.chain_data?.id === chain && p?.asset_data?.id === asset),
+  }
   const native_contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
   const nomad_contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)  
 

@@ -15,7 +15,7 @@ const providerOptions = {
       rpc: {
         1: `https://mainnet.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`,
         56: 'https://rpc.ankr.com/bsc',
-        137: 'https://polygon-rpc.com',
+        137: 'https://rpc.ankr.com/polygon',
         42161: 'https://arb1.arbitrum.io/rpc',
         10: 'https://mainnet.optimism.io',
         43114: 'https://api.avax.network/ext/bc/C/rpc',

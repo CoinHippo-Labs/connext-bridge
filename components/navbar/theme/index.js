@@ -19,7 +19,10 @@ export default () => {
       className="w-10 sm:w-12 h-16 btn-transparent flex items-center justify-center"
     >
       <div className="w-6 h-6 flex items-center justify-center">
-        {theme === 'light' ? <FiMoon size={16} /> : <FiSun size={16} />}
+        {theme === 'light' ?
+          <FiMoon size={16} /> :
+          <FiSun size={16} />
+        }
       </div>
     </button>
   )

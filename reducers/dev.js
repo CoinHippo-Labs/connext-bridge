@@ -4,7 +4,7 @@ export default (
   state = {
     [`${SDK}`]: null,
   },
-  action
+  action,
 ) => {
   switch (action.type) {
     case SDK:

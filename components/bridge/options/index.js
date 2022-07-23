@@ -31,14 +31,14 @@ export default ({
       type: 'text',
       placeholder: 'target contract or recipient address',
     },
-    // {
-    //   label: 'Slippage Tolerance',
-    //   name: 'slippage',
-    //   type: 'number',
-    //   placeholder: '0.00',
-    //   presets: [3.0, 2.0, 1.0],
-    //   postfix: '%',
-    // },
+    /*{
+      label: 'Slippage Tolerance',
+      name: 'slippage',
+      type: 'number',
+      placeholder: '0.00',
+      presets: [3.0, 2.0, 1.0],
+      postfix: '%',
+    },*/
     {
       label: 'Infinite Approval',
       name: 'infiniteApprove',

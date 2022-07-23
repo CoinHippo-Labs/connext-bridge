@@ -4,7 +4,7 @@ export default (
   state = {
     [`${RPCS}`]: null,
   },
-  action
+  action,
 ) => {
   switch (action.type) {
     case RPCS:

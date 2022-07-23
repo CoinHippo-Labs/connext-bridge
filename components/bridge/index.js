@@ -126,7 +126,12 @@ export default () => {
   useEffect(() => {
     const params = {}
     if (bridge) {
-      const { source_chain, destination_chain, asset, amount } = { ...bridge }
+      const {
+        source_chain,
+        destination_chain,
+        asset,
+        amount,
+      } = { ...bridge }
       if (chains_data?.findIndex(c => !c?.disabled && c?.id === source_chain) > -1) {
         params.source_chain = source_chain
         if (asset && assets_data?.findIndex(a => a?.id === asset && a.contracts?.findIndex(c => c?.chain_id === chains_data.find(_c => _c?.id === source_chain)?.chain_id) > -1) > -1) {
@@ -144,7 +149,12 @@ export default () => {
       }
     }
     if (Object.keys(params).length > 0) {
-      const { source_chain, destination_chain, asset, amount } = { ...params }
+      const {
+        source_chain,
+        destination_chain,
+        asset,
+        amount,
+      } = { ...params }
       delete params.source_chain
       delete params.destination_chain
       delete params.asset
@@ -164,7 +174,10 @@ export default () => {
 
   // update balances
   useEffect(() => {
-    const { source_chain, destination_chain } = { ...bridge }
+    const {
+      source_chain,
+      destination_chain,
+    } = { ...bridge }
     const chain = chains_data?.find(c => c?.chain_id === chain_id)?.id
     if (asPath && chain && (!source_chain || !destination_chain) && destination_chain !== chain) {
       const params = params_to_obj(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
@@ -185,7 +198,10 @@ export default () => {
       value: null,
     })
     if (address) {
-      const { source_chain, destination_chain } = { ...bridge }
+      const {
+        source_chain,
+        destination_chain,
+      } = { ...bridge }
       getBalances(source_chain)
       getBalances(destination_chain)
     }
@@ -198,7 +214,10 @@ export default () => {
   useEffect(() => {
     const getData = () => {
       if (address && !xcall && !calling && !['pending'].includes(approveResponse?.status)) {
-        const { source_chain, destination_chain } = { ...bridge }
+        const {
+          source_chain,
+          destination_chain,
+        } = { ...bridge }
         getBalances(source_chain)
         getBalances(destination_chain)
       }
@@ -237,8 +256,13 @@ export default () => {
 
   // trigger estimate
   useEffect(() => {
-    const { source_chain, amount } = { ...bridge }
-    const chain_id = chains_data?.find(c => c?.id === source_chain)?.chain_id
+    const {
+      source_chain,
+      amount,
+    } = { ...bridge }
+    const {
+      chain_id,
+    } = { ...chains_data?.find(c => c?.id === source_chain) }
     if (balances_data?.[chain_id] && amount) {
       setEstimateTrigger(moment().valueOf())
     }
@@ -262,17 +286,24 @@ export default () => {
   useEffect(() => {
     const update = async () => {
       if (sdk && address && xcall) {
-        if (!xcall.transfer_id && xcall.transactionHash) {
+        const {
+          transfer_id,
+          transactionHash,
+        } = { ...xcall }
+        if (!transfer_id && transactionHash) {
           let transfer
           try {
-            const response = await sdk.nxtpSdkUtils.getTransferByTransactionHash(xcall.transactionHash)
-            transfer = response?.find(t => equals_ignore_case(t?.xcall_transaction_hash, xcall.transactionHash))
+            const response = await sdk.nxtpSdkUtils.getTransferByTransactionHash(transactionHash)
+            transfer = response?.find(t => equals_ignore_case(t?.xcall_transaction_hash, transactionHash))
           } catch (error) {}
           try {
             const response = await sdk.nxtpSdkUtils.getTransfersByUser({ userAddress: address })
-            transfer = response?.find(t => equals_ignore_case(t?.xcall_transaction_hash, xcall.transactionHash))
+            transfer = response?.find(t => equals_ignore_case(t?.xcall_transaction_hash, transactionHash))
           } catch (error) {}
-          if ([XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(transfer?.status)) {
+          const {
+            status,
+          } = { ...transfer }
+          if ([XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(status)) {
             setApproveResponse(null)
             setXcall(null)
             setXcallResponse(null)
@@ -284,10 +315,13 @@ export default () => {
             })
           }
         }
-        else if (xcall.transfer_id) {
-          const response = await sdk.nxtpSdkUtils.getTransferById(xcall.transfer_id)
-          const transfer = response?.find(t => equals_ignore_case(t?.transfer_id, xcall.transfer_id))
-          if ([XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(transfer?.status)) {
+        else if (transfer_id) {
+          const response = await sdk.nxtpSdkUtils.getTransferById(transfer_id)
+          const transfer = response?.find(t => equals_ignore_case(t?.transfer_id, transfer_id))
+          const {
+            status,
+          } = { ...transfer }
+          if ([XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(status)) {
             setApproveResponse(null)
             setXcall(null)
             setXcallResponse(null)
@@ -304,8 +338,11 @@ export default () => {
 
   const getBalances = chain => {
     const getBalance = async (chain_id, contract_data) => {
-      const contract_address = contract_data?.contract_address 
-      const decimals = contract_data?.contract_decimals || 18
+      const {
+        contract_address,
+        contract_decimals,
+      } = { ...contract_data }
+      const decimals = contract_decimals || 18
       const rpc = rpcs?.[chain_id]
       let balance
       if (rpc && contract_address) {
@@ -322,12 +359,14 @@ export default () => {
         value: {
           [`${chain_id}`]: [{
             ...contract_data,
-            amount: balance ? Number(utils.formatUnits(balance, decimals)) : null,
+            amount: balance && Number(utils.formatUnits(balance, decimals)),
           }],
         },
       })
     }
-    const chain_id = chains_data?.find(c => c?.id === chain)?.chain_id
+    const {
+      chain_id,
+    } = { ...chains_data?.find(c => c?.id === chain) }
     const contracts = assets_data?.map(a => {
       return {
         ...a,
@@ -338,7 +377,11 @@ export default () => {
   }
 
   const checkSupport = () => {
-    const { source_chain, destination_chain, asset } = { ...bridge }
+    const {
+      source_chain,
+      destination_chain,
+      asset,
+    } = { ...bridge }
     const source_asset_data = assets_data?.find(a => a?.id === asset)
     const destination_asset_data = assets_data?.find(a => a?.id === asset)
     return source_chain && destination_chain && source_asset_data && destination_asset_data &&
@@ -372,14 +415,22 @@ export default () => {
 
     setTransfersTrigger(moment().valueOf())
 
-    const { source_chain, destination_chain } = { ...bridge }
+    const {
+      source_chain,
+      destination_chain,
+    } = { ...bridge }
     getBalances(source_chain)
     getBalances(destination_chain)
   }
 
   const estimate = async controller => {
     if (checkSupport() && !xcall) {
-      const { source_chain, destination_chain, asset, amount } = { ...bridge }
+      const {
+        source_chain,
+        destination_chain,
+        asset,
+        amount,
+      } = { ...bridge }
       const source_chain_data = chains_data?.find(c => c?.id === source_chain)
       const source_asset_data = assets_data?.find(a => a?.id === asset)
       const source_contract_data = source_asset_data?.contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
@@ -396,9 +447,15 @@ export default () => {
           setCalling(false)
           setXcallResponse(null)
           try {
-            const { forceSlow } = { ...options }
-            const native_token = source_chain_data?.provider_params?.[0]?.nativeCurrency
-            const decimals = native_token?.decimals || 18
+            const {
+              forceSlow,
+            } = { ...options }
+            const {
+              provider_params,
+            } = { ...source_chain_data }
+            const {
+              nativeCurrency,
+            } = { ...provider_params?.[0] }
             const routerFee = forceSlow ? 0 : amount * ROUTER_FEE_PERCENT / 100
             const params = {
               originDomain: source_chain_data?.domain_id,
@@ -406,7 +463,9 @@ export default () => {
               isHighPriority: !forceSlow,
             }
             const response = forceSlow ? 0 : await sdk.nxtpSdkBase.estimateRelayerFee(params)
-            const gasFee = response && Number(utils.formatUnits(response.toString(), decimals))
+            const gasFee = typeof response === 'number' ?
+              Number(utils.formatUnits(response.toString(), nativeCurrency?.decimals || 18)) :
+              null
             console.log('[Estimate Fees]', {
               options,
               params,
@@ -432,15 +491,29 @@ export default () => {
     setCalling(true)
     let success = false
     if (sdk) {
-      const { source_chain, destination_chain, asset, amount } = { ...bridge }
+      const {
+        source_chain,
+        destination_chain,
+        asset,
+        amount,
+      } = { ...bridge }
       const source_chain_data = chains_data?.find(c => c?.id === source_chain)
       const source_asset_data = assets_data?.find(a => a?.id === asset)
       const source_contract_data = source_asset_data?.contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
       const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
-      const decimals = source_contract_data?.contract_decimals || 18
       const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
-      const { gas } = { ...fee }
-      const { to, infiniteApprove, callData, slippage, forceSlow, receiveLocal } = { ...options }
+
+      const {
+        to,
+        infiniteApprove,
+        callData,
+        slippage,
+        forceSlow,
+        receiveLocal,
+      } = { ...options }
+      const {
+        gas,
+      } = { ...fee }
       const xcallParams = {
         params: {
           to: to || address,
@@ -456,8 +529,9 @@ export default () => {
           slippageTol: ((100 - (!receiveLocal && slippage ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)) * 100).toString(),
         },
         transactingAssetId: source_contract_data?.contract_address,
-        amount: utils.parseUnits(amount?.toString() || '0', decimals).toString(),
+        amount: utils.parseUnits(amount?.toString() || '0', source_contract_data?.contract_decimals || 18).toString(),
       }
+
       let failed = false
       try {
         const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(xcallParams.params.originDomain, xcallParams.transactingAssetId, xcallParams.amount, infiniteApprove)
@@ -487,7 +561,10 @@ export default () => {
           setApproving(false)
         }
       } catch (error) {
-        setApproveResponse({ status: 'failed', message: error?.data?.message || error?.message })
+        setApproveResponse({
+          status: 'failed',
+          message: error?.data?.message || error?.message,
+        })
         failed = true
         setApproveProcessing(false)
         setApproving(false)
@@ -517,7 +594,10 @@ export default () => {
             success = true
           }
         } catch (error) {
-          setXcallResponse({ status: 'failed', message: error?.data?.message || error?.message })
+          setXcallResponse({
+            status: 'failed',
+            message: error?.data?.message || error?.message,
+          })
           failed = true
         }
       }
@@ -535,7 +615,12 @@ export default () => {
 
   const headMeta = meta(asPath, null, chains_data, assets_data)
 
-  const { source_chain, destination_chain, asset, amount } = { ...bridge }
+  const {
+    source_chain,
+    destination_chain,
+    asset,
+    amount,
+  } = { ...bridge }
   const source_chain_data = chains_data?.find(c => c?.id === source_chain)
   const source_asset_data = assets_data?.find(a => a?.id === asset)
   const source_contract_data = source_asset_data?.contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
@@ -551,9 +636,14 @@ export default () => {
   const destination_decimals = destination_contract_data?.contract_decimals || 18
   const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol
 
-  const gas_fee = fee && (options.forceSlow ? 0 : fee.gas || 0)
-  const router_fee = fee && (options.forceSlow ? 0 : fee.router || 0)
-  // const total_fee = fee && (gas_fee + router_fee)
+  const {
+    to,
+    infiniteApprove,
+    forceSlow,
+    receiveLocal,
+  } = { ...options }
+  const gas_fee = fee && (forceSlow ? 0 : fee.gas || 0)
+  const router_fee = fee && (forceSlow ? 0 : fee.router || 0)
   const source_gas_native_token = source_chain_data?.provider_params?.[0]?.nativeCurrency
 
   const liquidity_amount = _.sum(asset_balances_data?.[destination_chain_data?.chain_id]?.filter(a => equals_ignore_case(a?.adopted, destination_contract_data?.contract_address))?.map(a => Number(utils.formatUnits(BigNumber.from(a?.amount || '0'), destination_decimals))) || [])
@@ -562,7 +652,7 @@ export default () => {
 
   const wrong_chain = source_chain_data && chain_id !== source_chain_data.chain_id && !xcall
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
-  const recipient_address = options?.to || address
+  const recipient_address = to || address
 
   const disabled = calling || approving
 
@@ -857,7 +947,7 @@ export default () => {
                     )}
                   </div>
                   {source_chain_data && asset && (
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-1.5">
                       <div className="text-slate-400 dark:text-slate-600 text-xs font-medium">
                         Balance
                       </div>
@@ -902,7 +992,7 @@ export default () => {
                     </div>
                     <div className="w-full h-0.25 bg-slate-100 dark:bg-slate-700 sm:px-1" />
                     <div className="space-y-2.5 sm:mx-3">
-                      {!options?.receiveLocal && (
+                      {!receiveLocal && (
                         <div className="flex items-center justify-between space-x-1">
                           <div className="text-slate-600 dark:text-white font-medium">
                             Slippage Tolerance
@@ -997,7 +1087,7 @@ export default () => {
                           Infinite Approval
                         </div>
                         <Switch
-                          checked={typeof options?.infiniteApprove === 'boolean' ? options.infiniteApprove : false}
+                          checked={typeof infiniteApprove === 'boolean' ? infiniteApprove : false}
                           onChange={() => {
                             console.log('[Transfer Confirmation]', {
                               bridge,
@@ -1005,12 +1095,12 @@ export default () => {
                               options: {
                                 ...options,
                                 to: recipient_address,
-                                infiniteApprove: !options?.infiniteApprove,
+                                infiniteApprove: !infiniteApprove,
                               },
                             })
                             setOptions({
                               ...options,
-                              infiniteApprove: !options?.infiniteApprove,
+                              infiniteApprove: !infiniteApprove,
                             })}
                           }
                           onColor="#3b82f6"
@@ -1037,7 +1127,7 @@ export default () => {
                       </div>
                       <div className="w-full h-0.25 bg-slate-100 dark:bg-slate-700 sm:px-1" />
                       <div className="space-y-2.5 sm:mx-3">
-                        {!options?.forceSlow && (
+                        {!forceSlow && (
                           <>
                             <div className="flex items-center justify-between space-x-1">
                               <div className="text-slate-600 dark:text-white font-medium">
@@ -1057,8 +1147,7 @@ export default () => {
                                     estimating
                                   </span>
                                   <Oval color={loader_color(theme)} width="20" height="20" />
-                                </div>
-                                :
+                                </div> :
                                 <span className="whitespace-nowrap text-xs font-semibold">
                                   {number_format(gas_fee, '0,0.000000', true)} {source_gas_native_token?.symbol}
                                 </span>
@@ -1100,7 +1189,7 @@ export default () => {
                         </div>
                       )}
                       {amount < liquidity_amount && (
-                        options?.forceSlow ?
+                        forceSlow ?
                           <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2 sm:mx-3">
                             <BiMessageDetail size={20} className="min-w-max" />
                             <span className="text-sm">
@@ -1190,9 +1279,7 @@ export default () => {
                         </span>
                       </button>
                       /*<Modal
-                        onClick={() => {
-                          setSlippageEditing(false)
-                        }}
+                        onClick={() => setSlippageEditing(false)}
                         buttonTitle="Transfer"
                         buttonClassName="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg py-3 sm:py-4 px-2 sm:px-3"
                         title="Transfer Confirmation"
@@ -1281,7 +1368,7 @@ export default () => {
                               )}
                             </div>
                           </div>
-                          {!options?.receiveLocal && (
+                          {!receiveLocal && (
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
                               <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
                                 Slippage Tolerance
@@ -1378,7 +1465,7 @@ export default () => {
                               <span className="hidden sm:block">:</span>
                             </div>
                             <Switch
-                              checked={typeof options?.infiniteApprove === 'boolean' ? options.infiniteApprove : false}
+                              checked={typeof infiniteApprove === 'boolean' ? infiniteApprove : false}
                               onChange={() => {
                                 console.log('[Transfer Confirmation]', {
                                   bridge,
@@ -1386,12 +1473,12 @@ export default () => {
                                   options: {
                                     ...options,
                                     to: recipient_address,
-                                    infiniteApprove: !options?.infiniteApprove,
+                                    infiniteApprove: !infiniteApprove,
                                   },
                                 })
                                 setOptions({
                                   ...options,
-                                  infiniteApprove: !options?.infiniteApprove,
+                                  infiniteApprove: !infiniteApprove,
                                 })}
                               }
                               onColor="#3b82f6"
@@ -1406,7 +1493,7 @@ export default () => {
                               <span className="hidden sm:block">:</span>
                             </div>
                             <div className="flex items-center space-x-2">
-                              {options.forceSlow ?
+                              {forceSlow ?
                                 <Popover
                                   placement="top"
                                   title="Slow Path (Nomad)"
@@ -1430,7 +1517,7 @@ export default () => {
                                 </Popover>
                               }
                               <Switch
-                                checked={!(typeof options?.forceSlow === 'boolean' ? options.forceSlow : false)}
+                                checked={!(typeof forceSlow === 'boolean' ? forceSlow : false)}
                                 onChange={() => {
                                   console.log('[Transfer Confirmation]', {
                                     bridge,
@@ -1438,12 +1525,12 @@ export default () => {
                                     options: {
                                       ...options,
                                       to: recipient_address,
-                                      forceSlow: !options?.forceSlow,
+                                      forceSlow: !forceSlow,
                                     },
                                   })
                                   setOptions({
                                     ...options,
-                                    forceSlow: !options?.forceSlow,
+                                    forceSlow: !forceSlow,
                                   })
                                 }}
                                 checkedIcon={false}
@@ -1494,7 +1581,7 @@ export default () => {
                             </div>
                           )}
                           {amount < liquidity_amount && (
-                            options?.forceSlow ?
+                            forceSlow ?
                               <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2">
                                 <BiMessageDetail size={20} className="min-w-max mt-0.5" />
                                 <span className="font-medium">
@@ -1573,16 +1660,14 @@ export default () => {
                                     className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                                   >
                                     <MdClose size={20} />
-                                  </button>
-                                  :
+                                  </button> :
                                   r.status === 'success' ?
                                     <button
                                       onClick={() => reset()}
                                       className={`${xcallResponse ? 'bg-yellow-500 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
                                     >
                                       <MdClose size={20} />
-                                    </button>
-                                    :
+                                    </button> :
                                     null
                                 }
                               </div>

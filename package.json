@@ -25,20 +25,19 @@
   },
   "homepage": "https://github.com/CoinHippo-Labs/connext-bridge#readme",
   "dependencies": {
-    "@coinbase/wallet-sdk": "^3.3.0",
+    "@coinbase/wallet-sdk": "^3.4.0",
     "@connext/nxtp-sdk": "^0.2.0-beta.17",
     "@popperjs/core": "^2.11.5",
     "@portis/web3": "^4.0.7",
     "@redux-devtools/extension": "^3.2.2",
     "@walletconnect/web3-provider": "^1.7.8",
     "base-64": "^1.0.0",
-    "config-yml": "^0.10.3",
     "env-cmd": "^10.1.0",
     "ethers": "^5.6.9",
-    "html-react-parser": "^2.0.0",
+    "html-react-parser": "^3.0.1",
     "lodash": "^4.17.21",
-    "moment": "^2.29.3",
-    "next": "^12.1.6",
+    "moment": "^2.29.4",
+    "next": "^12.2.3",
     "nprogress": "^0.2.0",
     "numeral": "^2.0.6",
     "postcss-flexbugs-fixes": "^5.0.2",
@@ -69,6 +68,6 @@
     "postcss-color-function": "^4.1.0",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
-    "tailwindcss": "^3.1.4"
+    "tailwindcss": "^3.1.6"
   }
 }

@@ -39,9 +39,11 @@ export default ({
   const asset_data = assets_data?.find(c => c?.id === value)
   const source_contract_data = asset_data?.contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
   const destination_contract_data = asset_data?.contracts?.find(c => c?.chain_id === destination_chain_data?.chain_id)
-  const image = asset_data?.image
-  const source_image = source_contract_data?.image || asset_data?.image
-  const destination_image = destination_contract_data?.image || asset_data?.image
+  const {
+    image,
+  } = { ...asset_data }
+  const source_image = source_contract_data?.image || image
+  const destination_image = destination_contract_data?.image || image
 
   return (
     <Modal

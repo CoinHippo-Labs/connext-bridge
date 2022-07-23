@@ -4,13 +4,16 @@ export default (
   state = {
     [`${ASSET_BALANCES_DATA}`]: null,
   },
-  action
+  action,
 ) => {
   switch (action.type) {
     case ASSET_BALANCES_DATA:
       return {
         ...state,
-        [`${ASSET_BALANCES_DATA}`]: { ...state[`${ASSET_BALANCES_DATA}`], ...action.value },
+        [`${ASSET_BALANCES_DATA}`]: {
+          ...state[`${ASSET_BALANCES_DATA}`],
+          ...action.value,
+        },
       }
     default:
       return state

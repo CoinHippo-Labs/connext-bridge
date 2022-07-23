@@ -4,7 +4,7 @@ export default (
   state = {
     [`${ANNOUNCEMENT_DATA}`]: null,
   },
-  action
+  action,
 ) => {
   switch (action.type) {
     case ANNOUNCEMENT_DATA:

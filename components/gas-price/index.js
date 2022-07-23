@@ -24,8 +24,7 @@ export default ({
         }
         const rpc = rpcs[chainId]
         try {
-          const gasPrice = Number(utils.formatUnits(await rpc.getGasPrice(), 'gwei'))
-          setGasPrice(gasPrice)
+          setGasPrice(Number(utils.formatUnits(await rpc.getGasPrice(), 'gwei')))
         } catch (error) {
           if (!gasPrice) {
             setGasPrice('')
