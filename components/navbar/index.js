@@ -88,7 +88,7 @@ export default () => {
         let updated_ids = is_interval ? [] : assets_data.filter(a => a?.price).map(a => a.id)
         if (updated_ids.length < assets_data.length) {
           let updated = false
-          for (const chains_data of chains_data) {
+          for (const chain_data of chains_data) {
             const {
               chain_id,
             } = { ...chain_data }

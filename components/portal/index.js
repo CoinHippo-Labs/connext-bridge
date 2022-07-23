@@ -15,5 +15,5 @@ export default ({
   }, [selector])
 
   return mounted &&
-    reatePortal(children, ref.current)
+    createPortal(children, ref.current)
 }
