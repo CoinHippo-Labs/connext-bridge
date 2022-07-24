@@ -25,9 +25,7 @@ const DEFAULT_OPTIONS = {
   deadline: DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES,
 }
 
-export default ({
-  data,
-}) => {
+export default ({ data }) => {
   const { preferences, dev, wallet } = useSelector(state => ({ preferences: state.preferences, dev: state.dev, wallet: state.wallet }), shallowEqual)
   const { theme } = { ...preferences }
   const { sdk } = { ...dev }

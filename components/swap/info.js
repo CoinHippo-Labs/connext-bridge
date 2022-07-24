@@ -44,8 +44,7 @@ export default ({ data }) => {
               {currency_symbol}{number_format(0, '0,0.000000')}
             </span>
           </div>
-        </div>
-        :
+        </div> :
         <TailSpin color={loader_color(theme)} width="36" height="36" />
       }
     </div>

@@ -124,8 +124,7 @@ export default ({
               </div>
             </div>
           </div>
-        </div>
-        :
+        </div> :
         <TailSpin color={loader_color(theme)} width="36" height="36" />
       }
     </div>

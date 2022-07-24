@@ -78,7 +78,11 @@ export default () => {
   useEffect(() => {
     const params = {}
     if (pool) {
-      const { chain, asset, amount } = { ...pool }
+      const {
+        chain,
+        asset,
+        amount,
+      } = { ...pool }
       if (chains_data?.findIndex(c => !c?.disabled && c?.id === chain) > -1) {
         params.chain = chain
         if (asset && assets_data?.findIndex(a => a?.id === asset && a.contracts?.findIndex(c => c?.chain_id === chains_data.find(_c => _c?.id === chain)?.chain_id) > -1) > -1) {
@@ -90,7 +94,11 @@ export default () => {
       }
     }
     if (Object.keys(params).length > 0) {
-      const { chain, asset, amount } = { ...params }
+      const {
+        chain,
+        asset,
+        amount,
+      } = { ...params }
       delete params.chain
       delete params.asset
       router.push(`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
@@ -101,7 +109,9 @@ export default () => {
 
   // update balances
   useEffect(() => {
-    const { chain } = { ...pool }
+    const {
+      chain,
+    } = { ...pool }
     const _chain = chains_data?.find(c => c?.chain_id === chain_id)?.id
     if (asPath && _chain && !chain) {
       const params = params_to_obj(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
@@ -122,7 +132,9 @@ export default () => {
       value: null,
     })
     if (address) {
-      const { chain } = { ...pool }
+      const {
+        chain,
+      } = { ...pool }
       getBalances(chain)
     }
     else {
@@ -134,7 +146,9 @@ export default () => {
   useEffect(() => {
     const getData = () => {
       if (address && !calling && !['pending'].includes(approveResponse?.status)) {
-        const { chain } = { ...pool }
+        const {
+          chain,
+        } = { ...pool }
         getBalances(chain)
       }
     }
@@ -150,13 +164,20 @@ export default () => {
     const getData = async () => {
       if (sdk && address && pool?.chain) {
         try {
-          const { chain } = { ...pool }
+          const {
+            chain,
+          } = { ...pool }
           const chain_data = chains_data.find(c => c?.id === chain)
-          const { domain_id } = { ...chain_data }
+          const {
+            chain_id,
+            domain_id,
+          } = { ...chain_data }
           const response = await sdk.nxtpSdkPool.getUserPools(domain_id, address)
           setPools(response?.map(p => {
-            const { symbol } = { ...p }
-            const asset_data = assets_data.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === chain_data?.chain_id && equals_ignore_case(c?.symbol, symbol)) > -1)
+            const {
+              symbol,
+            } = { ...p }
+            const asset_data = assets_data.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === chain_id && equals_ignore_case(c?.symbol, symbol)) > -1)
             return {
               ...p,
               chain_data,
@@ -171,8 +192,11 @@ export default () => {
 
   const getBalances = chain => {
     const getBalance = async (chain_id, contract_data) => {
-      const contract_address = contract_data?.contract_address 
-      const decimals = contract_data?.contract_decimals || 18
+      const {
+        contract_address,
+        contract_decimals,
+      } = { ...contract_data }
+      const decimals = contract_decimals || 18
       const rpc = rpcs?.[chain_id]
       let balance
       if (rpc && contract_address) {
@@ -189,12 +213,14 @@ export default () => {
         value: {
           [`${chain_id}`]: [{
             ...contract_data,
-            amount: balance ? Number(utils.formatUnits(balance, decimals)) : null,
+            amount: balance && Number(utils.formatUnits(balance, decimals)),
           }],
         },
       })
     }
-    const chain_id = chains_data?.find(c => c?.id === chain)?.chain_id
+    const {
+      chain_id,
+    } = { ...chains_data?.find(c => c?.id === chain) }
     const contracts = assets_data?.map(a => {
       return {
         ...a,
@@ -205,7 +231,10 @@ export default () => {
   }
 
   const checkSupport = () => {
-    const { chain, asset } = { ...pool }
+    const {
+      chain,
+      asset,
+    } = { ...pool }
     const asset_data = assets_data?.find(a => a?.id === asset)
     return chain && asset_data &&
       !(asset_data.contracts?.findIndex(c => c?.chain_id === chains_data?.find(_c => _c?.id === chain)?.chain_id) < 0)
@@ -230,11 +259,17 @@ export default () => {
 
     setPoolsTrigger(moment().valueOf())
 
-    const { chain } = { ...pool }
+    const {
+      chain,
+    } = { ...pool }
     getBalances(chain)
   }
 
-  const { chain, asset, amount } = { ...pool }
+  const {
+    chain,
+    asset,
+    amount,
+  } = { ...pool }
   const chain_data = chains_data?.find(c => c?.id === chain)
   const asset_data = assets_data?.find(a => a?.id === asset)
   const poolData = {
