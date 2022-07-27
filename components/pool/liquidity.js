@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
+import moment from 'moment'
 import { FixedNumber, utils } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
-import { RotatingSquare } from 'react-loader-spinner'
+import { TailSpin, RotatingSquare } from 'react-loader-spinner'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
 import { BiPlus, BiCaretUp, BiCaretDown, BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
@@ -187,13 +188,20 @@ export default ({
           if (!failed) {
             try {
               const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(domainId, contract_data?.contract_address)
+              const amounts = [
+                utils.parseUnits(amountX.toString(), x_asset_data?.decimals || 18).toString(),
+                utils.parseUnits(amountY.toString(), y_asset_data?.decimals || 18).toString(),
+              ]
+              console.log('[Add Liquidity]', {
+                domainId,
+                canonicalId,
+                amounts,
+                deadline,
+              })
               const add_request = await sdk.nxtpSdkPool.addLiquidity(
                 domainId,
                 canonicalId,
-                [
-                  utils.parseUnits(amountX.toString(), x_asset_data?.decimals || 18).toString(),
-                  utils.parseUnits(amountY.toString(), y_asset_data?.decimals || 18).toString(),
-                ],
+                amounts,
                 deadline,
               )
               if (add_request) {
@@ -232,10 +240,17 @@ export default ({
           if (!failed) {
             try {
               const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(domainId, contract_data?.contract_address)
+              const amount = utils.parseUnits(amount.toString(), y_asset_data?.decimals || 18).toString()
+              console.log('[Remove Liquidity]', {
+                domainId,
+                canonicalId,
+                amount,
+                deadline,
+              })
               const remove_request = await sdk.nxtpSdkPool.removeLiquidity(
                 domainId,
                 canonicalId,
-                utils.parseUnits(amount.toString(), y_asset_data?.decimals || 18).toString(),
+                amount,
                 deadline,
               )
               if (remove_request) {
@@ -373,9 +388,20 @@ export default ({
             <div className="space-y-2">
               {x_asset_data?.contract_address && (
                 <div className="flex items-center justify-between">
-                  <div className="text-base font-bold">
-                    {x_asset_data.symbol}
-                  </div>
+                  {chain_data?.explorer?.url ?
+                    <a
+                      href={`${chain_data.explorer.url}${chain_data.explorer.contract_path?.replace('{address}', x_asset_data.contract_address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <span className="text-base font-bold">
+                        {x_asset_data.symbol}
+                      </span>
+                    </a> :
+                    <div className="text-base font-bold">
+                      {x_asset_data.symbol}
+                    </div>
+                  }
                   <div className="space-y-0.5">
                     <div className="text-slate-400 dark:text-slate-600 text-xs font-medium text-right">
                       Balance
@@ -434,9 +460,20 @@ export default ({
             <div className="space-y-2">
               {y_asset_data?.contract_address && (
                 <div className="flex items-center justify-between">
-                  <div className="text-base font-bold">
-                    {y_asset_data.symbol}
-                  </div>
+                  {chain_data?.explorer?.url ?
+                    <a
+                      href={`${chain_data.explorer.url}${chain_data.explorer.contract_path?.replace('{address}', y_asset_data.contract_address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <span className="text-base font-bold">
+                        {y_asset_data.symbol}
+                      </span>
+                    </a> :
+                    <div className="text-base font-bold">
+                      {y_asset_data.symbol}
+                    </div>
+                  }
                   <div className="space-y-0.5">
                     <div className="text-slate-400 dark:text-slate-600 text-xs font-medium text-right">
                       Balance
@@ -592,34 +629,34 @@ export default ({
                   key={i}
                   color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
                   icon={r.status === 'failed' ?
-                    <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
+                    <BiMessageError className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
                     r.status === 'success' ?
-                      <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
-                      <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />
+                      <BiMessageCheck className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
+                      <BiMessageDetail className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" />
                   }
                   closeDisabled={true}
                   rounded={true}
-                  className="rounded-xl p-4.5"
+                  className="rounded-xl p-3"
                 >
                   <div className="flex items-center justify-between space-x-2">
-                    <span className="break-all">
+                    <span className="break-word text-xs">
                       {ellipse(r.message, 128)}
                     </span>
                     <div className="flex items-center space-x-2">
-                      {r.status === 'failed' && r.message && (
+                      {/*r.status === 'failed' && r.message && (
                         <Copy
                           value={r.message}
-                          size={24}
+                          size={18}
                           className="cursor-pointer text-slate-200 hover:text-white"
                         />
-                      )}
+                      )*/}
                       {chain_data?.explorer?.url && r.tx_hash && (
                         <a
                           href={`${chain_data.explorer.url}${chain_data.explorer.transaction_path?.replace('{tx}', r.tx_hash)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <TiArrowRight size={20} className="transform -rotate-45" />
+                          <TiArrowRight size={16} className="transform -rotate-45" />
                         </a>
                       )}
                       {r.status === 'failed' ?
@@ -627,7 +664,7 @@ export default ({
                           onClick={() => reset()}
                           className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                         >
-                          <MdClose size={20} />
+                          <MdClose size={16} />
                         </button>
                         :
                         r.status === 'success' ?
@@ -635,7 +672,7 @@ export default ({
                             onClick={() => reset()}
                             className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
                           >
-                            <MdClose size={20} />
+                            <MdClose size={16} />
                           </button>
                           :
                           null
@@ -648,20 +685,27 @@ export default ({
                 <button
                   disabled={disabled || !valid_amount}
                   onClick={() => call(pool_data)}
-                  className={`w-full ${disabled || !valid_amount ? 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
+                  className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
                 >
-                  {calling ?
-                    approving ?
-                      approveProcessing ?
-                        'Approving' :
-                        'Please Approve' :
-                      callProcessing ?
-                        'Adding' :
-                        typeof approving === 'boolean' ?
-                          'Please Confirm' :
-                          'Checking Approval' :
-                    'Supply'
-                  }
+                  <span className="flex items-center justify-center space-x-1.5">
+                    {(calling || approving) && (
+                      <TailSpin color="white" width="20" height="20" />
+                    )}
+                    <span>
+                      {calling ?
+                        approving ?
+                          approveProcessing ?
+                            'Approving' :
+                            'Please Approve' :
+                          callProcessing ?
+                            'Adding' :
+                            typeof approving === 'boolean' ?
+                              'Please Confirm' :
+                              'Checking Approval' :
+                        'Supply'
+                      }
+                    </span>
+                  </span>
                 </button> :
                 <Wallet
                   connectChainId={chain_id}
@@ -724,9 +768,20 @@ export default ({
           </div>
           <div className="bg-slate-50 dark:bg-slate-900 rounded-lg space-y-5 py-6 px-4">
             <div className="flex items-center justify-between space-x-3">
-              <div className="text-base font-bold">
-                {x_asset_data?.symbol}
-              </div>
+              {chain_data?.explorer?.url && x_asset_data?.contract_address ?
+                <a
+                  href={`${chain_data.explorer.url}${chain_data.explorer.contract_path?.replace('{address}', x_asset_data.contract_address)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="text-base font-bold">
+                    {x_asset_data.symbol}
+                  </span>
+                </a> :
+                <div className="text-base font-bold">
+                  {x_asset_data?.symbol}
+                </div>
+              }
               {web3_provider ?
                 !isNaN(tokensX) ?
                   <span className="text-base">
@@ -743,9 +798,20 @@ export default ({
               }
             </div>
             <div className="flex items-center justify-between space-x-3">
-              <div className="text-base font-bold">
-                {y_asset_data?.symbol}
-              </div>
+              {chain_data?.explorer?.url && y_asset_data?.contract_address ?
+                <a
+                  href={`${chain_data.explorer.url}${chain_data.explorer.contract_path?.replace('{address}', y_asset_data.contract_address)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="text-base font-bold">
+                    {y_asset_data.symbol}
+                  </span>
+                </a> :
+                <div className="text-base font-bold">
+                  {y_asset_data?.symbol}
+                </div>
+              }
               {web3_provider ?
                 !isNaN(tokensY) ?
                   <span className="text-base">
@@ -769,34 +835,34 @@ export default ({
                   key={i}
                   color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
                   icon={r.status === 'failed' ?
-                    <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
+                    <BiMessageError className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
                     r.status === 'success' ?
-                      <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
-                      <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />
+                      <BiMessageCheck className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
+                      <BiMessageDetail className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" />
                   }
                   closeDisabled={true}
                   rounded={true}
-                  className="rounded-xl p-4.5"
+                  className="rounded-xl p-3"
                 >
                   <div className="flex items-center justify-between space-x-2">
-                    <span className="break-all">
+                    <span className="break-word text-xs">
                       {ellipse(r.message, 128)}
                     </span>
                     <div className="flex items-center space-x-2">
-                      {r.status === 'failed' && r.message && (
+                      {/*r.status === 'failed' && r.message && (
                         <Copy
                           value={r.message}
-                          size={24}
+                          size={18}
                           className="cursor-pointer text-slate-200 hover:text-white"
                         />
-                      )}
+                      )*/}
                       {chain_data?.explorer?.url && r.tx_hash && (
                         <a
                           href={`${chain_data.explorer.url}${chain_data.explorer.transaction_path?.replace('{tx}', r.tx_hash)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <TiArrowRight size={20} className="transform -rotate-45" />
+                          <TiArrowRight size={16} className="transform -rotate-45" />
                         </a>
                       )}
                       {r.status === 'failed' ?
@@ -804,7 +870,7 @@ export default ({
                           onClick={() => reset()}
                           className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                         >
-                          <MdClose size={20} />
+                          <MdClose size={16} />
                         </button>
                         :
                         r.status === 'success' ?
@@ -812,7 +878,7 @@ export default ({
                             onClick={() => reset()}
                             className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
                           >
-                            <MdClose size={20} />
+                            <MdClose size={16} />
                           </button>
                           :
                           null
@@ -825,20 +891,27 @@ export default ({
                 <button
                   disabled={disabled || !valid_amount}
                   onClick={() => call(pool_data)}
-                  className={`w-full ${disabled || !valid_amount ? 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
+                  className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
                 >
-                  {calling ?
-                    approving ?
-                      approveProcessing ?
-                        'Approving' :
-                        'Please Approve' :
-                      callProcessing ?
-                        'Removing' :
-                        typeof approving === 'boolean' ?
-                          'Please Confirm' :
-                          'Checking Approval' :
-                    'Remove'
-                  }
+                  <span className="flex items-center justify-center space-x-1.5">
+                    {(calling || approving) && (
+                      <TailSpin color="white" width="20" height="20" />
+                    )}
+                    <span>
+                      {calling ?
+                        approving ?
+                          approveProcessing ?
+                            'Approving' :
+                            'Please Approve' :
+                          callProcessing ?
+                            'Removing' :
+                            typeof approving === 'boolean' ?
+                              'Please Confirm' :
+                              'Checking Approval' :
+                        'Remove'
+                      }
+                    </span>
+                  </span>
                 </button> :
                 <Wallet
                   connectChainId={chain_id}
