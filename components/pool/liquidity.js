@@ -639,7 +639,7 @@ export default ({
                   className="rounded-xl p-3"
                 >
                   <div className="flex items-center justify-between space-x-2">
-                    <span className="break-word text-xs">
+                    <span className="leading-5 break-all text-xs">
                       {ellipse(r.message, 128)}
                     </span>
                     <div className="flex items-center space-x-2">
@@ -845,7 +845,7 @@ export default ({
                   className="rounded-xl p-3"
                 >
                   <div className="flex items-center justify-between space-x-2">
-                    <span className="break-word text-xs">
+                    <span className="leading-5 break-all text-xs">
                       {ellipse(r.message, 128)}
                     </span>
                     <div className="flex items-center space-x-2">
