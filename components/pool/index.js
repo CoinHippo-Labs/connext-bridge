@@ -10,7 +10,6 @@ import { RiArrowLeftCircleFill } from 'react-icons/ri'
 import Announcement from '../announcement'
 import Info from './info'
 import Liquidity from './liquidity'
-import { currency_symbol } from '../../lib/object/currency'
 import { params_to_obj, equals_ignore_case } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
@@ -52,10 +51,6 @@ export default () => {
         pool.asset = asset
         updated = true
       }
-      if (params?.amount) {
-        pool.amount = Number(params.amount)
-        updated = true
-      }
     }
     if (updated) {
       setPool(pool)
@@ -70,7 +65,6 @@ export default () => {
       const {
         chain,
         asset,
-        amount,
       } = { ...pool }
       if (chains_data?.findIndex(c => !c?.disabled && c?.id === chain) > -1) {
         params.chain = chain
@@ -78,15 +72,11 @@ export default () => {
           params.asset = asset
         }
       }
-      if (params.chain && params.asset && amount) {
-        params.amount = amount
-      }
     }
     if (Object.keys(params).length > 0) {
       const {
         chain,
         asset,
-        amount,
       } = { ...params }
       delete params.chain
       delete params.asset
@@ -251,7 +241,6 @@ export default () => {
     if (reset_pool) {
       setPool({
         ...pool,
-        amount: null,
       })
     }
 
