@@ -99,6 +99,7 @@
   {
     "id": "avalanche",
     "chain_id": 43114,
+    "domain_id": "1635148152",
     "name": "Avalanche",
     "short_name": "AVAX",
     "provider_params": [
@@ -454,6 +455,7 @@
   {
     "id": "evmos",
     "chain_id": 9001,
+    "domain_id": "1702260083",
     "name": "Evmos",
     "short_name": "EVMOS",
     "provider_params": [

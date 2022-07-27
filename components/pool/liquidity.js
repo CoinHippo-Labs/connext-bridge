@@ -4,6 +4,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import { FixedNumber, utils } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
+import Switch from 'react-switch'
 import { TailSpin, RotatingSquare } from 'react-loader-spinner'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
@@ -173,6 +174,9 @@ export default ({
         ),
       }
 
+      const {
+        infiniteApprove,
+      } = { ...options }
       let {
         deadline,
       } = { ...options }
@@ -306,6 +310,7 @@ export default ({
   } = { ...chain_data }
 
   const {
+    infiniteApprove,
     slippage,
   } = { ...options }
 
@@ -544,6 +549,28 @@ export default ({
             </div>
             {openOptions && (
               <div className="form">
+                <div className="form-element">
+                  <div className="form-label text-slate-600 dark:text-slate-400 font-medium">
+                    Infinite Approval
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Switch
+                      checked={typeof infiniteApprove === 'boolean' ? infiniteApprove : false}
+                      onChange={() => {
+                        setOptions({
+                          ...options,
+                          infiniteApprove: !infiniteApprove,
+                        })}
+                      }
+                      onColor="#3b82f6"
+                      onHandleColor="#f8fafc"
+                      offColor="#64748b"
+                      offHandleColor="#f8fafc"
+                      width={48}
+                      height={24}
+                    />
+                  </div>
+                </div>
                 <div className="form-element">
                   <div className="form-label text-slate-600 dark:text-slate-400 font-medium">
                     Slippage Tolerance
