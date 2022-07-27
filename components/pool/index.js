@@ -167,7 +167,10 @@ export default () => {
             chain_id,
             domain_id,
           } = { ...chain_data }
-          const response = await sdk.nxtpSdkPool.getUserPools(domain_id, address)
+          const response = await sdk.nxtpSdkPool.getUserPools(
+            domain_id,
+            address,
+          )
           setPools(response?.map(p => {
             const {
               symbol,

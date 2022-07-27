@@ -11,8 +11,6 @@ import Image from '../image'
 import Alert from '../alerts'
 import { number_format } from '../../lib/utils'
 
-const TOKEN_ID = 'test'
-const FAUCET_AMOUNT = Number(process.env.NEXT_PUBLIC_FAUCET_AMOUNT) || 1000
 const ABI = [
   // Read-Only Functions
   'function balanceOf(address owner) view returns (uint256)',
@@ -23,7 +21,11 @@ const ABI = [
   'function mint(address account, uint256 amount)',
 ]
 
-export default () => {
+export default ({
+  token_id = 'test',
+  faucet_amount = Number(process.env.NEXT_PUBLIC_FAUCET_AMOUNT) || 1000,
+  contract_data,
+}) => {
   const { chains, assets, wallet } = useSelector(state => ({ chains: state.chains, assets: state.assets, wallet: state.wallet }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
@@ -68,12 +70,14 @@ export default () => {
     setMinting(true)
     setMintResponse(null)
     try {
-      const asset_data = assets_data?.find(a => a?.id === TOKEN_ID)
-      const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_id)
-      const contract_address = contract_data?.contract_address
-      const decimals = contract_data?.decimals || 18
+      const asset_data = assets_data?.find(a => a?.id === token_id)
+      const contract_data = contract_data || asset_data?.contracts?.find(c => c?.chain_id === chain_id)
+      const {
+        contract_address,
+        decimals,
+      } = { ...contract_data }
       const contract = new Contract(contract_address, ABI, signer)
-      const response = await contract.mint(data?.address, utils.parseUnits(FAUCET_AMOUNT.toString(), decimals))
+      const response = await contract.mint(data?.address, utils.parseUnits(faucet_amount.toString(), decimals || 18))
       const receipt = await signer.provider.waitForTransaction(response.hash)
       setMintResponse({
         status: !receipt?.status ? 'failed' : 'success',
@@ -81,13 +85,16 @@ export default () => {
         ...response,
       })
     } catch (error) {
-      setMintResponse({ status: 'failed', message: error?.data?.message || error?.message })
+      setMintResponse({
+        status: 'failed',
+        message: error?.data?.message || error?.message,
+      })
     }
     setMinting(false)
   }
 
   const chain_data = chains_data?.find(c => c?.id === data?.chain)
-  const asset_data = assets_data?.find(a => a?.id === TOKEN_ID)
+  const asset_data = assets_data?.find(a => a?.id === token_id)
 
   const hasAllFields = fields.length === fields.filter(f => data?.[f.name]).length
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
@@ -113,7 +120,7 @@ export default () => {
         }
       </button>
       {!collapse && (
-        <div className="w-full mb-2 px-4">
+        <div className="w-full mb-2">
           {fields.map((f, i) => (
             <div key={i} className="form-element">
               {f.label && (
@@ -191,10 +198,10 @@ export default () => {
                     Faucet
                   </span>
                   <span className="font-bold">
-                    {number_format(FAUCET_AMOUNT, '0,0.00')}
+                    {number_format(faucet_amount, '0,0.00')}
                   </span>
                   <span>
-                    {asset_data.symbol}
+                    {contract_data?.symbol || asset_data.symbol}
                   </span>
                 </button>
               }
@@ -203,7 +210,7 @@ export default () => {
         </div>
       )}
       {mintResponse && (
-        <div className="mx-2 sm:mx-4">
+        <div className="w-full mx-2 sm:mx-4">
           <Alert
             color={`${mintResponse.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : mintResponse.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white mb-4 sm:mb-6`}
             icon={mintResponse.status === 'failed' ? <BiMessageError className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mt-0.5 mr-2.5" /> : mintResponse.status === 'success' ? <BiMessageCheck className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mt-0.5 mr-2.5" /> : <BiMessageDetail className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mt-0.5 mr-2.5" />}
@@ -211,7 +218,7 @@ export default () => {
             className="mx-0"
           >
             <div className="flex items-center justify-between space-x-1">
-              <span className="leading-5 text-xs">
+              <span className="break-all leading-5 text-xs">
                 {mintResponse.message}
               </span>
               {['success'].includes(mintResponse.status) && mintResponse.hash && chain_data?.explorer?.url && (

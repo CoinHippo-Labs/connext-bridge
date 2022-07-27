@@ -3,18 +3,21 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
-import { TailSpin } from 'react-loader-spinner'
+import { RotatingSquare } from 'react-loader-spinner'
+import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
 import { BiPlus, BiCaretUp, BiCaretDown, BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
 
 import GasPrice from '../gas-price'
 import Balance from '../balance'
+import Faucet from '../faucet'
 import Image from '../image'
 import Wallet from '../wallet'
 import Alert from '../alerts'
 import Copy from '../copy'
 import { number_format, ellipse, equals_ignore_case, loader_color, sleep } from '../../lib/utils'
 
+const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT) || 1
 const DEFAULT_POOL_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_POOL_SLIPPAGE_PERCENTAGE) || 3
 const DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES = Number(process.env.NEXT_PUBLIC_DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES) || 60
 const ACTIONS = ['add', 'remove']
@@ -37,7 +40,7 @@ export default ({
   const { pools_data } = { ...pools }
   const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
-  const { provider, web3_provider, address, signer } = { ...wallet_data }
+  const { web3_provider, address, signer } = { ...wallet_data }
   const { balances_data } = { ...balances }
 
   const [action, setAction] = useState(_.head(ACTIONS))
@@ -128,80 +131,101 @@ export default ({
     }
   }
 
-  const call = async () => {
+  const call = async pool_data => {
     setApproving(null)
     setCalling(true)
     let success = false
     if (sdk) {
-      const { chain, asset, amount } = { ...pool }
-      const chain_data = chains_data?.find(c => c?.id === chain)
-      const asset_data = pool_assets_data?.find(a => a?.id === asset)
-      const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
-      const symbol = contract_data?.symbol || asset_data?.symbol
-      const decimals = contract_data?.decimals || 18
-      const callParams = {
-      
+      const {
+        chain_data,
+        asset_data,
+        contract_data,
+        domainId,
+        tokens,
+        decimals,
+        symbol,
+      } = { ...pool_data }
+      const x_asset_data = tokens?.[0] && {
+        ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
+        ...(
+          equals_ignore_case(tokens[0], contract_data?.contract_address) ?
+            contract_data :
+            {
+              chain_id,
+              contract_address: tokens[0],
+              decimals: decimals?.[0],
+              symbol: symbol?.split('-')[0],
+            }
+        ),
       }
+      const y_asset_data = tokens?.[1] && {
+        ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
+        ...(
+          equals_ignore_case(tokens[1], contract_data?.contract_address) ?
+            contract_data :
+            {
+              chain_id,
+              contract_address: tokens[1],
+              decimals: decimals?.[1],
+              symbol: symbol?.split('-')[1],
+            }
+        ),
+      }
+
+      let {
+        deadline,
+      } = { ...options }
+      deadline = deadline && moment().add(deadline, 'minutes').valueOf()
+
       let failed = false
-      // try {
-      //   const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(xcallParams.params.originDomain, xcallParams.transactingAssetId, xcallParams.amount, infiniteApprove)
-      //   if (approve_request) {
-      //     setApproving(true)
-      //     const approve_response = await signer.sendTransaction(approve_request)
-      //     const tx_hash = approve_response?.hash
-      //     setApproveResponse({
-      //       status: 'pending',
-      //       message: `Wait for ${source_symbol} approval`,
-      //       tx_hash,
-      //     })
-      //     setApproveProcessing(true)
-      //     const approve_receipt = await signer.provider.waitForTransaction(tx_hash)
-      //     setApproveResponse(approve_receipt?.status ?
-      //       null : {
-      //         status: 'failed',
-      //         message: `Failed to approve ${source_symbol}`,
-      //         tx_hash,
-      //       }
-      //     )
-      //     failed = !approve_receipt?.status
-      //     setApproveProcessing(false)
-      //     setApproving(false)
-      //   }
-      // } catch (error) {
-      //   setApproveResponse({ status: 'failed', message: error?.data?.message || error?.message })
-      //   failed = true
-      //   setApproveProcessing(false)
-      //   setApproving(false)
-      // }
-      // if (!failed) {
-      //   try {
-      //     const xcall_request = await sdk.nxtpSdkBase.xcall(xcallParams)
-      //     if (xcall_request) {
-      //       let gas_limit = await signer.estimateGas(xcall_request)
-      //       if (gas_limit) {
-      //         gas_limit = FixedNumber.fromString(gas_limit.toString())
-      //           .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
-      //           .round(0).toString().replace('.0', '')
-      //         xcall_request.gasLimit = gas_limit
-      //       }
-      //       const xcall_response = await signer.sendTransaction(xcall_request)
-      //       const tx_hash = xcall_response?.hash
-      //       setCallProcessing(true)
-      //       const xcall_receipt = await signer.provider.waitForTransaction(tx_hash)
-      //       setXcall(xcall_receipt)
-      //       failed = !xcall_receipt?.status
-      //       setXcallResponse({
-      //         status: failed ? 'failed' : 'success',
-      //         message: failed ? 'Failed to send transaction' : `${source_symbol} transfer detected, waiting for execution.`,
-      //         tx_hash,
-      //       })
-      //       success = true
-      //     }
-      //   } catch (error) {
-      //     setXcallResponse({ status: 'failed', message: error?.data?.message || error?.message })
-      //     failed = true
-      //   }
-      // }
+      switch (action) {
+        case 'add':
+          if (!(amountX && amountY)) {
+            failed = true
+          }
+          if (!failed) {
+            try {
+              const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(domainId, contract_data?.contract_address)
+              const add_request = await sdk.nxtpSdkPool.addLiquidity(
+                domainId,
+                canonicalId,
+                [amountX, amountY],
+                deadline,
+              )
+              if (add_request) {
+                let gasLimit = await signer.estimateGas(add_request)
+                if (gasLimit) {
+                  gasLimit = FixedNumber.fromString(gasLimit.toString())
+                    .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
+                    .round(0).toString().replace('.0', '')
+                  add_request.gasLimit = gasLimit
+                }
+                const add_response = await signer.sendTransaction(add_request)
+                const tx_hash = add_response?.hash
+                setCallProcessing(true)
+                const add_receipt = await signer.provider.waitForTransaction(tx_hash)
+                failed = !add_receipt?.status
+                setCallResponse({
+                  status: failed ? 'failed' : 'success',
+                  message: failed ? `Failed to add ${symbol} liquidity` : `Add ${symbol} liquidity successful`,
+                  tx_hash,
+                })
+                success = true
+              }
+            } catch (error) {
+              setCallResponse({
+                status: 'failed',
+                message: error?.data?.message || error?.message,
+              })
+              failed = true
+            }
+          }
+          break
+        case 'remove':
+          break
+        default:
+          break
+      }
     }
     setCallProcessing(false)
     setCalling(false)
@@ -266,9 +290,18 @@ export default ({
   }
   const y_balance = y_asset_data && balances_data?.[chain_id]?.find(b => equals_ignore_case(b?.contract_address, y_asset_data.contract_address))
   const y_balance_amount = y_balance && Number(y_balance.amount)
+  const pool_loading = selected && !no_pool && !pool_data
+
+  const user_pool_data = pool_data && user_pools_data?.find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
+  const {
+    tokensX,
+    tokensY,
+  } = { ...user_pool_data }
+  const _tokens = user_pool_data?.tokens
+  const position_loading = selected && !no_pool && (!user_pools_data || pool_loading)
 
   const valid_amount = action === 'remove' ?
-    amount :
+    amount/* && amount < _tokens*/ :
     amountX && amountY && amountX <= x_balance_amount && amountY <= y_balance_amount
   const disabled = !pool_data || calling || approving
 
@@ -536,6 +569,15 @@ export default ({
                           className="cursor-pointer text-slate-200 hover:text-white"
                         />
                       )}
+                      {chain_data?.explorer?.url && r.tx_hash && (
+                        <a
+                          href={`${chain_data.explorer.url}${chain_data.explorer.transaction_path?.replace('{tx}', r.tx_hash)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <TiArrowRight size={20} className="transform -rotate-45" />
+                        </a>
+                      )}
                       {r.status === 'failed' ?
                         <button
                           onClick={() => reset()}
@@ -583,69 +625,87 @@ export default ({
             <div className="text-slate-400 dark:text-slate-500 font-semibold">
               Your Pool Tokens
             </div>
-            <DebounceInput
-              debounceTimeout={300}
-              size="small"
-              type="number"
-              placeholder="0.00"
-              disabled={disabled}
-              value={typeof amount === 'number' && amount >= 0 ? amount : ''}
-              onChange={e => {
-                const regex = /^[0-9.\b]+$/
-                let value
-                if (e.target.value === '' || regex.test(e.target.value)) {
-                  value = e.target.value
-                }
-                value = value < 0 ? 0 : value
-                setAmount(value && !isNaN(value) ? Number(value) : value)
-              }}
-              onWheel={e => e.target.blur()}
-              onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-              className={`w-full bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled || !data ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
-            />
-            {/*<div className="flex items-center justify-end space-x-2.5">
+            <div className="space-y-1">
+              <DebounceInput
+                debounceTimeout={300}
+                size="small"
+                type="number"
+                placeholder="0.00"
+                disabled={disabled}
+                value={typeof amount === 'number' && amount >= 0 ? amount : ''}
+                onChange={e => {
+                  const regex = /^[0-9.\b]+$/
+                  let value
+                  if (e.target.value === '' || regex.test(e.target.value)) {
+                    value = e.target.value
+                  }
+                  value = value < 0 ? 0 : value
+                  setAmount(value && !isNaN(value) ? Number(value) : value)
+                }}
+                onWheel={e => e.target.blur()}
+                onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                className={`w-full bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
+              />
+              {typeof amount === 'number' && typeof _tokens === 'number' && amount > _tokens && (
+                <div className="flex items-center text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
+                  <BiMessageError size={16} className="min-w-max" />
+                  <span className="text-xs font-medium">
+                    Not enough {symbol}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center justify-end space-x-2.5">
               {[0.25, 0.5, 0.75, 1.0].map((p, i) => (
                 <div
                   key={i}
-                  onClick={() => setAmount(p * data?.value)}
-                  className={`${disabled || !data?.asset_data?.id ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === data?.value ? 'bg-slate-200 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-semibold'} rounded-lg shadow dark:shadow-slate-500 py-0.5 px-2`}
+                  onClick={() => setAmount(p * _tokens)}
+                  className={`${disabled || !_tokens ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === _tokens ? 'bg-slate-200 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-semibold'} rounded-lg shadow dark:shadow-slate-500 py-0.5 px-2`}
                 >
                   {p * 100} %
                 </div>
               ))}
-            </div>*/}
+            </div>
           </div>
           <div className="bg-slate-50 dark:bg-slate-900 rounded-lg space-y-5 py-6 px-4">
-            {/*<div className="flex items-center justify-between space-x-3">
+            <div className="flex items-center justify-between space-x-3">
+              <div className="text-base font-bold">
+                {x_asset_data?.symbol}
+              </div>
               {web3_provider ?
-                data ?
+                !isNaN(tokensX) ?
                   <span className="text-base">
-                    {number_format(data.amountX || 0, '0,0.000000', true)}
+                    {number_format(tokensX || 0, '0,0.000000', true)}
                   </span> :
-                  <TailSpin color={loader_color(theme)} width="24" height="24" /> :
+                  selected && !no_pool && (
+                    position_loading ?
+                      <RotatingSquare color={loader_color(theme)} width="24" height="24" /> :
+                      '-'
+                  ) :
                 <span className="text-base">
                   -
                 </span>
               }
-              <div className="text-base font-bold">
-                {data?.asset_data?.symbol}
-              </div>
             </div>
             <div className="flex items-center justify-between space-x-3">
+              <div className="text-base font-bold">
+                {y_asset_data?.symbol}
+              </div>
               {web3_provider ?
-                data ?
+                !isNaN(tokensY) ?
                   <span className="text-base">
-                    {number_format(data.amountY || 0, '0,0.000000', true)}
+                    {number_format(tokensY || 0, '0,0.000000', true)}
                   </span> :
-                  <TailSpin color={loader_color(theme)} width="24" height="24" /> :
+                  selected && !no_pool && (
+                    position_loading ?
+                      <RotatingSquare color={loader_color(theme)} width="24" height="24" /> :
+                      '-'
+                  ) :
                 <span className="text-base">
                   -
                 </span>
               }
-              <div className="text-base font-bold">
-                {data?.asset_data?.symbol}
-              </div>
-            </div>*/}
+            </div>
           </div>
           <div className="flex items-end">
             {callResponse || approveResponse ?
@@ -674,6 +734,15 @@ export default ({
                           size={24}
                           className="cursor-pointer text-slate-200 hover:text-white"
                         />
+                      )}
+                      {chain_data?.explorer?.url && r.tx_hash && (
+                        <a
+                          href={`${chain_data.explorer.url}${chain_data.explorer.transaction_path?.replace('{tx}', r.tx_hash)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <TiArrowRight size={20} className="transform -rotate-45" />
+                        </a>
                       )}
                       {r.status === 'failed' ?
                         <button
@@ -718,6 +787,13 @@ export default ({
           </div>
         </div>
       }
+      {['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) && asset_data && (
+        <Faucet
+          token_id={asset}
+          faucet_amount={10}
+          contract_data={x_asset_data?.symbol?.startsWith('mad') ? x_asset_data : y_asset_data}
+        />
+      )}
     </div>
   )
 }

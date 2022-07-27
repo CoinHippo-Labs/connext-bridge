@@ -541,7 +541,12 @@ export default () => {
 
       let failed = false
       try {
-        const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(xcallParams.params.originDomain, xcallParams.transactingAssetId, xcallParams.amount, infiniteApprove)
+        const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
+          xcallParams.params.originDomain,
+          xcallParams.transactingAssetId,
+          xcallParams.amount,
+          infiniteApprove,
+        )
         if (approve_request) {
           setApproving(true)
           const approve_response = await signer.sendTransaction(approve_request)
@@ -580,12 +585,12 @@ export default () => {
         try {
           const xcall_request = await sdk.nxtpSdkBase.xcall(xcallParams)
           if (xcall_request) {
-            let gas_limit = await signer.estimateGas(xcall_request)
-            if (gas_limit) {
-              gas_limit = FixedNumber.fromString(gas_limit.toString())
+            let gasLimit = await signer.estimateGas(xcall_request)
+            if (gasLimit) {
+              gasLimit = FixedNumber.fromString(gasLimit.toString())
                 .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
                 .round(0).toString().replace('.0', '')
-              xcall_request.gasLimit = gas_limit
+              xcall_request.gasLimit = gasLimit
             }
             const xcall_response = await signer.sendTransaction(xcall_request)
             const tx_hash = xcall_response?.hash

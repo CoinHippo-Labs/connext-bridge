@@ -309,8 +309,14 @@ export default () => {
             contract_address,
           } = { ...contract_data }
           try {
-            const pool = await sdk.nxtpSdkPool.getPool(domain_id, contract_address)
-            const stats = pool && await sdk.nxtpSdkPool.getPoolStats(domain_id, contract_address)
+            const pool = await sdk.nxtpSdkPool.getPool(
+              domain_id,
+              contract_address,
+            )
+            const stats = pool && await sdk.nxtpSdkPool.getPoolStats(
+              domain_id,
+              contract_address,
+            )
             data.push({
               ...pool,
               ...stats,

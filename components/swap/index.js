@@ -362,12 +362,12 @@ export default () => {
       //   try {
       //     const xcall_request = await sdk.nxtpSdkBase.xcall(xcallParams)
       //     if (xcall_request) {
-      //       let gas_limit = await signer.estimateGas(xcall_request)
-      //       if (gas_limit) {
-      //         gas_limit = FixedNumber.fromString(gas_limit.toString())
+      //       let gasLimit = await signer.estimateGas(xcall_request)
+      //       if (gasLimit) {
+      //         gasLimit = FixedNumber.fromString(gasLimit.toString())
       //           .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
       //           .round(0).toString().replace('.0', '')
-      //         xcall_request.gasLimit = gas_limit
+      //         xcall_request.gasLimit = gasLimit
       //       }
       //       const xcall_response = await signer.sendTransaction(xcall_request)
       //       const tx_hash = xcall_response?.hash
@@ -987,6 +987,15 @@ export default () => {
                                     size={24}
                                     className="cursor-pointer text-slate-200 hover:text-white"
                                   />
+                                )}
+                                {chain_data?.explorer?.url && r.tx_hash && (
+                                  <a
+                                    href={`${chain_data.explorer.url}${chain_data.explorer.transaction_path?.replace('{tx}', r.tx_hash)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <TiArrowRight size={20} className="transform -rotate-45" />
+                                  </a>
                                 )}
                                 {r.status === 'failed' ?
                                   <button
