@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { FixedNumber } from 'ethers'
+import { FixedNumber, utils } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
 import { RotatingSquare } from 'react-loader-spinner'
 import { TiArrowRight } from 'react-icons/ti'
@@ -190,7 +190,10 @@ export default ({
               const add_request = await sdk.nxtpSdkPool.addLiquidity(
                 domainId,
                 canonicalId,
-                [amountX, amountY],
+                [
+                  utils.parseUnits(amountX.toString(), x_asset_data?.decimals || 18).toString(),
+                  utils.parseUnits(amountY.toString(), y_asset_data?.decimals || 18).toString(),
+                ],
                 deadline,
               )
               if (add_request) {
@@ -223,6 +226,46 @@ export default ({
           }
           break
         case 'remove':
+          if (!(amount)) {
+            failed = true
+          }
+          if (!failed) {
+            try {
+              const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(domainId, contract_data?.contract_address)
+              const remove_request = await sdk.nxtpSdkPool.removeLiquidity(
+                domainId,
+                canonicalId,
+                utils.parseUnits(amount.toString(), y_asset_data?.decimals || 18).toString(),
+                deadline,
+              )
+              if (remove_request) {
+                let gasLimit = await signer.estimateGas(remove_request)
+                if (gasLimit) {
+                  gasLimit = FixedNumber.fromString(gasLimit.toString())
+                    .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
+                    .round(0).toString().replace('.0', '')
+                  remove_request.gasLimit = gasLimit
+                }
+                const remove_response = await signer.sendTransaction(remove_request)
+                const tx_hash = remove_response?.hash
+                setCallProcessing(true)
+                const remove_receipt = await signer.provider.waitForTransaction(tx_hash)
+                failed = !remove_receipt?.status
+                setCallResponse({
+                  status: failed ? 'failed' : 'success',
+                  message: failed ? `Failed to remove ${symbol} liquidity` : `Remove ${symbol} liquidity successful`,
+                  tx_hash,
+                })
+                success = true
+              }
+            } catch (error) {
+              setCallResponse({
+                status: 'failed',
+                message: error?.data?.message || error?.message,
+              })
+              failed = true
+            }
+          }
           break
         default:
           break
@@ -604,7 +647,7 @@ export default ({
               web3_provider ?
                 <button
                   disabled={disabled || !valid_amount}
-                  onClick={() => call()}
+                  onClick={() => call(pool_data)}
                   className={`w-full ${disabled || !valid_amount ? 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
                 >
                   {calling ?
@@ -781,7 +824,7 @@ export default ({
               web3_provider ?
                 <button
                   disabled={disabled || !valid_amount}
-                  onClick={() => call()}
+                  onClick={() => call(pool_data)}
                   className={`w-full ${disabled || !valid_amount ? 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
                 >
                   {calling ?
@@ -810,11 +853,11 @@ export default ({
           </div>
         </div>
       }
-      {['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) && asset_data && (
+      {['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) && y_asset_data?.symbol?.startsWith('mad') && (
         <Faucet
           token_id={asset}
           faucet_amount={10}
-          contract_data={x_asset_data?.symbol?.startsWith('mad') ? x_asset_data : y_asset_data}
+          contract_data={y_asset_data}
         />
       )}
     </div>
