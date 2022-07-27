@@ -886,118 +886,123 @@ export default () => {
                   />
                 </div>
               </div>
-              <div className="grid grid-flow-row grid-cols-5 sm:grid-cols-5 gap-6 sm:ml-3">
-                <div className="col-span-2 sm:col-span-2 space-y-1">
-                  <div className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
-                    <span className="text-slate-400 dark:text-white text-sm sm:text-base sm:font-semibold">
-                      Amount
-                    </span>
-                    {address && checkSupport() && source_balance && (
-                      <Popover
-                        placement="bottom"
-                        disabled={disabled}
-                        onClick={() => {
-                          setBridge({
-                            ...bridge,
-                            amount: max_amount,
-                          })
-                        }}
-                        title={<div className="flex items-center justify-between space-x-1">
-                          <span className="font-bold">
-                            {source_symbol}
-                          </span>
-                          <span className="font-semibold">
-                            Transfers size
-                          </span>
-                        </div>}
-                        content={<div className="flex flex-col space-y-1">
-                          <div className="flex items-center justify-between space-x-2.5">
-                            <span className="font-medium">
-                              Balance:
+              {source_chain && destination_chain && asset && !checkSupport() ?
+                <div className="text-slate-400 dark:text-slate-600 text-lg italic text-center sm:ml-3">
+                  Route not supported
+                </div> :
+                <div className="grid grid-flow-row grid-cols-5 sm:grid-cols-5 gap-6 sm:ml-3">
+                  <div className="col-span-2 sm:col-span-2 space-y-1">
+                    <div className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
+                      <span className="text-slate-400 dark:text-white text-sm sm:text-base sm:font-semibold">
+                        Amount
+                      </span>
+                      {address && checkSupport() && source_balance && (
+                        <Popover
+                          placement="bottom"
+                          disabled={disabled}
+                          onClick={() => {
+                            setBridge({
+                              ...bridge,
+                              amount: max_amount,
+                            })
+                          }}
+                          title={<div className="flex items-center justify-between space-x-1">
+                            <span className="font-bold">
+                              {source_symbol}
                             </span>
                             <span className="font-semibold">
-                              {typeof source_amount === 'number' ?
-                                number_format(source_amount, source_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
-                              }
+                              Transfers size
                             </span>
-                          </div>
-                          <div className="flex items-start justify-between space-x-2.5 pb-1">
-                            <span className="font-medium">
-                              Liquidity:
-                            </span>
-                            <span className="font-semibold">
-                              {typeof liquidity_amount === 'number' ?
-                                number_format(liquidity_amount, liquidity_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
-                              }
-                            </span>
-                          </div>
-                          <div className="border-t flex items-center justify-between space-x-2.5 pt-2">
-                            {/*<span className="font-semibold">
-                              Min:
-                            </span>
-                            <span className="font-semibold">
-                              {typeof min_amount === 'number' ?
-                                number_format(min_amount, min_amount > 10 ? '0,0.00' : '0,0.000000', true) : 'n/a'
-                              }
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between space-x-2.5">*/}
-                            <span className="font-semibold">
-                              Max:
-                            </span>
-                            <span className="font-semibold">
-                              {typeof max_amount === 'number' ?
-                                number_format(max_amount, max_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
-                              }
-                            </span>
-                          </div>
-                        </div>}
-                        className="bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
-                        titleClassName="normal-case py-1.5"
-                      >
-                        Max
-                      </Popover>
+                          </div>}
+                          content={<div className="flex flex-col space-y-1">
+                            <div className="flex items-center justify-between space-x-2.5">
+                              <span className="font-medium">
+                                Balance:
+                              </span>
+                              <span className="font-semibold">
+                                {typeof source_amount === 'number' ?
+                                  number_format(source_amount, source_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
+                                }
+                              </span>
+                            </div>
+                            <div className="flex items-start justify-between space-x-2.5 pb-1">
+                              <span className="font-medium">
+                                Liquidity:
+                              </span>
+                              <span className="font-semibold">
+                                {typeof liquidity_amount === 'number' ?
+                                  number_format(liquidity_amount, liquidity_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
+                                }
+                              </span>
+                            </div>
+                            <div className="border-t flex items-center justify-between space-x-2.5 pt-2">
+                              {/*<span className="font-semibold">
+                                Min:
+                              </span>
+                              <span className="font-semibold">
+                                {typeof min_amount === 'number' ?
+                                  number_format(min_amount, min_amount > 10 ? '0,0.00' : '0,0.000000', true) : 'n/a'
+                                }
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between space-x-2.5">*/}
+                              <span className="font-semibold">
+                                Max:
+                              </span>
+                              <span className="font-semibold">
+                                {typeof max_amount === 'number' ?
+                                  number_format(max_amount, max_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
+                                }
+                              </span>
+                            </div>
+                          </div>}
+                          className="bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
+                          titleClassName="normal-case py-1.5"
+                        >
+                          Max
+                        </Popover>
+                      )}
+                    </div>
+                    {source_chain_data && asset && (
+                      <div className="flex items-center space-x-1.5">
+                        <div className="text-slate-400 dark:text-slate-600 text-xs font-medium">
+                          Balance
+                        </div>
+                        <Balance
+                          chainId={source_chain_data.chain_id}
+                          asset={asset}
+                        />
+                      </div>
                     )}
                   </div>
-                  {source_chain_data && asset && (
-                    <div className="flex items-center space-x-1.5">
-                      <div className="text-slate-400 dark:text-slate-600 text-xs font-medium">
-                        Balance
-                      </div>
-                      <Balance
-                        chainId={source_chain_data.chain_id}
-                        asset={asset}
-                      />
-                    </div>
-                  )}
+                  <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end">
+                    <DebounceInput
+                      debounceTimeout={300}
+                      size="small"
+                      type="number"
+                      placeholder="0.00"
+                      disabled={disabled || !asset}
+                      value={typeof amount === 'number' && amount >= 0 ? amount : ''}
+                      onChange={e => {
+                        const regex = /^[0-9.\b]+$/
+                        let _amount
+                        if (e.target.value === '' || regex.test(e.target.value)) {
+                          _amount = e.target.value
+                        }
+                        _amount = _amount < 0 ? 0 : _amount
+                        setBridge({
+                          ...bridge,
+                          amount: _amount && !isNaN(_amount) ? Number(_amount) : _amount,
+                        })
+                      }}
+                      onWheel={e => e.target.blur()}
+                      onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                      className={`w-36 sm:w-48 bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
+                    />
+                  </div>
                 </div>
-                <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end">
-                  <DebounceInput
-                    debounceTimeout={300}
-                    size="small"
-                    type="number"
-                    placeholder="0.00"
-                    disabled={disabled || !asset}
-                    value={typeof amount === 'number' && amount >= 0 ? amount : ''}
-                    onChange={e => {
-                      const regex = /^[0-9.\b]+$/
-                      let _amount
-                      if (e.target.value === '' || regex.test(e.target.value)) {
-                        _amount = e.target.value
-                      }
-                      _amount = _amount < 0 ? 0 : _amount
-                      setBridge({
-                        ...bridge,
-                        amount: _amount && !isNaN(_amount) ? Number(_amount) : _amount,
-                      })
-                    }}
-                    onWheel={e => e.target.blur()}
-                    onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                    className={`w-36 sm:w-48 bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
-                  />
-                </div>
-              </div>
-              {checkSupport() && (web3_provider || amount) && (
+              }
+              {checkSupport() && (web3_provider || amount > 0) && (
                 <>
                   <div className="space-y-2">
                     <div className="text-slate-400 dark:text-slate-600 font-medium sm:mx-3">
