@@ -11,8 +11,8 @@
         "chainName": "Ethereum Rinkeby",
         "rpcUrls": ["https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"],
         "nativeCurrency": {
-          "name": "Rinkeby Ether",
-          "symbol": "RIN",
+          "name": "Ethereum",
+          "symbol": "ETH",
           "decimals": 18
         },
         "blockExplorerUrls": ["https://rinkeby.etherscan.io"]
@@ -44,8 +44,8 @@
         "chainName": "Ethereum Görli",
         "rpcUrls": ["https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"],
         "nativeCurrency": {
-          "name": "Görli Ether",
-          "symbol": "GOR",
+          "name": "Ethereum",
+          "symbol": "ETH",
           "decimals": 18
         },
         "blockExplorerUrls": ["https://goerli.etherscan.io"]

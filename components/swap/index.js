@@ -2,10 +2,11 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
+import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
 import Switch from 'react-switch'
-import { TailSpin, Watch } from 'react-loader-spinner'
+import { TailSpin } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdSwapVert, MdClose } from 'react-icons/md'
@@ -35,10 +36,11 @@ const DEFAULT_OPTIONS = {
 
 export default () => {
   const dispatch = useDispatch()
-  const { preferences, chains, pool_assets, rpc_providers, dev, wallet, balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, pool_assets: state.pool_assets, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances }), shallowEqual)
+  const { preferences, chains, pool_assets, pools, rpc_providers, dev, wallet, balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, pool_assets: state.pool_assets, pools: state.pools, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { pool_assets_data } = { ...pool_assets }
+  const { pools_data } = { ...pools }
   const { rpcs } = { ...rpc_providers }
   const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
@@ -180,6 +182,14 @@ export default () => {
     }
   }, [rpcs])
 
+  // update balances
+  useEffect(() => {
+    if (pools_data) {
+      const chains = _.uniq(pools_data.map(p => p?.chain_data?.id).filter(c => c))
+      chains.forEach(c => getBalances(c))
+    }
+  }, [pools_data])
+
   // get pair
   useEffect(() => {
     const getData = async () => {
@@ -241,14 +251,33 @@ export default () => {
     }
     const {
       chain_id,
+      domain_id,
     } = { ...chains_data?.find(c => c?.id === chain) }
-    const contracts = pool_assets_data?.map(a => {
+    const contracts = _.uniqBy(_.concat(
+      pool_assets_data?.map(a => {
+        return {
+          ...a,
+          ...a?.contracts?.find(c => c?.chain_id === chain_id),
+        }
+      }) || [],
+      pools_data?.filter(p => equals_ignore_case(p?.domainId, domain_id)).flatMap(p => p?.tokens?.map((t, i) => {
+        return {
+          chain_id,
+          contract_address: t,
+          decimals: p.decimals?.[i],
+          symbol: p.symbol?.split('-')[i],
+        }
+      }) || []) || [],
+    ).filter(a => a?.contract_address).map(a => {
+      const {
+        contract_address,
+      } = {  ...a }
       return {
         ...a,
-        ...a?.contracts?.find(c => c?.chain_id === chain_id),
+        contract_address: contract_address.toLowerCase(),
       }
-    }).filter(a => a?.contract_address)
-    contracts?.forEach(c => getBalance(chain_id, c))
+    }), 'contract_address')
+    contracts.forEach(c => getBalance(chain_id, c))
   }
 
   const reset = async origin => {
@@ -375,6 +404,10 @@ export default () => {
   } = { ...swap }
   const chain_data = chains_data?.find(c => c?.id === chain)
   const asset_data = pool_assets_data?.find(a => a?.id === asset)
+
+  const {
+    slippage,
+  } = { ...options }
 
   const x_asset_data = asset_data
   const y_asset_data = asset_data
@@ -830,7 +863,7 @@ export default () => {
                                       size="small"
                                       type="number"
                                       placeholder="0.00"
-                                      value={typeof options?.slippage === 'number' && options.slippage >= 0 ? options.slippage : ''}
+                                      value={typeof slippage === 'number' && slippage >= 0 ? slippage : ''}
                                       onChange={e => {
                                         const regex = /^[0-9.\b]+$/
                                         let value
@@ -879,17 +912,16 @@ export default () => {
                                           })
                                           setSlippageEditing(false)
                                         }}
-                                        className={`${options?.slippage === s ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white text-xs py-0.5 px-1.5`}
+                                        className={`${slippage === s ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white text-xs py-0.5 px-1.5`}
                                       >
                                         {s} %
                                       </div>
                                     ))}
                                   </div>
-                                </>
-                                :
+                                </> :
                                 <div className="flex items-center space-x-1">
                                   <span className="text-lg font-semibold">
-                                    {number_format(options?.slippage, '0,0.00')}%
+                                    {number_format(slippage, '0,0.00')}%
                                   </span>
                                   <button
                                     onClick={() => setSlippageEditing(true)}
@@ -933,14 +965,11 @@ export default () => {
                         [callResponse || approveResponse].map((r, i) => (
                           <Alert
                             key={i}
-                            color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? callResponse ? 'bg-yellow-400 dark:bg-blue-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                            color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
                             icon={r.status === 'failed' ?
                               <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
                               r.status === 'success' ?
-                                callResponse ?
-                                  <div className="mr-3">
-                                    <Watch color="white" width="20" height="20" />
-                                  </div> : <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
+                                <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
                                 <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />
                             }
                             closeDisabled={true}
@@ -970,7 +999,7 @@ export default () => {
                                   r.status === 'success' ?
                                     <button
                                       onClick={() => reset()}
-                                      className={`${callResponse ? 'bg-yellow-500 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
+                                      className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
                                     >
                                       <MdClose size={20} />
                                     </button>

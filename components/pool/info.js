@@ -59,10 +59,14 @@ export default ({
               <SelectAsset
                 disabled={disabled}
                 value={asset}
-                onSelect={a => onSelect({
-                  ...pool,
-                  asset: a,
-                })}
+                onSelect={a => {
+                  if (onSelect) {
+                    onSelect({
+                      ...pool,
+                      asset: a,
+                    })
+                  }
+                }}
                 chain={chain}
                 origin=""
                 is_pool={true}
@@ -73,10 +77,14 @@ export default ({
               <SelectChain
                 disabled={disabled}
                 value={chain}
-                onSelect={c => onSelect({
-                  ...pool,
-                  chain: c,
-                })}
+                onSelect={c => {
+                  if (onSelect) {
+                    onSelect({
+                      ...pool,
+                      chain: c,
+                    })
+                  }
+                }}
                 origin=""
               />
             </div>

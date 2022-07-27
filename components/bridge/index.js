@@ -371,7 +371,15 @@ export default () => {
         ...a,
         ...a?.contracts?.find(c => c?.chain_id === chain_id),
       }
-    }).filter(a => a?.contract_address)
+    }).filter(a => a?.contract_address).map(a => {
+      const {
+        contract_address,
+      } = {  ...a }
+      return {
+        ...a,
+        contract_address: contract_address.toLowerCase(),
+      }
+    })
     contracts?.forEach(c => getBalance(chain_id, c))
   }
 
@@ -638,6 +646,7 @@ export default () => {
   const {
     to,
     infiniteApprove,
+    slippage,
     forceSlow,
     receiveLocal,
   } = { ...options }
@@ -1005,7 +1014,7 @@ export default () => {
                                     size="small"
                                     type="number"
                                     placeholder="0.00"
-                                    value={typeof options?.slippage === 'number' && options.slippage >= 0 ? options.slippage : ''}
+                                    value={typeof slippage === 'number' && slippage >= 0 ? slippage : ''}
                                     onChange={e => {
                                       const regex = /^[0-9.\b]+$/
                                       let value
@@ -1058,17 +1067,16 @@ export default () => {
                                         })
                                         setSlippageEditing(false)
                                       }}
-                                      className={`${options?.slippage === s ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-semibold'} rounded-lg cursor-pointer text-xs py-0.5 px-1.5`}
+                                      className={`${slippage === s ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-semibold'} rounded-lg cursor-pointer text-xs py-0.5 px-1.5`}
                                     >
                                       {s} %
                                     </div>
                                   ))}
                                 </div>
-                              </>
-                              :
+                              </> :
                               <div className="flex items-center space-x-1">
                                 <span className="font-semibold">
-                                  {number_format(options?.slippage, '0,0.00')}%
+                                  {number_format(slippage, '0,0.00')}%
                                 </span>
                                 <button
                                   onClick={() => setSlippageEditing(true)}
@@ -1382,7 +1390,7 @@ export default () => {
                                         size="small"
                                         type="number"
                                         placeholder="0.00"
-                                        value={typeof options?.slippage === 'number' && options.slippage >= 0 ? options.slippage : ''}
+                                        value={typeof slippage === 'number' && slippage >= 0 ? slippage : ''}
                                         onChange={e => {
                                           const regex = /^[0-9.\b]+$/
                                           let value
@@ -1435,17 +1443,16 @@ export default () => {
                                             })
                                             setSlippageEditing(false)
                                           }}
-                                          className={`${options?.slippage === s ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white text-xs py-0.5 px-1.5`}
+                                          className={`${slippage === s ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white text-xs py-0.5 px-1.5`}
                                         >
                                           {s} %
                                         </div>
                                       ))}
                                     </div>
-                                  </>
-                                  :
+                                  </> :
                                   <div className="flex items-center space-x-1">
                                     <span className="text-lg font-semibold">
-                                      {number_format(options?.slippage, '0,0.00')}%
+                                      {number_format(slippage, '0,0.00')}%
                                     </span>
                                     <button
                                       onClick={() => setSlippageEditing(true)}
@@ -1681,8 +1688,7 @@ export default () => {
                     className="w-full bg-slate-100 dark:bg-slate-900 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
                   >
                     Transfer
-                  </button>
-                  :
+                  </button> :
                   <Wallet
                     connectChainId={source_chain_data?.chain_id}
                     buttonConnectTitle="Connect Wallet"

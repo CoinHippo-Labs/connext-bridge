@@ -2,44 +2,33 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
+import _ from 'lodash'
 import moment from 'moment'
-import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
+import { Contract, constants, utils } from 'ethers'
 import { RiArrowLeftCircleFill } from 'react-icons/ri'
 
 import Announcement from '../announcement'
 import Info from './info'
 import Liquidity from './liquidity'
 import { currency_symbol } from '../../lib/object/currency'
-import { params_to_obj, number_format, ellipse, equals_ignore_case, sleep } from '../../lib/utils'
+import { params_to_obj, equals_ignore_case } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
 export default () => {
   const dispatch = useDispatch()
-  const { preferences, chains, pool_assets, _pools, rpc_providers, dev, wallet, balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, pool_assets: state.pool_assets, _pools: state.pools, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances }), shallowEqual)
-  const { theme } = { ...preferences }
+  const { chains, pool_assets, _pools, rpc_providers, dev, wallet } = useSelector(state => ({ chains: state.chains, pool_assets: state.pool_assets, _pools: state.pools, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet }), shallowEqual)
   const { chains_data } = { ...chains }
   const { pool_assets_data } = { ...pool_assets }
   const { pools_data } = { ..._pools }
   const { rpcs } = { ...rpc_providers }
   const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
-  const { chain_id, provider, web3_provider, address, signer } = { ...wallet_data }
-  const { balances_data } = { ...balances }
+  const { chain_id, address } = { ...wallet_data }
 
   const router = useRouter()
   const { asPath } = { ...router }
 
   const [pool, setPool] = useState({})
-  const [controller, setController] = useState(null)
-
-  const [approving, setApproving] = useState(null)
-  const [approveProcessing, setApproveProcessing] = useState(null)
-  const [approveResponse, setApproveResponse] = useState(null)
-
-  const [calling, setCalling] = useState(null)
-  const [callProcessing, setCallProcessing] = useState(null)
-  const [callResponse, setCallResponse] = useState(null)
-
   const [pools, setPools] = useState(null)
   const [poolsTrigger, setPoolsTrigger] = useState(null)
 
@@ -103,8 +92,6 @@ export default () => {
       delete params.asset
       router.push(`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
     }
-    setApproveResponse(null)
-    setCallResponse(null)
   }, [address, pool])
 
   // update balances
@@ -145,7 +132,7 @@ export default () => {
   // update balances
   useEffect(() => {
     const getData = () => {
-      if (address && !calling && !['pending'].includes(approveResponse?.status)) {
+      if (address) {
         const {
           chain,
         } = { ...pool }
@@ -158,6 +145,14 @@ export default () => {
       clearInterval(interval)
     }
   }, [rpcs])
+
+  // update balances
+  useEffect(() => {
+    if (pools_data) {
+      const chains = _.uniq(pools_data.map(p => p?.chain_data?.id).filter(c => c))
+      chains.forEach(c => getBalances(c))
+    }
+  }, [pools_data])
 
   // get pools
   useEffect(() => {
@@ -219,24 +214,33 @@ export default () => {
     }
     const {
       chain_id,
+      domain_id,
     } = { ...chains_data?.find(c => c?.id === chain) }
-    const contracts = pool_assets_data?.map(a => {
+    const contracts = _.uniqBy(_.concat(
+      pool_assets_data?.map(a => {
+        return {
+          ...a,
+          ...a?.contracts?.find(c => c?.chain_id === chain_id),
+        }
+      }) || [],
+      pools_data?.filter(p => equals_ignore_case(p?.domainId, domain_id)).flatMap(p => p?.tokens?.map((t, i) => {
+        return {
+          chain_id,
+          contract_address: t,
+          decimals: p.decimals?.[i],
+          symbol: p.symbol?.split('-')[i],
+        }
+      }) || []) || [],
+    ).filter(a => a?.contract_address).map(a => {
+      const {
+        contract_address,
+      } = {  ...a }
       return {
         ...a,
-        ...a?.contracts?.find(c => c?.chain_id === chain_id),
+        contract_address: contract_address.toLowerCase(),
       }
-    }).filter(a => a?.contract_address)
-    contracts?.forEach(c => getBalance(chain_id, c))
-  }
-
-  const checkSupport = () => {
-    const {
-      chain,
-      asset,
-    } = { ...pool }
-    const asset_data = pool_assets_data?.find(a => a?.id === asset)
-    return chain && asset_data &&
-      !(asset_data.contracts?.findIndex(c => c?.chain_id === chains_data?.find(_c => _c?.id === chain)?.chain_id) < 0)
+    }), 'contract_address')
+    contracts.forEach(c => getBalance(chain_id, c))
   }
 
   const reset = async origin => {
@@ -248,14 +252,6 @@ export default () => {
       })
     }
 
-    setApproving(null)
-    setApproveProcessing(null)
-    setApproveResponse(null)
-
-    setCalling(null)
-    setCallProcessing(null)
-    setCallResponse(null)
-
     setPoolsTrigger(moment().valueOf())
 
     const {
@@ -263,31 +259,6 @@ export default () => {
     } = { ...pool }
     getBalances(chain)
   }
-
-  const {
-    chain,
-    asset,
-    amount,
-  } = { ...pool }
-  const chain_data = chains_data?.find(c => c?.id === chain)
-  const asset_data = pool_assets_data?.find(a => a?.id === asset)
-  const native_contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
-  const nomad_contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)  
-
-  const native_balance = balances_data?.[chain_data?.chain_id]?.find(b => equals_ignore_case(b?.contract_address, native_contract_data?.contract_address))
-  const native_amount = native_balance && Number(native_balance.amount)
-  const native_symbol = native_contract_data?.symbol || asset_data?.symbol
-  const nomad_balance = balances_data?.[chain_data?.chain_id]?.find(b => equals_ignore_case(b?.contract_address, nomad_contract_data?.contract_address))
-  const nomad_amount = nomad_balance && Number(nomad_balance.amount)
-  const nomad_decimals = nomad_contract_data?.decimals || 18
-  const nomad_symbol = nomad_contract_data?.symbol || asset_data?.symbol
-
-  const max_amount = native_amount
-
-  const wrong_chain = chain_data && chain_id !== chain_data.chain_id && !calling
-  const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
-
-  const disabled = calling || approving
 
   return (
     <div className="mb-4">
@@ -315,7 +286,9 @@ export default () => {
               />
             </div>
             <Liquidity
-              data={pools}
+              pool={pool}
+              user_pools_data={pools}
+              onFinish={() => setPoolsTrigger(moment().valueOf())}
             />
           </div>
         </div>

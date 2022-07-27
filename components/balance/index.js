@@ -6,6 +6,8 @@ import { number_format, equals_ignore_case, loader_color } from '../../lib/utils
 export default ({
   chainId,
   asset,
+  contractAddress,
+  symbol,
   className = '',
 }) => {
   const { preferences, assets, wallet, balances } = useSelector(state => ({ preferences: state.preferences, assets: state.assets, wallet: state.wallet, balances: state.balances }), shallowEqual)
@@ -17,9 +19,9 @@ export default ({
 
   const asset_data = assets_data?.find(a => a?.id === asset)
   const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chainId)
-  const balance = balances_data?.[chainId]?.find(b => equals_ignore_case(b?.contract_address, contract_data?.contract_address))
+  const balance = balances_data?.[chainId]?.find(b => equals_ignore_case(b?.contract_address, contractAddress || contract_data?.contract_address))
   const amount = balance && Number(balance.amount)
-  const symbol = contract_data?.symbol || asset_data?.symbol
+  symbol = symbol || contract_data?.symbol || asset_data?.symbol
 
   return chainId && asset && (
     <div className={`flex items-center justify-center text-slate-600 dark:text-white text-xs space-x-1 ${className}`}>

@@ -3,7 +3,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
-import { TailSpin, Watch } from 'react-loader-spinner'
+import { TailSpin } from 'react-loader-spinner'
 import { MdClose } from 'react-icons/md'
 import { BiPlus, BiCaretUp, BiCaretDown, BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
 
@@ -13,7 +13,7 @@ import Image from '../image'
 import Wallet from '../wallet'
 import Alert from '../alerts'
 import Copy from '../copy'
-import { number_format, ellipse, loader_color } from '../../lib/utils'
+import { number_format, ellipse, equals_ignore_case, loader_color, sleep } from '../../lib/utils'
 
 const DEFAULT_POOL_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_POOL_SLIPPAGE_PERCENTAGE) || 3
 const DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES = Number(process.env.NEXT_PUBLIC_DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES) || 60
@@ -25,12 +25,20 @@ const DEFAULT_OPTIONS = {
   deadline: DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES,
 }
 
-export default ({ data }) => {
-  const { preferences, dev, wallet } = useSelector(state => ({ preferences: state.preferences, dev: state.dev, wallet: state.wallet }), shallowEqual)
+export default ({
+  pool,
+  user_pools_data,
+  onFinish,
+}) => {
+  const { preferences, chains, pool_assets, pools, dev, wallet, balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, pool_assets: state.pool_assets, pools: state.pools, dev: state.dev, wallet: state.wallet, balances: state.balances }), shallowEqual)
   const { theme } = { ...preferences }
+  const { chains_data } = { ...chains }
+  const { pool_assets_data } = { ...pool_assets }
+  const { pools_data } = { ...pools }
   const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
-  const { chain_id, provider, web3_provider, address, signer } = { ...wallet_data }
+  const { provider, web3_provider, address, signer } = { ...wallet_data }
+  const { balances_data } = { ...balances }
 
   const [action, setAction] = useState(_.head(ACTIONS))
   const [amountX, setAmountX] = useState(null)
@@ -40,33 +48,88 @@ export default ({ data }) => {
   const [openOptions, setOpenOptions] = useState(false)
 
   const [approving, setApproving] = useState(null)
+  const [approveProcessing, setApproveProcessing] = useState(null)
   const [approveResponse, setApproveResponse] = useState(null)
 
   const [calling, setCalling] = useState(null)
+  const [callProcessing, setCallProcessing] = useState(null)
   const [callResponse, setCallResponse] = useState(null)
 
+  useEffect(() => {
+    reset()
+  }, [pool])
+
+  useEffect(() => {
+    if (typeof amountX === 'number') {
+      if (amountX > 0) {
+        const {
+          chain,
+          asset,
+        } = { ...pool }
+        const pool_data = pools_data?.find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
+        let {
+          rate,
+        } = { ...pool_data }
+        rate = rate || 1
+
+        setAmountY(amountX * rate)
+      }
+      else {
+        setAmountY(0)
+      }
+    }
+    else {
+      setAmountY(null)
+    }
+  }, [amountX])
+
+  useEffect(() => {
+    if (typeof amountY === 'number') {
+      if (amountY > 0) {
+        const {
+          chain,
+          asset,
+        } = { ...pool }
+        const pool_data = pools_data?.find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
+        let {
+          rate,
+        } = { ...pool_data }
+        rate = rate || 1
+
+        setAmountX(amountY / rate)
+      }
+      else {
+        setAmountX(0)
+      }
+    }
+    else {
+      setAmountX(null)
+    }
+  }, [amountY])
+
   const reset = async origin => {
-    // const reset_pool = origin !== 'address'
-    // if (reset_pool) {
-    //   setPool({
-    //     ...pool,
-    //     amount: null,
-    //   })
-    // }
+    const reset_pool = origin !== 'address'
+    if (reset_pool) {
+      setAmountX(null)
+      setAmountY(null)
+      setAmount(null)
+    }
 
     setApproving(null)
+    setApproveProcessing(null)
     setApproveResponse(null)
 
     setCalling(null)
+    setCallProcessing(null)
     setCallResponse(null)
 
-    // setPoolsTrigger(moment().valueOf())
-
-    // const { chain } = { ...pool }
-    // getBalances(chain)
+    if (onFinish) {
+      onFinish()
+    }
   }
 
   const call = async () => {
+    setApproving(null)
     setCalling(true)
     let success = false
     if (sdk) {
@@ -91,6 +154,7 @@ export default ({ data }) => {
       //       message: `Wait for ${source_symbol} approval`,
       //       tx_hash,
       //     })
+      //     setApproveProcessing(true)
       //     const approve_receipt = await signer.provider.waitForTransaction(tx_hash)
       //     setApproveResponse(approve_receipt?.status ?
       //       null : {
@@ -100,11 +164,13 @@ export default ({ data }) => {
       //       }
       //     )
       //     failed = !approve_receipt?.status
+      //     setApproveProcessing(false)
       //     setApproving(false)
       //   }
       // } catch (error) {
       //   setApproveResponse({ status: 'failed', message: error?.data?.message || error?.message })
       //   failed = true
+      //   setApproveProcessing(false)
       //   setApproving(false)
       // }
       // if (!failed) {
@@ -120,6 +186,7 @@ export default ({ data }) => {
       //       }
       //       const xcall_response = await signer.sendTransaction(xcall_request)
       //       const tx_hash = xcall_response?.hash
+      //       setCallProcessing(true)
       //       const xcall_receipt = await signer.provider.waitForTransaction(tx_hash)
       //       setXcall(xcall_receipt)
       //       failed = !xcall_receipt?.status
@@ -136,14 +203,74 @@ export default ({ data }) => {
       //   }
       // }
     }
+    setCallProcessing(false)
     setCalling(false)
     if (sdk && address && success) {
       await sleep(2 * 1000)
-      setPoolsTrigger(moment().valueOf())
+      if (onFinish) {
+        onFinish()
+      }
     }
   }
 
-  const disabled = calling || approving
+  const {
+    chain,
+    asset,
+  } = { ...pool }
+  const chain_data = chains_data?.find(c => c?.id === chain)
+  const {
+    chain_id,
+  } = { ...chain_data }
+
+  const {
+    slippage,
+  } = { ...options }
+
+  const selected = !!(chain && asset)
+  const no_pool = selected && pool_assets_data?.findIndex(a => a?.id === asset && a.contracts?.findIndex(a => a?.chain_id === chain_id) > -1) < 0
+  const pool_data = pools_data?.find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
+  const {
+    asset_data,
+    contract_data,
+    tokens,
+    decimals,
+    symbol,
+  } = { ...pool_data }
+  const x_asset_data = tokens?.[0] && {
+    ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
+    ...(
+      equals_ignore_case(tokens[0], contract_data?.contract_address) ?
+        contract_data :
+        {
+          chain_id,
+          contract_address: tokens[0],
+          decimals: decimals?.[0],
+          symbol: symbol?.split('-')[0],
+        }
+    ),
+  }
+  const x_balance = x_asset_data && balances_data?.[chain_id]?.find(b => equals_ignore_case(b?.contract_address, x_asset_data.contract_address))
+  const x_balance_amount = x_balance && Number(x_balance.amount)
+  const y_asset_data = tokens?.[1] && {
+    ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
+    ...(
+      equals_ignore_case(tokens[1], contract_data?.contract_address) ?
+        contract_data :
+        {
+          chain_id,
+          contract_address: tokens[1],
+          decimals: decimals?.[1],
+          symbol: symbol?.split('-')[1],
+        }
+    ),
+  }
+  const y_balance = y_asset_data && balances_data?.[chain_id]?.find(b => equals_ignore_case(b?.contract_address, y_asset_data.contract_address))
+  const y_balance_amount = y_balance && Number(y_balance.amount)
+
+  const valid_amount = action === 'remove' ?
+    amount :
+    amountX && amountY && amountX <= x_balance_amount && amountY <= y_balance_amount
+  const disabled = !pool_data || calling || approving
 
   return (
     <div className="border border-blue-400 dark:border-blue-800 rounded-2xl shadow-lg shadow-blue-200 dark:shadow-blue-600 space-y-3 p-6">
@@ -159,94 +286,130 @@ export default ({ data }) => {
             </div>
           ))}
         </div>
-        <GasPrice chainId={data?.chain_data?.chain_id} />
+        <GasPrice
+          chainId={chain_id}
+        />
       </div>
       {action === 'add' ?
         <>
           <div className="bg-slate-50 dark:bg-slate-900 rounded-lg space-y-5 py-6 px-4">
             <div className="space-y-2">
-              {data?.asset_data && (
+              {x_asset_data?.contract_address && (
                 <div className="flex items-center justify-between">
-                  <Balance
-                    chainId={data?.chain_data?.chain_id}
-                    asset={data?.asset_data?.id}
-                  />
                   <div className="text-base font-bold">
-                    {data?.asset_data?.symbol}
+                    {x_asset_data.symbol}
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="text-slate-400 dark:text-slate-600 text-xs font-medium text-right">
+                      Balance
+                    </div>
+                    <Balance
+                      chainId={chain_id}
+                      asset={asset}
+                      contractAddress={x_asset_data.contract_address}
+                      symbol={x_asset_data.symbol}
+                    />
                   </div>
                 </div>
               )}
-              <div className="flex items-center justify-between space-x-3">
-                <DebounceInput
-                  debounceTimeout={300}
-                  size="small"
-                  type="number"
-                  placeholder="0.00"
-                  disabled={disabled || !data?.asset_data?.id}
-                  value={typeof amountX === 'number' && amountX >= 0 ? amountX : ''}
-                  onChange={e => {
-                    const regex = /^[0-9.\b]+$/
-                    let value
-                    if (e.target.value === '' || regex.test(e.target.value)) {
-                      value = e.target.value
-                    }
-                    value = value < 0 ? 0 : value
-                    setAmountX(value && !isNaN(value) ? Number(value) : value)
-                  }}
-                  onWheel={e => e.target.blur()}
-                  onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                  className={`w-full bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
-                />
-                <div
-                  onClick={() => setAmountX(0)}
-                  className={`${disabled || !data?.asset_data?.id ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
-                >
-                  Max
+              <div className="space-y-1">
+                <div className="flex items-center justify-between space-x-3">
+                  <DebounceInput
+                    debounceTimeout={300}
+                    size="small"
+                    type="number"
+                    placeholder="0.00"
+                    disabled={disabled}
+                    value={typeof amountX === 'number' && amountX >= 0 ? amountX : ''}
+                    onChange={e => {
+                      const regex = /^[0-9.\b]+$/
+                      let value
+                      if (e.target.value === '' || regex.test(e.target.value)) {
+                        value = e.target.value
+                      }
+                      value = value < 0 ? 0 : value
+                      setAmountX(value && !isNaN(value) ? Number(value) : value)
+                    }}
+                    onWheel={e => e.target.blur()}
+                    onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                    className={`w-full bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
+                  />
+                  <div
+                    onClick={() => setAmountX(x_balance_amount)}
+                    className={`${disabled || typeof x_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
+                  >
+                    Max
+                  </div>
                 </div>
+                {typeof amountX === 'number' && typeof x_balance_amount === 'number' && amountX > x_balance_amount && (
+                  <div className="flex items-center text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
+                    <BiMessageError size={16} className="min-w-max" />
+                    <span className="text-xs font-medium">
+                      Not enough {x_asset_data?.symbol}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
             <div className="w-full flex items-center justify-center">
               <BiPlus size={24} />
             </div>
             <div className="space-y-2">
-              {data?.asset_data && (
+              {y_asset_data?.contract_address && (
                 <div className="flex items-center justify-between">
-                  <Balance
-                    chainId={data?.chain_data?.chain_id}
-                    asset={data?.asset_data?.id}
-                  />
                   <div className="text-base font-bold">
-                    {data?.asset_data?.symbol}
+                    {y_asset_data.symbol}
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="text-slate-400 dark:text-slate-600 text-xs font-medium text-right">
+                      Balance
+                    </div>
+                    <Balance
+                      chainId={chain_id}
+                      asset={asset}
+                      contractAddress={y_asset_data.contract_address}
+                      symbol={y_asset_data.symbol}
+                    />
                   </div>
                 </div>
               )}
-              <div className="flex items-center justify-between space-x-3">
-                <DebounceInput
-                  debounceTimeout={300}
-                  size="small"
-                  type="number"
-                  placeholder="0.00"
-                  disabled={disabled || !data?.asset_data?.id}
-                  value={typeof amountY === 'number' && amountY >= 0 ? amountY : ''}
-                  onChange={e => {
-                    const regex = /^[0-9.\b]+$/
-                    let value
-                    if (e.target.value === '' || regex.test(e.target.value)) {
-                      value = e.target.value
-                    }
-                    value = value < 0 ? 0 : value
-                    setAmountY(value && !isNaN(value) ? Number(value) : value)
-                  }}
-                  onWheel={e => e.target.blur()}
-                  onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                  className={`w-full bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
-                />
-                <div
-                  onClick={() => setAmountY(0)}
-                  className={`${disabled || !data?.asset_data?.id ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
-                >
-                  Max
+              <div className="space-y-1">
+                <div className="flex items-center justify-between space-x-3">
+                  <DebounceInput
+                    debounceTimeout={300}
+                    size="small"
+                    type="number"
+                    placeholder="0.00"
+                    disabled={disabled}
+                    value={typeof amountY === 'number' && amountY >= 0 ? amountY : ''}
+                    onChange={e => {
+                      const regex = /^[0-9.\b]+$/
+                      let value
+                      if (e.target.value === '' || regex.test(e.target.value)) {
+                        value = e.target.value
+                      }
+                      value = value < 0 ? 0 : value
+                      setAmountY(value && !isNaN(value) ? Number(value) : value)
+                    }}
+                    onWheel={e => e.target.blur()}
+                    onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                    className={`w-full bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
+                  />
+                  <div
+                    onClick={() => setAmountY(y_balance_amount)}
+                    className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
+                  >
+                    Max
+                  </div>
                 </div>
+                {typeof amountY === 'number' && typeof y_balance_amount === 'number' && amountY > y_balance_amount && (
+                  <div className="flex items-center text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
+                    <BiMessageError size={16} className="min-w-max" />
+                    <span className="text-xs font-medium">
+                      Not enough {y_asset_data?.symbol}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -269,15 +432,15 @@ export default ({ data }) => {
               <div className="form">
                 <div className="form-element">
                   <div className="form-label text-slate-600 dark:text-slate-400 font-medium">
-                    Slippage Tolerance Tolerance
+                    Slippage Tolerance
                   </div>
                   <div className="flex items-center space-x-3">
                     <DebounceInput
                       debounceTimeout={300}
                       size="small"
                       type="number"
-                      placeholder="Slippage Tolerance Tolerance"
-                      value={typeof options?.slippage === 'number' && options.slippage >= 0 ? options.slippage : ''}
+                      placeholder="Slippage Tolerance"
+                      value={typeof slippage === 'number' && slippage >= 0 ? slippage : ''}
                       onChange={e => {
                         const regex = /^[0-9.\b]+$/
                         let value
@@ -302,7 +465,7 @@ export default ({ data }) => {
                             ...options,
                             slippage: p,
                           })}
-                          className={`${options?.slippage === p ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white py-1 px-2`}
+                          className={`${slippage === p ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white py-1 px-2`}
                         >
                           {p} %
                         </div>
@@ -350,14 +513,11 @@ export default ({ data }) => {
               [callResponse || approveResponse].map((r, i) => (
                 <Alert
                   key={i}
-                  color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? callResponse ? 'bg-yellow-400 dark:bg-blue-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                  color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
                   icon={r.status === 'failed' ?
                     <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
                     r.status === 'success' ?
-                      callResponse ?
-                        <div className="mr-3">
-                          <Watch color="white" width="20" height="20" />
-                        </div> : <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
+                      <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
                       <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />
                   }
                   closeDisabled={true}
@@ -387,7 +547,7 @@ export default ({ data }) => {
                         r.status === 'success' ?
                           <button
                             onClick={() => reset()}
-                            className={`${xcallResponse ? 'bg-yellow-500 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
+                            className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
                           >
                             <MdClose size={20} />
                           </button>
@@ -397,19 +557,17 @@ export default ({ data }) => {
                     </div>
                   </div>
                 </Alert>
-              ))
-              :
+              )) :
               web3_provider ?
                 <button
-                  disabled={disabled || !amountX || !amountY}
+                  disabled={disabled || !valid_amount}
                   onClick={() => call()}
-                  className={`w-full ${disabled || !amountX || !amountY ? 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
+                  className={`w-full ${disabled || !valid_amount ? 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
                 >
                   Supply
-                </button>
-                :
+                </button> :
                 <Wallet
-                  connectChainId={data?.chain_data?.chain_id}
+                  connectChainId={chain_id}
                   buttonConnectTitle="Connect Wallet"
                   className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center sm:space-x-2 py-3 px-2 sm:px-3"
                 >
@@ -419,8 +577,7 @@ export default ({ data }) => {
                 </Wallet>
             }
           </div>
-        </>
-        :
+        </> :
         <div className="space-y-6">
           <div className="space-y-2">
             <div className="text-slate-400 dark:text-slate-500 font-semibold">
@@ -431,7 +588,7 @@ export default ({ data }) => {
               size="small"
               type="number"
               placeholder="0.00"
-              disabled={disabled || !data}
+              disabled={disabled}
               value={typeof amount === 'number' && amount >= 0 ? amount : ''}
               onChange={e => {
                 const regex = /^[0-9.\b]+$/
@@ -446,7 +603,7 @@ export default ({ data }) => {
               onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
               className={`w-full bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled || !data ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
             />
-            <div className="flex items-center justify-end space-x-2.5">
+            {/*<div className="flex items-center justify-end space-x-2.5">
               {[0.25, 0.5, 0.75, 1.0].map((p, i) => (
                 <div
                   key={i}
@@ -456,18 +613,16 @@ export default ({ data }) => {
                   {p * 100} %
                 </div>
               ))}
-            </div>
+            </div>*/}
           </div>
           <div className="bg-slate-50 dark:bg-slate-900 rounded-lg space-y-5 py-6 px-4">
-            <div className="flex items-center justify-between space-x-3">
+            {/*<div className="flex items-center justify-between space-x-3">
               {web3_provider ?
                 data ?
                   <span className="text-base">
                     {number_format(data.amountX || 0, '0,0.000000', true)}
-                  </span>
-                  :
-                  <TailSpin color={loader_color(theme)} width="24" height="24" />
-                :
+                  </span> :
+                  <TailSpin color={loader_color(theme)} width="24" height="24" /> :
                 <span className="text-base">
                   -
                 </span>
@@ -481,10 +636,8 @@ export default ({ data }) => {
                 data ?
                   <span className="text-base">
                     {number_format(data.amountY || 0, '0,0.000000', true)}
-                  </span>
-                  :
-                  <TailSpin color={loader_color(theme)} width="24" height="24" />
-                :
+                  </span> :
+                  <TailSpin color={loader_color(theme)} width="24" height="24" /> :
                 <span className="text-base">
                   -
                 </span>
@@ -492,21 +645,18 @@ export default ({ data }) => {
               <div className="text-base font-bold">
                 {data?.asset_data?.symbol}
               </div>
-            </div>
+            </div>*/}
           </div>
           <div className="flex items-end">
             {callResponse || approveResponse ?
               [callResponse || approveResponse].map((r, i) => (
                 <Alert
                   key={i}
-                  color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? callResponse ? 'bg-yellow-400 dark:bg-blue-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                  color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
                   icon={r.status === 'failed' ?
                     <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
                     r.status === 'success' ?
-                      callResponse ?
-                        <div className="mr-3">
-                          <Watch color="white" width="20" height="20" />
-                        </div> : <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
+                      <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
                       <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />
                   }
                   closeDisabled={true}
@@ -536,7 +686,7 @@ export default ({ data }) => {
                         r.status === 'success' ?
                           <button
                             onClick={() => reset()}
-                            className={`${xcallResponse ? 'bg-yellow-500 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
+                            className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
                           >
                             <MdClose size={20} />
                           </button>
@@ -546,19 +696,17 @@ export default ({ data }) => {
                     </div>
                   </div>
                 </Alert>
-              ))
-              :
+              )) :
               web3_provider ?
                 <button
-                  disabled={disabled || !amount}
+                  disabled={disabled || !valid_amount}
                   onClick={() => call()}
-                  className={`w-full ${disabled || !amount ? 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
+                  className={`w-full ${disabled || !valid_amount ? 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
                 >
                   Remove
-                </button>
-                :
+                </button> :
                 <Wallet
-                  connectChainId={data?.chain_data?.chain_id}
+                  connectChainId={chain_id}
                   buttonConnectTitle="Connect Wallet"
                   className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center sm:space-x-2 py-3 px-2 sm:px-3"
                 >
