@@ -72,7 +72,7 @@ export default ({ token_data }) => {
               options: {
                 address: contract.contract_address,
                 symbol: contract.symbol,
-                decimals: contract.contract_decimals,
+                decimals: contract.decimals,
                 image: contract.image ? `${contract.image.startsWith('/') ? process.env.NEXT_PUBLIC_SITE_URL : ''}${contract.image}` : undefined,
               },
             },

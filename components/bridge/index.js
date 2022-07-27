@@ -340,9 +340,8 @@ export default () => {
     const getBalance = async (chain_id, contract_data) => {
       const {
         contract_address,
-        contract_decimals,
+        decimals,
       } = { ...contract_data }
-      const decimals = contract_decimals || 18
       const rpc = rpcs?.[chain_id]
       let balance
       if (rpc && contract_address) {
@@ -359,7 +358,7 @@ export default () => {
         value: {
           [`${chain_id}`]: [{
             ...contract_data,
-            amount: balance && Number(utils.formatUnits(balance, decimals)),
+            amount: balance && Number(utils.formatUnits(balance, decimals || 18)),
           }],
         },
       })
@@ -529,7 +528,7 @@ export default () => {
           slippageTol: ((100 - (!receiveLocal && slippage ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)) * 100).toString(),
         },
         transactingAssetId: source_contract_data?.contract_address,
-        amount: utils.parseUnits(amount?.toString() || '0', source_contract_data?.contract_decimals || 18).toString(),
+        amount: utils.parseUnits(amount?.toString() || '0', source_contract_data?.decimals || 18).toString(),
       }
 
       let failed = false
@@ -633,7 +632,7 @@ export default () => {
   const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
   const destination_balance = balances_data?.[destination_chain_data?.chain_id]?.find(b => equals_ignore_case(b?.contract_address, destination_contract_data?.contract_address))
   const destination_amount = destination_balance && Number(destination_balance.amount)
-  const destination_decimals = destination_contract_data?.contract_decimals || 18
+  const destination_decimals = destination_contract_data?.decimals || 18
   const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol
 
   const {

@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 import { POOLS_DATA } from './types'
 
 export default (
@@ -10,10 +12,10 @@ export default (
     case POOLS_DATA:
       return {
         ...state,
-        [`${POOLS_DATA}`]: {
-          ...state[`${POOLS_DATA}`],
-          ...action.value,
-        },
+        [`${POOLS_DATA}`]: _.uniqBy(_.concat(
+          state[`${POOLS_DATA}`] || [],
+          action.value || [],
+        ), 'id'),
       }
     default:
       return state

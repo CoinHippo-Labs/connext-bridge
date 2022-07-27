@@ -1,5 +1,5 @@
 import { useSelector, shallowEqual } from 'react-redux'
-import { TailSpin } from 'react-loader-spinner'
+import { TailSpin, RotatingSquare } from 'react-loader-spinner'
 
 import SelectChain from '../select/chain'
 import SelectAsset from '../select/asset'
@@ -8,48 +8,88 @@ import { number_format, loader_color } from '../../lib/utils'
 
 export default ({
   pool,
-  data,
+  user_pools_data,
   disabled = false,
   onSelect,
 }) => {
-  const { preferences, chains, assets, _pools } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, _pools: state.pools }), shallowEqual)
+  const { preferences, chains, pool_assets, pools } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, pool_assets: state.pool_assets, pools: state.pools }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
-  const { assets_data } = { ...assets }
-  const { pools_data } = { ..._pools }
+  const { pool_assets_data } = { ...pool_assets }
+  const { pools_data } = { ...pools }
 
   const {
     chain,
     asset,
   } = { ...pool }
+  const chain_data = chains_data?.find(c => c?.id === chain)
+  const {
+    chain_id,
+  } = { ...chain_data }
+
+  const selected = !!(chain && asset)
+  const no_pool = selected && pool_assets_data?.findIndex(a => a?.id === asset && a.contracts?.findIndex(a => a?.chain_id === chain_id) > -1) < 0
+  const pool_data = pools_data?.find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
+  const {
+    name,
+    liquidity,
+    volume,
+    fees,
+    apy,
+    symbol,
+  } = { ...pool_data }
+  const symbols = symbol?.split('-')
+  const pool_loading = selected && !no_pool && !pool_data
+
+  const user_pool_data = pool_data && user_pools_data?.find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
+  const {
+    share,
+    tokens,
+    tokensX,
+    tokensY,
+  } = { ...user_pool_data }
+  const position_loading = selected && !no_pool && (!user_pools_data || pool_loading)
 
   return (
     <div className="sm:min-h-full border border-blue-400 dark:border-blue-800 rounded-2xl shadow-lg shadow-blue-200 dark:shadow-blue-600 p-6">
-      {pools_data || data ?
+      {pools_data ?
         <div className="flex flex-col space-y-8 lg:space-y-20 my-auto">
-          <div className="flex items-center space-x-4 sm:space-x-6">
-            <SelectAsset
-              disabled={disabled}
-              value={asset}
-              onSelect={a => onSelect({
-                ...pool,
-                asset: a,
-              })}
-              chain={chain}
-              origin=""
-            />
-            <div className="uppercase text-xs sm:text-sm font-semibold">
-              on
+          <div className="grid sm:flex sm:items-center sm:justify-between sm:space-x-2 gap-2">
+            <div className="order-2 sm:order-1 flex items-center space-x-4 sm:space-x-6">
+              <SelectAsset
+                disabled={disabled}
+                value={asset}
+                onSelect={a => onSelect({
+                  ...pool,
+                  asset: a,
+                })}
+                chain={chain}
+                origin=""
+                is_pool={true}
+              />
+              <div className="uppercase text-xs sm:text-sm font-semibold">
+                on
+              </div>
+              <SelectChain
+                disabled={disabled}
+                value={chain}
+                onSelect={c => onSelect({
+                  ...pool,
+                  chain: c,
+                })}
+                origin=""
+              />
             </div>
-            <SelectChain
-              disabled={disabled}
-              value={chain}
-              onSelect={c => onSelect({
-                ...pool,
-                chain: c,
-              })}
-              origin=""
-            />
+            {no_pool && (
+              <span className="order-2 text-slate-400 dark:text-slate-600 text-base font-medium italic">
+                No pool support
+              </span>
+            )}
+            {name && (
+              <span className="order-1 sm:order-2 text-base font-bold">
+                {name}
+              </span>
+            )}
           </div>
           <div className="grid grid-flow-row grid-cols-2 lg:grid-cols-4">
             <div className="flex flex-col space-y-0.5">
@@ -57,7 +97,19 @@ export default ({
                 Liquidity
               </span>
               <span className="text-lg font-bold">
-                {currency_symbol}{number_format(0, '0,0.00')}
+                {pool_data ?
+                  <>
+                    {currency_symbol}
+                    {number_format(liquidity, '0,0.00')}
+                  </> :
+                  selected && !no_pool && (
+                    pool_loading ?
+                      <div className="mt-1">
+                        <TailSpin color={loader_color(theme)} width="24" height="24" />
+                      </div> :
+                      '-'
+                  )
+                }
               </span>
             </div>
             <div className="flex flex-col space-y-0.5">
@@ -65,7 +117,19 @@ export default ({
                 Volume (24h)
               </span>
               <span className="text-lg font-bold">
-                {currency_symbol}{number_format(0, '0,0.00')}
+                {pool_data ?
+                  <>
+                    {currency_symbol}
+                    {number_format(volume, '0,0.00')}
+                  </> :
+                  selected && !no_pool && (
+                    pool_loading ?
+                      <div className="mt-1">
+                        <TailSpin color={loader_color(theme)} width="24" height="24" />
+                      </div> :
+                      '-'
+                  )
+                }
               </span>
             </div>
             <div className="flex flex-col space-y-0.5">
@@ -73,7 +137,19 @@ export default ({
                 Fees (24h)
               </span>
               <span className="text-lg font-bold">
-                {currency_symbol}{number_format(0, '0,0.00')}
+                {pool_data ?
+                  <>
+                    {currency_symbol}
+                    {number_format(fees, '0,0.00')}
+                  </> :
+                  selected && !no_pool && (
+                    pool_loading ?
+                      <div className="mt-1">
+                        <TailSpin color={loader_color(theme)} width="24" height="24" />
+                      </div> :
+                      '-'
+                  )
+                }
               </span>
             </div>
             <div className="flex flex-col space-y-0.5">
@@ -81,7 +157,31 @@ export default ({
                 APY
               </span>
               <span className="text-lg font-bold">
-                {number_format(0, '0,0.00')}%
+                {pool_data ?
+                  <div className="grid sm:grid-cols-2 gap-1 mt-1">
+                    {Object.entries({ ...apy }).filter(([k, v]) => !isNaN(v)).map(([k, v]) => (
+                      <div
+                        key={k}
+                        className="flex items-center text-sm space-x-1"
+                      >
+                        <span className="capitalize">
+                          {k}
+                        </span>
+                        <span>
+                          {number_format(v, '0,0.00')}
+                          %
+                        </span>
+                      </div>
+                    ))}
+                  </div> :
+                  selected && !no_pool && (
+                    pool_loading ?
+                      <div className="mt-1">
+                        <TailSpin color={loader_color(theme)} width="24" height="24" />
+                      </div> :
+                      '-'
+                  )
+                }
               </span>
             </div>
           </div>
@@ -95,7 +195,19 @@ export default ({
                   Pool Share
                 </span>
                 <span className="text-lg font-bold">
-                  {number_format(0, '0,0.00')}%
+                  {!isNaN(share) || (pool_data && user_pools_data) ?
+                    <>
+                      {number_format(share || 0, '0,0.00')}
+                      %
+                    </> :
+                    selected && !no_pool && (
+                      position_loading ?
+                        <div className="mt-0.5">
+                          <RotatingSquare color={loader_color(theme)} width="24" height="24" />
+                        </div> :
+                        '-'
+                    )
+                  }
                 </span>
               </div>
               <div className="flex flex-col space-y-0.5">
@@ -103,25 +215,66 @@ export default ({
                   Pool Tokens
                 </span>
                 <span className="text-lg font-bold">
-                  {number_format(0, '0,0.00')}
+                  {!isNaN(tokens) || (pool_data && user_pools_data) ?
+                    <>
+                      {number_format(tokens || 0, '0,0.00')}
+                    </> :
+                    selected && !no_pool && (
+                      position_loading ?
+                        <div className="mt-0.5">
+                          <RotatingSquare color={loader_color(theme)} width="24" height="24" />
+                        </div> :
+                        '-'
+                    )
+                  }
                 </span>
               </div>
-              <div className="flex flex-col space-y-0.5">
-                <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
-                  X
-                </span>
-                <span className="text-lg font-bold">
-                  {number_format(0, '0,0.00')}
-                </span>
-              </div>
-              <div className="flex flex-col space-y-0.5">
-                <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
-                  Y
-                </span>
-                <span className="text-lg font-bold">
-                  {number_format(0, '0,0.00')}
-                </span>
-              </div>
+              {symbols && (
+                <>
+                  {symbols[0] && (
+                    <div className="flex flex-col space-y-0.5">
+                      <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
+                        {symbols[0]}
+                      </span>
+                      <span className="text-lg font-bold">
+                        {!isNaN(tokensX) || (pool_data && user_pools_data) ?
+                          <>
+                            {number_format(tokensX || 0, '0,0.00')}
+                          </> :
+                          selected && !no_pool && (
+                            position_loading ?
+                              <div className="mt-0.5">
+                                <RotatingSquare color={loader_color(theme)} width="24" height="24" />
+                              </div> :
+                              '-'
+                          )
+                        }
+                      </span>
+                    </div>
+                  )}
+                  {symbols[1] && (
+                    <div className="flex flex-col space-y-0.5">
+                      <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
+                        {symbols[1]}
+                      </span>
+                      <span className="text-lg font-bold">
+                        {!isNaN(tokensY) || (pool_data && user_pools_data) ?
+                          <>
+                            {number_format(tokensY || 0, '0,0.00')}
+                          </> :
+                          selected && !no_pool && (
+                            position_loading ?
+                              <div className="mt-0.5">
+                                <RotatingSquare color={loader_color(theme)} width="24" height="24" />
+                              </div> :
+                              '-'
+                          )
+                        }
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div> :

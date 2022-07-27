@@ -15,11 +15,13 @@ export default ({
   onSelect,
   chain,
   origin = 'source',
+  is_pool = false,
 }) => {
-  const { preferences, chains, assets } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets }), shallowEqual)
+  const { preferences, chains, assets, pool_assets } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, pool_assets: state.pool_assets }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
+  const { pool_assets_data } = { ...pool_assets }
 
   const [hidden, setHidden] = useState(true)
 
@@ -31,7 +33,8 @@ export default ({
   }
 
   const chain_data = chains_data?.find(c => c?.id === chain)
-  const asset_data = assets_data?.find(c => c?.id === value)
+  const _assets_data = is_pool ? pool_assets_data : assets_data
+  const asset_data = _assets_data?.find(c => c?.id === value)
   const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
   const image = contract_data?.image || asset_data?.image
 
@@ -42,7 +45,7 @@ export default ({
       hidden={hidden}
       disabled={disabled}
       onClick={open => setHidden(!open)}
-      buttonTitle={assets_data ?
+      buttonTitle={_assets_data ?
         <div className="w-32 sm:w-48 min-w-max bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-xl shadow dark:shadow-slate-500 flex items-center justify-center space-x-1 sm:space-x-1.5 py-1.5 sm:py-2 px-2 sm:px-3">
           {image && (
             <>
@@ -102,6 +105,7 @@ export default ({
           value={value}
           onSelect={id => onClick(id)}
           chain={chain}
+          is_pool={is_pool}
         />
       )}
     />

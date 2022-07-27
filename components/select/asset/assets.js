@@ -9,17 +9,20 @@ export default ({
   inputSearch,
   onSelect,
   chain,
+  is_pool = false,
 }) => {
-  const { chains, assets, balances } = useSelector(state => ({ chains: state.chains, assets: state.assets, balances: state.balances }), shallowEqual)
+  const { chains, assets, pool_assets, balances } = useSelector(state => ({ chains: state.chains, assets: state.assets, pool_assets: state.pool_assets, balances: state.balances }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
+  const { pool_assets_data } = { ...pool_assets }
   const { balances_data } = { ...balances }
 
   const chain_data = chains_data?.find(c => c?.id === chain)
   const chain_id = chain_data?.chain_id
 
+  const _assets_data = is_pool ? pool_assets_data : assets_data
   const assets_data_sorted = _.orderBy(
-    assets_data?.filter(a => !inputSearch || a).map(a => {
+    _assets_data?.filter(a => !inputSearch || a).map(a => {
       return {
         ...a,
         scores: ['symbol', 'name', 'id'].map(f => a[f]?.toLowerCase().includes(inputSearch.toLowerCase()) ?
@@ -37,9 +40,9 @@ export default ({
 
   return (
     <div>
-      {assets_data?.filter(a => a?.preset).length > 0 && (
+      {_assets_data?.filter(a => a?.preset).length > 0 && (
         <div className="flex flex-wrap items-center mb-1">
-          {assets_data.filter(a => a?.preset).map((a, i) => (
+          {_assets_data.filter(a => a?.preset).map((a, i) => (
             <div
               key={i}
               onClick={() => onSelect(a.id)}

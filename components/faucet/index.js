@@ -71,7 +71,7 @@ export default () => {
       const asset_data = assets_data?.find(a => a?.id === TOKEN_ID)
       const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_id)
       const contract_address = contract_data?.contract_address
-      const decimals = contract_data?.contract_decimals || 18
+      const decimals = contract_data?.decimals || 18
       const contract = new Contract(contract_address, ABI, signer)
       const response = await contract.mint(data?.address, utils.parseUnits(FAUCET_AMOUNT.toString(), decimals))
       const receipt = await signer.provider.waitForTransaction(response.hash)

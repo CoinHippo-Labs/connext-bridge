@@ -30,8 +30,6 @@
     },
     "image": "/logos/chains/rinkeby.png",
     "color": "#c0c2c3",
-    "website": "https://rinkeby.io",
-    "coingecko_id": "ethereum",
     "group" : "evm"
   },
   {
@@ -65,8 +63,6 @@
     },
     "image": "/logos/chains/gorli.png",
     "color": "#c0c2c3",
-    "website": "https://goerli.net",
-    "coingecko_id": "ethereum",
     "group" : "evm"
   }
 ]

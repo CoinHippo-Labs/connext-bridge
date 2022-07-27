@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
@@ -19,20 +20,24 @@ import { announcement as getAnnouncement, chains as getChains, assets as getAsse
 import { tokens as getTokens } from '../../lib/api/tokens'
 import { ens as getEns } from '../../lib/api/ens'
 import { ellipse, equals_ignore_case } from '../../lib/utils'
-import { ANNOUNCEMENT_DATA, CHAINS_DATA, ASSETS_DATA, ENS_DATA, ASSET_BALANCES_DATA, POOLS_DATA, SDK, RPCS } from '../../reducers/types'
+import { ANNOUNCEMENT_DATA, CHAINS_DATA, ASSETS_DATA, POOL_ASSETS_DATA, ENS_DATA, ASSET_BALANCES_DATA, POOLS_DATA, SDK, RPCS } from '../../reducers/types'
 
 export default () => {
   const dispatch = useDispatch()
-  const { preferences, chains, assets, ens, asset_balances, rpc_providers, dev, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, ens: state.ens, asset_balances: state.asset_balances, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet }), shallowEqual)
+  const { preferences, chains, assets, pool_assets, ens, asset_balances, rpc_providers, dev, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, pool_assets: state.pool_assets, ens: state.ens, asset_balances: state.asset_balances, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
+  const { pool_assets_data } = { ...pool_assets }
   const { ens_data } = { ...ens }
   const { asset_balances_data } = { ...asset_balances }
   const { rpcs } = { ...rpc_providers }
   const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
   const { default_chain_id, chain_id, provider, web3_provider, address, signer } = { ...wallet_data }
+
+  const router = useRouter()
+  const { asPath } = { ...router }
 
   const [hiddenStatus, setHiddenStatus] = useState(false)
   const [currentAddress, setCurrentAddress] = useState(null)
@@ -75,6 +80,18 @@ export default () => {
         dispatch({
           type: ASSETS_DATA,
           value: response,
+        })
+        dispatch({
+          type: POOL_ASSETS_DATA,
+          value: response.map(d => {
+            const {
+              contracts,
+            } = { ...d }
+            return {
+              ...d,
+              contracts: contracts?.filter(c => c?.is_pool),
+            }
+          }).filter(d => d?.contracts.length > 0),
         })
       }
     }
@@ -237,7 +254,7 @@ export default () => {
   useEffect(() => {
     const getData = async () => {
       if (sdk && chains_data &&
-        assets_data && assets_data.findIndex(a => !a.price) < 0
+        assets_data?.findIndex(a => !a.price) < 0
       ) {
         try {
           const response = await sdk.nxtpSdkUtils.getRoutersData()
@@ -286,7 +303,7 @@ export default () => {
           domain_id,
         } = { ...chain_data }
         const data = []
-        for (const asset_data of assets_data) {
+        for (const asset_data of pool_assets_data) {
           const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_id)
           const {
             contract_address,
@@ -297,6 +314,7 @@ export default () => {
             data.push({
               ...pool,
               ...stats,
+              id: `${chain_data.id}_${asset_data.id}`,
               chain_id,
               chain_data,
               asset_data,
@@ -311,9 +329,7 @@ export default () => {
       }
     }
     const getData = async () => {
-      if (sdk && chains_data &&
-        assets_data && assets_data.findIndex(a => !a.price) < 0
-      ) {
+      if (sdk && chains_data && pool_assets_data) {
         chains_data.forEach(c => getChainData(c))
       }
     }
@@ -322,7 +338,7 @@ export default () => {
     return () => {
       clearInterval(interval)
     }
-  }, [sdk, chains_data, assets_data])
+  }, [asPath, sdk, chains_data, pool_assets_data])
 
   // ens
   useEffect(() => {

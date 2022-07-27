@@ -15,10 +15,10 @@ import { BALANCES_DATA } from '../../reducers/types'
 
 export default () => {
   const dispatch = useDispatch()
-  const { preferences, chains, assets, _pools, rpc_providers, dev, wallet, balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, _pools: state.pools, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances }), shallowEqual)
+  const { preferences, chains, pool_assets, _pools, rpc_providers, dev, wallet, balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, pool_assets: state.pool_assets, _pools: state.pools, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
-  const { assets_data } = { ...assets }
+  const { pool_assets_data } = { ...pool_assets }
   const { pools_data } = { ..._pools }
   const { rpcs } = { ...rpc_providers }
   const { sdk } = { ...dev }
@@ -54,7 +54,7 @@ export default () => {
       const chain = paths[paths.indexOf('on') + 1]
       const chain_data = chains_data?.find(c => c?.id === chain)
       const asset = paths[0] !== 'on' ? paths[0] : null
-      const asset_data = assets_data?.find(a => a?.id === asset || equals_ignore_case(a?.symbol, asset))
+      const asset_data = pool_assets_data?.find(a => a?.id === asset || equals_ignore_case(a?.symbol, asset))
       if (chain_data) {
         pool.chain = chain
         updated = true
@@ -72,7 +72,7 @@ export default () => {
       setPool(pool)
       setPoolsTrigger(moment().valueOf())
     }
-  }, [asPath, chains_data, assets_data])
+  }, [asPath, chains_data, pool_assets_data])
 
   // set pool to path
   useEffect(() => {
@@ -85,7 +85,7 @@ export default () => {
       } = { ...pool }
       if (chains_data?.findIndex(c => !c?.disabled && c?.id === chain) > -1) {
         params.chain = chain
-        if (asset && assets_data?.findIndex(a => a?.id === asset && a.contracts?.findIndex(c => c?.chain_id === chains_data.find(_c => _c?.id === chain)?.chain_id) > -1) > -1) {
+        if (asset && pool_assets_data?.findIndex(a => a?.id === asset && a.contracts?.findIndex(c => c?.chain_id === chains_data.find(_c => _c?.id === chain)?.chain_id) > -1) > -1) {
           params.asset = asset
         }
       }
@@ -177,7 +177,7 @@ export default () => {
             const {
               symbol,
             } = { ...p }
-            const asset_data = assets_data.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === chain_id && equals_ignore_case(c?.symbol, symbol)) > -1)
+            const asset_data = pool_assets_data.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === chain_id && equals_ignore_case(c?.symbol, symbol)) > -1)
             return {
               ...p,
               chain_data,
@@ -194,9 +194,8 @@ export default () => {
     const getBalance = async (chain_id, contract_data) => {
       const {
         contract_address,
-        contract_decimals,
+        decimals,
       } = { ...contract_data }
-      const decimals = contract_decimals || 18
       const rpc = rpcs?.[chain_id]
       let balance
       if (rpc && contract_address) {
@@ -213,7 +212,7 @@ export default () => {
         value: {
           [`${chain_id}`]: [{
             ...contract_data,
-            amount: balance && Number(utils.formatUnits(balance, decimals)),
+            amount: balance && Number(utils.formatUnits(balance, decimals || 18)),
           }],
         },
       })
@@ -221,7 +220,7 @@ export default () => {
     const {
       chain_id,
     } = { ...chains_data?.find(c => c?.id === chain) }
-    const contracts = assets_data?.map(a => {
+    const contracts = pool_assets_data?.map(a => {
       return {
         ...a,
         ...a?.contracts?.find(c => c?.chain_id === chain_id),
@@ -235,7 +234,7 @@ export default () => {
       chain,
       asset,
     } = { ...pool }
-    const asset_data = assets_data?.find(a => a?.id === asset)
+    const asset_data = pool_assets_data?.find(a => a?.id === asset)
     return chain && asset_data &&
       !(asset_data.contracts?.findIndex(c => c?.chain_id === chains_data?.find(_c => _c?.id === chain)?.chain_id) < 0)
   }
@@ -271,11 +270,7 @@ export default () => {
     amount,
   } = { ...pool }
   const chain_data = chains_data?.find(c => c?.id === chain)
-  const asset_data = assets_data?.find(a => a?.id === asset)
-  const poolData = {
-    ...pool,
-    ...pools?.find(p => p?.chain_data?.id === chain && p?.asset_data?.id === asset),
-  }
+  const asset_data = pool_assets_data?.find(a => a?.id === asset)
   const native_contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
   const nomad_contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)  
 
@@ -284,7 +279,7 @@ export default () => {
   const native_symbol = native_contract_data?.symbol || asset_data?.symbol
   const nomad_balance = balances_data?.[chain_data?.chain_id]?.find(b => equals_ignore_case(b?.contract_address, nomad_contract_data?.contract_address))
   const nomad_amount = nomad_balance && Number(nomad_balance.amount)
-  const nomad_decimals = nomad_contract_data?.contract_decimals || 18
+  const nomad_decimals = nomad_contract_data?.decimals || 18
   const nomad_symbol = nomad_contract_data?.symbol || asset_data?.symbol
 
   const max_amount = native_amount
@@ -311,16 +306,16 @@ export default () => {
               Manage Pool
             </h1>
           </div>
-          <div className={`${poolData ? '' : 'h-188'} grid grid-flow-row grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6`}>
+          <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6">
             <div className="lg:col-span-2">
               <Info
                 pool={pool}
-                data={poolData}
+                user_pools_data={pools}
                 onSelect={p => setPool(p)}
               />
             </div>
             <Liquidity
-              data={poolData}
+              data={pools}
             />
           </div>
         </div>

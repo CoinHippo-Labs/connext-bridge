@@ -35,10 +35,10 @@ const DEFAULT_OPTIONS = {
 
 export default () => {
   const dispatch = useDispatch()
-  const { preferences, chains, assets, rpc_providers, dev, wallet, balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances }), shallowEqual)
+  const { preferences, chains, pool_assets, rpc_providers, dev, wallet, balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, pool_assets: state.pool_assets, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
-  const { assets_data } = { ...assets }
+  const { pool_assets_data } = { ...pool_assets }
   const { rpcs } = { ...rpc_providers }
   const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
@@ -75,7 +75,7 @@ export default () => {
       const chain = paths[paths.indexOf('on') + 1]
       const chain_data = chains_data?.find(c => c?.id === chain)
       const asset = paths[0] !== 'on' ? paths[0] : null
-      const asset_data = assets_data?.find(a => a?.id === asset || equals_ignore_case(a?.symbol, asset))
+      const asset_data = pool_assets_data?.find(a => a?.id === asset || equals_ignore_case(a?.symbol, asset))
       if (chain_data) {
         swap.chain = chain
         updated = true
@@ -93,7 +93,7 @@ export default () => {
       setSwap(swap)
       setPairTrigger(moment().valueOf())
     }
-  }, [asPath, chains_data, assets_data])
+  }, [asPath, chains_data, pool_assets_data])
 
   // set swap to path
   useEffect(() => {
@@ -106,7 +106,7 @@ export default () => {
       } = { ...swap }
       if (chains_data?.findIndex(c => !c?.disabled && c?.id === chain) > -1) {
         params.chain = chain
-        if (asset && assets_data?.findIndex(a => a?.id === asset && a.contracts?.findIndex(c => c?.chain_id === chains_data.find(_c => _c?.id === chain)?.chain_id) > -1) > -1) {
+        if (asset && pool_assets_data?.findIndex(a => a?.id === asset && a.contracts?.findIndex(c => c?.chain_id === chains_data.find(_c => _c?.id === chain)?.chain_id) > -1) > -1) {
           params.asset = asset
         }
       }
@@ -199,7 +199,7 @@ export default () => {
             const {
               symbol,
             } = { ...p }
-            const asset_data = assets_data.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === chain_id && equals_ignore_case(c?.symbol, symbol)) > -1)
+            const asset_data = pool_assets_data.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === chain_id && equals_ignore_case(c?.symbol, symbol)) > -1)
             return {
               ...p,
               chain_data,
@@ -216,9 +216,8 @@ export default () => {
     const getBalance = async (chain_id, contract_data) => {
       const {
         contract_address,
-        contract_decimals,
+        decimals,
       } = { ...contract_data }
-      const decimals = contract_decimals || 18
       const rpc = rpcs?.[chain_id]
       let balance
       if (rpc && contract_address) {
@@ -235,7 +234,7 @@ export default () => {
         value: {
           [`${chain_id}`]: [{
             ...contract_data,
-            amount: balance && Number(utils.formatUnits(balance, decimals)),
+            amount: balance && Number(utils.formatUnits(balance, decimals || 18)),
           }],
         },
       })
@@ -243,7 +242,7 @@ export default () => {
     const {
       chain_id,
     } = { ...chains_data?.find(c => c?.id === chain) }
-    const contracts = assets_data?.map(a => {
+    const contracts = pool_assets_data?.map(a => {
       return {
         ...a,
         ...a?.contracts?.find(c => c?.chain_id === chain_id),
@@ -285,10 +284,10 @@ export default () => {
     if (sdk) {
       const { chain, asset, amount } = { ...swap }
       const chain_data = chains_data?.find(c => c?.id === chain)
-      const asset_data = assets_data?.find(a => a?.id === asset)
+      const asset_data = pool_assets_data?.find(a => a?.id === asset)
       const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
       const symbol = contract_data?.symbol || asset_data?.symbol
-      const decimals = contract_data?.contract_decimals || 18
+      const decimals = contract_data?.decimals || 18
       const { infiniteApprove, slippage } = { ...options }
       // const xcallParams = {
       //   params: {
@@ -375,7 +374,7 @@ export default () => {
     from,
   } = { ...swap }
   const chain_data = chains_data?.find(c => c?.id === chain)
-  const asset_data = assets_data?.find(a => a?.id === asset)
+  const asset_data = pool_assets_data?.find(a => a?.id === asset)
 
   const x_asset_data = asset_data
   const y_asset_data = asset_data
@@ -466,6 +465,7 @@ export default () => {
                       }}
                       chain={chain_data?.id}
                       origin=""
+                      is_pool={true}
                     />
                   </div>
                   <div className="w-full flex items-center justify-between space-x-3">

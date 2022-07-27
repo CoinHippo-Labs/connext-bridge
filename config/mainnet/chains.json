@@ -30,8 +30,6 @@
     },
     "image": "/logos/chains/ethereum.png",
     "color": "#c0c2c3",
-    "website": "https://ethereum.org",
-    "coingecko_id": "ethereum",
     "group" : "evm"
   },
   {
@@ -64,8 +62,6 @@
     },
     "image": "/logos/chains/binance.png",
     "color": "#e8b30b",
-    "website": "https://bnbchain.world",
-    "coingecko_id": "binancecoin",
     "group" : "evm"
   },
   {
@@ -98,8 +94,6 @@
     },
     "image": "/logos/chains/polygon.png",
     "color": "#8247e5",
-    "website": "https://polygon.technology",
-    "coingecko_id": "matic-network",
     "group" : "evm"
   },
   {
@@ -132,8 +126,6 @@
     },
     "image": "/logos/chains/avalanche.png",
     "color": "#e84143",
-    "website": "https://avax.network",
-    "coingecko_id": "avalanche-2",
     "group" : "evm"
   },
   {
@@ -166,8 +158,6 @@
     },
     "image": "/logos/chains/optimism.png",
     "color": "#dc2626",
-    "website": "https://optimism.io",
-    "coingecko_id": "optimism",
     "group" : "optimistic_rollups"
   },
   {
@@ -200,8 +190,6 @@
     },
     "image": "/logos/chains/arbitrum.png",
     "color": "#28a0f0",
-    "website": "https://arbitrum.io",
-    "coingecko_id": "arbitrum",
     "group" : "optimistic_rollups"
   },
   {
@@ -234,8 +222,6 @@
     },
     "image": "/logos/chains/fantom.png",
     "color": "#1869ff",
-    "website": "https://fantom.foundation",
-    "coingecko_id": "fantom",
     "group" : "evm"
   },
   {
@@ -269,8 +255,6 @@
     },
     "image": "/logos/chains/gnosis.png",
     "color": "#48a9a6",
-    "website": "https://gnosischain.com",
-    "coingecko_id": "gnosis",
     "group" : "evm"
   },
   {
@@ -304,8 +288,6 @@
     },
     "image": "/logos/chains/moonbeam.png",
     "color": "#53cbc8",
-    "website": "https://moonbeam.network",
-    "coingecko_id": "moonbeam",
     "group" : "evm"
   },
   {
@@ -338,8 +320,6 @@
     },
     "image": "/logos/chains/moonriver.png",
     "color": "#e6af07",
-    "website": "https://moonbeam.network/networks/moonriver",
-    "coingecko_id": "moonriver",
     "group" : "evm"
   },
   {
@@ -372,8 +352,6 @@
     },
     "image": "/logos/chains/fuse.png",
     "color": "#fde047",
-    "website": "https://fuse.io",
-    "coingecko_id": "fuse-network-token",
     "group" : "evm"
   },
   {
@@ -406,8 +384,6 @@
     },
     "image": "/logos/chains/gather.png",
     "color": "#3c4fe0",
-    "website": "https://gather.network",
-    "coingecko_id": "gather",
     "group" : "evm"
   },
   {
@@ -441,8 +417,6 @@
     },
     "image": "/logos/chains/milkomeda.png",
     "color": "#a4b2d8",
-    "website": "https://milkomeda.com",
-    "coingecko_id": "cardano",
     "group" : "evm"
   },
   {
@@ -475,8 +449,6 @@
     },
     "image": "/logos/chains/cronos.png",
     "color": "#012d74",
-    "website": "https://crypto.com",
-    "coingecko_id": "crypto-com-chain",
     "group" : "evm"
   },
   {
@@ -509,8 +481,6 @@
     },
     "image": "/logos/chains/evmos.png",
     "color": "#1f1577",
-    "website": "https://evmos.org",
-    "coingecko_id": "evmos",
     "group" : "evm"
   },
   {
@@ -543,8 +513,6 @@
     },
     "image": "/logos/chains/boba.png",
     "color": "#cbff00",
-    "website": "https://boba.network",
-    "coingecko_id": "boba-network",
     "group" : "evm"
   }
 ]

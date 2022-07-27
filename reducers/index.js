@@ -4,6 +4,7 @@ import preferences from './preferences'
 import announcement from './announcement'
 import chains from './chains'
 import assets from './assets'
+import pool_assets from './pool-assets'
 import ens from './ens'
 import asset_balances from './asset-balances'
 import pools from './pools'
@@ -18,6 +19,7 @@ export default combineReducers({
   announcement,
   chains,
   assets,
+  pool_assets,
   ens,
   asset_balances,
   pools,

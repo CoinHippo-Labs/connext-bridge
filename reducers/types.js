@@ -9,6 +9,7 @@ export const CHAINS_DATA = 'chains_data'
 
 // assets
 export const ASSETS_DATA = 'assets_data'
+export const POOL_ASSETS_DATA = 'pool_assets_data'
 
 // ens
 export const ENS_DATA = 'ens_data'

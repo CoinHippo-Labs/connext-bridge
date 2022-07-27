@@ -72,10 +72,10 @@ export default ({ data }) => {
     if (sdk) {
       const { chain, asset, amount } = { ...pool }
       const chain_data = chains_data?.find(c => c?.id === chain)
-      const asset_data = assets_data?.find(a => a?.id === asset)
+      const asset_data = pool_assets_data?.find(a => a?.id === asset)
       const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
       const symbol = contract_data?.symbol || asset_data?.symbol
-      const decimals = contract_data?.contract_decimals || 18
+      const decimals = contract_data?.decimals || 18
       const callParams = {
       
       }
