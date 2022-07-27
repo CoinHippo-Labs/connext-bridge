@@ -102,7 +102,7 @@ export default () => {
   useEffect(() => {
     const getData = async is_interval => {
       if (chains_data && assets_data) {
-        let updated_ids = is_interval ? [] : assets_data.filter(a => a?.price).map(a => a.id)
+        let updated_ids = is_interval ? [] : assets_data.filter(a => typeof a.price === 'number').map(a => a.id)
         if (updated_ids.length < assets_data.length) {
           let updated = false
           for (const chain_data of chains_data) {
@@ -122,7 +122,7 @@ export default () => {
                     const asset_index = assets_data.findIndex(a => a?.id && a.contracts?.findIndex(c => c?.chain_id === t?.chain_id && equals_ignore_case(c.contract_address, t?.contract_address)) > -1)
                     if (asset_index > -1) {
                       const asset = assets_data[asset_index]
-                      asset.price = t?.price || asset.price
+                      asset.price = t?.price || asset.price || 0
                       assets_data[asset_index] = asset
                       updated_ids = _.uniq(_.concat(updated_ids, asset.id))
                       updated = true
@@ -178,7 +178,7 @@ export default () => {
   // sdk
   useEffect(() => {
     const init = async () => {
-      if (chains_data && assets_data?.findIndex(a => !a.price) < 0) {
+      if (chains_data && assets_data?.findIndex(a => typeof a.price !== 'number') < 0) {
         const chains_config = {}
         for (const chain_data of chains_data) {
           const {
@@ -254,7 +254,7 @@ export default () => {
   useEffect(() => {
     const getData = async () => {
       if (sdk && chains_data &&
-        assets_data?.findIndex(a => !a.price) < 0
+        assets_data?.findIndex(a => typeof a.price !== 'number') < 0
       ) {
         try {
           const response = await sdk.nxtpSdkUtils.getRoutersData()

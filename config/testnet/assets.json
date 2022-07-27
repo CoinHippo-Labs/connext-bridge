@@ -24,7 +24,7 @@
     "image": "/logos/assets/eth.png",
     "contracts": [
       {
-        "contract_address": "0x76c4bfd2e8bf127f77adb986a17c7be1f63ee103",
+        "contract_address": "0xF25927315D101aC04C631878570152658defa7Db",
         "chain_id": 4,
         "decimals": 18,
         "symbol": "madWETH",
