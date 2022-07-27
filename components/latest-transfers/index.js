@@ -80,7 +80,7 @@ export default ({ trigger }) => {
       {!collapse && (
         <>
           <StackGrid
-            columnWidth={252}
+            columnWidth={272}
             gutterWidth={16}
             gutterHeight={16}
             className="hidden sm:block max-w-xl mx-auto"

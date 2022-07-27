@@ -5,7 +5,7 @@ import moment from 'moment'
 import { FixedNumber, utils } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
 import Switch from 'react-switch'
-import { TailSpin, RotatingSquare } from 'react-loader-spinner'
+import { TailSpin, RotatingSquare, Watch } from 'react-loader-spinner'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
 import { BiPlus, BiCaretUp, BiCaretDown, BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
@@ -65,6 +65,8 @@ export default ({
   }, [pool])
 
   useEffect(() => {
+    setApproveResponse(null)
+    setCallResponse(null)
     if (typeof amountX === 'number') {
       if (amountX > 0) {
         const {
@@ -89,6 +91,8 @@ export default ({
   }, [amountX])
 
   useEffect(() => {
+    setApproveResponse(null)
+    setCallResponse(null)
     if (typeof amountY === 'number') {
       if (amountY > 0) {
         const {
@@ -183,19 +187,110 @@ export default ({
       deadline = deadline && moment().add(deadline, 'minutes').valueOf()
 
       let failed = false
-      setApproving(false)
       switch (action) {
         case 'add':
           if (!(amountX && amountY)) {
             failed = true
+            setApproving(false)
+            break
+          }
+          const amounts = [
+            utils.parseUnits(amountX.toString(), x_asset_data?.decimals || 18).toString(),
+            utils.parseUnits(amountY.toString(), y_asset_data?.decimals || 18).toString(),
+          ]
+          if (!failed) {
+            try {
+              const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
+                domainId,
+                x_asset_data?.contract_address,
+                amounts[0],
+                infiniteApprove,
+              )
+              if (approve_request) {
+                setApproving(true)
+                const approve_response = await signer.sendTransaction(approve_request)
+                const tx_hash = approve_response?.hash
+                setApproveResponse({
+                  status: 'pending',
+                  message: `Wait for ${x_asset_data?.symbol} approval`,
+                  tx_hash,
+                })
+                setApproveProcessing(true)
+                const approve_receipt = await signer.provider.waitForTransaction(tx_hash)
+                setApproveResponse(approve_receipt?.status ?
+                  null : {
+                    status: 'failed',
+                    message: `Failed to approve ${x_asset_data?.symbol}`,
+                    tx_hash,
+                  }
+                )
+                failed = !approve_receipt?.status
+                setApproveProcessing(false)
+                setApproving(false)
+              }
+              else {
+                setApproving(false)
+              }
+            } catch (error) {
+              setApproveResponse({
+                status: 'failed',
+                message: error?.data?.message || error?.message,
+              })
+              failed = true
+              setApproveProcessing(false)
+              setApproving(false)
+            }
+            if (!failed) {
+              try {
+                const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
+                  domainId,
+                  y_asset_data?.contract_address,
+                  amounts[1],
+                  infiniteApprove,
+                )
+                if (approve_request) {
+                  setApproving(true)
+                  const approve_response = await signer.sendTransaction(approve_request)
+                  const tx_hash = approve_response?.hash
+                  setApproveResponse({
+                    status: 'pending',
+                    message: `Wait for ${y_asset_data?.symbol} approval`,
+                    tx_hash,
+                  })
+                  setApproveProcessing(true)
+                  const approve_receipt = await signer.provider.waitForTransaction(tx_hash)
+                  setApproveResponse(approve_receipt?.status ?
+                    null : {
+                      status: 'failed',
+                      message: `Failed to approve ${y_asset_data?.symbol}`,
+                      tx_hash,
+                    }
+                  )
+                  failed = !approve_receipt?.status
+                  setApproveProcessing(false)
+                  setApproving(false)
+                }
+                else {
+                  setApproving(false)
+                }
+              } catch (error) {
+                setApproveResponse({
+                  status: 'failed',
+                  message: error?.data?.message || error?.message,
+                })
+                failed = true
+                setApproveProcessing(false)
+                setApproving(false)
+              }
+            }
           }
           if (!failed) {
             try {
+              console.log('[getCanonicalFromLocal]', {
+                domainId,
+                tokenAddress: contract_data?.contract_address,
+              })
               const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(domainId, contract_data?.contract_address)
-              const amounts = [
-                utils.parseUnits(amountX.toString(), x_asset_data?.decimals || 18).toString(),
-                utils.parseUnits(amountY.toString(), y_asset_data?.decimals || 18).toString(),
-              ]
               console.log('[Add Liquidity]', {
                 domainId,
                 canonicalId,
@@ -240,11 +335,20 @@ export default ({
         case 'remove':
           if (!(amount)) {
             failed = true
+            setApproving(false)
+            break
+          }
+          const amount = utils.parseUnits(amount.toString(), y_asset_data?.decimals || 18).toString()
+          if (!failed) {
+            setApproving(false)
           }
           if (!failed) {
             try {
+              console.log('[getCanonicalFromLocal]', {
+                domainId,
+                tokenAddress: contract_data?.contract_address,
+              })
               const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(domainId, contract_data?.contract_address)
-              const amount = utils.parseUnits(amount.toString(), y_asset_data?.decimals || 18).toString()
               console.log('[Remove Liquidity]', {
                 domainId,
                 canonicalId,
@@ -371,7 +475,7 @@ export default ({
 
   return (
     <div className="border border-blue-400 dark:border-blue-800 rounded-2xl shadow-lg shadow-blue-200 dark:shadow-blue-600 space-y-3 p-6">
-      <div className="flex items-center justify-between space-x-3">
+      <div className="flex items-center justify-between space-x-3 mr-1.5">
         <div className="flex items-center space-x-0.5">
           {ACTIONS.map((a, i) => (
             <div
@@ -392,7 +496,7 @@ export default ({
           <div className="bg-slate-50 dark:bg-slate-900 rounded-lg space-y-5 py-6 px-4">
             <div className="space-y-2">
               {x_asset_data?.contract_address && (
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between -mt-3">
                   {chain_data?.explorer?.url ?
                     <a
                       href={`${chain_data.explorer.url}${chain_data.explorer.contract_path?.replace('{address}', x_asset_data.contract_address)}`}
@@ -659,7 +763,11 @@ export default ({
                     <BiMessageError className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
                     r.status === 'success' ?
                       <BiMessageCheck className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
-                      <BiMessageDetail className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" />
+                      r.status === 'pending' ?
+                        <div className="mr-2.5">
+                          <Watch color="white" width="16" height="16" />
+                        </div> :
+                        <BiMessageDetail className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" />
                   }
                   closeDisabled={true}
                   rounded={true}
@@ -683,7 +791,7 @@ export default ({
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <TiArrowRight size={16} className="transform -rotate-45" />
+                          <TiArrowRight size={20} className="transform -rotate-45" />
                         </a>
                       )}
                       {r.status === 'failed' ?
@@ -865,7 +973,11 @@ export default ({
                     <BiMessageError className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
                     r.status === 'success' ?
                       <BiMessageCheck className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
-                      <BiMessageDetail className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" />
+                      r.status === 'pending' ?
+                        <div className="mr-2.5">
+                          <Watch color="white" width="16" height="16" />
+                        </div> :
+                        <BiMessageDetail className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" />
                   }
                   closeDisabled={true}
                   rounded={true}
@@ -889,7 +1001,7 @@ export default ({
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <TiArrowRight size={16} className="transform -rotate-45" />
+                          <TiArrowRight size={20} className="transform -rotate-45" />
                         </a>
                       )}
                       {r.status === 'failed' ?
