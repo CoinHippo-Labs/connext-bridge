@@ -19,7 +19,7 @@
       },
       {
         "contract_address": "0x21c5a4dAeAf9625c781Aa996E9229eA95EE4Ff77",
-        "chain_id": 5,
+        "chain_id": 80001,
         "decimals": 18,
         "symbol": "madTEST"
       }

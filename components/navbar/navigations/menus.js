@@ -16,7 +16,7 @@ export default [
     id: 'pools',
     title: 'Pools',
     path: '/pools',
-    others_paths: ['/pool/[pool]'],
+    others_paths: ['/pool', '/pool/[pool]'],
     icon: <RiCopperCoinLine size={20} className="stroke-current" />,
   },
   {
