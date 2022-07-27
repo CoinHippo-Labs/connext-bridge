@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
+import { FixedNumber } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
 import { RotatingSquare } from 'react-loader-spinner'
 import { TiArrowRight } from 'react-icons/ti'
@@ -178,6 +178,7 @@ export default ({
       deadline = deadline && moment().add(deadline, 'minutes').valueOf()
 
       let failed = false
+      setApproving(false)
       switch (action) {
         case 'add':
           if (!(amountX && amountY)) {
@@ -606,7 +607,18 @@ export default ({
                   onClick={() => call()}
                   className={`w-full ${disabled || !valid_amount ? 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
                 >
-                  Supply
+                  {calling ?
+                    approving ?
+                      approveProcessing ?
+                        'Approving' :
+                        'Please Approve' :
+                      callProcessing ?
+                        'Adding' :
+                        typeof approving === 'boolean' ?
+                          'Please Confirm' :
+                          'Checking Approval' :
+                    'Supply'
+                  }
                 </button> :
                 <Wallet
                   connectChainId={chain_id}
@@ -772,7 +784,18 @@ export default ({
                   onClick={() => call()}
                   className={`w-full ${disabled || !valid_amount ? 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
                 >
-                  Remove
+                  {calling ?
+                    approving ?
+                      approveProcessing ?
+                        'Approving' :
+                        'Please Approve' :
+                      callProcessing ?
+                        'Removing' :
+                        typeof approving === 'boolean' ?
+                          'Please Confirm' :
+                          'Checking Approval' :
+                    'Remove'
+                  }
                 </button> :
                 <Wallet
                   connectChainId={chain_id}

@@ -32,6 +32,7 @@ export default ({
   const pool_data = pools_data?.find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
   const {
     name,
+    lpTokenAddress,
     liquidity,
     volume,
     fees,
@@ -93,10 +94,15 @@ export default ({
                 No pool support
               </span>
             )}
-            {name && (
-              <span className="order-1 sm:order-2 text-base font-bold">
+            {name && chain_data?.explorer?.url && (
+              <a
+                href={`${chain_data.explorer.url}${chain_data.explorer.contract_path?.replace('{address}', lpTokenAddress)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="order-1 sm:order-2 text-base font-bold"
+              >
                 {name}
-              </span>
+              </a>
             )}
           </div>
           <div className="grid grid-flow-row grid-cols-2 lg:grid-cols-4">
