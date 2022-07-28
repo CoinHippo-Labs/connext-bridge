@@ -1246,8 +1246,7 @@ export default () => {
                     <span className="font-semibold">
                       {source_chain_data?.name}
                     </span>
-                  </Wallet>
-                  :
+                  </Wallet> :
                   !xcall && (amount > source_amount || amount < min_amount || amount <= 0) ?
                     <Alert
                       color="bg-red-400 dark:bg-red-500 text-white text-base"
@@ -1264,8 +1263,7 @@ export default () => {
                             amount <= 0 ? 'The transfer amount cannot be equal or less than 0.' : ''
                         }
                       </span>
-                    </Alert>
-                    :
+                    </Alert> :
                     !xcall && !xcallResponse ?
                       <button
                         disabled={disabled}
@@ -1638,8 +1636,7 @@ export default () => {
                           </span>
                         </span>}
                         confirmButtonClassName="w-full btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white text-base sm:text-lg text-center"
-                      />*/
-                      :
+                      />*/ :
                       (xcallResponse || (!xcall && approveResponse)) && (
                         [xcallResponse || approveResponse].map((r, i) => (
                           <Alert

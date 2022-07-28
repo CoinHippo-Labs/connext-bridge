@@ -42,7 +42,7 @@ export default ({
   const { pools_data } = { ...pools }
   const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
-  const { web3_provider, address, signer } = { ...wallet_data }
+  const { chain_id, provider, web3_provider, address, signer } = { ...wallet_data }
   const { balances_data } = { ...balances }
 
   const [action, setAction] = useState(_.head(ACTIONS))
@@ -409,9 +409,7 @@ export default ({
     asset,
   } = { ...pool }
   const chain_data = chains_data?.find(c => c?.id === chain)
-  const {
-    chain_id,
-  } = { ...chain_data }
+  const _chain_id = chain_data?.chain_id
 
   const {
     infiniteApprove,
@@ -419,7 +417,7 @@ export default ({
   } = { ...options }
 
   const selected = !!(chain && asset)
-  const no_pool = selected && pool_assets_data?.findIndex(a => a?.id === asset && a.contracts?.findIndex(a => a?.chain_id === chain_id) > -1) < 0
+  const no_pool = selected && pool_assets_data?.findIndex(a => a?.id === asset && a.contracts?.findIndex(a => a?.chain_id === _chain_id) > -1) < 0
   const pool_data = pools_data?.find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
   const {
     asset_data,
@@ -434,14 +432,14 @@ export default ({
       equals_ignore_case(tokens[0], contract_data?.contract_address) ?
         contract_data :
         {
-          chain_id,
+          _chain_id,
           contract_address: tokens[0],
           decimals: decimals?.[0],
           symbol: symbol?.split('-')[0],
         }
     ),
   }
-  const x_balance = x_asset_data && balances_data?.[chain_id]?.find(b => equals_ignore_case(b?.contract_address, x_asset_data.contract_address))
+  const x_balance = x_asset_data && balances_data?.[_chain_id]?.find(b => equals_ignore_case(b?.contract_address, x_asset_data.contract_address))
   const x_balance_amount = x_balance && Number(x_balance.amount)
   const y_asset_data = tokens?.[1] && {
     ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
@@ -449,14 +447,14 @@ export default ({
       equals_ignore_case(tokens[1], contract_data?.contract_address) ?
         contract_data :
         {
-          chain_id,
+          _chain_id,
           contract_address: tokens[1],
           decimals: decimals?.[1],
           symbol: symbol?.split('-')[1],
         }
     ),
   }
-  const y_balance = y_asset_data && balances_data?.[chain_id]?.find(b => equals_ignore_case(b?.contract_address, y_asset_data.contract_address))
+  const y_balance = y_asset_data && balances_data?.[_chain_id]?.find(b => equals_ignore_case(b?.contract_address, y_asset_data.contract_address))
   const y_balance_amount = y_balance && Number(y_balance.amount)
   const pool_loading = selected && !no_pool && !pool_data
 
@@ -471,6 +469,10 @@ export default ({
   const valid_amount = action === 'remove' ?
     amount/* && amount < _tokens*/ :
     amountX && amountY && amountX <= x_balance_amount && amountY <= y_balance_amount
+
+  const wrong_chain = chain_id !== _chain_id && !callResponse
+  const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
+
   const disabled = !pool_data || calling || approving
 
   return (
@@ -488,7 +490,7 @@ export default ({
           ))}
         </div>
         <GasPrice
-          chainId={chain_id}
+          chainId={_chain_id}
         />
       </div>
       {action === 'add' ?
@@ -516,7 +518,7 @@ export default ({
                       Balance
                     </div>
                     <Balance
-                      chainId={chain_id}
+                      chainId={_chain_id}
                       asset={asset}
                       contractAddress={x_asset_data.contract_address}
                       symbol={x_asset_data.symbol}
@@ -588,7 +590,7 @@ export default ({
                       Balance
                     </div>
                     <Balance
-                      chainId={chain_id}
+                      chainId={_chain_id}
                       asset={asset}
                       contractAddress={y_asset_data.contract_address}
                       symbol={y_asset_data.symbol}
@@ -754,103 +756,124 @@ export default ({
             )}
           </div>
           <div className="flex items-end">
-            {callResponse || approveResponse ?
-              [callResponse || approveResponse].map((r, i) => (
-                <Alert
-                  key={i}
-                  color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
-                  icon={r.status === 'failed' ?
-                    <BiMessageError className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
-                    r.status === 'success' ?
-                      <BiMessageCheck className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
-                      r.status === 'pending' ?
-                        <div className="mr-2.5">
-                          <Watch color="white" width="16" height="16" />
-                        </div> :
-                        <BiMessageDetail className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" />
-                  }
-                  closeDisabled={true}
-                  rounded={true}
-                  className="rounded-xl p-3"
-                >
-                  <div className="flex items-center justify-between space-x-2">
-                    <span className="leading-5 break-all text-xs">
-                      {ellipse(r.message, 128)}
-                    </span>
-                    <div className="flex items-center space-x-2">
-                      {/*r.status === 'failed' && r.message && (
-                        <Copy
-                          value={r.message}
-                          size={18}
-                          className="cursor-pointer text-slate-200 hover:text-white"
-                        />
-                      )*/}
-                      {chain_data?.explorer?.url && r.tx_hash && (
-                        <a
-                          href={`${chain_data.explorer.url}${chain_data.explorer.transaction_path?.replace('{tx}', r.tx_hash)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <TiArrowRight size={20} className="transform -rotate-45" />
-                        </a>
-                      )}
-                      {r.status === 'failed' ?
-                        <button
-                          onClick={() => reset()}
-                          className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                        >
-                          <MdClose size={16} />
-                        </button>
-                        :
-                        r.status === 'success' ?
+            {web3_provider && wrong_chain ?
+              <Wallet
+                connectChainId={_chain_id}
+                className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg space-x-1.5 sm:space-x-2 py-3  px-2 sm:px-3"
+              >
+                <span className="mr-1.5 sm:mr-2">
+                  {is_walletconnect ? 'Reconnect' : 'Switch'} to
+                </span>
+                {chain_data?.image && (
+                  <Image
+                    src={chain_data.image}
+                    alt=""
+                    width={28}
+                    height={28}
+                    className="rounded-full"
+                  />
+                )}
+                <span className="font-semibold">
+                  {chain_data?.name}
+                </span>
+              </Wallet> :
+              callResponse || approveResponse ?
+                [callResponse || approveResponse].map((r, i) => (
+                  <Alert
+                    key={i}
+                    color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                    icon={r.status === 'failed' ?
+                      <BiMessageError className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
+                      r.status === 'success' ?
+                        <BiMessageCheck className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
+                        r.status === 'pending' ?
+                          <div className="mr-2.5">
+                            <Watch color="white" width="16" height="16" />
+                          </div> :
+                          <BiMessageDetail className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" />
+                    }
+                    closeDisabled={true}
+                    rounded={true}
+                    className="rounded-xl p-3"
+                  >
+                    <div className="flex items-center justify-between space-x-2">
+                      <span className={`leading-5 ${r.status === 'failed' ? 'break-all text-xs' : 'break-word'}`}>
+                        {ellipse(r.message, 128)}
+                      </span>
+                      <div className="flex items-center space-x-2">
+                        {/*r.status === 'failed' && r.message && (
+                          <Copy
+                            value={r.message}
+                            size={18}
+                            className="cursor-pointer text-slate-200 hover:text-white"
+                          />
+                        )*/}
+                        {chain_data?.explorer?.url && r.tx_hash && (
+                          <a
+                            href={`${chain_data.explorer.url}${chain_data.explorer.transaction_path?.replace('{tx}', r.tx_hash)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <TiArrowRight size={20} className="transform -rotate-45" />
+                          </a>
+                        )}
+                        {r.status === 'failed' ?
                           <button
                             onClick={() => reset()}
-                            className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                            className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                           >
                             <MdClose size={16} />
                           </button>
                           :
-                          null
-                      }
+                          r.status === 'success' ?
+                            <button
+                              onClick={() => reset()}
+                              className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                            >
+                              <MdClose size={16} />
+                            </button>
+                            :
+                            null
+                        }
+                      </div>
                     </div>
-                  </div>
-                </Alert>
-              )) :
-              web3_provider ?
-                <button
-                  disabled={disabled || !valid_amount}
-                  onClick={() => call(pool_data)}
-                  className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
-                >
-                  <span className="flex items-center justify-center space-x-1.5">
-                    {(calling || approving) && (
-                      <TailSpin color="white" width="20" height="20" />
-                    )}
-                    <span>
-                      {calling ?
-                        approving ?
-                          approveProcessing ?
-                            'Approving' :
-                            'Please Approve' :
-                          callProcessing ?
-                            'Adding' :
-                            typeof approving === 'boolean' ?
-                              'Please Confirm' :
-                              'Checking Approval' :
-                        'Supply'
-                      }
+                  </Alert>
+                )) :
+                web3_provider ?
+                  <button
+                    disabled={disabled || !valid_amount}
+                    onClick={() => call(pool_data)}
+                    className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
+                  >
+                    <span className="flex items-center justify-center space-x-1.5">
+                      {(calling || approving) && (
+                        <TailSpin color="white" width="20" height="20" />
+                      )}
+                      <span>
+                        {calling ?
+                          approving ?
+                            approveProcessing ?
+                              'Approving' :
+                              'Please Approve' :
+                            callProcessing ?
+                              'Adding' :
+                              typeof approving === 'boolean' ?
+                                'Please Confirm' :
+                                'Checking Approval' :
+                          'Supply'
+                        }
+                      </span>
                     </span>
-                  </span>
-                </button> :
-                <Wallet
-                  connectChainId={chain_id}
-                  buttonConnectTitle="Connect Wallet"
-                  className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center sm:space-x-2 py-3 px-2 sm:px-3"
-                >
-                  <span>
-                    Connect Wallet
-                  </span>
-                </Wallet>
+                  </button> :
+                  <Wallet
+                    connectChainId={_chain_id}
+                    buttonConnectTitle="Connect Wallet"
+                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center py-3 px-2 sm:px-3"
+                  >
+                    <span>
+                      Connect Wallet
+                    </span>
+                  </Wallet>
             }
           </div>
         </> :
@@ -964,103 +987,124 @@ export default ({
             </div>
           </div>
           <div className="flex items-end">
-            {callResponse || approveResponse ?
-              [callResponse || approveResponse].map((r, i) => (
-                <Alert
-                  key={i}
-                  color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
-                  icon={r.status === 'failed' ?
-                    <BiMessageError className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
-                    r.status === 'success' ?
-                      <BiMessageCheck className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
-                      r.status === 'pending' ?
-                        <div className="mr-2.5">
-                          <Watch color="white" width="16" height="16" />
-                        </div> :
-                        <BiMessageDetail className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" />
-                  }
-                  closeDisabled={true}
-                  rounded={true}
-                  className="rounded-xl p-3"
-                >
-                  <div className="flex items-center justify-between space-x-2">
-                    <span className="leading-5 break-all text-xs">
-                      {ellipse(r.message, 128)}
-                    </span>
-                    <div className="flex items-center space-x-2">
-                      {/*r.status === 'failed' && r.message && (
-                        <Copy
-                          value={r.message}
-                          size={18}
-                          className="cursor-pointer text-slate-200 hover:text-white"
-                        />
-                      )*/}
-                      {chain_data?.explorer?.url && r.tx_hash && (
-                        <a
-                          href={`${chain_data.explorer.url}${chain_data.explorer.transaction_path?.replace('{tx}', r.tx_hash)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <TiArrowRight size={20} className="transform -rotate-45" />
-                        </a>
-                      )}
-                      {r.status === 'failed' ?
-                        <button
-                          onClick={() => reset()}
-                          className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                        >
-                          <MdClose size={16} />
-                        </button>
-                        :
-                        r.status === 'success' ?
+            {web3_provider && wrong_chain ?
+              <Wallet
+                connectChainId={_chain_id}
+                className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg space-x-1.5 sm:space-x-2 py-3  px-2 sm:px-3"
+              >
+                <span className="mr-1.5 sm:mr-2">
+                  {is_walletconnect ? 'Reconnect' : 'Switch'} to
+                </span>
+                {chain_data?.image && (
+                  <Image
+                    src={chain_data.image}
+                    alt=""
+                    width={28}
+                    height={28}
+                    className="rounded-full"
+                  />
+                )}
+                <span className="font-semibold">
+                  {chain_data?.name}
+                </span>
+              </Wallet> :
+              callResponse || approveResponse ?
+                [callResponse || approveResponse].map((r, i) => (
+                  <Alert
+                    key={i}
+                    color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                    icon={r.status === 'failed' ?
+                      <BiMessageError className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
+                      r.status === 'success' ?
+                        <BiMessageCheck className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
+                        r.status === 'pending' ?
+                          <div className="mr-2.5">
+                            <Watch color="white" width="16" height="16" />
+                          </div> :
+                          <BiMessageDetail className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" />
+                    }
+                    closeDisabled={true}
+                    rounded={true}
+                    className="rounded-xl p-3"
+                  >
+                    <div className="flex items-center justify-between space-x-2">
+                      <span className={`leading-5 ${r.status === 'failed' ? 'break-all text-xs' : 'break-word'}`}>
+                        {ellipse(r.message, 128)}
+                      </span>
+                      <div className="flex items-center space-x-2">
+                        {/*r.status === 'failed' && r.message && (
+                          <Copy
+                            value={r.message}
+                            size={18}
+                            className="cursor-pointer text-slate-200 hover:text-white"
+                          />
+                        )*/}
+                        {chain_data?.explorer?.url && r.tx_hash && (
+                          <a
+                            href={`${chain_data.explorer.url}${chain_data.explorer.transaction_path?.replace('{tx}', r.tx_hash)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <TiArrowRight size={20} className="transform -rotate-45" />
+                          </a>
+                        )}
+                        {r.status === 'failed' ?
                           <button
                             onClick={() => reset()}
-                            className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                            className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                           >
                             <MdClose size={16} />
                           </button>
                           :
-                          null
-                      }
+                          r.status === 'success' ?
+                            <button
+                              onClick={() => reset()}
+                              className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                            >
+                              <MdClose size={16} />
+                            </button>
+                            :
+                            null
+                        }
+                      </div>
                     </div>
-                  </div>
-                </Alert>
-              )) :
-              web3_provider ?
-                <button
-                  disabled={disabled || !valid_amount}
-                  onClick={() => call(pool_data)}
-                  className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
-                >
-                  <span className="flex items-center justify-center space-x-1.5">
-                    {(calling || approving) && (
-                      <TailSpin color="white" width="20" height="20" />
-                    )}
-                    <span>
-                      {calling ?
-                        approving ?
-                          approveProcessing ?
-                            'Approving' :
-                            'Please Approve' :
-                          callProcessing ?
-                            'Removing' :
-                            typeof approving === 'boolean' ?
-                              'Please Confirm' :
-                              'Checking Approval' :
-                        'Remove'
-                      }
+                  </Alert>
+                )) :
+                web3_provider ?
+                  <button
+                    disabled={disabled || !valid_amount}
+                    onClick={() => call(pool_data)}
+                    className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
+                  >
+                    <span className="flex items-center justify-center space-x-1.5">
+                      {(calling || approving) && (
+                        <TailSpin color="white" width="20" height="20" />
+                      )}
+                      <span>
+                        {calling ?
+                          approving ?
+                            approveProcessing ?
+                              'Approving' :
+                              'Please Approve' :
+                            callProcessing ?
+                              'Removing' :
+                              typeof approving === 'boolean' ?
+                                'Please Confirm' :
+                                'Checking Approval' :
+                          'Remove'
+                        }
+                      </span>
                     </span>
-                  </span>
-                </button> :
-                <Wallet
-                  connectChainId={chain_id}
-                  buttonConnectTitle="Connect Wallet"
-                  className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center sm:space-x-2 py-3 px-2 sm:px-3"
-                >
-                  <span>
-                    Connect Wallet
-                  </span>
-                </Wallet>
+                  </button> :
+                  <Wallet
+                    connectChainId={_chain_id}
+                    buttonConnectTitle="Connect Wallet"
+                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center py-3 px-2 sm:px-3"
+                  >
+                    <span>
+                      Connect Wallet
+                    </span>
+                  </Wallet>
             }
           </div>
         </div>
