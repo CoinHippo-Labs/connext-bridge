@@ -45,7 +45,7 @@ export default ({
   const user_pool_data = pool_data && user_pools_data?.find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
   const {
     share,
-    tokens,
+    lpTokenBalance,
     tokensX,
     tokensY,
   } = { ...user_pool_data }
@@ -229,9 +229,9 @@ export default ({
                   Pool Tokens
                 </span>
                 <span className="text-lg font-bold">
-                  {!isNaN(tokens) || (pool_data && user_pools_data) ?
+                  {!isNaN(lpTokenBalance) || (pool_data && user_pools_data) ?
                     <>
-                      {number_format(tokens || 0, '0,0.00')}
+                      {number_format(lpTokenBalance || 0, '0,0.00')}
                     </> :
                     selected && !no_pool && (
                       position_loading ?

@@ -9,7 +9,7 @@ export default ({ data }) => {
   const { theme } = { ...preferences }
 
   return (
-    <div className="rounded-2xl py-2">
+    <div className="rounded-2xl pt-1">
       {data ?
         <div className="grid grid-flow-row grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col space-y-0.5">
@@ -45,7 +45,9 @@ export default ({ data }) => {
             </span>
           </div>
         </div> :
-        <TailSpin color={loader_color(theme)} width="36" height="36" />
+        <div className="flex items-center justify-center">
+          <TailSpin color={loader_color(theme)} width="36" height="36" />
+        </div>
       }
     </div>
   )

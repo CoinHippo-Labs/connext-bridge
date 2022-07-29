@@ -92,7 +92,7 @@ export default () => {
     }
     if (updated) {
       setSwap(swap)
-      setPairTrigger(moment().valueOf())
+      // setPairTrigger(moment().valueOf())
     }
   }, [asPath, chains_data, pool_assets_data])
 
@@ -194,6 +194,9 @@ export default () => {
     const getData = async () => {
       if (sdk && address && swap?.chain) {
         try {
+          if (pair === undefined) {
+            setPair(null)
+          }
           const {
             chain,
             asset,
@@ -212,24 +215,29 @@ export default () => {
             domain_id,
             contract_address,
           )
-          setPair(([response].map(p => {
-            const {
-              symbol,
-            } = { ...p }
-            const symbols = symbol?.split('-') || []
-            const asset_data = pool_assets_data.find(a => symbols.findIndex(s => equals_ignore_case(s, a?.symbol)) > -1 || a?.contracts?.findIndex(c => c?.chain_id === chain_id && symbols.findIndex(s => equals_ignore_case(s, c?.symbol)) > -1) > -1)
-            return {
-              ...p,
-              chain_data,
-              asset_data,
-              symbols,
-            }
-          }) || [pair] || []).find(p => equals_ignore_case(p?.asset_data?.id, asset)))
-        } catch (error) {}
+          setPair((response ?
+            [response].map(p => {
+              const {
+                symbol,
+              } = { ...p }
+              const symbols = symbol?.split('-') || []
+              const asset_data = pool_assets_data.find(a => symbols.findIndex(s => equals_ignore_case(s, a?.symbol)) > -1 || a?.contracts?.findIndex(c => c?.chain_id === chain_id && symbols.findIndex(s => equals_ignore_case(s, c?.symbol)) > -1) > -1)
+              return {
+                ...p,
+                chain_data,
+                asset_data,
+                symbols,
+              }
+            }) :
+            [pair] || []
+          ).find(p => equals_ignore_case(p?.domainId, domain_id) && equals_ignore_case(p?.asset_data?.id, asset)))
+        } catch (error) {
+          setPair(undefined)
+        }
       }
     }
     getData()
-  }, [sdk, address, pairTrigger])
+  }, [sdk, address, swap, pairTrigger])
 
   const getBalances = chain => {
     const getBalance = async (chain_id, contract_data) => {
@@ -507,7 +515,7 @@ export default () => {
   const y_balance = y_asset_data && balances_data?.[_chain_id]?.find(b => equals_ignore_case(b?.contract_address, y_asset_data.contract_address))
   const y_balance_amount = y_balance && Number(y_balance.amount)
 
-  const valid_amount = amount && amount <= x_balance_amount && amount <= y_balance_amount
+  const valid_amount = amount && amount <= (origin === 'x' ? x_balance_amount : y_balance_amount)
 
   const wrong_chain = chain_data && chain_id !== _chain_id && !callResponse
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
@@ -524,7 +532,7 @@ export default () => {
           <h1 className="text-2xl font-bold">
             Swap
           </h1>
-          <div className={`${valid_amount ? 'border-2 border-blue-400 dark:border-blue-800 shadow-xl shadow-blue-200 dark:shadow-blue-600' : 'shadow dark:shadow-slate-400'} rounded-2xl flex flex-col items-center space-y-4 py-8 px-6`}>
+          <div className={`${valid_amount ? 'border-2 border-blue-400 dark:border-blue-800 shadow-xl shadow-blue-200 dark:shadow-blue-600' : 'shadow dark:shadow-slate-400'} rounded-2xl flex flex-col items-center space-y-6 py-8 px-6`}>
             <div className="w-full space-y-5">
               <div className="bg-slate-50 dark:bg-slate-900 rounded-xl space-y-2 sm:space-y-0 p-4">
                 <div className="flex items-center justify-between">
@@ -783,20 +791,18 @@ export default () => {
                         Max
                       </div>
                     </div>
-                    {typeof amount === 'number' && typeof (origin === 'x' ? y_balance_amount : x_balance_amount) === 'number' && amount > (origin === 'x' ? y_balance_amount : x_balance_amount) && (
-                      <div className="flex items-center text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
-                        <BiMessageError size={16} className="min-w-max" />
-                        <span className="text-xs font-medium">
-                          Not enough {(origin === 'x' ? y_asset_data : x_asset_data)?.symbol}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
-              <Info
-                data={pair}
-              />
+              {chain && asset && (
+                pair === undefined ?
+                  <div className="text-slate-400 dark:text-slate-600 text-lg italic text-center sm:ml-3">
+                    Route not supported
+                  </div> :
+                  <Info
+                    data={pair}
+                  />
+              )}
             </div>
             <div className="w-full max-w-4xl">
               {web3_provider && wrong_chain ?
@@ -826,14 +832,14 @@ export default () => {
                       setSlippageEditing(false)
                     }}
                     buttonTitle="Swap"
-                    buttonClassName="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg py-3 sm:py-4 px-2 sm:px-3"
+                    buttonClassName={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
                     title="Swap Confirmation"
                     body={<div className="flex flex-col space-y-4 -mb-2">
-                      <div className="flex items-center space-x-6 mx-auto pt-2 pb-1">
+                      <div className="flex items-end space-x-6 mx-auto pt-2 pb-1">
                         <div className="flex flex-col items-center space-y-1">
-                          {asset_data?.image && (
+                          {(origin === 'x' ? x_asset_data : y_asset_data)?.image && (
                             <Image
-                              src={asset_data?.image}
+                              src={(origin === 'x' ? x_asset_data : y_asset_data).image}
                               alt=""
                               width={40}
                               height={40}
@@ -841,10 +847,10 @@ export default () => {
                             />
                           )}
                           <span className="text-lg font-bold">
-                            {asset_data?.symbol}
+                            {(origin === 'x' ? x_asset_data : y_asset_data)?.symbol}
                           </span>
                         </div>
-                        <span className="text-slate-400 dark:text-white text-base font-semibold">
+                        <span className="text-slate-400 dark:text-slate-500 text-base font-normal mb-0.5">
                           on
                         </span>
                         <div className="flex flex-col items-center space-y-1">
@@ -1118,9 +1124,9 @@ export default () => {
                     )) :
                     web3_provider ?
                       <button
-                        disabled={disabled || !valid_amount}
+                        disabled={disabled || !pair || !valid_amount}
                         onClick={() => call()}
-                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
+                        className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
                       >
                         <span className="flex items-center justify-center space-x-1.5">
                           {(calling || approving) && (
@@ -1133,7 +1139,7 @@ export default () => {
                                   'Approving' :
                                   'Please Approve' :
                                 callProcessing ?
-                                  'Adding' :
+                                  'Swaping' :
                                   typeof approving === 'boolean' ?
                                     'Please Confirm' :
                                     'Checking Approval' :

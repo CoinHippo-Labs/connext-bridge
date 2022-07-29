@@ -468,14 +468,14 @@ export default ({
 
   const user_pool_data = pool_data && user_pools_data?.find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
   const {
+    lpTokenBalance,
     tokensX,
     tokensY,
   } = { ...user_pool_data }
-  const _tokens = user_pool_data?.tokens
   const position_loading = selected && !no_pool && (!user_pools_data || pool_loading)
 
   const valid_amount = action === 'remove' ?
-    amount/* && amount < _tokens*/ :
+    amount/* && amount < lpTokenBalance*/ :
     amountX && amountY && amountX <= x_balance_amount && amountY <= y_balance_amount
 
   const wrong_chain = chain_id !== _chain_id && !callResponse
@@ -911,7 +911,7 @@ export default ({
                 onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                 className={`w-full bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
               />
-              {typeof amount === 'number' && typeof _tokens === 'number' && amount > _tokens && (
+              {typeof amount === 'number' && typeof lpTokenBalance === 'number' && amount > lpTokenBalance && (
                 <div className="flex items-center text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
                   <BiMessageError size={16} className="min-w-max" />
                   <span className="text-xs font-medium">
@@ -924,8 +924,8 @@ export default ({
               {[0.25, 0.5, 0.75, 1.0].map((p, i) => (
                 <div
                   key={i}
-                  onClick={() => setAmount(p * _tokens)}
-                  className={`${disabled || !_tokens ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === _tokens ? 'bg-slate-200 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-semibold'} rounded-lg shadow dark:shadow-slate-500 py-0.5 px-2`}
+                  onClick={() => setAmount(p * lpTokenBalance)}
+                  className={`${disabled || !lpTokenBalance ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-200 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-semibold'} rounded-lg shadow dark:shadow-slate-500 py-0.5 px-2`}
                 >
                   {p * 100} %
                 </div>

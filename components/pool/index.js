@@ -164,18 +164,24 @@ export default () => {
           setPools(response?.map(p => {
             const {
               info,
+              lpTokenBalance,
             } = { ...p }
             const {
               symbol,
             } = { ...info }
             const symbols = symbol?.split('-') || []
             const asset_data = pool_assets_data.find(a => symbols.findIndex(s => equals_ignore_case(s, a?.symbol)) > -1 || a?.contracts?.findIndex(c => c?.chain_id === chain_id && symbols.findIndex(s => equals_ignore_case(s, c?.symbol)) > -1) > -1)
+            const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_id)
+            const {
+              decimals,
+            } = { ...contract_data }
             return {
               ...p,
               chain_data,
               asset_data,
               symbols,
               ...info,
+              lpTokenBalance: utils.formatUnits(BigNumber.from(lpTokenBalance || '0'), decimals || 18),
             }
           }) || pools || [])
         } catch (error) {}
