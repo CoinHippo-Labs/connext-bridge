@@ -16,6 +16,7 @@ export default ({
   chain,
   origin = 'source',
   is_pool = false,
+  data,
 }) => {
   const { preferences, chains, assets, pool_assets } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, pool_assets: state.pool_assets }), shallowEqual)
   const { theme } = { ...preferences }
@@ -34,7 +35,7 @@ export default ({
 
   const chain_data = chains_data?.find(c => c?.id === chain)
   const _assets_data = is_pool ? pool_assets_data : assets_data
-  const asset_data = _assets_data?.find(c => c?.id === value)
+  const asset_data = data || _assets_data?.find(c => c?.id === value)
   const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
   const image = contract_data?.image || asset_data?.image
 

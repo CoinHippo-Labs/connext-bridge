@@ -588,6 +588,7 @@ export default () => {
                       chain={chain}
                       origin=""
                       is_pool={true}
+                      data={origin === 'x' ? x_asset_data : y_asset_data}
                     />
                   </div>
                   <div className="space-y-1">
@@ -643,7 +644,7 @@ export default () => {
                       <div className="flex items-center text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
                         <BiMessageError size={16} className="min-w-max" />
                         <span className="text-xs font-medium">
-                          Not enough {(origin === 'x' ? x_balance_amount : y_balance_amount)?.symbol}
+                          Not enough {(origin === 'x' ? x_asset_data : y_asset_data)?.symbol}
                         </span>
                       </div>
                     )}
@@ -657,13 +658,13 @@ export default () => {
                     console.log('[Swap]', {
                       swap: {
                         ...swap,
-                        from: origin === 'x' ? 'y' : origin,
+                        origin: origin === 'x' ? 'y' : 'x',
                         amount: null,
                       },
                     })
                     setSwap({
                       ...swap,
-                      from: origin === 'x' ? 'y' : origin,
+                      origin: origin === 'x' ? 'y' : 'x',
                       amount: null,
                     })
                     getBalances(chain)
@@ -714,9 +715,9 @@ export default () => {
                       </span>
                     </div>
                     <div className="w-48 sm:h-16 min-w-max flex items-center justify-center space-x-1.5 py-2 px-3">
-                      {(origin === 'x' ? y_asset_data : xasset_data)?.image && (
+                      {(origin === 'x' ? y_asset_data : x_asset_data)?.image && (
                         <Image
-                          src={(origin === 'x' ? y_asset_data : xasset_data).image}
+                          src={(origin === 'x' ? y_asset_data : x_asset_data).image}
                           alt=""
                           width={24}
                           height={24}
@@ -724,8 +725,8 @@ export default () => {
                         />
                       )}
                       <span className="text-sm sm:text-base font-semibold">
-                        {(origin === 'x' ? y_asset_data : xasset_data)?.symbol ?
-                          (origin === 'x' ? y_asset_data : xasset_data).symbol :
+                        {(origin === 'x' ? y_asset_data : x_asset_data)?.symbol ?
+                          (origin === 'x' ? y_asset_data : x_asset_data).symbol :
                           <span className="text-slate-400 dark:text-slate-500">
                             To Token
                           </span>
@@ -786,7 +787,7 @@ export default () => {
                       <div className="flex items-center text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
                         <BiMessageError size={16} className="min-w-max" />
                         <span className="text-xs font-medium">
-                          Not enough {(origin === 'x' ? y_balance_amount : x_balance_amount)?.symbol}
+                          Not enough {(origin === 'x' ? y_asset_data : x_asset_data)?.symbol}
                         </span>
                       </div>
                     )}
