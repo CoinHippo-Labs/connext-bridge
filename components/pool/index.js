@@ -163,13 +163,19 @@ export default () => {
           )
           setPools(response?.map(p => {
             const {
-              symbol,
+              info,
             } = { ...p }
-            const asset_data = pool_assets_data.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === chain_id && equals_ignore_case(c?.symbol, symbol)) > -1)
+            const {
+              symbol,
+            } = { ...info }
+            const symbols = symbol?.split('-') || []
+            const asset_data = pool_assets_data.find(a => symbols.findIndex(s => equals_ignore_case(s, a?.symbol)) > -1 || a?.contracts?.findIndex(c => c?.chain_id === chain_id && symbols.findIndex(s => equals_ignore_case(s, c?.symbol)) > -1) > -1)
             return {
               ...p,
               chain_data,
               asset_data,
+              symbols,
+              ...info,
             }
           }) || pools || [])
         } catch (error) {}
@@ -221,7 +227,7 @@ export default () => {
           chain_id,
           contract_address: t,
           decimals: p.decimals?.[i],
-          symbol: p.symbol?.split('-')[i],
+          symbol: p.symbols?.[i],
         }
       }) || []) || [],
     ).filter(a => a?.contract_address).map(a => {

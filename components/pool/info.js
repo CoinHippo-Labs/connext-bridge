@@ -38,8 +38,8 @@ export default ({
     fees,
     apy,
     symbol,
+    symbols,
   } = { ...pool_data }
-  const symbols = symbol?.split('-')
   const pool_loading = selected && !no_pool && !pool_data
 
   const user_pool_data = pool_data && user_pools_data?.find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)

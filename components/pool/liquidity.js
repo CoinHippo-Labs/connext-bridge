@@ -150,6 +150,7 @@ export default ({
         tokens,
         decimals,
         symbol,
+        symbols,
       } = { ...pool_data }
       const x_asset_data = tokens?.[0] && {
         ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
@@ -160,7 +161,7 @@ export default ({
               chain_id,
               contract_address: tokens[0],
               decimals: decimals?.[0],
-              symbol: symbol?.split('-')[0],
+              symbol: symbols?.[0],
             }
         ),
       }
@@ -173,7 +174,7 @@ export default ({
               chain_id,
               contract_address: tokens[1],
               decimals: decimals?.[1],
-              symbol: symbol?.split('-')[1],
+              symbol: symbols?.[1],
             }
         ),
       }
@@ -290,7 +291,10 @@ export default ({
                 domainId,
                 tokenAddress: contract_data?.contract_address,
               })
-              const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(domainId, contract_data?.contract_address)
+              const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(
+                domainId,
+                contract_data?.contract_address,
+              )
               console.log('[Add Liquidity]', {
                 domainId,
                 canonicalId,
@@ -348,7 +352,10 @@ export default ({
                 domainId,
                 tokenAddress: contract_data?.contract_address,
               })
-              const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(domainId, contract_data?.contract_address)
+              const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(
+                domainId,
+                contract_data?.contract_address,
+              )
               console.log('[Remove Liquidity]', {
                 domainId,
                 canonicalId,
@@ -425,6 +432,7 @@ export default ({
     tokens,
     decimals,
     symbol,
+    symbols,
   } = { ...pool_data }
   const x_asset_data = tokens?.[0] && {
     ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
@@ -432,10 +440,10 @@ export default ({
       equals_ignore_case(tokens[0], contract_data?.contract_address) ?
         contract_data :
         {
-          _chain_id,
+          chain_id: _chain_id,
           contract_address: tokens[0],
           decimals: decimals?.[0],
-          symbol: symbol?.split('-')[0],
+          symbol: symbols?.[0],
         }
     ),
   }
@@ -447,10 +455,10 @@ export default ({
       equals_ignore_case(tokens[1], contract_data?.contract_address) ?
         contract_data :
         {
-          _chain_id,
+          chain_id: _chain_id,
           contract_address: tokens[1],
           decimals: decimals?.[1],
-          symbol: symbol?.split('-')[1],
+          symbol: symbols?.[1],
         }
     ),
   }

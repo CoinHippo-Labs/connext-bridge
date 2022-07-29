@@ -1,16 +1,15 @@
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
+import { Contract, FixedNumber, constants, utils } from 'ethers'
 import Switch from 'react-switch'
-import { TailSpin } from 'react-loader-spinner'
+import { TailSpin, Watch } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdSwapVert, MdClose } from 'react-icons/md'
-import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit, BiEditAlt, BiCheckCircle } from 'react-icons/bi'
+import { BiMessageError, BiMessageCheck, BiMessageDetail, BiEditAlt, BiCheckCircle } from 'react-icons/bi'
 
 import Announcement from '../announcement'
 import SelectChain from '../select/chain'
@@ -27,8 +26,8 @@ import { currency_symbol } from '../../lib/object/currency'
 import { params_to_obj, number_format, ellipse, equals_ignore_case, sleep } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
+const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT) || 1
 const DEFAULT_SWAP_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_SWAP_SLIPPAGE_PERCENTAGE) || 3
-
 const DEFAULT_OPTIONS = {
   infiniteApprove: false,
   slippage: DEFAULT_SWAP_SLIPPAGE_PERCENTAGE,
@@ -73,7 +72,7 @@ export default () => {
     let path = !asPath ? '/' : asPath.toLowerCase()
     path = path.includes('?') ? path.substring(0, path.indexOf('?')) : path
     if (path.includes('on-')) {
-      const paths = path.replace('/swap', '').split('-')
+      const paths = path.replace('/swap/', '').split('-')
       const chain = paths[paths.indexOf('on') + 1]
       const chain_data = chains_data?.find(c => c?.id === chain)
       const asset = paths[0] !== 'on' ? paths[0] : null
@@ -204,18 +203,28 @@ export default () => {
             chain_id,
             domain_id,
           } = { ...chain_data }
-          const response = await sdk.nxtpSdkUtils.getPools(domain_id)
-          setPair((response?.map(p => {
+          const asset_data = pool_assets_data.find(a => a?.id === asset)
+          const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_id)
+          const {
+            contract_address,
+          } = { ...contract_data }
+          const response = await sdk.nxtpSdkPool.getPool(
+            domain_id,
+            contract_address,
+          )
+          setPair(([response].map(p => {
             const {
               symbol,
             } = { ...p }
-            const asset_data = pool_assets_data.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === chain_id && equals_ignore_case(c?.symbol, symbol)) > -1)
+            const symbols = symbol?.split('-') || []
+            const asset_data = pool_assets_data.find(a => symbols.findIndex(s => equals_ignore_case(s, a?.symbol)) > -1 || a?.contracts?.findIndex(c => c?.chain_id === chain_id && symbols.findIndex(s => equals_ignore_case(s, c?.symbol)) > -1) > -1)
             return {
               ...p,
               chain_data,
               asset_data,
+              symbols,
             }
-          }) || pair || []).find(p => equals_ignore_case(p?.symbol, asset)))
+          }) || [pair] || []).find(p => equals_ignore_case(p?.asset_data?.id, asset)))
         } catch (error) {}
       }
     }
@@ -265,7 +274,7 @@ export default () => {
           chain_id,
           contract_address: t,
           decimals: p.decimals?.[i],
-          symbol: p.symbol?.split('-')[i],
+          symbol: p.symbols?.[i],
         }
       }) || []) || [],
     ).filter(a => a?.contract_address).map(a => {
@@ -311,82 +320,128 @@ export default () => {
     setCalling(true)
     let success = false
     if (sdk) {
-      const { chain, asset, amount } = { ...swap }
+      const {
+        chain,
+        asset,
+      } = { ...swap }
+      let {
+        amount,
+      } = { ...swap }
       const chain_data = chains_data?.find(c => c?.id === chain)
       const asset_data = pool_assets_data?.find(a => a?.id === asset)
       const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
       const symbol = contract_data?.symbol || asset_data?.symbol
-      const decimals = contract_data?.decimals || 18
-      const { infiniteApprove, slippage } = { ...options }
-      // const xcallParams = {
-      //   params: {
-      //     originDomain: source_chain_data?.domain_id,
-      //     destinationDomain: destination_chain_data?.domain_id,
-      //   },
-      //   transactingAssetId: source_contract_data?.contract_address,
-      //   amount: utils.parseUnits(amount?.toString() || '0', decimals).toString(),
-      //   relayerFee: '0',
-      // }
-      // let failed = false
-      // try {
-      //   const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(xcallParams.params.originDomain, xcallParams.transactingAssetId, xcallParams.amount, infiniteApprove)
-      //   if (approve_request) {
-      //     setApproving(true)
-      //     const approve_response = await signer.sendTransaction(approve_request)
-      //     const tx_hash = approve_response?.hash
-      //     setApproveResponse({
-      //       status: 'pending',
-      //       message: `Wait for ${source_symbol} approval`,
-      //       tx_hash,
-      //     })
-      //     setApproveProcessing(true)
-      //     const approve_receipt = await signer.provider.waitForTransaction(tx_hash)
-      //     setApproveResponse(approve_receipt?.status ?
-      //       null : {
-      //         status: 'failed',
-      //         message: `Failed to approve ${source_symbol}`,
-      //         tx_hash,
-      //       }
-      //     )
-      //     failed = !approve_receipt?.status
-      //     setApproveProcessing(false)
-      //     setApproving(false)
-      //   }
-      // } catch (error) {
-      //   setApproveResponse({ status: 'failed', message: error?.data?.message || error?.message })
-      //   failed = true
-      //   setApproveProcessing(false)
-      //   setApproving(false)
-      // }
-      // if (!failed) {
-      //   try {
-      //     const xcall_request = await sdk.nxtpSdkBase.xcall(xcallParams)
-      //     if (xcall_request) {
-      //       let gasLimit = await signer.estimateGas(xcall_request)
-      //       if (gasLimit) {
-      //         gasLimit = FixedNumber.fromString(gasLimit.toString())
-      //           .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
-      //           .round(0).toString().replace('.0', '')
-      //         xcall_request.gasLimit = gasLimit
-      //       }
-      //       const xcall_response = await signer.sendTransaction(xcall_request)
-      //       const tx_hash = xcall_response?.hash
-      //       setCallProcessing(true)
-      //       const xcall_receipt = await signer.provider.waitForTransaction(tx_hash)
-      //       setXcall(xcall_receipt)
-      //       failed = !xcall_receipt?.status
-      //       setXcallResponse({
-      //         status: failed ? 'failed' : 'success',
-      //         message: failed ? 'Failed to send transaction' : `${source_symbol} transfer detected, waiting for execution.`,
-      //         tx_hash,
-      //       })
-      //       success = true
-      //     }
-      //   } catch (error) {
-      //     setXcallResponse({ status: 'failed', message: error?.data?.message || error?.message })
-      //     failed = true
-      //   }
-      // }
+
+      const {
+        infiniteApprove,
+      } = { ...options }
+      let {
+        deadline,
+      } = { ...options }
+      deadline = deadline && moment().add(deadline, 'minutes').valueOf()
+
+      let failed = false
+      if (!(amount)) {
+        failed = true
+        setApproving(false)
+      }
+      else {
+        amount = utils.parseUnits(amount.toString(), contract_data?.decimals || 18).toString()
+      }
+      if (!failed) {
+        try {
+          const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
+            domainId,
+            contract_data?.contract_address,
+            amount,
+            infiniteApprove,
+          )
+          if (approve_request) {
+            setApproving(true)
+            const approve_response = await signer.sendTransaction(approve_request)
+            const tx_hash = approve_response?.hash
+            setApproveResponse({
+              status: 'pending',
+              message: `Wait for ${contract_data?.symbol} approval`,
+              tx_hash,
+            })
+            setApproveProcessing(true)
+            const approve_receipt = await signer.provider.waitForTransaction(tx_hash)
+            setApproveResponse(approve_receipt?.status ?
+              null : {
+                status: 'failed',
+                message: `Failed to approve ${contract_data?.symbol}`,
+                tx_hash,
+              }
+            )
+            failed = !approve_receipt?.status
+            setApproveProcessing(false)
+            setApproving(false)
+          }
+          else {
+            setApproving(false)
+          }
+        } catch (error) {
+          setApproveResponse({
+            status: 'failed',
+            message: error?.data?.message || error?.message,
+          })
+          failed = true
+          setApproveProcessing(false)
+          setApproving(false)
+        }
+      }
+      if (!failed) {
+        try {
+          console.log('[getCanonicalFromLocal]', {
+            domainId,
+            tokenAddress: contract_data?.contract_address,
+          })
+          const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(domainId, contract_data?.contract_address)
+          console.log('[Swap]', {
+            domainId,
+            canonicalId,
+            from: contract_data?.contract_address,
+            to: contract_data?.contract_address,
+            amount,
+            deadline,
+          })
+          const swap_request = await sdk.nxtpSdkPool.swap(
+            domainId,
+            canonicalId,
+            contract_data?.contract_address,
+            contract_data?.contract_address,
+            amount,
+            deadline,
+          )
+          if (swap_request) {
+            let gasLimit = await signer.estimateGas(swap_request)
+            if (gasLimit) {
+              gasLimit = FixedNumber.fromString(gasLimit.toString())
+                .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
+                .round(0).toString().replace('.0', '')
+              swap_request.gasLimit = gasLimit
+            }
+            const swap_response = await signer.sendTransaction(swap_request)
+            const tx_hash = swap_response?.hash
+            setCallProcessing(true)
+            const swap_receipt = await signer.provider.waitForTransaction(tx_hash)
+            failed = !swap_receipt?.status
+            setCallResponse({
+              status: failed ? 'failed' : 'success',
+              message: failed ? `Failed to swap ${symbol}` : `Swap ${symbol} successful`,
+              tx_hash,
+            })
+            success = true
+          }
+        } catch (error) {
+          setCallResponse({
+            status: 'failed',
+            message: error?.data?.message || error?.message,
+          })
+          failed = true
+        }
+      }
     }
     setCallProcessing(false)
     setCalling(false)
@@ -400,29 +455,61 @@ export default () => {
     chain,
     asset,
     amount,
-    from,
   } = { ...swap }
+  let {
+    origin,
+  } = { ...swap }
+  origin = origin || 'x'
   const chain_data = chains_data?.find(c => c?.id === chain)
-  const asset_data = pool_assets_data?.find(a => a?.id === asset)
+  const _chain_id = chain_data?.chain_id
 
   const {
     slippage,
   } = { ...options }
 
-  const x_asset_data = asset_data
-  const y_asset_data = asset_data
-  const x_contract_data = x_asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
-  const y_contract_data = y_asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
-  const x_symbol = x_contract_data?.symbol || x_asset_data?.symbol
-  const y_symbol = y_contract_data?.symbol || y_asset_data?.symbol
-  const x_amount = amount
-  const y_amount = amount
+  const {
+    asset_data,
+    contract_data,
+    tokens,
+    decimals,
+    symbol,
+    symbols,
+    rate,
+  } = { ...pair }
+  const x_asset_data = tokens?.[0] && {
+    ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
+    ...(
+      equals_ignore_case(tokens[0], contract_data?.contract_address) ?
+        contract_data :
+        {
+          chain_id: _chain_id,
+          contract_address: tokens[0],
+          decimals: decimals?.[0],
+          symbol: symbols?.[0],
+        }
+    ),
+  }
+  const x_balance = x_asset_data && balances_data?.[_chain_id]?.find(b => equals_ignore_case(b?.contract_address, x_asset_data.contract_address))
+  const x_balance_amount = x_balance && Number(x_balance.amount)
+  const y_asset_data = tokens?.[1] && {
+    ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
+    ...(
+      equals_ignore_case(tokens[1], contract_data?.contract_address) ?
+        contract_data :
+        {
+          chain_id: _chain_id,
+          contract_address: tokens[1],
+          decimals: decimals?.[1],
+          symbol: symbols?.[1],
+        }
+    ),
+  }
+  const y_balance = y_asset_data && balances_data?.[_chain_id]?.find(b => equals_ignore_case(b?.contract_address, y_asset_data.contract_address))
+  const y_balance_amount = y_balance && Number(y_balance.amount)
 
-  const liquidity_amount = amount
-  const min_amount = 0
-  const valid = amount > min_amount && amount < liquidity_amount
+  const valid_amount = amount && amount <= x_balance_amount && amount <= y_balance_amount
 
-  const wrong_chain = chain_data && chain_id !== chain_data.chain_id && !calling
+  const wrong_chain = chain_data && chain_id !== _chain_id && !callResponse
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
 
   const disabled = calling || approving
@@ -437,21 +524,23 @@ export default () => {
           <h1 className="text-2xl font-bold">
             Swap
           </h1>
-          <div className={`${valid ? 'border-2 border-blue-400 dark:border-blue-800 shadow-xl shadow-blue-200 dark:shadow-blue-600' : 'shadow dark:shadow-slate-400'} rounded-2xl flex flex-col items-center space-y-4 py-8 px-6`}>
+          <div className={`${valid_amount ? 'border-2 border-blue-400 dark:border-blue-800 shadow-xl shadow-blue-200 dark:shadow-blue-600' : 'shadow dark:shadow-slate-400'} rounded-2xl flex flex-col items-center space-y-4 py-8 px-6`}>
             <div className="w-full space-y-5">
               <div className="bg-slate-50 dark:bg-slate-900 rounded-xl space-y-2 sm:space-y-0 p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-slate-400 dark:text-slate-600 text-sm font-bold">
                     From
                   </span>
-                  {web3_provider && x_asset_data && (
+                  {web3_provider && (origin === 'x' ? x_asset_data : y_asset_data) && (
                     <div className="flex items-center space-x-2">
                       <span className="text-slate-400 dark:text-slate-200 font-semibold">
                         Balance:
                       </span>
                       <Balance
-                        chainId={chain_data?.chain_id}
-                        asset={x_asset_data?.id}
+                        chainId={_chain_id}
+                        asset={asset}
+                        contractAddress={(origin === 'x' ? x_asset_data : y_asset_data).contract_address}
+                        symbol={(origin === 'x' ? x_asset_data : y_asset_data).symbol}
                       />
                     </div>
                   )}
@@ -460,7 +549,7 @@ export default () => {
                   <div className="w-full flex items-center justify-between sm:justify-start space-x-2 sm:space-x-4">
                     <SelectChain
                       disabled={disabled}
-                      value={chain_data?.id}
+                      value={chain}
                       onSelect={c => {
                         console.log('[Swap]', {
                           swap: {
@@ -480,7 +569,7 @@ export default () => {
                     />
                     <SelectAsset
                       disabled={disabled}
-                      value={asset_data?.id}
+                      value={asset}
                       onSelect={a => {
                         console.log('[Swap]', {
                           swap: {
@@ -496,58 +585,68 @@ export default () => {
                         })
                         getBalances(chain)
                       }}
-                      chain={chain_data?.id}
+                      chain={chain}
                       origin=""
                       is_pool={true}
                     />
                   </div>
-                  <div className="w-full flex items-center justify-between space-x-3">
-                    <DebounceInput
-                      debounceTimeout={300}
-                      size="small"
-                      type="number"
-                      placeholder="0.00"
-                      disabled={disabled || !asset_data?.id}
-                      value={typeof x_amount === 'number' && x_amount >= 0 ? x_amount : ''}
-                      onChange={e => {
-                        const regex = /^[0-9.\b]+$/
-                        let value
-                        if (e.target.value === '' || regex.test(e.target.value)) {
-                          value = e.target.value
-                        }
-                        value = value < 0 ? 0 : value
-                        console.log('[Swap]', {
-                          swap: {
+                  <div className="space-y-1">
+                    <div className="w-full flex items-center justify-between space-x-3">
+                      <DebounceInput
+                        debounceTimeout={300}
+                        size="small"
+                        type="number"
+                        placeholder="0.00"
+                        disabled={disabled}
+                        value={typeof amount === 'number' && amount >= 0 ? amount : ''}
+                        onChange={e => {
+                          const regex = /^[0-9.\b]+$/
+                          let value
+                          if (e.target.value === '' || regex.test(e.target.value)) {
+                            value = e.target.value
+                          }
+                          value = value < 0 ? 0 : value
+                          console.log('[Swap]', {
+                            swap: {
+                              ...swap,
+                              amount: value && !isNaN(value) ? Number(value) : value,
+                            },
+                          })
+                          setSwap({
                             ...swap,
                             amount: value && !isNaN(value) ? Number(value) : value,
-                          },
-                        })
-                        setSwap({
-                          ...swap,
-                          amount: value && !isNaN(value) ? Number(value) : value,
-                        })
-                      }}
-                      onWheel={e => e.target.blur()}
-                      onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                      className={`w-full bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
-                    />
-                    <div
-                      onClick={() => {
-                        console.log('[Swap]', {
-                          swap: {
+                          })
+                        }}
+                        onWheel={e => e.target.blur()}
+                        onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                        className={`w-full bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
+                      />
+                      <div
+                        onClick={() => {
+                          console.log('[Swap]', {
+                            swap: {
+                              ...swap,
+                              amount: origin === 'x' ? x_balance_amount : y_balance_amount,
+                            },
+                          })
+                          setSwap({
                             ...swap,
-                            amount: x_amount,
-                          },
-                        })
-                        setSwap({
-                          ...swap,
-                          amount: x_amount,
-                        })
-                      }}
-                      className={`${disabled || !asset_data?.id ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
-                    >
-                      Max
+                            amount: origin === 'x' ? x_balance_amount : y_balance_amount,
+                          })
+                        }}
+                        className={`${disabled || typeof (origin === 'x' ? x_balance_amount : y_balance_amount) !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
+                      >
+                        Max
+                      </div>
                     </div>
+                    {typeof amount === 'number' && typeof (origin === 'x' ? x_balance_amount : y_balance_amount) === 'number' && amount > (origin === 'x' ? x_balance_amount : y_balance_amount) && (
+                      <div className="flex items-center text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
+                        <BiMessageError size={16} className="min-w-max" />
+                        <span className="text-xs font-medium">
+                          Not enough {(origin === 'x' ? x_balance_amount : y_balance_amount)?.symbol}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -558,13 +657,13 @@ export default () => {
                     console.log('[Swap]', {
                       swap: {
                         ...swap,
-                        from: !from || from === 'native' ? 'nomad' : 'native',
+                        from: origin === 'x' ? 'y' : origin,
                         amount: null,
                       },
                     })
                     setSwap({
                       ...swap,
-                      from: !from || from === 'native' ? 'nomad' : 'native',
+                      from: origin === 'x' ? 'y' : origin,
                       amount: null,
                     })
                     getBalances(chain)
@@ -579,14 +678,16 @@ export default () => {
                   <span className="text-slate-400 dark:text-slate-600 text-sm font-bold">
                     To
                   </span>
-                  {web3_provider && y_asset_data && (
+                  {web3_provider && (origin === 'x' ? y_asset_data : x_asset_data) && (
                     <div className="flex items-center space-x-2">
                       <span className="text-slate-400 dark:text-slate-200 font-semibold">
                         Balance:
                       </span>
                       <Balance
-                        chainId={chain_data?.chain_id}
-                        asset={y_asset_data?.id}
+                        chainId={_chain_id}
+                        asset={asset}
+                        contractAddress={(origin === 'x' ? y_asset_data : x_asset_data).contract_address}
+                        symbol={(origin === 'x' ? y_asset_data : x_asset_data).symbol}
                       />
                     </div>
                   )}
@@ -613,9 +714,9 @@ export default () => {
                       </span>
                     </div>
                     <div className="w-48 sm:h-16 min-w-max flex items-center justify-center space-x-1.5 py-2 px-3">
-                      {(y_contract_data?.image || y_asset_data?.image) && (
+                      {(origin === 'x' ? y_asset_data : xasset_data)?.image && (
                         <Image
-                          src={y_contract_data?.image || y_asset_data?.image}
+                          src={(origin === 'x' ? y_asset_data : xasset_data).image}
                           alt=""
                           width={24}
                           height={24}
@@ -623,8 +724,8 @@ export default () => {
                         />
                       )}
                       <span className="text-sm sm:text-base font-semibold">
-                        {y_symbol ?
-                          y_symbol :
+                        {(origin === 'x' ? y_asset_data : xasset_data)?.symbol ?
+                          (origin === 'x' ? y_asset_data : xasset_data).symbol :
                           <span className="text-slate-400 dark:text-slate-500">
                             To Token
                           </span>
@@ -632,314 +733,395 @@ export default () => {
                       </span>
                     </div>
                   </div>
-                  <div className="w-full flex items-center justify-between space-x-3">
-                    <DebounceInput
-                      debounceTimeout={300}
-                      size="small"
-                      type="number"
-                      placeholder="0.00"
-                      disabled={disabled || !asset_data?.id}
-                      value={typeof x_amount === 'number' && x_amount >= 0 ? x_amount : ''}
-                      onChange={e => {
-                        const regex = /^[0-9.\b]+$/
-                        let value
-                        if (e.target.value === '' || regex.test(e.target.value)) {
-                          value = e.target.value
-                        }
-                        value = value < 0 ? 0 : value
-                        console.log('[Swap]', {
-                          swap: {
+                  <div className="space-y-1">
+                    <div className="w-full flex items-center justify-between space-x-3">
+                      <DebounceInput
+                        debounceTimeout={300}
+                        size="small"
+                        type="number"
+                        placeholder="0.00"
+                        disabled={disabled}
+                        value={typeof amount === 'number' && amount >= 0 ? amount : ''}
+                        onChange={e => {
+                          const regex = /^[0-9.\b]+$/
+                          let value
+                          if (e.target.value === '' || regex.test(e.target.value)) {
+                            value = e.target.value
+                          }
+                          value = value < 0 ? 0 : value
+                          console.log('[Swap]', {
+                            swap: {
+                              ...swap,
+                              amount: value && !isNaN(value) ? Number(value) : value,
+                            },
+                          })
+                          setSwap({
                             ...swap,
                             amount: value && !isNaN(value) ? Number(value) : value,
-                          },
-                        })
-                        setSwap({
-                          ...swap,
-                          amount: value && !isNaN(value) ? Number(value) : value,
-                        })
-                      }}
-                      onWheel={e => e.target.blur()}
-                      onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                      className={`w-full bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
-                    />
-                    <div
-                      onClick={() => {
-                        console.log('[Swap]', {
-                          swap: {
+                          })
+                        }}
+                        onWheel={e => e.target.blur()}
+                        onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                        className={`w-full bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
+                      />
+                      <div
+                        onClick={() => {
+                          console.log('[Swap]', {
+                            swap: {
+                              ...swap,
+                              amount: origin === 'x' ? y_balance_amount : x_balance_amount,
+                            },
+                          })
+                          setSwap({
                             ...swap,
-                            amount: x_amount,
-                          },
-                        })
-                        setSwap({
-                          ...swap,
-                          amount: x_amount,
-                        })
-                      }}
-                      className={`${disabled || !asset_data?.id ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
-                    >
-                      Max
+                            amount: origin === 'x' ? y_balance_amount : x_balance_amount,
+                          })
+                        }}
+                        className={`${disabled || typeof (origin === 'x' ? y_balance_amount : x_balance_amount) !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
+                      >
+                        Max
+                      </div>
                     </div>
+                    {typeof amount === 'number' && typeof (origin === 'x' ? y_balance_amount : x_balance_amount) === 'number' && amount > (origin === 'x' ? y_balance_amount : x_balance_amount) && (
+                      <div className="flex items-center text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
+                        <BiMessageError size={16} className="min-w-max" />
+                        <span className="text-xs font-medium">
+                          Not enough {(origin === 'x' ? y_balance_amount : x_balance_amount)?.symbol}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-              <Info data={pair || {}} />
+              <Info
+                data={pair}
+              />
             </div>
             <div className="w-full max-w-4xl">
-              {(typeof amount === 'number' || (web3_provider && wrong_chain)) ?
-                web3_provider && wrong_chain ?
-                  <Wallet
-                    connectChainId={chain_data?.chain_id}
-                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
-                  >
-                    <span className="mr-1.5 sm:mr-2">
-                      {is_walletconnect ? 'Reconnect' : 'Switch'} to
-                    </span>
-                    {chain_data?.image && (
-                      <Image
-                        src={chain_data.image}
-                        alt=""
-                        width={32}
-                        height={32}
-                        className="rounded-full"
-                      />
-                    )}
-                    <span className="font-semibold">
-                      {chain_data?.name}
-                    </span>
-                  </Wallet>
-                  :
-                  !calling && !approving && (amount > liquidity_amount || amount < min_amount || amount <= 0) ?
-                    <Alert
-                      color="bg-red-400 dark:bg-red-500 text-white text-base"
-                      icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
-                      closeDisabled={true}
-                      rounded={true}
-                      className="rounded-xl p-4.5"
-                    >
+              {web3_provider && wrong_chain ?
+                <Wallet
+                  connectChainId={_chain_id}
+                  className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                >
+                  <span className="mr-1.5 sm:mr-2">
+                    {is_walletconnect ? 'Reconnect' : 'Switch'} to
+                  </span>
+                  {chain_data?.image && (
+                    <Image
+                      src={chain_data.image}
+                      alt=""
+                      width={32}
+                      height={32}
+                      className="rounded-full"
+                    />
+                  )}
+                  <span className="font-semibold">
+                    {chain_data?.name}
+                  </span>
+                </Wallet> :
+                !callResponse ?
+                  <Modal
+                    onClick={() => {
+                      setSlippageEditing(false)
+                    }}
+                    buttonTitle="Swap"
+                    buttonClassName="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg py-3 sm:py-4 px-2 sm:px-3"
+                    title="Swap Confirmation"
+                    body={<div className="flex flex-col space-y-4 -mb-2">
+                      <div className="flex items-center space-x-6 mx-auto pt-2 pb-1">
+                        <div className="flex flex-col items-center space-y-1">
+                          {asset_data?.image && (
+                            <Image
+                              src={asset_data?.image}
+                              alt=""
+                              width={40}
+                              height={40}
+                              className="rounded-full"
+                            />
+                          )}
+                          <span className="text-lg font-bold">
+                            {asset_data?.symbol}
+                          </span>
+                        </div>
+                        <span className="text-slate-400 dark:text-white text-base font-semibold">
+                          on
+                        </span>
+                        <div className="flex flex-col items-center space-y-1">
+                          {chain_data?.image && (
+                            <Image
+                              src={chain_data?.image}
+                              alt=""
+                              width={40}
+                              height={40}
+                              className="rounded-full"
+                            />
+                          )}
+                          <span className="text-lg font-bold">
+                            {chainName(chain_data)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
+                        <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
+                          Amount
+                          <span className="hidden sm:block">:</span>
+                        </div>
+                        <div className="sm:text-right">
+                          <div className="text-lg space-x-1.5">
+                            <span className="font-bold">
+                              {number_format(amount, '0,0.000000', true)}
+                            </span>
+                            <span className="font-semibold">
+                              {(origin === 'x' ? x_asset_data : y_asset_data)?.symbol}
+                            </span>
+                          </div>
+                          {amount && typeof (origin === 'x' ? x_asset_data : y_asset_data)?.price === 'number' && (
+                            <div className="font-mono text-blue-500 sm:text-right">
+                              ({currency_symbol}{number_format(amount * (origin === 'x' ? x_asset_data : y_asset_data).price, '0,0.00')})
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
+                        <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
+                          Amount Received
+                          <span className="hidden sm:block">:</span>
+                        </div>
+                        <div className="sm:text-right">
+                          <div className="text-lg space-x-1.5">
+                            <span className="font-bold">
+                              {number_format(amount, '0,0.000000', true)}
+                            </span>
+                            <span className="font-semibold">
+                              {(origin === 'x' ? y_asset_data : x_asset_data)?.symbol}
+                            </span>
+                          </div>
+                          {amount && typeof (origin === 'x' ? y_asset_data : x_asset_data)?.price === 'number' && (
+                            <div className="font-mono text-blue-500 sm:text-right">
+                              ({currency_symbol}{number_format(amount * (origin === 'x' ? y_asset_data : x_asset_data).price, '0,0.00')})
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
+                        <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base">
+                          Rate
+                          <span className="hidden sm:block">:</span>
+                        </div>
+                        <div className="sm:text-right">
+                          <div className="text-lg space-x-1.5">
+                            <span className="font-bold">
+                              {number_format(0, '0,0.000000', true)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
+                        <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
+                          Infinite Approval
+                          <span className="hidden sm:block">:</span>
+                        </div>
+                        <Switch
+                          checked={typeof options?.infiniteApprove === 'boolean' ? options.infiniteApprove : false}
+                          onChange={() => {
+                            console.log('[Swap Confirmation]', {
+                              swap,
+                              options: {
+                                ...options,
+                                infiniteApprove: !options?.infiniteApprove,
+                              },
+                            })
+                            setOptions({
+                              ...options,
+                              infiniteApprove: !options?.infiniteApprove,
+                            })}
+                          }
+                          onColor="#3b82f6"
+                          onHandleColor="#f8fafc"
+                          offColor="#64748b"
+                          offHandleColor="#f8fafc"
+                        />
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
+                        <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
+                          Slippage Tolerance
+                          <span className="hidden sm:block">:</span>
+                        </div>
+                        <div className="flex flex-col items-end space-y-1.5">
+                          {slippageEditing ?
+                            <>
+                              <div className="flex items-center space-x-1">
+                                <DebounceInput
+                                  debounceTimeout={300}
+                                  size="small"
+                                  type="number"
+                                  placeholder="0.00"
+                                  value={typeof slippage === 'number' && slippage >= 0 ? slippage : ''}
+                                  onChange={e => {
+                                    const regex = /^[0-9.\b]+$/
+                                    let value
+                                    if (e.target.value === '' || regex.test(e.target.value)) {
+                                      value = e.target.value
+                                    }
+                                    value = value <= 0 || value > 100 ? DEFAULT_SWAP_SLIPPAGE_PERCENTAGE : value
+                                    console.log('[Swap Confirmation]', {
+                                      swap,
+                                      options: {
+                                        ...options,
+                                        slippage: value && !isNaN(value) ? Number(value) : value,
+                                      },
+                                    })
+                                    setOptions({
+                                      ...options,
+                                      slippage: value && !isNaN(value) ? Number(value) : value,
+                                    })
+                                  }}
+                                  onWheel={e => e.target.blur()}
+                                  onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                                  className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1.5 px-2.5`}
+                                />
+                                <button
+                                  onClick={() => setSlippageEditing(false)}
+                                  className="bg-slate-100 bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
+                                >
+                                  <BiCheckCircle size={20} />
+                                </button>
+                              </div>
+                              <div className="flex items-center space-x-1.5">
+                                {[3.0, 2.0, 1.0].map((s, i) => (
+                                  <div
+                                    key={i}
+                                    onClick={() => {
+                                      console.log('[Swap Confirmation]', {
+                                        swap,
+                                        options: {
+                                          ...options,
+                                          slippage: s,
+                                        },
+                                      })
+                                      setOptions({
+                                        ...options,
+                                        slippage: s,
+                                      })
+                                      setSlippageEditing(false)
+                                    }}
+                                    className={`${slippage === s ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white text-xs py-0.5 px-1.5`}
+                                  >
+                                    {s} %
+                                  </div>
+                                ))}
+                              </div>
+                            </> :
+                            <div className="flex items-center space-x-1">
+                              <span className="text-lg font-semibold">
+                                {number_format(slippage, '0,0.00')}%
+                              </span>
+                              <button
+                                onClick={() => setSlippageEditing(true)}
+                                className="hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
+                                >
+                                <BiEditAlt size={20} />
+                              </button>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    </div>}
+                    cancelDisabled={disabled}
+                    cancelButtonClassName="hidden"
+                    confirmDisabled={disabled}
+                    onConfirm={() => call()}
+                    onConfirmHide={false}
+                    confirmButtonTitle={<span className="flex items-center justify-center space-x-1.5 py-2">
+                      {(calling || approving) && (
+                        <TailSpin color="white" width="20" height="20" />
+                      )}
                       <span>
-                        {amount > liquidity_amount ?
-                          'Insufficient Liquidity' :
-                          amount < min_amount ?
-                            'The swap amount cannot be less than the swap fee.' :
-                            amount <= 0 ? 'The swap amount cannot be equal or less than 0.' : ''
+                        {calling ?
+                          approving ?
+                            approveProcessing ?
+                              'Approving' :
+                              'Please Approve' :
+                            callProcessing ?
+                              'Swapping' :
+                              typeof approving === 'boolean' ?
+                                'Please Confirm' :
+                                'Checking Approval' :
+                          'Confirm'
                         }
                       </span>
-                    </Alert>
-                    :
-                    !callResponse ?
-                      <Modal
-                        onClick={() => {
-                          setSlippageEditing(false)
-                        }}
-                        buttonTitle="Swap"
-                        buttonClassName="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg py-3 sm:py-4 px-2 sm:px-3"
-                        title="Swap Confirmation"
-                        body={<div className="flex flex-col space-y-4 -mb-2">
-                          <div className="flex items-center space-x-6 mx-auto pt-2 pb-1">
-                            <div className="flex flex-col items-center space-y-1">
-                              {asset_data?.image && (
-                                <Image
-                                  src={asset_data?.image}
-                                  alt=""
-                                  width={40}
-                                  height={40}
-                                  className="rounded-full"
-                                />
-                              )}
-                              <span className="text-lg font-bold">
-                                {asset_data?.symbol}
-                              </span>
-                            </div>
-                            <span className="text-slate-400 dark:text-white text-base font-semibold">
-                              on
-                            </span>
-                            <div className="flex flex-col items-center space-y-1">
-                              {chain_data?.image && (
-                                <Image
-                                  src={chain_data?.image}
-                                  alt=""
-                                  width={40}
-                                  height={40}
-                                  className="rounded-full"
-                                />
-                              )}
-                              <span className="text-lg font-bold">
-                                {chainName(chain_data)}
-                              </span>
-                            </div>
+                    </span>}
+                    confirmButtonClassName="w-full btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white text-base sm:text-lg text-center"
+                  /> :
+                  callResponse || approveResponse ?
+                    [callResponse || approveResponse].map((r, i) => (
+                      <Alert
+                        key={i}
+                        color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                        icon={r.status === 'failed' ?
+                          <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
+                          r.status === 'success' ?
+                            <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
+                            r.status === 'pending' ?
+                              <div className="mr-3">
+                                <Watch color="white" width="20" height="20" />
+                              </div> :
+                              <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />
+                        }
+                        closeDisabled={true}
+                        rounded={true}
+                        className="rounded-xl p-4.5"
+                      >
+                        <div className="flex items-center justify-between space-x-2">
+                          <span className="break-all">
+                            {ellipse(r.message, 128)}
+                          </span>
+                          <div className="flex items-center space-x-2">
+                            {r.status === 'failed' && r.message && (
+                              <Copy
+                                value={r.message}
+                                size={24}
+                                className="cursor-pointer text-slate-200 hover:text-white"
+                              />
+                            )}
+                            {chain_data?.explorer?.url && r.tx_hash && (
+                              <a
+                                href={`${chain_data.explorer.url}${chain_data.explorer.transaction_path?.replace('{tx}', r.tx_hash)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <TiArrowRight size={20} className="transform -rotate-45" />
+                              </a>
+                            )}
+                            {r.status === 'failed' ?
+                              <button
+                                onClick={() => reset()}
+                                className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
+                              >
+                                <MdClose size={20} />
+                              </button>
+                              :
+                              r.status === 'success' ?
+                                <button
+                                  onClick={() => reset()}
+                                  className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                                >
+                                  <MdClose size={20} />
+                                </button>
+                                :
+                                null
+                            }
                           </div>
-                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
-                              Amount
-                              <span className="hidden sm:block">:</span>
-                            </div>
-                            <div className="sm:text-right">
-                              <div className="text-lg space-x-1.5">
-                                <span className="font-bold">
-                                  {number_format(x_amount, '0,0.000000', true)}
-                                </span>
-                                <span className="font-semibold">
-                                  {x_symbol}
-                                </span>
-                              </div>
-                              {x_amount && typeof x_asset_data?.price === 'number' && (
-                                <div className="font-mono text-blue-500 sm:text-right">
-                                  ({currency_symbol}{number_format(x_amount * x_asset_data.price, '0,0.00')})
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
-                              Amount Received
-                              <span className="hidden sm:block">:</span>
-                            </div>
-                            <div className="sm:text-right">
-                              <div className="text-lg space-x-1.5">
-                                <span className="font-bold">
-                                  {number_format(y_amount, '0,0.000000', true)}
-                                </span>
-                                <span className="font-semibold">
-                                  {y_symbol}
-                                </span>
-                              </div>
-                              {y_amount && typeof y_asset_data?.price === 'number' && (
-                                <div className="font-mono text-blue-500 sm:text-right">
-                                  ({currency_symbol}{number_format(y_amount * y_asset_data.price, '0,0.00')})
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base">
-                              Rate
-                              <span className="hidden sm:block">:</span>
-                            </div>
-                            <div className="sm:text-right">
-                              <div className="text-lg space-x-1.5">
-                                <span className="font-bold">
-                                  {number_format(0, '0,0.000000', true)}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
-                              Infinite Approval
-                              <span className="hidden sm:block">:</span>
-                            </div>
-                            <Switch
-                              checked={typeof options?.infiniteApprove === 'boolean' ? options.infiniteApprove : false}
-                              onChange={() => {
-                                console.log('[Swap Confirmation]', {
-                                  swap,
-                                  options: {
-                                    ...options,
-                                    infiniteApprove: !options?.infiniteApprove,
-                                  },
-                                })
-                                setOptions({
-                                  ...options,
-                                  infiniteApprove: !options?.infiniteApprove,
-                                })}
-                              }
-                              onColor="#3b82f6"
-                              onHandleColor="#f8fafc"
-                              offColor="#64748b"
-                              offHandleColor="#f8fafc"
-                            />
-                          </div>
-                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
-                              Slippage Tolerance
-                              <span className="hidden sm:block">:</span>
-                            </div>
-                            <div className="flex flex-col items-end space-y-1.5">
-                              {slippageEditing ?
-                                <>
-                                  <div className="flex items-center space-x-1">
-                                    <DebounceInput
-                                      debounceTimeout={300}
-                                      size="small"
-                                      type="number"
-                                      placeholder="0.00"
-                                      value={typeof slippage === 'number' && slippage >= 0 ? slippage : ''}
-                                      onChange={e => {
-                                        const regex = /^[0-9.\b]+$/
-                                        let value
-                                        if (e.target.value === '' || regex.test(e.target.value)) {
-                                          value = e.target.value
-                                        }
-                                        value = value <= 0 || value > 100 ? DEFAULT_SWAP_SLIPPAGE_PERCENTAGE : value
-                                        console.log('[Swap Confirmation]', {
-                                          swap,
-                                          options: {
-                                            ...options,
-                                            slippage: value && !isNaN(value) ? Number(value) : value,
-                                          },
-                                        })
-                                        setOptions({
-                                          ...options,
-                                          slippage: value && !isNaN(value) ? Number(value) : value,
-                                        })
-                                      }}
-                                      onWheel={e => e.target.blur()}
-                                      onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                                      className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1.5 px-2.5`}
-                                    />
-                                    <button
-                                      onClick={() => setSlippageEditing(false)}
-                                      className="bg-slate-100 bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
-                                    >
-                                      <BiCheckCircle size={20} />
-                                    </button>
-                                  </div>
-                                  <div className="flex items-center space-x-1.5">
-                                    {[3.0, 2.0, 1.0].map((s, i) => (
-                                      <div
-                                        key={i}
-                                        onClick={() => {
-                                          console.log('[Swap Confirmation]', {
-                                            swap,
-                                            options: {
-                                              ...options,
-                                              slippage: s,
-                                            },
-                                          })
-                                          setOptions({
-                                            ...options,
-                                            slippage: s,
-                                          })
-                                          setSlippageEditing(false)
-                                        }}
-                                        className={`${slippage === s ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white text-xs py-0.5 px-1.5`}
-                                      >
-                                        {s} %
-                                      </div>
-                                    ))}
-                                  </div>
-                                </> :
-                                <div className="flex items-center space-x-1">
-                                  <span className="text-lg font-semibold">
-                                    {number_format(slippage, '0,0.00')}%
-                                  </span>
-                                  <button
-                                    onClick={() => setSlippageEditing(true)}
-                                    className="hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white p-1.5"
-                                    >
-                                    <BiEditAlt size={20} />
-                                  </button>
-                                </div>
-                              }
-                            </div>
-                          </div>
-                        </div>}
-                        cancelDisabled={disabled}
-                        cancelButtonClassName="hidden"
-                        confirmDisabled={disabled}
-                        onConfirm={() => call()}
-                        onConfirmHide={false}
-                        confirmButtonTitle={<span className="flex items-center justify-center space-x-1.5 py-2">
+                        </div>
+                      </Alert>
+                    )) :
+                    web3_provider ?
+                      <button
+                        disabled={disabled || !valid_amount}
+                        onClick={() => call()}
+                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
+                      >
+                        <span className="flex items-center justify-center space-x-1.5">
                           {(calling || approving) && (
                             <TailSpin color="white" width="20" height="20" />
                           )}
@@ -950,94 +1132,24 @@ export default () => {
                                   'Approving' :
                                   'Please Approve' :
                                 callProcessing ?
-                                  'Swapping' :
+                                  'Adding' :
                                   typeof approving === 'boolean' ?
                                     'Please Confirm' :
                                     'Checking Approval' :
-                              'Confirm'
+                              'Swap'
                             }
                           </span>
-                        </span>}
-                        confirmButtonClassName="w-full btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white text-base sm:text-lg text-center"
-                      />
-                      :
-                      (callResponse || approveResponse) && (
-                        [callResponse || approveResponse].map((r, i) => (
-                          <Alert
-                            key={i}
-                            color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
-                            icon={r.status === 'failed' ?
-                              <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
-                              r.status === 'success' ?
-                                <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
-                                <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />
-                            }
-                            closeDisabled={true}
-                            rounded={true}
-                            className="rounded-xl p-4.5"
-                          >
-                            <div className="flex items-center justify-between space-x-2">
-                              <span className="break-all">
-                                {ellipse(r.message, 128)}
-                              </span>
-                              <div className="flex items-center space-x-2">
-                                {r.status === 'failed' && r.message && (
-                                  <Copy
-                                    value={r.message}
-                                    size={24}
-                                    className="cursor-pointer text-slate-200 hover:text-white"
-                                  />
-                                )}
-                                {chain_data?.explorer?.url && r.tx_hash && (
-                                  <a
-                                    href={`${chain_data.explorer.url}${chain_data.explorer.transaction_path?.replace('{tx}', r.tx_hash)}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    <TiArrowRight size={20} className="transform -rotate-45" />
-                                  </a>
-                                )}
-                                {r.status === 'failed' ?
-                                  <button
-                                    onClick={() => reset()}
-                                    className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                                  >
-                                    <MdClose size={20} />
-                                  </button>
-                                  :
-                                  r.status === 'success' ?
-                                    <button
-                                      onClick={() => reset()}
-                                      className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
-                                    >
-                                      <MdClose size={20} />
-                                    </button>
-                                    :
-                                    null
-                                }
-                              </div>
-                            </div>
-                          </Alert>
-                        ))
-                      )
-                :
-                web3_provider ?
-                  <button
-                    disabled={true}
-                    className="w-full bg-slate-100 dark:bg-slate-900 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
-                  >
-                    Swap
-                  </button>
-                  :
-                  <Wallet
-                    connectChainId={chain_data?.chain_id}
-                    buttonConnectTitle="Connect Wallet"
-                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
-                  >
-                    <span>
-                      Connect Wallet
-                    </span>
-                  </Wallet>
+                        </span>
+                      </button> :
+                      <Wallet
+                        connectChainId={_chain_id}
+                        buttonConnectTitle="Connect Wallet"
+                        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                      >
+                        <span>
+                          Connect Wallet
+                        </span>
+                      </Wallet>
               }
             </div>
           </div>

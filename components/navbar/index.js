@@ -313,6 +313,10 @@ export default () => {
               domain_id,
               contract_address,
             )
+            const {
+              symbol,
+            } = { ...pool }
+            const symbols = symbol?.split('-') || []
             const stats = pool && await sdk.nxtpSdkPool.getPoolStats(
               domain_id,
               contract_address,
@@ -325,6 +329,7 @@ export default () => {
               chain_data,
               asset_data,
               contract_data,
+              symbols,
             })
           } catch (error) {}
         }
