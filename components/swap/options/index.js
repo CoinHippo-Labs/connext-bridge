@@ -6,9 +6,8 @@ import { RiSettings3Line } from 'react-icons/ri'
 import { MdSettingsSuggest } from 'react-icons/md'
 
 import Modal from '../../modals'
-import Popover from '../../popover'
 
-const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE) || 3
+const DEFAULT_SWAP_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_SWAP_SLIPPAGE_PERCENTAGE) || 3
 
 export default ({
   disabled = false,
@@ -26,39 +25,17 @@ export default ({
 
   const fields = [
     {
-      label: 'Recipient Address',
-      name: 'to',
-      type: 'text',
-      placeholder: 'target contract or recipient address',
-    },
-    {
       label: 'Infinite Approval',
       name: 'infiniteApprove',
       type: 'switch',
     },
-    /*{
+    {
       label: 'Slippage Tolerance',
       name: 'slippage',
       type: 'number',
       placeholder: '0.00',
       presets: [3.0, 2.0, 1.0],
       postfix: '%',
-    },*/
-    {
-      label: 'Bridge Path',
-      name: 'forceSlow',
-      type: 'switch',
-    },
-    {
-      label: 'Receive Local',
-      name: 'receiveLocal',
-      type: 'switch',
-    },
-    {
-      label: 'Call Data',
-      name: 'callData',
-      type: 'textarea',
-      placeholder: 'encoded calldata to execute on receiving chain',
     },
   ]
 
@@ -91,7 +68,7 @@ export default ({
                 placeholder={f.placeholder}
                 value={data?.[f.name]}
                 onChange={e => {
-                  console.log('[Options]', {
+                  console.log('[Swap Options]', {
                     ...data,
                     [`${f.name}`]: e.target.value,
                   })
@@ -114,69 +91,23 @@ export default ({
               </select>
               :
               f.type === 'switch' ?
-                f.name === 'forceSlow' ?
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      checked={!(typeof data?.[f.name] === 'boolean' ? data[f.name] : false)}
-                      onChange={e => {
-                        console.log('[Options]', {
-                          ...data,
-                          [`${f.name}`]: !data?.[f.name],
-                        })
-                        setData({
-                          ...data,
-                          [`${f.name}`]: !data?.[f.name],
-                        })
-                      }}
-                      checkedIcon={false}
-                      uncheckedIcon={false}
-                      onColor="#3b82f6"
-                      onHandleColor="#f8fafc"
-                      offColor="#64748b"
-                      offHandleColor="#f8fafc"
-                    />
-                    {data?.forceSlow ?
-                      <Popover
-                        placement="top"
-                        title="Slow Path (Nomad)"
-                        content="Use bridge only (wait 30-60 mins, no fees)"
-                        titleClassName="normal-case font-semibold py-1.5"
-                      >
-                        <span className="uppercase font-bold">
-                          Slow
-                        </span>
-                      </Popover>
-                      :
-                      <Popover
-                        placement="top"
-                        title="Fast Path"
-                        content="Connext Router (+ Nomad) (less than 3 mins, .05% fees)"
-                        titleClassName="normal-case font-semibold py-1.5"
-                      >
-                        <span className="uppercase font-bold">
-                          Fast
-                        </span>
-                      </Popover>
-                    }
-                  </div>
-                  :
-                  <Switch
-                    checked={typeof data?.[f.name] === 'boolean' ? data[f.name] : false}
-                    onChange={e => {
-                      console.log('[Options]', {
-                        ...data,
-                        [`${f.name}`]: !data?.[f.name],
-                      })
-                      setData({
-                        ...data,
-                        [`${f.name}`]: !data?.[f.name],
-                      })
-                    }}
-                    onColor="#3b82f6"
-                    onHandleColor="#f8fafc"
-                    offColor="#64748b"
-                    offHandleColor="#f8fafc"
-                  />
+                <Switch
+                  checked={typeof data?.[f.name] === 'boolean' ? data[f.name] : false}
+                  onChange={e => {
+                    console.log('[Swap Options]', {
+                      ...data,
+                      [`${f.name}`]: !data?.[f.name],
+                    })
+                    setData({
+                      ...data,
+                      [`${f.name}`]: !data?.[f.name],
+                    })
+                  }}
+                  onColor="#3b82f6"
+                  onHandleColor="#f8fafc"
+                  offColor="#64748b"
+                  offHandleColor="#f8fafc"
+                />
                 :
                 f.type === 'textarea' ?
                   <textarea
@@ -185,7 +116,7 @@ export default ({
                     placeholder={f.placeholder}
                     value={data?.[f.name]}
                     onChange={e => {
-                      console.log('[Options]', {
+                      console.log('[Swap Options]', {
                         ...data,
                         [`${f.name}`]: e.target.value,
                       })
@@ -211,8 +142,8 @@ export default ({
                           if (e.target.value === '' || regex.test(e.target.value)) {
                             value = e.target.value
                           }
-                          value = ['slippage'].includes(f.name) && (value <= 0 || value > 100) ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
-                          console.log('[Options]', {
+                          value = ['slippage'].includes(f.name) && (value <= 0 || value > 100) ? DEFAULT_SWAP_SLIPPAGE_PERCENTAGE : value
+                          console.log('[Swap Options]', {
                             ...data,
                             [`${f.name}`]: value && !isNaN(value) ? Number(value) : value,
                           })
@@ -231,7 +162,7 @@ export default ({
                             <div
                               key={i}
                               onClick={() => {
-                                console.log('[Options]', {
+                                console.log('[Swap Options]', {
                                   ...data,
                                   [`${f.name}`]: p,
                                 })
@@ -240,7 +171,7 @@ export default ({
                                   [`${f.name}`]: p,
                                 })
                               }}
-                              className={`${data?.[f.name] === p ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-semibold'} rounded-lg cursor-pointer py-1 px-2`}
+                              className={`${data?.[f.name] === p ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer py-1 px-2`}
                             >
                               {p} {f.postfix}
                             </div>
@@ -254,7 +185,7 @@ export default ({
                       placeholder={f.placeholder}
                       value={data?.[f.name]}
                       onChange={e => {
-                        console.log('[Options]', {
+                        console.log('[Swap Options]', {
                           ...data,
                           [`${f.name}`]: e.target.value,
                         })

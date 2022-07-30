@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { Contract, constants, utils } from 'ethers'
+import { BigNumber, Contract, constants, utils } from 'ethers'
 import { RiArrowLeftCircleFill } from 'react-icons/ri'
 
 import Announcement from '../announcement'
@@ -165,23 +165,25 @@ export default () => {
             const {
               info,
               lpTokenBalance,
+              poolTokenBalances,
             } = { ...p }
             const {
               symbol,
+              decimals,
+              balances,
+              liquidity,
             } = { ...info }
             const symbols = symbol?.split('-') || []
             const asset_data = pool_assets_data.find(a => symbols.findIndex(s => equals_ignore_case(s, a?.symbol)) > -1 || a?.contracts?.findIndex(c => c?.chain_id === chain_id && symbols.findIndex(s => equals_ignore_case(s, c?.symbol)) > -1) > -1)
-            const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_id)
-            const {
-              decimals,
-            } = { ...contract_data }
             return {
               ...p,
               chain_data,
               asset_data,
-              symbols,
               ...info,
-              lpTokenBalance: utils.formatUnits(BigNumber.from(lpTokenBalance || '0'), decimals || 18),
+              symbols,
+              lpTokenBalance: Number(utils.formatUnits(BigNumber.from(lpTokenBalance || '0'), _.last(decimals) || 18)),
+              poolTokenBalances: poolTokenBalances?.map((b, i) => Number(utils.formatUnits(BigNumber.from(b || '0'), decimals?.[i] || 18))) || [],
+              balances: balances?.map((b, i) => Number(utils.formatUnits(BigNumber.from(b || '0'), decimals?.[i] || 18))) || [],
             }
           }) || pools || [])
         } catch (error) {}

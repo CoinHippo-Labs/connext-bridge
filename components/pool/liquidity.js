@@ -35,7 +35,7 @@ export default ({
   user_pools_data,
   onFinish,
 }) => {
-  const { preferences, chains, pool_assets, pools, dev, wallet, balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, pool_assets: state.pool_assets, pools: state.pools, dev: state.dev, wallet: state.wallet, balances: state.balances }), shallowEqual)
+  const { preferences, chains, pool_assets, pools, dev, wallet, _balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, pool_assets: state.pool_assets, pools: state.pools, dev: state.dev, wallet: state.wallet, _balances: state.balances }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { pool_assets_data } = { ...pool_assets }
@@ -43,7 +43,7 @@ export default ({
   const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
   const { chain_id, provider, web3_provider, address, signer } = { ...wallet_data }
-  const { balances_data } = { ...balances }
+  const { balances_data } = { ..._balances }
 
   const [action, setAction] = useState(_.head(ACTIONS))
   const [amountX, setAmountX] = useState(null)
@@ -62,7 +62,7 @@ export default ({
 
   useEffect(() => {
     reset()
-  }, [pool])
+  }, [action, pool])
 
   useEffect(() => {
     setApproveResponse(null)
@@ -151,6 +151,7 @@ export default ({
         decimals,
         symbol,
         symbols,
+        lpTokenAddress,
       } = { ...pool_data }
       const x_asset_data = tokens?.[0] && {
         ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
@@ -199,6 +200,7 @@ export default ({
             utils.parseUnits(amountX.toString(), x_asset_data?.decimals || 18).toString(),
             utils.parseUnits(amountY.toString(), y_asset_data?.decimals || 18).toString(),
           ]
+          const minToMint = '0'
           if (!failed) {
             try {
               const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
@@ -299,12 +301,14 @@ export default ({
                 domainId,
                 canonicalId,
                 amounts,
+                minToMint,
                 deadline,
               })
               const add_request = await sdk.nxtpSdkPool.addLiquidity(
                 domainId,
                 canonicalId,
                 amounts,
+                minToMint,
                 deadline,
               )
               if (add_request) {
@@ -342,9 +346,50 @@ export default ({
             setApproving(false)
             break
           }
-          const amount = utils.parseUnits(amount.toString(), y_asset_data?.decimals || 18).toString()
+          const _amount = utils.parseUnits(amount.toString(), y_asset_data?.decimals || 18).toString()
+          const minAmounts = ['0', '0']
           if (!failed) {
-            setApproving(false)
+            try {
+              const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
+                domainId,
+                lpTokenAddress,
+                _amount,
+                infiniteApprove,
+              )
+              if (approve_request) {
+                setApproving(true)
+                const approve_response = await signer.sendTransaction(approve_request)
+                const tx_hash = approve_response?.hash
+                setApproveResponse({
+                  status: 'pending',
+                  message: `Wait for ${symbol} approval`,
+                  tx_hash,
+                })
+                setApproveProcessing(true)
+                const approve_receipt = await signer.provider.waitForTransaction(tx_hash)
+                setApproveResponse(approve_receipt?.status ?
+                  null : {
+                    status: 'failed',
+                    message: `Failed to approve ${symbol}`,
+                    tx_hash,
+                  }
+                )
+                failed = !approve_receipt?.status
+                setApproveProcessing(false)
+                setApproving(false)
+              }
+              else {
+                setApproving(false)
+              }
+            } catch (error) {
+              setApproveResponse({
+                status: 'failed',
+                message: error?.data?.message || error?.message,
+              })
+              failed = true
+              setApproveProcessing(false)
+              setApproving(false)
+            }
           }
           if (!failed) {
             try {
@@ -359,13 +404,15 @@ export default ({
               console.log('[Remove Liquidity]', {
                 domainId,
                 canonicalId,
-                amount,
+                amount: _amount,
+                minAmounts,
                 deadline,
               })
               const remove_request = await sdk.nxtpSdkPool.removeLiquidity(
                 domainId,
                 canonicalId,
-                amount,
+                _amount,
+                minAmounts,
                 deadline,
               )
               if (remove_request) {
@@ -404,7 +451,7 @@ export default ({
     setCallProcessing(false)
     setCalling(false)
     if (sdk && address && success) {
-      await sleep(2 * 1000)
+      await sleep(1 * 1000)
       if (onFinish) {
         onFinish()
       }
@@ -434,6 +481,10 @@ export default ({
     symbol,
     symbols,
   } = { ...pool_data }
+  let {
+    rate,
+  } = { ...pool_data }
+  rate = rate || 1
   const x_asset_data = tokens?.[0] && {
     ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
     ...(
@@ -469,19 +520,138 @@ export default ({
   const user_pool_data = pool_data && user_pools_data?.find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
   const {
     lpTokenBalance,
-    tokensX,
-    tokensY,
+    balances,
   } = { ...user_pool_data }
   const position_loading = selected && !no_pool && (!user_pools_data || pool_loading)
 
   const valid_amount = action === 'remove' ?
-    amount/* && amount < lpTokenBalance*/ :
+    amount && amount <= lpTokenBalance :
     amountX && amountY && amountX <= x_balance_amount && amountY <= y_balance_amount
 
   const wrong_chain = chain_id !== _chain_id && !callResponse
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
 
   const disabled = !pool_data || calling || approving
+
+  const advancedOptions = (
+    <div className="space-y-2">
+      <div className="flex items-center justify-end">
+        <div
+          onClick={() => setOpenOptions(!openOptions)}
+          className="cursor-pointer flex items-center text-slate-400 dark:text-slate-200 space-x-2"
+        >
+          <span className="font-semibold">
+            Advanced
+          </span>
+          {openOptions ?
+            <BiCaretUp size={18} /> :
+            <BiCaretDown size={18} />
+          }
+        </div>
+      </div>
+      {openOptions && (
+        <div className="form">
+          <div className="form-element">
+            <div className="form-label text-slate-600 dark:text-slate-400 font-medium">
+              Infinite Approval
+            </div>
+            <div className="flex items-center space-x-3">
+              <Switch
+                checked={typeof infiniteApprove === 'boolean' ? infiniteApprove : false}
+                onChange={() => {
+                  setOptions({
+                    ...options,
+                    infiniteApprove: !infiniteApprove,
+                  })}
+                }
+                onColor="#3b82f6"
+                onHandleColor="#f8fafc"
+                offColor="#64748b"
+                offHandleColor="#f8fafc"
+                width={48}
+                height={24}
+              />
+            </div>
+          </div>
+          <div className="form-element">
+            <div className="form-label text-slate-600 dark:text-slate-400 font-medium">
+              Slippage Tolerance
+            </div>
+            <div className="flex items-center space-x-3">
+              <DebounceInput
+                debounceTimeout={300}
+                size="small"
+                type="number"
+                placeholder="Slippage Tolerance"
+                value={typeof slippage === 'number' && slippage >= 0 ? slippage : ''}
+                onChange={e => {
+                  const regex = /^[0-9.\b]+$/
+                  let value
+                  if (e.target.value === '' || regex.test(e.target.value)) {
+                    value = e.target.value
+                  }
+                  value = value <= 0 || value > 100 ? DEFAULT_POOL_SLIPPAGE_PERCENTAGE : value
+                  setOptions({
+                    ...options,
+                    slippage: value && !isNaN(value) ? Number(value) : value,
+                  })
+                }}
+                onWheel={e => e.target.blur()}
+                onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                className={`w-20 bg-slate-50 dark:bg-slate-800 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
+              />
+              <div className="flex items-center space-x-2.5">
+                {[3.0, 2.0, 1.0].map((p, i) => (
+                  <div
+                    key={i}
+                    onClick={() => setOptions({
+                      ...options,
+                      slippage: p,
+                    })}
+                    className={`${slippage === p ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white py-1 px-2`}
+                  >
+                    {p} %
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="form-element">
+            <div className="form-label text-slate-600 dark:text-slate-400 font-medium">
+              Transaction Deadline
+            </div>
+            <div className="flex items-center space-x-3">
+              <DebounceInput
+                debounceTimeout={300}
+                size="small"
+                type="number"
+                placeholder="Transaction Deadline (minutes)"
+                value={typeof options?.deadline === 'number' && options.deadline >= 0 ? options.deadline : ''}
+                onChange={e => {
+                  const regex = /^[0-9.\b]+$/
+                  let value
+                  if (e.target.value === '' || regex.test(e.target.value)) {
+                    value = e.target.value
+                  }
+                  value = value < 0 ? DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES : value
+                  setOptions({
+                    ...options,
+                    deadline: value && !isNaN(value) ? Number(value) : value,
+                  })
+                }}
+                onWheel={e => e.target.blur()}
+                onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                className={`w-20 bg-slate-50 dark:bg-slate-800 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
+              />
+              <span className="font-semibold">
+                minutes
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
 
   return (
     <div className="border border-blue-400 dark:border-blue-800 rounded-2xl shadow-lg shadow-blue-200 dark:shadow-blue-600 space-y-3 p-6">
@@ -646,123 +816,7 @@ export default ({
               </div>
             </div>
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-end">
-              <div
-                onClick={() => setOpenOptions(!openOptions)}
-                className="cursor-pointer flex items-center text-slate-400 dark:text-slate-200 space-x-2"
-              >
-                <span className="font-semibold">
-                  Advanced
-                </span>
-                {openOptions ?
-                  <BiCaretUp size={18} /> :
-                  <BiCaretDown size={18} />
-                }
-              </div>
-            </div>
-            {openOptions && (
-              <div className="form">
-                <div className="form-element">
-                  <div className="form-label text-slate-600 dark:text-slate-400 font-medium">
-                    Infinite Approval
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Switch
-                      checked={typeof infiniteApprove === 'boolean' ? infiniteApprove : false}
-                      onChange={() => {
-                        setOptions({
-                          ...options,
-                          infiniteApprove: !infiniteApprove,
-                        })}
-                      }
-                      onColor="#3b82f6"
-                      onHandleColor="#f8fafc"
-                      offColor="#64748b"
-                      offHandleColor="#f8fafc"
-                      width={48}
-                      height={24}
-                    />
-                  </div>
-                </div>
-                <div className="form-element">
-                  <div className="form-label text-slate-600 dark:text-slate-400 font-medium">
-                    Slippage Tolerance
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <DebounceInput
-                      debounceTimeout={300}
-                      size="small"
-                      type="number"
-                      placeholder="Slippage Tolerance"
-                      value={typeof slippage === 'number' && slippage >= 0 ? slippage : ''}
-                      onChange={e => {
-                        const regex = /^[0-9.\b]+$/
-                        let value
-                        if (e.target.value === '' || regex.test(e.target.value)) {
-                          value = e.target.value
-                        }
-                        value = value <= 0 || value > 100 ? DEFAULT_POOL_SLIPPAGE_PERCENTAGE : value
-                        setOptions({
-                          ...options,
-                          slippage: value && !isNaN(value) ? Number(value) : value,
-                        })
-                      }}
-                      onWheel={e => e.target.blur()}
-                      onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                      className={`w-20 bg-slate-50 dark:bg-slate-800 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
-                    />
-                    <div className="flex items-center space-x-2.5">
-                      {[3.0, 2.0, 1.0].map((p, i) => (
-                        <div
-                          key={i}
-                          onClick={() => setOptions({
-                            ...options,
-                            slippage: p,
-                          })}
-                          className={`${slippage === p ? 'bg-blue-600 dark:bg-blue-700 font-bold' : 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 hover:font-semibold'} rounded-lg cursor-pointer text-white py-1 px-2`}
-                        >
-                          {p} %
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div className="form-element">
-                  <div className="form-label text-slate-600 dark:text-slate-400 font-medium">
-                    Transaction Deadline
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <DebounceInput
-                      debounceTimeout={300}
-                      size="small"
-                      type="number"
-                      placeholder="Transaction Deadline (minutes)"
-                      value={typeof options?.deadline === 'number' && options.deadline >= 0 ? options.deadline : ''}
-                      onChange={e => {
-                        const regex = /^[0-9.\b]+$/
-                        let value
-                        if (e.target.value === '' || regex.test(e.target.value)) {
-                          value = e.target.value
-                        }
-                        value = value < 0 ? DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES : value
-                        setOptions({
-                          ...options,
-                          deadline: value && !isNaN(value) ? Number(value) : value,
-                        })
-                      }}
-                      onWheel={e => e.target.blur()}
-                      onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                      className={`w-20 bg-slate-50 dark:bg-slate-800 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
-                    />
-                    <span className="font-semibold">
-                      minutes
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          {advancedOptions}
           <div className="flex items-end">
             {web3_provider && wrong_chain ?
               <Wallet
@@ -885,115 +939,118 @@ export default ({
             }
           </div>
         </> :
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <div className="text-slate-400 dark:text-slate-500 font-semibold">
-              Your Pool Tokens
+        <>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <div className="text-slate-400 dark:text-slate-500 font-semibold">
+                Your Pool Tokens
+              </div>
+              <div className="space-y-1">
+                <DebounceInput
+                  debounceTimeout={300}
+                  size="small"
+                  type="number"
+                  placeholder="0.00"
+                  disabled={disabled}
+                  value={typeof amount === 'number' && amount >= 0 ? amount : ''}
+                  onChange={e => {
+                    const regex = /^[0-9.\b]+$/
+                    let value
+                    if (e.target.value === '' || regex.test(e.target.value)) {
+                      value = e.target.value
+                    }
+                    value = value < 0 ? 0 : value
+                    setAmount(value && !isNaN(value) ? Number(value) : value)
+                  }}
+                  onWheel={e => e.target.blur()}
+                  onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                  className={`w-full bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
+                />
+                {typeof amount === 'number' && typeof lpTokenBalance === 'number' && amount > lpTokenBalance && (
+                  <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
+                    <BiMessageError size={16} className="min-w-max" />
+                    <span className="text-xs font-medium">
+                      Not enough {symbol}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center justify-end space-x-2.5">
+                {[0.25, 0.5, 0.75, 1.0].map((p, i) => (
+                  <div
+                    key={i}
+                    onClick={() => setAmount(parseFloat((p * lpTokenBalance).toFixed(12)))}
+                    className={`${disabled || !lpTokenBalance ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-200 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-semibold'} rounded-lg shadow dark:shadow-slate-500 py-0.5 px-2`}
+                  >
+                    {p * 100} %
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="space-y-1">
-              <DebounceInput
-                debounceTimeout={300}
-                size="small"
-                type="number"
-                placeholder="0.00"
-                disabled={disabled}
-                value={typeof amount === 'number' && amount >= 0 ? amount : ''}
-                onChange={e => {
-                  const regex = /^[0-9.\b]+$/
-                  let value
-                  if (e.target.value === '' || regex.test(e.target.value)) {
-                    value = e.target.value
-                  }
-                  value = value < 0 ? 0 : value
-                  setAmount(value && !isNaN(value) ? Number(value) : value)
-                }}
-                onWheel={e => e.target.blur()}
-                onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                className={`w-full bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
-              />
-              {typeof amount === 'number' && typeof lpTokenBalance === 'number' && amount > lpTokenBalance && (
-                <div className="flex items-center text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
-                  <BiMessageError size={16} className="min-w-max" />
-                  <span className="text-xs font-medium">
-                    Not enough {symbol}
+            <div className="bg-slate-50 dark:bg-slate-900 rounded-lg space-y-5 py-6 px-4">
+              <div className="flex items-center justify-between space-x-3">
+                {chain_data?.explorer?.url && x_asset_data?.contract_address ?
+                  <a
+                    href={`${chain_data.explorer.url}${chain_data.explorer.contract_path?.replace('{address}', x_asset_data.contract_address)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="text-base font-bold">
+                      {x_asset_data.symbol}
+                    </span>
+                  </a> :
+                  <div className="text-base font-bold">
+                    {x_asset_data?.symbol}
+                  </div>
+                }
+                {web3_provider ?
+                  !isNaN(balances?.[0]) ?
+                    <span className="text-base">
+                      {number_format((typeof amount === 'number' ? amount / (1 + rate) : balances[0]) || 0, '0,0.000000', true)}
+                    </span> :
+                    selected && !no_pool && (
+                      position_loading ?
+                        <RotatingSquare color={loader_color(theme)} width="24" height="24" /> :
+                        '-'
+                    ) :
+                  <span className="text-base">
+                    -
                   </span>
-                </div>
-              )}
-            </div>
-            <div className="flex items-center justify-end space-x-2.5">
-              {[0.25, 0.5, 0.75, 1.0].map((p, i) => (
-                <div
-                  key={i}
-                  onClick={() => setAmount(p * lpTokenBalance)}
-                  className={`${disabled || !lpTokenBalance ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-200 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-semibold'} rounded-lg shadow dark:shadow-slate-500 py-0.5 px-2`}
-                >
-                  {p * 100} %
-                </div>
-              ))}
+                }
+              </div>
+              <div className="flex items-center justify-between space-x-3">
+                {chain_data?.explorer?.url && y_asset_data?.contract_address ?
+                  <a
+                    href={`${chain_data.explorer.url}${chain_data.explorer.contract_path?.replace('{address}', y_asset_data.contract_address)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="text-base font-bold">
+                      {y_asset_data.symbol}
+                    </span>
+                  </a> :
+                  <div className="text-base font-bold">
+                    {y_asset_data?.symbol}
+                  </div>
+                }
+                {web3_provider ?
+                  !isNaN(balances?.[1]) ?
+                    <span className="text-base">
+                      {number_format((typeof amount === 'number' ? amount * rate / (1 + rate) : balances[1]) || 0, '0,0.000000', true)}
+                    </span> :
+                    selected && !no_pool && (
+                      position_loading ?
+                        <RotatingSquare color={loader_color(theme)} width="24" height="24" /> :
+                        '-'
+                    ) :
+                  <span className="text-base">
+                    -
+                  </span>
+                }
+              </div>
             </div>
           </div>
-          <div className="bg-slate-50 dark:bg-slate-900 rounded-lg space-y-5 py-6 px-4">
-            <div className="flex items-center justify-between space-x-3">
-              {chain_data?.explorer?.url && x_asset_data?.contract_address ?
-                <a
-                  href={`${chain_data.explorer.url}${chain_data.explorer.contract_path?.replace('{address}', x_asset_data.contract_address)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span className="text-base font-bold">
-                    {x_asset_data.symbol}
-                  </span>
-                </a> :
-                <div className="text-base font-bold">
-                  {x_asset_data?.symbol}
-                </div>
-              }
-              {web3_provider ?
-                !isNaN(tokensX) ?
-                  <span className="text-base">
-                    {number_format(tokensX || 0, '0,0.000000', true)}
-                  </span> :
-                  selected && !no_pool && (
-                    position_loading ?
-                      <RotatingSquare color={loader_color(theme)} width="24" height="24" /> :
-                      '-'
-                  ) :
-                <span className="text-base">
-                  -
-                </span>
-              }
-            </div>
-            <div className="flex items-center justify-between space-x-3">
-              {chain_data?.explorer?.url && y_asset_data?.contract_address ?
-                <a
-                  href={`${chain_data.explorer.url}${chain_data.explorer.contract_path?.replace('{address}', y_asset_data.contract_address)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span className="text-base font-bold">
-                    {y_asset_data.symbol}
-                  </span>
-                </a> :
-                <div className="text-base font-bold">
-                  {y_asset_data?.symbol}
-                </div>
-              }
-              {web3_provider ?
-                !isNaN(tokensY) ?
-                  <span className="text-base">
-                    {number_format(tokensY || 0, '0,0.000000', true)}
-                  </span> :
-                  selected && !no_pool && (
-                    position_loading ?
-                      <RotatingSquare color={loader_color(theme)} width="24" height="24" /> :
-                      '-'
-                  ) :
-                <span className="text-base">
-                  -
-                </span>
-              }
-            </div>
-          </div>
+          {advancedOptions}
           <div className="flex items-end">
             {web3_provider && wrong_chain ?
               <Wallet
@@ -1082,7 +1139,7 @@ export default ({
                   <button
                     disabled={disabled || !valid_amount}
                     onClick={() => call(pool_data)}
-                    className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
+                    className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
                   >
                     <span className="flex items-center justify-center space-x-1.5">
                       {(calling || approving) && (
@@ -1115,7 +1172,7 @@ export default ({
                   </Wallet>
             }
           </div>
-        </div>
+        </>
       }
       {['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) && y_asset_data?.symbol?.startsWith('mad') && (
         <Faucet

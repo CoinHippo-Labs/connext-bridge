@@ -21,7 +21,20 @@ export default ({
       if (address) {
         const addresses = [address.toLowerCase()].filter(a => a && !ens_data?.[a])
         if (addresses.length > 0) {
-          let _ens_data = await getEns(addresses)
+          let _ens_data
+          addresses.forEach(a => {
+            if (!_ens_data?.[a]) {
+              _ens_data = {
+                ..._ens_data,
+                [`${a}`]: {},
+              }
+            }
+          })
+          dispatch({
+            type: ENS_DATA,
+            value: { ..._ens_data },
+          })
+          _ens_data = await getEns(addresses)
           addresses.forEach(a => {
             if (!_ens_data?.[a]) {
               _ens_data = {

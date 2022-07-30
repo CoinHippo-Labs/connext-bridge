@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import { create } from '@connext/nxtp-sdk'
-import { Bignumber, providers, utils } from 'ethers'
+import { BigNumber, providers, utils } from 'ethers'
 import Linkify from 'react-linkify'
 import parse from 'html-react-parser'
 import { MdClose } from 'react-icons/md'
@@ -315,11 +315,20 @@ export default () => {
             )
             const {
               symbol,
+              decimals,
             } = { ...pool }
             const symbols = symbol?.split('-') || []
             const stats = pool && await sdk.nxtpSdkPool.getPoolStats(
               domain_id,
               contract_address,
+            )
+            const [canonicalDomain, canonicalId] = pool && await sdk.nxtpSdkPool.getCanonicalFromLocal(
+              domain_id,
+              contract_address,
+            )
+            const rate = pool && await sdk.nxtpSdkPool.getVirtualPrice(
+              domain_id,
+              canonicalId,
             )
             data.push({
               ...pool,
@@ -330,6 +339,7 @@ export default () => {
               asset_data,
               contract_data,
               symbols,
+              rate: Number(utils.formatUnits(BigNumber.from(rate || '0'), _.last(decimals) || 18)),
             })
           } catch (error) {}
         }

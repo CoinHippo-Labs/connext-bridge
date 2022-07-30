@@ -44,11 +44,10 @@ export default ({
 
   const user_pool_data = pool_data && user_pools_data?.find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
   const {
-    share,
     lpTokenBalance,
-    tokensX,
-    tokensY,
+    balances,
   } = { ...user_pool_data }
+  const share = lpTokenBalance * 100 / (Number(liquidity) || 1)
   const position_loading = selected && !no_pool && (!user_pools_data || pool_loading)
 
   return (
@@ -113,8 +112,7 @@ export default ({
               <span className="text-lg font-bold">
                 {pool_data ?
                   <>
-                    {currency_symbol}
-                    {number_format(liquidity, '0,0.00')}
+                    {number_format(liquidity, '0,0.000000')}
                   </> :
                   selected && !no_pool && (
                     pool_loading ?
@@ -134,7 +132,7 @@ export default ({
                 {pool_data ?
                   <>
                     {currency_symbol}
-                    {number_format(volume, '0,0.00')}
+                    {number_format(volume, '0,0.000000')}
                   </> :
                   selected && !no_pool && (
                     pool_loading ?
@@ -154,7 +152,7 @@ export default ({
                 {pool_data ?
                   <>
                     {currency_symbol}
-                    {number_format(fees, '0,0.00')}
+                    {number_format(fees, '0,0.000000')}
                   </> :
                   selected && !no_pool && (
                     pool_loading ?
@@ -182,7 +180,7 @@ export default ({
                           {k}
                         </span>
                         <span>
-                          {number_format(v, '0,0.00')}
+                          {number_format(v, '0,0.000000')}
                           %
                         </span>
                       </div>
@@ -211,7 +209,7 @@ export default ({
                 <span className="text-lg font-bold">
                   {!isNaN(share) || (pool_data && user_pools_data) ?
                     <>
-                      {number_format(share || 0, '0,0.00')}
+                      {number_format(share || 0, '0,0.000000')}
                       %
                     </> :
                     selected && !no_pool && (
@@ -231,7 +229,7 @@ export default ({
                 <span className="text-lg font-bold">
                   {!isNaN(lpTokenBalance) || (pool_data && user_pools_data) ?
                     <>
-                      {number_format(lpTokenBalance || 0, '0,0.00')}
+                      {number_format(lpTokenBalance || 0, '0,0.000000')}
                     </> :
                     selected && !no_pool && (
                       position_loading ?
@@ -251,9 +249,9 @@ export default ({
                         {symbols[0]}
                       </span>
                       <span className="text-lg font-bold">
-                        {!isNaN(tokensX) || (pool_data && user_pools_data) ?
+                        {!isNaN(balances?.[0]) || (pool_data && user_pools_data) ?
                           <>
-                            {number_format(tokensX || 0, '0,0.00')}
+                            {number_format(balances?.[0] || 0, '0,0.000000')}
                           </> :
                           selected && !no_pool && (
                             position_loading ?
@@ -272,9 +270,9 @@ export default ({
                         {symbols[1]}
                       </span>
                       <span className="text-lg font-bold">
-                        {!isNaN(tokensY) || (pool_data && user_pools_data) ?
+                        {!isNaN(balances?.[1]) || (pool_data && user_pools_data) ?
                           <>
-                            {number_format(tokensY || 0, '0,0.00')}
+                            {number_format(balances?.[1] || 0, '0,0.000000')}
                           </> :
                           selected && !no_pool && (
                             position_loading ?

@@ -25,7 +25,7 @@ export default ({ data }) => {
               Slippage Tolerance
             </span>
             <span className="text-lg font-bold">
-              {number_format(0, '0,0.00')}%
+              {number_format(0, '0,0.000000')}%
             </span>
           </div>
           <div className="flex flex-col space-y-0.5">
@@ -33,7 +33,7 @@ export default ({ data }) => {
               Price Impact
             </span>
             <span className="text-lg font-bold">
-              {number_format(0, '0,0.00')}%
+              {number_format(0, '0,0.000000')}%
             </span>
           </div>
           <div className="flex flex-col space-y-0.5">
@@ -41,7 +41,8 @@ export default ({ data }) => {
               Minimum Received
             </span>
             <span className="text-lg font-bold">
-              {currency_symbol}{number_format(0, '0,0.000000')}
+              {currency_symbol}
+              {number_format(0, '0,0.000000')}
             </span>
           </div>
         </div> :
