@@ -80,11 +80,17 @@ export default ({
         } = { ...pool_data }
         rate = rate || 1
 
-        setAmountY(Number(
-          FixedNumber.fromString(amountX.toString())
-            .mulUnsafe(FixedNumber.fromString(rate.toString()))
-            .toString()
-        ))
+        let _amount
+        try {
+          _amount = Number(
+            FixedNumber.fromString(amountX.toString())
+              .mulUnsafe(FixedNumber.fromString(rate.toString()))
+              .toString()
+          )
+        } catch (error) {
+          _amount = 0
+        }
+        setAmountY(_amount)
       }
       else {
         setAmountY(0)
@@ -110,11 +116,17 @@ export default ({
         } = { ...pool_data }
         rate = rate || 1
 
-        setAmountX(Number(
-          FixedNumber.fromString(amountY.toString())
-            .divUnsafe(FixedNumber.fromString(rate.toString()))
-            .toString()
-        ))
+        let _amount
+        try {
+          _amount = Number(
+            FixedNumber.fromString(amountY.toString())
+              .mulUnsafe(FixedNumber.fromString(rate.toString()))
+              .toString()
+          )
+        } catch (error) {
+          _amount = 0
+        }
+        setAmountX(_amount)
       }
       else {
         setAmountX(0)
@@ -1035,11 +1047,19 @@ export default ({
                 {[0.25, 0.5, 0.75, 1.0].map((p, i) => (
                   <div
                     key={i}
-                    onClick={() => setAmount(Number(
-                      FixedNumber.fromString((lpTokenBalance || 0).toString())
-                        .mulUnsafe(FixedNumber.fromString(p.toString()))
-                        .toString()
-                    ))}
+                    onClick={() => {
+                      let _amount
+                      try {
+                        _amount = Number(
+                          FixedNumber.fromString((lpTokenBalance || 0).toString())
+                            .mulUnsafe(FixedNumber.fromString(p.toString()))
+                            .toString()
+                        )
+                      } catch (error) {
+                        _amount = 0
+                      }
+                      setAmount(_amount)
+                    }}
                     className={`${disabled || !lpTokenBalance ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-200 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-semibold'} rounded-lg shadow dark:shadow-slate-500 py-0.5 px-2`}
                   >
                     {p * 100} %
