@@ -68,74 +68,7 @@ export default ({
   useEffect(() => {
     setApproveResponse(null)
     setCallResponse(null)
-    if (typeof amountX === 'number') {
-      if (amountX > 0) {
-        const {
-          chain,
-          asset,
-        } = { ...pool }
-        const pool_data = pools_data?.find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
-        let {
-          rate,
-        } = { ...pool_data }
-        rate = rate || 1
-
-        let _amount
-        try {
-          _amount = Number(
-            FixedNumber.fromString(amountX.toString())
-              .mulUnsafe(FixedNumber.fromString(rate.toString()))
-              .toString()
-          )
-        } catch (error) {
-          _amount = 0
-        }
-        setAmountY(_amount)
-      }
-      else {
-        setAmountY(0)
-      }
-    }
-    else {
-      setAmountY(null)
-    }
-  }, [amountX])
-
-  useEffect(() => {
-    setApproveResponse(null)
-    setCallResponse(null)
-    if (typeof amountY === 'number') {
-      if (amountY > 0) {
-        const {
-          chain,
-          asset,
-        } = { ...pool }
-        const pool_data = pools_data?.find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
-        let {
-          rate,
-        } = { ...pool_data }
-        rate = rate || 1
-
-        let _amount
-        try {
-          _amount = Number(
-            FixedNumber.fromString(amountY.toString())
-              .mulUnsafe(FixedNumber.fromString(rate.toString()))
-              .toString()
-          )
-        } catch (error) {
-          _amount = 0
-        }
-        setAmountX(_amount)
-      }
-      else {
-        setAmountX(0)
-      }
-    }
-    else {
-      setAmountX(null)
-    }
-  }, [amountY])
+  }, [amountX, amountY])
 
   useEffect(() => {
     const getData = async () => {
@@ -531,6 +464,54 @@ export default ({
     }
   }
 
+  const autoSetY = value => {
+    if (typeof value === 'number') {
+      if (value > 0) {
+        let _amount
+        try {
+          _amount = Number(
+            FixedNumber.fromString(value.toString())
+              .mulUnsafe(FixedNumber.fromString(rate.toString()))
+              .toString()
+          )
+        } catch (error) {
+          _amount = 0
+        }
+        setAmountY(_amount)
+      }
+      else {
+        setAmountY(0)
+      }
+    }
+    else {
+      setAmountY(null)
+    }
+  }
+
+  const autoSetX = value => {
+    if (typeof value === 'number') {
+      if (value > 0) {
+        let _amount
+        try {
+          _amount = Number(
+            FixedNumber.fromString(value.toString())
+              .divUnsafe(FixedNumber.fromString(rate.toString()))
+              .toString()
+          )
+        } catch (error) {
+          _amount = 0
+        }
+        setAmountX(_amount)
+      }
+      else {
+        setAmountX(0)
+      }
+    }
+    else {
+      setAmountX(null)
+    }
+  }
+
   const {
     chain,
     asset,
@@ -554,6 +535,10 @@ export default ({
     symbol,
     symbols,
   } = { ...pool_data }
+  let {
+    rate,
+  } = { ...pool_data }
+  rate = rate || 1
   const x_asset_data = tokens?.[0] && {
     ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
     ...(
@@ -788,14 +773,19 @@ export default ({
                         value = e.target.value
                       }
                       value = value < 0 ? 0 : value
-                      setAmountX(value && !isNaN(value) ? Number(value) : value)
+                      value = value && !isNaN(value) ? Number(value) : value
+                      setAmountX(value)
+                      autoSetY(value)
                     }}
                     onWheel={e => e.target.blur()}
                     onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                     className={`w-full bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
                   />
                   <div
-                    onClick={() => setAmountX(x_balance_amount)}
+                    onClick={() => {
+                      setAmountX(x_balance_amount)
+                      autoSetY(x_balance_amount)
+                    }}
                     className={`${disabled || typeof x_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
                   >
                     Max
@@ -860,14 +850,19 @@ export default ({
                         value = e.target.value
                       }
                       value = value < 0 ? 0 : value
-                      setAmountY(value && !isNaN(value) ? Number(value) : value)
+                      value = value && !isNaN(value) ? Number(value) : value
+                      setAmountY(value)
+                      autoSetX(value)
                     }}
                     onWheel={e => e.target.blur()}
                     onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                     className={`w-full bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
                   />
                   <div
-                    onClick={() => setAmountY(y_balance_amount)}
+                    onClick={() => {
+                      setAmountY(y_balance_amount)
+                      autoSetX(y_balance_amount)
+                    }}
                     className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
                   >
                     Max
