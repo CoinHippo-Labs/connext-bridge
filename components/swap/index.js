@@ -196,11 +196,19 @@ export default () => {
           if (pair === undefined) {
             setPair(null)
           }
-          setSwapAmount(true)
           const {
             chain,
             asset,
+            amount,
           } = { ...swap }
+
+          if (typeof amount === 'number') {
+            setSwapAmount(true)
+          }
+          else if (typeof swapAmount === 'number') {
+            setSwapAmount(null)
+          }
+
           const chain_data = chains_data.find(c => c?.id === chain)
           const {
             chain_id,
@@ -513,13 +521,12 @@ export default () => {
     }
   }
 
-  const calculateSwap = async pair => {
-    if (pair && typeof swap?.amount === 'number') {
+  const calculateSwap = async _pair => {
+    if (_pair && typeof swap?.amount === 'number') {
       if (swap.amount <= 0) {
         setSwapAmount(0)
       }
       else {
-        setSwapAmount(true)
         let {
           amount,
           origin,
@@ -529,10 +536,11 @@ export default () => {
           asset_data,
           contract_data,
           domainId,
+          lpTokenAddress,
           tokens,
           decimals,
           symbols,
-        } = { ...pair }
+        } = { ..._pair }
         const x_asset_data = tokens?.[0] && {
           ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
           ...(
@@ -558,6 +566,10 @@ export default () => {
                 symbol: symbols?.[1],
               }
           ),
+        }
+
+        if (!(equals_ignore_case(domainId, pair?.domainId) && equals_ignore_case(lpTokenAddress, pair?.lpTokenAddress))) {
+          setSwapAmount(true)
         }
 
         try {
