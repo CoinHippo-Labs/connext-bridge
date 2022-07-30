@@ -605,7 +605,7 @@ export default () => {
                   </span>
                   {web3_provider && (origin === 'x' ? x_asset_data : y_asset_data) && (
                     <div className="flex items-center space-x-2">
-                      <span className="text-slate-400 dark:text-slate-200 font-semibold">
+                      <span className="text-slate-400 dark:text-slate-600 font-semibold">
                         Balance:
                       </span>
                       <Balance
@@ -753,7 +753,7 @@ export default () => {
                   </span>
                   {web3_provider && (origin === 'x' ? y_asset_data : x_asset_data) && (
                     <div className="flex items-center space-x-2">
-                      <span className="text-slate-400 dark:text-slate-200 font-semibold">
+                      <span className="text-slate-400 dark:text-slate-600 font-semibold">
                         Balance:
                       </span>
                       <Balance
@@ -865,6 +865,8 @@ export default () => {
                   </div> :
                   <Info
                     data={pair}
+                    amount_received={amount * (origin === 'x' ? rate : 1 / rate)}
+                    asset_data={origin === 'x' ? y_asset_data : x_asset_data}
                   />
               )}
             </div>
