@@ -35,7 +35,7 @@ export default ({
   user_pools_data,
   onFinish,
 }) => {
-  const { preferences, chains, pool_assets, pools, dev, wallet, _balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, pool_assets: state.pool_assets, pools: state.pools, dev: state.dev, wallet: state.wallet, _balances: state.balances }), shallowEqual)
+  const { preferences, chains, pool_assets, pools, dev, wallet, balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, pool_assets: state.pool_assets, pools: state.pools, dev: state.dev, wallet: state.wallet, balances: state.balances }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { pool_assets_data } = { ...pool_assets }
@@ -43,7 +43,7 @@ export default ({
   const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
   const { chain_id, provider, web3_provider, address, signer } = { ...wallet_data }
-  const { balances_data } = { ..._balances }
+  const { balances_data } = { ...balances }
 
   const [action, setAction] = useState(_.head(ACTIONS))
   const [amountX, setAmountX] = useState(null)
@@ -81,8 +81,8 @@ export default ({
         rate = rate || 1
 
         setAmountY(Number(
-          FixedNumber.fromString(amountX)
-            .mulUnsafe(FixedNumber.fromString(rate))
+          FixedNumber.fromString(amountX.toString())
+            .mulUnsafe(FixedNumber.fromString(rate.toString()))
             .toString()
         ))
       }
@@ -111,8 +111,8 @@ export default ({
         rate = rate || 1
 
         setAmountX(Number(
-          FixedNumber.fromString(amountY)
-            .divUnsafe(FixedNumber.fromString(rate))
+          FixedNumber.fromString(amountY.toString())
+            .divUnsafe(FixedNumber.fromString(rate.toString()))
             .toString()
         ))
       }
@@ -577,7 +577,6 @@ export default ({
   const user_pool_data = pool_data && user_pools_data?.find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
   const {
     lpTokenBalance,
-    balances,
   } = { ...user_pool_data }
   const position_loading = selected && !no_pool && (!user_pools_data || pool_loading)
 
@@ -1065,9 +1064,9 @@ export default ({
                   </div>
                 }
                 {web3_provider ?
-                  !isNaN(balances?.[0]) ?
+                  !isNaN(removeAmounts?.[0]) ?
                     <span className="text-base">
-                      {number_format((typeof amount === 'number' && removeAmounts ? removeAmounts[0] : balances[0]) || 0, '0,0.000000', true)}
+                      {number_format(removeAmounts[0] || 0, '0,0.000000', true)}
                     </span> :
                     selected && !no_pool && (
                       position_loading ?
@@ -1095,9 +1094,9 @@ export default ({
                   </div>
                 }
                 {web3_provider ?
-                  !isNaN(balances?.[1]) ?
+                  !isNaN(removeAmounts?.[1]) ?
                     <span className="text-base">
-                      {number_format((typeof amount === 'number' && removeAmounts ? removeAmounts[1] : balances[1]) || 0, '0,0.000000', true)}
+                      {number_format(removeAmounts[1] || 0, '0,0.000000', true)}
                     </span> :
                     selected && !no_pool && (
                       position_loading ?
