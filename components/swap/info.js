@@ -50,10 +50,13 @@ export default ({
               Minimum Received
             </span>
             <span className="flex items-center whitespace-nowrap text-lg font-bold space-x-2">
-              <span>
-                {number_format(amount_received * (100 - (slippage || 0)) / 100, '0,0.000000')}
-              </span>
-              <span>
+              {typeof amount_received === 'boolean' ?
+                <TailSpin color="white" width="20" height="20" /> :
+                <span>
+                  {number_format(amount_received * (100 - (slippage || 0)) / 100, '0,0.00000000', true)}
+                </span>
+              }
+              <span className="hidden sm:block text-sm">
                 {asset_data?.symbol}
               </span>
             </span>

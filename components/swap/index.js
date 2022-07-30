@@ -49,6 +49,7 @@ export default () => {
   const { asPath } = { ...router }
 
   const [swap, setSwap] = useState({})
+  const [swapAmount, setSwapAmount] = useState(null)
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [controller, setController] = useState(null)
 
@@ -195,6 +196,7 @@ export default () => {
           if (pair === undefined) {
             setPair(null)
           }
+          setSwapAmount(true)
           const {
             chain,
             asset,
@@ -221,7 +223,7 @@ export default () => {
             domain_id,
             canonicalId,
           )
-          const _pair = (pool ?
+          let _pair = (pool ?
             [pool].map(p => {
               const {
                 symbol,
@@ -237,13 +239,16 @@ export default () => {
             }) :
             [pair] || []
           ).find(p => equals_ignore_case(p?.domainId, domain_id) && equals_ignore_case(p?.asset_data?.id, asset))
-          setPair(_pair && {
+          _pair = _pair && {
             ..._pair,
             contract_data,
             rate: Number(utils.formatUnits(BigNumber.from(rate || '0'), _.last(_pair.decimals) || 18)),
-          })
+          }
+          setPair(_pair)
+          calculateSwap(_pair)
         } catch (error) {
           setPair(undefined)
+          calculateSwap(null)
         }
       }
     }
@@ -452,7 +457,10 @@ export default () => {
             domainId,
             tokenAddress: contract_data?.contract_address,
           })
-          const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(domainId, contract_data?.contract_address)
+          const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(
+            domainId,
+            contract_data?.contract_address,
+          )
           console.log('[Swap]', {
             domainId,
             canonicalId,
@@ -506,6 +514,108 @@ export default () => {
     if (sdk && address && success) {
       await sleep(1 * 1000)
       setPairTrigger(moment().valueOf())
+    }
+  }
+
+  const calculateSwap = async pair => {
+    if (pair && typeof swap?.amount === 'number') {
+      if (swap.amount <= 0) {
+        setSwapAmount(0)
+      }
+      else {
+        setSwapAmount(true)
+        let {
+          amount,
+          origin,
+        } = { ...swap }
+        origin = origin || 'x'
+        const {
+          asset_data,
+          contract_data,
+          domainId,
+          tokens,
+          decimals,
+          symbols,
+        } = { ...pair }
+        const x_asset_data = tokens?.[0] && {
+          ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
+          ...(
+            equals_ignore_case(tokens[0], contract_data?.contract_address) ?
+              contract_data :
+              {
+                chain_id,
+                contract_address: tokens[0],
+                decimals: decimals?.[0],
+                symbol: symbols?.[0],
+              }
+          ),
+        }
+        const y_asset_data = tokens?.[1] && {
+          ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
+          ...(
+            equals_ignore_case(tokens[1], contract_data?.contract_address) ?
+              contract_data :
+              {
+                chain_id,
+                contract_address: tokens[1],
+                decimals: decimals?.[1],
+                symbol: symbols?.[1],
+              }
+          ),
+        }
+
+        try {
+          console.log('[getCanonicalFromLocal]', {
+            domainId,
+            tokenAddress: contract_data?.contract_address,
+          })
+          const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(
+            domainId,
+            contract_data?.contract_address,
+          )
+          console.log('[getPoolTokenIndex]', {
+            domainId,
+            canonicalId,
+            tokenAddress: (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address,
+          })
+          const tokenIndexFrom = await sdk.nxtpSdkPool.getPoolTokenIndex(
+            domainId,
+            canonicalId,
+            (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address,
+          )
+          console.log('[getPoolTokenIndex]', {
+            domainId,
+            canonicalId,
+            tokenAddress: (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address,
+          })
+          const tokenIndexTo = await sdk.nxtpSdkPool.getPoolTokenIndex(
+            domainId,
+            canonicalId,
+            (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address,
+          )
+          amount = utils.parseUnits(amount.toString(), (origin === 'x' ? x_asset_data : y_asset_data)?.decimals || 18).toString()
+          console.log('[calculateSwap]', {
+            domainId,
+            canonicalId,
+            tokenIndexFrom,
+            tokenIndexTo,
+            amount,
+          })
+          const _amount = await sdk.nxtpSdkPool.calculateSwap(
+            domainId,
+            canonicalId,
+            tokenIndexFrom,
+            tokenIndexTo,
+            amount,
+          )
+          setSwapAmount(Number(utils.formatUnits(BigNumber.from(_amount || '0'), (origin === 'x' ? y_asset_data : x_asset_data)?.decimals || 18)))
+        } catch (error) {
+          setSwapAmount(null)
+        }
+      }
+    }
+    else {
+      setSwapAmount(null)
     }
   }
 
@@ -806,7 +916,7 @@ export default () => {
                       </span>
                     </div>
                   </div>
-                  <div className="space-y-1">
+                  {/*<div className="space-y-1">
                     <div className="w-full flex items-center justify-between space-x-3">
                       <DebounceInput
                         debounceTimeout={300}
@@ -855,6 +965,14 @@ export default () => {
                         Max
                       </div>
                     </div>
+                  </div>*/}
+                  <div className="w-72 h-11 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-end text-lg font-semibold text-right py-2 px-3">
+                    {typeof swapAmount === 'number' ?
+                      number_format(swapAmount, '0,0.00000000', true) :
+                      swapAmount ?
+                        <TailSpin color="white" width="20" height="20" /> :
+                        null
+                    }
                   </div>
                 </div>
               </div>
@@ -865,7 +983,7 @@ export default () => {
                   </div> :
                   <Info
                     data={pair}
-                    amount_received={amount * (origin === 'x' ? rate : 1 / rate)}
+                    amount_received={swapAmount}
                     asset_data={origin === 'x' ? y_asset_data : x_asset_data}
                   />
               )}
