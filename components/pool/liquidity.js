@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { FixedNumber, utils } from 'ethers'
+import { BigNumber, FixedNumber, utils } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
 import Switch from 'react-switch'
 import { TailSpin, RotatingSquare, Watch } from 'react-loader-spinner'
@@ -49,6 +49,7 @@ export default ({
   const [amountX, setAmountX] = useState(null)
   const [amountY, setAmountY] = useState(null)
   const [amount, setAmount] = useState(null)
+  const [removeAmounts, setRemoveAmounts] = useState(null)
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [openOptions, setOpenOptions] = useState(false)
 
@@ -115,6 +116,58 @@ export default ({
       setAmountX(null)
     }
   }, [amountY])
+
+  useEffect(() => {
+    const getData = async () => {
+      if (typeof amount === 'number') {
+        if (amount <= 0) {
+          setRemoveAmounts([0, 0])
+        }
+        else {
+          const {
+            chain,
+            asset,
+          } = { ...pool }
+          const chain_data = chains_data?.find(c => c?.id === chain)
+          const pool_data = pools_data?.find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
+          const {
+            contract_data,
+            domainId,
+            tokens,
+            decimals,
+          } = { ...pool_data }
+          const _amount = utils.parseUnits(amount.toString(), _.last(decimals) || 18).toString()
+          try {
+            console.log('[getCanonicalFromLocal]', {
+              domainId,
+              tokenAddress: contract_data?.contract_address,
+            })
+            const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(
+              domainId,
+              contract_data?.contract_address,
+            )
+            console.log('[calculateRemoveSwapLiquidity]', {
+              domainId,
+              canonicalId,
+              amount: _amount,
+            })
+            const amounts = await sdk.nxtpSdkPool.calculateRemoveSwapLiquidity(
+              domainId,
+              canonicalId,
+              _amount,
+            )
+            setRemoveAmounts(amounts?.map((a, i) => Number(utils.formatUnits(BigNumber.from(a || '0'), decimals?.[i] || 18))))
+          } catch (error) {
+            setRemoveAmounts(null)
+          }
+        }
+      }
+      else {
+        setRemoveAmounts(null)
+      }
+    }
+    getData()
+  }, [amount])
 
   const reset = async origin => {
     const reset_pool = origin !== 'address'
@@ -1006,7 +1059,7 @@ export default ({
                 {web3_provider ?
                   !isNaN(balances?.[0]) ?
                     <span className="text-base">
-                      {number_format((typeof amount === 'number' ? amount / (1 + rate) : balances[0]) || 0, '0,0.000000', true)}
+                      {number_format((typeof amount === 'number' && removeAmounts ? removeAmounts[0] : balances[0]) || 0, '0,0.000000', true)}
                     </span> :
                     selected && !no_pool && (
                       position_loading ?
@@ -1036,7 +1089,7 @@ export default ({
                 {web3_provider ?
                   !isNaN(balances?.[1]) ?
                     <span className="text-base">
-                      {number_format((typeof amount === 'number' ? amount * rate / (1 + rate) : balances[1]) || 0, '0,0.000000', true)}
+                      {number_format((typeof amount === 'number' && removeAmounts ? removeAmounts[1] : balances[1]) || 0, '0,0.000000', true)}
                     </span> :
                     selected && !no_pool && (
                       position_loading ?

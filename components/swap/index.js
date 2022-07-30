@@ -209,20 +209,20 @@ export default () => {
           const {
             contract_address,
           } = { ...contract_data }
-          const response = await sdk.nxtpSdkPool.getPool(
+          const pool = await sdk.nxtpSdkPool.getPool(
             domain_id,
             contract_address,
           )
-          const [canonicalDomain, canonicalId] = response && await sdk.nxtpSdkPool.getCanonicalFromLocal(
+          const [canonicalDomain, canonicalId] = pool && await sdk.nxtpSdkPool.getCanonicalFromLocal(
             domain_id,
             contract_address,
           )
-          const rate = response && await sdk.nxtpSdkPool.getVirtualPrice(
+          const rate = pool && await sdk.nxtpSdkPool.getVirtualPrice(
             domain_id,
             canonicalId,
           )
-          const _pair = (response ?
-            [response].map(p => {
+          const _pair = (pool ?
+            [pool].map(p => {
               const {
                 symbol,
               } = { ...p }
