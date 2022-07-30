@@ -360,10 +360,6 @@ export default () => {
         symbol,
         symbols,
       } = { ...pair }
-      let {
-        rate,
-      } = { ...pair }
-      rate = rate || 1
       const x_asset_data = tokens?.[0] && {
         ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
         ...(
@@ -643,10 +639,6 @@ export default () => {
     symbol,
     symbols,
   } = { ...pair }
-  let {
-    rate,
-  } = { ...pair }
-  rate = rate || 1
   const x_asset_data = tokens?.[0] && {
     ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
     ...(
@@ -916,56 +908,6 @@ export default () => {
                       </span>
                     </div>
                   </div>
-                  {/*<div className="space-y-1">
-                    <div className="w-full flex items-center justify-between space-x-3">
-                      <DebounceInput
-                        debounceTimeout={300}
-                        size="small"
-                        type="number"
-                        placeholder="0.00"
-                        disabled={disabled}
-                        value={typeof amount === 'number' && amount >= 0 ? amount * (origin === 'x' ? rate : 1 / rate) : ''}
-                        onChange={e => {
-                          const regex = /^[0-9.\b]+$/
-                          let value
-                          if (e.target.value === '' || regex.test(e.target.value)) {
-                            value = e.target.value
-                          }
-                          value = value < 0 ? 0 : value
-                          console.log('[Swap]', {
-                            swap: {
-                              ...swap,
-                              amount: value && !isNaN(value) ? Number(value) * (origin === 'x' ? 1 / rate : rate) : value,
-                            },
-                          })
-                          setSwap({
-                            ...swap,
-                            amount: value && !isNaN(value) ? Number(value) * (origin === 'x' ? 1 / rate : rate) : value,
-                          })
-                        }}
-                        onWheel={e => e.target.blur()}
-                        onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                        className={`w-full bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
-                      />
-                      <div
-                        onClick={() => {
-                          console.log('[Swap]', {
-                            swap: {
-                              ...swap,
-                              amount: origin === 'x' ? y_balance_amount / rate : x_balance_amount * rate,
-                            },
-                          })
-                          setSwap({
-                            ...swap,
-                            amount: origin === 'x' ? y_balance_amount / rate : x_balance_amount * rate,
-                          })
-                        }}
-                        className={`${disabled || typeof (origin === 'x' ? y_balance_amount : x_balance_amount) !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
-                      >
-                        Max
-                      </div>
-                    </div>
-                  </div>*/}
                   <div className="w-72 h-11 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-end text-lg font-semibold text-right py-2 px-3">
                     {typeof swapAmount === 'number' ?
                       number_format(swapAmount, '0,0.00000000', true) :

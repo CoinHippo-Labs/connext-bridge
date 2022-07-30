@@ -104,118 +104,24 @@ export default ({
               </a>
             )}
           </div>
-          <div className="grid grid-flow-row grid-cols-2 lg:grid-cols-4">
-            <div className="flex flex-col space-y-0.5">
-              <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
-                Liquidity
-              </span>
-              <span className="text-lg font-bold">
-                {pool_data ?
-                  <>
-                    {number_format(liquidity, '0,0.000000')}
-                  </> :
-                  selected && !no_pool && (
-                    pool_loading ?
-                      <div className="mt-1">
-                        <TailSpin color={loader_color(theme)} width="24" height="24" />
-                      </div> :
-                      '-'
-                  )
-                }
-              </span>
-            </div>
-            <div className="flex flex-col space-y-0.5">
-              <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
-                Volume (24h)
-              </span>
-              <span className="text-lg font-bold">
-                {pool_data ?
-                  <>
-                    {currency_symbol}
-                    {number_format(volume, '0,0.000000')}
-                  </> :
-                  selected && !no_pool && (
-                    pool_loading ?
-                      <div className="mt-1">
-                        <TailSpin color={loader_color(theme)} width="24" height="24" />
-                      </div> :
-                      '-'
-                  )
-                }
-              </span>
-            </div>
-            <div className="flex flex-col space-y-0.5">
-              <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
-                Fees (24h)
-              </span>
-              <span className="text-lg font-bold">
-                {pool_data ?
-                  <>
-                    {currency_symbol}
-                    {number_format(fees, '0,0.000000')}
-                  </> :
-                  selected && !no_pool && (
-                    pool_loading ?
-                      <div className="mt-1">
-                        <TailSpin color={loader_color(theme)} width="24" height="24" />
-                      </div> :
-                      '-'
-                  )
-                }
-              </span>
-            </div>
-            <div className="flex flex-col space-y-0.5">
-              <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
-                APY
-              </span>
-              <span className="text-lg font-bold">
-                {pool_data ?
-                  <div className="grid sm:grid-cols-2 gap-1 mt-1">
-                    {Object.entries({ ...apy }).filter(([k, v]) => !isNaN(v)).map(([k, v]) => (
-                      <div
-                        key={k}
-                        className="flex items-center text-sm space-x-1"
-                      >
-                        <span className="capitalize">
-                          {k}
-                        </span>
-                        <span>
-                          {number_format(v, '0,0.000000')}
-                          %
-                        </span>
-                      </div>
-                    ))}
-                  </div> :
-                  selected && !no_pool && (
-                    pool_loading ?
-                      <div className="mt-1">
-                        <TailSpin color={loader_color(theme)} width="24" height="24" />
-                      </div> :
-                      '-'
-                  )
-                }
-              </span>
-            </div>
-          </div>
           <div className="space-y-3">
             <div className="text-xl font-semibold">
-              Your Position
+              Statistics
             </div>
             <div className="grid grid-flow-row grid-cols-2 lg:grid-cols-4">
               <div className="flex flex-col space-y-0.5">
                 <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
-                  Pool Share
+                  Liquidity
                 </span>
                 <span className="text-lg font-bold">
-                  {!isNaN(share) || (pool_data && user_pools_data) ?
+                  {pool_data ?
                     <>
-                      {number_format(share || 0, '0,0.000000')}
-                      %
+                      {number_format(liquidity, '0,0.000000')}
                     </> :
                     selected && !no_pool && (
-                      position_loading ?
-                        <div className="mt-0.5">
-                          <RotatingSquare color={loader_color(theme)} width="24" height="24" />
+                      pool_loading ?
+                        <div className="mt-1">
+                          <TailSpin color={loader_color(theme)} width="24" height="24" />
                         </div> :
                         '-'
                     )
@@ -224,25 +130,85 @@ export default ({
               </div>
               <div className="flex flex-col space-y-0.5">
                 <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
-                  Pool Tokens
+                  Volume (24h)
                 </span>
                 <span className="text-lg font-bold">
-                  {!isNaN(lpTokenBalance) || (pool_data && user_pools_data) ?
+                  {pool_data ?
                     <>
-                      {number_format(lpTokenBalance || 0, '0,0.000000')}
+                      {currency_symbol}
+                      {number_format(volume, '0,0.000000')}
                     </> :
                     selected && !no_pool && (
-                      position_loading ?
-                        <div className="mt-0.5">
-                          <RotatingSquare color={loader_color(theme)} width="24" height="24" />
+                      pool_loading ?
+                        <div className="mt-1">
+                          <TailSpin color={loader_color(theme)} width="24" height="24" />
                         </div> :
                         '-'
                     )
                   }
                 </span>
               </div>
-              {symbols && (
-                <>
+              <div className="flex flex-col space-y-0.5">
+                <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
+                  Fees (24h)
+                </span>
+                <span className="text-lg font-bold">
+                  {pool_data ?
+                    <>
+                      {currency_symbol}
+                      {number_format(fees, '0,0.000000')}
+                    </> :
+                    selected && !no_pool && (
+                      pool_loading ?
+                        <div className="mt-1">
+                          <TailSpin color={loader_color(theme)} width="24" height="24" />
+                        </div> :
+                        '-'
+                    )
+                  }
+                </span>
+              </div>
+              <div className="flex flex-col space-y-0.5">
+                <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
+                  APY
+                </span>
+                <span className="text-lg font-bold">
+                  {pool_data ?
+                    <div className="grid sm:grid-cols-2 gap-1 mt-1">
+                      {Object.entries({ ...apy }).filter(([k, v]) => !isNaN(v)).map(([k, v]) => (
+                        <div
+                          key={k}
+                          className="flex items-center text-sm space-x-1"
+                        >
+                          <span className="capitalize">
+                            {k}
+                          </span>
+                          <span>
+                            {number_format(v, '0,0.000000')}
+                            %
+                          </span>
+                        </div>
+                      ))}
+                    </div> :
+                    selected && !no_pool && (
+                      pool_loading ?
+                        <div className="mt-1">
+                          <TailSpin color={loader_color(theme)} width="24" height="24" />
+                        </div> :
+                        '-'
+                    )
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-flow-row grid-cols-1 lg:grid-cols-2">
+            {symbols && (
+              <div className="space-y-3">
+                <div className="text-xl font-semibold">
+                  Tokens
+                </div>
+                <div className="grid grid-flow-row grid-cols-2">
                   {symbols[0] && (
                     <div className="flex flex-col space-y-0.5">
                       <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
@@ -285,8 +251,54 @@ export default ({
                       </span>
                     </div>
                   )}
-                </>
-              )}
+                </div>
+              </div>
+            )}
+            <div className="space-y-3">
+              <div className="text-xl font-semibold">
+                Your Position
+              </div>
+              <div className="grid grid-flow-row grid-cols-2">
+                <div className="flex flex-col space-y-0.5">
+                  <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
+                    Pool Share
+                  </span>
+                  <span className="text-lg font-bold">
+                    {!isNaN(share) || (pool_data && user_pools_data) ?
+                      <>
+                        {number_format(share || 0, '0,0.000000')}
+                        %
+                      </> :
+                      selected && !no_pool && (
+                        position_loading ?
+                          <div className="mt-0.5">
+                            <RotatingSquare color={loader_color(theme)} width="24" height="24" />
+                          </div> :
+                          '-'
+                      )
+                    }
+                  </span>
+                </div>
+                <div className="flex flex-col space-y-0.5">
+                  <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
+                    Pool Tokens
+                  </span>
+                  <span className="text-lg font-bold">
+                    {!isNaN(lpTokenBalance) || (pool_data && user_pools_data) ?
+                      <>
+                        {number_format(lpTokenBalance || 0, '0,0.000000')}
+                      </> :
+                      selected && !no_pool && (
+                        position_loading ?
+                          <div className="mt-0.5">
+                            <RotatingSquare color={loader_color(theme)} width="24" height="24" />
+                          </div> :
+                          '-'
+                      )
+                    }
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div> :

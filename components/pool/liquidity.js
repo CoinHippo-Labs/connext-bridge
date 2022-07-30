@@ -80,7 +80,11 @@ export default ({
         } = { ...pool_data }
         rate = rate || 1
 
-        setAmountY(amountX * rate)
+        setAmountY(Number(
+          FixedNumber.fromString(amountX)
+            .mulUnsafe(FixedNumber.fromString(rate))
+            .toString()
+        ))
       }
       else {
         setAmountY(0)
@@ -106,7 +110,11 @@ export default ({
         } = { ...pool_data }
         rate = rate || 1
 
-        setAmountX(amountY / rate)
+        setAmountX(Number(
+          FixedNumber.fromString(amountY)
+            .divUnsafe(FixedNumber.fromString(rate))
+            .toString()
+        ))
       }
       else {
         setAmountX(0)
@@ -534,10 +542,6 @@ export default ({
     symbol,
     symbols,
   } = { ...pool_data }
-  let {
-    rate,
-  } = { ...pool_data }
-  rate = rate || 1
   const x_asset_data = tokens?.[0] && {
     ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
     ...(
@@ -1032,7 +1036,11 @@ export default ({
                 {[0.25, 0.5, 0.75, 1.0].map((p, i) => (
                   <div
                     key={i}
-                    onClick={() => setAmount(parseFloat((p * lpTokenBalance).toFixed(12)))}
+                    onClick={() => setAmount(Number(
+                      FixedNumber.fromString((lpTokenBalance || 0).toString())
+                        .mulUnsafe(FixedNumber.fromString(p.toString()))
+                        .toString()
+                    ))}
                     className={`${disabled || !lpTokenBalance ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-200 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-semibold'} rounded-lg shadow dark:shadow-slate-500 py-0.5 px-2`}
                   >
                     {p * 100} %
