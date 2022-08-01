@@ -243,40 +243,6 @@
     "image": "/logos/chains/mainnet/optimism.png"
   },
   {
-    "id": "moonbeam",
-    "title": "Moonbeam",
-    "short_name": "MBEAM",
-    "chain_id": 1284,
-    "provider_params": [
-      {
-        "chainId": "0x504",
-        "chainName": "Moonbeam",
-        "rpcUrls": ["https://rpc.api.moonbeam.network", "https://rpc.ankr.com/moonbeam"],
-        "nativeCurrency": {
-          "name": "Glimmer",
-          "symbol": "GLMR",
-          "decimals": 18
-        },
-        "blockExplorerUrls": ["https://moonscan.io"]
-      }
-    ],
-    "explorer": {
-      "name": "Moonscan",
-      "url": "https://moonscan.io",
-      "icon": "/logos/explorers/moonbeam.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/mainnet/moonbeam.png",
-    "optional_bridge_urls": ["https://app.nomad.xyz"],
-    "nomad": {
-      "id": "moonbeam"
-    }
-  },
-  {
     "id": "moonriver",
     "title": "Moonriver",
     "short_name": "MOVR",
@@ -335,39 +301,6 @@
       "transaction_path": "/tx/{tx}"
     },
     "image": "/logos/chains/mainnet/fuse.png"
-  },
-  {
-    "id": "milkomeda",
-    "title": "Milkomeda Cardano (C1)",
-    "short_name": "MMEDA",
-    "chain_id": 2001,
-    "provider_params": [
-      {
-        "chainId": "0x7d1",
-        "chainName": "Milkomeda Cardano (C1)",
-        "rpcUrls": ["https://rpc.c1.milkomeda.com:8545"],
-        "nativeCurrency": {
-          "name": "MilkADA",
-          "symbol": "mADA",
-          "decimals": 18
-        },
-        "blockExplorerUrls": ["https://rpc.c1.milkomeda.com:4000"]
-      }
-    ],
-    "explorer": {
-      "name": "BlockScout",
-      "url": "https://rpc.c1.milkomeda.com:4000",
-      "icon": "/logos/explorers/blockscout.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/mainnet/milkomeda.png",
-    "nomad": {
-      "id": "milkomeda"
-    }
   },
   {
     "id": "boba",
@@ -458,38 +391,5 @@
       "transaction_path": "/tx/{tx}"
     },
     "image": "/logos/chains/mainnet/cronos.png"
-  },
-  {
-    "id": "evmos",
-    "title": "Evmos",
-    "short_name": "EVMOS",
-    "chain_id": 9001,
-    "provider_params": [
-      {
-        "chainId": "0x2329",
-        "chainName": "Evmos",
-        "rpcUrls": ["https://eth.bd.evmos.org:8545"],
-        "nativeCurrency": {
-          "name": "Evmos",
-          "symbol": "EVMOS",
-          "decimals": 18
-        },
-        "blockExplorerUrls": ["https://evm.evmos.org"]
-      }
-    ],
-    "explorer": {
-      "name": "Evmos",
-      "url": "https://evm.evmos.org",
-      "icon": "/logos/explorers/evmos.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/address/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/mainnet/evmos.png",
-    "nomad": {
-      "id": "evmos"
-    }
   }
 ]
