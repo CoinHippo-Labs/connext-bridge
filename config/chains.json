@@ -243,36 +243,6 @@
     "image": "/logos/chains/mainnet/optimism.png"
   },
   {
-    "id": "moonriver",
-    "title": "Moonriver",
-    "short_name": "MOVR",
-    "chain_id": 1285,
-    "provider_params": [
-      {
-        "chainId": "0x505",
-        "chainName": "Moonriver",
-        "rpcUrls": ["https://rpc.api.moonriver.moonbeam.network"],
-        "nativeCurrency": {
-          "name": "Moonriver",
-          "symbol": "MOVR",
-          "decimals": 18
-        },
-        "blockExplorerUrls": ["https://moonriver.moonscan.io"]
-      }
-    ],
-    "explorer": {
-      "name": "Moonscan",
-      "url": "https://moonriver.moonscan.io",
-      "icon": "/logos/explorers/moonriver.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/mainnet/moonriver.png"
-  },
-  {
     "id": "fuse",
     "title": "Fuse",
     "short_name": "FUSE",
