@@ -41,7 +41,7 @@ export default ({
   return (
     <div>
       {_assets_data?.filter(a => a?.preset).length > 0 && (
-        <div className="flex flex-wrap items-center mb-1">
+        <div className="flex flex-wrap items-center mb-2">
           {_assets_data.filter(a => a?.preset).map((a, i) => (
             <div
               key={i}
