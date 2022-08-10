@@ -194,6 +194,38 @@
     "group" : "optimistic_rollups"
   },
   {
+    "id": "arbitrum_nova",
+    "chain_id": 42170,
+    "name": "Arbitrum Nova",
+    "short_name": "NOVA",
+    "provider_params": [
+      {
+        "chainId": "0xa4ba",
+        "chainName": "Arbitrum Nova",
+        "rpcUrls": ["https://nova.arbitrum.io/rpc"],
+        "nativeCurrency": {
+          "name": "Ethereum",
+          "symbol": "aETH",
+          "decimals": 18
+        },
+        "blockExplorerUrls": ["https://nova-explorer.arbitrum.io"]
+      }
+    ],
+    "explorer": {
+      "name": "Arbitrum",
+      "url": "https://nova-explorer.arbitrum.io",
+      "icon": "/logos/explorers/arbiscan.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/arbitrum.png",
+    "color": "#28a0f0",
+    "group" : "optimistic_rollups"
+  },
+  {
     "id": "fantom",
     "chain_id": 250,
     "name": "Fantom",
