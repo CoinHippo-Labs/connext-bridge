@@ -213,6 +213,37 @@
     "image": "/logos/chains/mainnet/arbitrum.png"
   },
   {
+    "id": "arbitrum_nova",
+    "title": "Arbitrum Nova",
+    "short_name": "NOVA",
+    "chain_id": 42170,
+    "provider_params": [
+      {
+        "chainId": "0xa4ba",
+        "chainName": "Arbitrum Nova",
+        "rpcUrls": ["https://nova.arbitrum.io/rpc"],
+        "nativeCurrency": {
+          "name": "Arbitrum Ether",
+          "symbol": "aETH",
+          "decimals": 18
+        },
+        "blockExplorerUrls": ["https://nova-explorer.arbitrum.io"]
+      }
+    ],
+    "explorer": {
+      "name": "Arbitrum",
+      "url": "https://nova-explorer.arbitrum.io",
+      "icon": "/logos/explorers/arbiscan.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/mainnet/arbitrum.png",
+    "is_staging": true
+  },
+  {
     "id": "optimism",
     "title": "Optimism",
     "short_name": "OPT",
