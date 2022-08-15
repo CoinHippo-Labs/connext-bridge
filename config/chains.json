@@ -240,8 +240,7 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
-    "image": "/logos/chains/mainnet/arbitrum.png",
-    "is_staging": true
+    "image": "/logos/chains/mainnet/arbitrum.png"
   },
   {
     "id": "optimism",
