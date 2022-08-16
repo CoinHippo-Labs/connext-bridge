@@ -167,16 +167,16 @@
           "symbol": "xDAI",
           "decimals": 18
         },
-        "blockExplorerUrls": ["https://blockscout.com/poa/xdai/"]
+        "blockExplorerUrls": ["https://gnosisscan.io"]
       }
     ],
     "explorer": {
-      "name": "BlockScout",
-      "url": "https://blockscout.com/xdai/mainnet",
-      "icon": "/logos/explorers/blockscout.png",
-      "block_path": "/blocks/{block}",
+      "name": "Gnosisscan",
+      "url": "https://gnosisscan.io",
+      "icon": "/logos/explorers/gnosisscan.png",
+      "block_path": "/block/{block}",
       "address_path": "/address/{address}",
-      "contract_path": "/tokens/{address}",
+      "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
