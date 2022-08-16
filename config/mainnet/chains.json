@@ -9,7 +9,10 @@
       {
         "chainId": "0x1",
         "chainName": "Ethereum",
-        "rpcUrls": ["https://rpc.ankr.com/eth", "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"],
+        "rpcUrls": [
+          "https://rpc.ankr.com/eth",
+          "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
+        ],
         "nativeCurrency": {
           "name": "Ethereum",
           "symbol": "ETH",
@@ -41,7 +44,10 @@
       {
         "chainId": "0x38",
         "chainName": "BNB Chain",
-        "rpcUrls": ["https://rpc.ankr.com/bsc", "https://bsc-dataseed.binance.org"],
+        "rpcUrls": [
+          "https://rpc.ankr.com/bsc",
+          "https://bsc-dataseed.binance.org"
+        ],
         "nativeCurrency": {
           "name": "BNB",
           "symbol": "BNB",
@@ -73,7 +79,9 @@
       {
         "chainId": "0x89",
         "chainName": "Polygon",
-        "rpcUrls": ["https://rpc.ankr.com/polygon"],
+        "rpcUrls": [
+          "https://rpc.ankr.com/polygon"
+        ],
         "nativeCurrency": {
           "name": "Polygon",
           "symbol": "MATIC",
@@ -106,7 +114,10 @@
       {
         "chainId": "0xa86a",
         "chainName": "Avalanche",
-        "rpcUrls": ["https://rpc.ankr.com/avalanche", "https://api.avax.network/ext/bc/C/rpc"],
+        "rpcUrls": [
+          "https://rpc.ankr.com/avalanche",
+          "https://api.avax.network/ext/bc/C/rpc"
+        ],
         "nativeCurrency": {
           "name": "Avalanche",
           "symbol": "AVAX",
@@ -138,7 +149,10 @@
       {
         "chainId": "0xa",
         "chainName": "Optimism",
-        "rpcUrls": ["https://rpc.ankr.com/optimism", "https://mainnet.optimism.io"],
+        "rpcUrls": [
+          "https://rpc.ankr.com/optimism",
+          "https://mainnet.optimism.io"
+        ],
         "nativeCurrency": {
           "name": "Ethereum",
           "symbol": "oETH",
@@ -170,7 +184,10 @@
       {
         "chainId": "0xa4b1",
         "chainName": "Arbitrum",
-        "rpcUrls": ["https://rpc.ankr.com/arbitrum", "https://arb1.arbitrum.io/rpc"],
+        "rpcUrls": [
+          "https://rpc.ankr.com/arbitrum",
+          "https://arb1.arbitrum.io/rpc"
+        ],
         "nativeCurrency": {
           "name": "Ethereum",
           "symbol": "aETH",
@@ -202,7 +219,9 @@
       {
         "chainId": "0xa4ba",
         "chainName": "Arbitrum Nova",
-        "rpcUrls": ["https://nova.arbitrum.io/rpc"],
+        "rpcUrls": [
+          "https://nova.arbitrum.io/rpc"
+        ],
         "nativeCurrency": {
           "name": "Ethereum",
           "symbol": "aETH",
@@ -234,7 +253,10 @@
       {
         "chainId": "0xfa",
         "chainName": "Fantom",
-        "rpcUrls": ["https://rpc.ankr.com/fantom", "https://rpc.ftm.tools"],
+        "rpcUrls": [
+          "https://rpc.ankr.com/fantom",
+          "https://rpc.ftm.tools"
+        ],
         "nativeCurrency": {
           "name": "Fantom",
           "symbol": "FTM",
@@ -267,19 +289,21 @@
       {
         "chainId": "0x64",
         "chainName": "Gnosis",
-        "rpcUrls": ["https://rpc.ankr.com/gnosis"],
+        "rpcUrls": [
+          "https://rpc.ankr.com/gnosis"
+        ],
         "nativeCurrency": {
           "name": "xDAI",
           "symbol": "xDAI",
           "decimals": 18
         },
-        "blockExplorerUrls": ["https://blockscout.com/xdai/mainnet/"]
+        "blockExplorerUrls": ["https://gnosisscan.io"]
       }
     ],
     "explorer": {
-      "name": "BlockScout",
-      "url": "https://blockscout.com/xdai/mainnet",
-      "icon": "/logos/explorers/blockscout.png",
+      "name": "Gnosisscan",
+      "url": "https://gnosisscan.io",
+      "icon": "/logos/explorers/gnosisscan.png",
       "block_path": "/block/{block}",
       "address_path": "/address/{address}",
       "contract_path": "/token/{address}",
@@ -300,7 +324,10 @@
       {
         "chainId": "0x504",
         "chainName": "Moonbeam",
-        "rpcUrls": ["https://rpc.ankr.com/moonbeam", "https://rpc.api.moonbeam.network"],
+        "rpcUrls": [
+          "https://rpc.ankr.com/moonbeam",
+          "https://rpc.api.moonbeam.network"
+        ],
         "nativeCurrency": {
           "name": "Moonbeam",
           "symbol": "GLMR",
@@ -332,7 +359,9 @@
       {
         "chainId": "0x505",
         "chainName": "Moonriver",
-        "rpcUrls": ["https://rpc.api.moonriver.moonbeam.network"],
+        "rpcUrls": [
+          "https://rpc.api.moonriver.moonbeam.network"
+        ],
         "nativeCurrency": {
           "name": "Moonriver",
           "symbol": "MOVR",
@@ -364,7 +393,9 @@
       {
         "chainId": "0x7a",
         "chainName": "Fuse",
-        "rpcUrls": ["https://rpc.fuse.io"],
+        "rpcUrls": [
+          "https://rpc.fuse.io"
+        ],
         "nativeCurrency": {
           "name": "Fuse",
           "symbol": "FUSE",
@@ -396,7 +427,9 @@
       {
         "chainId": "0xb7e7759",
         "chainName": "Gather",
-        "rpcUrls": ["https://mainnet.gather.network"],
+        "rpcUrls": [
+          "https://mainnet.gather.network"
+        ],
         "nativeCurrency": {
           "name": "Gather",
           "symbol": "GTH",
@@ -429,7 +462,9 @@
       {
         "chainId": "0x7d1",
         "chainName": "Milkomeda",
-        "rpcUrls": ["https://rpc.c1.milkomeda.com:8545"],
+        "rpcUrls": [
+          "https://rpc.c1.milkomeda.com:8545"
+        ],
         "nativeCurrency": {
           "name": "MilkADA",
           "symbol": "mADA",
@@ -461,7 +496,9 @@
       {
         "chainId": "0x19",
         "chainName": "Cronos",
-        "rpcUrls": ["https://evm.cronos.org"],
+        "rpcUrls": [
+          "https://evm.cronos.org"
+        ],
         "nativeCurrency": {
           "name": "Cronos",
           "symbol": "CRO",
@@ -494,7 +531,9 @@
       {
         "chainId": "0x2329",
         "chainName": "Evmos",
-        "rpcUrls": ["https://eth.bd.evmos.org:8545"],
+        "rpcUrls": [
+          "https://eth.bd.evmos.org:8545"
+        ],
         "nativeCurrency": {
           "name": "Evmos",
           "symbol": "EVMOS",
@@ -526,7 +565,9 @@
       {
         "chainId": "0x120",
         "chainName": "Boba",
-        "rpcUrls": ["https://mainnet.boba.network"],
+        "rpcUrls": [
+          "https://mainnet.boba.network"
+        ],
         "nativeCurrency": {
           "name": "Ethereum",
           "symbol": "ETH",

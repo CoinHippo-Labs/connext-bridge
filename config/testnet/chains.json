@@ -9,7 +9,9 @@
       {
         "chainId": "0x4",
         "chainName": "Ethereum Rinkeby",
-        "rpcUrls": ["https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"],
+        "rpcUrls": [
+          "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
+        ],
         "nativeCurrency": {
           "name": "Ethereum",
           "symbol": "ETH",
@@ -42,7 +44,9 @@
       {
         "chainId": "0x5",
         "chainName": "Ethereum Görli",
-        "rpcUrls": ["https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"],
+        "rpcUrls": [
+          "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
+        ],
         "nativeCurrency": {
           "name": "Ethereum",
           "symbol": "ETH",
@@ -75,7 +79,10 @@
       {
         "chainId": "0x13881",
         "chainName": "Polygon Mumbai",
-        "rpcUrls": ["https://polygon-mumbai.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161", "https://matic-mumbai.chainstacklabs.com"],
+        "rpcUrls": [
+          "https://polygon-mumbai.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+          "https://matic-mumbai.chainstacklabs.com"
+        ],
         "nativeCurrency": {
           "name": "Polygon",
           "symbol": "Matic",
