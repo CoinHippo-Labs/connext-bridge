@@ -184,7 +184,7 @@
   },
   {
     "id": "arbitrum",
-    "title": "Arbitrum",
+    "title": "Arbitrum One",
     "short_name": "ARB",
     "chain_id": 42161,
     "provider_params": [
