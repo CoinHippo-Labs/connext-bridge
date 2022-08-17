@@ -178,12 +178,12 @@
   {
     "id": "arbitrum",
     "chain_id": 42161,
-    "name": "Arbitrum",
+    "name": "Arbitrum One",
     "short_name": "ARB",
     "provider_params": [
       {
         "chainId": "0xa4b1",
-        "chainName": "Arbitrum",
+        "chainName": "Arbitrum One",
         "rpcUrls": [
           "https://rpc.ankr.com/arbitrum",
           "https://arb1.arbitrum.io/rpc"
