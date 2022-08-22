@@ -302,12 +302,15 @@ export default () => {
           chain_id,
           domain_id,
         } = { ...chain_data }
+
         const data = []
+
         for (const asset_data of pool_assets_data) {
           const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_id)
           const {
             contract_address,
           } = { ...contract_data }
+
           try {
             const pool = await sdk.nxtpSdkPool.getPool(
               domain_id,
@@ -317,19 +320,30 @@ export default () => {
               symbol,
               decimals,
             } = { ...pool }
+
             const symbols = symbol?.split('-') || []
-            const stats = pool && await sdk.nxtpSdkPool.getPoolStats(
-              domain_id,
-              contract_address,
-            )
-            const [canonicalDomain, canonicalId] = pool && await sdk.nxtpSdkPool.getCanonicalFromLocal(
-              domain_id,
-              contract_address,
-            )
-            const rate = pool && await sdk.nxtpSdkPool.getVirtualPrice(
-              domain_id,
-              canonicalId,
-            )
+
+            const stats = pool &&
+              await sdk.nxtpSdkPool.getPoolStats(
+                domain_id,
+                contract_address,
+              )
+
+            const canonicals = pool &&
+              await sdk.nxtpSdkPool.getCanonicalFromLocal(
+                domain_id,
+                contract_address,
+              )
+
+            const canonicalDomain = canonicals?.[0],
+              canonicalId = canonicals?.[1]
+
+            const rate = pool &&
+              await sdk.nxtpSdkPool.getVirtualPrice(
+                domain_id,
+                canonicalId,
+              )
+
             data.push({
               ...pool,
               ...stats,

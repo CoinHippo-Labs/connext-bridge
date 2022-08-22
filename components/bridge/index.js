@@ -670,7 +670,7 @@ export default () => {
   const disabled = calling || approving
 
   return (
-    <div className="grid grid-flow-row grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
+    <div className="grid grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
       <div className="hidden lg:block col-span-0 lg:col-span-2" />
       <div className="col-span-1 lg:col-span-4">
         <div className="mt-4 sm:mt-8">
@@ -727,7 +727,7 @@ export default () => {
             </div>
             <div className={`${checkSupport() && amount > 0 ? 'border-2 border-blue-400 dark:border-blue-800 shadow-xl shadow-blue-200 dark:shadow-blue-600' : 'shadow dark:shadow-slate-400'} rounded-2xl space-y-6 pt-4 sm:pt-8 pb-3 sm:pb-6 px-3 sm:px-6`}>
               <div className="space-y-2">
-                <div className="grid grid-flow-row grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
+                <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
                   <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start">
                     <div className="w-32 sm:w-48 flex sm:flex-col items-center justify-center space-x-1.5">
                       <span className="text-slate-400 dark:text-white text-lg font-semibold text-center">
@@ -890,7 +890,7 @@ export default () => {
                 <div className="text-slate-400 dark:text-slate-600 text-lg italic text-center sm:ml-3">
                   Route not supported
                 </div> :
-                <div className="grid grid-flow-row grid-cols-5 sm:grid-cols-5 gap-6 sm:ml-3">
+                <div className="grid grid-cols-5 sm:grid-cols-5 gap-6 sm:ml-3">
                   <div className="col-span-2 sm:col-span-2 space-y-1">
                     <div className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
                       <span className="text-slate-400 dark:text-white text-sm sm:text-base sm:font-semibold">

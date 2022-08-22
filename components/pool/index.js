@@ -274,16 +274,16 @@ export default () => {
         </div>
         <div className="w-full flex flex-col space-y-4 my-6 my-4 sm:my-6 mx-1 sm:mx-4">
           <div className="flex items-center space-x-3">
-            {/*<Link href="/pools">
+            <Link href="/pools">
               <a className="text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white">
                 <RiArrowLeftCircleFill size={36} />
               </a>
-            </Link>*/}
+            </Link>
             <h1 className="text-2xl font-bold">
               Manage Pool
             </h1>
           </div>
-          <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6">
             <div className="lg:col-span-2">
               <Info
                 pool={pool}

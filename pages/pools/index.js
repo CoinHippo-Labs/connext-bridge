@@ -2,6 +2,8 @@ import Pools from '../../components/pools'
 
 export default () => {
   return (
-    <Pools />
+    <div className="max-w-6.5xl mx-auto">
+      <Pools />
+    </div>
   )
 }

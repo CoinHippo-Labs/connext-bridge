@@ -223,15 +223,22 @@ export default () => {
             domain_id,
             contract_address,
           )
-          const [canonicalDomain, canonicalId] = pool && await sdk.nxtpSdkPool.getCanonicalFromLocal(
-            domain_id,
-            contract_address,
-          )
+
+          const canonicals = pool &&
+            await sdk.nxtpSdkPool.getCanonicalFromLocal(
+              domain_id,
+              contract_address,
+            )
+
+          const canonicalDomain = canonicals?.[0],
+            canonicalId = canonicals?.[1]
+
           const rate = pool && await sdk.nxtpSdkPool.getVirtualPrice(
             domain_id,
             canonicalId,
           )
-          let _pair = (pool ?
+
+         let _pair = (pool ?
             [pool].map(p => {
               const {
                 symbol,
@@ -247,11 +254,13 @@ export default () => {
             }) :
             [pair] || []
           ).find(p => equals_ignore_case(p?.domainId, domain_id) && equals_ignore_case(p?.asset_data?.id, asset))
+
           _pair = _pair && {
             ..._pair,
             contract_data,
             rate: Number(utils.formatUnits(BigNumber.from(rate || '0'), _.last(_pair.decimals) || 18)),
           }
+
           setPair(_pair)
           calculateSwap(_pair)
         } catch (error) {
@@ -461,10 +470,15 @@ export default () => {
             domainId,
             tokenAddress: contract_data?.contract_address,
           })
-          const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(
+
+          const canonicals = await sdk.nxtpSdkPool.getCanonicalFromLocal(
             domainId,
             contract_data?.contract_address,
           )
+
+          const canonicalDomain = canonicals?.[0],
+            canonicalId = canonicals?.[1]
+
           console.log('[Swap]', {
             domainId,
             canonicalId,
@@ -474,6 +488,7 @@ export default () => {
             minDy,
             deadline,
           })
+
           const swap_request = await sdk.nxtpSdkPool.swap(
             domainId,
             canonicalId,
@@ -483,6 +498,7 @@ export default () => {
             minDy,
             deadline,
           )
+
           if (swap_request) {
             let gasLimit = await signer.estimateGas(swap_request)
             if (gasLimit) {
@@ -577,31 +593,41 @@ export default () => {
             domainId,
             tokenAddress: contract_data?.contract_address,
           })
-          const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(
+
+          const canonicals = await sdk.nxtpSdkPool.getCanonicalFromLocal(
             domainId,
             contract_data?.contract_address,
           )
+
+          const canonicalDomain = canonicals?.[0],
+            canonicalId = canonicals?.[1]
+
           console.log('[getPoolTokenIndex]', {
             domainId,
             canonicalId,
             tokenAddress: (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address,
           })
+
           const tokenIndexFrom = await sdk.nxtpSdkPool.getPoolTokenIndex(
             domainId,
             canonicalId,
             (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address,
           )
+
           console.log('[getPoolTokenIndex]', {
             domainId,
             canonicalId,
             tokenAddress: (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address,
           })
+
           const tokenIndexTo = await sdk.nxtpSdkPool.getPoolTokenIndex(
             domainId,
             canonicalId,
             (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address,
           )
+ 
           amount = utils.parseUnits(amount.toString(), (origin === 'x' ? x_asset_data : y_asset_data)?.decimals || 18).toString()
+ 
           console.log('[calculateSwap]', {
             domainId,
             canonicalId,
@@ -609,6 +635,7 @@ export default () => {
             tokenIndexTo,
             amount,
           })
+ 
           const _amount = await sdk.nxtpSdkPool.calculateSwap(
             domainId,
             canonicalId,
@@ -616,6 +643,7 @@ export default () => {
             tokenIndexTo,
             amount,
           )
+ 
           setSwapAmount(Number(utils.formatUnits(BigNumber.from(_amount || '0'), (origin === 'x' ? y_asset_data : x_asset_data)?.decimals || 18)))
         } catch (error) {
           setSwapAmount(null)

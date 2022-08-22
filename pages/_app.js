@@ -17,6 +17,7 @@ import '../styles/components/navbar.css'
 import '../styles/components/notifications.css'
 import '../styles/components/nprogress.css'
 import '../styles/components/skeleton.css'
+import '../styles/components/table.css'
 
 Router.events.on('routeChangeStart', () => NProgress.start())
 Router.events.on('routeChangeComplete', () => NProgress.done())

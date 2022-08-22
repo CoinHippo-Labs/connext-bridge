@@ -108,7 +108,7 @@ export default ({
             <div className="text-xl font-semibold">
               Statistics
             </div>
-            <div className="grid grid-flow-row grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4">
               <div className="flex flex-col space-y-0.5">
                 <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
                   Liquidity
@@ -202,13 +202,13 @@ export default ({
               </div>
             </div>
           </div>
-          <div className="grid grid-flow-row grid-cols-1 lg:grid-cols-2">
+          <div className="grid grid-cols-1 lg:grid-cols-2">
             {symbols && (
               <div className="space-y-3">
                 <div className="text-xl font-semibold">
                   Tokens
                 </div>
-                <div className="grid grid-flow-row grid-cols-2">
+                <div className="grid grid-cols-2">
                   {symbols[0] && (
                     <div className="flex flex-col space-y-0.5">
                       <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
@@ -258,7 +258,7 @@ export default ({
               <div className="text-xl font-semibold">
                 Your Position
               </div>
-              <div className="grid grid-flow-row grid-cols-2">
+              <div className="grid grid-cols-2">
                 <div className="flex flex-col space-y-0.5">
                   <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
                     Pool Share

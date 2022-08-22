@@ -20,7 +20,7 @@ export default ({
   return (
     <div className="rounded-2xl pt-1">
       {data ?
-        <div className="grid grid-flow-row grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col space-y-0.5">
             <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
               Rate

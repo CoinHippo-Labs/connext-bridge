@@ -22,7 +22,10 @@ import { number_format, ellipse, equals_ignore_case, loader_color, sleep } from 
 const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT) || 1
 const DEFAULT_POOL_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_POOL_SLIPPAGE_PERCENTAGE) || 3
 const DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES = Number(process.env.NEXT_PUBLIC_DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES) || 60
-const ACTIONS = ['add', 'remove']
+const ACTIONS = [
+  'add',
+  'remove',
+]
 
 const DEFAULT_OPTIONS = {
   infiniteApprove: false,
@@ -95,20 +98,27 @@ export default ({
               domainId,
               tokenAddress: contract_data?.contract_address,
             })
-            const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(
+
+            const canonicals = await sdk.nxtpSdkPool.getCanonicalFromLocal(
               domainId,
               contract_data?.contract_address,
             )
+
+            const canonicalDomain = canonicals?.[0],
+              canonicalId = canonicals?.[1]
+
             console.log('[calculateRemoveSwapLiquidity]', {
               domainId,
               canonicalId,
               amount: _amount,
             })
+
             const amounts = await sdk.nxtpSdkPool.calculateRemoveSwapLiquidity(
               domainId,
               canonicalId,
               _amount,
             )
+
             setRemoveAmounts(amounts?.map((a, i) => Number(utils.formatUnits(BigNumber.from(a || '0'), decimals?.[i] || 18))))
           } catch (error) {
             setRemoveAmounts(null)
@@ -299,10 +309,15 @@ export default ({
                 domainId,
                 tokenAddress: contract_data?.contract_address,
               })
-              const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(
+
+              const canonicals = await sdk.nxtpSdkPool.getCanonicalFromLocal(
                 domainId,
                 contract_data?.contract_address,
               )
+
+              const canonicalDomain = canonicals?.[0],
+                canonicalId = canonicals?.[1]
+
               console.log('[Add Liquidity]', {
                 domainId,
                 canonicalId,
@@ -310,6 +325,7 @@ export default ({
                 minToMint,
                 deadline,
               })
+
               const add_request = await sdk.nxtpSdkPool.addLiquidity(
                 domainId,
                 canonicalId,
@@ -317,6 +333,7 @@ export default ({
                 minToMint,
                 deadline,
               )
+
               if (add_request) {
                 let gasLimit = await signer.estimateGas(add_request)
                 if (gasLimit) {
@@ -403,10 +420,15 @@ export default ({
                 domainId,
                 tokenAddress: contract_data?.contract_address,
               })
-              const [canonicalDomain, canonicalId] = await sdk.nxtpSdkPool.getCanonicalFromLocal(
+
+              const canonicals = await sdk.nxtpSdkPool.getCanonicalFromLocal(
                 domainId,
                 contract_data?.contract_address,
               )
+
+              const canonicalDomain = canonicals?.[0],
+                canonicalId = canonicals?.[1]
+
               console.log('[Remove Liquidity]', {
                 domainId,
                 canonicalId,
@@ -414,6 +436,7 @@ export default ({
                 minAmounts,
                 deadline,
               })
+
               const remove_request = await sdk.nxtpSdkPool.removeLiquidity(
                 domainId,
                 canonicalId,
@@ -421,6 +444,7 @@ export default ({
                 minAmounts,
                 deadline,
               )
+
               if (remove_request) {
                 let gasLimit = await signer.estimateGas(remove_request)
                 if (gasLimit) {
