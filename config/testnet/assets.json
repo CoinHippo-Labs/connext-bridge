@@ -9,19 +9,19 @@
         "contract_address": "0x3FFc03F05D1869f493c7dbf913E636C6280e0ff9",
         "chain_id": 4,
         "decimals": 18,
-        "symbol": "madTEST"
+        "symbol": "TEST"
       },
       {
         "contract_address": "0x26FE8a8f86511d678d031a022E48FfF41c6a3e3b",
         "chain_id": 5,
         "decimals": 18,
-        "symbol": "madTEST"
+        "symbol": "TEST"
       },
       {
         "contract_address": "0x21c5a4dAeAf9625c781Aa996E9229eA95EE4Ff77",
         "chain_id": 80001,
         "decimals": 18,
-        "symbol": "madTEST"
+        "symbol": "TEST"
       }
     ]
   },
@@ -32,10 +32,10 @@
     "image": "/logos/assets/eth.png",
     "contracts": [
       {
-        "contract_address": "0xF25927315D101aC04C631878570152658defa7Db",
+        "contract_address": "0xc778417E063141139Fce010982780140Aa0cD5Ab",
         "chain_id": 4,
         "decimals": 18,
-        "symbol": "madWETH",
+        "symbol": "WETH",
         "is_pool": true
       },
       {
@@ -45,10 +45,10 @@
         "symbol": "WETH"
       },
       {
-        "contract_address": "0x4E2FCcA06dA37869047d84b82364d1831E5aa7E1",
+        "contract_address": "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa",
         "chain_id": 80001,
         "decimals": 18,
-        "symbol": "madWETH",
+        "symbol": "WETH",
         "is_pool": true
       }
     ],
