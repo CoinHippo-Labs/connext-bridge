@@ -8,6 +8,8 @@ import WalletLink from 'walletlink'
 import { providers, utils } from 'ethers'
 import { IoWalletOutline } from 'react-icons/io5'
 
+import { equals_ignore_case } from '../../lib/utils'
+import blocked_addresses from '../../config/blocked_addresses.json'
 import { WALLET_DATA, WALLET_RESET } from '../../reducers/types'
 
 const providerOptions = {
@@ -225,16 +227,23 @@ export default function Wallet({ chainIdToConnect, main, hidden, disabled = fals
     const network = await web3Provider.getNetwork()
     const address = await signer.getAddress()
 
-    dispatch({
-      type: WALLET_DATA,
-      value: {
-        provider,
-        web3_provider: web3Provider,
-        signer,
-        chain_id: network.chainId,
-        address,
-      },
-    })
+    if (blocked_addresses?.findIndex(a => equals_ignore_case(a, address)) > -1) {
+      dispatch({
+        type: WALLET_RESET,
+      })
+    }
+    else {
+      dispatch({
+        type: WALLET_DATA,
+        value: {
+          provider,
+          web3_provider: web3Provider,
+          signer,
+          chain_id: network.chainId,
+          address,
+        },
+      })
+    }
   }, [web3Modal])
 
   const disconnect = useCallback(async (e, is_reestablish) => {
