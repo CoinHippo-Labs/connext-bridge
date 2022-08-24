@@ -1,28 +1,28 @@
 [
   {
-    "id": "rinkeby",
-    "chain_id": 4,
-    "domain_id": "1111",
-    "name": "Rinkeby",
-    "short_name": "RIN",
+    "id": "gorli",
+    "chain_id": 5,
+    "domain_id": "1735353714",
+    "name": "Görli",
+    "short_name": "GOR",
     "provider_params": [
       {
-        "chainId": "0x4",
-        "chainName": "Ethereum Rinkeby",
+        "chainId": "0x5",
+        "chainName": "Ethereum Görli",
         "rpcUrls": [
-          "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
+          "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
         ],
         "nativeCurrency": {
           "name": "Ethereum",
           "symbol": "ETH",
           "decimals": 18
         },
-        "blockExplorerUrls": ["https://rinkeby.etherscan.io"]
+        "blockExplorerUrls": ["https://goerli.etherscan.io"]
       }
     ],
     "explorer": {
       "name": "Etherscan",
-      "url": "https://rinkeby.etherscan.io",
+      "url": "https://goerli.etherscan.io",
       "icon": "/logos/explorers/etherscan.png",
       "block_path": "/block/{block}",
       "address_path": "/address/{address}",
@@ -30,44 +30,43 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
-    "image": "/logos/chains/rinkeby.png",
+    "image": "/logos/chains/goerli.png",
     "color": "#c0c2c3",
     "group" : "evm"
   },
   {
-    "id": "mumbai",
-    "chain_id": 80001,
-    "domain_id": "9991",
-    "name": "Polygon",
-    "short_name": "MUM",
+    "id": "optimism",
+    "chain_id": 420,
+    "domain_id": "1735356532",
+    "name": "Optimism",
+    "short_name": "OPT",
     "provider_params": [
       {
-        "chainId": "0x13881",
-        "chainName": "Polygon Mumbai",
+        "chainId": "0x1a4",
+        "chainName": "Optimism Görli",
         "rpcUrls": [
-          "https://polygon-mumbai.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-          "https://matic-mumbai.chainstacklabs.com"
+          "https://goerli.optimism.io"
         ],
         "nativeCurrency": {
-          "name": "Polygon",
-          "symbol": "Matic",
+          "name": "Ethereum",
+          "symbol": "oETH",
           "decimals": 18
         },
-        "blockExplorerUrls": ["https://mumbai.polygonscan.com"]
+        "blockExplorerUrls": ["https://blockscout.com/optimism/goerli"]
       }
     ],
     "explorer": {
-      "name": "Polygonscan",
-      "url": "https://mumbai.polygonscan.com",
-      "icon": "/logos/explorers/polygonscan.png",
+      "name": "Optimism",
+      "url": "https://blockscout.com/optimism/goerli",
+      "icon": "/logos/explorers/optimism.png",
       "block_path": "/block/{block}",
       "address_path": "/address/{address}",
       "contract_path": "/token/{address}",
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
-    "image": "/logos/chains/mumbai.png",
-    "color": "#8247e5",
+    "image": "/logos/chains/optimism.png",
+    "color": "#dc2626",
     "group" : "evm"
   }
 ]
