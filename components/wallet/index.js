@@ -6,6 +6,8 @@ import Portis from '@portis/web3'
 import Coinbase from '@coinbase/wallet-sdk'
 import { providers, utils } from 'ethers'
 
+import { equals_ignore_case } from '../../lib/utils'
+import blocked_addresses from '../../config/blocked_addresses.json'
 import { WALLET_DATA, WALLET_RESET } from '../../reducers/types'
 
 const providerOptions = {
@@ -203,16 +205,24 @@ export default ({
     const network = await web3Provider.getNetwork()
     const signer = web3Provider.getSigner()
     const address = await signer.getAddress()
-    dispatch({
-      type: WALLET_DATA,
-      value: {
-        chain_id: network.chainId,
-        provider,
-        web3_provider: web3Provider,
-        address,
-        signer,
-      },
-    })
+
+    if (blocked_addresses?.findIndex(a => equals_ignore_case(a, address)) > -1) {
+      dispatch({
+        type: WALLET_RESET,
+      })
+    }
+    else {
+      dispatch({
+        type: WALLET_DATA,
+        value: {
+          chain_id: network.chainId,
+          provider,
+          web3_provider: web3Provider,
+          address,
+          signer,
+        },
+      })
+    }
   }, [web3Modal])
 
   const disconnect = useCallback(async (e, is_reestablish) => {
