@@ -26,7 +26,8 @@
   "homepage": "https://github.com/CoinHippo-Labs/connext-bridge#readme",
   "dependencies": {
     "@coinbase/wallet-sdk": "^3.4.0",
-    "@connext/nxtp-sdk": "^0.2.0-beta.20",
+    "@connext/nxtp-sdk": "^0.2.0-beta.21",
+    "@nomad-xyz/sdk": "^2.1.1",
     "@popperjs/core": "^2.11.5",
     "@portis/web3": "^4.0.7",
     "@redux-devtools/extension": "^3.2.2",
@@ -53,9 +54,9 @@
     "react-popper": "^2.3.0",
     "react-redux": "^8.0.2",
     "react-reveal": "^1.2.2",
-    "react-table": "^7.8.0",
     "react-stack-grid": "^0.7.1",
     "react-switch": "^7.0.0",
+    "react-table": "^7.8.0",
     "redux": "^4.2.0",
     "web3": "^1.7.4",
     "web3modal": "^1.9.8"
