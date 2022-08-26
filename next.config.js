@@ -11,7 +11,6 @@ module.exports = {
       os: require.resolve('os-browserify'),
       stream: require.resolve('stream-browserify'),
     }
-    config.experiments.asyncWebAssembly = true
     return config
   },
   images: {
