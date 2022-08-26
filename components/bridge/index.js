@@ -446,6 +446,7 @@ export default () => {
       const destination_contract_data = destination_asset_data?.contracts?.find(c => c?.chain_id === destination_chain_data?.chain_id)
 
       setFeeEstimating(true)
+
       if (source_contract_data && destination_contract_data && !isNaN(amount)) {
         if (sdk && !controller.signal.aborted) {
           setApproveResponse(null)
@@ -453,6 +454,7 @@ export default () => {
           setCallProcessing(false)
           setCalling(false)
           setXcallResponse(null)
+
           try {
             const {
               forceSlow,
@@ -462,23 +464,38 @@ export default () => {
             } = { ...source_chain_data }
             const {
               nativeCurrency,
-            } = { ...provider_params?.[0] }
-            const routerFee = forceSlow ? 0 : amount * ROUTER_FEE_PERCENT / 100
+            } = { ..._.head(provider_params) }
+
+            const routerFee = forceSlow ?
+              0 :
+              amount * ROUTER_FEE_PERCENT / 100
+
             const params = {
               originDomain: source_chain_data?.domain_id,
               destinationDomain: destination_chain_data?.domain_id,
               isHighPriority: !forceSlow,
             }
-            const response = forceSlow ? 0 : await sdk.nxtpSdkBase.estimateRelayerFee(params)
-            const gasFee = typeof response === 'number' ?
-              Number(utils.formatUnits(response.toString(), nativeCurrency?.decimals || 18)) :
-              null
+
+            const response = forceSlow ?
+              0 :
+              await sdk.nxtpSdkBase.estimateRelayerFee(params)
+
+            const gasFee = forceSlow ?
+              0 :
+              response && Number(
+                utils.formatUnits(
+                  response,
+                  nativeCurrency?.decimals || 18,
+                )
+              )
+
             console.log('[Estimate Fees]', {
               options,
               params,
               routerFee,
               gasFee,
             })
+
             setFee({
               router: routerFee,
               gas: gasFee,
@@ -489,6 +506,7 @@ export default () => {
       else {
         setFee(null)
       }
+
       setFeeEstimating(false)
     }
   }
@@ -547,6 +565,7 @@ export default () => {
           xcallParams.amount,
           infiniteApprove,
         )
+
         if (approve_request) {
           setApproving(true)
           const approve_response = await signer.sendTransaction(approve_request)
@@ -573,36 +592,51 @@ export default () => {
           setApproving(false)
         }
       } catch (error) {
+        failed = true
+
         setApproveResponse({
           status: 'failed',
           message: error?.data?.message || error?.message,
         })
-        failed = true
         setApproveProcessing(false)
         setApproving(false)
       }
+
       if (!failed) {
         try {
+          console.log('[xCall]', {
+            xcallParams,
+          })
+
           const xcall_request = await sdk.nxtpSdkBase.xcall(xcallParams)
+
           if (xcall_request) {
             let gasLimit = await signer.estimateGas(xcall_request)
+
             if (gasLimit) {
               gasLimit = FixedNumber.fromString(gasLimit.toString())
                 .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
                 .round(0).toString().replace('.0', '')
               xcall_request.gasLimit = gasLimit
             }
+
             const xcall_response = await signer.sendTransaction(xcall_request)
             const tx_hash = xcall_response?.hash
+
             setCallProcessing(true)
+
             const xcall_receipt = await signer.provider.waitForTransaction(tx_hash)
+
             setXcall(xcall_receipt)
+
             failed = !xcall_receipt?.status
+
             setXcallResponse({
               status: failed ? 'failed' : 'success',
               message: failed ? 'Failed to send transaction' : `${source_symbol} transfer detected, waiting for execution.`,
               tx_hash,
             })
+
             success = true
           }
         } catch (error) {
@@ -610,17 +644,22 @@ export default () => {
             status: 'failed',
             message: error?.data?.message || error?.message,
           })
+
           failed = true
         }
       }
+
       if (failed) {
         setXcall(null)
       }
     }
+
     setCallProcessing(false)
     setCalling(false)
+
     if (sdk && address && success) {
       await sleep(2 * 1000)
+
       setTransfersTrigger(moment().valueOf())
     }
   }
