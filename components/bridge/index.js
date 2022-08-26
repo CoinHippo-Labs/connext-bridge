@@ -527,6 +527,7 @@ export default () => {
       const source_contract_data = source_asset_data?.contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
       const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
       const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
+      const destination_contract_data = source_asset_data?.contracts?.find(c => c?.chain_id === destination_chain_data?.chain_id)
 
       const {
         to,
@@ -539,6 +540,15 @@ export default () => {
       const {
         gas,
       } = { ...fee }
+
+      const minAmount = (amount || 0) * (
+        100 -
+        (!receiveLocal && slippage ?
+          slippage :
+          DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE
+        )
+      )
+
       const xcallParams = {
         params: {
           to: to || address,
@@ -556,18 +566,18 @@ export default () => {
               'ether',
             ).toString() :
             '0',
-          slippageTol: (
-            (100 -
-              (!receiveLocal && slippage ?
-                slippage :
-                DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE
-              )
-            ) * 100
+          destinationMinOut: utils.parseUnits(
+            minAmount.toString(),
+            destination_contract_data?.decimals || 18,
           ).toString(),
         },
-        transactingAssetId: source_contract_data?.contract_address,
+        transactingAsset: source_contract_data?.contract_address,
         transactingAmount: utils.parseUnits(
           amount?.toString() || '0',
+          source_contract_data?.decimals || 18,
+        ).toString(),
+        originMinOut: utils.parseUnits(
+          minAmount.toString(),
           source_contract_data?.decimals || 18,
         ).toString(),
       }
@@ -577,7 +587,7 @@ export default () => {
       try {
         const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
           xcallParams.params.originDomain,
-          xcallParams.transactingAssetId,
+          xcallParams.transactingAsset,
           xcallParams.transactingAmount,
           infiniteApprove,
         )
