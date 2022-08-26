@@ -550,19 +550,35 @@ export default () => {
           recovery: address,
           forceSlow: forceSlow || false,
           receiveLocal: receiveLocal || false,
-          relayerFee: !forceSlow && gas ? utils.parseUnits(gas.toString(), 'ether').toString() : '0',
-          slippageTol: ((100 - (!receiveLocal && slippage ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)) * 100).toString(),
+          relayerFee: !forceSlow && gas ?
+            utils.parseUnits(
+              gas.toString(),
+              'ether',
+            ).toString() :
+            '0',
+          slippageTol: (
+            (100 -
+              (!receiveLocal && slippage ?
+                slippage :
+                DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE
+              )
+            ) * 100
+          ).toString(),
         },
         transactingAssetId: source_contract_data?.contract_address,
-        amount: utils.parseUnits(amount?.toString() || '0', source_contract_data?.decimals || 18).toString(),
+        transactingAmount: utils.parseUnits(
+          amount?.toString() || '0',
+          source_contract_data?.decimals || 18,
+        ).toString(),
       }
 
       let failed = false
+
       try {
         const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
           xcallParams.params.originDomain,
           xcallParams.transactingAssetId,
-          xcallParams.amount,
+          xcallParams.transactingAmount,
           infiniteApprove,
         )
 
@@ -664,7 +680,12 @@ export default () => {
     }
   }
 
-  const headMeta = meta(asPath, null, chains_data, assets_data)
+  const headMeta = meta(
+    asPath,
+    null,
+    chains_data,
+    assets_data,
+  )
 
   const {
     source_chain,
