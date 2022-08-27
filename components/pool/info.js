@@ -116,12 +116,19 @@ export default ({
                 <span className="text-lg font-bold">
                   {pool_data ?
                     <>
-                      {number_format(liquidity, '0,0.000000')}
+                      {number_format(
+                        liquidity,
+                        '0,0.000000',
+                      )}
                     </> :
                     selected && !no_pool && (
                       pool_loading ?
                         <div className="mt-1">
-                          <TailSpin color={loader_color(theme)} width="24" height="24" />
+                          <TailSpin
+                            color={loader_color(theme)}
+                            width="24"
+                            height="24"
+                          />
                         </div> :
                         '-'
                     )
@@ -136,12 +143,19 @@ export default ({
                   {pool_data ?
                     <>
                       {currency_symbol}
-                      {number_format(volume, '0,0.000000')}
+                      {number_format(
+                        volume,
+                        '0,0.000000',
+                      )}
                     </> :
                     selected && !no_pool && (
                       pool_loading ?
                         <div className="mt-1">
-                          <TailSpin color={loader_color(theme)} width="24" height="24" />
+                          <TailSpin
+                            color={loader_color(theme)}
+                            width="24"
+                            height="24"
+                          />
                         </div> :
                         '-'
                     )
@@ -156,12 +170,19 @@ export default ({
                   {pool_data ?
                     <>
                       {currency_symbol}
-                      {number_format(fees, '0,0.000000')}
+                      {number_format(
+                        fees,
+                        '0,0.000000',
+                      )}
                     </> :
                     selected && !no_pool && (
                       pool_loading ?
                         <div className="mt-1">
-                          <TailSpin color={loader_color(theme)} width="24" height="24" />
+                          <TailSpin
+                            color={loader_color(theme)}
+                            width="24"
+                            height="24"
+                          />
                         </div> :
                         '-'
                     )
@@ -184,7 +205,10 @@ export default ({
                             {k}
                           </span>
                           <span>
-                            {number_format(v, '0,0.000000')}
+                            {number_format(
+                              v,
+                              '0,0.000000',
+                            )}
                             %
                           </span>
                         </div>
@@ -193,7 +217,11 @@ export default ({
                     selected && !no_pool && (
                       pool_loading ?
                         <div className="mt-1">
-                          <TailSpin color={loader_color(theme)} width="24" height="24" />
+                          <TailSpin
+                            color={loader_color(theme)}
+                            width="24"
+                            height="24"
+                          />
                         </div> :
                         '-'
                     )
@@ -217,12 +245,19 @@ export default ({
                       <span className="text-lg font-bold">
                         {!isNaN(balances?.[0]) || (pool_data && user_pools_data) ?
                           <>
-                            {number_format(balances?.[0] || 0, '0,0.000000')}
+                            {number_format(
+                              balances?.[0] || 0,
+                              '0,0.000000',
+                            )}
                           </> :
                           selected && !no_pool && (
                             position_loading ?
                               <div className="mt-0.5">
-                                <RotatingSquare color={loader_color(theme)} width="24" height="24" />
+                                <RotatingSquare
+                                  color={loader_color(theme)}
+                                  width="24"
+                                  height="24"
+                                />
                               </div> :
                               '-'
                           )
@@ -238,12 +273,19 @@ export default ({
                       <span className="text-lg font-bold">
                         {!isNaN(balances?.[1]) || (pool_data && user_pools_data) ?
                           <>
-                            {number_format(balances?.[1] || 0, '0,0.000000')}
+                            {number_format(
+                              balances?.[1] || 0,
+                              '0,0.000000',
+                            )}
                           </> :
                           selected && !no_pool && (
                             position_loading ?
                               <div className="mt-0.5">
-                                <RotatingSquare color={loader_color(theme)} width="24" height="24" />
+                                <RotatingSquare
+                                  color={loader_color(theme)}
+                                  width="24"
+                                  height="24"
+                                />
                               </div> :
                               '-'
                           )
@@ -266,13 +308,20 @@ export default ({
                   <span className="text-lg font-bold">
                     {!isNaN(share) || (pool_data && user_pools_data) ?
                       <>
-                        {number_format(share || 0, '0,0.000000')}
+                        {number_format(
+                          share || 0,
+                          '0,0.000000',
+                        )}
                         %
                       </> :
                       selected && !no_pool && (
                         position_loading ?
                           <div className="mt-0.5">
-                            <RotatingSquare color={loader_color(theme)} width="24" height="24" />
+                            <RotatingSquare
+                              color={loader_color(theme)}
+                              width="24"
+                              height="24"
+                            />
                           </div> :
                           '-'
                       )
@@ -286,12 +335,19 @@ export default ({
                   <span className="text-lg font-bold">
                     {!isNaN(lpTokenBalance) || (pool_data && user_pools_data) ?
                       <>
-                        {number_format(lpTokenBalance || 0, '0,0.000000')}
+                        {number_format(
+                          lpTokenBalance || 0,
+                          '0,0.000000',
+                        )}
                       </> :
                       selected && !no_pool && (
                         position_loading ?
                           <div className="mt-0.5">
-                            <RotatingSquare color={loader_color(theme)} width="24" height="24" />
+                            <RotatingSquare
+                              color={loader_color(theme)}
+                              width="24"
+                              height="24"
+                            />
                           </div> :
                           '-'
                       )
@@ -302,7 +358,11 @@ export default ({
             </div>
           </div>
         </div> :
-        <TailSpin color={loader_color(theme)} width="36" height="36" />
+        <TailSpin
+          color={loader_color(theme)}
+          width="36"
+          height="36"
+        />
       }
     </div>
   )

@@ -45,15 +45,20 @@ export default ({ chain_id }) => {
               width={24}
               height={24}
               className="rounded-full"
-            />
-            :
+            /> :
             <span className="font-bold">
               {chain_data.short_name}
-            </span>
-          :
+            </span> :
           chains_data ?
-            <RiRefreshFill size={20} className="transform hover:rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out" /> :
-            <Puff color={loader_color(theme)} width="24" height="24" />
+            <RiRefreshFill
+              size={20}
+              className="transform hover:rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out"
+            /> :
+            <Puff
+              color={loader_color(theme)}
+              width="24"
+              height="24"
+            />
         }
       </button>
       <div

@@ -10,42 +10,72 @@ export default [
     title: 'Bridge',
     path: '/',
     others_paths: ['/[bridge]'],
-    icon: <CgArrowRightR size={20} className="stroke-current" />,
+    icon: (
+      <CgArrowRightR
+        size={20}
+        className="stroke-current"
+      />
+    ),
   },
   {
     id: 'pools',
     title: 'Pools',
     path: '/pools',
     others_paths: ['/pool', '/pool/[pool]'],
-    icon: <RiCopperCoinLine size={20} className="stroke-current" />,
+    icon: (
+      <RiCopperCoinLine
+        size={20}
+        className="stroke-current"
+      />
+    ),
   },
   {
     id: 'swap',
     title: 'Swap',
     path: '/swap',
     others_paths: ['/swap/[swap]'],
-    icon: <MdSwapHoriz size={20} className="stroke-current" />,
+    icon: (
+      <MdSwapHoriz
+        size={20}
+        className="stroke-current"
+      />
+    ),
   },
   {
     id: 'explore',
     title: 'Explore',
     path: process.env.NEXT_PUBLIC_EXPLORER_URL,
     external: true,
-    icon: <HiOutlineDocumentSearch size={20} className="stroke-current" />,
+    icon: (
+      <HiOutlineDocumentSearch
+        size={20}
+        className="stroke-current"
+      />
+    ),
   },
   {
     id: 'doc',
     title: 'Doc',
     path: process.env.NEXT_PUBLIC_DOC_URL,
     external: true,
-    icon: <BiBook size={20} className="stroke-current" />,
+    icon: (
+      <BiBook
+        size={20}
+        className="stroke-current"
+      />
+    ),
   },
   {
     id: 'support',
     title: 'Support',
     path: process.env.NEXT_PUBLIC_SUPPORT_URL,
     external: true,
-    icon: <RiQuestionAnswerLine size={20} className="stroke-current" />,
+    icon: (
+      <RiQuestionAnswerLine
+        size={20}
+        className="stroke-current"
+      />
+    ),
   },
   {
     id: 'feedback',
@@ -53,6 +83,11 @@ export default [
     path: process.env.NEXT_PUBLIC_FEEDBACK_URL,
     external: true,
     emphasize: true,
-    icon: <BiCommentDetail size={20} className="stroke-current" />,
+    icon: (
+      <BiCommentDetail
+        size={20}
+        className="stroke-current"
+      />
+    ),
   },
 ]

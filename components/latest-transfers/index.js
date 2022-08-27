@@ -100,7 +100,10 @@ export default ({ trigger }) => {
               <span className="font-semibold">
                 See more
               </span>
-              <TiArrowRight size={18} className="transform -rotate-45 mt-0.5" />
+              <TiArrowRight
+                size={18}
+                className="transform -rotate-45 mt-0.5"
+              />
             </a>
           )}
         </>

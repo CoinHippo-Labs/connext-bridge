@@ -48,9 +48,11 @@ export const Pages = ({
           key={i}
           className={`${hide(i - 1) ? 'hidden' : ''}`}
         >
-          <BsThreeDots size={20} className="text-slate-300 dark:text-slate-600 mt-1.5" />
-        </div>
-        :
+          <BsThreeDots
+            size={20}
+            className="text-slate-300 dark:text-slate-600 mt-1.5"
+          />
+        </div> :
         <Page
           key={i}
           disabled={disabled}

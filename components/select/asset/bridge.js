@@ -112,7 +112,11 @@ export default ({
             </>
             :
             <div className="sm:col-span-3 w-full flex items-center justify-center">
-              <Puff color={loader_color(theme)} width="24" height="24" />
+              <Puff
+                color={loader_color(theme)}
+                width="24"
+                height="24"
+              />
             </div>
           }
         </>

@@ -76,7 +76,10 @@ export default ({ data }) => {
           rel="noopener noreferrer"
           className="text-blue-500 dark:text-white"
         >
-          <TiArrowRight size={20} className="transform -rotate-45" />
+          <TiArrowRight
+            size={20}
+            className="transform -rotate-45"
+          />
         </a>
       </div>
       <div className="flex items-start justify-between space-x-2 mt-3">
@@ -114,9 +117,17 @@ export default ({ data }) => {
           <div className="flex flex-col">
             {source_amount ?
               <span className="font-bold">
-                {number_format(source_amount, '0,0.000000', true)}
+                {number_format(
+                  source_amount,
+                  '0,0.000000',
+                  true,
+                )}
               </span> :
-              <RotatingSquare color={loader_color(theme)} width="20" height="20" />
+              <RotatingSquare
+                color={loader_color(theme)}
+                width="20"
+                height="20"
+              />
             }
             <div className="flex items-center justify-center space-x-1">
               {source_asset_image && (
@@ -133,7 +144,10 @@ export default ({ data }) => {
               </span>
               {source_asset_data && (
                 <AddToken
-                  token_data={{ ...source_asset_data, ...source_contract_data }}
+                  token_data={{
+                    ...source_asset_data,
+                    ...source_contract_data,
+                  }}
                 />
               )}
             </div>
@@ -146,18 +160,33 @@ export default ({ data }) => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <HiCheckCircle size={36} className="rounded-full shadow dark:shadow-white text-green-400 dark:text-green-200" />
+              <HiCheckCircle
+                size={36}
+                className="rounded-full shadow dark:shadow-white text-green-400 dark:text-green-200"
+              />
             </a> :
-            <Bars color={loader_color('light')} width="32" height="32" />
+            <Bars
+              color={loader_color('light')}
+              width="32"
+              height="32"
+            />
           }
         </div>
         <LightSpeed left>
           <div className="flex flex-col items-end" style={{ minWidth: '4rem' }}>
             {destination_amount ?
               <span className="font-bold">
-                {number_format(destination_amount, '0,0.000000', true)}
+                {number_format(
+                  destination_amount,
+                  '0,0.000000',
+                  true,
+                )}
               </span> :
-              <RotatingSquare color={loader_color(theme)} width="20" height="20" />
+              <RotatingSquare
+                color={loader_color(theme)}
+                width="20"
+                height="20"
+              />
             }
             <div className="flex items-center justify-center space-x-1">
               {destination_asset_image && (

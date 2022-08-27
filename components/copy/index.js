@@ -24,7 +24,10 @@ export default ({
           {title}
         </span>
       )}
-      <HiCheckCircle size={size} className={className || 'text-green-300 dark:text-green-500'} />
+      <HiCheckCircle
+        size={size}
+        className={className || 'text-green-300 dark:text-green-500'}
+      />
     </div>
     :
     <CopyToClipboard
@@ -42,7 +45,10 @@ export default ({
             {title}
           </span>
         )}
-        <BiCopy size={size} className={className || 'cursor-pointer text-slate-300 hover:text-slate-400 dark:text-slate-700 dark:hover:text-slate-600'} />
+        <BiCopy
+          size={size}
+          className={className || 'cursor-pointer text-slate-300 hover:text-slate-400 dark:text-slate-700 dark:hover:text-slate-600'}
+        />
       </div>
     </CopyToClipboard>
 }

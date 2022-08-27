@@ -54,7 +54,10 @@ export default () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <BsTwitter size={20} className="text-blue-400 dark:text-white" />
+            <BsTwitter
+              size={20}
+              className="text-blue-400 dark:text-white"
+            />
           </a>
         )}
         {process.env.NEXT_PUBLIC_TELEGRAM_USERNAME && (
@@ -63,7 +66,10 @@ export default () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <BsTelegram size={20} className="text-blue-500 dark:text-white" />
+            <BsTelegram
+              size={20}
+              className="text-blue-500 dark:text-white"
+            />
           </a>
         )}
         {process.env.NEXT_PUBLIC_DISCORD_URL && (
@@ -72,7 +78,10 @@ export default () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <FaDiscord size={20} className="text-blue-600 dark:text-white" />
+            <FaDiscord
+              size={20}
+              className="text-blue-600 dark:text-white"
+            />
           </a>
         )}
         {process.env.NEXT_PUBLIC_GITHUB_URL && (
@@ -81,7 +90,10 @@ export default () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <BsGithub size={20} className="text-black dark:text-white" />
+            <BsGithub
+              size={20}
+              className="text-black dark:text-white"
+            />
           </a>
         )}
         {process.env.NEXT_PUBLIC_ENS_NAME && (

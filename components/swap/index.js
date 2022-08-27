@@ -772,11 +772,13 @@ export default () => {
                             amount: null,
                           },
                         })
+
                         setSwap({
                           ...swap,
                           chain: c,
                           amount: null,
                         })
+
                         getBalances(c)
                       }}
                       origin=""
@@ -792,11 +794,13 @@ export default () => {
                             amount: null,
                           },
                         })
+
                         setSwap({
                           ...swap,
                           asset: a,
                           amount: null,
                         })
+
                         getBalances(chain)
                       }}
                       chain={chain}
@@ -821,12 +825,14 @@ export default () => {
                             value = e.target.value
                           }
                           value = value < 0 ? 0 : value
+
                           console.log('[Swap]', {
                             swap: {
                               ...swap,
                               amount: value && !isNaN(value) ? Number(value) : value,
                             },
                           })
+
                           setSwap({
                             ...swap,
                             amount: value && !isNaN(value) ? Number(value) : value,
@@ -844,6 +850,7 @@ export default () => {
                               amount: origin === 'x' ? x_balance_amount : y_balance_amount,
                             },
                           })
+
                           setSwap({
                             ...swap,
                             amount: origin === 'x' ? x_balance_amount : y_balance_amount,
@@ -856,7 +863,10 @@ export default () => {
                     </div>
                     {typeof amount === 'number' && typeof (origin === 'x' ? x_balance_amount : y_balance_amount) === 'number' && amount > (origin === 'x' ? x_balance_amount : y_balance_amount) && (
                       <div className="flex items-center text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
-                        <BiMessageError size={16} className="min-w-max" />
+                        <BiMessageError
+                          size={16}
+                          className="min-w-max"
+                        />
                         <span className="text-xs font-medium">
                           Not enough {(origin === 'x' ? x_asset_data : y_asset_data)?.symbol}
                         </span>
@@ -876,6 +886,7 @@ export default () => {
                         amount: null,
                       },
                     })
+
                     setSwap({
                       ...swap,
                       origin: origin === 'x' ? 'y' : 'x',
@@ -950,9 +961,17 @@ export default () => {
                   </div>
                   <div className="w-72 h-11 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-end text-lg font-semibold text-right py-2 px-3">
                     {typeof swapAmount === 'number' ?
-                      number_format(swapAmount, '0,0.00000000', true) :
+                      number_format(
+                        swapAmount,
+                        '0,0.00000000',
+                        true,
+                      ) :
                       swapAmount ?
-                        <TailSpin color="white" width="20" height="20" /> :
+                        <TailSpin
+                          color="white"
+                          width="20"
+                          height="20"
+                        /> :
                         null
                     }
                   </div>
@@ -1003,7 +1022,11 @@ export default () => {
                           <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
                           r.status === 'pending' ?
                             <div className="mr-3">
-                              <Watch color="white" width="20" height="20" />
+                              <Watch
+                                color="white"
+                                width="20"
+                                height="20"
+                              />
                             </div> :
                             <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />
                       }
@@ -1029,7 +1052,10 @@ export default () => {
                               target="_blank"
                               rel="noopener noreferrer"
                             >
-                              <TiArrowRight size={20} className="transform -rotate-45" />
+                              <TiArrowRight
+                                size={20}
+                                className="transform -rotate-45"
+                              />
                             </a>
                           )}
                           {r.status === 'failed' ?
@@ -1038,16 +1064,14 @@ export default () => {
                               className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                             >
                               <MdClose size={20} />
-                            </button>
-                            :
+                            </button> :
                             r.status === 'success' ?
                               <button
                                 onClick={() => reset()}
                                 className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
                               >
                                 <MdClose size={20} />
-                              </button>
-                              :
+                              </button> :
                               null
                           }
                         </div>
@@ -1062,7 +1086,11 @@ export default () => {
                     >
                       <span className="flex items-center justify-center space-x-1.5">
                         {(calling || approving) && (
-                          <TailSpin color="white" width="20" height="20" />
+                          <TailSpin
+                            color="white"
+                            width="20"
+                            height="20"
+                          />
                         )}
                         <span>
                           {calling ?

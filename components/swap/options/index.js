@@ -46,8 +46,14 @@ export default ({
       disabled={disabled}
       buttonTitle={<div className="bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg p-2">
         {applied ?
-          <MdSettingsSuggest size={20} className="text-green-600 hover:text-green-500 dark:text-white dark:hover:text-slate-100 mb-0.5" /> :
-          <RiSettings3Line size={20} className="text-slate-400 hover:text-slate-500 dark:text-slate-400 dark:hover:text-slate-200" />
+          <MdSettingsSuggest
+            size={20}
+            className="text-green-600 hover:text-green-500 dark:text-white dark:hover:text-slate-100 mb-0.5"
+          /> :
+          <RiSettings3Line
+            size={20}
+            className="text-slate-400 hover:text-slate-500 dark:text-slate-400 dark:hover:text-slate-200"
+          />
         }
       </div>}
       buttonClassName={`min-w-max ${disabled ? 'cursor-not-allowed' : ''} ${applied ? 'ring-2 ring-green-500 dark:ring-white' : ''} rounded-lg shadow flex items-center justify-center`}
@@ -72,6 +78,7 @@ export default ({
                     ...data,
                     [`${f.name}`]: e.target.value,
                   })
+
                   setData({
                     ...data,
                     [`${f.name}`]: e.target.value,
@@ -98,6 +105,7 @@ export default ({
                       ...data,
                       [`${f.name}`]: !data?.[f.name],
                     })
+
                     setData({
                       ...data,
                       [`${f.name}`]: !data?.[f.name],
@@ -120,6 +128,7 @@ export default ({
                         ...data,
                         [`${f.name}`]: e.target.value,
                       })
+
                       setData({
                         ...data,
                         [`${f.name}`]: e.target.value,
@@ -143,10 +152,12 @@ export default ({
                             value = e.target.value
                           }
                           value = ['slippage'].includes(f.name) && (value <= 0 || value > 100) ? DEFAULT_SWAP_SLIPPAGE_PERCENTAGE : value
+
                           console.log('[Swap Options]', {
                             ...data,
                             [`${f.name}`]: value && !isNaN(value) ? Number(value) : value,
                           })
+
                           setData({
                             ...data,
                             [`${f.name}`]: value && !isNaN(value) ? Number(value) : value,
@@ -166,6 +177,7 @@ export default ({
                                   ...data,
                                   [`${f.name}`]: p,
                                 })
+
                                 setData({
                                   ...data,
                                   [`${f.name}`]: p,
@@ -189,6 +201,7 @@ export default ({
                           ...data,
                           [`${f.name}`]: e.target.value,
                         })
+
                         setData({
                           ...data,
                           [`${f.name}`]: e.target.value,

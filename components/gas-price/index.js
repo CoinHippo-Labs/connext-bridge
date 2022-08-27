@@ -45,21 +45,26 @@ export default ({
       {typeof gasPrice === 'number' ?
         <>
           <span className="font-semibold">
-            {number_format(gasPrice, '0,0')}
+            {number_format(
+              gasPrice,
+              '0,0',
+            )}
           </span>
           <span className="font-medium">
             Gwei
           </span>
-        </>
-        :
+        </> :
         typeof gasPrice === 'string' ?
           <span>
             -
           </span> :
-          <RotatingSquare color={loader_color('light')} width="16" height="16" />
+          <RotatingSquare
+            color={loader_color('light')}
+            width="16"
+            height="16"
+          />
       }
-    </div>
-    :
+    </div> :
     dummy && (
       <div className="h-5" />
     )

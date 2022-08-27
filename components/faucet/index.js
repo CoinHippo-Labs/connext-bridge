@@ -192,13 +192,20 @@ export default ({
                   className={`bg-blue-600 hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
                 >
                   {minting && (
-                    <RotatingSquare color="white" width="16" height="16" />
+                    <RotatingSquare
+                      color="white"
+                      width="16"
+                      height="16"
+                    />
                   )}
                   <span>
                     Faucet
                   </span>
                   <span className="font-bold">
-                    {number_format(faucet_amount, '0,0.00')}
+                    {number_format(
+                      faucet_amount,
+                      '0,0.00',
+                    )}
                   </span>
                   <span>
                     {contract_data?.symbol || asset_data.symbol}

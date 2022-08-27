@@ -817,7 +817,10 @@ export default ({
                 </div>
                 {typeof amountX === 'number' && typeof x_balance_amount === 'number' && amountX > x_balance_amount && (
                   <div className="flex items-center text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
-                    <BiMessageError size={16} className="min-w-max" />
+                    <BiMessageError
+                      size={16}
+                      className="min-w-max"
+                    />
                     <span className="text-xs font-medium">
                       Not enough {x_asset_data?.symbol}
                     </span>
@@ -894,7 +897,10 @@ export default ({
                 </div>
                 {typeof amountY === 'number' && typeof y_balance_amount === 'number' && amountY > y_balance_amount && (
                   <div className="flex items-center text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
-                    <BiMessageError size={16} className="min-w-max" />
+                    <BiMessageError
+                      size={16}
+                      className="min-w-max"
+                    />
                     <span className="text-xs font-medium">
                       Not enough {y_asset_data?.symbol}
                     </span>
@@ -937,7 +943,11 @@ export default ({
                         <BiMessageCheck className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
                         r.status === 'pending' ?
                           <div className="mr-2.5">
-                            <Watch color="white" width="16" height="16" />
+                            <Watch
+                              color="white"
+                              width="16"
+                              height="16"
+                            />
                           </div> :
                           <BiMessageDetail className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" />
                     }
@@ -963,7 +973,10 @@ export default ({
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            <TiArrowRight size={20} className="transform -rotate-45" />
+                            <TiArrowRight
+                              size={20}
+                              className="transform -rotate-45"
+                            />
                           </a>
                         )}
                         {r.status === 'failed' ?
@@ -972,16 +985,14 @@ export default ({
                             className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                           >
                             <MdClose size={16} />
-                          </button>
-                          :
+                          </button> :
                           r.status === 'success' ?
                             <button
                               onClick={() => reset()}
                               className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
                             >
                               <MdClose size={16} />
-                            </button>
-                            :
+                            </button> :
                             null
                         }
                       </div>
@@ -996,7 +1007,11 @@ export default ({
                   >
                     <span className="flex items-center justify-center space-x-1.5">
                       {(calling || approving) && (
-                        <TailSpin color="white" width="20" height="20" />
+                        <TailSpin
+                          color="white"
+                          width="20"
+                          height="20"
+                        />
                       )}
                       <span>
                         {calling ?
@@ -1055,7 +1070,10 @@ export default ({
                 />
                 {typeof amount === 'number' && typeof lpTokenBalance === 'number' && amount > lpTokenBalance && (
                   <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
-                    <BiMessageError size={16} className="min-w-max" />
+                    <BiMessageError
+                      size={16}
+                      className="min-w-max"
+                    />
                     <span className="text-xs font-medium">
                       Not enough {symbol}
                     </span>
@@ -1105,11 +1123,19 @@ export default ({
                 {web3_provider ?
                   !isNaN(removeAmounts?.[0]) ?
                     <span className="text-base">
-                      {number_format(removeAmounts[0] || 0, '0,0.000000', true)}
+                      {number_format(
+                        removeAmounts[0] || 0,
+                        '0,0.000000',
+                        true,
+                      )}
                     </span> :
                     selected && !no_pool && (
                       position_loading ?
-                        <RotatingSquare color={loader_color(theme)} width="24" height="24" /> :
+                        <RotatingSquare
+                          color={loader_color(theme)}
+                          width="24"
+                          height="24"
+                        /> :
                         '-'
                     ) :
                   <span className="text-base">
@@ -1135,11 +1161,19 @@ export default ({
                 {web3_provider ?
                   !isNaN(removeAmounts?.[1]) ?
                     <span className="text-base">
-                      {number_format(removeAmounts[1] || 0, '0,0.000000', true)}
+                      {number_format(
+                        removeAmounts[1] || 0,
+                        '0,0.000000',
+                        true,
+                      )}
                     </span> :
                     selected && !no_pool && (
                       position_loading ?
-                        <RotatingSquare color={loader_color(theme)} width="24" height="24" /> :
+                        <RotatingSquare
+                          color={loader_color(theme)}
+                          width="24"
+                          height="24"
+                        /> :
                         '-'
                     ) :
                   <span className="text-base">
@@ -1183,7 +1217,11 @@ export default ({
                         <BiMessageCheck className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" /> :
                         r.status === 'pending' ?
                           <div className="mr-2.5">
-                            <Watch color="white" width="16" height="16" />
+                            <Watch
+                              color="white"
+                              width="16"
+                              height="16"
+                            />
                           </div> :
                           <BiMessageDetail className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5" />
                     }
@@ -1209,7 +1247,10 @@ export default ({
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            <TiArrowRight size={20} className="transform -rotate-45" />
+                            <TiArrowRight
+                              size={20}
+                              className="transform -rotate-45"
+                            />
                           </a>
                         )}
                         {r.status === 'failed' ?
@@ -1218,16 +1259,14 @@ export default ({
                             className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                           >
                             <MdClose size={16} />
-                          </button>
-                          :
+                          </button> :
                           r.status === 'success' ?
                             <button
                               onClick={() => reset()}
                               className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
                             >
                               <MdClose size={16} />
-                            </button>
-                            :
+                            </button> :
                             null
                         }
                       </div>
@@ -1242,7 +1281,11 @@ export default ({
                   >
                     <span className="flex items-center justify-center space-x-1.5">
                       {(calling || approving) && (
-                        <TailSpin color="white" width="20" height="20" />
+                        <TailSpin
+                          color="white"
+                          width="20"
+                          height="20"
+                        />
                       )}
                       <span>
                         {calling ?

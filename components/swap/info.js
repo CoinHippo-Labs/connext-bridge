@@ -26,7 +26,10 @@ export default ({
               Rate
             </span>
             <span className="text-lg font-bold">
-              {number_format(rate, '0,0.000000')}
+              {number_format(
+                rate,
+                '0,0.000000',
+              )}
             </span>
           </div>
           <div className="flex flex-col space-y-0.5">
@@ -34,7 +37,10 @@ export default ({
               Slippage Tolerance
             </span>
             <span className="text-lg font-bold">
-              {number_format(slippage, '0,0.000000')}%
+              {number_format(
+                slippage,
+                '0,0.000000',
+              )}%
             </span>
           </div>
           <div className="flex flex-col space-y-0.5">
@@ -42,7 +48,10 @@ export default ({
               Price Impact
             </span>
             <span className="text-lg font-bold">
-              {number_format(price_impact, '0,0.000000')}%
+              {number_format(
+                price_impact,
+                '0,0.000000',
+              )}%
             </span>
           </div>
           <div className="flex flex-col space-y-0.5">
@@ -51,9 +60,17 @@ export default ({
             </span>
             <span className="flex items-center whitespace-nowrap text-lg font-bold space-x-2">
               {typeof amount_received === 'boolean' ?
-                <TailSpin color="white" width="20" height="20" /> :
+                <TailSpin
+                  color="white"
+                  width="20"
+                  height="20"
+                /> :
                 <span>
-                  {number_format(amount_received * (100 - (slippage || 0)) / 100, '0,0.00000000', true)}
+                  {number_format(
+                    amount_received * (100 - (slippage || 0)) / 100,
+                    '0,0.00000000',
+                    true,
+                  )}
                 </span>
               }
               <span className="hidden sm:block text-sm">
@@ -63,7 +80,11 @@ export default ({
           </div>
         </div> :
         <div className="flex items-center justify-center">
-          <TailSpin color={loader_color(theme)} width="36" height="36" />
+          <TailSpin
+            color={loader_color(theme)}
+            width="36"
+            height="36"
+          />
         </div>
       }
     </div>

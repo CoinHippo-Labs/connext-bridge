@@ -780,7 +780,10 @@ export default () => {
                       <span className="text-base font-semibold">
                         Liquidity
                       </span>
-                      <TiArrowRight size={20} className="transform -rotate-45 -mr-1" />
+                      <TiArrowRight
+                        size={20}
+                        className="transform -rotate-45 -mr-1"
+                      />
                     </div>
                   </a>
                 )}
@@ -991,7 +994,14 @@ export default () => {
                               </span>
                               <span className="font-semibold">
                                 {typeof source_amount === 'number' ?
-                                  number_format(source_amount, source_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
+                                  number_format(
+                                    source_amount,
+                                    source_amount > 1000 ?
+                                      '0,0.00' :
+                                      '0,0.000000',
+                                    true,
+                                  ) :
+                                  'n/a'
                                 }
                               </span>
                             </div>
@@ -1001,7 +1011,14 @@ export default () => {
                               </span>
                               <span className="font-semibold">
                                 {typeof liquidity_amount === 'number' ?
-                                  number_format(liquidity_amount, liquidity_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
+                                  number_format(
+                                    liquidity_amount,
+                                    liquidity_amount > 1000 ?
+                                      '0,0.00' :
+                                      '0,0.000000',
+                                    true,
+                                  ) :
+                                  'n/a'
                                 }
                               </span>
                             </div>
@@ -1011,7 +1028,14 @@ export default () => {
                               </span>
                               <span className="font-semibold">
                                 {typeof min_amount === 'number' ?
-                                  number_format(min_amount, min_amount > 10 ? '0,0.00' : '0,0.000000', true) : 'n/a'
+                                  number_format(
+                                    min_amount,
+                                    min_amount > 10 ?
+                                      '0,0.00' :
+                                      '0,0.000000',
+                                    true,
+                                  ) :
+                                  'n/a'
                                 }
                               </span>
                             </div>
@@ -1021,7 +1045,14 @@ export default () => {
                               </span>
                               <span className="font-semibold">
                                 {typeof max_amount === 'number' ?
-                                  number_format(max_amount, max_amount > 1000 ? '0,0.00' : '0,0.000000', true) : 'n/a'
+                                  number_format(
+                                    max_amount,
+                                    max_amount > 1000 ?
+                                      '0,0.00' :
+                                      '0,0.000000',
+                                    true,
+                                  ) :
+                                  'n/a'
                                 }
                               </span>
                             </div>
@@ -1102,6 +1133,7 @@ export default () => {
                                         value = e.target.value
                                       }
                                       value = value <= 0 || value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
+
                                       console.log('[Transfer Confirmation]', {
                                         bridge,
                                         fee,
@@ -1111,6 +1143,7 @@ export default () => {
                                           slippage: value && !isNaN(value) ? Number(value) : value,
                                         },
                                       })
+
                                       setOptions({
                                         ...options,
                                         slippage: value && !isNaN(value) ? Number(value) : value,
@@ -1141,6 +1174,7 @@ export default () => {
                                             slippage: s,
                                           },
                                         })
+
                                         setOptions({
                                           ...options,
                                           slippage: s,
@@ -1156,7 +1190,11 @@ export default () => {
                               </> :
                               <div className="flex items-center space-x-1">
                                 <span className="font-semibold">
-                                  {number_format(slippage, '0,0.00')}%
+                                  {number_format(
+                                    slippage,
+                                    '0,0.00',
+                                  )}
+                                  %
                                 </span>
                                 <button
                                   onClick={() => setSlippageEditing(true)}
@@ -1185,6 +1223,7 @@ export default () => {
                                 infiniteApprove: !infiniteApprove,
                               },
                             })
+
                             setOptions({
                               ...options,
                               infiniteApprove: !infiniteApprove,
@@ -1221,7 +1260,11 @@ export default () => {
                                 Bridge Fee
                               </div>
                               <span className="whitespace-nowrap text-xs font-semibold">
-                                {number_format(router_fee, '0,0.000000', true)} {source_symbol}
+                                {number_format(
+                                  router_fee,
+                                  '0,0.000000',
+                                  true,
+                                )} {source_symbol}
                               </span>
                             </div>
                             <div className="flex items-center justify-between space-x-1">
@@ -1236,7 +1279,11 @@ export default () => {
                                   <Oval color={loader_color(theme)} width="20" height="20" />
                                 </div> :
                                 <span className="whitespace-nowrap text-xs font-semibold">
-                                  {number_format(gas_fee, '0,0.000000', true)} {source_gas_native_token?.symbol}
+                                  {number_format(
+                                    gas_fee,
+                                    '0,0.000000',
+                                    true,
+                                  )} {source_gas_native_token?.symbol}
                                 </span>
                               }
                             </div>
@@ -1250,14 +1297,22 @@ export default () => {
                             <span className="whitespace-nowrap text-sm font-bold">
                               {total_fee ?
                                 <>
-                                  {number_format(total_fee, '0,0.000000', true)} {source_symbol}
+                                  {number_format(
+                                    total_fee,
+                                    '0,0.000000',
+                                    true,
+                                  )} {source_symbol}
                                 </> :
                                 'no fees'
                               }
                             </span>
                             {total_fee > 0 && typeof source_asset_data?.price === 'number' && (
                               <div className="font-mono text-red-500 text-xs font-semibold text-right">
-                                ({currency_symbol}{number_format(total_fee * source_asset_data.price, '0,0.000000')})
+                                ({currency_symbol}
+                                {number_format(
+                                  total_fee * source_asset_data.price,
+                                  '0,0.000000',
+                                )})
                               </div>
                             )}
                           </div>
@@ -1269,7 +1324,10 @@ export default () => {
                     <>
                       {asset_balances_data && amount > liquidity_amount && (
                         <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2 sm:mx-3">
-                          <BiMessageEdit size={20} className="min-w-max" />
+                          <BiMessageEdit
+                            size={20}
+                            className="min-w-max"
+                          />
                           <span className="text-sm">
                             Insufficient router liquidity. Funds must transfer through the bridge directly. (wait time est. 30-60 mins)
                           </span>
@@ -1278,14 +1336,20 @@ export default () => {
                       {amount < liquidity_amount && (
                         forceSlow ?
                           <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2 sm:mx-3">
-                            <BiMessageDetail size={20} className="min-w-max" />
+                            <BiMessageDetail
+                              size={20}
+                              className="min-w-max"
+                            />
                             <span className="text-sm">
                               Use bridge only (wait 30-60 mins, no fees)
                             </span>
                           </div>
                           :
                           <div className="flex items-center text-blue-500 dark:text-green-500 space-x-2 sm:mx-3">
-                            <GiPartyPopper size={20} className="min-w-max" />
+                            <GiPartyPopper
+                              size={20}
+                              className="min-w-max"
+                            />
                             <span className="text-sm">
                               Fast liquidity available! Transfer will likely complete within 3 minutes!
                             </span>
@@ -1345,7 +1409,11 @@ export default () => {
                       >
                         <span className="flex items-center justify-center space-x-1.5">
                           {(calling || approving) && (
-                            <TailSpin color="white" width="20" height="20" />
+                            <TailSpin
+                              color="white"
+                              width="20"
+                              height="20"
+                            />
                           )}
                           <span>
                             {calling ?
@@ -1440,7 +1508,11 @@ export default () => {
                             <div className="sm:text-right">
                               <div className="text-lg space-x-1.5">
                                 <span className="font-bold">
-                                  {number_format(amount, '0,0.000000', true)}
+                                  {number_format(
+                                    amount,
+                                    '0,0.000000',
+                                    true,
+                                  )}
                                 </span>
                                 <span className="font-semibold">
                                   {source_symbol}
@@ -1448,7 +1520,13 @@ export default () => {
                               </div>
                               {amount && typeof source_asset_data?.price === 'number' && (
                                 <div className="font-mono text-blue-500 sm:text-right">
-                                  ({currency_symbol}{number_format(amount * source_asset_data.price, '0,0.00')})
+                                  (
+                                  {currency_symbol}
+                                  {number_format(
+                                    amount * source_asset_data.price,
+                                    '0,0.00',
+                                  )}
+                                  )
                                 </div>
                               )}
                             </div>
@@ -1476,6 +1554,7 @@ export default () => {
                                             value = e.target.value
                                           }
                                           value = value <= 0 || value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
+
                                           console.log('[Transfer Confirmation]', {
                                             bridge,
                                             fee,
@@ -1485,6 +1564,7 @@ export default () => {
                                               slippage: value && !isNaN(value) ? Number(value) : value,
                                             },
                                           })
+
                                           setOptions({
                                             ...options,
                                             slippage: value && !isNaN(value) ? Number(value) : value,
@@ -1515,6 +1595,7 @@ export default () => {
                                                 slippage: s,
                                               },
                                             })
+
                                             setOptions({
                                               ...options,
                                               slippage: s,
@@ -1530,7 +1611,11 @@ export default () => {
                                   </> :
                                   <div className="flex items-center space-x-1">
                                     <span className="text-lg font-semibold">
-                                      {number_format(slippage, '0,0.00')}%
+                                      {number_format(
+                                        slippage,
+                                        '0,0.00',
+                                      )}
+                                      %
                                     </span>
                                     <button
                                       onClick={() => setSlippageEditing(true)}
@@ -1560,6 +1645,7 @@ export default () => {
                                     infiniteApprove: !infiniteApprove,
                                   },
                                 })
+
                                 setOptions({
                                   ...options,
                                   infiniteApprove: !infiniteApprove,
@@ -1612,6 +1698,7 @@ export default () => {
                                       forceSlow: !forceSlow,
                                     },
                                   })
+
                                   setOptions({
                                     ...options,
                                     forceSlow: !forceSlow,
@@ -1637,7 +1724,11 @@ export default () => {
                                   {router_fee ?
                                     <>
                                       <span className="font-bold">
-                                        {number_format(router_fee, '0,0.000000', true)}
+                                        {number_format(
+                                          router_fee,
+                                          '0,0.000000',
+                                          true,
+                                        )}
                                       </span>
                                       <span className="font-semibold">
                                         {source_symbol}
@@ -1650,7 +1741,13 @@ export default () => {
                                 </div>
                                 {router_fee > 0 && typeof source_asset_data?.price === 'number' && (
                                   <div className="font-mono text-red-500 sm:text-right">
-                                    ({currency_symbol}{number_format(router_fee * source_asset_data.price, '0,0.000000')})
+                                    (
+                                    {currency_symbol}
+                                    {number_format(
+                                      router_fee * source_asset_data.price,
+                                      '0,0.000000',
+                                    )}
+                                    )
                                   </div>
                                 )}
                               </div>
@@ -1658,7 +1755,10 @@ export default () => {
                           )}
                           {amount > liquidity_amount && (
                             <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2">
-                              <BiMessageEdit size={20} className="min-w-max mt-0.5" />
+                              <BiMessageEdit
+                                size={20}
+                                className="min-w-max mt-0.5"
+                              />
                               <span className="font-medium">
                                 Insufficient router liquidity. Funds must transfer through the bridge directly. (wait time est. 30-60 mins)
                               </span>
@@ -1667,14 +1767,20 @@ export default () => {
                           {amount < liquidity_amount && (
                             forceSlow ?
                               <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2">
-                                <BiMessageDetail size={20} className="min-w-max mt-0.5" />
+                                <BiMessageDetail
+                                  size={20}
+                                  className="min-w-max mt-0.5"
+                                />
                                 <span className="font-medium">
                                   Use bridge only (wait 30-60 mins, no fees)
                                 </span>
                               </div>
                               :
                               <div className="flex items-center text-blue-500 dark:text-green-500 space-x-2">
-                                <GiPartyPopper size={20} className="min-w-max mt-0.5" />
+                                <GiPartyPopper
+                                  size={20}
+                                  className="min-w-max mt-0.5"
+                                />
                                 <span className="font-medium">
                                   Fast liquidity available! Transfer will likely complete within 3 minutes!
                                 </span>
@@ -1688,7 +1794,11 @@ export default () => {
                         onConfirmHide={false}
                         confirmButtonTitle={<span className="flex items-center justify-center space-x-1.5 py-2">
                           {(calling || approving) && (
-                            <TailSpin color="white" width="20" height="20" />
+                            <TailSpin
+                              color="white"
+                              width="20"
+                              height="20"
+                            />
                           )}
                           <span>
                             {calling ?
@@ -1717,7 +1827,11 @@ export default () => {
                               r.status === 'success' ?
                                 xcallResponse ?
                                   <div className="mr-3">
-                                    <Watch color="white" width="20" height="20" />
+                                    <Watch
+                                      color="white"
+                                      width="20"
+                                      height="20"
+                                    />
                                   </div> : <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
                                 <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />
                             }

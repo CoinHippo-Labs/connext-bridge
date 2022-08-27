@@ -74,7 +74,11 @@ export default ({
             {asset_data ? contract_data?.symbol || asset_data.symbol : 'Token'}
           </span>
         </div> :
-        <Puff color={loader_color(theme)} width="24" height="24" />
+        <Puff
+          color={loader_color(theme)}
+          width="24"
+          height="24"
+        />
       }
       buttonClassName={`w-32 sm:w-48 min-w-max h-10 sm:h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
       title={<div className="flex items-center justify-between">

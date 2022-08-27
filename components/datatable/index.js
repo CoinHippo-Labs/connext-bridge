@@ -153,17 +153,28 @@ export default ({
                   items={[...Array(pageCount).keys()]}
                   disabled={loading}
                   active={pageIndex + 1}
-                  previous={noRecordPerPage ? <BiLeftArrowAlt size={16} /> : 'Previous'}
-                  next={noRecordPerPage ? <BiRightArrowAlt size={16} /> : 'Next'}
+                  previous={noRecordPerPage ?
+                    <BiLeftArrowAlt size={16} /> :
+                    'Previous'
+                  }
+                  next={noRecordPerPage ?
+                    <BiRightArrowAlt size={16} /> :
+                    'Next'
+                  }
                   onClick={p => {
                     gotoPage(p - 1)
                     tableRef.current.scrollIntoView() 
                   }}
-                  icons={noRecordPerPage ? true : false}
-                  className={noRecordPerPage ? 'space-x-0.5' : ''}
+                  icons={noRecordPerPage ?
+                    true :
+                    false
+                  }
+                  className={noRecordPerPage ?
+                    'space-x-0.5' :
+                    ''
+                  }
                 />
-              </div>
-              :
+              </div> :
               <>
                 {pageIndex !== 0 && (
                   <PageWithText

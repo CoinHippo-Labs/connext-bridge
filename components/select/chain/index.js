@@ -68,14 +68,20 @@ export default ({
             {chain_data ? chainName(chain_data) : 'Chain'}
           </span>
         </div> :
-        <Puff color={loader_color(theme)} width="24" height="24" />
+        <Puff
+          color={loader_color(theme)}
+          width="24"
+          height="24"
+        />
       }
       buttonClassName={`w-32 sm:w-48 min-w-max h-10 sm:h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
       title={<span className="flex items-center space-x-1">
         <span className="capitalize">
           {origin}
         </span>
-        <span>Chain</span>
+        <span>
+          Chain
+        </span>
       </span>}
       body={(
         <Search

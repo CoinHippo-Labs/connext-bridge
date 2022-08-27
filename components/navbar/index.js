@@ -180,6 +180,7 @@ export default () => {
     const init = async () => {
       if (chains_data && assets_data?.findIndex(a => typeof a.price !== 'number') < 0) {
         const chains_config = {}
+
         for (const chain_data of chains_data) {
           const {
             chain_id,
@@ -187,6 +188,7 @@ export default () => {
             provider_params,
             disabled,
           } = { ...chain_data }
+
           if (!disabled) {
             const rpc_urls = provider_params?.[0]?.rpcUrls?.filter(url => url) || []
             if (domain_id) {
@@ -212,6 +214,7 @@ export default () => {
             }
           }
         }
+
         const config = {
           chains: chains_config,
           // signerAddress: address,
@@ -219,13 +222,16 @@ export default () => {
           network: process.env.NEXT_PUBLIC_NETWORK,
           environment: process.env.NEXT_PUBLIC_ENVIRONMENT,
         }
+
         dispatch({
           type: SDK,
           value: await create(config),
         })
+
         console.log('[SDK config]', config)
       }
     }
+
     init()
   }, [chains_data, assets_data])
 
@@ -239,14 +245,18 @@ export default () => {
         if (sdk.nxtpSdkRouter) {
           await sdk.nxtpSdkRouter.changeSignerAddress(address)
         }
+
         setCurrentAddress(address)
+
         dispatch({
           type: SDK,
           value: sdk,
         })
+
         console.log('[Signer address]', address)
       }
     }
+
     update()
   }, [sdk, provider, web3_provider, address, signer, currentAddress])
 
