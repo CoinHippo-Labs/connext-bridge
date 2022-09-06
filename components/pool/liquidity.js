@@ -731,7 +731,7 @@ export default ({
   )
 
   return (
-    <div className="border border-blue-400 dark:border-blue-800 rounded-2xl shadow-lg shadow-blue-200 dark:shadow-blue-600 space-y-3 p-6">
+    <div className="border border-blue-400 dark:border-blue-800 rounded-2xl shadow-2xl shadow-blue-200 dark:shadow-blue-600 space-y-3 p-6">
       <div className="flex items-center justify-between space-x-3 mr-1.5">
         <div className="flex items-center space-x-0.5">
           {ACTIONS.map((a, i) => (

@@ -157,10 +157,12 @@ export default () => {
             chain_id,
             domain_id,
           } = { ...chain_data }
+
           const response = await sdk.nxtpSdkPool.getUserPools(
             domain_id,
             address,
           )
+
           setPools(response?.map(p => {
             const {
               info,
@@ -175,6 +177,7 @@ export default () => {
             } = { ...info }
             const symbols = symbol?.split('-') || []
             const asset_data = pool_assets_data.find(a => symbols.findIndex(s => equals_ignore_case(s, a?.symbol)) > -1 || a?.contracts?.findIndex(c => c?.chain_id === chain_id && symbols.findIndex(s => equals_ignore_case(s, c?.symbol)) > -1) > -1)
+
             return {
               ...p,
               chain_data,
@@ -189,6 +192,7 @@ export default () => {
         } catch (error) {}
       }
     }
+
     getData()
   }, [sdk, address, poolsTrigger])
 

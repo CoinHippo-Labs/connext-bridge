@@ -798,7 +798,7 @@ export default () => {
                 />
               </div>
             </div>
-            <div className={`${checkSupport() && amount > 0 ? 'border-2 border-blue-400 dark:border-blue-800 shadow-xl shadow-blue-200 dark:shadow-blue-600' : 'shadow dark:shadow-slate-400'} rounded-2xl space-y-6 pt-4 sm:pt-8 pb-3 sm:pb-6 px-3 sm:px-6`}>
+            <div className={`${checkSupport() && amount > 0 ? 'border-2 border-blue-400 dark:border-blue-800 shadow-2xl shadow-blue-200 dark:shadow-blue-600' : 'shadow dark:shadow-slate-400'} rounded-2xl space-y-6 pt-4 sm:pt-8 pb-3 sm:pb-6 px-3 sm:px-6`}>
               <div className="space-y-2">
                 <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
                   <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start">
@@ -865,7 +865,7 @@ export default () => {
                         getBalances(source_chain)
                         getBalances(destination_chain)
                       }}
-                      className={`transform hover:rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-500 dark:hover:shadow-white flex items-center justify-center p-2.5`}
+                      className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-500 dark:hover:shadow-white flex items-center justify-center p-2.5`}
                     >
                       <div className="flex sm:hidden">
                         <Image
@@ -1087,13 +1087,20 @@ export default () => {
                       onChange={e => {
                         const regex = /^[0-9.\b]+$/
                         let _amount
+
                         if (e.target.value === '' || regex.test(e.target.value)) {
                           _amount = e.target.value
                         }
-                        _amount = _amount < 0 ? 0 : _amount
+
+                        _amount = _amount < 0 ?
+                          0 :
+                          _amount
+
                         setBridge({
                           ...bridge,
-                          amount: _amount && !isNaN(_amount) ? Number(_amount) : _amount,
+                          amount: _amount && !isNaN(_amount) ?
+                            Number(_amount) :
+                            _amount,
                         })
                       }}
                       onWheel={e => e.target.blur()}
@@ -1129,10 +1136,14 @@ export default () => {
                                     onChange={e => {
                                       const regex = /^[0-9.\b]+$/
                                       let value
+
                                       if (e.target.value === '' || regex.test(e.target.value)) {
                                         value = e.target.value
                                       }
-                                      value = value <= 0 || value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
+
+                                      value = value <= 0 || value > 100 ?
+                                        DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
+                                        value
 
                                       console.log('[Transfer Confirmation]', {
                                         bridge,
@@ -1140,13 +1151,17 @@ export default () => {
                                         options: {
                                           ...options,
                                           to: recipient_address,
-                                          slippage: value && !isNaN(value) ? Number(value) : value,
+                                          slippage: value && !isNaN(value) ?
+                                            Number(value) :
+                                            value,
                                         },
                                       })
 
                                       setOptions({
                                         ...options,
-                                        slippage: value && !isNaN(value) ? Number(value) : value,
+                                        slippage: value && !isNaN(value) ?
+                                          Number(value) :
+                                          value,
                                       })
                                     }}
                                     onWheel={e => e.target.blur()}
@@ -1212,7 +1227,10 @@ export default () => {
                           Infinite Approval
                         </div>
                         <Switch
-                          checked={typeof infiniteApprove === 'boolean' ? infiniteApprove : false}
+                          checked={typeof infiniteApprove === 'boolean' ?
+                            infiniteApprove :
+                            false
+                          }
                           onChange={() => {
                             console.log('[Transfer Confirmation]', {
                               bridge,
@@ -1550,10 +1568,14 @@ export default () => {
                                         onChange={e => {
                                           const regex = /^[0-9.\b]+$/
                                           let value
+
                                           if (e.target.value === '' || regex.test(e.target.value)) {
                                             value = e.target.value
                                           }
-                                          value = value <= 0 || value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
+
+                                          value = value <= 0 || value > 100 ?
+                                            DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
+                                            value
 
                                           console.log('[Transfer Confirmation]', {
                                             bridge,
@@ -1561,13 +1583,17 @@ export default () => {
                                             options: {
                                               ...options,
                                               to: recipient_address,
-                                              slippage: value && !isNaN(value) ? Number(value) : value,
+                                              slippage: value && !isNaN(value) ?
+                                                Number(value) :
+                                                value,
                                             },
                                           })
 
                                           setOptions({
                                             ...options,
-                                            slippage: value && !isNaN(value) ? Number(value) : value,
+                                            slippage: value && !isNaN(value) ?
+                                              Number(value) :
+                                              value,
                                           })
                                         }}
                                         onWheel={e => e.target.blur()}

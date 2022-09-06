@@ -46,22 +46,28 @@ export default () => {
   useEffect(() => {
     const getData = async () => {
       const response = await getAnnouncement()
+
       dispatch({
         type: ANNOUNCEMENT_DATA,
         value: response,
       })
     }
+
     getData()
-    const interval = setInterval(() => getData(), 1 * 60 * 1000)
-    return () => {
-      clearInterval(interval)
-    }
+
+    return () => clearInterval(
+      setInterval(() =>
+        getData(),
+        1 * 60 * 1000,
+      )
+    )
   }, [])
 
   // chains
   useEffect(() => {
     const getData = async () => {
       const response = await getChains()
+
       if (response) {
         dispatch({
           type: CHAINS_DATA,
@@ -69,6 +75,7 @@ export default () => {
         })
       }
     }
+
     getData()
   }, [])
 
@@ -76,17 +83,20 @@ export default () => {
   useEffect(() => {
     const getData = async () => {
       const response = await getAssets()
+
       if (response) {
         dispatch({
           type: ASSETS_DATA,
           value: response,
         })
+
         dispatch({
           type: POOL_ASSETS_DATA,
           value: response.map(d => {
             const {
               contracts,
             } = { ...d }
+
             return {
               ...d,
               contracts: contracts?.filter(c => c?.is_pool),
@@ -95,6 +105,7 @@ export default () => {
         })
       }
     }
+
     getData()
   }, [])
 
@@ -102,29 +113,49 @@ export default () => {
   useEffect(() => {
     const getData = async is_interval => {
       if (chains_data && assets_data) {
-        let updated_ids = is_interval ? [] : assets_data.filter(a => typeof a.price === 'number').map(a => a.id)
+        let updated_ids = is_interval ? [] :
+          assets_data
+            .filter(a => typeof a.price === 'number')
+            .map(a => a.id)
+
         if (updated_ids.length < assets_data.length) {
           let updated = false
+
           for (const chain_data of chains_data) {
             const {
               chain_id,
             } = { ...chain_data }
+
             if (chain_id) {
-              const addresses = assets_data.filter(a => !updated_ids.includes(a?.id) && a?.contracts?.findIndex(c => c?.chain_id === chain_id && c.contract_address) > -1)
+              const addresses = assets_data
+                .filter(a => !updated_ids.includes(a?.id) && a?.contracts?.findIndex(c => c?.chain_id === chain_id && c.contract_address) > -1)
                 .map(a => a.contracts.find(c => c?.chain_id === chain_id).contract_address)
+
               if (addresses.length > 0) {
                 const response = await getTokens({
                   chain_id,
                   addresses,
                 })
+
                 if (Array.isArray(response)) {
                   response.forEach(t => {
                     const asset_index = assets_data.findIndex(a => a?.id && a.contracts?.findIndex(c => c?.chain_id === t?.chain_id && equals_ignore_case(c.contract_address, t?.contract_address)) > -1)
+
                     if (asset_index > -1) {
                       const asset = assets_data[asset_index]
-                      asset.price = t?.price || asset.price || 0
+                      asset.price = t?.price ||
+                        asset.price ||
+                        0
+
                       assets_data[asset_index] = asset
-                      updated_ids = _.uniq(_.concat(updated_ids, asset.id))
+
+                      updated_ids = _.uniq(
+                        _.concat(
+                          updated_ids,
+                          asset.id,
+                        )
+                      )
+
                       updated = true
                     }
                   })
@@ -132,6 +163,7 @@ export default () => {
               }
             }
           }
+
           if (updated) {
             dispatch({
               type: ASSETS_DATA,
@@ -141,11 +173,15 @@ export default () => {
         }
       }
     }
+
     getData()
-    const interval = setInterval(() => getData(true), 5 * 60 * 1000)
-    return () => {
-      clearInterval(interval)
-    }
+
+    return () => clearInterval(
+      setInterval(() =>
+        getData(true),
+        5 * 60 * 1000,
+      )
+    )
   }, [chains_data, assets_data])
 
   // rpcs
@@ -153,17 +189,27 @@ export default () => {
     const init = async => {
       if (chains_data) {
         const _rpcs = {}
+
         for (const chain_data of chains_data) {
           const {
             disabled,
             chain_id,
             provider_params,
           } = { ...chain_data }
+
           if (!disabled) {
-            const rpc_urls = provider_params?.[0]?.rpcUrls?.filter(url => url) || []
-            _rpcs[chain_id] = new providers.FallbackProvider(rpc_urls.map(url => new providers.JsonRpcProvider(url)))
+            const {
+              rpcUrls,
+            } = { ..._.head(provider_params) }
+
+            const rpc_urls = rpcUrls?.filter(url => url) || []
+
+            _rpcs[chain_id] = new providers.FallbackProvider(
+              rpc_urls.map(url => new providers.JsonRpcProvider(url))
+            )
           }
         }
+
         if (!rpcs) {
           dispatch({
             type: RPCS,
@@ -268,27 +314,33 @@ export default () => {
       ) {
         try {
           const response = await sdk.nxtpSdkUtils.getRoutersData()
+
           if (response) {
-            const data = _.groupBy(response.map(l => {
-              const {
-                domain,
-                adopted,
-                balance,
-              } = { ...l }
-              const chain_data = chains_data.find(c => c?.domain_id === domain)
-              const {
-                chain_id,
-              } = { ...chain_data }
-              const asset_data = assets_data.find(a => a?.contracts?.findIndex(c => c?.chain_id === chain_id && equals_ignore_case(c?.contract_address, adopted)) > -1)
-              return {
-                ...l,
-                chain_id,
-                chain_data,
-                contract_address: adopted,
-                asset_data,
-                amount: BigInt(Number(balance) || 0).toString(),
-              }
-            }), 'chain_id')
+            const data = _.groupBy(
+              response.map(l => {
+                const {
+                  domain,
+                  adopted,
+                  balance,
+                } = { ...l }
+                const chain_data = chains_data.find(c => c?.domain_id === domain)
+                const {
+                  chain_id,
+                } = { ...chain_data }
+                const asset_data = assets_data.find(a => a?.contracts?.findIndex(c => c?.chain_id === chain_id && equals_ignore_case(c?.contract_address, adopted)) > -1)
+
+                return {
+                  ...l,
+                  chain_id,
+                  chain_data,
+                  contract_address: adopted,
+                  asset_data,
+                  amount: BigInt(Number(balance) || 0).toString(),
+                }
+              }),
+              'chain_id',
+            )
+
             dispatch({
               type: ASSET_BALANCES_DATA,
               value: data,
@@ -297,11 +349,15 @@ export default () => {
         } catch (error) {}
       }
     }
+
     getData()
-    const interval = setInterval(() => getData(), 1 * 60 * 1000)
-    return () => {
-      clearInterval(interval)
-    }
+
+    return () => clearInterval(
+      setInterval(() =>
+        getData(),
+        1 * 60 * 1000,
+      )
+    )
   }, [sdk, chains_data, assets_data])
 
   // pools
@@ -363,10 +419,17 @@ export default () => {
               asset_data,
               contract_data,
               symbols,
-              rate: Number(utils.formatUnits(BigNumber.from(rate || '0'), _.last(decimals) || 18)),
+              rate: Number(
+                utils.formatUnits(
+                  BigNumber.from(rate || '0'),
+                  _.last(decimals) || 18,
+                )
+              ),
             })
           } catch (error) {}
         }
+
+
         dispatch({
           type: POOLS_DATA,
           value: data,
@@ -378,19 +441,30 @@ export default () => {
         chains_data.forEach(c => getChainData(c))
       }
     }
+
     getData()
-    const interval = setInterval(() => getData(), 1 * 60 * 1000)
-    return () => {
-      clearInterval(interval)
-    }
+
+    return () => clearInterval(
+      setInterval(() =>
+        getData(),
+        1 * 60 * 1000,
+      )
+    )
   }, [asPath, sdk, chains_data, pool_assets_data])
 
   // ens
   useEffect(() => {
     const getData = async () => {
       if (chains_data && asset_balances_data && chains_data.filter(c => !c?.disabled).length <= Object.keys(asset_balances_data).length) {
-        const addresses = _.uniq(Object.values(asset_balances_data).flatMap(a => a || []).map(a => a?.router_address).filter(a => a && !ens_data?.[a]))
+        const addresses = _.uniq(
+          Object.values(asset_balances_data)
+            .flatMap(a => a || [])
+            .map(a => a?.router_address)
+            .filter(a => a && !ens_data?.[a])
+        )
+
         const ens_data = await getEns(addresses)
+
         if (ens_data) {
           dispatch({
             type: ENS_DATA,
@@ -399,6 +473,7 @@ export default () => {
         }
       }
     }
+
     getData()
   }, [chains_data, asset_balances_data])
 
@@ -408,10 +483,14 @@ export default () => {
         <div className="navbar-inner w-full sm:h-20 flex xl:grid xl:grid-flow-row xl:grid-cols-3 items-center justify-between gap-4">
           <div className="flex items-center">
             <Logo />
-            <DropdownNavigations address={web3_provider && address} />
+            <DropdownNavigations
+              address={web3_provider && address}
+            />
           </div>
           <div className="flex items-center justify-center">
-            <Navigations address={web3_provider && address} />
+            <Navigations
+              address={web3_provider && address}
+            />
           </div>
           <div className="flex items-center justify-end">
             {web3_provider && address && (
@@ -423,10 +502,16 @@ export default () => {
                       value={address}
                       title={<span className="text-slate-400 dark:text-slate-200 text-sm">
                         <span className="xl:hidden">
-                          {ellipse(address, 6)}
+                          {ellipse(
+                            address,
+                            6,
+                          )}
                         </span>
                         <span className="hidden xl:block">
-                          {ellipse(address, 8)}
+                          {ellipse(
+                            address,
+                            8,
+                          )}
                         </span>
                       </span>}
                       size={18}
@@ -442,7 +527,9 @@ export default () => {
               />
             </div>
             {web3_provider && (
-              <Chains chain_id={chain_id} />
+              <Chains
+                chain_id={chain_id}
+              />
             )}
             <Theme />
           </div>

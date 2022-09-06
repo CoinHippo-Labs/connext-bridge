@@ -52,7 +52,7 @@ export default ({ chain_id }) => {
           chains_data ?
             <RiRefreshFill
               size={20}
-              className="transform hover:rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out"
+              className="transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out"
             /> :
             <Puff
               color={loader_color(theme)}
