@@ -240,7 +240,7 @@
       "contract_0_path": "/address/{address}",
       "transaction_path": "/tx/{tx}"
     },
-    "image": "/logos/chains/arbitrum.png",
+    "image": "/logos/chains/nova.png",
     "color": "#28a0f0",
     "group" : "optimistic_rollups"
   },
