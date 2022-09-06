@@ -36,7 +36,11 @@ export default () => {
             className="transform -rotate-45 text-blue-500 dark:text-white mt-0.5 -mr-1"
           />
         </a>
-        <div>
+        <a
+          href="https://nomad.xyz"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <div className="flex dark:hidden items-center">
             <Image
               src="/logos/externals/nomad/logo.png"
@@ -53,7 +57,7 @@ export default () => {
               height={18}
             />
           </div>
-        </div>
+        </a>
       </div>
     </div>
   )
