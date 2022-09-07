@@ -1921,7 +1921,7 @@ export default () => {
           {['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) && (
             <Faucet />
           )}
-          <PoweredBy />
+          {/*<PoweredBy />*/}
         </div>
       </div>
       <div className="col-span-1 lg:col-span-2">
