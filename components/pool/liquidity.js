@@ -731,7 +731,7 @@ export default ({
   )
 
   return (
-    <div className="border border-blue-400 dark:border-blue-800 rounded-2xl shadow-2xl shadow-blue-200 dark:shadow-blue-600 space-y-3 p-6">
+    <div className="bg-slate-50 dark:bg-slate-900 bg-opacity-50 border-2 border-blue-400 dark:border-blue-800 rounded-2xl shadow-2xl shadow-blue-200 dark:shadow-blue-600 space-y-3 p-6">
       <div className="flex items-center justify-between space-x-3 mr-1.5">
         <div className="flex items-center space-x-0.5">
           {ACTIONS.map((a, i) => (
@@ -810,7 +810,7 @@ export default ({
                       setAmountX(x_balance_amount)
                       autoSetY(x_balance_amount)
                     }}
-                    className={`${disabled || typeof x_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
+                    className={`${disabled || typeof x_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-700 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
                   >
                     Max
                   </div>
@@ -890,7 +890,7 @@ export default ({
                       setAmountY(y_balance_amount)
                       autoSetX(y_balance_amount)
                     }}
-                    className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
+                    className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-700 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
                   >
                     Max
                   </div>
@@ -1097,7 +1097,7 @@ export default ({
                       }
                       setAmount(_amount)
                     }}
-                    className={`${disabled || !lpTokenBalance ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-200 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-semibold'} rounded-lg shadow dark:shadow-slate-500 py-0.5 px-2`}
+                    className={`${disabled || !lpTokenBalance ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-200 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-semibold'} rounded-lg shadow dark:shadow-slate-700 py-0.5 px-2`}
                   >
                     {p * 100} %
                   </div>

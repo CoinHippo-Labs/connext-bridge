@@ -1,3 +1,5 @@
+const { createSecureHeaders } = require('next-secure-headers')
+
 module.exports = {
   webpack5: true,
   webpack: config => {
@@ -16,5 +18,13 @@ module.exports = {
   images: {
     loader: 'imgix',
     path: '',
+  },
+  headers: () => {
+    return [
+      {
+        source: '/(.*)',
+        headers: createSecureHeaders(),
+      },
+    ]
   },
 }

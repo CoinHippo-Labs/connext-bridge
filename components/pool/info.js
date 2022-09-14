@@ -51,7 +51,7 @@ export default ({
   const position_loading = selected && !no_pool && (!user_pools_data || pool_loading)
 
   return (
-    <div className="sm:min-h-full border border-blue-400 dark:border-blue-800 rounded-2xl shadow-2xl shadow-blue-200 dark:shadow-blue-600 p-6">
+    <div className="sm:min-h-full bg-slate-50 dark:bg-slate-900 bg-opacity-50 border-2 border-blue-400 dark:border-blue-800 rounded-2xl shadow-2xl shadow-blue-200 dark:shadow-blue-600 p-6">
       {pools_data ?
         <div className="flex flex-col space-y-8 lg:space-y-20 my-auto">
           <div className="grid sm:flex sm:items-center sm:justify-between sm:space-x-2 gap-2">

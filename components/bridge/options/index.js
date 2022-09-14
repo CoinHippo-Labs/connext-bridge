@@ -36,14 +36,14 @@ export default ({
       name: 'infiniteApprove',
       type: 'switch',
     },
-    /*{
+    {
       label: 'Slippage Tolerance',
       name: 'slippage',
       type: 'number',
       placeholder: '0.00',
       presets: [3.0, 2.0, 1.0],
       postfix: '%',
-    },*/
+    },
     {
       label: 'Bridge Path',
       name: 'forceSlow',
@@ -71,7 +71,7 @@ export default ({
         {applied ?
           <MdSettingsSuggest
             size={20}
-            className="text-green-600 hover:text-green-500 dark:text-white dark:hover:text-slate-100 mb-0.5"
+            className="text-green-600 hover:text-green-500 dark:text-slate-200 dark:hover:text-slate-100 mb-0.5"
           /> :
           <RiSettings3Line
             size={20}
@@ -218,19 +218,27 @@ export default ({
                         onChange={e => {
                           const regex = /^[0-9.\b]+$/
                           let value
+
                           if (e.target.value === '' || regex.test(e.target.value)) {
                             value = e.target.value
                           }
-                          value = ['slippage'].includes(f.name) && (value <= 0 || value > 100) ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
+
+                          value = ['slippage'].includes(f.name) && (value <= 0 || value > 100) ?
+                            DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
+                            value
 
                           console.log('[Options]', {
                             ...data,
-                            [`${f.name}`]: value && !isNaN(value) ? Number(value) : value,
+                            [`${f.name}`]: value && !isNaN(value) ?
+                              Number(value) :
+                              value,
                           })
 
                           setData({
                             ...data,
-                            [`${f.name}`]: value && !isNaN(value) ? Number(value) : value,
+                            [`${f.name}`]: value && !isNaN(value) ?
+                              Number(value) :
+                              value,
                           })
                         }}
                         onWheel={e => e.target.blur()}

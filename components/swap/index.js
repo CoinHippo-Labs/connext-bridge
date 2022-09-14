@@ -856,7 +856,7 @@ export default () => {
                             amount: origin === 'x' ? x_balance_amount : y_balance_amount,
                           })
                         }}
-                        className={`${disabled || typeof (origin === 'x' ? x_balance_amount : y_balance_amount) !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
+                        className={`${disabled || typeof (origin === 'x' ? x_balance_amount : y_balance_amount) !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-700 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
                       >
                         Max
                       </div>
@@ -894,7 +894,7 @@ export default () => {
                     })
                     getBalances(chain)
                   }}
-                  className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-500 dark:hover:shadow-white flex items-center justify-center p-2.5`}
+                  className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
                 >
                   <MdSwapVert size={32} />
                 </button>

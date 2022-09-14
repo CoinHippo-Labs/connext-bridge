@@ -95,7 +95,7 @@ export default ({ trigger }) => {
               href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${address}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center text-blue-500 dark:text-white mt-2.5"
+              className="flex items-center justify-center text-blue-500 dark:text-slate-200 mt-2.5"
             >
               <span className="font-semibold">
                 See more

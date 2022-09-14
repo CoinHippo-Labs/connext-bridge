@@ -24,7 +24,7 @@ export default ({
   symbol = symbol || contract_data?.symbol || asset_data?.symbol
 
   return chainId && asset && (
-    <div className={`flex items-center justify-center text-slate-600 dark:text-white text-xs space-x-1 ${className}`}>
+    <div className={`flex items-center justify-center text-slate-600 dark:text-slate-200 text-xs space-x-1 ${className}`}>
       {typeof amount === 'number' ?
         <>
           <span className="font-bold">

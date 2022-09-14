@@ -765,7 +765,7 @@ export default () => {
                     href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${destination_chain_data.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="min-w-max bg-slate-50 hover:bg-slate-100 dark:bg-black dark:hover:bg-slate-900 cursor-pointer rounded-lg shadow flex items-center text-blue-600 dark:text-white space-x-2 py-1.5 px-2"
+                    className="min-w-max bg-slate-50 hover:bg-slate-100 dark:bg-black dark:hover:bg-slate-900 cursor-pointer rounded-lg shadow flex items-center text-blue-600 dark:text-slate-200 space-x-2 py-1.5 px-2"
                   >
                     {destination_chain_data.image && (
                       <Image
@@ -790,20 +790,20 @@ export default () => {
                 <Options
                   disabled={disabled}
                   applied={!_.isEqual(
-                    Object.fromEntries(Object.entries(options).filter(([k, v]) => !['slippage'].includes(k))),
-                    Object.fromEntries(Object.entries(DEFAULT_OPTIONS).filter(([k, v]) => !['slippage'].includes(k))),
+                    Object.fromEntries(Object.entries(options).filter(([k, v]) => ![/*'slippage'*/].includes(k))),
+                    Object.fromEntries(Object.entries(DEFAULT_OPTIONS).filter(([k, v]) => ![/*'slippage'*/].includes(k))),
                   )}
                   initialData={options}
                   onChange={o => setOptions(o)}
                 />
               </div>
             </div>
-            <div className={`${checkSupport() && amount > 0 ? 'border-2 border-blue-400 dark:border-blue-800 shadow-2xl shadow-blue-200 dark:shadow-blue-600' : 'shadow dark:shadow-slate-400'} rounded-2xl space-y-6 pt-4 sm:pt-8 pb-3 sm:pb-6 px-3 sm:px-6`}>
+            <div className={`bg-slate-50 dark:bg-slate-900 bg-opacity-50 ${checkSupport() && amount > 0 ? 'border-2 border-blue-400 dark:border-blue-800 shadow-2xl shadow-blue-200 dark:shadow-blue-600' : 'shadow dark:shadow-slate-700'} rounded-2xl space-y-6 pt-4 sm:pt-8 pb-3 sm:pb-6 px-3 sm:px-6`}>
               <div className="space-y-2">
                 <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
                   <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start">
                     <div className="w-32 sm:w-48 flex sm:flex-col items-center justify-center space-x-1.5">
-                      <span className="text-slate-400 dark:text-white text-lg font-semibold text-center">
+                      <span className="text-slate-600 dark:text-slate-200 text-lg font-semibold text-center">
                         Origin
                       </span>
                       {/*<GasPrice
@@ -865,7 +865,7 @@ export default () => {
                         getBalances(source_chain)
                         getBalances(destination_chain)
                       }}
-                      className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-500 dark:hover:shadow-white flex items-center justify-center p-2.5`}
+                      className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
                     >
                       <div className="flex sm:hidden">
                         <Image
@@ -887,7 +887,7 @@ export default () => {
                   </div>
                   <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end">
                     <div className="w-32 sm:w-48 flex sm:flex-col items-center justify-center space-x-1.5">
-                      <span className="text-slate-400 dark:text-white text-lg font-semibold text-center">
+                      <span className="text-slate-600 dark:text-slate-200 text-lg font-semibold text-center">
                         Destination
                       </span>
                       {/*<GasPrice
@@ -938,7 +938,7 @@ export default () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="text-slate-400 dark:text-white text-lg font-semibold sm:ml-3">
+                  <div className="text-slate-600 dark:text-slate-200 text-lg font-semibold sm:ml-3">
                     Asset
                   </div>
                   <SelectBridgeAsset
@@ -966,7 +966,7 @@ export default () => {
                 <div className="grid grid-cols-5 sm:grid-cols-5 gap-6 sm:ml-3">
                   <div className="col-span-2 sm:col-span-2 space-y-1">
                     <div className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
-                      <span className="text-slate-400 dark:text-white text-sm sm:text-base sm:font-semibold">
+                      <span className="text-slate-600 dark:text-slate-200 text-sm sm:text-base sm:font-semibold">
                         Amount
                       </span>
                       {address && checkSupport() && source_balance && (
@@ -1057,7 +1057,7 @@ export default () => {
                               </span>
                             </div>
                           </div>}
-                          className="bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg shadow dark:shadow-slate-500 text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
+                          className="bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg shadow dark:shadow-slate-700 text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
                           titleClassName="normal-case py-1.5"
                         >
                           Max
@@ -1112,15 +1112,15 @@ export default () => {
               }
               {checkSupport() && (web3_provider || amount > 0) && (
                 <>
-                  <div className="space-y-2">
-                    <div className="text-slate-400 dark:text-slate-600 font-medium sm:mx-3">
+                  {/*<div className="space-y-2">
+                    <div className="text-slate-400 dark:text-slate-600 font-normal sm:mx-3">
                       Transfer Details
                     </div>
                     <div className="w-full h-0.25 bg-slate-100 dark:bg-slate-700 sm:px-1" />
                     <div className="space-y-2.5 sm:mx-3">
                       {!receiveLocal && (
                         <div className="flex items-center justify-between space-x-1">
-                          <div className="text-slate-600 dark:text-white font-medium">
+                          <div className="text-slate-600 dark:text-slate-200 font-medium">
                             Slippage Tolerance
                           </div>
                           <div className="flex flex-col sm:items-end space-y-1.5">
@@ -1223,7 +1223,7 @@ export default () => {
                         </div>
                       )}
                       <div className="flex items-center justify-between space-x-2">
-                        <div className="text-slate-600 dark:text-white font-medium">
+                        <div className="text-slate-600 dark:text-slate-200 font-medium">
                           Infinite Approval
                         </div>
                         <Switch
@@ -1256,11 +1256,11 @@ export default () => {
                         />
                       </div>
                     </div>
-                  </div>
+                  </div>*/}
                   {(feeEstimating || fee) && (
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2 sm:mx-3">
-                        <span className="text-slate-400 dark:text-slate-600 font-medium">
+                        <span className="text-slate-400 dark:text-slate-600 font-normal">
                           Fees Breakdown
                         </span>
                         {/*feeEstimateCooldown > 0 && (
@@ -1269,12 +1269,12 @@ export default () => {
                           </div>
                         )*/}
                       </div>
-                      <div className="w-full h-0.25 bg-slate-100 dark:bg-slate-700 sm:px-1" />
+                      <div className="w-full h-0.25 bg-slate-100 dark:bg-slate-800 sm:px-1" />
                       <div className="space-y-2.5 sm:mx-3">
                         {!forceSlow && (
                           <>
                             <div className="flex items-center justify-between space-x-1">
-                              <div className="text-slate-600 dark:text-white font-medium">
+                              <div className="text-slate-600 dark:text-slate-200 font-medium">
                                 Bridge Fee
                               </div>
                               <span className="whitespace-nowrap text-xs font-semibold">
@@ -1286,12 +1286,12 @@ export default () => {
                               </span>
                             </div>
                             <div className="flex items-center justify-between space-x-1">
-                              <div className="text-slate-600 dark:text-white font-medium">
+                              <div className="text-slate-600 dark:text-slate-200 font-medium">
                                 Gas Fee
                               </div>
                               {feeEstimating ?
                                 <div className="flex items-center space-x-1.5">
-                                  <span className="text-slate-600 dark:text-white font-medium">
+                                  <span className="text-slate-600 dark:text-slate-200 font-medium">
                                     estimating
                                   </span>
                                   <Oval color={loader_color(theme)} width="20" height="20" />
@@ -1308,7 +1308,7 @@ export default () => {
                           </>
                         )}
                         {/*<div className="flex items-start justify-between space-x-1">
-                          <div className="text-slate-600 dark:text-white font-medium">
+                          <div className="text-slate-600 dark:text-slate-200 font-medium">
                             Total
                           </div>
                           <div className="space-y-1">
@@ -1325,7 +1325,7 @@ export default () => {
                               }
                             </span>
                             {total_fee > 0 && typeof source_asset_data?.price === 'number' && (
-                              <div className="font-mono text-red-500 text-xs font-semibold text-right">
+                              <div className="text-red-500 text-xs font-semibold text-right">
                                 ({currency_symbol}
                                 {number_format(
                                   total_fee * source_asset_data.price,
@@ -1466,7 +1466,7 @@ export default () => {
                                   className="rounded-full"
                                 />
                               )}
-                              <span className="text-slate-400 dark:text-white font-semibold">
+                              <span className="text-slate-400 dark:text-slate-200 font-semibold">
                                 {chainName(source_chain_data)}
                               </span>
                             </div>
@@ -1490,13 +1490,13 @@ export default () => {
                                   className="rounded-full"
                                 />
                               )}
-                              <span className="text-slate-400 dark:text-white font-semibold">
+                              <span className="text-slate-400 dark:text-slate-200 font-semibold">
                                 {chainName(destination_chain_data)}
                               </span>
                             </div>
                           </div>
                           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base">
+                            <div className="flex items-center text-slate-400 dark:text-slate-200 text-lg md:text-sm lg:text-base">
                               Recipient Address
                               <span className="hidden sm:block">:</span>
                             </div>
@@ -1519,7 +1519,7 @@ export default () => {
                             />
                           </div>
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
+                            <div className="flex items-center text-slate-400 dark:text-slate-200 text-lg md:text-sm lg:text-base mt-0.5">
                               Amount
                               <span className="hidden sm:block">:</span>
                             </div>
@@ -1537,7 +1537,7 @@ export default () => {
                                 </span>
                               </div>
                               {amount && typeof source_asset_data?.price === 'number' && (
-                                <div className="font-mono text-blue-500 sm:text-right">
+                                <div className="text-blue-500 sm:text-right">
                                   (
                                   {currency_symbol}
                                   {number_format(
@@ -1551,7 +1551,7 @@ export default () => {
                           </div>
                           {!receiveLocal && (
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                              <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
+                              <div className="flex items-center text-slate-400 dark:text-slate-200 text-lg md:text-sm lg:text-base mt-0.5">
                                 Slippage Tolerance
                                 <span className="hidden sm:block">:</span>
                               </div>
@@ -1655,7 +1655,7 @@ export default () => {
                             </div>
                           )}
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
+                            <div className="flex items-center text-slate-400 dark:text-slate-200 text-lg md:text-sm lg:text-base mt-0.5">
                               Infinite Approval
                               <span className="hidden sm:block">:</span>
                             </div>
@@ -1684,7 +1684,7 @@ export default () => {
                             />
                           </div>
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                            <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base mt-0.5">
+                            <div className="flex items-center text-slate-400 dark:text-slate-200 text-lg md:text-sm lg:text-base mt-0.5">
                               Bridge Path
                               <span className="hidden sm:block">:</span>
                             </div>
@@ -1741,7 +1741,7 @@ export default () => {
                           </div>
                           {fee && (
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2.5">
-                              <div className="flex items-center text-slate-400 dark:text-white text-lg md:text-sm lg:text-base">
+                              <div className="flex items-center text-slate-400 dark:text-slate-200 text-lg md:text-sm lg:text-base">
                                 Bridge Fee
                                 <span className="hidden sm:block">:</span>
                               </div>
@@ -1766,7 +1766,7 @@ export default () => {
                                   }
                                 </div>
                                 {router_fee > 0 && typeof source_asset_data?.price === 'number' && (
-                                  <div className="font-mono text-red-500 sm:text-right">
+                                  <div className="text-red-500 sm:text-right">
                                     (
                                     {currency_symbol}
                                     {number_format(

@@ -62,10 +62,16 @@ export default ({ data }) => {
           value={transfer_id}
           title={<span className="cursor-pointer text-slate-700 dark:text-slate-300 text-sm font-bold">
             <span className="sm:hidden">
-              {ellipse(transfer_id, 12)}
+              {ellipse(
+                transfer_id,
+                12,
+              )}
             </span>
             <span className="hidden sm:block">
-              {ellipse(transfer_id, 8)}
+              {ellipse(
+                transfer_id,
+                8,
+              )}
             </span>
           </span>}
           size={18}
@@ -203,7 +209,10 @@ export default ({ data }) => {
               </span>
               {destination_asset_data && (
                 <AddToken
-                  token_data={{ ...destination_asset_data, ...destination_contract_data }}
+                  token_data={{
+                    ...destination_asset_data,
+                    ...destination_contract_data,
+                  }}
                 />
               )}
             </div>
@@ -222,10 +231,16 @@ export default ({ data }) => {
                 value={to}
                 title={<span className="text-slate-400 dark:text-white text-sm">
                   <span className="sm:hidden">
-                    {ellipse(to, 12)}
+                    {ellipse(
+                      to,
+                      12,
+                    )}
                   </span>
                   <span className="hidden sm:block">
-                    {ellipse(to, 8)}
+                    {ellipse(
+                      to,
+                      8,
+                    )}
                   </span>
                 </span>}
                 size={18}
