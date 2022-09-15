@@ -111,7 +111,7 @@ export default ({
             Connect wallet to
           </span>
         )}
-        <span className="font-bold">
+        <span className="uppercase tracking-wider font-medium">
           Faucet
         </span>
         {collapse ?

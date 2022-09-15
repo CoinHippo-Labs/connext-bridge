@@ -88,7 +88,7 @@ export default ({
             className="form-element"
           >
             {f.label && (
-              <div className="form-label text-slate-600 dark:text-slate-400 font-medium">
+              <div className="form-label text-slate-800 dark:text-slate-200 font-medium">
                 {f.label}
               </div>
             )}

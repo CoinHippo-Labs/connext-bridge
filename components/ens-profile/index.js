@@ -58,7 +58,7 @@ export default ({
   const ens_name = ens_data?.[address]?.name && (
     <span
       title={ens_data[address].name}
-      className="normal-case text-black dark:text-white text-base font-semibold"
+      className="normal-case tracking-wider text-black dark:text-white text-base font-medium"
     >
       <span className="xl:hidden">
         {ellipse(ens_data[address].name, 12)}

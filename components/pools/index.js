@@ -106,7 +106,7 @@ export default () => {
         <div className="w-full flex flex-col space-y-8 my-6 my-4 sm:my-6 mx-1 sm:mx-4">
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="flex flex-col space-y-4">
-              <h1 className="text-2xl font-bold">
+              <h1 className="uppercase tracking-widest text-2xl font-medium">
                 Add Liquidity
               </h1>
               <div className="flex items-center space-x-0.5">

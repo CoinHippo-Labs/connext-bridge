@@ -725,7 +725,7 @@ export default () => {
         </div>
         <div className="w-full flex flex-col space-y-4 my-2 sm:my-4 mx-1 sm:mx-4">
           <div className="flex items-center justify-between space-x-2">
-            <h1 className="text-2xl font-bold">
+            <h1 className="uppercase tracking-widest text-2xl font-medium">
               Swap
             </h1>
             <Options
@@ -738,11 +738,11 @@ export default () => {
               onChange={o => setOptions(o)}
             />
           </div>
-          <div className={`${valid_amount ? 'border-2 border-blue-400 dark:border-blue-800 shadow-2xl shadow-blue-200 dark:shadow-blue-600' : 'shadow dark:shadow-slate-400'} rounded-2xl flex flex-col items-center space-y-6 py-8 px-6`}>
+          <div className={`${valid_amount ? 'border-2 border-blue-400 dark:border-blue-800 shadow-2xl shadow-blue-200 dark:shadow-blue-600' : 'shadow dark:shadow-slate-400'} rounded-2xl flex flex-col items-center space-y-6 py-10 px-6`}>
             <div className="w-full space-y-5">
               <div className="bg-slate-50 dark:bg-slate-900 rounded-xl space-y-2 sm:space-y-0 p-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400 dark:text-slate-600 text-sm font-bold">
+                  <span className="text-slate-400 dark:text-slate-600 text-sm font-medium">
                     From
                   </span>
                   {web3_provider && (origin === 'x' ? x_asset_data : y_asset_data) && (
@@ -901,7 +901,7 @@ export default () => {
               </div>
               <div className="bg-slate-50 dark:bg-slate-900 rounded-xl space-y-2 sm:space-y-0 p-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400 dark:text-slate-600 text-sm font-bold">
+                  <span className="text-slate-400 dark:text-slate-600 text-sm font-medium">
                     To
                   </span>
                   {web3_provider && (origin === 'x' ? y_asset_data : x_asset_data) && (

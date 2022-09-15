@@ -283,7 +283,7 @@ export default () => {
                 <RiArrowLeftCircleFill size={36} />
               </a>
             </Link>
-            <h1 className="text-2xl font-bold">
+            <h1 className="uppercase tracking-widest text-2xl font-medium">
               Manage Pool
             </h1>
           </div>

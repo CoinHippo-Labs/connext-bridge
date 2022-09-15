@@ -2,7 +2,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import moment from 'moment'
 import { BigNumber, utils } from 'ethers'
 import { XTransferStatus } from '@connext/nxtp-utils'
-import { Bars, RotatingSquare } from 'react-loader-spinner'
+import { Vortex, RotatingSquare } from 'react-loader-spinner'
 import LightSpeed from 'react-reveal/LightSpeed'
 import { TiArrowRight } from 'react-icons/ti'
 import { HiCheckCircle } from 'react-icons/hi'
@@ -56,39 +56,24 @@ export default ({ data }) => {
   const pending = ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(status)
 
   return data && (
-    <div className={`max-w-xs sm:max-w-none rounded-xl ${pending ? 'border-2 border-blue-500 shadow shadow-blue-500' : 'border-2 border-green-500 shadow shadow-green-500'} mx-auto p-4`}>
-      <div className="flex items-center justify-between space-x-2">
-        <Copy
-          value={transfer_id}
-          title={<span className="cursor-pointer text-slate-700 dark:text-slate-300 text-sm font-bold">
-            <span className="sm:hidden">
-              {ellipse(
-                transfer_id,
-                12,
-              )}
-            </span>
-            <span className="hidden sm:block">
-              {ellipse(
-                transfer_id,
-                8,
-              )}
-            </span>
-          </span>}
-          size={18}
-        />
+    <div className={`max-w-xs sm:max-w-none rounded-lg ${pending ? 'border border-blue-500 shadow shadow-blue-500' : 'border border-green-400 shadow shadow-green-600'} mx-auto py-5 px-4`}>
+      <div className="flex items-center justify-end -mt-2">
         <a
           href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/tx/${transfer_id}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-500 dark:text-white"
+          className="flex items-center text-blue-500 dark:text-blue-500 space-x-0.5 -mr-2"
         >
+          <span>
+            See more on explorer
+          </span>
           <TiArrowRight
             size={20}
-            className="transform -rotate-45"
+            className="transform -rotate-45 mt-0.5"
           />
         </a>
       </div>
-      <div className="flex items-start justify-between space-x-2 mt-3">
+      <div className="flex items-start justify-between space-x-2 mt-2">
         <div className="flex items-center space-x-1">
           {source_chain_data?.image && (
             <Image
@@ -168,10 +153,10 @@ export default ({ data }) => {
             >
               <HiCheckCircle
                 size={36}
-                className="rounded-full shadow dark:shadow-white text-green-400 dark:text-green-200"
+                className="rounded-full shadow-inner dark:shadow-white text-green-400 dark:text-green-200"
               />
             </a> :
-            <Bars
+            <Vortex
               color={loader_color('light')}
               width="32"
               height="32"

@@ -750,11 +750,11 @@ export default () => {
           <div className="w-full max-w-lg space-y-4">
             <div className="flex items-center justify-between space-x-2">
               <div className="space-y-1">
-                <h1 className="text-base sm:text-lg font-bold">
+                <h1 className="uppercase tracking-widest text-base sm:text-xl font-normal">
                   Cross-Chain Transfer
                 </h1>
                 {asPath?.includes('from-') && asPath.includes('to-') && headMeta?.title && (
-                  <h2 className="text-slate-400 dark:text-slate-500 text-xs sm:text-sm">
+                  <h2 className="tracking-wider text-slate-400 dark:text-slate-500 text-xs sm:text-sm">
                     {headMeta.title.replace(' with Connext', '')}
                   </h2>
                 )}
@@ -777,12 +777,12 @@ export default () => {
                       />
                     )}
                     <div className="flex items-center">
-                      <span className="text-base font-semibold">
+                      <span className="tracking-wider text-base font-medium">
                         Liquidity
                       </span>
                       <TiArrowRight
                         size={20}
-                        className="transform -rotate-45 -mr-1"
+                        className="transform -rotate-45 mt-0.5 -mr-1"
                       />
                     </div>
                   </a>
@@ -798,12 +798,12 @@ export default () => {
                 />
               </div>
             </div>
-            <div className={`bg-slate-50 dark:bg-slate-900 bg-opacity-50 ${checkSupport() && amount > 0 ? 'border-2 border-blue-400 dark:border-blue-800 shadow-2xl shadow-blue-200 dark:shadow-blue-600' : 'shadow dark:shadow-slate-700'} rounded-2xl space-y-6 pt-4 sm:pt-8 pb-3 sm:pb-6 px-3 sm:px-6`}>
+            <div className={`bg-zinc-50 dark:bg-slate-900 bg-opacity-50 ${checkSupport() && amount > 0 ? 'border-0 border-blue-400 dark:border-blue-800 shadow-2xl shadow-blue-400 dark:shadow-blue-600' : 'shadow-inner shadow-slate-200 dark:shadow-slate-700'} rounded-3xl space-y-6 pt-4 sm:pt-10 pb-3 sm:pb-8 px-3 sm:px-6`}>
               <div className="space-y-2">
                 <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
                   <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start">
                     <div className="w-32 sm:w-48 flex sm:flex-col items-center justify-center space-x-1.5">
-                      <span className="text-slate-600 dark:text-slate-200 text-lg font-semibold text-center">
+                      <span className="tracking-wider text-slate-600 dark:text-slate-200 text-lg font-medium text-center">
                         Origin
                       </span>
                       {/*<GasPrice
@@ -887,7 +887,7 @@ export default () => {
                   </div>
                   <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end">
                     <div className="w-32 sm:w-48 flex sm:flex-col items-center justify-center space-x-1.5">
-                      <span className="text-slate-600 dark:text-slate-200 text-lg font-semibold text-center">
+                      <span className="tracking-wider text-slate-600 dark:text-slate-200 text-lg font-medium text-center">
                         Destination
                       </span>
                       {/*<GasPrice
@@ -938,7 +938,7 @@ export default () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="text-slate-600 dark:text-slate-200 text-lg font-semibold sm:ml-3">
+                  <div className="tracking-wider text-slate-600 dark:text-slate-200 text-lg font-medium sm:ml-3">
                     Asset
                   </div>
                   <SelectBridgeAsset
@@ -966,7 +966,7 @@ export default () => {
                 <div className="grid grid-cols-5 sm:grid-cols-5 gap-6 sm:ml-3">
                   <div className="col-span-2 sm:col-span-2 space-y-1">
                     <div className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
-                      <span className="text-slate-600 dark:text-slate-200 text-sm sm:text-base sm:font-semibold">
+                      <span className="tracking-wider text-slate-600 dark:text-slate-200 text-sm sm:text-base sm:font-medium">
                         Amount
                       </span>
                       {address && checkSupport() && source_balance && (
@@ -1274,10 +1274,10 @@ export default () => {
                         {!forceSlow && (
                           <>
                             <div className="flex items-center justify-between space-x-1">
-                              <div className="text-slate-600 dark:text-slate-200 font-medium">
+                              <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
                                 Bridge Fee
                               </div>
-                              <span className="whitespace-nowrap text-xs font-semibold">
+                              <span className="whitespace-nowrap tracking-wider text-xs font-semibold">
                                 {number_format(
                                   router_fee,
                                   '0,0.000000',
@@ -1286,17 +1286,17 @@ export default () => {
                               </span>
                             </div>
                             <div className="flex items-center justify-between space-x-1">
-                              <div className="text-slate-600 dark:text-slate-200 font-medium">
+                              <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
                                 Gas Fee
                               </div>
                               {feeEstimating ?
                                 <div className="flex items-center space-x-1.5">
-                                  <span className="text-slate-600 dark:text-slate-200 font-medium">
+                                  <span className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
                                     estimating
                                   </span>
                                   <Oval color={loader_color(theme)} width="20" height="20" />
                                 </div> :
-                                <span className="whitespace-nowrap text-xs font-semibold">
+                                <span className="whitespace-nowrap tracking-wider text-xs font-semibold">
                                   {number_format(
                                     gas_fee,
                                     '0,0.000000',

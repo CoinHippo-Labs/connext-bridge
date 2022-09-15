@@ -30,7 +30,7 @@
     }
     @apply bg-slate-50 border-slate-50;
     [data-background="dark"] & {
-      @apply bg-slate-800 border-slate-800 text-white;
+      @apply bg-slate-800 border-slate-800 bg-opacity-50 text-white;
       &::placeholder {
         color: #6B7280;/*theme('colors.white');*/
       }
