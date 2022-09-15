@@ -17,7 +17,8 @@
         "decimals": 18,
         "symbol": "TEST"
       }
-    ]
+    ],
+    "color": "#2675C8"
   },
   {
     "id": "eth",
@@ -39,6 +40,7 @@
         "is_pool": true
       }
     ],
+    "color": "#2E3130",
     "preset": true
   }
 ]
