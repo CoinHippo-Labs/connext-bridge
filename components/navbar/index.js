@@ -377,58 +377,76 @@ export default () => {
             contract_address,
           } = { ...contract_data }
 
-          try {
-            const pool = await sdk.nxtpSdkPool.getPool(
-              domain_id,
-              contract_address,
-            )
-            const {
-              symbol,
-              decimals,
-            } = { ...pool }
+          if (contract_address) {
+            try {
+              console.log(
+                '[getPool]',
+                {
+                  domain_id,
+                  contract_address,
+                }
+              )
 
-            const symbols = symbol?.split('-') || []
-
-            const stats = pool &&
-              await sdk.nxtpSdkPool.getPoolStats(
+              const pool = await sdk.nxtpSdkPool.getPool(
                 domain_id,
                 contract_address,
               )
+              const {
+                symbol,
+                decimals,
+              } = { ...pool }
 
-            const canonicals = pool &&
-              await sdk.nxtpSdkPool.getCanonicalFromLocal(
-                domain_id,
-                contract_address,
-              )
+              const symbols = symbol?.split('-') || []
 
-            const canonicalDomain = canonicals?.[0],
-              canonicalId = canonicals?.[1]
-
-            const rate = pool &&
-              await sdk.nxtpSdkPool.getVirtualPrice(
-                domain_id,
-                canonicalId,
-              )
-
-            data.push({
-              ...pool,
-              ...stats,
-              id: `${chain_data.id}_${asset_data.id}`,
-              chain_id,
-              chain_data,
-              asset_data,
-              contract_data,
-              symbols,
-              rate: Number(
-                utils.formatUnits(
-                  BigNumber.from(rate || '0'),
-                  _.last(decimals) || 18,
+              const stats = pool &&
+                await sdk.nxtpSdkPool.getPoolStats(
+                  domain_id,
+                  contract_address,
                 )
-              ),
-            })
-          } catch (error) {}
-        }
 
+              const canonicals = pool &&
+                await sdk.nxtpSdkPool.getCanonicalFromLocal(
+                  domain_id,
+                  contract_address,
+                )
+
+              const canonicalDomain = canonicals?.[0],
+                canonicalId = canonicals?.[1]
+
+              const rate = pool &&
+                await sdk.nxtpSdkPool.getVirtualPrice(
+                  domain_id,
+                  canonicalId,
+                )
+
+              data.push({
+                ...pool,
+                ...stats,
+                id: `${chain_data.id}_${asset_data.id}`,
+                chain_id,
+                chain_data,
+                asset_data,
+                contract_data,
+                symbols,
+                rate: Number(
+                  utils.formatUnits(
+                    BigNumber.from(rate || '0'),
+                    _.last(decimals) || 18,
+                  )
+                ),
+              })
+            } catch (error) {
+              console.log(
+                '[ERROR getPool]',
+                {
+                  domain_id,
+                  contract_address,
+                },
+                error,
+              )
+            }
+          }
+        }
 
         dispatch({
           type: POOLS_DATA,
