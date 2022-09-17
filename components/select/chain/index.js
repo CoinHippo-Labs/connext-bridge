@@ -103,8 +103,8 @@ export default ({
         />
       }
       buttonClassName={`w-32 sm:w-48 min-w-max h-10 sm:h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
-      title={<span className="flex items-center space-x-1">
-        <span className="capitalize">
+      title={<span className="flex items-center uppercase space-x-1">
+        <span>
           {origin}
         </span>
         <span>
