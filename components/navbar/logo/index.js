@@ -2,9 +2,9 @@ import Image from '../../image'
 
 export default () => {
   return (
-    <div className="logo ml-3 mr-1 sm:mr-3">
+    <div className="logo ml-3 mr-0.5 sm:mr-3">
       <a
-        title="cross-chain bridge"
+        title="Cross-Chain Bridge"
         href={process.env.NEXT_PUBLIC_MAIN_URL}
         target="_blank"
         rel="noopener noreferrer"

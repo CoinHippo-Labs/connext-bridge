@@ -9,7 +9,9 @@ export default [
     id: 'bridge',
     title: 'Bridge',
     path: '/',
-    others_paths: ['/[bridge]'],
+    others_paths: [
+      '/[bridge]',
+    ],
     icon: (
       <CgArrowRightR
         size={20}
@@ -21,7 +23,10 @@ export default [
     id: 'pools',
     title: 'Pools',
     path: '/pools',
-    others_paths: ['/pool', '/pool/[pool]'],
+    others_paths: [
+      '/pool',
+      '/pool/[pool]',
+    ],
     icon: (
       <RiCopperCoinLine
         size={20}
@@ -33,7 +38,9 @@ export default [
     id: 'swap',
     title: 'Swap',
     path: '/swap',
-    others_paths: ['/swap/[swap]'],
+    others_paths: [
+      '/swap/[swap]',
+    ],
     icon: (
       <MdSwapHoriz
         size={20}

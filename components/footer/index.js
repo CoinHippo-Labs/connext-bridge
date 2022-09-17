@@ -7,15 +7,32 @@ import Image from '../image'
 import _package from '../../package.json'
 
 export default () => {
-  const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
-  const { theme } = { ...preferences }
+  const {
+    preferences,
+  } = useSelector(state =>
+    (
+      {
+        preferences: state.preferences,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    theme,
+  } = { ...preferences }
+
+  const {
+    dependencies,
+  } = { ..._package }
 
   return (
-    <div className={`footer flex flex-col md:flex-row items-center text-xs space-y-2 sm:space-y-0 p-3 ${theme}`}>
-      <div className="w-full md:w-1/2 lg:w-1/3 min-w-max flex items-center justify-center md:justify-start font-medium space-x-1.5">
-        <span>Built with</span>
+    <div className={`${theme} footer flex flex-col md:flex-row items-center space-y-2.5 sm:space-y-0 p-3`}>
+      <div className="w-full md:w-1/2 lg:w-1/3 min-w-max flex items-center justify-center md:justify-start space-x-2">
+        <span>
+          Built with
+        </span>
         <a
-          title="build cross-chain apps"
+          title="Build Cross-Chain Apps"
           href={process.env.NEXT_PUBLIC_PROTOCOL_URL}
           target="_blank"
           rel="noopener noreferrer"
@@ -24,27 +41,34 @@ export default () => {
           <div className="min-w-max">
             <div className="flex dark:hidden items-center">
               <Image
-                src="/logos/externals/connext/logo.png"
+                src="/logos/logo.png"
                 alt=""
-                width={16}
-                height={16}
+                width={20}
+                height={20}
               />
             </div>
             <div className="hidden dark:flex items-center">
               <Image
-                src="/logos/externals/connext/logo_white.png"
+                src="/logos/logo_white.png"
                 alt=""
-                width={16}
-                height={16}
+                width={20}
+                height={20}
               />
             </div>
           </div>
-          <span>Connext Protocol</span>
-        </a>
-        {_package?.dependencies?.['@connext/nxtp-sdk'] && (
-          <span className="text-slate-400 dark:text-white font-semibold">
-            (SDK v{_package.dependencies['@connext/nxtp-sdk'].replace('^', '')})
+          <span>
+            Connext Protocol
           </span>
+        </a>
+        {dependencies?.['@connext/nxtp-sdk'] && (
+          <a
+            href="https://github.com/connext/nxtp"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 dark:text-white text-xs font-medium"
+          >
+            SDK v{dependencies['@connext/nxtp-sdk'].replace('^', '')}
+          </a>
         )}
       </div>
       <div className="hidden lg:flex w-full lg:w-1/3 flex-wrap items-center justify-center space-x-2">
@@ -124,15 +148,19 @@ export default () => {
         )}
       </div>
       <div className="w-full md:w-1/2 lg:w-1/3 min-w-max flex items-center justify-center md:justify-end text-slate-400 dark:text-white space-x-1">
-        <span>© {moment().format('YYYY')} made with</span>
-        <FaHeart className="text-red-400 text-xl pr-0.5" />
+        <span>
+          © {moment().format('YYYY')} made with
+        </span>
+        <FaHeart
+          className="text-red-400 text-xl pr-0.5"
+        />
         <span>
           {"by "}
           <a
             href={process.env.NEXT_PUBLIC_TEAM_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 dark:text-white font-semibold"
+            className="text-blue-600 dark:text-white font-semibold"
           >
             {process.env.NEXT_PUBLIC_TEAM_NAME}
           </a>

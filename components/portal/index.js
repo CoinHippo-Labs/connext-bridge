@@ -11,9 +11,13 @@ export default ({
 
   useEffect(() => {
     ref.current = document.querySelector(selector)
+
     setMounted(true)
   }, [selector])
 
   return mounted &&
-    createPortal(children, ref.current)
+    createPortal(
+      children,
+      ref.current,
+    )
 }

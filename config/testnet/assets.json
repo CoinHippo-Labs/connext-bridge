@@ -24,7 +24,7 @@
         "symbol": "TEST"
       }
     ],
-    "color": "#2675C8"
+    "color": "#2675c8"
   },
   {
     "id": "eth",
@@ -52,7 +52,7 @@
         "is_pool": true
       }
     ],
-    "color": "#2E3130",
+    "color": "#2e3130",
     "preset": true
   }
 ]

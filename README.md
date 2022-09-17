@@ -5,9 +5,6 @@ Connext Bridge is a bridge app built on top of [Connext's NXTP Protocol](https:/
 - mainnet: [https://bridge.connext.network](https://bridge.connext.network)
 - testnet: [https://testnet.bridge.connext.network](https://testnet.bridge.connext.network)
 
-## Stacks
-- [Next.js](https://nextjs.org)
-
 ### Prerequisites
 node >= 16.0.0
 

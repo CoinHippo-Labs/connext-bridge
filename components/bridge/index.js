@@ -798,7 +798,7 @@ export default () => {
                 />
               </div>
             </div>
-            <div className={`bg-zinc-50 dark:bg-slate-900 bg-opacity-50 ${checkSupport() && amount > 0 ? 'border-0 border-blue-400 dark:border-blue-800 shadow-2xl shadow-blue-400 dark:shadow-blue-600' : 'shadow-inner shadow-slate-200 dark:shadow-slate-700'} rounded-3xl space-y-6 pt-4 sm:pt-10 pb-3 sm:pb-8 px-3 sm:px-6`}>
+            <div className={`bg-slate-200 dark:bg-slate-900 bg-opacity-50 ${checkSupport() && amount > 0 ? 'border-0 border-blue-400 dark:border-blue-800 shadow-2xl shadow-blue-400 dark:shadow-blue-600' : 'shadow shadow-slate-200 dark:shadow-slate-700'} rounded-3xl space-y-6 pt-4 sm:pt-10 pb-3 sm:pb-8 px-3 sm:px-6`}>
               <div className="space-y-2">
                 <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
                   <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start">
@@ -865,7 +865,7 @@ export default () => {
                         getBalances(source_chain)
                         getBalances(destination_chain)
                       }}
-                      className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
+                      className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out bg-slate-50 dark:bg-slate-900 ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
                     >
                       <div className="flex sm:hidden">
                         <Image

@@ -11,8 +11,19 @@ export default ({
   dummy,
   className = '',
 }) => {
-  const { rpc_providers } = useSelector(state => ({ rpc_providers: state.rpc_providers }), shallowEqual)
-  const { rpcs } = { ...rpc_providers }
+  const {
+    rpc_providers,
+  } = useSelector(state =>
+    (
+      {
+        rpc_providers: state.rpc_providers,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    rpcs,
+  } = { ...rpc_providers }
 
   const [gasPrice, setGasPrice] = useState(null)
 
@@ -22,9 +33,18 @@ export default ({
         if (!is_interval) {
           setGasPrice(null)
         }
-        const rpc = rpcs[chainId]
+
+        const provider = rpcs[chainId]
+
         try {
-          setGasPrice(Number(utils.formatUnits(await rpc.getGasPrice(), 'gwei')))
+          setGasPrice(
+            Number(
+              utils.formatUnits(
+                await provider.getGasPrice(),
+                'gwei',
+              )
+            )
+          )
         } catch (error) {
           if (!gasPrice) {
             setGasPrice('')
@@ -32,22 +52,29 @@ export default ({
         }
       }
     }
+
     getData()
-    const interval = setInterval(() => getData(true), 0.5 * 60 * 1000)
-    return () => {
-      clearInterval(interval)
-    }
+
+    const interval = setInterval(() =>
+      getData(true),
+      0.5 * 60 * 1000,
+    )
+
+    return () => clearInterval(interval)
   }, [chainId, rpcs])
 
   return chainId ?
-    <div className={`flex items-center justify-center text-blue-400 dark:text-blue-500 space-x-1 ${className}`}>
-      <MdLocalGasStation size={20} />
+    <div className={`flex items-center justify-center text-blue-500 dark:text-blue-500 space-x-1 ${className}`}>
+      <MdLocalGasStation
+        size={20}
+      />
       {typeof gasPrice === 'number' ?
         <>
           <span className="font-semibold">
             {number_format(
               gasPrice,
               '0,0',
+              true,
             )}
           </span>
           <span className="font-medium">

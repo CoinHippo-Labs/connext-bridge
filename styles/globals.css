@@ -268,3 +268,13 @@ a {
     }
   }
 }
+
+.backdrop-blur-8 {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.backdrop-blur-16 {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}

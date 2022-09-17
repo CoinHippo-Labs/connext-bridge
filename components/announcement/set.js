@@ -6,10 +6,27 @@ import { ANNOUNCEMENT_DATA } from '../../reducers/types'
 
 export default () => {
   const dispatch = useDispatch()
-  const { announcement, wallet } = useSelector(state => ({ announcement: state.announcement, wallet: state.wallet }), shallowEqual)
-  const { announcement_data } = { ...announcement }
-  const { wallet_data } = { ...wallet }
-  const { address } = { ...wallet_data }
+  const {
+    announcement,
+    wallet,
+  } = useSelector(state =>
+    (
+      {
+        announcement: state.announcement,
+        wallet: state.wallet,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    announcement_data,
+  } = { ...announcement }
+  const {
+    wallet_data,
+  } = { ...wallet }
+  const {
+    address,
+  } = { ...wallet_data }
 
   const [updating, setUpdating] = useState(null)
   const [data, setData] = useState('')
@@ -22,20 +39,25 @@ export default () => {
 
   const update = async () => {
     setUpdating(true)
+
     await setAnnouncement(
       {
-        data: data?.trim().split('\n').join('<br>'),
+        data: (data || '')
+          .trim()
+          .split('\n')
+          .join('<br>'),
       },
       address && {
         username: new URL(process.env.NEXT_PUBLIC_SITE_URL)?.hostname,
         password: address,
-      }
+      },
     )
-    const response = await getAnnouncement()
+
     dispatch({
       type: ANNOUNCEMENT_DATA,
-      value: response,
+      value: await getAnnouncement(),
     })
+
     setUpdating(false)
   }
 

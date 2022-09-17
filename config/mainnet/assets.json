@@ -97,7 +97,7 @@
         "decimals": 6
       }
     ],
-    "color": "#23A47B",
+    "color": "#23a47b",
     "preset": true
   },
   {
@@ -197,7 +197,7 @@
         "decimals": 6
       }
     ],
-    "color": "#2675C8",
+    "color": "#2675c8",
     "preset": true
   },
   {
@@ -299,7 +299,7 @@
         "decimals": 18
       }
     ],
-    "color": "#FCAD19",
+    "color": "#fcad19",
     "preset": true
   },
   {
@@ -398,7 +398,7 @@
         "symbol": "WETH"
       }
     ],
-    "color": "#2E3130",
+    "color": "#2e3130",
     "preset": true
   },
   {
@@ -490,7 +490,7 @@
         "decimals": 8
       }
     ],
-    "color": "#EB9240",
+    "color": "#eb9240",
     "preset": true
   },
   {
@@ -531,7 +531,7 @@
         "decimals": 18
       }
     ],
-    "color": "#5040BA"
+    "color": "#5040ba"
   },
   {
     "id": "gno",
@@ -560,7 +560,7 @@
         "decimals": 18
       }
     ],
-    "color": "#06101C"
+    "color": "#06101c"
   },
   {
     "id": "fei",
@@ -595,7 +595,7 @@
         "decimals": 18
       }
     ],
-    "color": "#219A6F"
+    "color": "#219a6f"
   },
   {
     "id": "gth",
@@ -619,7 +619,7 @@
         "decimals": 18
       }
     ],
-    "color": "#384FE3"
+    "color": "#384fe3"
   },
   {
     "id": "boba",
@@ -638,7 +638,7 @@
         "decimals": 18
       }
     ],
-    "color": "#D1F14C"
+    "color": "#d1f14c"
   },
   {
     "id": "magic",
@@ -657,7 +657,7 @@
         "decimals": 18
       }
     ],
-    "color": "#ED494B"
+    "color": "#ed494b"
   },
   {
     "id": "miva",
@@ -676,7 +676,7 @@
         "decimals": 18
       }
     ],
-    "color": "#6440D5"
+    "color": "#6440d5"
   },
   {
     "id": "fraction",

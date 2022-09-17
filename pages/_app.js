@@ -3,8 +3,8 @@ import Router from 'next/router'
 import { Provider } from 'react-redux'
 import NProgress from 'nprogress'
 
-import { useStore } from '../store'
 import Layout from '../layouts'
+import { useStore } from '../store'
 import '../styles/globals.css'
 import '../styles/animate.css'
 import '../styles/layout.css'
@@ -19,23 +19,57 @@ import '../styles/components/nprogress.css'
 import '../styles/components/skeleton.css'
 import '../styles/components/table.css'
 
-Router.events.on('routeChangeStart', () => NProgress.start())
-Router.events.on('routeChangeComplete', () => NProgress.done())
-Router.events.on('routeChangeError', () => NProgress.done())
+Router.events.on(
+  'routeChangeStart',
+  () => NProgress.start(),
+)
 
-export default ({ Component, pageProps }) => {
+Router.events.on(
+  'routeChangeComplete',
+  () => NProgress.done(),
+)
+
+Router.events.on(
+  'routeChangeError',
+  () => NProgress.done(),
+)
+
+export default ({
+  Component,
+  pageProps,
+}) => {
   const store = useStore(pageProps.initialReduxState)
 
   return (
     <>
       <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta charSet="utf-8" />
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="shortcut icon" href="/favicon.png" />
-        <meta name="msapplication-TileColor" content="#050707" />
-        <meta name="msapplication-TileImage" content="/icons/mstile-150x150.png" />
-        <meta name="theme-color" content="#050707" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+        <meta
+          charSet="utf-8"
+        />
+        <link
+          rel="manifest"
+          href="/manifest.json"
+        />
+        <link
+          rel="shortcut icon"
+          href="/favicon.png"
+        />
+        <meta
+          name="msapplication-TileColor"
+          content="#050707"
+        />
+        <meta
+          name="msapplication-TileImage"
+          content="/icons/mstile-150x150.png"
+        />
+        <meta
+          name="theme-color"
+          content="#050707"
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -52,7 +86,9 @@ export default ({ Component, pageProps }) => {
           <div id="portal" />
           <div id="modal-chains" />
           <div id="modal-assets" />
-          <Component { ...pageProps } />
+          <Component
+            { ...pageProps }
+          />
         </Layout>
       </Provider>
     </>

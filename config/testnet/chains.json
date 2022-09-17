@@ -1,14 +1,14 @@
 [
   {
-    "id": "goerli",
+    "id": "ethereum",
     "chain_id": 5,
     "domain_id": "1735353714",
-    "name": "Görli",
+    "name": "Ethereum",
     "short_name": "GOR",
     "provider_params": [
       {
         "chainId": "0x5",
-        "chainName": "Ethereum Görli",
+        "chainName": "Ethereum Goerli",
         "rpcUrls": [
           "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
         ],
@@ -17,7 +17,9 @@
           "symbol": "ETH",
           "decimals": 18
         },
-        "blockExplorerUrls": ["https://goerli.etherscan.io"]
+        "blockExplorerUrls": [
+          "https://goerli.etherscan.io"
+        ]
       }
     ],
     "explorer": {
@@ -53,7 +55,9 @@
           "symbol": "MATIC",
           "decimals": 18
         },
-        "blockExplorerUrls": ["https://mumbai.polygonscan.com"]
+        "blockExplorerUrls": [
+          "https://mumbai.polygonscan.com"
+        ]
       }
     ],
     "explorer": {
@@ -79,7 +83,7 @@
     "provider_params": [
       {
         "chainId": "0x1a4",
-        "chainName": "Optimism Görli",
+        "chainName": "Optimism Goerli",
         "rpcUrls": [
           "https://goerli.optimism.io"
         ],
@@ -88,7 +92,9 @@
           "symbol": "oETH",
           "decimals": 18
         },
-        "blockExplorerUrls": ["https://blockscout.com/optimism/goerli"]
+        "blockExplorerUrls": [
+          "https://blockscout.com/optimism/goerli"
+        ]
       }
     ],
     "explorer": {

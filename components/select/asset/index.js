@@ -18,11 +18,34 @@ export default ({
   is_pool = false,
   data,
 }) => {
-  const { preferences, chains, assets, pool_assets } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, pool_assets: state.pool_assets }), shallowEqual)
-  const { theme } = { ...preferences }
-  const { chains_data } = { ...chains }
-  const { assets_data } = { ...assets }
-  const { pool_assets_data } = { ...pool_assets }
+  const {
+    preferences,
+    chains,
+    assets,
+    pool_assets,
+  } = useSelector(state =>
+    (
+      {
+        preferences: state.preferences,
+        chains: state.chains,
+        assets: state.assets,
+        pool_assets: state.pool_assets,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    theme,
+  } = { ...preferences }
+  const {
+    chains_data,
+  } = { ...chains }
+  const {
+    assets_data,
+  } = { ...assets }
+  const {
+    pool_assets_data,
+  } = { ...pool_assets }
 
   const [hidden, setHidden] = useState(true)
 
@@ -30,14 +53,36 @@ export default ({
     if (onSelect) {
       onSelect(id)
     }
+
     setHidden(!hidden)
   }
 
   const chain_data = chains_data?.find(c => c?.id === chain)
-  const _assets_data = is_pool ? pool_assets_data : assets_data
-  const asset_data = data || _assets_data?.find(c => c?.id === value)
-  const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
-  const image = contract_data?.image || asset_data?.image
+  const {
+    chain_id,
+  } = { ...chain_data }
+
+  const _assets_data = is_pool ?
+    pool_assets_data :
+    assets_data
+
+  const asset_data = data ||
+    _assets_data?.find(c => c?.id === value)
+  const {
+    contracts,
+  } = { ...asset_data }
+
+  const contract_data = contracts?.find(c => c?.chain_id === chain_id)
+  let {
+    symbol,
+    image,
+  } = { ...contract_data }
+
+  symbol = symbol ||
+    asset_data?.symbol ||
+    'Token'
+  image = image ||
+    asset_data?.image
 
   return (
     <Modal
@@ -70,8 +115,8 @@ export default ({
               </div>
             </>
           )}
-          <span className="text-xs sm:text-base font-semibold">
-            {asset_data ? contract_data?.symbol || asset_data.symbol : 'Token'}
+          <span className="whitespace-nowrap text-sm sm:text-base font-semibold">
+            {symbol}
           </span>
         </div> :
         <Puff
@@ -86,7 +131,9 @@ export default ({
           <span className="capitalize">
             {origin}
           </span>
-          <span>Token</span>
+          <span>
+            Token
+          </span>
         </span>
         {chain_data && (
           <div className="flex items-center space-x-2">

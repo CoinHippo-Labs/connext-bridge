@@ -17,7 +17,10 @@ export default ({
   const buttonRef = useRef(null)
   const popoverRef = useRef(null)
 
-  const { styles, attributes } = usePopper(
+  const {
+    styles,
+    attributes,
+  } = usePopper(
     buttonRef.current,
     popoverRef.current,
     {
@@ -27,38 +30,106 @@ export default ({
           name: 'offset',
           enabled: true,
           options: {
-            offset: [0, 0]
-          }
-        }
-      ]
-    }
+            offset: [
+              [
+                'top',
+                'bottom',
+              ].includes(placement) ?
+                -50 :
+                0,
+              0,
+            ],
+          },
+        },
+      ],
+    },
   )
 
   useEffect(() => {
     const handleClickOutside = e => {
-      if (hidden || buttonRef.current.contains(e.target) || popoverRef.current.contains(e.target)) return false
+      if (
+        hidden ||
+        buttonRef.current.contains(e.target) ||
+        popoverRef.current.contains(e.target)
+      ) {
+        return false
+      }
+
       setHidden(!hidden)
     }
 
     const handleMouseEnter = e => {
-      if (buttonRef.current.contains(e.target) || popoverRef.current.contains(e.target)) setHidden(false)
+      if (
+        buttonRef.current.contains(e.target) ||
+        popoverRef.current.contains(e.target)
+      ) {
+        setHidden(false)
+      }
     }
 
     const handleMouseLeave = e => {
-      if (buttonRef.current.contains(e.target) || popoverRef.current.contains(e.target)) setHidden(true)
+      if (
+        buttonRef.current.contains(e.target) ||
+        popoverRef.current.contains(e.target)
+      ) {
+        setHidden(true)
+      }
     }
 
-    document.addEventListener('mousedown', handleClickOutside)
-    buttonRef?.current?.addEventListener('mouseenter', handleMouseEnter)
-    buttonRef?.current?.addEventListener('mouseleave', handleMouseLeave)
-    popoverRef?.current?.addEventListener('mouseenter', handleMouseEnter)
-    popoverRef?.current?.addEventListener('mouseleave', handleMouseLeave)
+    document.addEventListener(
+      'mousedown',
+      handleClickOutside,
+    )
+
+    if (buttonRef?.current) {
+      buttonRef.current.addEventListener(
+        'mouseenter',
+        handleMouseEnter,
+      )
+      buttonRef.current.addEventListener(
+        'mouseleave',
+        handleMouseLeave,
+      )
+    }
+
+    if (popoverRef?.current) {
+      popoverRef.current.addEventListener(
+        'mouseenter',
+        handleMouseEnter,
+      )
+      popoverRef.current.addEventListener(
+        'mouseleave',
+        handleMouseLeave,
+      )
+    }
+
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-      buttonRef?.current?.removeEventListener('mouseenter', handleMouseEnter)
-      buttonRef?.current?.removeEventListener('mouseleave', handleMouseLeave)
-      popoverRef?.current?.removeEventListener('mouseenter', handleMouseEnter)
-      popoverRef?.current?.removeEventListener('mouseleave', handleMouseLeave)
+      document.removeEventListener(
+        'mousedown',
+        handleClickOutside,
+      )
+
+      if (buttonRef?.current) {
+        buttonRef.current.removeEventListener(
+          'mouseenter',
+          handleMouseEnter,
+        )
+        buttonRef.current.removeEventListener(
+          'mouseleave',
+          handleMouseLeave,
+        )
+      }
+
+      if (popoverRef?.current) {
+        popoverRef.current.removeEventListener(
+          'mouseenter',
+          handleMouseEnter,
+        )
+        popoverRef.current.removeEventListener(
+          'mouseleave',
+          handleMouseLeave,
+        )
+      }
     }
   }, [hidden, popoverRef, buttonRef])
 
@@ -69,22 +140,29 @@ export default ({
         disabled={disabled}
         onClick={() => {
           setHidden(!hidden)
+
           if (onClick) {
             onClick()
           }
         }}
-        className={`btn btn-rounded ${className}`}
+        className={className}
       >
         {children}
       </button>
-      <div ref={popoverRef} { ...attributes.popper } style={styles.popper}>
+      <div
+        ref={popoverRef}
+        { ...attributes.popper }
+        style={styles.popper}
+      >
         <div
-          className={`${hidden ? 'hidden' : 'block'} w-auto bg-white dark:bg-black rounded-lg shadow-lg border-0 border-slate-200 dark:border-slate-900 z-10 no-underline break-words text-sm font-normal`}
+          className={`${hidden ? 'hidden' : 'block'} w-auto bg-white dark:bg-black rounded shadow z-10 no-underline break-words text-sm font-normal`}
           style={styles.offset}
         >
-          <div className={`bg-slate-100 dark:bg-black rounded-t-lg border-b border-solid border-slate-200 dark:border-slate-900 uppercase font-semibold mb-0 p-2 ${titleClassName}`}>
-            {title}
-          </div>
+          {title && (
+            <div className={`bg-zinc-50 dark:bg-zinc-900 rounded-t border-b border-solid border-zinc-100 dark:border-zinc-800 uppercase font-semibold mb-0 p-2 ${titleClassName}`}>
+              {title}
+            </div>
+          )}
           <div className={`p-2 ${contentClassName}`}>
             {content}
           </div>

@@ -1,6 +1,14 @@
 const { createSecureHeaders } = require('next-secure-headers')
 
 module.exports = {
+  headers: () => {
+    return [
+      {
+        source: '/(.*)',
+        headers: createSecureHeaders(),
+      },
+    ]
+  },
   webpack5: true,
   webpack: config => {
     config.resolve.fallback = {
@@ -13,18 +21,11 @@ module.exports = {
       os: require.resolve('os-browserify'),
       stream: require.resolve('stream-browserify'),
     }
+
     return config
   },
   images: {
     loader: 'imgix',
     path: '',
-  },
-  headers: () => {
-    return [
-      {
-        source: '/(.*)',
-        headers: createSecureHeaders(),
-      },
-    ]
   },
 }
