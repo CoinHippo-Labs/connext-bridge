@@ -28,25 +28,73 @@ import { BALANCES_DATA } from '../../reducers/types'
 const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT) || 1
 const DEFAULT_SWAP_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_SWAP_SLIPPAGE_PERCENTAGE) || 3
 const DEFAULT_OPTIONS = {
-  infiniteApprove: false,
+  infiniteApprove: true,
   slippage: DEFAULT_SWAP_SLIPPAGE_PERCENTAGE,
 }
 
 export default () => {
   const dispatch = useDispatch()
-  const { preferences, chains, pool_assets, pools, rpc_providers, dev, wallet, balances } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, pool_assets: state.pool_assets, pools: state.pools, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances }), shallowEqual)
-  const { theme } = { ...preferences }
-  const { chains_data } = { ...chains }
-  const { pool_assets_data } = { ...pool_assets }
-  const { pools_data } = { ...pools }
-  const { rpcs } = { ...rpc_providers }
-  const { sdk } = { ...dev }
-  const { wallet_data } = { ...wallet }
-  const { chain_id, provider, web3_provider, address, signer } = { ...wallet_data }
-  const { balances_data } = { ...balances }
+  const {
+    preferences,
+    chains,
+    pool_assets,
+    pools,
+    rpc_providers,
+    dev,
+    wallet,
+    balances,
+  } = useSelector(state =>
+    (
+      {
+        preferences: state.preferences,
+        chains: state.chains,
+        pool_assets: state.pool_assets,
+        pools: state.pools,
+        rpc_providers: state.rpc_providers,
+        dev: state.dev,
+        wallet: state.wallet,
+        balances: state.balances,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    theme,
+  } = { ...preferences }
+  const {
+    chains_data,
+  } = { ...chains }
+  const {
+    pool_assets_data,
+  } = { ...pool_assets }
+  const {
+    pools_data,
+  } = { ...pools }
+  const {
+    rpcs,
+  } = { ...rpc_providers }
+  const {
+    sdk,
+  } = { ...dev }
+  const {
+    wallet_data,
+  } = { ...wallet }
+  const {
+    provider,
+    web3_provider,
+    address,
+    signer,
+  } = { ...wallet_data }
+  const {
+    balances_data,
+  } = { ...balances }
+
+  const wallet_chain_id = wallet_data?.chain_id
 
   const router = useRouter()
-  const { asPath } = { ...router }
+  const {
+    asPath,
+  } = { ...router }
 
   const [swap, setSwap] = useState({})
   const [swapAmount, setSwapAmount] = useState(null)
@@ -67,63 +115,137 @@ export default () => {
   // get swap from path
   useEffect(() => {
     let updated = false
-    const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-    let path = !asPath ? '/' : asPath.toLowerCase()
-    path = path.includes('?') ? path.substring(0, path.indexOf('?')) : path
-    if (path.includes('on-')) {
-      const paths = path.replace('/swap/', '').split('-')
+
+    const params = params_to_obj(
+      asPath?.indexOf('?') > -1 &&
+      asPath.substring(asPath.indexOf('?') + 1)
+    )
+
+    const {
+      amount,
+    } = { ...params }
+
+    let path = !asPath ?
+      '/' :
+      asPath.toLowerCase()
+    path = path.includes('?') ?
+      path.substring(
+        0,
+        path.indexOf('?'),
+      ) :
+      path
+
+    if (
+      path.includes('on-')
+    ) {
+      const paths = path
+        .replace(
+          '/swap/',
+          '',
+        )
+        .split('-')
+
       const chain = paths[paths.indexOf('on') + 1]
+      const asset = _.head(paths) !== 'on' ?
+        _.head(paths) :
+        null
+
       const chain_data = chains_data?.find(c => c?.id === chain)
-      const asset = paths[0] !== 'on' ? paths[0] : null
-      const asset_data = pool_assets_data?.find(a => a?.id === asset || equals_ignore_case(a?.symbol, asset))
+      const asset_data = pool_assets_data?.find(a =>
+        a?.id === asset ||
+        equals_ignore_case(a?.symbol, asset)
+      )
+
       if (chain_data) {
         swap.chain = chain
         updated = true
       }
+
       if (asset_data) {
         swap.asset = asset
         updated = true
       }
-      if (params?.amount) {
-        swap.amount = Number(params.amount)
+
+      if (amount) {
+        swap.amount = Number(amount)
         updated = true
       }
     }
+
     if (updated) {
       setSwap(swap)
-      // setPairTrigger(moment().valueOf())
     }
   }, [asPath, chains_data, pool_assets_data])
 
   // set swap to path
   useEffect(() => {
     const params = {}
+
     if (swap) {
       const {
         chain,
         asset,
         amount,
       } = { ...swap }
-      if (chains_data?.findIndex(c => !c?.disabled && c?.id === chain) > -1) {
+
+      if (
+        chains_data?.findIndex(c =>
+          !c?.disabled &&
+          c?.id === chain
+        ) > -1
+      ) {
         params.chain = chain
-        if (asset && pool_assets_data?.findIndex(a => a?.id === asset && a.contracts?.findIndex(c => c?.chain_id === chains_data.find(_c => _c?.id === chain)?.chain_id) > -1) > -1) {
+
+        if (
+          asset &&
+          pool_assets_data?.findIndex(a =>
+            a?.id === asset &&
+            a.contracts?.findIndex(c =>
+              c?.chain_id === chains_data.find(_c => _c?.id === chain)?.chain_id
+            ) > -1
+          ) > -1
+        ) {
           params.asset = asset
         }
       }
-      if (params.chain && params.asset && amount) {
+
+      if (
+        params.chain &&
+        params.asset &&
+        amount
+      ) {
         params.amount = amount
       }
     }
+
     if (Object.keys(params).length > 0) {
       const {
         chain,
         asset,
         amount,
       } = { ...params }
+
       delete params.chain
       delete params.asset
-      router.push(`/swap/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
+
+      router.push(
+        `/swap/${chain ?
+          `${asset ?
+            `${asset.toUpperCase()}-` :
+            ''
+          }on-${chain}` :
+          ''
+        }${Object.keys(params).length > 0 ?
+          `?${new URLSearchParams(params).toString()}` :
+          ''
+        }`,
+        undefined,
+        {
+          shallow: true,
+        },
+      )
     }
+
     setApproveResponse(null)
     setCallResponse(null)
   }, [address, swap])
@@ -133,18 +255,35 @@ export default () => {
     const {
       chain,
     } = { ...swap }
-    const _chain = chains_data?.find(c => c?.chain_id === chain_id)?.id
-    if (asPath && _chain && !chain) {
-      const params = params_to_obj(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-      if (!params?.chain && !asPath.includes('on-') && chains_data?.findIndex(c => !c?.disabled && c?.id === _chain) > -1) {
+
+    const {
+      id,
+    } = { ...chains_data?.find(c => c?.chain_id === chain_id) }
+
+    if (
+      asPath &&
+      id &&
+      !chain
+    ) {
+      const params = params_to_obj(
+        asPath.indexOf('?') > -1 &&
+        asPath.substring(asPath.indexOf('?') + 1)
+      )
+
+      if (
+        !params?.chain &&
+        !asPath.includes('on-') &&
+        chains_data?.findIndex(c => !c?.disabled && c?.id === id) > -1
+      ) {
         setSwap({
           ...swap,
-          chain: _chain,
+          chain: id,
         })
       }
-      getBalances(_chain)
+
+      getBalances(id)
     }
-  }, [asPath, chain_id, chains_data])
+  }, [asPath, wallet_chain_id, chains_data])
 
   // update balances
   useEffect(() => {
@@ -152,10 +291,12 @@ export default () => {
       type: BALANCES_DATA,
       value: null,
     })
+
     if (address) {
       const {
         chain,
       } = { ...swap }
+
       getBalances(chain)
     }
     else {
@@ -166,36 +307,66 @@ export default () => {
   // update balances
   useEffect(() => {
     const getData = () => {
-      if (address && !calling && !['pending'].includes(approveResponse?.status)) {
+      const {
+        status,
+      } = { ...approveResponse }
+
+      if (
+        address &&
+        !calling &&
+        ![
+          'pending',
+        ].includes(status)
+      ) {
         const {
           chain,
         } = { ...swap }
+
         getBalances(chain)
       }
     }
+
     getData()
-    const interval = setInterval(() => getData(), 0.25 * 60 * 1000)
-    return () => {
-      clearInterval(interval)
-    }
+
+    const interval = setInterval(() =>
+      getData(),
+      0.25 * 60 * 1000,
+    )
+
+    return () => clearInterval(interval)
   }, [rpcs])
 
   // update balances
   useEffect(() => {
     if (pools_data) {
-      const chains = _.uniq(pools_data.map(p => p?.chain_data?.id).filter(c => c))
-      chains.forEach(c => getBalances(c))
+      const chains = _.uniq(
+        pools_data.map(p => p?.chain_data?.id)
+        .filter(c => c)
+      )
+
+      chains.forEach(c =>
+        getBalances(c)
+      )
     }
   }, [pools_data])
 
   // get pair
   useEffect(() => {
     const getData = async () => {
-      if (sdk && address && swap?.chain) {
+      const {
+        chain,
+      } = { ...swap }
+
+      if (
+        sdk &&
+        address &&
+        chain
+      ) {
         try {
           if (pair === undefined) {
             setPair(null)
           }
+
           const {
             chain,
             asset,
@@ -214,11 +385,14 @@ export default () => {
             chain_id,
             domain_id,
           } = { ...chain_data }
+
           const asset_data = pool_assets_data.find(a => a?.id === asset)
+
           const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_id)
           const {
             contract_address,
           } = { ...contract_data }
+
           const pool = await sdk.nxtpSdkPool.getPool(
             domain_id,
             contract_address,
@@ -230,36 +404,58 @@ export default () => {
               contract_address,
             )
 
-          const canonicalDomain = canonicals?.[0],
-            canonicalId = canonicals?.[1]
+          const canonicalDomain = _.head(canonicals),
+            canonicalId = _.last(canonicals)
 
-          const rate = pool && await sdk.nxtpSdkPool.getVirtualPrice(
-            domain_id,
-            canonicalId,
+          const rate = pool &&
+            await sdk.nxtpSdkPool.getVirtualPrice(
+              domain_id,
+              canonicalId,
+            )
+
+         let _pair = (
+            pool ?
+              [pool]
+                .map(p => {
+                  const {
+                    symbol,
+                  } = { ...p }
+
+                  const symbols = (symbol || '')
+                    .split('-')
+
+                  const asset_data = pool_assets_data.find(a =>
+                    symbols.findIndex(s => equals_ignore_case(s, a?.symbol)) > -1 ||
+                    a?.contracts?.findIndex(c =>
+                      c?.chain_id === chain_id &&
+                      symbols.findIndex(s => equals_ignore_case(s, c?.symbol)) > -1
+                    ) > -1
+                  )
+
+                  return {
+                    ...p,
+                    chain_data,
+                    asset_data,
+                    symbols,
+                  }
+                }) :
+              [pair]
+          ).find(p =>
+            equals_ignore_case(p?.domainId, domain_id) &&
+            equals_ignore_case(p?.asset_data?.id, asset)
           )
 
-         let _pair = (pool ?
-            [pool].map(p => {
-              const {
-                symbol,
-              } = { ...p }
-              const symbols = symbol?.split('-') || []
-              const asset_data = pool_assets_data.find(a => symbols.findIndex(s => equals_ignore_case(s, a?.symbol)) > -1 || a?.contracts?.findIndex(c => c?.chain_id === chain_id && symbols.findIndex(s => equals_ignore_case(s, c?.symbol)) > -1) > -1)
-              return {
-                ...p,
-                chain_data,
-                asset_data,
-                symbols,
-              }
-            }) :
-            [pair] || []
-          ).find(p => equals_ignore_case(p?.domainId, domain_id) && equals_ignore_case(p?.asset_data?.id, asset))
-
-          _pair = _pair && {
-            ..._pair,
-            contract_data,
-            rate: Number(utils.formatUnits(BigNumber.from(rate || '0'), _.last(_pair.decimals) || 18)),
-          }
+          _pair = _pair &&
+            {
+              ..._pair,
+              contract_data,
+              rate: Number(
+                utils.formatUnits(
+                  BigNumber.from(rate || '0'),
+                  _.last(_pair.decimals) || 18,
+                )
+              ),
+            }
 
           setPair(_pair)
           calculateSwap(_pair)
@@ -269,75 +465,137 @@ export default () => {
         }
       }
     }
+
     getData()
   }, [sdk, address, swap, pairTrigger])
 
   const getBalances = chain => {
-    const getBalance = async (chain_id, contract_data) => {
+    const getBalance = async (
+      chain_id,
+      contract_data,
+    ) => {
       const {
         contract_address,
         decimals,
       } = { ...contract_data }
-      const rpc = rpcs?.[chain_id]
+
+      const provider = rpcs?.[chain_id]
+
       let balance
-      if (rpc && contract_address) {
+
+      if (
+        provider &&
+        contract_address
+      ) {
         if (contract_address === constants.AddressZero) {
-          balance = await rpc.getBalance(address)
+          balance = await provider.getBalance(
+            address,
+          )
         }
         else {
-          const contract = new Contract(contract_address, ['function balanceOf(address owner) view returns (uint256)'], rpc)
-          balance = await contract.balanceOf(address)
+          const contract = new Contract(
+            contract_address,
+            [
+              'function balanceOf(address owner) view returns (uint256)',
+            ],
+            provider,
+          )
+
+          balance = await contract.balanceOf(
+            address,
+          )
         }
       }
+
       dispatch({
         type: BALANCES_DATA,
         value: {
           [`${chain_id}`]: [{
             ...contract_data,
-            amount: balance && Number(utils.formatUnits(balance, decimals || 18)),
+            amount: balance &&
+              Number(
+                utils.formatUnits(
+                  balance,
+                  decimals || 18,
+                )
+              ),
           }],
         },
       })
     }
+
     const {
       chain_id,
       domain_id,
     } = { ...chains_data?.find(c => c?.id === chain) }
-    const contracts = _.uniqBy(_.concat(
-      pool_assets_data?.map(a => {
+
+    const contracts_data = _.uniqBy(
+      _.concat(
+        (pool_assets_data || [])
+          .map(a => {
+            const {
+              contracts,
+            } = { ...a }
+
+            return {
+              ...a,
+              ...contracts?.find(c => c?.chain_id === chain_id),
+            }
+          }),
+        (pools_data || [])
+          .filter(p => equals_ignore_case(p?.domainId, domain_id))
+          .flatMap(p => {
+            const {
+              tokens,
+              symbols,
+              decimals,
+            } = { ...p }
+
+            return (tokens || [])
+              .map((t, i) => {
+                return {
+                  chain_id,
+                  contract_address: t,
+                  decimals: decimals?.[i],
+                  symbol: symbols?.[i],
+                }
+              })
+          }),
+      )
+      .filter(a => a?.contract_address)
+      .map(a => {
+        let {
+          contract_address,
+        } = {  ...a }
+
+        contract_address = contract_address.toLowerCase()
+
         return {
           ...a,
-          ...a?.contracts?.find(c => c?.chain_id === chain_id),
+          contract_address,
         }
-      }) || [],
-      pools_data?.filter(p => equals_ignore_case(p?.domainId, domain_id)).flatMap(p => p?.tokens?.map((t, i) => {
-        return {
-          chain_id,
-          contract_address: t,
-          decimals: p.decimals?.[i],
-          symbol: p.symbols?.[i],
-        }
-      }) || []) || [],
-    ).filter(a => a?.contract_address).map(a => {
-      const {
-        contract_address,
-      } = {  ...a }
-      return {
-        ...a,
-        contract_address: contract_address.toLowerCase(),
-      }
-    }), 'contract_address')
-    contracts.forEach(c => getBalance(chain_id, c))
+      }),
+      'contract_address',
+    )
+
+    contracts_data.forEach(c =>
+      getBalance(
+        chain_id,
+        c,
+      )
+    )
   }
 
   const reset = async origin => {
     const reset_swap = origin !== 'address'
+
     if (reset_swap) {
       setSwap({
         ...swap,
         amount: null,
       })
     }
+
     setOptions(DEFAULT_OPTIONS)
 
     setApproving(null)
@@ -353,19 +611,24 @@ export default () => {
     const {
       chain,
     } = { ...swap }
+
     getBalances(chain)
   }
 
   const call = async () => {
     setApproving(null)
     setCalling(true)
+
     let success = false
+
     if (sdk) {
       let {
         amount,
         origin,
       } = { ...swap }
-      origin = origin || 'x'
+
+      origin = origin ||
+        'x'
 
       const {
         chain_data,
@@ -377,32 +640,45 @@ export default () => {
         symbol,
         symbols,
       } = { ...pair }
-      const x_asset_data = tokens?.[0] && {
-        ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
-        ...(
-          equals_ignore_case(tokens[0], contract_data?.contract_address) ?
-            contract_data :
-            {
-              chain_id,
-              contract_address: tokens[0],
-              decimals: decimals?.[0],
-              symbol: symbols?.[0],
-            }
-        ),
-      }
-      const y_asset_data = tokens?.[1] && {
-        ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
-        ...(
-          equals_ignore_case(tokens[1], contract_data?.contract_address) ?
-            contract_data :
-            {
-              chain_id,
-              contract_address: tokens[1],
-              decimals: decimals?.[1],
-              symbol: symbols?.[1],
-            }
-        ),
-      }
+      const {
+        contract_address,
+      } = { ...contract_data }
+
+      const x_asset_data = _.head(tokens) &&
+        {
+          ...Object.fromEntries(
+            Object.entries({ ...asset_data }).
+              filter(([k, v]) => !['contracts'].includes(k))
+          ),
+          ...(
+            equals_ignore_case(_.head(tokens), contract_address) ?
+              contract_data :
+              {
+                chain_id,
+                contract_address: _.head(tokens),
+                decimals: _.head(decimals),
+                symbol: _.head(symbols),
+              }
+          ),
+        }
+
+      const y_asset_data = _.last(tokens) &&
+        {
+          ...Object.fromEntries(
+            Object.entries({ ...asset_data })
+              .filter(([k, v]) => !['contracts'].includes(k))
+          ),
+          ...(
+            equals_ignore_case(_.last(tokens), contract_address) ?
+              contract_data :
+              {
+                chain_id,
+                contract_address: _.last(tokens),
+                decimals: _.last(decimals),
+                symbol: _.last(symbols),
+              }
+          ),
+        }
 
       const {
         infiniteApprove,
@@ -410,44 +686,86 @@ export default () => {
       let {
         deadline,
       } = { ...options }
-      deadline = deadline && moment().add(deadline, 'minutes').valueOf()
+
+      deadline = deadline &&
+        moment().add(deadline, 'minutes').valueOf()
 
       let failed = false
-      if (!(amount)) {
+
+      if (!amount) {
         failed = true
+
         setApproving(false)
       }
       else {
-        amount = utils.parseUnits(amount.toString(), (origin === 'x' ? x_asset_data : y_asset_data)?.decimals || 18).toString()
+        amount = utils.parseUnits(
+          amount.toString(),
+          (origin === 'x' ?
+            x_asset_data :
+            y_asset_data
+          )?.decimals || 18,
+        )
+        .toString()
       }
+
       const minDy = 0
+
       if (!failed) {
         try {
           const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
             domainId,
-            (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address,
+            (origin === 'x' ?
+              x_asset_data :
+              y_asset_data
+            )?.contract_address,
             amount,
             infiniteApprove,
           )
+
           if (approve_request) {
             setApproving(true)
-            const approve_response = await signer.sendTransaction(approve_request)
-            const tx_hash = approve_response?.hash
+
+            const approve_response = await signer.sendTransaction(
+              approve_request,
+            )
+
+            const {
+              hash,
+            } = { ...approve_response }
+
             setApproveResponse({
               status: 'pending',
-              message: `Wait for ${(origin === 'x' ? x_asset_data : y_asset_data)?.symbol} approval`,
-              tx_hash,
+              message: `Wait for ${(origin === 'x' ?
+                x_asset_data :
+                y_asset_data
+              )?.symbol} approval`,
+              tx_hash: hash,
             })
+
             setApproveProcessing(true)
-            const approve_receipt = await signer.provider.waitForTransaction(tx_hash)
-            setApproveResponse(approve_receipt?.status ?
-              null : {
+
+            const approve_receipt = await signer.provider.waitForTransaction(
+              hash,
+            )
+
+            const {
+              status,
+            } = { ...approve_receipt }
+
+            setApproveResponse(status ?
+              null :
+              {
                 status: 'failed',
-                message: `Failed to approve ${(origin === 'x' ? x_asset_data : y_asset_data)?.symbol}`,
-                tx_hash,
+                message: `Failed to approve ${(origin === 'x' ?
+                  x_asset_data :
+                  y_asset_data
+                )?.symbol}`,
+                tx_hash: hash,
               }
             )
-            failed = !approve_receipt?.status
+
+            failed = !status
+
             setApproveProcessing(false)
             setApproving(false)
           }
@@ -457,43 +775,65 @@ export default () => {
         } catch (error) {
           setApproveResponse({
             status: 'failed',
-            message: error?.data?.message || error?.message,
+            message: error?.data?.message ||
+              error?.message,
           })
+
           failed = true
+
           setApproveProcessing(false)
           setApproving(false)
         }
       }
+
       if (!failed) {
         try {
-          console.log('[getCanonicalFromLocal]', {
-            domainId,
-            tokenAddress: contract_data?.contract_address,
-          })
+          console.log(
+            '[getCanonicalFromLocal]',
+            {
+              domainId,
+              tokenAddress: contract_address,
+            },
+          )
 
           const canonicals = await sdk.nxtpSdkPool.getCanonicalFromLocal(
             domainId,
-            contract_data?.contract_address,
+            contract_address,
           )
 
-          const canonicalDomain = canonicals?.[0],
-            canonicalId = canonicals?.[1]
+          const canonicalDomain = _.head(canonicals),
+            canonicalId = _.last(canonicals)
 
-          console.log('[Swap]', {
-            domainId,
-            canonicalId,
-            from: (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address,
-            to: (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address,
-            amount,
-            minDy,
-            deadline,
-          })
+          console.log(
+            '[Swap]',
+            {
+              domainId,
+              canonicalId,
+              from: (origin === 'x' ?
+                x_asset_data :
+                y_asset_data
+              )?.contract_address,
+              to: (origin === 'x' ?
+                y_asset_data :
+                x_asset_data
+              )?.contract_address,
+              amount,
+              minDy,
+              deadline,
+            },
+          )
 
           const swap_request = await sdk.nxtpSdkPool.swap(
             domainId,
             canonicalId,
-            (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address,
-            (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address,
+            (origin === 'x' ?
+              x_asset_data :
+              y_asset_data
+            )?.contract_address,
+            (origin === 'x' ?
+              y_asset_data :
+              x_asset_data
+            )?.contract_address,
             amount,
             minDy,
             deadline,
@@ -501,45 +841,102 @@ export default () => {
 
           if (swap_request) {
             let gasLimit = await signer.estimateGas(swap_request)
+
             if (gasLimit) {
-              gasLimit = FixedNumber.fromString(gasLimit.toString())
-                .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
-                .round(0).toString().replace('.0', '')
+              gasLimit =
+                FixedNumber.fromString(
+                  gasLimit.toString()
+                )
+                .mulUnsafe(
+                  FixedNumber.fromString(
+                    GAS_LIMIT_ADJUSTMENT.toString()
+                  )
+                )
+                .round(0)
+                .toString()
+                .replace('.0', '')
+
               swap_request.gasLimit = gasLimit
             }
-            const swap_response = await signer.sendTransaction(swap_request)
-            const tx_hash = swap_response?.hash
+
+            const swap_response = await signer.sendTransaction(
+              swap_request,
+            )
+
+            const {
+              hash,
+            } = { ...swap_response }
+
             setCallProcessing(true)
-            const swap_receipt = await signer.provider.waitForTransaction(tx_hash)
-            failed = !swap_receipt?.status
-            const _symbol = (origin === 'x' ? symbols : _.reverse(_.cloneDeep(symbols))).join('/')
+
+            const swap_receipt = await signer.provider.waitForTransaction(
+              hash,
+            )
+
+            const {
+              status,
+            } = { ...swap_receipt }
+
+            failed = !status
+
+            const _symbol =
+              (
+                origin === 'x' ?
+                  symbols :
+                  _.reverse(
+                    _.cloneDeep(symbols)
+                  )
+              )
+              .join('/')
+
             setCallResponse({
-              status: failed ? 'failed' : 'success',
-              message: failed ? `Failed to swap ${_symbol}` : `Swap ${_symbol} successful`,
-              tx_hash,
+              status: failed ?
+                'failed' :
+                'success',
+              message: failed ?
+                `Failed to swap ${_symbol}` :
+                `Swap ${_symbol} successful`,
+              tx_hash: hash,
             })
+
             success = true
           }
         } catch (error) {
           setCallResponse({
             status: 'failed',
-            message: error?.data?.message || error?.message,
+            message: error?.data?.message ||
+              error?.message,
           })
+
           failed = true
         }
       }
     }
+
     setCallProcessing(false)
     setCalling(false)
-    if (sdk && address && success) {
+
+    if (
+      sdk &&
+      address &&
+      success
+    ) {
       await sleep(1 * 1000)
+
       setPairTrigger(moment().valueOf())
     }
   }
 
   const calculateSwap = async _pair => {
-    if (_pair && typeof swap?.amount === 'number') {
-      if (swap.amount <= 0) {
+    const {
+      amount,
+    } = { ...swap }
+
+    if (
+      _pair &&
+      typeof amount === 'number'
+    ) {
+      if (amount <= 0) {
         setSwapAmount(0)
       }
       else {
@@ -547,7 +944,10 @@ export default () => {
           amount,
           origin,
         } = { ...swap }
-        origin = origin || 'x'
+
+        origin = origin ||
+          'x'
+
         const {
           asset_data,
           contract_data,
@@ -557,84 +957,131 @@ export default () => {
           decimals,
           symbols,
         } = { ..._pair }
-        const x_asset_data = tokens?.[0] && {
-          ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
-          ...(
-            equals_ignore_case(tokens[0], contract_data?.contract_address) ?
-              contract_data :
-              {
-                chain_id,
-                contract_address: tokens[0],
-                decimals: decimals?.[0],
-                symbol: symbols?.[0],
-              }
-          ),
-        }
-        const y_asset_data = tokens?.[1] && {
-          ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
-          ...(
-            equals_ignore_case(tokens[1], contract_data?.contract_address) ?
-              contract_data :
-              {
-                chain_id,
-                contract_address: tokens[1],
-                decimals: decimals?.[1],
-                symbol: symbols?.[1],
-              }
-          ),
-        }
+        const {
+          contract_address,
+        } = { ...contract_data }
 
-        if (!(equals_ignore_case(domainId, pair?.domainId) && equals_ignore_case(lpTokenAddress, pair?.lpTokenAddress))) {
+        const x_asset_data = _.head(tokens) &&
+          {
+            ...Object.fromEntries(
+              Object.entries({ ...asset_data })
+                .filter(([k, v]) => !['contracts'].includes(k))
+            ),
+            ...(
+              equals_ignore_case(_.head(tokens), contract_address) ?
+                contract_data :
+                {
+                  chain_id,
+                  contract_address: _.head(tokens),
+                  decimals: _.head(decimals),
+                  symbol: _.head(symbols),
+                }
+            ),
+          }
+
+        const y_asset_data = _.last(tokens) &&
+          {
+            ...Object.fromEntries(
+              Object.entries({ ...asset_data })
+                .filter(([k, v]) => !['contracts'].includes(k))
+            ),
+            ...(
+              equals_ignore_case(_.last(tokens), contract_address) ?
+                contract_data :
+                {
+                  chain_id,
+                  contract_address: _.last(tokens),
+                  decimals: _.last(decimals),
+                  symbol: _.last(symbols),
+                }
+            ),
+          }
+
+        if (
+          !(equals_ignore_case(domainId, pair?.domainId) &&
+            equals_ignore_case(lpTokenAddress, pair?.lpTokenAddress))
+        ) {
           setSwapAmount(true)
         }
 
         try {
-          console.log('[getCanonicalFromLocal]', {
-            domainId,
-            tokenAddress: contract_data?.contract_address,
-          })
+          console.log(
+            '[getCanonicalFromLocal]',
+            {
+              domainId,
+              tokenAddress: contract_address,
+            },
+          )
 
           const canonicals = await sdk.nxtpSdkPool.getCanonicalFromLocal(
             domainId,
-            contract_data?.contract_address,
+            contract_address,
           )
 
-          const canonicalDomain = canonicals?.[0],
-            canonicalId = canonicals?.[1]
+          const canonicalDomain = _.head(canonicals),
+            canonicalId = _.last(canonicals)
 
-          console.log('[getPoolTokenIndex]', {
-            domainId,
-            canonicalId,
-            tokenAddress: (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address,
-          })
+          console.log(
+            '[getPoolTokenIndex]',
+            {
+              domainId,
+              canonicalId,
+              tokenAddress: (origin === 'x' ?
+                x_asset_data :
+                y_asset_data
+              )?.contract_address,
+            },
+          )
 
           const tokenIndexFrom = await sdk.nxtpSdkPool.getPoolTokenIndex(
             domainId,
             canonicalId,
-            (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address,
+            (origin === 'x' ?
+              x_asset_data :
+              y_asset_data
+            )?.contract_address,
           )
 
-          console.log('[getPoolTokenIndex]', {
-            domainId,
-            canonicalId,
-            tokenAddress: (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address,
-          })
+          console.log(
+            '[getPoolTokenIndex]',
+            {
+              domainId,
+              canonicalId,
+              tokenAddress: (origin === 'x' ?
+                y_asset_data :
+                x_asset_data
+              )?.contract_address,
+            })
 
           const tokenIndexTo = await sdk.nxtpSdkPool.getPoolTokenIndex(
             domainId,
             canonicalId,
-            (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address,
+            (origin === 'x' ?
+              y_asset_data :
+              x_asset_data
+            )?.contract_address,
           )
  
-          amount = utils.parseUnits(amount.toString(), (origin === 'x' ? x_asset_data : y_asset_data)?.decimals || 18).toString()
+          amount =
+            utils.parseUnits(
+              amount.toString(),
+              (origin === 'x' ?
+                x_asset_data :
+                y_asset_data
+              )?.decimals || 18,
+            )
+            .toString()
  
-          console.log('[calculateSwap]', {
-            domainId,
-            canonicalId,
-            tokenIndexFrom,
-            tokenIndexTo,
-            amount,
-          })
+          console.log(
+            '[calculateSwap]',
+            {
+              domainId,
+              canonicalId,
+              tokenIndexFrom,
+              tokenIndexTo,
+              amount,
+            },
+          )
  
           const _amount = await sdk.nxtpSdkPool.calculateSwap(
             domainId,
@@ -644,7 +1091,17 @@ export default () => {
             amount,
           )
  
-          setSwapAmount(Number(utils.formatUnits(BigNumber.from(_amount || '0'), (origin === 'x' ? y_asset_data : x_asset_data)?.decimals || 18)))
+          setSwapAmount(
+            Number(
+              utils.formatUnits(
+                BigNumber.from(_amount || '0'),
+                (origin === 'x' ?
+                  y_asset_data :
+                  x_asset_data
+                )?.decimals || 18,
+              )
+            )
+          )
         } catch (error) {
           setSwapAmount(null)
         }
@@ -663,9 +1120,21 @@ export default () => {
   let {
     origin,
   } = { ...swap }
-  origin = origin || 'x'
+
+  origin = origin ||
+    'x'
+
   const chain_data = chains_data?.find(c => c?.id === chain)
-  const _chain_id = chain_data?.chain_id
+  const {
+    chain_id,
+    name,
+    image,
+    explorer,
+  } = { ...chain_data }
+  const {
+    url,
+    transaction_path,
+  } = { ...explorer }
 
   const {
     slippage,
@@ -679,43 +1148,72 @@ export default () => {
     symbol,
     symbols,
   } = { ...pair }
-  const x_asset_data = tokens?.[0] && {
-    ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
+  const {
+    contract_address,
+  } = { ...contract_data }
+
+  const x_asset_data = _.head(tokens) &&
+    {
+      ...Object.fromEntries(
+        Object.entries({ ...asset_data })
+          .filter(([k, v]) => !['contracts'].includes(k))
+      ),
+      ...(
+        equals_ignore_case(_.head(tokens), contract_address) ?
+          contract_data :
+          {
+            chain_id,
+            contract_address: _.head(tokens),
+            decimals: _.head(decimals),
+            symbol: _.head(symbols),
+          }
+      ),
+    }
+
+  const x_balance = x_asset_data &&
+    balances_data?.[chain_id]?.find(b =>
+      equals_ignore_case(b?.contract_address, x_asset_data.contract_address)
+    )
+  const x_balance_amount = x_balance &&
+    Number(x_balance.amount)
+
+  const y_asset_data = _.last(tokens) && {
+    ...Object.fromEntries(
+      Object.entries({ ...asset_data })
+        .filter(([k, v]) => !['contracts'].includes(k))
+    ),
     ...(
-      equals_ignore_case(tokens[0], contract_data?.contract_address) ?
+      equals_ignore_case(_.last(tokens), contract_address) ?
         contract_data :
         {
-          chain_id: _chain_id,
-          contract_address: tokens[0],
-          decimals: decimals?.[0],
-          symbol: symbols?.[0],
+          chain_id,
+          contract_address: _.last(tokens),
+          decimals: _.last(decimals),
+          symbol: _.last(symbols),
         }
     ),
   }
-  const x_balance = x_asset_data && balances_data?.[_chain_id]?.find(b => equals_ignore_case(b?.contract_address, x_asset_data.contract_address))
-  const x_balance_amount = x_balance && Number(x_balance.amount)
-  const y_asset_data = tokens?.[1] && {
-    ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
-    ...(
-      equals_ignore_case(tokens[1], contract_data?.contract_address) ?
-        contract_data :
-        {
-          chain_id: _chain_id,
-          contract_address: tokens[1],
-          decimals: decimals?.[1],
-          symbol: symbols?.[1],
-        }
-    ),
-  }
-  const y_balance = y_asset_data && balances_data?.[_chain_id]?.find(b => equals_ignore_case(b?.contract_address, y_asset_data.contract_address))
-  const y_balance_amount = y_balance && Number(y_balance.amount)
+  const y_balance = y_asset_data &&
+    balances_data?.[chain_id]?.find(b =>
+      equals_ignore_case(b?.contract_address, y_asset_data.contract_address)
+    )
+  const y_balance_amount = y_balance &&
+    Number(y_balance.amount)
 
-  const valid_amount = amount && amount <= (origin === 'x' ? x_balance_amount : y_balance_amount)
+  const valid_amount = amount &&
+    amount <= (
+      origin === 'x' ?
+        x_balance_amount :
+        y_balance_amount
+    )
 
-  const wrong_chain = chain_data && chain_id !== _chain_id && !callResponse
+  const wrong_chain = chain_data &&
+    wallet_chain_id !== chain_id &&
+    !callResponse
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
 
-  const disabled = calling || approving
+  const disabled = calling ||
+    approving
 
   return (
     <div className="mb-4">
@@ -731,8 +1229,14 @@ export default () => {
             <Options
               disabled={disabled}
               applied={!_.isEqual(
-                Object.fromEntries(Object.entries(options).filter(([k, v]) => ![].includes(k))),
-                Object.fromEntries(Object.entries(DEFAULT_OPTIONS).filter(([k, v]) => ![].includes(k))),
+                Object.fromEntries(
+                  Object.entries(options)
+                    .filter(([k, v]) => ![].includes(k))
+                ),
+                Object.fromEntries(
+                  Object.entries(DEFAULT_OPTIONS)
+                    .filter(([k, v]) => ![].includes(k))
+                ),
               )}
               initialData={options}
               onChange={o => setOptions(o)}
@@ -745,19 +1249,32 @@ export default () => {
                   <span className="text-slate-400 dark:text-slate-600 text-sm font-medium">
                     From
                   </span>
-                  {web3_provider && (origin === 'x' ? x_asset_data : y_asset_data) && (
-                    <div className="flex items-center space-x-2">
-                      <span className="text-slate-400 dark:text-slate-600 font-semibold">
-                        Balance:
-                      </span>
-                      <Balance
-                        chainId={_chain_id}
-                        asset={asset}
-                        contractAddress={(origin === 'x' ? x_asset_data : y_asset_data).contract_address}
-                        symbol={(origin === 'x' ? x_asset_data : y_asset_data).symbol}
-                      />
-                    </div>
-                  )}
+                  {
+                    web3_provider &&
+                    (origin === 'x' ?
+                      x_asset_data :
+                      y_asset_data
+                    ) &&
+                    (
+                      <div className="flex items-center space-x-2">
+                        <span className="text-slate-400 dark:text-slate-600 font-medium">
+                          Balance:
+                        </span>
+                        <Balance
+                          chainId={chain_id}
+                          asset={asset}
+                          contractAddress={(origin === 'x' ?
+                            x_asset_data :
+                            y_asset_data
+                          ).contract_address}
+                          symbol={(origin === 'x' ?
+                            x_asset_data :
+                            y_asset_data
+                          ).symbol}
+                        />
+                      </div>
+                    )
+                  }
                 </div>
                 <div className="flex flex-col sm:flex-row items-center sm:justify-between space-y-2 sm:space-y-0 sm:space-x-4">
                   <div className="w-full flex items-center justify-between sm:justify-start space-x-2 sm:space-x-4">
@@ -765,13 +1282,18 @@ export default () => {
                       disabled={disabled}
                       value={chain}
                       onSelect={c => {
-                        console.log('[Swap]', {
+                        const _data = {
                           swap: {
                             ...swap,
                             chain: c,
                             amount: null,
                           },
-                        })
+                        }
+
+                        console.log(
+                          '[Swap]',
+                          _data,
+                        )
 
                         setSwap({
                           ...swap,
@@ -787,26 +1309,30 @@ export default () => {
                       disabled={disabled}
                       value={asset}
                       onSelect={a => {
-                        console.log('[Swap]', {
+                        const _data = {
                           swap: {
                             ...swap,
                             asset: a,
                             amount: null,
                           },
-                        })
+                        }
 
-                        setSwap({
-                          ...swap,
-                          asset: a,
-                          amount: null,
-                        })
+                        console.log(
+                          '[Swap]',
+                          _data,
+                        )
+
+                        setSwap(_data)
 
                         getBalances(chain)
                       }}
                       chain={chain}
                       origin=""
                       is_pool={true}
-                      data={origin === 'x' ? x_asset_data : y_asset_data}
+                      data={origin === 'x' ?
+                        x_asset_data :
+                        y_asset_data
+                      }
                     />
                   </div>
                   <div className="space-y-1">
@@ -817,44 +1343,70 @@ export default () => {
                         type="number"
                         placeholder="0.00"
                         disabled={disabled}
-                        value={typeof amount === 'number' && amount >= 0 ? amount : ''}
+                        value={typeof amount === 'number' && amount >= 0 ?
+                          amount :
+                          ''
+                        }
                         onChange={e => {
                           const regex = /^[0-9.\b]+$/
+
                           let value
-                          if (e.target.value === '' || regex.test(e.target.value)) {
+
+                          if (
+                            e.target.value === '' ||
+                            regex.test(e.target.value)
+                          ) {
                             value = e.target.value
                           }
-                          value = value < 0 ? 0 : value
 
-                          console.log('[Swap]', {
+                          value = value < 0 ?
+                            0 :
+                            value
+
+                          const _data = {
                             swap: {
                               ...swap,
-                              amount: value && !isNaN(value) ? Number(value) : value,
+                              amount: value && !isNaN(value) ?
+                                Number(value) :
+                                value,
                             },
-                          })
+                          }
 
-                          setSwap({
-                            ...swap,
-                            amount: value && !isNaN(value) ? Number(value) : value,
-                          })
+                          console.log(
+                            '[Swap]',
+                            _data,
+                          )
+
+                          setSwap(_data)
                         }}
                         onWheel={e => e.target.blur()}
-                        onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                        onKeyDown={e =>
+                          [
+                            'e',
+                            'E',
+                            '-',
+                          ].includes(e.key) &&
+                          e.preventDefault()
+                        }
                         className={`w-full bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
                       />
                       <div
                         onClick={() => {
-                          console.log('[Swap]', {
+                          const _data = {
                             swap: {
                               ...swap,
-                              amount: origin === 'x' ? x_balance_amount : y_balance_amount,
+                              amount: origin === 'x' ?
+                                x_balance_amount :
+                                y_balance_amount,
                             },
-                          })
+                          };
 
-                          setSwap({
-                            ...swap,
-                            amount: origin === 'x' ? x_balance_amount : y_balance_amount,
-                          })
+                          console.log(
+                            '[Swap]',
+                            _data,
+                          )
+
+                          setSwap(_data)
                         }}
                         className={`${disabled || typeof (origin === 'x' ? x_balance_amount : y_balance_amount) !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-700 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
                       >
@@ -879,24 +1431,30 @@ export default () => {
                 <button
                   disabled={disabled}
                   onClick={() => {
-                    console.log('[Swap]', {
+                    const _data = {
                       swap: {
                         ...swap,
-                        origin: origin === 'x' ? 'y' : 'x',
+                        origin: origin === 'x' ?
+                          'y' :
+                          'x',
                         amount: null,
                       },
-                    })
+                    }
 
-                    setSwap({
-                      ...swap,
-                      origin: origin === 'x' ? 'y' : 'x',
-                      amount: null,
-                    })
+                    console.log(
+                      '[Swap]',
+                      _data,
+                    )
+
+                    setSwap(_data)
+
                     getBalances(chain)
                   }}
                   className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
                 >
-                  <MdSwapVert size={32} />
+                  <MdSwapVert
+                    size={32}
+                  />
                 </button>
               </div>
               <div className="bg-slate-50 dark:bg-slate-900 rounded-xl space-y-2 sm:space-y-0 p-4">
@@ -904,33 +1462,45 @@ export default () => {
                   <span className="text-slate-400 dark:text-slate-600 text-sm font-medium">
                     To
                   </span>
-                  {web3_provider && (origin === 'x' ? y_asset_data : x_asset_data) && (
-                    <div className="flex items-center space-x-2">
-                      <span className="text-slate-400 dark:text-slate-600 font-semibold">
-                        Balance:
-                      </span>
-                      <Balance
-                        chainId={_chain_id}
-                        asset={asset}
-                        contractAddress={(origin === 'x' ? y_asset_data : x_asset_data).contract_address}
-                        symbol={(origin === 'x' ? y_asset_data : x_asset_data).symbol}
-                      />
-                    </div>
-                  )}
+                  {web3_provider &&
+                    (origin === 'x' ?
+                      y_asset_data :
+                      x_asset_data
+                    ) &&
+                    (
+                      <div className="flex items-center space-x-2">
+                        <span className="text-slate-400 dark:text-slate-600 font-medium">
+                          Balance:
+                        </span>
+                        <Balance
+                          chainId={chain_id}
+                          asset={asset}
+                          contractAddress={(origin === 'x' ?
+                            y_asset_data :
+                            x_asset_data
+                          ).contract_address}
+                          symbol={(origin === 'x' ?
+                            y_asset_data :
+                            x_asset_data
+                          ).symbol}
+                        />
+                      </div>
+                    )
+                  }
                 </div>
                 <div className="flex flex-col sm:flex-row items-center sm:justify-between space-y-2 sm:space-y-0 sm:space-x-4">
                   <div className="w-full flex items-center justify-between sm:justify-start space-x-2 sm:space-x-4">
                     <div className="w-48 sm:h-16 min-w-max flex items-center justify-center space-x-1.5 py-2 px-3">
-                      {chain_data?.image && (
+                      {image && (
                         <Image
-                          src={chain_data.image}
+                          src={image}
                           alt=""
                           width={24}
                           height={24}
                           className="rounded-full"
                         />
                       )}
-                      <span className="text-sm sm:text-base font-semibold">
+                      <span className="text-sm sm:text-base font-medium">
                         {chain_data ?
                           chainName(chain_data) :
                           <span className="text-slate-400 dark:text-slate-500">
@@ -940,21 +1510,40 @@ export default () => {
                       </span>
                     </div>
                     <div className="w-48 sm:h-16 min-w-max flex items-center justify-center space-x-1.5 py-2 px-3">
-                      {(origin === 'x' ? y_asset_data : x_asset_data)?.image && (
-                        <Image
-                          src={(origin === 'x' ? y_asset_data : x_asset_data).image}
-                          alt=""
-                          width={24}
-                          height={24}
-                          className="rounded-full"
-                        />
-                      )}
-                      <span className="text-sm sm:text-base font-semibold">
-                        {(origin === 'x' ? y_asset_data : x_asset_data)?.symbol ?
-                          (origin === 'x' ? y_asset_data : x_asset_data).symbol :
-                          <span className="text-slate-400 dark:text-slate-500">
-                            To Token
-                          </span>
+                      {
+                        (
+                          origin === 'x' ?
+                            y_asset_data :
+                            x_asset_data
+                        )?.image &&
+                        (
+                          <Image
+                            src={(origin === 'x' ?
+                              y_asset_data :
+                              x_asset_data
+                            ).image}
+                            alt=""
+                            width={24}
+                            height={24}
+                            className="rounded-full"
+                          />
+                        )
+                      }
+                      <span className="text-sm sm:text-base font-medium">
+                        {
+                          (
+                            origin === 'x' ?
+                              y_asset_data :
+                              x_asset_data
+                          )?.symbol ?
+                            (
+                              origin === 'x' ?
+                                y_asset_data :
+                                x_asset_data
+                            ).symbol :
+                            <span className="text-slate-400 dark:text-slate-500">
+                              To Token
+                            </span>
                         }
                       </span>
                     </div>
@@ -977,121 +1566,173 @@ export default () => {
                   </div>
                 </div>
               </div>
-              {chain && asset && (
-                pair === undefined ?
-                  <div className="text-slate-400 dark:text-slate-600 text-lg italic text-center sm:ml-3">
-                    Route not supported
-                  </div> :
-                  <Info
-                    data={pair}
-                    amount_received={swapAmount}
-                    asset_data={origin === 'x' ? y_asset_data : x_asset_data}
-                  />
-              )}
+              {
+                chain &&
+                asset &&
+                (
+                  pair === undefined ?
+                    <div className="tracking-wider text-slate-400 dark:text-slate-600 text-lg text-center sm:ml-3">
+                      Route not supported
+                    </div> :
+                    <Info
+                      data={pair}
+                      amount_received={swapAmount}
+                      asset_data={origin === 'x' ?
+                        y_asset_data :
+                        x_asset_data
+                      }
+                    />
+                )
+              }
             </div>
             <div className="w-full max-w-4xl">
-              {web3_provider && wrong_chain ?
-                <Wallet
-                  connectChainId={_chain_id}
-                  className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
-                >
-                  <span className="mr-1.5 sm:mr-2">
-                    {is_walletconnect ? 'Reconnect' : 'Switch'} to
-                  </span>
-                  {chain_data?.image && (
-                    <Image
-                      src={chain_data.image}
-                      alt=""
-                      width={32}
-                      height={32}
-                      className="rounded-full"
-                    />
-                  )}
-                  <span className="font-semibold">
-                    {chain_data?.name}
-                  </span>
-                </Wallet> :
-                callResponse || approveResponse ?
-                  [callResponse || approveResponse].map((r, i) => (
-                    <Alert
-                      key={i}
-                      color={`${r.status === 'failed' ? 'bg-red-400 dark:bg-red-500' : r.status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
-                      icon={r.status === 'failed' ?
-                        <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
-                        r.status === 'success' ?
-                          <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
-                          r.status === 'pending' ?
-                            <div className="mr-3">
-                              <Watch
-                                color="white"
-                                width="20"
-                                height="20"
+              {
+                web3_provider &&
+                wrong_chain ?
+                  <Wallet
+                    connectChainId={chain_id}
+                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                  >
+                    <span className="mr-1.5 sm:mr-2">
+                      {is_walletconnect ?
+                        'Reconnect' :
+                        'Switch'
+                      } to
+                    </span>
+                    {image && (
+                      <Image
+                        src={image}
+                        alt=""
+                        width={32}
+                        height={32}
+                        className="rounded-full"
+                      />
+                    )}
+                    <span className="font-medium">
+                      {name}
+                    </span>
+                  </Wallet> :
+                callResponse ||
+                approveResponse ?
+                  [
+                    callResponse ||
+                    approveResponse,
+                  ].map((r, i) => {
+                    const {
+                      status,
+                      message,
+                      tx_hash,
+                    } = { ...r }
+
+                    return (
+                      <Alert
+                        key={i}
+                        color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                        icon={status === 'failed' ?
+                          <BiMessageError
+                            className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                          /> :
+                          status === 'success' ?
+                            <BiMessageCheck
+                              className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                            /> :
+                            status === 'pending' ?
+                              <div className="mr-3">
+                                <Watch
+                                  color="white"
+                                  width="20"
+                                  height="20"
+                                />
+                              </div> :
+                              <BiMessageDetail
+                                className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
                               />
-                            </div> :
-                            <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />
-                      }
-                      closeDisabled={true}
-                      rounded={true}
-                      className="rounded-xl p-4.5"
-                    >
-                      <div className="flex items-center justify-between space-x-2">
-                        <span className="break-all">
-                          {ellipse(r.message, 128)}
-                        </span>
-                        <div className="flex items-center space-x-2">
-                          {r.status === 'failed' && r.message && (
-                            <Copy
-                              value={r.message}
-                              size={24}
-                              className="cursor-pointer text-slate-200 hover:text-white"
-                            />
-                          )}
-                          {chain_data?.explorer?.url && r.tx_hash && (
-                            <a
-                              href={`${chain_data.explorer.url}${chain_data.explorer.transaction_path?.replace('{tx}', r.tx_hash)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <TiArrowRight
-                                size={20}
-                                className="transform -rotate-45"
-                              />
-                            </a>
-                          )}
-                          {r.status === 'failed' ?
-                            <button
-                              onClick={() => reset()}
-                              className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                            >
-                              <MdClose size={20} />
-                            </button> :
-                            r.status === 'success' ?
+                        }
+                        closeDisabled={true}
+                        rounded={true}
+                        className="rounded-xl p-4.5"
+                      >
+                        <div className="flex items-center justify-between space-x-2">
+                          <span className="break-all">
+                            {ellipse(
+                              message,
+                              128,
+                            )}
+                          </span>
+                          <div className="flex items-center space-x-2">
+                            {
+                              status === 'failed' &&
+                              message &&
+                              (
+                                <Copy
+                                  size={24}
+                                  value={message}
+                                  className="cursor-pointer text-slate-200 hover:text-white"
+                                />
+                              )
+                            }
+                            {
+                              url &&
+                              tx_hash &&
+                              (
+                                <a
+                                  href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <TiArrowRight
+                                    size={20}
+                                    className="transform -rotate-45"
+                                  />
+                                </a>
+                              )
+                            }
+                            {status === 'failed' ?
                               <button
                                 onClick={() => reset()}
-                                className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                                className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                               >
-                                <MdClose size={20} />
+                                <MdClose
+                                  size={20}
+                                />
                               </button> :
-                              null
-                          }
+                              status === 'success' ?
+                                <button
+                                  onClick={() => reset()}
+                                  className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                                >
+                                  <MdClose
+                                    size={20}
+                                  />
+                                </button> :
+                                null
+                            }
+                          </div>
                         </div>
-                      </div>
-                    </Alert>
-                  )) :
+                      </Alert>
+                    )
+                  }) :
                   web3_provider ?
                     <button
-                      disabled={disabled || !pair || !valid_amount}
+                      disabled={
+                        disabled ||
+                        !pair ||
+                        !valid_amount
+                      }
                       onClick={() => call()}
                       className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
                     >
                       <span className="flex items-center justify-center space-x-1.5">
-                        {(calling || approving) && (
-                          <TailSpin
-                            color="white"
-                            width="20"
-                            height="20"
-                          />
-                        )}
+                        {
+                          disabled &&
+                          (
+                            <TailSpin
+                              color="white"
+                              width="20"
+                              height="20"
+                            />
+                          )
+                        }
                         <span>
                           {calling ?
                             approving ?
@@ -1109,7 +1750,7 @@ export default () => {
                       </span>
                     </button> :
                     <Wallet
-                      connectChainId={_chain_id}
+                      connectChainId={chain_id}
                       buttonConnectTitle="Connect Wallet"
                       className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                     >

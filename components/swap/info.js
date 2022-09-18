@@ -1,5 +1,5 @@
 import { useSelector, shallowEqual } from 'react-redux'
-import { TailSpin } from 'react-loader-spinner'
+import { TailSpin, RotatingTriangles } from 'react-loader-spinner'
 
 import { number_format, loader_color } from '../../lib/utils'
 
@@ -8,8 +8,19 @@ export default ({
   amount_received,
   asset_data,
 }) => {
-  const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
-  const { theme } = { ...preferences }
+  const {
+    preferences,
+  } = useSelector(state =>
+    (
+      {
+        preferences: state.preferences,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    theme,
+  } = { ...preferences }
 
   const {
     rate,
@@ -22,52 +33,60 @@ export default ({
       {data ?
         <div className="grid grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col space-y-0.5">
-            <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
+            <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
               Rate
             </span>
-            <span className="text-lg font-bold">
+            <span className="text-lg font-semibold">
               {number_format(
                 rate,
                 '0,0.000000',
+                true,
               )}
             </span>
           </div>
           <div className="flex flex-col space-y-0.5">
-            <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
+            <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
               Slippage Tolerance
             </span>
-            <span className="text-lg font-bold">
+            <span className="text-lg font-semibold">
               {number_format(
                 slippage,
                 '0,0.000000',
+                true,
               )}%
             </span>
           </div>
           <div className="flex flex-col space-y-0.5">
-            <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
+            <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
               Price Impact
             </span>
-            <span className="text-lg font-bold">
+            <span className="text-lg font-semibold">
               {number_format(
                 price_impact,
                 '0,0.000000',
+                true,
               )}%
             </span>
           </div>
           <div className="flex flex-col space-y-0.5">
-            <span className="text-slate-400 dark:text-slate-500 text-base font-semibold">
+            <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
               Minimum Received
             </span>
-            <span className="flex items-center whitespace-nowrap text-lg font-bold space-x-2">
+            <span className="flex items-center whitespace-nowrap text-lg font-semibold space-x-2">
               {typeof amount_received === 'boolean' ?
-                <TailSpin
+                <RotatingTriangles
                   color="white"
-                  width="20"
-                  height="20"
+                  width="24"
+                  height="24"
                 /> :
                 <span>
                   {number_format(
-                    amount_received * (100 - (slippage || 0)) / 100,
+                    amount_received *
+                    (
+                      100 -
+                      (slippage || 0)
+                    ) /
+                    100,
                     '0,0.00000000',
                     true,
                   )}

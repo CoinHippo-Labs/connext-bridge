@@ -14,40 +14,58 @@ export default ({
   view,
   user_pools_data,
 }) => {
-  const { preferences, pools } = useSelector(state => ({ preferences: state.preferences, pools: state.pools }), shallowEqual)
-  const { theme } = { ...preferences }
-  const { pools_data } = { ...pools }
+  const {
+    preferences,
+    pools,
+  } = useSelector(state =>
+    (
+      {
+        preferences: state.preferences,
+        pools: state.pools,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    theme,
+  } = { ...preferences }
+  const {
+    pools_data,
+  } = { ...pools }
 
   const [uncollapseAssetIds, setUncollapseAssetIds] = useState([])
 
   const data = view === 'my_pools' ?
-    user_pools_data?.map(p => {
-      const {
-        id,
-        lpTokenBalance,
-      } = { ...p }
-      let {
-        share,
-      } = { ...p }
+    (user_pools_data || [])
+      .map(p => {
+        const {
+          id,
+          lpTokenBalance,
+        } = { ...p }
+        let {
+          share,
+        } = { ...p }
 
-      const pool_data = pools_data?.find(_p => _p?.id === id)
-      const {
-        liquidity,
-      } = { ...pool_data }
+        const pool_data = pools_data?.find(_p => _p?.id === id)
+        const {
+          liquidity,
+        } = { ...pool_data }
 
-      share = lpTokenBalance * 100 / (Number(liquidity) || 1)
+        share = lpTokenBalance * 100 /
+          (Number(liquidity) || 1)
 
-      return {
-        ...p,
-        share,
-      }
-    }) || [] :
+        return {
+          ...p,
+          share,
+        }
+      }) :
     Object.entries(
       _.groupBy(
         pools_data || [],
         'asset_data.id',
       )
-    ).map(([k, v]) => {
+    )
+    .map(([k, v]) => {
       return {
         id: k,
         asset_data: _.head(v)?.asset_data,
@@ -87,7 +105,8 @@ export default ({
                 const _symbol = view === 'my_pools' ?
                   contract_data?.symbol || symbol :
                   symbol
-                name = name || _symbol
+                name = name ||
+                  _symbol
 
                 const chain = chain_data?.id
                 const asset = asset_data?.id
@@ -98,7 +117,7 @@ export default ({
                       <Link
                         href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                       >
-                        <a className="h-6 flex items-center font-bold">
+                        <a className="h-6 flex items-center font-semibold">
                           {name}
                         </a>
                       </Link> :
@@ -113,41 +132,45 @@ export default ({
                               className="rounded-full"
                             />
                           )}
-                          <span className="text-base font-bold">
+                          <span className="text-base font-semibold">
                             {_symbol}
                           </span>
                         </div>
-                        {uncollapseAssetIds.includes(id) &&
-                          pools?.map((p, i) => {
-                            const {
-                              chain_data,
-                              asset_data,
-                              contract_data,
-                            } = { ...p }
-                            let {
-                              name,
-                            } = { ...p }
-                            let {
-                              symbol,
-                            } = {  ...contract_data }
+                        {
+                          uncollapseAssetIds.includes(id) &&
+                          (pools || [])
+                            .map((p, i) => {
+                              const {
+                                chain_data,
+                                asset_data,
+                                contract_data,
+                              } = { ...p }
+                              let {
+                                name,
+                              } = { ...p }
+                              let {
+                                symbol,
+                              } = {  ...contract_data }
 
-                            symbol = symbol || asset_data?.symbol
-                            name = name || symbol
+                              symbol = symbol ||
+                                asset_data?.symbol
+                              name = name ||
+                                symbol
 
-                            const chain = chain_data?.id
-                            const asset = asset_data?.id
+                              const chain = chain_data?.id
+                              const asset = asset_data?.id
 
-                            return (
-                              <Link
-                                key={i}
-                                href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                              >
-                                <a className="h-6 flex items-center font-bold">
-                                  {name}
-                                </a>
-                              </Link>
-                            )
-                          })
+                              return (
+                                <Link
+                                  key={i}
+                                  href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                                >
+                                  <a className="h-6 flex items-center font-semibold">
+                                    {name}
+                                  </a>
+                                </Link>
+                              )
+                            })
                         }
                       </>
                     }
@@ -203,7 +226,7 @@ export default ({
                               className="rounded-full"
                             />
                           )}
-                          <span className="text-base font-bold">
+                          <span className="text-base font-semibold">
                             {name}
                           </span>
                         </a>
@@ -215,21 +238,78 @@ export default ({
                         >
                           {pools?.length > 0 ?
                             <>
-                              {pools.map((p, i) => {
-                                const {
-                                  chain_data,
-                                } = { ...p }
-                                const {
-                                  name,
-                                  image,
-                                } = { ...chain_data }
+                              {pools
+                                .map((p, i) => {
+                                  const {
+                                    chain_data,
+                                  } = { ...p }
+                                  const {
+                                    name,
+                                    image,
+                                  } = { ...chain_data }
 
-                                return (
-                                  <div
-                                    key={i}
-                                    title={name}
-                                    className="h-6 mr-1.5"
-                                  >
+                                  return (
+                                    <div
+                                      key={i}
+                                      title={name}
+                                      className="h-6 mr-1.5"
+                                    >
+                                      {image && (
+                                        <Image
+                                          src={image}
+                                          alt=""
+                                          width={24}
+                                          height={24}
+                                          className="rounded-full"
+                                        />
+                                      )}
+                                    </div>
+                                  )
+                                })
+                              }
+                              <div className="mr-1.5">
+                                <button
+                                  onClick={() => onClick()}
+                                  className="w-6 h-6 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full flex items-center justify-center p-1"
+                                >
+                                  {uncollapseAssetIds.includes(id) ?
+                                    <MdKeyboardArrowUp
+                                      size={18}
+                                    /> :
+                                    <MdKeyboardArrowDown
+                                      size={18}
+                                    />
+                                  }
+                                </button>
+                              </div>
+                            </> :
+                            <span className="tracking-wider text-slate-400 dark:text-slate-500">
+                              No chains supported
+                            </span>
+                          }
+                        </div>
+                        {
+                          uncollapseAssetIds.includes(id) &&
+                          (pools || [])
+                            .map((p, i) => {
+                              const {
+                                chain_data,
+                                asset_data,
+                              } = { ...p }
+                              const {
+                                name,
+                                image,
+                              } = { ...chain_data }
+
+                              const chain = chain_data?.id
+                              const asset = asset_data?.id
+
+                              return (
+                                <Link
+                                  key={i}
+                                  href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                                >
+                                  <a className="h-6 flex items-center space-x-2">
                                     {image && (
                                       <Image
                                         src={image}
@@ -239,62 +319,13 @@ export default ({
                                         className="rounded-full"
                                       />
                                     )}
-                                  </div>
-                                )
-                              })}
-                              <div className="mr-1.5">
-                                <button
-                                  onClick={() => onClick()}
-                                  className="w-6 h-6 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full flex items-center justify-center p-1"
-                                >
-                                  {uncollapseAssetIds.includes(id) ?
-                                    <MdKeyboardArrowUp size={18} /> :
-                                    <MdKeyboardArrowDown size={18} />
-                                  }
-                                </button>
-                              </div>
-                            </> :
-                            <span className="text-slate-400 dark:text-slate-500">
-                              No chains supported
-                            </span>
-                          }
-                        </div>
-                        {uncollapseAssetIds.includes(id) &&
-                          pools?.map((p, i) => {
-                            const {
-                              chain_data,
-                              asset_data,
-                            } = { ...p }
-                            const {
-                              name,
-                              image,
-                            } = { ...chain_data }
-
-                            const chain = chain_data?.id
-                            const asset = asset_data?.id
-
-                            return (
-                              <Link
-                                key={i}
-                                href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                              >
-                                <a className="h-6 flex items-center space-x-2">
-                                  {image && (
-                                    <Image
-                                      src={image}
-                                      alt=""
-                                      width={24}
-                                      height={24}
-                                      className="rounded-full"
-                                    />
-                                  )}
-                                  <span className="text-base font-bold">
-                                    {name}
-                                  </span>
-                                </a>
-                              </Link>
-                            )
-                          })
+                                    <span className="text-base font-semibold">
+                                      {name}
+                                    </span>
+                                  </a>
+                                </Link>
+                              )
+                            })
                         }
                       </>
                     }
@@ -329,44 +360,48 @@ export default ({
 
                 return (
                   <div className="flex flex-col space-y-3">
-                    <div className="text-base font-bold text-right">
+                    <div className="text-base font-semibold text-right">
                       <span className="uppercase">
                         {currency_symbol}
                         {number_format(
                           value,
                           '0,0.00',
+                          true,
                         )}
                       </span>
                     </div>
-                    {uncollapseAssetIds.includes(id) &&
-                      pools?.map((p, i) => {
-                        const {
-                          chain_data,
-                          asset_data,
-                          liquidity,
-                        } = { ...p }
+                    {
+                      uncollapseAssetIds.includes(id) &&
+                      (pools || [])
+                        .map((p, i) => {
+                          const {
+                            chain_data,
+                            asset_data,
+                            liquidity,
+                          } = { ...p }
 
-                        const chain = chain_data?.id
-                        const asset = asset_data?.id
-                        const value = liquidity
+                          const chain = chain_data?.id
+                          const asset = asset_data?.id
+                          const value = liquidity
 
-                        return (
-                          <Link
-                            key={i}
-                            href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                          >
-                            <a className="h-6 text-base font-bold text-right">
-                              <span className="uppercase">
-                                {currency_symbol}
-                                {number_format(
-                                  value,
-                                  '0,0.00',
-                                )}
-                              </span>
-                            </a>
-                          </Link>
-                        )
-                      })
+                          return (
+                            <Link
+                              key={i}
+                              href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                            >
+                              <a className="h-6 text-base font-semibold text-right">
+                                <span className="uppercase">
+                                  {currency_symbol}
+                                  {number_format(
+                                    value,
+                                    '0,0.00',
+                                    true,
+                                  )}
+                                </span>
+                              </a>
+                            </Link>
+                          )
+                        })
                     }
                   </div>
                 )
@@ -400,44 +435,48 @@ export default ({
 
                 return (
                   <div className="flex flex-col space-y-3">
-                    <div className="text-base font-bold text-right">
+                    <div className="text-base font-semibold text-right">
                       <span className="uppercase">
                         {currency_symbol}
                         {number_format(
                           value,
                           '0,0.00',
+                          true,
                         )}
                       </span>
                     </div>
-                    {uncollapseAssetIds.includes(id) &&
-                      pools?.map((p, i) => {
-                        const {
-                          chain_data,
-                          asset_data,
-                          volume,
-                        } = { ...p }
+                    {
+                      uncollapseAssetIds.includes(id) &&
+                      (pools || [])
+                        .map((p, i) => {
+                          const {
+                            chain_data,
+                            asset_data,
+                            volume,
+                          } = { ...p }
 
-                        const chain = chain_data?.id
-                        const asset = asset_data?.id
-                        const value = volume
+                          const chain = chain_data?.id
+                          const asset = asset_data?.id
+                          const value = volume
 
-                        return (
-                          <Link
-                            key={i}
-                            href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                          >
-                            <a className="h-6 text-base font-bold text-right">
-                              <span className="uppercase">
-                                {currency_symbol}
-                                {number_format(
-                                  value,
-                                  '0,0.00',
-                                )}
-                              </span>
-                            </a>
-                          </Link>
-                        )
-                      })
+                          return (
+                            <Link
+                              key={i}
+                              href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                            >
+                              <a className="h-6 text-base font-semibold text-right">
+                                <span className="uppercase">
+                                  {currency_symbol}
+                                  {number_format(
+                                    value,
+                                    '0,0.00',
+                                    true,
+                                  )}
+                                </span>
+                              </a>
+                            </Link>
+                          )
+                        })
                     }
                   </div>
                 )
@@ -471,44 +510,48 @@ export default ({
 
                 return (
                   <div className="flex flex-col space-y-3">
-                    <div className="text-base font-bold text-right">
+                    <div className="text-base font-semibold text-right">
                       <span className="uppercase">
                         {currency_symbol}
                         {number_format(
                           value,
                           '0,0.00',
+                          true,
                         )}
                       </span>
                     </div>
-                    {uncollapseAssetIds.includes(id) &&
-                      pools?.map((p, i) => {
-                        const {
-                          chain_data,
-                          asset_data,
-                          fees,
-                        } = { ...p }
+                    {
+                      uncollapseAssetIds.includes(id) &&
+                      (pools || [])
+                        .map((p, i) => {
+                          const {
+                            chain_data,
+                            asset_data,
+                            fees,
+                          } = { ...p }
 
-                        const chain = chain_data?.id
-                        const asset = asset_data?.id
-                        const value = fees
+                          const chain = chain_data?.id
+                          const asset = asset_data?.id
+                          const value = fees
 
-                        return (
-                          <Link
-                            key={i}
-                            href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                          >
-                            <a className="h-6 text-base font-bold text-right">
-                              <span className="uppercase">
-                                {currency_symbol}
-                                {number_format(
-                                  value,
-                                  '0,0.00',
-                                )}
-                              </span>
-                            </a>
-                          </Link>
-                        )
-                      })
+                          return (
+                            <Link
+                              key={i}
+                              href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                            >
+                              <a className="h-6 text-base font-semibold text-right">
+                                <span className="uppercase">
+                                  {currency_symbol}
+                                  {number_format(
+                                    value,
+                                    '0,0.00',
+                                    true,
+                                  )}
+                                </span>
+                              </a>
+                            </Link>
+                          )
+                        })
                     }
                   </div>
                 )
@@ -542,44 +585,48 @@ export default ({
 
                 return (
                   <div className="flex flex-col space-y-3">
-                    <div className="text-base font-bold text-right">
+                    <div className="text-base font-semibold text-right">
                       <span className="uppercase">
                         {number_format(
                           value,
                           '0,0.00',
+                          true,
                         )}
                         %
                       </span>
                     </div>
-                    {uncollapseAssetIds.includes(id) &&
-                      pools?.map((p, i) => {
-                        const {
-                          chain_data,
-                          asset_data,
-                          apy,
-                        } = { ...p }
+                    {
+                      uncollapseAssetIds.includes(id) &&
+                      (pools || [])
+                        .map((p, i) => {
+                          const {
+                            chain_data,
+                            asset_data,
+                            apy,
+                          } = { ...p }
 
-                        const chain = chain_data?.id
-                        const asset = asset_data?.id
-                        const value = apy?.day
+                          const chain = chain_data?.id
+                          const asset = asset_data?.id
+                          const value = apy?.day
 
-                        return (
-                          <Link
-                            key={i}
-                            href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                          >
-                            <a className="h-6 text-base font-bold text-right">
-                              <span className="uppercase">
-                                {number_format(
-                                  value,
-                                  '0,0.00',
-                                )}
-                                %
-                              </span>
-                            </a>
-                          </Link>
-                        )
-                      })
+                          return (
+                            <Link
+                              key={i}
+                              href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                            >
+                              <a className="h-6 text-base font-semibold text-right">
+                                <span className="uppercase">
+                                  {number_format(
+                                    value,
+                                    '0,0.00',
+                                    true,
+                                  )}
+                                  %
+                                </span>
+                              </a>
+                            </Link>
+                          )
+                        })
                     }
                   </div>
                 )
@@ -589,7 +636,13 @@ export default ({
             {
               Header: 'Your Pool Tokens',
               accessor: 'lpTokenBalance',
-              sortType: (a, b) => a.original.lpTokenBalance * a.original.price > b.original.lpTokenBalance * b.original.price ? 1 : -1,
+              sortType: (a, b) =>
+                a.original.lpTokenBalance *
+                a.original.price >
+                b.original.lpTokenBalance *
+                b.original.price ?
+                  1 :
+                  -1,
               Cell: props => {
                 const {
                   symbol,
@@ -601,7 +654,7 @@ export default ({
 
                 return (
                   <div className="flex flex-col space-y-1">
-                    <div className="flex items-center text-base font-bold text-right space-x-1">
+                    <div className="flex items-center text-base font-semibold text-right space-x-1">
                       <span className="uppercase">
                         {number_format(
                           value,
@@ -609,24 +662,30 @@ export default ({
                           true,
                         )}
                       </span>
-                      {symbol && (
-                        <span>
-                          {symbol}
-                        </span>
-                      )}
+                      {
+                        symbol &&
+                        (
+                          <span>
+                            {symbol}
+                          </span>
+                        )
+                      }
                     </div>
-                    {price > 0 && (
-                      <div className="text-slate-800 dark:text-slate-200 text-sm text-right">
-                        <span className="uppercase">
-                          {currency_symbol}
-                          {number_format(
-                            value * price,
-                            '0,0.00',
-                            true,
-                          )}
-                        </span>
-                      </div>
-                    )}
+                    {
+                      price > 0 &&
+                      (
+                        <div className="text-slate-800 dark:text-slate-200 text-sm text-right">
+                          <span className="uppercase">
+                            {currency_symbol}
+                            {number_format(
+                              value * price,
+                              '0,0.00',
+                              true,
+                            )}
+                          </span>
+                        </div>
+                      )
+                    }
                   </div>
                 )
               },
@@ -635,7 +694,13 @@ export default ({
             {
               Header: 'Pooled Tokens',
               accessor: 'balances',
-              sortType: (a, b) => a.original.lpTokenBalance * a.original.price > b.original.lpTokenBalance * b.original.price ? 1 : -1,
+              sortType: (a, b) =>
+                a.original.lpTokenBalance *
+                a.original.price >
+                b.original.lpTokenBalance *
+                b.original.price ?
+                  1 :
+                  -1,
               Cell: props => {
                 const {
                   symbols,
@@ -646,36 +711,42 @@ export default ({
 
                 return (
                   <div className="flex items-center justify-end space-x-1.5">
-                    <div className="flex items-center text-base font-bold space-x-1">
+                    <div className="flex items-center text-base font-semibold space-x-1">
                       <span className="uppercase">
                         {number_format(
-                          value?.[0],
+                          _.head(value),
                           '0,0.000000',
                           true,
                         )}
                       </span>
-                      {symbols?.[0] && (
-                        <span>
-                          {symbol[0]}
-                        </span>
-                      )}
+                      {
+                        _.head(symbols) &&
+                        (
+                          <span>
+                            {_.head(symbols)}
+                          </span>
+                        )
+                      }
                     </div>
-                    <span className="text-base font-semibold">
+                    <span className="text-base font-medium">
                       /
                     </span>
-                    <div className="flex items-center text-base font-bold space-x-1">
+                    <div className="flex items-center text-base font-semibold space-x-1">
                       <span className="uppercase">
                         {number_format(
-                          value?.[1],
+                          _.last(value),
                           '0,0.000000',
                           true,
                         )}
                       </span>
-                      {symbols?.[1] && (
-                        <span>
-                          {symbol[1]}
-                        </span>
-                      )}
+                      {
+                        _.last(symbols) &&
+                        (
+                          <span>
+                            {_.last(symbols)}
+                          </span>
+                        )
+                      }
                     </div>
                   </div>
                 )
@@ -685,14 +756,16 @@ export default ({
             {
               Header: 'Pool Share',
               accessor: 'share',
-              sortType: (a, b) => a.original.share > b.original.share ? 1 : -1,
+              sortType: (a, b) => a.original.share > b.original.share ?
+                1 :
+                -1,
               Cell: props => {
                 const {
                   value,
                 } = { ...props }
 
                 return (
-                  <div className="text-base font-bold text-right">
+                  <div className="text-base font-semibold text-right">
                     {number_format(
                       value,
                       '0,0.000000',
@@ -704,20 +777,23 @@ export default ({
               },
               headerClassName: 'whitespace-nowrap justify-end text-right',
             },
-          ].filter(c => !(
-            view === 'my_pools' ?
-              [
-                'liquidity',
-                'volume',
-                'fees',
-                'apy.day',
-              ] :
-              [
-                'lpTokenBalance',
-                'balances',
-                'share',
-              ]
-          ).includes(c.accessor))}
+          ]
+          .filter(c =>
+            !(
+              view === 'my_pools' ?
+                [
+                  'liquidity',
+                  'volume',
+                  'fees',
+                  'apy.day',
+                ] :
+                [
+                  'lpTokenBalance',
+                  'balances',
+                  'share',
+                ]
+            ).includes(c.accessor)
+          )}
           data={data}
           noPagination={data.length <= 10}
           defaultPageSize={50}

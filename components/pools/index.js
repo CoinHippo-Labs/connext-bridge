@@ -15,13 +15,41 @@ const VIEWS = [
 ]
 
 export default () => {
-  const { chains, pool_assets, _pools, dev, wallet } = useSelector(state => ({ chains: state.chains, pool_assets: state.pool_assets, _pools: state.pools, dev: state.dev, wallet: state.wallet }), shallowEqual)
-  const { chains_data } = { ...chains }
-  const { pool_assets_data } = { ...pool_assets }
-  const { pools_data } = { ..._pools }
-  const { sdk } = { ...dev }
-  const { wallet_data } = { ...wallet }
-  const { address } = { ...wallet_data }
+  const {
+    chains,
+    pool_assets,
+    _pools,
+    dev,
+    wallet,
+  } = useSelector(state =>
+    (
+      {
+        chains: state.chains,
+        pool_assets: state.pool_assets,
+        _pools: state.pools,
+        dev: state.dev,
+        wallet: state.wallet,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    chains_data,
+  } = { ...chains }
+  const {
+    pool_assets_data,
+  } = { ...pool_assets }
+  const {
+    pools_data,
+  } = { ..._pools }
+  const { sdk,
+  } = { ...dev }
+  const {
+    wallet_data,
+  } = { ...wallet }
+  const {
+    address,
+  } = { ...wallet_data }
 
   const [view, setView] = useState(_.head(VIEWS))
   const [pools, setPools] = useState(null)
@@ -46,39 +74,71 @@ export default () => {
                 address,
               )
 
-              data = _.concat(
-                data,
-                response?.map(p => {
-                  const {
-                    info,
-                    lpTokenBalance,
-                    poolTokenBalances,
-                  } = { ...p }
-                  const {
-                    symbol,
-                    decimals,
-                    balances,
-                    liquidity,
-                  } = { ...info }
+              if (Array.isArray(response)) {
+                data = _.concat(
+                  data,
+                  response
+                    .map(p => {
+                      const {
+                        info,
+                        lpTokenBalance,
+                        poolTokenBalances,
+                      } = { ...p }
+                      const {
+                        symbol,
+                        decimals,
+                        balances,
+                        liquidity,
+                      } = { ...info }
 
-                  const symbols = symbol?.split('-') || []
-                  const asset_data = pool_assets_data.find(a =>
-                    symbols.findIndex(s => equals_ignore_case(s, a?.symbol)) > -1 ||
-                    a?.contracts?.findIndex(c => c?.chain_id === chain_id && symbols.findIndex(s => equals_ignore_case(s, c?.symbol)) > -1) > -1
-                  )
+                      const symbols = (symbol || '')
+                        .split('-')
 
-                  return {
-                    ...p,
-                    chain_data,
-                    asset_data,
-                    ...info,
-                    symbols,
-                    lpTokenBalance: Number(utils.formatUnits(BigNumber.from(lpTokenBalance || '0'), _.last(decimals) || 18)),
-                    poolTokenBalances: poolTokenBalances?.map((b, i) => Number(utils.formatUnits(BigNumber.from(b || '0'), decimals?.[i] || 18))) || [],
-                    balances: balances?.map((b, i) => Number(utils.formatUnits(BigNumber.from(b || '0'), decimals?.[i] || 18))) || [],
-                  }
-                })
-              ).filter(d => d)
+                      const asset_data = pool_assets_data.find(a =>
+                        symbols.findIndex(s =>
+                          equals_ignore_case(s, a?.symbol)
+                        ) > -1 ||
+                        a?.contracts?.findIndex(c =>
+                          c?.chain_id === chain_id &&
+                          symbols.findIndex(s => equals_ignore_case(s, c?.symbol)) > -1
+                        ) > -1
+                      )
+
+                      return {
+                        ...p,
+                        chain_data,
+                        asset_data,
+                        ...info,
+                        symbols,
+                        lpTokenBalance: Number(
+                          utils.formatUnits(
+                            igNumber.from(lpTokenBalance || '0'),
+                            _.last(decimals) || 18,
+                          )
+                        ),
+                        poolTokenBalances: (poolTokenBalances || [])
+                          .map((b, i) =>
+                            Number(
+                              utils.formatUnits(
+                                BigNumber.from(b || '0'),
+                                decimals?.[i] || 18,
+                              )
+                            )
+                          ),
+                        balances: (balances || [])
+                          .map((b, i) =>
+                            Number(
+                              utils.formatUnits(
+                                BigNumber.from(b || '0'),
+                                decimals?.[i] || 18,
+                              )
+                            )
+                          ),
+                      }
+                    })
+                )
+                .filter(d => d)
+              }
             } catch (error) {}
           }
 
@@ -110,20 +170,25 @@ export default () => {
                 Add Liquidity
               </h1>
               <div className="flex items-center space-x-0.5">
-                {VIEWS.map((v, i) => (
-                  <div
-                    key={i}
-                    onClick={() => setView(v)}
-                    className={`${view === v ? 'bg-blue-500 dark:bg-blue-600 font-bold text-white' : 'hover:bg-slate-50 dark:hover:bg-slate-900 font-medium hover:font-semibold'} rounded-lg cursor-pointer uppercase py-1 px-2.5`}
-                  >
-                    {name(v)}
-                  </div>
-                ))}
+                {VIEWS
+                  .map((v, i) => (
+                    <div
+                      key={i}
+                      onClick={() => setView(v)}
+                      className={`${view === v ? 'bg-blue-500 dark:bg-blue-600 font-semibold text-white' : 'hover:bg-slate-50 dark:hover:bg-slate-900 font-normal hover:font-medium'} rounded-lg cursor-pointer uppercase py-1 px-2.5`}
+                    >
+                      {name(v)}
+                    </div>
+                  ))
+                }
               </div>
             </div>
-            {view === 'all_pools' && (
-              <Total />
-            )}
+            {
+              view === 'all_pools' &&
+              (
+                <Total />
+              )
+            }
           </div>
           <Pools
             view={view}

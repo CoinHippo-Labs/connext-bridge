@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import Switch from 'react-switch'
 import { DebounceInput } from 'react-debounce-input'
@@ -7,6 +8,7 @@ import { MdSettingsSuggest } from 'react-icons/md'
 
 import Modal from '../../modals'
 import Popover from '../../popover'
+import { switch_color } from '../../../lib/utils'
 
 const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE) || 3
 
@@ -16,6 +18,19 @@ export default ({
   initialData,
   onChange,
 }) => {
+  const {
+    preferences,
+  } = useSelector(state =>
+    (
+      { preferences: state.preferences,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    theme,
+  } = { ...preferences }
+
   const [data, setData] = useState(initialData)
 
   useEffect(() => {
@@ -41,7 +56,11 @@ export default ({
       name: 'slippage',
       type: 'number',
       placeholder: '0.00',
-      presets: [3.0, 2.0, 1.0],
+      presets: [
+        3.0,
+        2.0,
+        1.0,
+      ],
       postfix: '%',
     },
     {
@@ -62,7 +81,14 @@ export default ({
     },
   ]
 
-  const hasChanged = !_.isEqual(data, initialData)
+  const changed = !_.isEqual(
+    data,
+    initialData,
+  )
+
+  const {
+    forceSlow,
+  } = { ...data }
 
   return (
     <Modal
@@ -82,217 +108,279 @@ export default ({
       buttonClassName={`min-w-max ${disabled ? 'cursor-not-allowed' : ''} ${applied ? 'ring-2 ring-green-500 dark:ring-white' : ''} rounded-lg shadow flex items-center justify-center`}
       title="Options"
       body={<div className="form mt-2">
-        {fields.map((f, i) => (
-          <div
-            key={i}
-            className="form-element"
-          >
-            {f.label && (
-              <div className="form-label text-slate-800 dark:text-slate-200 font-medium">
-                {f.label}
-              </div>
-            )}
-            {f.type === 'select' ?
-              <select
-                placeholder={f.placeholder}
-                value={data?.[f.name]}
-                onChange={e => {
-                  console.log('[Options]', {
-                    ...data,
-                    [`${f.name}`]: e.target.value,
-                  })
+        {fields
+          .map((f, i) => {
+            const {
+              label,
+              name,
+              size,
+              type,
+              placeholder,
+              options,
+              presets,
+              postfix,
+            } = { ...f }
 
-                  setData({
-                    ...data,
-                    [`${f.name}`]: e.target.value,
-                  })
-                }}
-                className="form-select bg-slate-50 border-0 focus:ring-0 rounded-lg"
+            return (
+              <div
+                key={i}
+                className="form-element"
               >
-                {f.options?.map((o, i) => (
-                  <option
-                    key={i}
-                    title={o.title}
-                    value={o.value}
-                  >
-                    {o.name}
-                  </option>
-                ))}
-              </select>
-              :
-              f.type === 'switch' ?
-                f.name === 'forceSlow' ?
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      checked={!(typeof data?.[f.name] === 'boolean' ? data[f.name] : false)}
-                      onChange={e => {
-                        console.log('[Options]', {
-                          ...data,
-                          [`${f.name}`]: !data?.[f.name],
-                        })
-
-                        setData({
-                          ...data,
-                          [`${f.name}`]: !data?.[f.name],
-                        })
-                      }}
-                      checkedIcon={false}
-                      uncheckedIcon={false}
-                      onColor="#3b82f6"
-                      onHandleColor="#f8fafc"
-                      offColor="#64748b"
-                      offHandleColor="#f8fafc"
-                    />
-                    {data?.forceSlow ?
-                      <Popover
-                        placement="top"
-                        title="Slow Path (Nomad)"
-                        content="Use bridge only (wait 30-60 mins, no fees)"
-                        titleClassName="normal-case font-semibold py-1.5"
-                      >
-                        <span className="uppercase font-bold">
-                          Slow
-                        </span>
-                      </Popover>
-                      :
-                      <Popover
-                        placement="top"
-                        title="Fast Path"
-                        content="Connext Router (+ Nomad) (less than 3 mins, .05% fees)"
-                        titleClassName="normal-case font-semibold py-1.5"
-                      >
-                        <span className="uppercase font-bold">
-                          Fast
-                        </span>
-                      </Popover>
-                    }
+                {label && (
+                  <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
+                    {label}
                   </div>
-                  :
-                  <Switch
-                    checked={typeof data?.[f.name] === 'boolean' ? data[f.name] : false}
+                )}
+                {type === 'select' ?
+                  <select
+                    placeholder={placeholder}
+                    value={data?.[name]}
                     onChange={e => {
-                      console.log('[Options]', {
+                      const _data = {
                         ...data,
-                        [`${f.name}`]: !data?.[f.name],
-                      })
+                        [`${name}`]: e.target.value,
+                      }
 
-                      setData({
-                        ...data,
-                        [`${f.name}`]: !data?.[f.name],
-                      })
-                    }}
-                    onColor="#3b82f6"
-                    onHandleColor="#f8fafc"
-                    offColor="#64748b"
-                    offHandleColor="#f8fafc"
-                  />
-                :
-                f.type === 'textarea' ?
-                  <textarea
-                    type="text"
-                    rows="5"
-                    placeholder={f.placeholder}
-                    value={data?.[f.name]}
-                    onChange={e => {
-                      console.log('[Options]', {
-                        ...data,
-                        [`${f.name}`]: e.target.value,
-                      })
+                      console.log(
+                        '[Options]',
+                        _data,
+                      )
 
-                      setData({
-                        ...data,
-                        [`${f.name}`]: e.target.value,
-                      })
+                      setData(_data)
                     }}
-                    className="form-textarea border-0 focus:ring-0 rounded-lg"
-                  />
-                  :
-                  f.type === 'number' ?
-                    <div className="flex items-center space-x-3">
-                      <DebounceInput
-                        debounceTimeout={300}
-                        size={f.size || 'small'}
-                        type={f.type}
-                        placeholder={f.placeholder}
-                        value={typeof data?.[f.name] === 'number' && data[f.name] >= 0 ? data[f.name] : ''}
+                    className="form-select bg-slate-50 border-0 focus:ring-0 rounded-lg"
+                  >
+                    {(options || [])
+                      .map((o, j) => {
+                        const {
+                          title,
+                          value,
+                          name,
+                        } = { ...o }
+
+                        return (
+                          <option
+                            key={j}
+                            title={title}
+                            value={value}
+                          >
+                            {name}
+                          </option>
+                        )
+                      })
+                    }
+                  </select> :
+                  type === 'switch' ?
+                    name === 'forceSlow' ?
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={!(
+                            typeof data?.[name] === 'boolean' ?
+                              data[name] :
+                              false
+                          )}
+                          onChange={e => {
+                            const _data = {
+                              ...data,
+                              [`${name}`]: !data?.[name],
+                            }
+
+                            console.log(
+                              '[Options]',
+                              _data,
+                            )
+
+                            setData(_data)
+                          }}
+                          checkedIcon={false}
+                          uncheckedIcon={false}
+                          onColor={switch_color(theme).on}
+                          onHandleColor="#f8fafc"
+                          offColor={switch_color(theme).off}
+                          offHandleColor="#f8fafc"
+                        />
+                        {forceSlow ?
+                          <Popover
+                            placement="top"
+                            title="Slow Path (Nomad)"
+                            content="Use bridge only (wait 30-60 mins, no fees)"
+                            titleClassName="normal-case font-semibold py-1.5"
+                          >
+                            <span className="uppercase font-bold">
+                              Slow
+                            </span>
+                          </Popover> :
+                          <Popover
+                            placement="top"
+                            title="Fast Path"
+                            content="Connext Router (+ Nomad) (less than 3 mins, .05% fees)"
+                            titleClassName="normal-case font-semibold py-1.5"
+                          >
+                            <span className="uppercase font-bold">
+                              Fast
+                            </span>
+                          </Popover>
+                        }
+                      </div> :
+                      <Switch
+                        checked={typeof data?.[name] === 'boolean' ?
+                          data[name] :
+                          false
+                        }
                         onChange={e => {
-                          const regex = /^[0-9.\b]+$/
-                          let value
-
-                          if (e.target.value === '' || regex.test(e.target.value)) {
-                            value = e.target.value
+                          const _data = {
+                            ...data,
+                            [`${name}`]: !data?.[name],
                           }
 
-                          value = ['slippage'].includes(f.name) && (value <= 0 || value > 100) ?
-                            DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
-                            value
+                          console.log(
+                            '[Options]',
+                            _data,
+                          )
 
-                          console.log('[Options]', {
-                            ...data,
-                            [`${f.name}`]: value && !isNaN(value) ?
-                              Number(value) :
-                              value,
-                          })
-
-                          setData({
-                            ...data,
-                            [`${f.name}`]: value && !isNaN(value) ?
-                              Number(value) :
-                              value,
-                          })
+                          setData(_data)
                         }}
-                        onWheel={e => e.target.blur()}
-                        onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                        className={`w-20 bg-slate-50 dark:bg-slate-800 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
-                      />
-                      {f?.presets.length > 0 && (
-                        <div className="flex items-center space-x-2.5">
-                          {f.presets.map((p, i) => (
-                            <div
-                              key={i}
-                              onClick={() => {
-                                console.log('[Options]', {
-                                  ...data,
-                                  [`${f.name}`]: p,
-                                })
+                        checkedIcon={false}
+                        uncheckedIcon={false}
+                        onColor={switch_color(theme).on}
+                        onHandleColor="#f8fafc"
+                        offColor={switch_color(theme).off}
+                        offHandleColor="#f8fafc"
+                      /> :
+                    type === 'textarea' ?
+                      <textarea
+                        type="text"
+                        rows="5"
+                        placeholder={placeholder}
+                        value={data?.[name]}
+                        onChange={e => {
+                          const _data = {
+                            ...data,
+                            [`${name}`]: e.target.value,
+                          }
 
-                                setData({
-                                  ...data,
-                                  [`${f.name}`]: p,
-                                })
-                              }}
-                              className={`${data?.[f.name] === p ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-semibold'} rounded-lg cursor-pointer py-1 px-2`}
-                            >
-                              {p} {f.postfix}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    :
-                    <input
-                      type={f.type}
-                      placeholder={f.placeholder}
-                      value={data?.[f.name]}
-                      onChange={e => {
-                        console.log('[Options]', {
-                          ...data,
-                          [`${f.name}`]: e.target.value,
-                        })
+                          console.log(
+                            '[Options]',
+                            _data,
+                          )
 
-                        setData({
-                          ...data,
-                          [`${f.name}`]: e.target.value,
-                        })
-                      }}
-                      className="form-input border-0 focus:ring-0 rounded-lg"
-                    />
-            }
-          </div>
-        ))}
+                          setData(_data)
+                        }}
+                        className="form-textarea border-0 focus:ring-0 rounded-lg"
+                      /> :
+                      type === 'number' ?
+                        <div className="flex items-center space-x-3">
+                          <DebounceInput
+                            debounceTimeout={300}
+                            size={
+                              size ||
+                              'small'
+                            }
+                            type={type}
+                            placeholder={placeholder}
+                            value={typeof data?.[name] === 'number' && data[name] >= 0 ?
+                              data[name] :
+                              ''
+                            }
+                            onChange={e => {
+                              const regex = /^[0-9.\b]+$/
+
+                              let value
+
+                              if (
+                                e.target.value === '' ||
+                                regex.test(e.target.value)
+                              ) {
+                                value = e.target.value
+                              }
+
+                              value = ['slippage'].includes(name) && (value <= 0 || value > 100) ?
+                                DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
+                                value
+
+                              const _data = {
+                                ...data,
+                                [`${name}`]: value && !isNaN(value) ?
+                                  Number(value) :
+                                  value,
+                              }
+
+                              console.log(
+                                '[Options]',
+                                _data,
+                              )
+
+                              setData(_data)
+                            }}
+                            onWheel={e => e.target.blur()}
+                            onKeyDown={e =>
+                              [
+                                'e',
+                                'E',
+                                '-',
+                              ].includes(e.key) &&
+                              e.preventDefault()
+                            }
+                            className={`w-20 bg-slate-50 dark:bg-slate-800 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
+                          />
+                          {
+                            presets?.length > 0 &&
+                            (
+                              <div className="flex items-center space-x-2.5">
+                                {presets
+                                  .map((p, j) => (
+                                    <div
+                                      key={j}
+                                      onClick={() => {
+                                        const _data = {
+                                          ...data,
+                                          [`${name}`]: p,
+                                        }
+
+                                        console.log(
+                                          '[Options]',
+                                          _data,
+                                        )
+
+                                        setData(_data)
+                                      }}
+                                      className={`${data?.[name] === p ? 'bg-slate-100 dark:bg-slate-800 font-semibold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-medium'} rounded-lg cursor-pointer py-1 px-2`}
+                                    >
+                                      {p} {postfix}
+                                    </div>
+                                  ))
+                                }
+                              </div>
+                            )
+                          }
+                        </div> :
+                        <input
+                          type={type}
+                          placeholder={placeholder}
+                          value={data?.[name]}
+                          onChange={e => {
+                            const _data = {
+                              ...data,
+                              [`${name}`]: e.target.value,
+                            }
+
+                            console.log(
+                              '[Options]',
+                              _data,
+                            )
+
+                            setData(_data)
+                          }}
+                          className="form-input border-0 focus:ring-0 rounded-lg"
+                        />
+                }
+              </div>
+            )
+          })
+        }
       </div>}
       onCancel={() => reset()}
-      confirmDisabled={!hasChanged}
+      confirmDisabled={!changed}
       onConfirm={() => {
         if (onChange) {
           onChange(data)

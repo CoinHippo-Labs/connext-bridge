@@ -70,7 +70,7 @@ export default ({
       />
       {typeof gasPrice === 'number' ?
         <>
-          <span className="font-semibold">
+          <span className="whitespace-nowrap font-semibold">
             {number_format(
               gasPrice,
               '0,0',
