@@ -168,7 +168,9 @@ export default () => {
       const destination_chain = paths[paths.indexOf('to') + 1]
       const asset = _.head(paths) !== 'from' ?
         _.head(paths) :
-        null
+        process.env.NEXT_PUBLIC_NETWORK === 'testnet' ?
+          'test' :
+          'usdc'
 
       const source_chain_data = chains_data?.find(c => c?.id === source_chain)
       const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
@@ -323,6 +325,7 @@ export default () => {
         amount > liquidity_amount :
         false,
     })
+
     setEstimateTrigger(moment().valueOf())
     setApproveResponse(null)
     setXcall(null)
@@ -331,7 +334,7 @@ export default () => {
 
   // update balances
   useEffect(() => {
-    const {
+    let {
       source_chain,
       destination_chain,
     } = { ...bridge }
@@ -357,16 +360,39 @@ export default () => {
       if (
         !params?.source_chain &&
         !asPath.includes('from-') &&
-        chains_data?.findIndex(c => !c?.disabled && c?.id === id) > -1
+        chains_data?.findIndex(c =>
+          !c?.disabled &&
+          c?.id === id
+        ) > -1
       ) {
-        setBridge({
-          ...bridge,
-          source_chain: id,
-        })
+        source_chain = id
       }
 
       getBalances(id)
     }
+
+    if (Object.keys(bridge).length > 0) {
+      source_chain = source_chain ||
+        _.head(
+          chains_data?.filter(c =>
+            !c?.disabled &&
+            c?.id !== destination_chain
+          )
+        )?.id
+      destination_chain = destination_chain ||
+        _.head(
+          chains_data?.filter(c =>
+            !c?.disabled &&
+            c?.id !== source_chain
+          )
+        )?.id
+    }
+
+    setBridge({
+      ...bridge,
+      source_chain,
+      destination_chain,
+    })
   }, [asPath, chain_id, chains_data])
 
   // update balances
@@ -1911,7 +1937,14 @@ export default () => {
           {
             ['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) &&
             (
-              <Faucet />
+              [
+                'WETH',
+              ].includes(source_contract_data?.symbol) ?
+                <Faucet
+                  token_id={asset}
+                  contract_data={source_contract_data}
+                /> :
+                <Faucet />
             )
           }
           {/*<PoweredBy />*/}

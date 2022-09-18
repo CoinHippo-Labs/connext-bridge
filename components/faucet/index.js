@@ -61,23 +61,11 @@ export default ({
   const [minting, setMinting] = useState(null)
   const [mintResponse, setMintResponse] = useState(null)
 
-  const fields = [
-    {
-      label: 'Chain',
-      name: 'chain',
-      type: 'select-chain',
-      placeholder: 'Select chain to faucet',
-    },
-    {
-      label: 'Recipient Address',
-      name: 'address',
-      type: 'text',
-      placeholder: 'Faucet token to an address',
-    },
-  ]
-
   useEffect(() => {
-    if (chain_id && address) {
+    if (
+      chain_id &&
+      address
+    ) {
       let {
         chain,
       } = { ...data }
@@ -125,14 +113,34 @@ export default ({
         signer,
       )
 
-      const response = await contract.mint(
+      const _address = is_wrapped ?
+        contract_address :
         data?.address ||
-          address,
+          address
+
+      const _amount =
         utils.parseUnits(
-          faucet_amount.toString(),
-          decimals || 18,
+          (is_wrapped ?
+            data?.amount :
+            faucet_amount
+          )
+          .toString(),
+          is_wrapped ?
+            'ether' :
+            decimals || 18,
         )
-      )
+
+      const response = is_wrapped ?
+        await signer.sendTransaction(
+          {
+            to: _address,
+            value: _amount,
+          }
+        ) :
+        await contract.mint(
+          _address,
+          _amount,
+        )
 
       const {
         hash,
@@ -151,8 +159,14 @@ export default ({
           'failed' :
           'success',
         message: !status ?
-          'Failed to faucet' :
-          'Faucet Successful',
+          `Failed to ${is_wrapped ?
+            'wrap' :
+            'faucet'
+          }` :
+          `${is_wrapped ?
+            'Wrap' :
+            'Faucet'
+          } Successful`,
         ...response,
       })
     } catch (error) {
@@ -166,11 +180,49 @@ export default ({
     setMinting(false)
   }
 
+  const asset_data = assets_data?.find(a => a?.id === token_id)
+  const {
+    symbol,
+  } = { ...asset_data }
+
+  const is_wrapped =
+    [
+      'WETH',
+    ].includes(contract_data?.symbol)
+
+  const fields = is_wrapped ?
+    [
+      {
+        label: 'Amount',
+        name: 'amount',
+        type: 'number',
+        placeholder: `${symbol} amount to wrap`,
+      },
+    ] :
+    [
+      {
+        label: 'Chain',
+        name: 'chain',
+        type: 'select-chain',
+        placeholder: 'Select chain to faucet',
+      },
+      {
+        label: 'Recipient Address',
+        name: 'address',
+        type: 'text',
+        placeholder: 'Faucet token to an address',
+      },
+    ]
+
   const {
     chain,
   } = { ...data }
 
-  const chain_data = chains_data?.find(c => c?.id === data?.chain)
+  const chain_data = chains_data?.find(c =>
+    is_wrapped ?
+      c?.chain_id === contract_data.chain_id :
+      c?.id === chain
+  )
   const {
     image,
     explorer,
@@ -179,11 +231,6 @@ export default ({
     url,
     transaction_path,
   } = { ...explorer }
-
-  const asset_data = assets_data?.find(a => a?.id === token_id)
-  const {
-    symbol,
-  } = { ...asset_data }
 
   const {
     status,
@@ -212,7 +259,12 @@ export default ({
             )
           }
           <span className="uppercase tracking-wider font-medium">
-            Faucet
+            {is_wrapped ?
+              <>
+                Wrap {symbol}
+              </> :
+              'Faucet'
+            }
           </span>
           {collapse ?
             <BiChevronDown
@@ -329,22 +381,32 @@ export default ({
                         onClick={() => mint()}
                         className={`bg-blue-600 hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
                       >
-                        {minting && (
-                          <RotatingSquare
-                            color="white"
-                            width="16"
-                            height="16"
-                          />
-                        )}
-                        <span>
-                          Faucet
-                        </span>
-                        <span className="font-semibold">
-                          {number_format(
-                            faucet_amount,
-                            '0,0.00',
-                          )}
-                        </span>
+                        {
+                          minting &&
+                          (
+                            <RotatingSquare
+                              color="white"
+                              width="16"
+                              height="16"
+                            />
+                          )
+                        }
+                        {is_wrapped ?
+                          <span>
+                            Wrap
+                          </span> :
+                          <>
+                            <span>
+                              Faucet
+                            </span>
+                            <span className="font-semibold">
+                              {number_format(
+                                faucet_amount,
+                                '0,0.00',
+                              )}
+                            </span>
+                          </>
+                        }
                         <span>
                           {
                             contract_data?.symbol ||
@@ -364,7 +426,7 @@ export default ({
             <Alert
               color={`${status === 'failed' ?
                 'bg-red-400 dark:bg-red-500' :
-                tatus === 'success' ?
+                status === 'success' ?
                   'bg-green-400 dark:bg-green-500' :
                   'bg-blue-400 dark:bg-blue-500'
               } text-white mb-4 sm:mb-6`}

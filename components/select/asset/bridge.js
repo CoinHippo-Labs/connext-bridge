@@ -72,6 +72,7 @@ export default ({
   const destination_contract_data = contracts?.find(c => c?.chain_id === destination_chain_data?.chain_id)
 
   const {
+    name,
     symbol,
     image,
     color,
@@ -108,7 +109,7 @@ export default ({
               )
             }
           </div>*/}
-          <div className="sm:col-span-3 w-full min-w-max flex items-center justify-center space-x-1.5">
+          <div className="col-span-2 sm:col-span-3 w-full min-w-max flex items-center justify-center space-x-2">
             {image && (
               <div>
                 <div className="hidden sm:flex">
@@ -131,9 +132,9 @@ export default ({
                 </div>
               </div>
             )}
-            <span className="text-sm sm:text-lg font-semibold">
+            <span className="tracking-wider text-sm sm:text-lg font-medium">
               {
-                symbol ||
+                name ||
                 'Select Token'
               }
             </span>
@@ -164,7 +165,7 @@ export default ({
           />
         </div>
       }
-      buttonClassName={`w-full min-w-max h-20 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-xl shadow dark:shadow-slate-700 ${disabled ? 'cursor-not-allowed' : ''} grid grid-cols-3 sm:grid-cols-3 items-center gap-2 py-2 px-3`}
+      buttonClassName={`w-full min-w-max h-20 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-xl shadow dark:shadow-slate-700 ${disabled ? 'cursor-not-allowed' : ''} grid grid-cols-2 sm:grid-cols-3 items-center gap-2 py-2 px-3`}
       buttonStyle={{
         background: color ?
           `${color}28` :

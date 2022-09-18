@@ -207,7 +207,10 @@ export default () => {
       if (
         !params?.chain &&
         !asPath.includes('on-') &&
-        chains_data?.findIndex(c => !c?.disabled && c?.id === id) > -1
+        chains_data?.findIndex(c =>
+          !c?.disabled &&
+          c?.id === id
+        ) > -1
       ) {
         setPool({
           ...pool,

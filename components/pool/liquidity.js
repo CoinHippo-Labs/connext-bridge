@@ -1930,7 +1930,14 @@ export default ({
       }
       {
         ['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) &&
-        y_asset_data?.symbol?.startsWith('mad') &&
+        (
+          [
+            'test',
+          ].includes(y_asset_data?.id) ||
+          [
+            'WETH',
+          ].includes(y_asset_data?.symbol)
+        ) &&
         (
           <Faucet
             token_id={asset}
