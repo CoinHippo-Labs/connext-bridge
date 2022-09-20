@@ -545,6 +545,7 @@ export default () => {
 
               const symbols = (symbol || '')
                 .split('-')
+                .filter(s => s)
 
               if (pool) {
                 console.log(

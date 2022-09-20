@@ -51,7 +51,7 @@
         "symbol": "madWETH",
         "is_pool": true,
         "wrapped": {
-          "contract_address": "0x4E283927E35b7118eA546Ef58Ea60bfF59E857DB",
+          "contract_address": "0x74c6FD7D2Bc6a8F0Ebd7D78321A95471b8C2B806",
           "decimals": 18,
           "symbol": "WETH"
         }

@@ -45,6 +45,7 @@ export default () => {
         data: (data || '')
           .trim()
           .split('\n')
+          .filter(s => s)
           .join('<br>'),
       },
       address && {

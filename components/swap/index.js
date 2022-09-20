@@ -218,6 +218,25 @@ export default () => {
       }
     }
 
+    if (
+      !(
+        params.chain &&
+        params.asset
+      ) &&
+      pool_assets_data?.length > 0
+    ) {
+      const {
+        id,
+        contracts,
+      } = { ..._.head(pool_assets_data) }
+
+      params.chain = params.chain ||
+        chains_data?.find(c => c?.chain_id === _.head(contracts)?.chain_id)?.id
+
+      params.asset = params.asset ||
+        id
+    }
+
     if (Object.keys(params).length > 0) {
       const {
         chain,
@@ -426,6 +445,7 @@ export default () => {
 
                   const symbols = (symbol || '')
                     .split('-')
+                    .filter(s => s)
 
                   const asset_data = pool_assets_data.find(a =>
                     symbols.findIndex(s => equals_ignore_case(s, a?.symbol)) > -1 ||

@@ -339,6 +339,7 @@ export default () => {
 
                   const symbols = (symbol || '')
                     .split('-')
+                    .filter(s => s)
                   const asset_data = pool_assets_data?.find(a =>
                     symbols.findIndex(s =>
                       equals_ignore_case(s, a?.symbol)
