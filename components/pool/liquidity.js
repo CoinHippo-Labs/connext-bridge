@@ -1532,7 +1532,10 @@ export default ({
                     >
                       <span className="flex items-center justify-center space-x-1.5">
                         {
-                          disabled &&
+                          (
+                            calling ||
+                            approving
+                          ) &&
                           (
                             <TailSpin
                               color="white"
@@ -1890,7 +1893,10 @@ export default ({
                     >
                       <span className="flex items-center justify-center space-x-1.5">
                         {
-                          disabled &&
+                          (
+                            calling ||
+                            approving
+                          ) &&
                           (
                             <TailSpin
                               color="white"
@@ -1931,17 +1937,23 @@ export default ({
       {
         ['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) &&
         (
+          // faucet
           [
             'test',
           ].includes(y_asset_data?.id) ||
+          // wrap
           [
             'WETH',
-          ].includes(y_asset_data?.symbol)
+          ].findIndex(s =>
+            [
+              y_asset_data?.wrapped?.symbol,
+              y_asset_data?.symbol,
+            ].includes(s)
+          ) > -1
         ) &&
         (
           <Faucet
             token_id={asset}
-            faucet_amount={10}
             contract_data={y_asset_data}
           />
         )

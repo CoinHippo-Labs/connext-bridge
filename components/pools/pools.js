@@ -36,46 +36,50 @@ export default ({
   const [uncollapseAssetIds, setUncollapseAssetIds] = useState([])
 
   const data = view === 'my_pools' ?
-    (user_pools_data || [])
-      .map(p => {
-        const {
-          id,
-          lpTokenBalance,
-        } = { ...p }
-        let {
-          share,
-        } = { ...p }
+    user_pools_data ?
+      user_pools_data
+        .map(p => {
+          const {
+            id,
+            lpTokenBalance,
+          } = { ...p }
+          let {
+            share,
+          } = { ...p }
 
-        const pool_data = pools_data?.find(_p => _p?.id === id)
-        const {
-          liquidity,
-        } = { ...pool_data }
+          const pool_data = pools_data?.find(_p => _p?.id === id)
+          const {
+            liquidity,
+          } = { ...pool_data }
 
-        share = lpTokenBalance * 100 /
-          (Number(liquidity) || 1)
+          share = lpTokenBalance * 100 /
+            (Number(liquidity) || 1)
 
+          return {
+            ...p,
+            share,
+          }
+        }) :
+        null :
+    pools_data ?
+      Object.entries(
+        _.groupBy(
+          pools_data,
+          'asset_data.id',
+        )
+      )
+      .map(([k, v]) => {
         return {
-          ...p,
-          share,
+          id: k,
+          asset_data: _.head(v)?.asset_data,
+          pools: _.orderBy(
+            v,
+            ['liquidity'],
+            ['desc'],
+          ),
         }
       }) :
-    Object.entries(
-      _.groupBy(
-        pools_data || [],
-        'asset_data.id',
-      )
-    )
-    .map(([k, v]) => {
-      return {
-        id: k,
-        asset_data: _.head(v)?.asset_data,
-        pools: _.orderBy(
-          v,
-          ['liquidity'],
-          ['desc'],
-        ),
-      }
-    })
+      null
 
   return (
     data ?

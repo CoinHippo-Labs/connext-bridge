@@ -1939,7 +1939,12 @@ export default () => {
             (
               [
                 'WETH',
-              ].includes(source_contract_data?.symbol) ?
+              ].findIndex(s =>
+                [
+                  source_contract_data?.wrapped?.symbol,
+                  source_contract_data?.symbol,
+                ].includes(s)
+              ) > -1 ?
                 <Faucet
                   token_id={asset}
                   contract_data={source_contract_data}

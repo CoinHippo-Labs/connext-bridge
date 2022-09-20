@@ -105,6 +105,7 @@ export default ({
       const {
         contract_address,
         decimals,
+        wrapped,
       } = { ..._contract_data }
 
       const contract = new Contract(
@@ -114,7 +115,8 @@ export default ({
       )
 
       const _address = is_wrapped ?
-        contract_address :
+        wrapped?.contract_address ||
+          contract_address :
         data?.address ||
           address
 
@@ -130,12 +132,38 @@ export default ({
             decimals || 18,
         )
 
-      const response = is_wrapped ?
-        await signer.sendTransaction(
+      const gasLimit = 500000
+
+      console.log(
+        is_wrapped ?
+          '[Wrap]' :
+          '[Mint]',
+        is_wrapped ?
           {
             to: _address,
             value: _amount,
-          }
+            overrides: {
+              gasLimit,
+            },
+          } :
+          {
+            address: _address,
+            amount: _amount,
+          },
+      )
+
+      const wrap_request = is_wrapped &&
+        await signer.populateTransaction(
+          {
+            to: _address,
+            value: _amount,
+            gasLimit,
+          },
+        )
+
+      const response = is_wrapped ?
+        await signer.sendTransaction(
+          wrap_request,
         ) :
         await contract.mint(
           _address,
@@ -181,14 +209,22 @@ export default ({
   }
 
   const asset_data = assets_data?.find(a => a?.id === token_id)
-  const {
+  let {
     symbol,
   } = { ...asset_data }
+
+  symbol = contract_data?.wrapped?.symbol ||
+    symbol
 
   const is_wrapped =
     [
       'WETH',
-    ].includes(contract_data?.symbol)
+    ].findIndex(s =>
+      [
+        contract_data?.wrapped?.symbol,
+        contract_data?.symbol,
+      ].includes(s)
+    ) > -1
 
   const fields = is_wrapped ?
     [
@@ -409,6 +445,8 @@ export default ({
                         }
                         <span>
                           {
+                            is_wrapped ?
+                              symbol :
                             contract_data?.symbol ||
                             symbol
                           }

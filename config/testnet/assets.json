@@ -48,8 +48,13 @@
         "contract_address": "0x39B061B7e41DE8B721f9aEcEB6b3f17ECB7ba63E",
         "chain_id": 420,
         "decimals": 18,
-        "symbol": "nextWETH",
-        "is_pool": true
+        "symbol": "madWETH",
+        "is_pool": true,
+        "wrapped": {
+          "contract_address": "0x4E283927E35b7118eA546Ef58Ea60bfF59E857DB",
+          "decimals": 18,
+          "symbol": "WETH"
+        }
       }
     ],
     "color": "#2e3130",

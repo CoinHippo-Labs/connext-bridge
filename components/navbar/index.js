@@ -514,6 +514,15 @@ export default () => {
                 contract_address,
               )
 
+              console.log(
+                '[Pool]',
+                {
+                  domain_id,
+                  contract_address,
+                  pool,
+                },
+              )
+
               const {
                 symbol,
                 decimals,
@@ -522,11 +531,32 @@ export default () => {
               const symbols = (symbol || '')
                 .split('-')
 
+              if (pool) {
+                console.log(
+                  '[getPoolStats]',
+                  {
+                    domain_id,
+                    contract_address,
+                  },
+                )
+              }
+
               const stats = pool &&
                 await sdk.nxtpSdkPool.getPoolStats(
                   domain_id,
                   contract_address,
                 )
+
+              if (pool) {
+                console.log(
+                  '[PoolStats]',
+                  {
+                    domain_id,
+                    contract_address,
+                    stats,
+                  },
+                )
+              }
 
               const canonicals = pool &&
                 await sdk.nxtpSdkPool.getCanonicalFromLocal(
@@ -534,14 +564,35 @@ export default () => {
                   contract_address,
                 )
 
-              const canonicalDomain = canonicals?.[0],
-                canonicalId = canonicals?.[1]
+              const canonicalDomain = _.head(canonicals),
+                canonicalId = _.last(canonicals)
+
+              if (pool) {
+                console.log(
+                  '[getVirtualPrice]',
+                  {
+                    domain_id,
+                    canonicalId,
+                  },
+                )
+              }
 
               const rate = pool &&
                 await sdk.nxtpSdkPool.getVirtualPrice(
                   domain_id,
                   canonicalId,
                 )
+
+              if (pool) {
+                console.log(
+                  '[VirtualPrice]',
+                  {
+                    domain_id,
+                    canonicalId,
+                    rate,
+                  },
+                )
+              }
 
               data.push({
                 ...pool,
@@ -572,10 +623,12 @@ export default () => {
           }
         }
 
-        dispatch({
-          type: POOLS_DATA,
-          value: data,
-        })
+        if (data.length > 0) {
+          dispatch({
+            type: POOLS_DATA,
+            value: data,
+          })
+        }
       }
     }
 
