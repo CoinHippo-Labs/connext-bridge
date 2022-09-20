@@ -10,6 +10,7 @@ import { TailSpin, Oval, Watch } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
+import { TbArrowBigRight } from 'react-icons/tb'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit, BiEditAlt, BiCheckCircle } from 'react-icons/bi'
 import { GiPartyPopper } from 'react-icons/gi'
 
@@ -1241,7 +1242,7 @@ export default () => {
           <div className="w-full max-w-lg space-y-4">
             <div className="flex items-center justify-between space-x-2">
               <div className="space-y-1">
-                <h1 className="uppercase tracking-widest text-base sm:text-xl font-normal">
+                <h1 className="uppercase tracking-widest text-base sm:text-xl font-medium">
                   Bridge
                 </h1>
                 {
@@ -1362,7 +1363,10 @@ export default () => {
                       }}
                       className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out bg-slate-50 dark:bg-slate-900 ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
                     >
-                      <div className="flex sm:hidden">
+                      <TbArrowBigRight
+                        size={28}
+                      />
+                      {/*<div className="flex sm:hidden">
                         <Image
                           src="/logos/logo.png"
                           alt=""
@@ -1377,7 +1381,7 @@ export default () => {
                           width={32}
                           height={32}
                         />
-                      </div>
+                      </div>*/}
                     </button>
                   </div>
                   <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end">
