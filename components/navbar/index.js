@@ -164,7 +164,10 @@ export default () => {
   // price
   useEffect(() => {
     const getData = async is_interval => {
-      if (chains_data && assets_data) {
+      if (
+        chains_data &&
+        assets_data
+      ) {
         let updated_ids = is_interval ? [] :
           assets_data
             .filter(a => typeof a.price === 'number')
@@ -180,7 +183,13 @@ export default () => {
 
             if (chain_id) {
               const addresses = assets_data
-                .filter(a => !updated_ids.includes(a?.id) && a?.contracts?.findIndex(c => c?.chain_id === chain_id && c.contract_address) > -1)
+                .filter(a =>
+                  !updated_ids.includes(a?.id) &&
+                  a?.contracts?.findIndex(c =>
+                    c?.chain_id === chain_id &&
+                    c.contract_address
+                  ) > -1
+                )
                 .map(a => a.contracts.find(c => c?.chain_id === chain_id).contract_address)
 
               if (addresses.length > 0) {
@@ -191,7 +200,13 @@ export default () => {
 
                 if (Array.isArray(response)) {
                   response.forEach(t => {
-                    const asset_index = assets_data.findIndex(a => a?.id && a.contracts?.findIndex(c => c?.chain_id === t?.chain_id && equals_ignore_case(c.contract_address, t?.contract_address)) > -1)
+                    const asset_index = assets_data.findIndex(a =>
+                      a?.id &&
+                      a.contracts?.findIndex(c =>
+                        c?.chain_id === t?.chain_id &&
+                        equals_ignore_case(c.contract_address, t?.contract_address)
+                      ) > -1
+                    )
 
                     if (asset_index > -1) {
                       const asset = assets_data[asset_index]

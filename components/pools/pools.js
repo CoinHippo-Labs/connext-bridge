@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import { TailSpin } from 'react-loader-spinner'
@@ -33,7 +33,20 @@ export default ({
     pools_data,
   } = { ...pools }
 
-  const [uncollapseAssetIds, setUncollapseAssetIds] = useState([])
+  const [uncollapseAssetIds, setUncollapseAssetIds] = useState(null)
+
+  useEffect(() => {
+    if (
+      pools_data &&
+      !uncollapseAssetIds
+    ) {
+      const ids = pools_data
+        .map(p => p?.asset_data?.id)
+        .filter(id => id)
+
+      setUncollapseAssetIds(ids)
+    }
+  }, pools_data)
 
   const data = view === 'my_pools' ?
     user_pools_data ?
@@ -141,7 +154,7 @@ export default ({
                           </span>
                         </div>
                         {
-                          uncollapseAssetIds.includes(id) &&
+                          uncollapseAssetIds?.includes(id) &&
                           (pools || [])
                             .map((p, i) => {
                               const {
@@ -204,10 +217,10 @@ export default ({
                 const onClick = () => {
                   if (pools?.length > 0) {
                     setUncollapseAssetIds(
-                      uncollapseAssetIds.includes(id) ?
+                      uncollapseAssetIds?.includes(id) ?
                         uncollapseAssetIds.filter(_id => _id !== id) :
                         _.concat(
-                          uncollapseAssetIds,
+                          uncollapseAssetIds || [],
                           id,
                         )
                     )
@@ -276,7 +289,7 @@ export default ({
                                   onClick={() => onClick()}
                                   className="w-6 h-6 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full flex items-center justify-center p-1"
                                 >
-                                  {uncollapseAssetIds.includes(id) ?
+                                  {uncollapseAssetIds?.includes(id) ?
                                     <MdKeyboardArrowUp
                                       size={18}
                                     /> :
@@ -293,7 +306,7 @@ export default ({
                           }
                         </div>
                         {
-                          uncollapseAssetIds.includes(id) &&
+                          uncollapseAssetIds?.includes(id) &&
                           (pools || [])
                             .map((p, i) => {
                               const {
@@ -375,7 +388,7 @@ export default ({
                       </span>
                     </div>
                     {
-                      uncollapseAssetIds.includes(id) &&
+                      uncollapseAssetIds?.includes(id) &&
                       (pools || [])
                         .map((p, i) => {
                           const {
@@ -450,7 +463,7 @@ export default ({
                       </span>
                     </div>
                     {
-                      uncollapseAssetIds.includes(id) &&
+                      uncollapseAssetIds?.includes(id) &&
                       (pools || [])
                         .map((p, i) => {
                           const {
@@ -525,7 +538,7 @@ export default ({
                       </span>
                     </div>
                     {
-                      uncollapseAssetIds.includes(id) &&
+                      uncollapseAssetIds?.includes(id) &&
                       (pools || [])
                         .map((p, i) => {
                           const {
@@ -600,7 +613,7 @@ export default ({
                       </span>
                     </div>
                     {
-                      uncollapseAssetIds.includes(id) &&
+                      uncollapseAssetIds?.includes(id) &&
                       (pools || [])
                         .map((p, i) => {
                           const {

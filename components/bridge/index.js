@@ -1242,7 +1242,7 @@ export default () => {
             <div className="flex items-center justify-between space-x-2">
               <div className="space-y-1">
                 <h1 className="uppercase tracking-widest text-base sm:text-xl font-normal">
-                  Cross-Chain Transfer
+                  Bridge
                 </h1>
                 {
                   asPath?.includes('from-') &&
@@ -1279,7 +1279,7 @@ export default () => {
                       )}
                       <div className="flex items-center">
                         <span className="tracking-wider text-base font-medium">
-                          Liquidity
+                          Explorer
                         </span>
                         <TiArrowRight
                           size={20}
@@ -1688,7 +1688,7 @@ export default () => {
                                   className="min-w-max"
                                 />
                                 <span className="text-sm">
-                                  Insufficient router liquidity. Funds must transfer through the bridge directly. (wait time est. 30-60 mins)
+                                  Insufficient router liquidity. Funds must transfer through the bridge directly.
                                 </span>
                               </div>
                             )
@@ -1712,7 +1712,7 @@ export default () => {
                                     className="min-w-max"
                                   />
                                   <span className="text-sm">
-                                    Fast liquidity available! Transfer will likely complete within 3 minutes!
+                                    Fast liquidity available!
                                   </span>
                                 </div>
                             )
@@ -1937,6 +1937,7 @@ export default () => {
           {
             ['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) &&
             (
+              // wrap
               [
                 'WETH',
               ].findIndex(s =>
@@ -1949,6 +1950,7 @@ export default () => {
                   token_id={asset}
                   contract_data={source_contract_data}
                 /> :
+                // faucet
                 <Faucet />
             )
           }

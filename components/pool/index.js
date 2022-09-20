@@ -156,6 +156,25 @@ export default () => {
       }
     }
 
+    if (
+      !(
+        params.chain &&
+        params.asset
+      ) &&
+      pool_assets_data?.length > 0
+    ) {
+      const {
+        id,
+        contracts,
+      } = { ..._.head(pool_assets_data) }
+
+      params.chain = params.chain ||
+        chains_data?.find(c => c?.chain_id === _.head(contracts)?.chain_id)?.id
+
+      params.asset = params.asset ||
+        id
+    }
+
     if (Object.keys(params).length > 0) {
       const {
         chain,
@@ -291,7 +310,7 @@ export default () => {
         chain
       ) {
         try {
-          const chain_data = chains_data.find(c => c?.id === chain)
+          const chain_data = chains_data?.find(c => c?.id === chain)
           const {
             chain_id,
             domain_id,
@@ -304,65 +323,66 @@ export default () => {
 
           if (Array.isArray(response)) {
             setPools(
-              response.map(p => {
-                const {
-                  info,
-                  lpTokenBalance,
-                  poolTokenBalances,
-                } = { ...p }
-                const {
-                  symbol,
-                  decimals,
-                  balances,
-                  liquidity,
-                } = { ...info }
+              response
+                .map(p => {
+                  const {
+                    info,
+                    lpTokenBalance,
+                    poolTokenBalances,
+                  } = { ...p }
+                  const {
+                    symbol,
+                    decimals,
+                    balances,
+                    liquidity,
+                  } = { ...info }
 
-                const symbols = (symbol || '')
-                  .split('-')
-                const asset_data = pool_assets_data.find(a =>
-                  symbols.findIndex(s =>
-                    equals_ignore_case(s, a?.symbol)
-                  ) > -1 ||
-                  a?.contracts?.findIndex(c =>
-                    c?.chain_id === chain_id &&
+                  const symbols = (symbol || '')
+                    .split('-')
+                  const asset_data = pool_assets_data?.find(a =>
                     symbols.findIndex(s =>
-                      equals_ignore_case(s, c?.symbol)
+                      equals_ignore_case(s, a?.symbol)
+                    ) > -1 ||
+                    a?.contracts?.findIndex(c =>
+                      c?.chain_id === chain_id &&
+                      symbols.findIndex(s =>
+                        equals_ignore_case(s, c?.symbol)
+                      ) > -1
                     ) > -1
-                  ) > -1
-                )
+                  )
 
-                return {
-                  ...p,
-                  chain_data,
-                  asset_data,
-                  ...info,
-                  symbols,
-                  lpTokenBalance: Number(
-                    utils.formatUnits(
-                      BigNumber.from(lpTokenBalance || '0'),
-                      _.last(decimals) || 18,
-                    )
-                  ),
-                  poolTokenBalances: (poolTokenBalances || [])
-                    .map((b, i) =>
-                      Number(
-                        utils.formatUnits(
-                          BigNumber.from(b || '0'),
-                          decimals?.[i] || 18,
-                        )
+                  return {
+                    ...p,
+                    chain_data,
+                    asset_data,
+                    ...info,
+                    symbols,
+                    lpTokenBalance: Number(
+                      utils.formatUnits(
+                        BigNumber.from(lpTokenBalance || '0'),
+                        _.last(decimals) || 18,
                       )
                     ),
-                  balances: (balances || [])
-                    .map((b, i) =>
-                      Number(
-                        utils.formatUnits(
-                          BigNumber.from(b || '0'),
-                          decimals?.[i] || 18,
+                    poolTokenBalances: (poolTokenBalances || [])
+                      .map((b, i) =>
+                        Number(
+                          utils.formatUnits(
+                            BigNumber.from(b || '0'),
+                            decimals?.[i] || 18,
+                          )
                         )
-                      )
-                    ),
-                }
-              })
+                      ),
+                    balances: (balances || [])
+                      .map((b, i) =>
+                        Number(
+                          utils.formatUnits(
+                            BigNumber.from(b || '0'),
+                            decimals?.[i] || 18,
+                          )
+                        )
+                      ),
+                  }
+                })
             )
           }
           else {

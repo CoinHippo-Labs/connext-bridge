@@ -1264,7 +1264,7 @@ export default ({
                     }
                     className={`w-full bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
                   />
-                  <div
+                  {/*<div
                     onClick={() => {
                       setAmountX(x_balance_amount)
                       autoSetY(x_balance_amount)
@@ -1272,7 +1272,7 @@ export default ({
                     className={`${disabled || typeof x_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-700 text-blue-400 dark:text-slate-200 text-base font-medium py-0.5 px-2.5`}
                   >
                     Max
-                  </div>
+                  </div>*/}
                 </div>
                 {
                   typeof amountX === 'number' &&
@@ -1376,7 +1376,7 @@ export default ({
                     }
                     className={`w-full bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
                   />
-                  <div
+                  {/*<div
                     onClick={() => {
                       setAmountY(y_balance_amount)
                       autoSetX(y_balance_amount)
@@ -1384,7 +1384,7 @@ export default ({
                     className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-700 text-blue-400 dark:text-slate-200 text-base font-medium py-0.5 px-2.5`}
                   >
                     Max
-                  </div>
+                  </div>*/}
                 </div>
                 {
                   typeof amountY === 'number' &&
@@ -1405,7 +1405,7 @@ export default ({
               </div>
             </div>
           </div>
-          {advancedOptions}
+          {/*advancedOptions*/}
           <div className="flex items-end">
             {
               web3_provider &&
@@ -1765,7 +1765,7 @@ export default ({
               </div>
             </div>
           </div>
-          {advancedOptions}
+          {/*advancedOptions*/}
           <div className="flex items-end">
             {
               web3_provider &&
