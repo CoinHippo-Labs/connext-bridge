@@ -141,28 +141,36 @@ export default function CrosschainBridge() {
     let changed = false
 
     const query = paramsToObject(asPath?.indexOf('?') > -1 && asPath?.substring(asPath.indexOf('?') + 1))
-    if (query && Object.keys(query).length > 0 && Object.keys(swapConfig).length < 1 && chains_data && assets_data) {
-      if (query.sendingChainId && chains_data.findIndex(c => !c?.disabled && c.chain_id === Number(query.sendingChainId)) > -1) {
-        swapConfig.fromChainId = Number(query.sendingChainId)
 
-        if (query.sendingAssetId && assets_data.findIndex(a => a.contracts?.findIndex(c => c.chain_id === swapConfig.fromChainId && c.contract_address === query.sendingAssetId.toLowerCase()) > -1) > -1) {
-          swapConfig.fromAssetId = assets_data.find(a => a.contracts?.findIndex(c => c.chain_id === swapConfig.fromChainId && c.contract_address === query.sendingAssetId.toLowerCase()) > -1).id
-          swapConfig.toAssetId = swapConfig.fromAssetId
-        }
-      
-        changed = true
-      }
-      if (query.receivingChainId && Number(query.receivingChainId) !== swapConfig.fromChainId && chains_data.findIndex(c => !c?.disabled && c.chain_id === Number(query.receivingChainId)) > -1) {
-        swapConfig.toChainId = Number(query.receivingChainId)
+    if (
+      Object.keys({ ...query }).length > 0 &&
+      chains_data &&
+      assets_data
+    ) {
+      if (Object.keys(swapConfig).length < 1) {
+        if (query.sendingChainId && chains_data.findIndex(c => !c?.disabled && c.chain_id === Number(query.sendingChainId)) > -1) {
+          swapConfig.fromChainId = Number(query.sendingChainId)
 
-        if (!swapConfig.fromAssetId && query.receivingAssetId && assets_data.findIndex(a => a.contracts?.findIndex(c => c.chain_id === swapConfig.toChainId && c.contract_address === query.receivingAssetId.toLowerCase()) > -1) > -1) {
-          swapConfig.toAssetId = assets_data.find(a => a.contracts?.findIndex(c => c.chain_id === swapConfig.fromChainId && c.contract_address === query.receivingAssetId.toLowerCase()) > -1).id
-          swapConfig.fromAssetId = swapConfig.toAssetId
+          if (query.sendingAssetId && assets_data.findIndex(a => a.contracts?.findIndex(c => c.chain_id === swapConfig.fromChainId && c.contract_address === query.sendingAssetId.toLowerCase()) > -1) > -1) {
+            swapConfig.fromAssetId = assets_data.find(a => a.contracts?.findIndex(c => c.chain_id === swapConfig.fromChainId && c.contract_address === query.sendingAssetId.toLowerCase()) > -1).id
+            swapConfig.toAssetId = swapConfig.fromAssetId
+          }
+        
+          changed = true
         }
-      
-        changed = true
+        if (query.receivingChainId && Number(query.receivingChainId) !== swapConfig.fromChainId && chains_data.findIndex(c => !c?.disabled && c.chain_id === Number(query.receivingChainId)) > -1) {
+          swapConfig.toChainId = Number(query.receivingChainId)
+
+          if (!swapConfig.fromAssetId && query.receivingAssetId && assets_data.findIndex(a => a.contracts?.findIndex(c => c.chain_id === swapConfig.toChainId && c.contract_address === query.receivingAssetId.toLowerCase()) > -1) > -1) {
+            swapConfig.toAssetId = assets_data.find(a => a.contracts?.findIndex(c => c.chain_id === swapConfig.fromChainId && c.contract_address === query.receivingAssetId.toLowerCase()) > -1).id
+            swapConfig.fromAssetId = swapConfig.toAssetId
+          }
+        
+          changed = true
+        }
       }
-      if (!isNaN(query.amount) && swapConfig.fromChainId && swapConfig.toChainId && swapConfig.fromAssetId && swapConfig.toAssetId) {
+
+      if (!isNaN(query.amount)/* && swapConfig.fromChainId && swapConfig.toChainId && swapConfig.fromAssetId && swapConfig.toAssetId*/) {
         swapConfig.amount = Number(query.amount)
         changed = true
       }
@@ -1145,7 +1153,7 @@ export default function CrosschainBridge() {
                   </a>
                 )}
               </div>
-              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md space-y-8 sm:space-y-6 p-8 sm:p-6">
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md space-y-8 sm:space-y-6 p-8 sm:px-6 sm:pt-12">
                 <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-5 gap-6">
                   <div className="sm:col-span-2 flex flex-col items-center sm:items-start">
                     <div className="w-48 flex items-center justify-center space-x-1.5">
