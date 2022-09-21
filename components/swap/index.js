@@ -7,7 +7,8 @@ import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
 import { TailSpin, Watch } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
-import { MdSwapVert, MdClose } from 'react-icons/md'
+import { MdClose } from 'react-icons/md'
+import { HiSwitchVertical } from 'react-icons/hi'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiEditAlt, BiCheckCircle } from 'react-icons/bi'
 
 import Announcement from '../announcement'
@@ -1475,7 +1476,7 @@ export default () => {
                   }}
                   className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
                 >
-                  <MdSwapVert
+                  <HiSwitchVertical
                     size={32}
                   />
                 </button>

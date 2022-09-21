@@ -282,10 +282,10 @@ export default ({
 
   return asset_data &&
     (
-      <div className="w-full max-w-lg flex flex-col items-center justify-center">
+      <div className="w-full max-w-lg bg-slate-200 dark:bg-slate-900 bg-opacity-50 rounded-3xl flex flex-col items-center justify-center space-y-2 p-3 sm:p-6">
         <button
           onClick={() => setCollapse(!collapse)}
-          className="w-full flex items-center justify-center text-base font-semibold space-x-1.5 py-4"
+          className="w-full flex items-center justify-center text-base font-semibold space-x-1.5"
         >
           {!signer &&
             (
@@ -314,7 +314,7 @@ export default ({
         {
           !collapse &&
           (
-            <div className="w-full mb-2">
+            <div className="w-full">
               {fields
                 .map((f, i) => {
                   const {

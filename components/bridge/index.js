@@ -10,7 +10,7 @@ import { TailSpin, Oval, Watch } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
-import { TbArrowBigRight } from 'react-icons/tb'
+import { HiSwitchHorizontal } from 'react-icons/hi'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit, BiEditAlt, BiCheckCircle } from 'react-icons/bi'
 import { GiPartyPopper } from 'react-icons/gi'
 
@@ -1168,6 +1168,9 @@ export default () => {
   const destination_asset_data = assets_data?.find(a => a?.id === asset)
   const destination_contract_data = destination_asset_data?.contracts?.find(c => c?.chain_id === destination_chain_data?.chain_id)  
 
+  const {
+    color,
+  } = { ...source_asset_data }
   const source_symbol = source_contract_data?.symbol ||
     source_asset_data?.symbol
   const source_balance = balances_data?.[source_chain_data?.chain_id]?.find(b => equals_ignore_case(b?.contract_address, source_contract_data?.contract_address))
@@ -1241,8 +1244,8 @@ export default () => {
         <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6 my-4 sm:my-6 mx-1 sm:mx-4">
           <div className="w-full max-w-lg space-y-4">
             <div className="flex items-center justify-between space-x-2">
-              <div className="space-y-1">
-                <h1 className="uppercase tracking-widest text-base sm:text-xl font-medium">
+              <div className="space-y-1 sm:ml-2">
+                <h1 className="tracking-widest text-base sm:text-xl font-semibold">
                   Bridge
                 </h1>
                 {
@@ -1250,7 +1253,7 @@ export default () => {
                   asPath.includes('to-') &&
                   title &&
                   (
-                    <h2 className="tracking-wider text-slate-400 dark:text-slate-500 text-xs sm:text-sm">
+                    <h2 className="tracking-wider text-slate-600 dark:text-slate-400 text-xs">
                       {title.replace(
                         ' with Connext',
                         '',
@@ -1267,7 +1270,7 @@ export default () => {
                       href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${destination_chain_data.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="min-w-max bg-slate-50 hover:bg-slate-100 dark:bg-black dark:hover:bg-slate-900 cursor-pointer rounded-lg shadow flex items-center text-blue-600 dark:text-slate-200 space-x-2 py-1.5 px-2"
+                      className="min-w-max bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 cursor-pointer rounded-lg shadow flex items-center text-blue-600 dark:text-slate-200 space-x-2 py-1.5 px-2"
                     >
                       {destination_chain_data.image && (
                         <Image
@@ -1315,7 +1318,17 @@ export default () => {
                 />
               </div>
             </div>
-            <div className={`bg-slate-200 dark:bg-slate-900 bg-opacity-50 ${checkSupport() && amount > 0 ? 'border-0 border-blue-400 dark:border-blue-800 shadow-2xl shadow-blue-400 dark:shadow-blue-600' : 'shadow shadow-slate-200 dark:shadow-slate-700'} rounded-3xl space-y-6 pt-4 sm:pt-10 pb-3 sm:pb-8 px-3 sm:px-6`}>
+            <div
+              className="bg-slate-50 dark:bg-slate-900 bg-opacity-50 rounded-3xl space-y-6 pt-4 sm:pt-10 pb-3 sm:pb-8 px-3 sm:px-6"
+              style={checkSupport() && amount > 0 ?
+                {
+                  boxShadow: `${color}ff 0px 8px 76px 6px`,
+                  WebkitBoxShadow: `${color}ff 0px 8px 76px 6px`,
+                  MozBoxShadow: `${color}ff 0px 8px 76px 6px`,
+                } :
+                undefined
+              }
+            >
               <div className="space-y-2">
                 <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
                   <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start">
@@ -1361,9 +1374,9 @@ export default () => {
                         getBalances(source_chain)
                         getBalances(destination_chain)
                       }}
-                      className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out bg-slate-50 dark:bg-slate-900 ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
+                      className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out bg-slate-100 dark:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
                     >
-                      <TbArrowBigRight
+                      <HiSwitchHorizontal
                         size={28}
                       />
                       {/*<div className="flex sm:hidden">
@@ -1526,7 +1539,7 @@ export default () => {
                                   </span>
                                 </div>
                               </div>}
-                              className="bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg shadow dark:shadow-slate-700 text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
+                              className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
                               titleClassName="normal-case py-1.5"
                             >
                               Max
@@ -1596,7 +1609,7 @@ export default () => {
                           ].includes(e.key) &&
                           e.preventDefault()
                         }
-                        className={`w-36 sm:w-48 bg-slate-50 focus:bg-slate-100 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
+                        className={`w-36 sm:w-48 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
                       />
                     </div>
                   </div>
@@ -1639,12 +1652,16 @@ export default () => {
                                       Bridge Fee
                                     </div>
                                     <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
-                                      {number_format(
-                                        router_fee,
-                                        '0,0.000000',
-                                        true,
-                                      )}
-                                      {source_symbol}
+                                      <span>
+                                        {number_format(
+                                          router_fee,
+                                          '0,0.000000',
+                                          true,
+                                        )}
+                                      </span>
+                                      <span>
+                                        {source_symbol}
+                                      </span>
                                     </span>
                                   </div>
                                   <div className="flex items-center justify-between space-x-1">
@@ -1663,12 +1680,16 @@ export default () => {
                                         />
                                       </div> :
                                       <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
-                                        {number_format(
-                                          gas_fee,
-                                          '0,0.000000',
-                                          true,
-                                        )}
-                                        {source_gas_native_token?.symbol}
+                                        <span>
+                                          {number_format(
+                                            gas_fee,
+                                            '0,0.000000',
+                                            true,
+                                          )}
+                                        </span>
+                                        <span>
+                                          {source_gas_native_token?.symbol}
+                                        </span>
                                       </span>
                                     }
                                   </div>
@@ -1691,7 +1712,7 @@ export default () => {
                                   size={20}
                                   className="min-w-max"
                                 />
-                                <span className="text-sm">
+                                <span className="text-base">
                                   Insufficient router liquidity. Funds must transfer through the bridge directly.
                                 </span>
                               </div>
@@ -1706,7 +1727,7 @@ export default () => {
                                     size={20}
                                     className="min-w-max"
                                   />
-                                  <span className="text-sm">
+                                  <span className="text-base">
                                     Use bridge only (wait 30-60 mins, no fees)
                                   </span>
                                 </div> :
@@ -1715,7 +1736,7 @@ export default () => {
                                     size={20}
                                     className="min-w-max"
                                   />
-                                  <span className="text-sm">
+                                  <span className="text-base">
                                     Fast liquidity available!
                                   </span>
                                 </div>

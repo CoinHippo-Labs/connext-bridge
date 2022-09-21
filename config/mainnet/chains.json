@@ -34,7 +34,7 @@
       "transaction_path": "/tx/{tx}"
     },
     "image": "/logos/chains/ethereum.png",
-    "color": "#c0c2c3",
+    "color": "#636890",
     "group" : "evm"
   },
   {
