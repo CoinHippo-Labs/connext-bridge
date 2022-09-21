@@ -933,6 +933,14 @@ export default ({
             contract_address: _.last(tokens),
             decimals: _.last(decimals),
             symbol: _.last(symbols),
+            mintable: _.last(symbols)?.startsWith('mad') ||
+              [
+                'TEST',
+              ].findIndex(s => equals_ignore_case(s, _.last(symbols))) > -1,
+            wrapable:
+              [
+                'WETH',
+              ].findIndex(s => equals_ignore_case(s, _.last(symbols))) > -1,
           }
       ),
     }
@@ -1935,21 +1943,10 @@ export default ({
         </>
       }
       {
-        ['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) &&
         (
-          // faucet
-          [
-            'test',
-          ].includes(y_asset_data?.id) ||
-          // wrap
-          [
-            'WETH',
-          ].findIndex(s =>
-            [
-              y_asset_data?.wrapped?.symbol,
-              y_asset_data?.symbol,
-            ].includes(s)
-          ) > -1
+          y_asset_data?.mintable ||
+          y_asset_data?.wrapable ||
+          y_asset_data?.wrapped
         ) &&
         (
           <Faucet

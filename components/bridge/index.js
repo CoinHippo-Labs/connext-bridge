@@ -1960,23 +1960,16 @@ export default () => {
             </div>
           </div>
           {
-            ['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) &&
             (
-              // wrap
-              [
-                'WETH',
-              ].findIndex(s =>
-                [
-                  source_contract_data?.wrapped?.symbol,
-                  source_contract_data?.symbol,
-                ].includes(s)
-              ) > -1 ?
-                <Faucet
-                  token_id={asset}
-                  contract_data={source_contract_data}
-                /> :
-                // faucet
-                <Faucet />
+              source_contract_data?.mintable ||
+              source_contract_data?.wrapable ||
+              source_contract_data?.wrapped
+            ) &&
+            (
+              <Faucet
+                token_id={asset}
+                contract_data={source_contract_data}
+              />
             )
           }
           {/*<PoweredBy />*/}

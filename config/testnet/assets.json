@@ -9,19 +9,22 @@
         "contract_address": "0x7ea6eA49B0b0Ae9c5db7907d139D9Cd3439862a1",
         "chain_id": 5,
         "decimals": 18,
-        "symbol": "TEST"
+        "symbol": "TEST",
+        "mintable": true
       },
       {
         "contract_address": "0xeDb95D8037f769B72AAab41deeC92903A98C9E16",
         "chain_id": 80001,
         "decimals": 18,
-        "symbol": "TEST"
+        "symbol": "TEST",
+        "mintable": true
       },
       {
         "contract_address": "0x68Db1c8d85C09d546097C65ec7DCBFF4D6497CbF",
         "chain_id": 420,
         "decimals": 18,
-        "symbol": "TEST"
+        "symbol": "TEST",
+        "mintable": true
       }
     ],
     "color": "#2675c8"
@@ -36,19 +39,22 @@
         "contract_address": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
         "chain_id": 5,
         "decimals": 18,
-        "symbol": "WETH"
+        "symbol": "WETH",
+        "wrapable": true
       },
       {
         "contract_address": "0x1E5341E4b7ed5D0680d9066aac0396F0b1bD1E69",
         "chain_id": 80001,
         "decimals": 18,
-        "symbol": "WETH"
+        "symbol": "WETH",
+        "wrapable": true
       },
       {
         "contract_address": "0x39B061B7e41DE8B721f9aEcEB6b3f17ECB7ba63E",
         "chain_id": 420,
         "decimals": 18,
         "symbol": "madWETH",
+        "mintable": true,
         "is_pool": true,
         "wrapped": {
           "contract_address": "0x74c6FD7D2Bc6a8F0Ebd7D78321A95471b8C2B806",

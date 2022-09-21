@@ -217,14 +217,8 @@ export default ({
     symbol
 
   const is_wrapped =
-    [
-      'WETH',
-    ].findIndex(s =>
-      [
-        contract_data?.wrapped?.symbol,
-        contract_data?.symbol,
-      ].includes(s)
-    ) > -1
+    contract_data?.wrapped ||
+    contract_data?.wrapable
 
   const fields = is_wrapped ?
     [

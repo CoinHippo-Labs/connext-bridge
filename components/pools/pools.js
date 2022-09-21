@@ -149,7 +149,7 @@ export default ({
                               className="rounded-full"
                             />
                           )}
-                          <span className="text-base font-semibold">
+                          <span className="text-slate-600 dark:text-slate-400 text-base font-medium">
                             {_symbol}
                           </span>
                         </div>
@@ -182,7 +182,7 @@ export default ({
                                   key={i}
                                   href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                 >
-                                  <a className="h-6 flex items-center font-semibold">
+                                  <a className="h-6 flex items-center font-semibold ml-8">
                                     {name}
                                   </a>
                                 </Link>
@@ -377,15 +377,13 @@ export default ({
 
                 return (
                   <div className="flex flex-col space-y-3">
-                    <div className="text-base font-semibold text-right">
-                      <span className="uppercase">
-                        {currency_symbol}
-                        {number_format(
-                          value,
-                          '0,0.00',
-                          true,
-                        )}
-                      </span>
+                    <div className="uppercase text-slate-600 dark:text-slate-400 text-base font-medium text-right">
+                      {currency_symbol}
+                      {number_format(
+                        value,
+                        '0,0.00',
+                        true,
+                      )}
                     </div>
                     {
                       uncollapseAssetIds?.includes(id) &&
@@ -452,15 +450,13 @@ export default ({
 
                 return (
                   <div className="flex flex-col space-y-3">
-                    <div className="text-base font-semibold text-right">
-                      <span className="uppercase">
-                        {currency_symbol}
-                        {number_format(
-                          value,
-                          '0,0.00',
-                          true,
-                        )}
-                      </span>
+                    <div className="uppercase text-slate-600 dark:text-slate-400 text-base font-medium text-right">
+                      {currency_symbol}
+                      {number_format(
+                        value,
+                        '0,0.00',
+                        true,
+                      )}
                     </div>
                     {
                       uncollapseAssetIds?.includes(id) &&
@@ -527,15 +523,13 @@ export default ({
 
                 return (
                   <div className="flex flex-col space-y-3">
-                    <div className="text-base font-semibold text-right">
-                      <span className="uppercase">
-                        {currency_symbol}
-                        {number_format(
-                          value,
-                          '0,0.00',
-                          true,
-                        )}
-                      </span>
+                    <div className="uppercase text-slate-600 dark:text-slate-400 text-base font-medium text-right">
+                      {currency_symbol}
+                      {number_format(
+                        value,
+                        '0,0.00',
+                        true,
+                      )}
                     </div>
                     {
                       uncollapseAssetIds?.includes(id) &&
@@ -602,15 +596,13 @@ export default ({
 
                 return (
                   <div className="flex flex-col space-y-3">
-                    <div className="text-base font-semibold text-right">
-                      <span className="uppercase">
-                        {number_format(
-                          value,
-                          '0,0.00',
-                          true,
-                        )}
-                        %
-                      </span>
+                    <div className="uppercase text-slate-600 dark:text-slate-400 text-base font-medium text-right">
+                      {number_format(
+                        value,
+                        '0,0.00',
+                        true,
+                      )}
+                      %
                     </div>
                     {
                       uncollapseAssetIds?.includes(id) &&
