@@ -310,7 +310,7 @@ export default () => {
 
     const liquidity_amount = _.sum(
       (asset_balances_data?.[chain_id] || [])
-        .filter(a => equals_ignore_case(a?.adopted, contract_address))
+        .filter(a => equals_ignore_case(a?.contract_address, contract_address))
         .map(a => Number(
           utils.formatUnits(
             BigNumber.from(a?.amount || '0'),
@@ -1209,7 +1209,7 @@ export default () => {
 
   const liquidity_amount = _.sum(
     (asset_balances_data?.[destination_chain_data?.chain_id] || [])
-      .filter(a => equals_ignore_case(a?.adopted, destination_contract_data?.contract_address))
+      .filter(a => equals_ignore_case(a?.contract_address, destination_contract_data?.contract_address))
       .map(a =>
         Number(
           utils.formatUnits(
@@ -1840,7 +1840,7 @@ export default () => {
                                     'Approving' :
                                     'Please Approve' :
                                   callProcessing ?
-                                    'xCalling' :
+                                    'Bridging' :
                                     typeof approving === 'boolean' ?
                                       'Please Confirm' :
                                       'Checking Approval' :

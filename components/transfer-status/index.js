@@ -2,10 +2,11 @@ import { useSelector, shallowEqual } from 'react-redux'
 import moment from 'moment'
 import { BigNumber, utils } from 'ethers'
 import { XTransferStatus } from '@connext/nxtp-utils'
-import { Vortex, RotatingSquare } from 'react-loader-spinner'
+import { TailSpin, RotatingSquare } from 'react-loader-spinner'
 import LightSpeed from 'react-reveal/LightSpeed'
 import { TiArrowRight } from 'react-icons/ti'
 import { HiOutlineCheckCircle } from 'react-icons/hi'
+import { TbArrowBigRight } from 'react-icons/tb'
 
 import Image from '../image'
 import EnsProfile from '../ens-profile'
@@ -172,6 +173,9 @@ export default ({
               {chainName(source_chain_data)}
             </span>
           </div>
+          <TbArrowBigRight
+            size={18}
+          />
           <div className="flex items-center justify-end space-x-1.5">
             {destination_chain_data?.image && (
               <Image
@@ -240,8 +244,8 @@ export default ({
                   className="text-green-500 dark:text-green-400"
                 />
               </a> :
-              <Vortex
-                color={loader_color('light')}
+              <TailSpin
+                color={loader_color(theme)}
                 width="36"
                 height="36"
               />

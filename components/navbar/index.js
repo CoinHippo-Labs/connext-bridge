@@ -193,10 +193,12 @@ export default () => {
                 .map(a => a.contracts.find(c => c?.chain_id === chain_id).contract_address)
 
               if (addresses.length > 0) {
-                const response = await getAssetsPrice({
-                  chain_id,
-                  addresses,
-                })
+                const response = await getAssetsPrice(
+                  {
+                    chain_id,
+                    addresses,
+                  },
+                )
 
                 if (Array.isArray(response)) {
                   response.forEach(t => {
@@ -441,7 +443,7 @@ export default () => {
                 .map(l => {
                   const {
                     domain,
-                    adopted,
+                    local,
                     balance,
                   } = { ...l }
 
@@ -453,7 +455,7 @@ export default () => {
                   const asset_data = assets_data.find(a =>
                     a?.contracts?.findIndex(c =>
                       c?.chain_id === chain_id &&
-                      equals_ignore_case(c?.contract_address, adopted)
+                      equals_ignore_case(c?.contract_address, local)
                     ) > -1
                   )
 
@@ -463,7 +465,7 @@ export default () => {
                     ...l,
                     chain_id,
                     chain_data,
-                    contract_address: adopted,
+                    contract_address: local,
                     asset_data,
                     amount,
                   }
