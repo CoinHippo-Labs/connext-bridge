@@ -53,7 +53,7 @@
         "contract_address": "0x39B061B7e41DE8B721f9aEcEB6b3f17ECB7ba63E",
         "chain_id": 420,
         "decimals": 18,
-        "symbol": "madWETH",
+        "symbol": "nextWETH",
         "mintable": true,
         "is_pool": true,
         "wrapped": {

@@ -18,6 +18,7 @@ export default ({
     chains,
     pool_assets,
     pools,
+    wallet,
   } = useSelector(state =>
     (
       {
@@ -25,6 +26,7 @@ export default ({
         chains: state.chains,
         pool_assets: state.pool_assets,
         pools: state.pools,
+        wallet: state.wallet,
       }
     ),
     shallowEqual,
@@ -41,6 +43,12 @@ export default ({
   const {
     pools_data,
   } = { ...pools }
+  const {
+    wallet_data,
+  } = { ...wallet }
+  const {
+    address,
+  } = { ...wallet_data }
 
   const {
     chain,
@@ -108,7 +116,7 @@ export default ({
     )
 
   return (
-    <div className="sm:min-h-full bg-slate-50 dark:bg-slate-900 bg-opacity-50 border-2 border-blue-400 dark:border-blue-800 rounded-2xl shadow-2xl shadow-blue-200 dark:shadow-blue-600 p-6">
+    <div className="sm:min-h-full bg-slate-100 dark:bg-slate-900 bg-opacity-100 dark:bg-opacity-50 border-2 border-blue-400 dark:border-blue-800 rounded-2xl shadow-2xl shadow-blue-200 dark:shadow-blue-600 p-6">
       {pools_data ?
         <div className="flex flex-col space-y-8 lg:space-y-20 my-auto">
           <div className="grid sm:flex sm:items-center sm:justify-between sm:space-x-2 gap-2">
@@ -172,7 +180,7 @@ export default ({
             <div className="tracking-wider text-xl font-medium">
               Statistics
             </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-4">
               <div className="flex flex-col space-y-0.5">
                 <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
                   Liquidity
@@ -307,8 +315,9 @@ export default ({
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-4">
             {
+              address &&
               symbols &&
               (
                 <div className="space-y-3">
@@ -392,81 +401,87 @@ export default ({
                     }
                   </div>
                 </div>
-              )}
-            <div className="space-y-3">
-              <div className="text-xl font-medium">
-                Your Position
-              </div>
-              <div className="grid grid-cols-2">
-                <div className="flex flex-col space-y-0.5">
-                  <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
-                    Pool Share
-                  </span>
-                  <span className="text-lg font-semibold">
-                    {
-                      !isNaN(share) ||
-                      (
-                        pool_data &&
-                        user_pools_data
-                      ) ?
-                      <>
-                        {number_format(
-                          share || 0,
-                          '0,0.000000',
-                          true,
-                        )}
-                        %
-                      </> :
-                      selected &&
-                      !no_pool &&
-                      (
-                        position_loading ?
-                          <div className="mt-0.5">
-                            <RotatingTriangles
-                              color={loader_color(theme)}
-                              width="24"
-                              height="24"
-                            />
-                          </div> :
-                          '-'
-                      )
-                    }
-                  </span>
+              )
+            }
+            {
+              address &&
+              (
+                <div className="space-y-3">
+                  <div className="text-xl font-medium">
+                    Your Position
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <div className="flex flex-col space-y-0.5">
+                      <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
+                        Pool Share
+                      </span>
+                      <span className="text-lg font-semibold">
+                        {
+                          !isNaN(share) ||
+                          (
+                            pool_data &&
+                            user_pools_data
+                          ) ?
+                          <>
+                            {number_format(
+                              share || 0,
+                              '0,0.000000',
+                              true,
+                            )}
+                            %
+                          </> :
+                          selected &&
+                          !no_pool &&
+                          (
+                            position_loading ?
+                              <div className="mt-0.5">
+                                <RotatingTriangles
+                                  color={loader_color(theme)}
+                                  width="24"
+                                  height="24"
+                                />
+                              </div> :
+                              '-'
+                          )
+                        }
+                      </span>
+                    </div>
+                    <div className="flex flex-col space-y-0.5">
+                      <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
+                        Pool Tokens
+                      </span>
+                      <span className="text-lg font-semibold">
+                        {
+                          !isNaN(lpTokenBalance) ||
+                          (
+                            pool_data &&
+                            user_pools_data
+                          ) ?
+                            number_format(
+                              lpTokenBalance || 0,
+                              '0,0.000000',
+                              true,
+                            ) :
+                            selected &&
+                            !no_pool &&
+                            (
+                              position_loading ?
+                                <div className="mt-0.5">
+                                  <RotatingTriangles
+                                    color={loader_color(theme)}
+                                    width="24"
+                                    height="24"
+                                  />
+                                </div> :
+                                '-'
+                            )
+                        }
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col space-y-0.5">
-                  <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
-                    Pool Tokens
-                  </span>
-                  <span className="text-lg font-semibold">
-                    {
-                      !isNaN(lpTokenBalance) ||
-                      (
-                        pool_data &&
-                        user_pools_data
-                      ) ?
-                        number_format(
-                          lpTokenBalance || 0,
-                          '0,0.000000',
-                          true,
-                        ) :
-                        selected &&
-                        !no_pool &&
-                        (
-                          position_loading ?
-                            <div className="mt-0.5">
-                              <RotatingTriangles
-                                color={loader_color(theme)}
-                                width="24"
-                                height="24"
-                              />
-                            </div> :
-                            '-'
-                        )
-                    }
-                  </span>
-                </div>
-              </div>
-            </div>
+              )
+            }
           </div>
         </div> :
         <TailSpin

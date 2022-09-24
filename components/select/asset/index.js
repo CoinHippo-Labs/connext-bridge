@@ -78,9 +78,13 @@ export default ({
     image,
   } = { ...contract_data }
 
-  symbol = symbol ||
-    asset_data?.symbol ||
-    'Token'
+  symbol = is_pool ?
+    data?.symbol ||
+    asset_data?.name ||
+      'From Token' :
+      symbol ||
+        asset_data?.symbol ||
+        'Token'
   image = image ||
     asset_data?.image
 

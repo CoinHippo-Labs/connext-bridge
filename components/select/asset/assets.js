@@ -126,6 +126,7 @@ export default ({
             const {
               id,
               disabled,
+              name,
               contracts,
             } = { ...a }
 
@@ -158,7 +159,10 @@ export default ({
                   />
                 )}
                 <span className={`whitespace-nowrap text-base ${selected ? 'font-bold' : 'font-normal'}`}>
-                  {symbol}
+                  {is_pool ?
+                    name :
+                    symbol
+                  }
                 </span>
               </div>
             )

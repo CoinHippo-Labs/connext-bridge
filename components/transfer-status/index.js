@@ -2,7 +2,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import moment from 'moment'
 import { BigNumber, utils } from 'ethers'
 import { XTransferStatus } from '@connext/nxtp-utils'
-import { TailSpin, RotatingSquare } from 'react-loader-spinner'
+import { TailSpin } from 'react-loader-spinner'
 import LightSpeed from 'react-reveal/LightSpeed'
 import { TiArrowRight } from 'react-icons/ti'
 import { HiOutlineCheckCircle } from 'react-icons/hi'
@@ -202,7 +202,7 @@ export default ({
                     true,
                   )}
                 </span> :
-                <RotatingSquare
+                <TailSpin
                   color={loader_color(theme)}
                   width="20"
                   height="20"
@@ -264,7 +264,7 @@ export default ({
                     true,
                   )}
                 </span> :
-                <RotatingSquare
+                <TailSpin
                   color={loader_color(theme)}
                   width="20"
                   height="20"

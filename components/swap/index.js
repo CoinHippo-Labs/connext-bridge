@@ -8,22 +8,21 @@ import { TailSpin, Watch } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
-import { HiSwitchVertical } from 'react-icons/hi'
+import { HiSwitchHorizontal } from 'react-icons/hi'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiEditAlt, BiCheckCircle } from 'react-icons/bi'
 
+import Info from './info'
 import Announcement from '../announcement'
 import Options from './options'
 import SelectChain from '../select/chain'
 import SelectAsset from '../select/asset'
-import Info from './info'
 import Balance from '../balance'
 import Image from '../image'
 import Wallet from '../wallet'
 import Alert from '../alerts'
 import Copy from '../copy'
-import { chainName } from '../../lib/object/chain'
-import { currency_symbol } from '../../lib/object/currency'
-import { params_to_obj, number_format, ellipse, equals_ignore_case, sleep } from '../../lib/utils'
+import meta from '../../lib/meta'
+import { params_to_obj, number_format, ellipse, equals_ignore_case, loader_color, sleep } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
 const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT) || 1
@@ -38,6 +37,7 @@ export default () => {
   const {
     preferences,
     chains,
+    assets,
     pool_assets,
     pools,
     rpc_providers,
@@ -49,6 +49,7 @@ export default () => {
       {
         preferences: state.preferences,
         chains: state.chains,
+        assets: state.assets,
         pool_assets: state.pool_assets,
         pools: state.pools,
         rpc_providers: state.rpc_providers,
@@ -65,6 +66,9 @@ export default () => {
   const {
     chains_data,
   } = { ...chains }
+  const {
+    assets_data,
+  } = { ...assets }
   const {
     pool_assets_data,
   } = { ...pool_assets }
@@ -100,7 +104,6 @@ export default () => {
   const [swap, setSwap] = useState({})
   const [swapAmount, setSwapAmount] = useState(null)
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
-  const [controller, setController] = useState(null)
 
   const [approving, setApproving] = useState(null)
   const [approveProcessing, setApproveProcessing] = useState(null)
@@ -149,7 +152,9 @@ export default () => {
       const chain = paths[paths.indexOf('on') + 1]
       const asset = _.head(paths) !== 'on' ?
         _.head(paths) :
-        null
+        process.env.NEXT_PUBLIC_NETWORK === 'testnet' ?
+          'eth' :
+          'usdc'
 
       const chain_data = chains_data?.find(c => c?.id === chain)
       const asset_data = pool_assets_data?.find(a =>
@@ -221,7 +226,7 @@ export default () => {
 
     if (
       !(
-        params.chain &&
+        params.chain ||
         params.asset
       ) &&
       pool_assets_data?.length > 0
@@ -272,7 +277,7 @@ export default () => {
 
   // update balances
   useEffect(() => {
-    const {
+    let {
       chain,
     } = { ...swap }
 
@@ -298,14 +303,25 @@ export default () => {
           c?.id === id
         ) > -1
       ) {
-        setSwap({
-          ...swap,
-          chain: id,
-        })
+        chain = id
       }
 
       getBalances(id)
     }
+
+    if (Object.keys(swap).length > 0) {
+      chain = chain ||
+        _.head(
+          chains_data?.filter(c =>
+            !c?.disabled
+          )
+        )?.id
+    }
+
+    setSwap({
+      ...swap,
+      chain,
+    })
   }, [asPath, wallet_chain_id, chains_data])
 
   // update balances
@@ -382,7 +398,6 @@ export default () => {
 
       if (
         sdk &&
-        address &&
         chain
       ) {
         try {
@@ -491,7 +506,7 @@ export default () => {
     }
 
     getData()
-  }, [sdk, address, swap, pairTrigger])
+  }, [sdk, swap, pairTrigger])
 
   const getBalances = chain => {
     const getBalance = async (
@@ -776,16 +791,17 @@ export default () => {
               status,
             } = { ...approve_receipt }
 
-            setApproveResponse(status ?
-              null :
-              {
-                status: 'failed',
-                message: `Failed to approve ${(origin === 'x' ?
-                  x_asset_data :
-                  y_asset_data
-                )?.symbol}`,
-                tx_hash: hash,
-              }
+            setApproveResponse(
+              status ?
+                null :
+                {
+                  status: 'failed',
+                  message: `Failed to approve ${(origin === 'x' ?
+                    x_asset_data :
+                    y_asset_data
+                  )?.symbol}`,
+                  tx_hash: hash,
+                }
             )
 
             failed = !status
@@ -797,13 +813,13 @@ export default () => {
             setApproving(false)
           }
         } catch (error) {
+          failed = true
+
           setApproveResponse({
             status: 'failed',
             message: error?.data?.message ||
               error?.message,
           })
-
-          failed = true
 
           setApproveProcessing(false)
           setApproving(false)
@@ -864,7 +880,9 @@ export default () => {
           )
 
           if (swap_request) {
-            let gasLimit = await signer.estimateGas(swap_request)
+            let gasLimit = await signer.estimateGas(
+              swap_request,
+            )
 
             if (gasLimit) {
               gasLimit =
@@ -1136,6 +1154,16 @@ export default () => {
     }
   }
 
+  const headMeta = meta(
+    asPath,
+    null,
+    chains_data,
+    assets_data,
+  )
+  const {
+    title,
+  } = { ...headMeta }
+
   const {
     chain,
     asset,
@@ -1172,6 +1200,9 @@ export default () => {
     symbol,
     symbols,
   } = { ...pair }
+  const {
+    color,
+  } = { ...asset_data }
   const {
     contract_address,
   } = { ...contract_data }
@@ -1240,85 +1271,77 @@ export default () => {
     approving
 
   return (
-    <div className="mb-4">
-      <div className="flex justify-center">
+    <div className="grid grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
+      <div className="hidden lg:block col-span-0 lg:col-span-2" />
+      <div className="col-span-1 lg:col-span-4">
         <div className="mt-4 sm:mt-8">
           <Announcement />
         </div>
-        <div className="w-full flex flex-col space-y-4 my-2 sm:my-4 mx-1 sm:mx-4">
-          <div className="flex items-center justify-between space-x-2">
-            <h1 className="uppercase tracking-widest text-2xl font-medium">
-              Swap
-            </h1>
-            <Options
-              disabled={disabled}
-              applied={!_.isEqual(
-                Object.fromEntries(
-                  Object.entries(options)
-                    .filter(([k, v]) => ![].includes(k))
-                ),
-                Object.fromEntries(
-                  Object.entries(DEFAULT_OPTIONS)
-                    .filter(([k, v]) => ![].includes(k))
-                ),
-              )}
-              initialData={options}
-              onChange={o => setOptions(o)}
-            />
-          </div>
-          <div className={`${valid_amount ? 'border-2 border-blue-400 dark:border-blue-800 shadow-2xl shadow-blue-200 dark:shadow-blue-600' : 'shadow dark:shadow-slate-400'} rounded-2xl flex flex-col items-center space-y-6 py-10 px-6`}>
-            <div className="w-full space-y-5">
-              <div className="bg-slate-50 dark:bg-slate-900 rounded-xl space-y-2 sm:space-y-0 p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-400 dark:text-slate-600 text-sm font-medium">
-                    From
-                  </span>
-                  {
-                    web3_provider &&
-                    (origin === 'x' ?
-                      x_asset_data :
-                      y_asset_data
-                    ) &&
-                    (
-                      <div className="flex items-center space-x-2">
-                        <span className="text-slate-400 dark:text-slate-600 font-medium">
-                          Balance:
-                        </span>
-                        <Balance
-                          chainId={chain_id}
-                          asset={asset}
-                          contractAddress={(origin === 'x' ?
-                            x_asset_data :
-                            y_asset_data
-                          ).contract_address}
-                          symbol={(origin === 'x' ?
-                            x_asset_data :
-                            y_asset_data
-                          ).symbol}
-                        />
-                      </div>
-                    )
-                  }
-                </div>
-                <div className="flex flex-col sm:flex-row items-center sm:justify-between space-y-2 sm:space-y-0 sm:space-x-4">
-                  <div className="w-full flex items-center justify-between sm:justify-start space-x-2 sm:space-x-4">
+        <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6 my-4 sm:my-6 mx-1 sm:mx-4">
+          <div className="w-full max-w-lg space-y-3">
+            <div className="flex items-center justify-between space-x-2 pb-1">
+              <div className="space-y-1 ml-1 sm:ml-2">
+                <h1 className="tracking-widest text-base sm:text-xl font-semibold">
+                  Swap
+                </h1>
+                {
+                  asPath?.includes('on-') &&
+                  title &&
+                  (
+                    <h2 className="tracking-wider text-slate-500 dark:text-slate-400 text-xs">
+                      {title.replace(
+                        ' with Connext',
+                        '',
+                      )}
+                    </h2>
+                  )
+                }
+              </div>
+              <Options
+                disabled={disabled}
+                applied={!_.isEqual(
+                  Object.fromEntries(
+                    Object.entries(options)
+                      .filter(([k, v]) =>
+                        ![
+                        ].includes(k)
+                      )
+                  ),
+                  Object.fromEntries(
+                    Object.entries(DEFAULT_OPTIONS)
+                      .filter(([k, v]) =>
+                        ![
+                        ].includes(k)
+                      )
+                  ),
+                )}
+                initialData={options}
+                onChange={o => setOptions(o)}
+              />
+            </div>
+            <div
+              className="bg-slate-100 dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-4 sm:pt-6 pb-6 sm:pb-8 px-4 sm:px-6"
+              style={valid_amount ?
+                {
+                  boxShadow: `${color}ff 0px 8px 76px 6px`,
+                  WebkitBoxShadow: `${color}ff 0px 8px 76px 6px`,
+                  MozBoxShadow: `${color}ff 0px 8px 76px 6px`,
+                } :
+                undefined
+              }
+            >
+              <div className="space-y-2">
+                <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
+                  <div className="col-span-2 sm:col-span-2 flex items-center justify-start">
+                    <span className="tracking-wider text-slate-600 dark:text-slate-200 text-lg font-medium ml-1 sm:ml-3">
+                      Chain
+                    </span>
+                  </div>
+                  <div className="col-span-3 sm:col-span-3 flex items-center justify-end">
                     <SelectChain
                       disabled={disabled}
                       value={chain}
                       onSelect={c => {
-                        const _data = {
-                          swap: {
-                            ...swap,
-                            chain: c,
-                            amount: null,
-                          },
-                        }
-
-                        console.log(
-                          '[Swap]',
-                          _data,
-                        )
-
                         setSwap({
                           ...swap,
                           chain: c,
@@ -1329,264 +1352,108 @@ export default () => {
                       }}
                       origin=""
                     />
-                    <SelectAsset
-                      disabled={disabled}
-                      value={asset}
-                      onSelect={a => {
-                        const _data = {
-                          swap: {
+                  </div>
+                </div>
+                <div className="space-y-0">
+                  <div className="tracking-wider text-slate-600 dark:text-slate-200 text-lg font-medium ml-1 sm:ml-3">
+                    Asset
+                  </div>
+                  <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
+                    <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start">
+                      <SelectAsset
+                        disabled={disabled}
+                        value={asset}
+                        onSelect={a => {
+                          setSwap({
                             ...swap,
                             asset: a,
                             amount: null,
-                          },
-                        }
+                          })
 
-                        console.log(
-                          '[Swap]',
-                          _data,
-                        )
-
-                        setSwap(_data)
-
-                        getBalances(chain)
-                      }}
-                      chain={chain}
-                      origin=""
-                      is_pool={true}
-                      data={origin === 'x' ?
-                        x_asset_data :
-                        y_asset_data
-                      }
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="w-full flex items-center justify-between space-x-3">
-                      <DebounceInput
-                        debounceTimeout={300}
-                        size="small"
-                        type="number"
-                        placeholder="0.00"
-                        disabled={disabled}
-                        value={typeof amount === 'number' && amount >= 0 ?
-                          amount :
-                          ''
-                        }
-                        onChange={e => {
-                          const regex = /^[0-9.\b]+$/
-
-                          let value
-
-                          if (
-                            e.target.value === '' ||
-                            regex.test(e.target.value)
-                          ) {
-                            value = e.target.value
-                          }
-
-                          value = value < 0 ?
-                            0 :
-                            value
-
-                          const _data = {
-                            swap: {
-                              ...swap,
-                              amount: value && !isNaN(value) ?
-                                Number(value) :
-                                value,
-                            },
-                          }
-
-                          console.log(
-                            '[Swap]',
-                            _data,
-                          )
-
-                          setSwap(_data)
+                          getBalances(chain)
                         }}
-                        onWheel={e => e.target.blur()}
-                        onKeyDown={e =>
-                          [
-                            'e',
-                            'E',
-                            '-',
-                          ].includes(e.key) &&
-                          e.preventDefault()
+                        chain={chain}
+                        origin=""
+                        is_pool={true}
+                        data={origin === 'x' ?
+                          x_asset_data :
+                          y_asset_data
                         }
-                        className={`w-full bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
                       />
-                      <div
+                    </div>
+                    <div className="flex items-center justify-center">
+                      <button
+                        disabled={disabled}
                         onClick={() => {
-                          const _data = {
-                            swap: {
-                              ...swap,
-                              amount: origin === 'x' ?
-                                x_balance_amount :
-                                y_balance_amount,
-                            },
-                          };
+                          setSwap({
+                            ...swap,
+                            origin: origin === 'x' ?
+                              'y' :
+                              'x',
+                            amount: null,
+                          })
 
-                          console.log(
-                            '[Swap]',
-                            _data,
-                          )
-
-                          setSwap(_data)
+                          getBalances(chain)
                         }}
-                        className={`${disabled || typeof (origin === 'x' ? x_balance_amount : y_balance_amount) !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-100 dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-700 text-blue-400 dark:text-slate-200 text-base font-semibold py-0.5 px-2.5`}
+                        className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
                       >
-                        Max
-                      </div>
+                        <HiSwitchHorizontal
+                          size={28}
+                        />
+                      </button>
                     </div>
-                    {typeof amount === 'number' && typeof (origin === 'x' ? x_balance_amount : y_balance_amount) === 'number' && amount > (origin === 'x' ? x_balance_amount : y_balance_amount) && (
-                      <div className="flex items-center text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
-                        <BiMessageError
-                          size={16}
-                          className="min-w-max"
-                        />
-                        <span className="text-xs font-medium">
-                          Not enough {(origin === 'x' ? x_asset_data : y_asset_data)?.symbol}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center justify-center">
-                <button
-                  disabled={disabled}
-                  onClick={() => {
-                    const _data = {
-                      swap: {
-                        ...swap,
-                        origin: origin === 'x' ?
-                          'y' :
-                          'x',
-                        amount: null,
-                      },
-                    }
-
-                    console.log(
-                      '[Swap]',
-                      _data,
-                    )
-
-                    setSwap(_data)
-
-                    getBalances(chain)
-                  }}
-                  className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
-                >
-                  <HiSwitchVertical
-                    size={32}
-                  />
-                </button>
-              </div>
-              <div className="bg-slate-50 dark:bg-slate-900 rounded-xl space-y-2 sm:space-y-0 p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-400 dark:text-slate-600 text-sm font-medium">
-                    To
-                  </span>
-                  {web3_provider &&
-                    (origin === 'x' ?
-                      y_asset_data :
-                      x_asset_data
-                    ) &&
-                    (
-                      <div className="flex items-center space-x-2">
-                        <span className="text-slate-400 dark:text-slate-600 font-medium">
-                          Balance:
-                        </span>
-                        <Balance
-                          chainId={chain_id}
-                          asset={asset}
-                          contractAddress={(origin === 'x' ?
-                            y_asset_data :
-                            x_asset_data
-                          ).contract_address}
-                          symbol={(origin === 'x' ?
-                            y_asset_data :
-                            x_asset_data
-                          ).symbol}
-                        />
-                      </div>
-                    )
-                  }
-                </div>
-                <div className="flex flex-col sm:flex-row items-center sm:justify-between space-y-2 sm:space-y-0 sm:space-x-4">
-                  <div className="w-full flex items-center justify-between sm:justify-start space-x-2 sm:space-x-4">
-                    <div className="w-48 sm:h-16 min-w-max flex items-center justify-center space-x-1.5 py-2 px-3">
-                      {image && (
-                        <Image
-                          src={image}
-                          alt=""
-                          width={24}
-                          height={24}
-                          className="rounded-full"
-                        />
-                      )}
-                      <span className="text-sm sm:text-base font-medium">
-                        {chain_data ?
-                          chainName(chain_data) :
-                          <span className="text-slate-400 dark:text-slate-500">
-                            To Chain
-                          </span>
-                        }
-                      </span>
-                    </div>
-                    <div className="w-48 sm:h-16 min-w-max flex items-center justify-center space-x-1.5 py-2 px-3">
-                      {
-                        (
-                          origin === 'x' ?
-                            y_asset_data :
-                            x_asset_data
-                        )?.image &&
-                        (
-                          <Image
-                            src={(origin === 'x' ?
+                    <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end">
+                      <div className="w-32 sm:w-48 min-w-max h-10 sm:h-16 flex items-center justify-center">
+                        <div className="w-32 sm:w-48 min-w-max bg-white dark:bg-slate-900 rounded-xl flex items-center justify-center space-x-1 sm:space-x-1.5 py-1.5 sm:py-2 px-2 sm:px-3">
+                          {
+                            (origin === 'x' ?
                               y_asset_data :
                               x_asset_data
-                            ).image}
-                            alt=""
-                            width={24}
-                            height={24}
-                            className="rounded-full"
-                          />
-                        )
-                      }
-                      <span className="text-sm sm:text-base font-medium">
-                        {
-                          (
-                            origin === 'x' ?
-                              y_asset_data :
-                              x_asset_data
-                          )?.symbol ?
-                            (
-                              origin === 'x' ?
+                            )?.image && (
+                              <>
+                                <div className="flex sm:hidden">
+                                  <Image
+                                    src={(origin === 'x' ?
+                                      y_asset_data :
+                                      x_asset_data
+                                    ).image}
+                                    alt=""
+                                    width={18}
+                                    height={18}
+                                    className="rounded-full"
+                                  />
+                                </div>
+                                <div className="hidden sm:flex">
+                                  <Image
+                                    src={(origin === 'x' ?
+                                      y_asset_data :
+                                      x_asset_data
+                                    ).image}
+                                    alt=""
+                                    width={24}
+                                    height={24}
+                                    className="rounded-full"
+                                  />
+                                </div>
+                              </>
+                            )
+                          }
+                          <span className="whitespace-nowrap text-sm sm:text-base font-semibold">
+                            {
+                              (origin === 'x' ?
                                 y_asset_data :
                                 x_asset_data
-                            ).symbol :
-                            <span className="text-slate-400 dark:text-slate-500">
-                              To Token
-                            </span>
-                        }
-                      </span>
+                              )?.symbol ||
+                              (origin === 'x' ?
+                                y_asset_data :
+                                x_asset_data
+                              )?.name ||
+                              'To Token'
+                            }
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="w-72 h-11 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-end text-lg font-semibold text-right py-2 px-3">
-                    {typeof swapAmount === 'number' ?
-                      number_format(
-                        swapAmount,
-                        '0,0.00000000',
-                        true,
-                      ) :
-                      swapAmount ?
-                        <TailSpin
-                          color="white"
-                          width="20"
-                          height="20"
-                        /> :
-                        null
-                    }
                   </div>
                 </div>
               </div>
@@ -1595,183 +1462,360 @@ export default () => {
                 asset &&
                 (
                   pair === undefined ?
-                    <div className="tracking-wider text-slate-400 dark:text-slate-600 text-lg text-center sm:ml-3">
+                    <div className="tracking-wider text-slate-400 dark:text-slate-200 text-lg text-center ml-1 sm:ml-3">
                       Route not supported
                     </div> :
-                    <Info
-                      data={pair}
-                      amount_received={swapAmount}
-                      asset_data={origin === 'x' ?
-                        y_asset_data :
-                        x_asset_data
-                      }
-                    />
+                    pair ?
+                      <div className="grid grid-cols-5 sm:grid-cols-5 gap-6 ml-1 sm:ml-3">
+                        <div className="col-span-2 sm:col-span-2 space-y-1">
+                          <div className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
+                            <span className="tracking-wider text-slate-600 dark:text-slate-200 text-sm sm:text-base sm:font-medium">
+                              Amount
+                            </span>
+                            {
+                              address &&
+                              (origin === 'x' ?
+                                x_balance :
+                                y_balance
+                              ) &&
+                              (
+                                <button
+                                  onClick={() => {
+                                    setSwap({
+                                      ...swap,
+                                      amount: origin === 'x' ?
+                                        x_balance_amount :
+                                        y_balance_amount,
+                                    })
+                                  }}
+                                  className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
+                                >
+                                  Max
+                                </button>
+                              )
+                            }
+                          </div>
+                          {
+                            chain_data &&
+                            asset &&
+                            (origin === 'x' ?
+                              x_asset_data :
+                              y_asset_data
+                            ) &&
+                            (
+                              <div className="flex items-center space-x-1.5">
+                                <div className="tracking-wider text-slate-400 dark:text-slate-600 text-xs">
+                                  Balance
+                                </div>
+                                <Balance
+                                  chainId={chain_id}
+                                  asset={asset}
+                                  contractAddress={(origin === 'x' ?
+                                    x_asset_data :
+                                    y_asset_data
+                                  ).contract_address}
+                                  symbol={(origin === 'x' ?
+                                    x_asset_data :
+                                    y_asset_data
+                                  ).symbol}
+                                />
+                              </div>
+                            )
+                          }
+                        </div>
+                        <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end">
+                          <DebounceInput
+                            debounceTimeout={300}
+                            size="small"
+                            type="number"
+                            placeholder="0.00"
+                            disabled={
+                              disabled ||
+                              !asset
+                            }
+                            value={typeof amount === 'number' && amount >= 0 ?
+                              amount :
+                              ''
+                            }
+                            onChange={e => {
+                              const regex = /^[0-9.\b]+$/
+
+                              let value
+
+                              if (
+                                e.target.value === '' ||
+                                regex.test(e.target.value)
+                              ) {
+                                value = e.target.value
+                              }
+
+                              value = value < 0 ?
+                                0 :
+                                value
+
+                              setSwap({
+                                ...swap,
+                                amount: value && !isNaN(value) ?
+                                  Number(value) :
+                                  value,
+                              })
+                            }}
+                            onWheel={e => e.target.blur()}
+                            onKeyDown={e =>
+                              [
+                                'e',
+                                'E',
+                                '-',
+                              ].includes(e.key) &&
+                              e.preventDefault()
+                            }
+                            className={`w-36 sm:w-48 bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
+                          />
+                        </div>
+                      </div> :
+                      <div className="flex items-center justify-center space-x-2">
+                        <div>
+                          <TailSpin
+                            color={loader_color(theme)}
+                            width="20"
+                            height="20"
+                          />
+                        </div>
+                        <span className="text-slate-400 dark:text-slate-200 text-lg">
+                          Fetching pair information ...
+                        </span>
+                      </div>
                 )
               }
-            </div>
-            <div className="w-full max-w-4xl">
               {
-                web3_provider &&
-                wrong_chain ?
-                  <Wallet
-                    connectChainId={chain_id}
-                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
-                  >
-                    <span className="mr-1.5 sm:mr-2">
-                      {is_walletconnect ?
-                        'Reconnect' :
-                        'Switch'
-                      } to
-                    </span>
-                    {image && (
-                      <Image
-                        src={image}
-                        alt=""
-                        width={32}
-                        height={32}
-                        className="rounded-full"
-                      />
-                    )}
-                    <span className="font-medium">
-                      {name}
-                    </span>
-                  </Wallet> :
-                callResponse ||
-                approveResponse ?
-                  [
-                    callResponse ||
-                    approveResponse,
-                  ].map((r, i) => {
-                    const {
-                      status,
-                      message,
-                      tx_hash,
-                    } = { ...r }
-
-                    return (
+                chain &&
+                asset &&
+                pair &&
+                (
+                  <Info
+                    data={pair}
+                    amount_received={swapAmount}
+                    asset_data={origin === 'x' ?
+                      y_asset_data :
+                      x_asset_data
+                    }
+                  />
+                )
+              }
+              {
+                chain &&
+                asset &&
+                (origin === 'x' ?
+                  x_balance :
+                  y_balance
+                ) &&
+                (
+                  typeof amount === 'number' ||
+                  (
+                    web3_provider &&
+                    wrong_chain
+                  )
+                ) ?
+                  web3_provider &&
+                  wrong_chain ?
+                    <Wallet
+                      connectChainId={chain_id}
+                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                    >
+                      <span className="mr-1.5 sm:mr-2">
+                        {is_walletconnect ?
+                          'Reconnect' :
+                          'Switch'
+                        } to
+                      </span>
+                      {image && (
+                        <Image
+                          src={image}
+                          alt=""
+                          width={32}
+                          height={32}
+                          className="rounded-full"
+                        />
+                      )}
+                      <span className="font-semibold">
+                        {name}
+                      </span>
+                    </Wallet> :
+                    !callResponse &&
+                    (
+                      amount > (origin === 'x' ?
+                        x_balance_amount :
+                        y_balance_amount
+                      ) ||
+                      amount <= 0
+                    ) ?
                       <Alert
-                        key={i}
-                        color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
-                        icon={status === 'failed' ?
-                          <BiMessageError
-                            className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                          /> :
-                          status === 'success' ?
-                            <BiMessageCheck
-                              className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                            /> :
-                            status === 'pending' ?
-                              <div className="mr-3">
-                                <Watch
-                                  color="white"
-                                  width="20"
-                                  height="20"
-                                />
-                              </div> :
-                              <BiMessageDetail
-                                className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                              />
-                        }
+                        color="bg-red-400 dark:bg-red-500 text-white text-base"
+                        icon={<BiMessageError
+                          className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                        />}
                         closeDisabled={true}
                         rounded={true}
                         className="rounded-xl p-4.5"
                       >
-                        <div className="flex items-center justify-between space-x-2">
-                          <span className="break-all">
-                            {ellipse(
-                              message,
-                              128,
-                            )}
-                          </span>
-                          <div className="flex items-center space-x-2">
-                            {
-                              status === 'failed' &&
-                              message &&
-                              (
-                                <Copy
-                                  size={24}
-                                  value={message}
-                                  className="cursor-pointer text-slate-200 hover:text-white"
-                                />
-                              )
-                            }
-                            {
-                              url &&
-                              tx_hash &&
-                              (
-                                <a
-                                  href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <TiArrowRight
-                                    size={20}
-                                    className="transform -rotate-45"
-                                  />
-                                </a>
-                              )
-                            }
-                            {status === 'failed' ?
-                              <button
-                                onClick={() => reset()}
-                                className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                              >
-                                <MdClose
-                                  size={20}
-                                />
-                              </button> :
-                              status === 'success' ?
-                                <button
-                                  onClick={() => reset()}
-                                  className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
-                                >
-                                  <MdClose
-                                    size={20}
-                                  />
-                                </button> :
-                                null
-                            }
-                          </div>
-                        </div>
-                      </Alert>
-                    )
-                  }) :
-                  web3_provider ?
-                    <button
-                      disabled={
-                        disabled ||
-                        !pair ||
-                        !valid_amount
-                      }
-                      onClick={() => call()}
-                      className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
-                    >
-                      <span className="flex items-center justify-center space-x-1.5">
-                        {
-                          disabled &&
-                          (
-                            <TailSpin
-                              color="white"
-                              width="20"
-                              height="20"
-                            />
-                          )
-                        }
                         <span>
-                          {calling ?
-                            approving ?
-                              approveProcessing ?
-                                'Approving' :
-                                'Please Approve' :
-                              callProcessing ?
-                                'Swapping' :
-                                typeof approving === 'boolean' ?
-                                  'Please Confirm' :
-                                  'Checking Approval' :
-                            'Swap'
+                          {amount > (origin === 'x' ?
+                            x_balance_amount :
+                            y_balance_amount
+                          ) ?
+                            'Insufficient Balance' :
+                            amount <= 0 ?
+                              'The transfer amount cannot be equal or less than 0.' :
+                              ''
                           }
                         </span>
-                      </span>
+                      </Alert> :
+                      !callResponse ?
+                        <button
+                          disabled={
+                            disabled ||
+                            !pair ||
+                            !valid_amount
+                          }
+                          onClick={() => call()}
+                          className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
+                        >
+                          <span className="flex items-center justify-center space-x-1.5">
+                            {
+                              disabled &&
+                              (
+                                <TailSpin
+                                  color="white"
+                                  width="20"
+                                  height="20"
+                                />
+                              )
+                            }
+                            <span>
+                              {calling ?
+                                approving ?
+                                  approveProcessing ?
+                                    'Approving' :
+                                    'Please Approve' :
+                                  callProcessing ?
+                                    'Swapping' :
+                                    typeof approving === 'boolean' ?
+                                      'Please Confirm' :
+                                      'Checking Approval' :
+                                'Swap'
+                              }
+                            </span>
+                          </span>
+                        </button> :
+                        callResponse ||
+                        approveResponse &&
+                        (
+                          [
+                            callResponse ||
+                            approveResponse,
+                          ].map((r, i) => {
+                            const {
+                              status,
+                              message,
+                              tx_hash,
+                            } = { ...r }
+
+                            return (
+                              <Alert
+                                key={i}
+                                color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                                icon={status === 'failed' ?
+                                  <BiMessageError
+                                    className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                                  /> :
+                                  status === 'success' ?
+                                    <BiMessageCheck
+                                      className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                                    /> :
+                                    status === 'pending' ?
+                                      <div className="mr-3">
+                                        <Watch
+                                          color="white"
+                                          width="20"
+                                          height="20"
+                                        />
+                                      </div> :
+                                      <BiMessageDetail
+                                        className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                                      />
+                                }
+                                closeDisabled={true}
+                                rounded={true}
+                                className="rounded-xl p-4.5"
+                              >
+                                <div className="flex items-center justify-between space-x-2">
+                                  <span className="break-all">
+                                    {ellipse(
+                                      message,
+                                      128,
+                                    )}
+                                  </span>
+                                  <div className="flex items-center space-x-2">
+                                    {
+                                      status === 'failed' &&
+                                      message &&
+                                      (
+                                        <Copy
+                                          size={24}
+                                          value={message}
+                                          className="cursor-pointer text-slate-200 hover:text-white"
+                                        />
+                                      )
+                                    }
+                                    {
+                                      url &&
+                                      tx_hash &&
+                                      (
+                                        <a
+                                          href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                        >
+                                          <TiArrowRight
+                                            size={20}
+                                            className="transform -rotate-45"
+                                          />
+                                        </a>
+                                      )
+                                    }
+                                    {status === 'failed' ?
+                                      <button
+                                        onClick={() => reset()}
+                                        className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
+                                      >
+                                        <MdClose
+                                          size={20}
+                                        />
+                                      </button> :
+                                      status === 'success' ?
+                                        <button
+                                          onClick={() => reset()}
+                                          className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                                        >
+                                          <MdClose
+                                            size={20}
+                                          />
+                                        </button> :
+                                        null
+                                    }
+                                  </div>
+                                </div>
+                              </Alert>
+                            )
+                          })
+                        ) :
+                  web3_provider ?
+                    <button
+                      disabled={true}
+                      onClick={() => call()}
+                      className="w-full bg-slate-200 dark:bg-slate-800 bg-opacity-75 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
+                    >
+                      Swap
                     </button> :
                     <Wallet
                       connectChainId={chain_id}

@@ -22,7 +22,8 @@ export default ({
     preferences,
   } = useSelector(state =>
     (
-      { preferences: state.preferences,
+      {
+        preferences: state.preferences,
       }
     ),
     shallowEqual,
@@ -93,7 +94,7 @@ export default ({
   return (
     <Modal
       disabled={disabled}
-      buttonTitle={<div className={`bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg flex items-center ${applied ? 'text-green-600 hover:text-green-500 dark:text-slate-200 dark:hover:text-slate-100 py-1' : 'text-slate-500 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-200 py-2'} space-x-1 px-2`}>
+      buttonTitle={<div className={`bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg flex items-center ${applied ? 'text-green-600 hover:text-green-500 dark:text-slate-200 dark:hover:text-slate-100 py-1' : 'text-slate-500 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-200 py-2'} space-x-1 px-3`}>
         {applied ?
           <MdSettingsSuggest
             size={20}
@@ -108,7 +109,7 @@ export default ({
         </span>
       </div>}
       buttonClassName={`min-w-max ${disabled ? 'cursor-not-allowed' : ''} ${applied ? 'ring-2 ring-green-500 dark:ring-white' : ''} rounded-lg shadow flex items-center justify-center`}
-      title="Options"
+      title="Advanced Options"
       body={<div className="form mt-2">
         {fields
           .map((f, i) => {
@@ -296,9 +297,13 @@ export default ({
                                 value = e.target.value
                               }
 
-                              value = ['slippage'].includes(name) && (value <= 0 || value > 100) ?
-                                DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
-                                value
+                              value = ['slippage'].includes(name) &&
+                                (
+                                  value <= 0 ||
+                                  value > 100
+                                ) ?
+                                  DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
+                                  value
 
                               const _data = {
                                 ...data,

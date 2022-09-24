@@ -1,5 +1,5 @@
 import { useSelector, shallowEqual } from 'react-redux'
-import { TailSpin, RotatingTriangles } from 'react-loader-spinner'
+import { Oval } from 'react-loader-spinner'
 
 import { number_format, loader_color } from '../../lib/utils'
 
@@ -29,83 +29,100 @@ export default ({
   } = { ...data }
 
   return (
-    <div className="rounded-2xl pt-1">
-      {data ?
-        <div className="grid grid-cols-2 lg:grid-cols-4">
-          <div className="flex flex-col space-y-0.5">
-            <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
-              Rate
-            </span>
-            <span className="text-lg font-semibold">
-              {number_format(
-                rate,
-                '0,0.000000',
-                true,
-              )}
-            </span>
-          </div>
-          <div className="flex flex-col space-y-0.5">
-            <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
-              Slippage Tolerance
-            </span>
-            <span className="text-lg font-semibold">
-              {number_format(
-                slippage,
-                '0,0.000000',
-                true,
-              )}%
-            </span>
-          </div>
-          <div className="flex flex-col space-y-0.5">
-            <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
-              Price Impact
-            </span>
-            <span className="text-lg font-semibold">
-              {number_format(
-                price_impact,
-                '0,0.000000',
-                true,
-              )}%
-            </span>
-          </div>
-          <div className="flex flex-col space-y-0.5">
-            <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
-              Minimum Received
-            </span>
-            <span className="flex items-center whitespace-nowrap text-lg font-semibold space-x-2">
-              {typeof amount_received === 'boolean' ?
-                <RotatingTriangles
-                  color="white"
-                  width="24"
-                  height="24"
-                /> :
-                <span>
-                  {number_format(
-                    amount_received *
-                    (
-                      100 -
-                      (slippage || 0)
-                    ) /
-                    100,
-                    '0,0.00000000',
-                    true,
-                  )}
+    <div className="space-y-2">
+      <div className="flex items-center space-x-2 sm:mx-3">
+        <span className="tracking-wider text-slate-400 dark:text-slate-600 font-normal">
+          Swap Breakdown
+        </span>
+      </div>
+      <div className="w-full h-0.25 bg-slate-200 dark:bg-slate-700 sm:px-1" />
+      <div className="space-y-2.5 sm:mx-3">
+        {
+          data &&
+          (
+            <>
+              <div className="flex items-center justify-between space-x-1">
+                <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
+                  Minimum Received
+                </div>
+                {typeof amount_received === 'boolean' ?
+                  <div className="flex items-center space-x-1.5">
+                    <span className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
+                      estimating
+                    </span>
+                    <Oval
+                      color={loader_color(theme)}
+                      width="20"
+                      height="20"
+                    />
+                  </div> :
+                  <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
+                    <span>
+                      {number_format(
+                        amount_received *
+                        (
+                          100 -
+                          (slippage || 0)
+                        ) /
+                        100,
+                        '0,0.00000000',
+                        true,
+                      )}
+                    </span>
+                    <span>
+                      {asset_data?.symbol}
+                    </span>
+                  </span>
+                }
+              </div>
+              <div className="flex items-center justify-between space-x-1">
+                <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
+                  Rate
+                </div>
+                <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
+                  <span>
+                    {number_format(
+                      rate,
+                      '0,0.000000',
+                      true,
+                    )}
+                  </span>
                 </span>
-              }
-              <span className="hidden sm:block text-sm">
-                {asset_data?.symbol}
-              </span>
-            </span>
-          </div>
-        </div> :
-        <div className="flex items-center justify-center">
-          <TailSpin
-            color={loader_color(theme)}
-            width="36"
-            height="36"
-          />
-        </div>
-      }
+              </div>
+              <div className="flex items-center justify-between space-x-1">
+                <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
+                  Slippage Tolerance
+                </div>
+                <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
+                  <span>
+                    {number_format(
+                      slippage,
+                      '0,0.000000',
+                      true,
+                    )}
+                    %
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center justify-between space-x-1">
+                <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
+                  Price Impact
+                </div>
+                <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
+                  <span>
+                    {number_format(
+                      price_impact,
+                      '0,0.000000',
+                      true,
+                    )}
+                    %
+                  </span>
+                </span>
+              </div>
+            </>
+          )
+        }
+      </div>
     </div>
   )
 }

@@ -5,7 +5,6 @@ import _ from 'lodash'
 import moment from 'moment'
 import { XTransferStatus } from '@connext/nxtp-utils'
 import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
-import Switch from 'react-switch'
 import { TailSpin, Oval, Watch } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
@@ -23,14 +22,11 @@ import Balance from '../balance'
 import LatestTransfers from '../latest-transfers'
 import Faucet from '../faucet'
 import Image from '../image'
-import EnsProfile from '../ens-profile'
 import Wallet from '../wallet'
 import Alert from '../alerts'
 import Popover from '../popover'
 import Copy from '../copy'
 import meta from '../../lib/meta'
-import { chainName } from '../../lib/object/chain'
-import { currency_symbol } from '../../lib/object/currency'
 import { params_to_obj, number_format, ellipse, equals_ignore_case, loader_color, sleep } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
@@ -105,6 +101,8 @@ export default () => {
     balances_data,
   } = { ...balances }
 
+  const wallet_chain_id = wallet_data?.chain_id
+
   const router = useRouter()
   const {
     asPath,
@@ -113,7 +111,6 @@ export default () => {
   const [bridge, setBridge] = useState({})
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [controller, setController] = useState(null)
-  const [slippageEditing, setSlippageEditing] = useState(false)
 
   const [fee, setFee] = useState(null)
   const [feeEstimating, setFeeEstimating] = useState(null)
@@ -394,7 +391,7 @@ export default () => {
       source_chain,
       destination_chain,
     })
-  }, [asPath, chain_id, chains_data])
+  }, [asPath, wallet_chain_id, chains_data])
 
   // update balances
   useEffect(() => {
@@ -1224,7 +1221,7 @@ export default () => {
   const max_amount = source_amount
 
   const wrong_chain = source_chain_data &&
-    chain_id !== source_chain_data.chain_id &&
+    wallet_chain_id !== source_chain_data.chain_id &&
     !xcall
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
 
@@ -1244,7 +1241,7 @@ export default () => {
         <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6 my-4 sm:my-6 mx-1 sm:mx-4">
           <div className="w-full max-w-lg space-y-3">
             <div className="flex items-center justify-between space-x-2 pb-1">
-              <div className="space-y-1 sm:ml-2">
+              <div className="space-y-1 ml-1 sm:ml-2">
                 <h1 className="tracking-widest text-base sm:text-xl font-semibold">
                   Bridge
                 </h1>
@@ -1269,7 +1266,6 @@ export default () => {
                     Object.entries(options)
                       .filter(([k, v]) =>
                         ![
-                          /*'slippage',*/
                         ].includes(k)
                       )
                   ),
@@ -1277,7 +1273,6 @@ export default () => {
                     Object.entries(DEFAULT_OPTIONS)
                       .filter(([k, v]) =>
                         ![
-                          /*'slippage',*/
                         ].includes(k)
                       )
                   ),
@@ -1287,7 +1282,7 @@ export default () => {
               />
             </div>
             <div
-              className="bg-slate-100 dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-4 sm:pt-10 pb-3 sm:pb-8 px-3 sm:px-6"
+              className="bg-slate-100 dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-8 sm:pt-10 pb-6 sm:pb-8 px-4 sm:px-6"
               style={checkSupport() && amount > 0 ?
                 {
                   boxShadow: `${color}ff 0px 8px 76px 6px`,
@@ -1396,7 +1391,7 @@ export default () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="tracking-wider text-slate-600 dark:text-slate-200 text-lg font-medium sm:ml-3">
+                  <div className="tracking-wider text-slate-600 dark:text-slate-200 text-lg font-medium ml-1 sm:ml-3">
                     Asset
                   </div>
                   <SelectBridgeAsset
@@ -1423,10 +1418,10 @@ export default () => {
                 destination_chain &&
                 asset &&
                 !checkSupport() ?
-                  <div className="tracking-wider text-slate-400 dark:text-slate-200 text-lg text-center sm:ml-3">
+                  <div className="tracking-wider text-slate-400 dark:text-slate-200 text-lg text-center ml-1 sm:ml-3">
                     Route not supported
                   </div> :
-                  <div className="grid grid-cols-5 sm:grid-cols-5 gap-6 sm:ml-3">
+                  <div className="grid grid-cols-5 sm:grid-cols-5 gap-6 ml-1 sm:ml-3">
                     <div className="col-span-2 sm:col-span-2 space-y-1">
                       <div className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
                         <span className="tracking-wider text-slate-600 dark:text-slate-200 text-sm sm:text-base sm:font-medium">
@@ -1666,7 +1661,8 @@ export default () => {
                             }
                           </div>
                         </div>
-                      )}
+                      )
+                    }
                     {
                       amount > 0 &&
                       (
@@ -1784,10 +1780,7 @@ export default () => {
                       !xcallResponse ?
                         <button
                           disabled={disabled}
-                          onClick={() => {
-                            setSlippageEditing(false)
-                            call()
-                          }}
+                          onClick={() => call()}
                           className={`w-full ${disabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'} rounded-xl flex items-center justify-center text-white text-base sm:text-lg py-3 sm:py-4 px-2 sm:px-3`}
                         >
                           <span className="flex items-center justify-center space-x-1.5">
