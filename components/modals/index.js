@@ -136,7 +136,7 @@ export default ({
                       </div>
                     )}
                     <div className="w-full flex flex-col">
-                      <div className="uppercase tracking-wider text-lg font-medium mb-2">
+                      <div className="uppercase text-base font-bold mb-2">
                         {title}
                       </div>
                       {body}

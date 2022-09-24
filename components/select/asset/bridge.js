@@ -165,7 +165,7 @@ export default ({
           />
         </div>
       }
-      buttonClassName={`w-full min-w-max h-20 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl ${disabled ? 'cursor-not-allowed' : ''} grid grid-cols-2 sm:grid-cols-3 items-center gap-2 py-2 px-3`}
+      buttonClassName={`w-full min-w-max h-20 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl ${disabled ? 'cursor-not-allowed' : ''} grid grid-cols-2 sm:grid-cols-3 items-center gap-2 py-2 px-3`}
       buttonStyle={{
         // background: color ?
         //   `${color}28` :

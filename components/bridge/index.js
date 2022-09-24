@@ -10,7 +10,7 @@ import { TailSpin, Oval, Watch } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
-import { HiSwitchHorizontal } from 'react-icons/hi'
+import { HiSwitchHorizontal, HiOutlineDocumentSearch } from 'react-icons/hi'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit, BiEditAlt, BiCheckCircle } from 'react-icons/bi'
 import { GiPartyPopper } from 'react-icons/gi'
 
@@ -1242,8 +1242,8 @@ export default () => {
           <Announcement />
         </div>
         <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6 my-4 sm:my-6 mx-1 sm:mx-4">
-          <div className="w-full max-w-lg space-y-4">
-            <div className="flex items-center justify-between space-x-2">
+          <div className="w-full max-w-lg space-y-3">
+            <div className="flex items-center justify-between space-x-2 pb-1">
               <div className="space-y-1 sm:ml-2">
                 <h1 className="tracking-widest text-base sm:text-xl font-semibold">
                   Bridge
@@ -1253,7 +1253,7 @@ export default () => {
                   asPath.includes('to-') &&
                   title &&
                   (
-                    <h2 className="tracking-wider text-slate-600 dark:text-slate-400 text-xs">
+                    <h2 className="tracking-wider text-slate-500 dark:text-slate-400 text-xs">
                       {title.replace(
                         ' with Connext',
                         '',
@@ -1262,64 +1262,32 @@ export default () => {
                   )
                 }
               </div>
-              <div className="flex items-center space-x-2">
-                {
-                  destination_chain_data &&
-                  (
-                    <a
-                      href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${destination_chain_data.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="min-w-max bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 cursor-pointer rounded-lg shadow flex items-center text-blue-600 dark:text-slate-200 space-x-2 py-1.5 px-2"
-                    >
-                      {destination_chain_data.image && (
-                        <Image
-                          src={destination_chain_data.image}
-                          alt=""
-                          width={20}
-                          height={20}
-                          className="rounded-full"
-                        />
-                      )}
-                      <div className="flex items-center">
-                        <span className="tracking-wider text-base font-medium">
-                          Explorer
-                        </span>
-                        <TiArrowRight
-                          size={20}
-                          className="transform -rotate-45 mt-0.5 -mr-1"
-                        />
-                      </div>
-                    </a>
-                  )
-                }
-                <Options
-                  disabled={disabled}
-                  applied={!_.isEqual(
-                    Object.fromEntries(
-                      Object.entries(options)
-                        .filter(([k, v]) =>
-                          ![
-                            /*'slippage',*/
-                          ].includes(k)
-                        )
-                    ),
-                    Object.fromEntries(
-                      Object.entries(DEFAULT_OPTIONS)
-                        .filter(([k, v]) =>
-                          ![
-                            /*'slippage',*/
-                          ].includes(k)
-                        )
-                    ),
-                  )}
-                  initialData={options}
-                  onChange={o => setOptions(o)}
-                />
-              </div>
+              <Options
+                disabled={disabled}
+                applied={!_.isEqual(
+                  Object.fromEntries(
+                    Object.entries(options)
+                      .filter(([k, v]) =>
+                        ![
+                          /*'slippage',*/
+                        ].includes(k)
+                      )
+                  ),
+                  Object.fromEntries(
+                    Object.entries(DEFAULT_OPTIONS)
+                      .filter(([k, v]) =>
+                        ![
+                          /*'slippage',*/
+                        ].includes(k)
+                      )
+                  ),
+                )}
+                initialData={options}
+                onChange={o => setOptions(o)}
+              />
             </div>
             <div
-              className="bg-slate-50 dark:bg-slate-900 bg-opacity-50 rounded-3xl space-y-6 pt-4 sm:pt-10 pb-3 sm:pb-8 px-3 sm:px-6"
+              className="bg-slate-100 dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-4 sm:pt-10 pb-3 sm:pb-8 px-3 sm:px-6"
               style={checkSupport() && amount > 0 ?
                 {
                   boxShadow: `${color}ff 0px 8px 76px 6px`,
@@ -1374,7 +1342,7 @@ export default () => {
                         getBalances(source_chain)
                         getBalances(destination_chain)
                       }}
-                      className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out bg-slate-100 dark:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
+                      className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
                     >
                       <HiSwitchHorizontal
                         size={28}
@@ -1609,7 +1577,7 @@ export default () => {
                           ].includes(e.key) &&
                           e.preventDefault()
                         }
-                        className={`w-36 sm:w-48 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
+                        className={`w-36 sm:w-48 bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
                       />
                     </div>
                   </div>
@@ -1635,13 +1603,13 @@ export default () => {
                             </span>
                             {/*feeEstimateCooldown > 0 &&
                               (
-                                <div className="bg-slate-50 dark:bg-slate-800 rounded-lg font-medium py-1 px-2">
+                                <div className="bg-slate-100 dark:bg-slate-800 rounded-lg font-medium py-1 px-2">
                                   {feeEstimateCooldown}s
                                 </div>
                               )
                             */}
                           </div>
-                          <div className="w-full h-0.25 bg-slate-100 dark:bg-slate-800 sm:px-1" />
+                          <div className="w-full h-0.25 bg-slate-200 dark:bg-slate-700 sm:px-1" />
                           <div className="space-y-2.5 sm:mx-3">
                             {
                               !forceSlow &&
@@ -1943,7 +1911,7 @@ export default () => {
                   web3_provider ?
                     <button
                       disabled={true}
-                      className="w-full bg-slate-100 dark:bg-slate-900 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
+                      className="w-full bg-slate-200 dark:bg-slate-800 bg-opacity-75 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
                     >
                       Transfer
                     </button> :
@@ -1957,6 +1925,21 @@ export default () => {
                       </span>
                     </Wallet>
               }
+            </div>
+            <div className="flex items-center justify-end mr-3">
+              <a
+                href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}${destination_chain_data?.id ? `/${destination_chain_data.id}` : ''}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center text-slate-400 dark:text-slate-500 space-x-1"
+              >
+                <HiOutlineDocumentSearch
+                  size={18}
+                />
+                <span className="text-sm font-normal">
+                  Explorer
+                </span>
+              </a>
             </div>
           </div>
           {
