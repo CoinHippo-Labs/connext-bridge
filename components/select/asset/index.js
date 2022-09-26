@@ -80,7 +80,7 @@ export default ({
 
   symbol = is_pool ?
     data?.symbol ||
-    asset_data?.name ||
+    asset_data?.symbol ||
       'From Token' :
       symbol ||
         asset_data?.symbol ||
