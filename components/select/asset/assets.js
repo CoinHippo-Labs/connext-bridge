@@ -159,10 +159,7 @@ export default ({
                   />
                 )}
                 <span className={`whitespace-nowrap text-base ${selected ? 'font-bold' : 'font-normal'}`}>
-                  {is_pool ?
-                    name :
-                    symbol
-                  }
+                  {symbol}
                 </span>
               </div>
             )
