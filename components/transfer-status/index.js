@@ -4,9 +4,9 @@ import { BigNumber, utils } from 'ethers'
 import { XTransferStatus } from '@connext/nxtp-utils'
 import { TailSpin } from 'react-loader-spinner'
 import LightSpeed from 'react-reveal/LightSpeed'
+import Fade from 'react-reveal/Fade'
 import { TiArrowRight } from 'react-icons/ti'
 import { HiOutlineCheckCircle } from 'react-icons/hi'
-import { TbArrowBigRight } from 'react-icons/tb'
 
 import Image from '../image'
 import EnsProfile from '../ens-profile'
@@ -158,7 +158,7 @@ export default ({
             />
           </a>
         </div>
-        <div className="flex items-start justify-between space-x-2 mt-2.5">
+        <div className="flex items-center justify-between mt-2.5">
           <div className="flex items-center space-x-1.5">
             {source_chain_data?.image && (
               <Image
@@ -173,9 +173,30 @@ export default ({
               {chainName(source_chain_data)}
             </span>
           </div>
-          <TbArrowBigRight
-            size={18}
-          />
+          {
+            pending &&
+            (
+              <div className="flex items-center justify-center">
+                <div
+                  className="w-12 h-0.5 border-t border-slate-300 dark:border-slate-700 mt-px ml-2"
+                />
+                <Fade
+                  left
+                  distance="64px"
+                  duration={2500}
+                  forever
+                >
+                  <div
+                    className="w-2 h-2 rounded-full"
+                    style={{
+                      background: `${source_asset_data?.color ||
+                        loader_color(theme)}aa`,
+                    }}
+                  />
+                </Fade>
+              </div>
+            )
+          }
           <div className="flex items-center justify-end space-x-1.5">
             {destination_chain_data?.image && (
               <Image
@@ -194,19 +215,17 @@ export default ({
         <div className="flex items-start justify-between space-x-2 my-2.5">
           <LightSpeed left>
             <div className="flex flex-col space-y-1">
-              {source_amount ?
-                <span className="font-semibold">
-                  {number_format(
-                    source_amount,
-                    '0,0.000000',
-                    true,
-                  )}
-                </span> :
-                <TailSpin
-                  color={loader_color(theme)}
-                  width="20"
-                  height="20"
-                />
+              {
+                typeof source_amount === 'number' &&
+                (
+                  <span className="font-semibold">
+                    {number_format(
+                      source_amount,
+                      '0,0.000000',
+                      true,
+                    )}
+                  </span>
+                )
               }
               <div className="flex items-center justify-center space-x-1">
                 {source_asset_image && (
@@ -233,22 +252,20 @@ export default ({
             </div>
           </LightSpeed>
           <div className="flex flex-col items-center">
-            {!pending ?
-              <a
-                href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', execute_transaction_hash)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <HiOutlineCheckCircle
-                  size={36}
-                  className="text-green-500 dark:text-green-400"
-                />
-              </a> :
-              <TailSpin
-                color={loader_color(theme)}
-                width="36"
-                height="36"
-              />
+            {
+              !pending &&
+              (
+                <a
+                  href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', execute_transaction_hash)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <HiOutlineCheckCircle
+                    size={36}
+                    className="text-green-500 dark:text-green-400"
+                  />
+                </a>
+              )
             }
           </div>
           <LightSpeed left>
@@ -256,19 +273,17 @@ export default ({
               className="flex flex-col items-end space-y-1"
               style={{ minWidth: '4rem' }}
             >
-              {destination_amount ?
-                <span className="font-semibold">
-                  {number_format(
-                    destination_amount,
-                    '0,0.000000',
-                    true,
-                  )}
-                </span> :
-                <TailSpin
-                  color={loader_color(theme)}
-                  width="20"
-                  height="20"
-                />
+              {
+                typeof destination_amount === 'number' &&
+                (
+                  <span className="font-semibold">
+                    {number_format(
+                      destination_amount,
+                      '0,0.000000',
+                      true,
+                    )}
+                  </span>
+                )
               }
               <div className="flex items-center justify-center space-x-1">
                 {destination_asset_image && (
