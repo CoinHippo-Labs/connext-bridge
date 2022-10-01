@@ -1104,7 +1104,7 @@ export default () => {
                 'success',
               message: failed ?
                 'Failed to send transaction' :
-                `${symbol} transfer detected, waiting for execution.`,
+                `Transferring ${symbol}. Please wait.`,
               tx_hash: hash,
             })
 
