@@ -542,13 +542,13 @@ export default () => {
         </div>
         <div className="w-full flex flex-col space-y-4 my-6 my-4 sm:my-6 mx-1 sm:mx-4">
           <div className="flex items-center space-x-3">
-            <Link href="/pools">
+            {/*<Link href="/pools">
               <a className="text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white">
                 <RiArrowLeftCircleFill
                   size={36}
                 />
               </a>
-            </Link>
+            </Link>*/}
             <h1 className="uppercase tracking-widest text-2xl font-medium">
               Manage Pool
             </h1>

@@ -115,10 +115,14 @@ export default ({
       pool_loading
     )
 
+  const metricClassName = 'bg-slate-100 dark:bg-slate-900 bg-opacity-100 dark:bg-opacity-50 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col space-y-0.5 py-3 px-4'
+  const titleClassName = 'text-slate-400 dark:text-slate-400 text-base font-normal'
+  const valueClassName = 'text-lg sm:text-2xl font-bold'
+
   return (
-    <div className="sm:min-h-full bg-slate-100 dark:bg-slate-900 bg-opacity-100 dark:bg-opacity-50 border-2 border-blue-400 dark:border-blue-800 rounded-2xl shadow-2xl shadow-blue-200 dark:shadow-blue-600 p-6">
+    <div className="sm:min-h-full bg-transparent">
       {pools_data ?
-        <div className="flex flex-col space-y-8 lg:space-y-20 my-auto">
+        <div className="flex flex-col space-y-8 my-auto">
           <div className="grid sm:flex sm:items-center sm:justify-between sm:space-x-2 gap-2">
             <div className="order-2 sm:order-1 flex items-center space-x-4 sm:space-x-6">
               <SelectAsset
@@ -156,9 +160,9 @@ export default ({
             {
               no_pool &&
               (
-                <span className="order-2 tracking-wider text-slate-400 dark:text-slate-200 text-base font-normal">
+                <div className="order-2 bg-slate-100 dark:bg-slate-800 bg-opacity-100 dark:bg-opacity-50 rounded-2xl tracking-wider text-slate-400 dark:text-slate-400 text-base font-normal py-1.5 px-4">
                   No pool support
-                </span>
+                </div>
               )
             }
             {
@@ -169,7 +173,7 @@ export default ({
                   href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="order-1 sm:order-2 text-base font-semibold"
+                  className="order-1 sm:order-2 bg-slate-100 dark:bg-slate-800 bg-opacity-100 dark:bg-opacity-50 rounded-2xl text-base font-semibold py-1.5 px-4"
                 >
                   {name}
                 </a>
@@ -180,12 +184,12 @@ export default ({
             <div className="tracking-wider text-xl font-medium">
               Statistics
             </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-4">
-              <div className="flex flex-col space-y-0.5">
-                <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className={metricClassName}>
+                <span className={titleClassName}>
                   Liquidity
                 </span>
-                <span className="text-lg font-semibold">
+                <span className={valueClassName}>
                   {pool_data ?
                     number_format(
                       liquidity,
@@ -208,11 +212,11 @@ export default ({
                   }
                 </span>
               </div>
-              <div className="flex flex-col space-y-0.5">
-                <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
+              <div className={metricClassName}>
+                <span className={titleClassName}>
                   Volume (24h)
                 </span>
-                <span className="text-lg font-semibold">
+                <span className={valueClassName}>
                   {pool_data ?
                     <>
                       {currency_symbol}
@@ -238,11 +242,11 @@ export default ({
                   }
                 </span>
               </div>
-              <div className="flex flex-col space-y-0.5">
-                <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
+              <div className={metricClassName}>
+                <span className={titleClassName}>
                   Fees (24h)
                 </span>
-                <span className="text-lg font-semibold">
+                <span className={valueClassName}>
                   {pool_data ?
                     <>
                       {currency_symbol}
@@ -268,13 +272,13 @@ export default ({
                   }
                 </span>
               </div>
-              <div className="flex flex-col space-y-0.5">
-                <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
+              <div className={metricClassName}>
+                <span className={titleClassName}>
                   APY
                 </span>
-                <span className="text-lg font-semibold">
+                <span className={valueClassName}>
                   {pool_data ?
-                    <div className="grid sm:grid-cols-2 gap-1 mt-1">
+                    /*<div className="grid sm:grid-cols-1 gap-1 mt-1">
                       {Object.entries({ ...apy })
                         .filter(([k, v]) => !isNaN(v))
                         .map(([k, v]) => (
@@ -296,7 +300,15 @@ export default ({
                           </div>
                         ))
                       }
-                    </div> :
+                    </div>*/
+                    <span>
+                      {number_format(
+                        apy?.total,
+                        '0,0.000000',
+                        true,
+                      )}
+                      %
+                    </span> :
                     selected &&
                     !no_pool &&
                     (
@@ -315,7 +327,7 @@ export default ({
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {
               address &&
               symbols &&
@@ -324,15 +336,15 @@ export default ({
                   <div className="tracking-wider text-xl font-medium">
                     Tokens
                   </div>
-                  <div className="grid grid-cols-2">
+                  <div className="grid grid-cols-2 gap-4">
                     {
                       _.head(symbols) &&
                       (
-                        <div className="flex flex-col space-y-0.5">
-                          <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
+                        <div className={metricClassName}>
+                          <span className={titleClassName}>
                             {_.head(symbols)}
                           </span>
-                          <span className="text-lg font-semibold">
+                          <span className={valueClassName}>
                             {
                               !isNaN(_.head(balances)) ||
                               (
@@ -365,11 +377,11 @@ export default ({
                     {
                       _.last(symbols) &&
                       (
-                        <div className="flex flex-col space-y-0.5">
-                          <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
+                        <div className={metricClassName}>
+                          <span className={titleClassName}>
                             {_.last(symbols)}
                           </span>
-                          <span className="text-lg font-semibold">
+                          <span className={valueClassName}>
                             {
                               !isNaN(_.last(balances)) ||
                               (
@@ -410,12 +422,12 @@ export default ({
                   <div className="text-xl font-medium">
                     Your Position
                   </div>
-                  <div className="grid grid-cols-2">
-                    <div className="flex flex-col space-y-0.5">
-                      <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className={metricClassName}>
+                      <span className={titleClassName}>
                         Pool Share
                       </span>
-                      <span className="text-lg font-semibold">
+                      <span className={valueClassName}>
                         {
                           !isNaN(share) ||
                           (
@@ -446,11 +458,11 @@ export default ({
                         }
                       </span>
                     </div>
-                    <div className="flex flex-col space-y-0.5">
-                      <span className="text-slate-400 dark:text-slate-500 text-base font-medium">
+                    <div className={metricClassName}>
+                      <span className={titleClassName}>
                         Pool Tokens
                       </span>
-                      <span className="text-lg font-semibold">
+                      <span className={valueClassName}>
                         {
                           !isNaN(lpTokenBalance) ||
                           (
@@ -484,11 +496,13 @@ export default ({
             }
           </div>
         </div> :
-        <TailSpin
-          color={loader_color(theme)}
-          width="36"
-          height="36"
-        />
+        <div className="py-4">
+          <TailSpin
+            color={loader_color(theme)}
+            width="36"
+            height="36"
+          />
+        </div>
       }
     </div>
   )

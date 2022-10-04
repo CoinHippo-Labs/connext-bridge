@@ -22,7 +22,8 @@ export default [
   {
     id: 'pools',
     title: 'Pools',
-    path: '/pools',
+    // path: '/pools',
+    path: '/pool',
     others_paths: [
       '/pool',
       '/pool/[pool]',
