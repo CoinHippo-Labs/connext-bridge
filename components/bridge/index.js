@@ -5,7 +5,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import { XTransferStatus } from '@connext/nxtp-utils'
 import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
-import { TailSpin, Oval, Watch } from 'react-loader-spinner'
+import { TailSpin, Oval } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
@@ -443,7 +443,7 @@ export default () => {
 
     const interval = setInterval(() =>
       getData(),
-      0.25 * 60 * 1000,
+      10 * 1000,
     )
 
     return () => clearInterval(interval)
@@ -622,7 +622,7 @@ export default () => {
 
     const interval = setInterval(() =>
       update(),
-      0.25 * 60 * 1000,
+      10 * 1000,
     )
 
     return () => clearInterval(interval)
@@ -1781,7 +1781,7 @@ export default () => {
                         <button
                           disabled={disabled}
                           onClick={() => call()}
-                          className={`w-full ${disabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'} rounded-xl flex items-center justify-center text-white text-base sm:text-lg py-3 sm:py-4 px-2 sm:px-3`}
+                          className={`w-full ${disabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'} rounded-xl flex items-center ${calling && !approving && callProcessing ? 'justify-start' : 'justify-center sm:text-lg'} text-white text-base py-3 sm:py-4 px-2 sm:px-3`}
                         >
                           <span className="flex items-center justify-center space-x-1.5">
                             {
@@ -1801,7 +1801,7 @@ export default () => {
                                     'Approving' :
                                     'Please Approve' :
                                   callProcessing ?
-                                    'Bridging' :
+                                    `Transferring ${source_symbol}. Please wait.` :
                                     typeof approving === 'boolean' ?
                                       'Please Confirm' :
                                       'Checking Approval' :
@@ -1839,7 +1839,7 @@ export default () => {
                                   status === 'success' ?
                                     xcallResponse ?
                                       <div className="mr-3">
-                                        <Watch
+                                        <TailSpin
                                           color="white"
                                           width="20"
                                           height="20"
