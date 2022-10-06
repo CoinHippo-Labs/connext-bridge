@@ -7,7 +7,6 @@ import moment from 'moment'
 import { BigNumber, Contract, constants, utils } from 'ethers'
 import { RiArrowLeftCircleFill } from 'react-icons/ri'
 
-import Announcement from '../announcement'
 import Info from './info'
 import Liquidity from './liquidity'
 import { params_to_obj, equals_ignore_case } from '../../lib/utils'
@@ -537,9 +536,6 @@ export default () => {
   return (
     <div className="mb-4">
       <div className="flex justify-center">
-        <div className="mt-4 sm:mt-8">
-          <Announcement />
-        </div>
         <div className="w-full flex flex-col space-y-4 my-6 my-4 sm:my-6 mx-1 sm:mx-4">
           <div className="flex items-center space-x-3">
             {/*<Link href="/pools">

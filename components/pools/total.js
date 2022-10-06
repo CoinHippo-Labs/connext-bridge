@@ -1,6 +1,6 @@
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { RotatingTriangles } from 'react-loader-spinner'
+import { TailSpin } from 'react-loader-spinner'
 
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, loader_color } from '../../lib/utils'
@@ -44,7 +44,7 @@ export default () => {
               )}
             </> :
             <div className="mt-1">
-              <RotatingTriangles
+              <TailSpin
                 color={loader_color(theme)}
                 width="24"
                 height="24"
@@ -71,7 +71,7 @@ export default () => {
               )}
             </> :
             <div className="mt-1">
-              <RotatingTriangles
+              <TailSpin
                 color={loader_color(theme)}
                 width="24"
                 height="24"
@@ -98,7 +98,7 @@ export default () => {
               %
             </> :
             <div className="mt-1">
-              <RotatingTriangles
+              <TailSpin
                 color={loader_color(theme)}
                 width="24"
                 height="24"

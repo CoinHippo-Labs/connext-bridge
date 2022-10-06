@@ -12,7 +12,6 @@ import { HiSwitchHorizontal } from 'react-icons/hi'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiEditAlt, BiCheckCircle } from 'react-icons/bi'
 
 import Info from './info'
-import Announcement from '../announcement'
 import Options from './options'
 import SelectChain from '../select/chain'
 import SelectAsset from '../select/asset'
@@ -1274,9 +1273,6 @@ export default () => {
     <div className="grid grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
       <div className="hidden lg:block col-span-0 lg:col-span-2" />
       <div className="col-span-1 lg:col-span-4">
-        <div className="mt-4 sm:mt-8">
-          <Announcement />
-        </div>
         <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6 my-4 sm:my-6 mx-1 sm:mx-4">
           <div className="w-full max-w-lg space-y-3">
             <div className="flex items-center justify-between space-x-2 pb-1">

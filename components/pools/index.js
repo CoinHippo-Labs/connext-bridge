@@ -3,7 +3,6 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import { BigNumber, utils } from 'ethers'
 
-import Announcement from '../announcement'
 import Total from './total'
 import Pools from './pools'
 import { currency_symbol } from '../../lib/object/currency'
@@ -161,9 +160,6 @@ export default () => {
   return (
     <div className="mb-4">
       <div className="flex justify-center">
-        <div className="mt-4 sm:mt-8">
-          <Announcement />
-        </div>
         <div className="w-full flex flex-col space-y-8 my-6 my-4 sm:my-6 mx-1 sm:mx-4">
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="flex flex-col space-y-4">
