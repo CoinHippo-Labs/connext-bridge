@@ -922,16 +922,21 @@ export default () => {
         gas,
       } = { ...fee }
 
+      /*
       const minAmount = (amount || 0) *
         (
           100 -
-          (!receiveLocal && slippage ?
-            slippage :
-            DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE
+          (
+            !receiveLocal &&
+            typeof slippage === 'number' ?
+              slippage :
+              DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE
           )
-        )
+        ) /
+        100
+      */
 
-      const xcallParams = {
+      /*const xcallParams = {
         params: {
           to: to ||
             address,
@@ -971,15 +976,55 @@ export default () => {
           source_contract_data?.decimals || 18,
         )
         .toString(),
+      }*/
+
+      const xcallParams = {
+        origin: source_chain_data?.domain_id,
+        destination: destination_chain_data?.domain_id,
+        to:
+          to ||
+          address,
+        asset: source_contract_data?.contract_address,
+        delegate:
+          to ||
+          address,
+        amount:
+          utils.parseUnits(
+            (
+              amount ||
+              0
+            )
+            .toString(),
+            source_contract_data?.decimals ||
+            18,
+          )
+          .toString(),
+        slippage:
+          (
+            !receiveLocal &&
+            typeof slippage === 'number' ?
+              slippage :
+              DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE
+          )
+          .toString(),
+        callData:
+          callData ||
+          '0x',
       }
 
       let failed = false
 
       try {
-        const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
+        /*const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
           xcallParams.params.originDomain,
           xcallParams.transactingAsset,
           xcallParams.transactingAmount,
+          infiniteApprove,
+        )*/
+        const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
+          xcallParams.origin,
+          xcallParams.asset,
+          xcallParams.amount,
           infiniteApprove,
         )
 
@@ -1783,7 +1828,7 @@ export default () => {
                           onClick={() => call()}
                           className={`w-full ${disabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'} rounded-xl flex items-center ${calling && !approving && callProcessing ? 'justify-start' : 'justify-center sm:text-lg'} text-white text-base py-3 sm:py-4 px-2 sm:px-3`}
                         >
-                          <span className="flex items-center justify-center space-x-1.5">
+                          <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-1.5'}`}>
                             {
                               disabled &&
                               (
