@@ -48,6 +48,7 @@
     "react-copy-to-clipboard": "^5.1.0",
     "react-debounce-input": "^3.3.0",
     "react-dom": "18.2.0",
+    "react-gtm-module": "^2.0.11",
     "react-icons": "^4.4.0",
     "react-linkify": "^1.0.0-alpha",
     "react-loader-spinner": "^5.3.4",
