@@ -444,7 +444,7 @@ export default () => {
             )
 
           const canonicals = pool &&
-            await sdk.nxtpSdkPool.getCanonicalFromLocal(
+            await sdk.nxtpSdkPool.getCanonicalToken(
               domain_id,
               contract_address,
             )
@@ -452,18 +452,10 @@ export default () => {
           const canonicalDomain = _.head(canonicals),
             canonicalId = _.last(canonicals)
 
-          const key =
-            canonicalDomain &&
-            canonicalId &&
-            getCanonicalHash(
-              canonicalDomain,
-              canonicalId,
-            )
-
           const rate = pool &&
             await sdk.nxtpSdkPool.getVirtualPrice(
               domain_id,
-              key,
+              contract_address,
             )
 
           let _pair = (
@@ -853,14 +845,14 @@ export default () => {
       if (!failed) {
         try {
           console.log(
-            '[getCanonicalFromLocal]',
+            '[getCanonicalToken]',
             {
               domainId,
               tokenAddress: contract_address,
             },
           )
 
-          const canonicals = await sdk.nxtpSdkPool.getCanonicalFromLocal(
+          const canonicals = await sdk.nxtpSdkPool.getCanonicalToken(
             domainId,
             contract_address,
           )
@@ -1072,14 +1064,14 @@ export default () => {
 
         try {
           console.log(
-            '[getCanonicalFromLocal]',
+            '[getCanonicalToken]',
             {
               domainId,
               tokenAddress: contract_address,
             },
           )
 
-          const canonicals = await sdk.nxtpSdkPool.getCanonicalFromLocal(
+          const canonicals = await sdk.nxtpSdkPool.getCanonicalToken(
             domainId,
             contract_address,
           )
