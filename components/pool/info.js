@@ -166,7 +166,7 @@ export default ({
               {
                 no_pool &&
                 (
-                  <div className="order-2 bg-slate-100 dark:bg-slate-800 bg-opacity-100 dark:bg-opacity-50 rounded-2xl tracking-wider text-slate-400 dark:text-slate-400 text-base font-normal py-1.5 px-4">
+                  <div className="order-2 bg-slate-100 dark:bg-slate-800 bg-opacity-100 dark:bg-opacity-50 rounded-lg tracking-wider text-slate-400 dark:text-slate-400 text-base font-normal py-1.5 px-4">
                     No pool support
                   </div>
                 )

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
+import { getCanonicalHash } from '@connext/nxtp-utils'
 import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
 import { TailSpin, Watch } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
@@ -451,10 +452,18 @@ export default () => {
           const canonicalDomain = _.head(canonicals),
             canonicalId = _.last(canonicals)
 
+          const key =
+            canonicalDomain &&
+            canonicalId &&
+            getCanonicalHash(
+              canonicalDomain,
+              canonicalId,
+            )
+
           const rate = pool &&
             await sdk.nxtpSdkPool.getVirtualPrice(
               domain_id,
-              canonicalId,
+              key,
             )
 
           let _pair = (
