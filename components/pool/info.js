@@ -89,10 +89,12 @@ export default ({
     apy,
     symbol,
     symbols,
+    error,
   } = { ...pool_data }
 
   const pool_loading = selected &&
     !no_pool &&
+    !error &&
     !pool_data
 
   const user_pool_data = pool_data &&
@@ -110,6 +112,7 @@ export default ({
 
   const position_loading = selected &&
     !no_pool &&
+    !error &&
     (
       !user_pools_data ||
       pool_loading
@@ -125,60 +128,70 @@ export default ({
     <div className="sm:min-h-full bg-transparent">
       {pools_data || true ?
         <div className="flex flex-col space-y-8 my-auto">
-          <div className="grid sm:flex sm:items-center sm:justify-between sm:space-x-2 gap-2">
-            <div className="order-2 sm:order-1 flex items-center space-x-4 sm:space-x-6">
-              <SelectAsset
-                disabled={disabled}
-                value={asset}
-                onSelect={a => {
-                  if (onSelect) {
-                    onSelect({
-                      ...pool,
-                      asset: a,
-                    })
-                  }
-                }}
-                chain={chain}
-                origin=""
-                is_pool={true}
-              />
-              <div className="uppercase text-xs sm:text-sm font-medium">
-                on
+          <div className="space-y-2">
+            <div className="grid sm:flex sm:items-center sm:justify-between sm:space-x-2 gap-2">
+              <div className="order-2 sm:order-1 flex items-center space-x-4 sm:space-x-6">
+                <SelectAsset
+                  disabled={disabled}
+                  value={asset}
+                  onSelect={a => {
+                    if (onSelect) {
+                      onSelect({
+                        ...pool,
+                        asset: a,
+                      })
+                    }
+                  }}
+                  chain={chain}
+                  origin=""
+                  is_pool={true}
+                />
+                <div className="uppercase text-xs sm:text-sm font-medium">
+                  on
+                </div>
+                <SelectChain
+                  disabled={disabled}
+                  value={chain}
+                  onSelect={c => {
+                    if (onSelect) {
+                      onSelect({
+                        ...pool,
+                        chain: c,
+                      })
+                    }
+                  }}
+                  origin=""
+                />
               </div>
-              <SelectChain
-                disabled={disabled}
-                value={chain}
-                onSelect={c => {
-                  if (onSelect) {
-                    onSelect({
-                      ...pool,
-                      chain: c,
-                    })
-                  }
-                }}
-                origin=""
-              />
+              {
+                no_pool &&
+                (
+                  <div className="order-2 bg-slate-100 dark:bg-slate-800 bg-opacity-100 dark:bg-opacity-50 rounded-2xl tracking-wider text-slate-400 dark:text-slate-400 text-base font-normal py-1.5 px-4">
+                    No pool support
+                  </div>
+                )
+              }
+              {
+                name &&
+                url &&
+                (
+                  <a
+                    href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="order-1 sm:order-2 bg-slate-100 dark:bg-slate-800 bg-opacity-100 dark:bg-opacity-50 rounded-2xl text-base font-semibold py-1.5 px-4"
+                  >
+                    {name}
+                  </a>
+                )
+              }
             </div>
             {
-              no_pool &&
+              error &&
               (
-                <div className="order-2 bg-slate-100 dark:bg-slate-800 bg-opacity-100 dark:bg-opacity-50 rounded-2xl tracking-wider text-slate-400 dark:text-slate-400 text-base font-normal py-1.5 px-4">
-                  No pool support
+                <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-100 dark:bg-opacity-50 rounded-lg tracking-wider text-red-600 dark:text-red-400 text-base font-normal py-1.5 px-4">
+                  {error.message}
                 </div>
-              )
-            }
-            {
-              name &&
-              url &&
-              (
-                <a
-                  href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="order-1 sm:order-2 bg-slate-100 dark:bg-slate-800 bg-opacity-100 dark:bg-opacity-50 rounded-2xl text-base font-semibold py-1.5 px-4"
-                >
-                  {name}
-                </a>
               )
             }
           </div>
@@ -193,25 +206,28 @@ export default ({
                     Liquidity
                   </span>
                   <span className={valueClassName}>
-                    {pool_data ?
-                      number_format(
-                        liquidity,
-                        '0,0.000000',
-                        true,
-                      ) :
-                      selected &&
-                      !no_pool &&
-                      (
-                        pool_loading ?
-                          <div className="mt-1">
-                            <TailSpin
-                              color={loader_color(theme)}
-                              width="24"
-                              height="24"
-                            />
-                          </div> :
-                          '-'
-                      )
+                    {
+                      pool_data &&
+                      !error ?
+                        number_format(
+                          liquidity,
+                          '0,0.000000',
+                          true,
+                        ) :
+                        selected &&
+                        !no_pool &&
+                        !error &&
+                        (
+                          pool_loading ?
+                            <div className="mt-1">
+                              <TailSpin
+                                color={loader_color(theme)}
+                                width="24"
+                                height="24"
+                              />
+                            </div> :
+                            '-'
+                        )
                     }
                   </span>
                 </div>
@@ -220,28 +236,31 @@ export default ({
                     Volume (24h)
                   </span>
                   <span className={valueClassName}>
-                    {pool_data ?
-                      <>
-                        {currency_symbol}
-                        {number_format(
-                          volume,
-                          '0,0.000000',
-                          true,
-                        )}
-                      </> :
-                      selected &&
-                      !no_pool &&
-                      (
-                        pool_loading ?
-                          <div className="mt-1">
-                            <TailSpin
-                              color={loader_color(theme)}
-                              width="24"
-                              height="24"
-                            />
-                          </div> :
-                          '-'
-                      )
+                    {
+                      pool_data &&
+                      !error ?
+                        <>
+                          {currency_symbol}
+                          {number_format(
+                            volume,
+                            '0,0.000000',
+                            true,
+                          )}
+                        </> :
+                        selected &&
+                        !no_pool &&
+                        !error &&
+                        (
+                          pool_loading ?
+                            <div className="mt-1">
+                              <TailSpin
+                                color={loader_color(theme)}
+                                width="24"
+                                height="24"
+                              />
+                            </div> :
+                            '-'
+                        )
                     }
                   </span>
                 </div>
@@ -250,28 +269,31 @@ export default ({
                     Fees (24h)
                   </span>
                   <span className={valueClassName}>
-                    {pool_data ?
-                      <>
-                        {currency_symbol}
-                        {number_format(
-                          fees,
-                          '0,0.000000',
-                          true,
-                        )}
-                      </> :
-                      selected &&
-                      !no_pool &&
-                      (
-                        pool_loading ?
-                          <div className="mt-1">
-                            <TailSpin
-                              color={loader_color(theme)}
-                              width="24"
-                              height="24"
-                            />
-                          </div> :
-                          '-'
-                      )
+                    {
+                      pool_data &&
+                      !error ?
+                        <>
+                          {currency_symbol}
+                          {number_format(
+                            fees,
+                            '0,0.000000',
+                            true,
+                          )}
+                        </> :
+                        selected &&
+                        !no_pool &&
+                        !error &&
+                        (
+                          pool_loading ?
+                            <div className="mt-1">
+                              <TailSpin
+                                color={loader_color(theme)}
+                                width="24"
+                                height="24"
+                              />
+                            </div> :
+                            '-'
+                        )
                     }
                   </span>
                 </div>
@@ -280,51 +302,54 @@ export default ({
                     APY
                   </span>
                   <span className={valueClassName}>
-                    {pool_data ?
-                      /*<div className="grid sm:grid-cols-1 gap-1 mt-1">
-                        {Object.entries({ ...apy })
-                          .filter(([k, v]) => !isNaN(v))
-                          .map(([k, v]) => (
-                            <div
-                              key={k}
-                              className="flex items-center text-sm space-x-1"
-                            >
-                              <span className="capitalize">
-                                {k}
-                              </span>
-                              <span>
-                                {number_format(
-                                  v,
-                                  '0,0.000000',
-                                  true,
-                                )}
-                                %
-                              </span>
-                            </div>
-                          ))
-                        }
-                      </div>*/
-                      <span>
-                        {number_format(
-                          apy?.total,
-                          '0,0.000000',
-                          true,
-                        )}
-                        %
-                      </span> :
-                      selected &&
-                      !no_pool &&
-                      (
-                        pool_loading ?
-                          <div className="mt-1">
-                            <TailSpin
-                              color={loader_color(theme)}
-                              width="24"
-                              height="24"
-                            />
-                          </div> :
-                          '-'
-                      )
+                    {
+                      pool_data &&
+                      !error ?
+                        /*<div className="grid sm:grid-cols-1 gap-1 mt-1">
+                          {Object.entries({ ...apy })
+                            .filter(([k, v]) => !isNaN(v))
+                            .map(([k, v]) => (
+                              <div
+                                key={k}
+                                className="flex items-center text-sm space-x-1"
+                              >
+                                <span className="capitalize">
+                                  {k}
+                                </span>
+                                <span>
+                                  {number_format(
+                                    v,
+                                    '0,0.000000',
+                                    true,
+                                  )}
+                                  %
+                                </span>
+                              </div>
+                            ))
+                          }
+                        </div>*/
+                        <span>
+                          {number_format(
+                            apy?.total,
+                            '0,0.000000',
+                            true,
+                          )}
+                          %
+                        </span> :
+                        selected &&
+                        !no_pool &&
+                        !error &&
+                        (
+                          pool_loading ?
+                            <div className="mt-1">
+                              <TailSpin
+                                color={loader_color(theme)}
+                                width="24"
+                                height="24"
+                              />
+                            </div> :
+                            '-'
+                        )
                     }
                   </span>
                 </div>
@@ -352,6 +377,7 @@ export default ({
                                 !isNaN(_.head(balances)) ||
                                 (
                                   pool_data &&
+                                  !error &&
                                   user_pools_data
                                 ) ?
                                   number_format(
@@ -361,6 +387,7 @@ export default ({
                                   ) :
                                   selected &&
                                   !no_pool &&
+                                  !error &&
                                   (
                                     position_loading ?
                                       <div className="mt-0.5">
@@ -389,6 +416,7 @@ export default ({
                                 !isNaN(_.last(balances)) ||
                                 (
                                   pool_data &&
+                                  !error &&
                                   user_pools_data
                                 ) ?
                                   number_format(
@@ -398,6 +426,7 @@ export default ({
                                   ) :
                                   selected &&
                                   !no_pool &&
+                                  !error &&
                                   (
                                     position_loading ?
                                       <div className="mt-0.5">
@@ -435,6 +464,7 @@ export default ({
                             !isNaN(share) ||
                             (
                               pool_data &&
+                              !error &&
                               user_pools_data
                             ) ?
                             <>
@@ -447,6 +477,7 @@ export default ({
                             </> :
                             selected &&
                             !no_pool &&
+                            !error &&
                             (
                               position_loading ?
                                 <div className="mt-0.5">
@@ -470,6 +501,7 @@ export default ({
                             !isNaN(lpTokenBalance) ||
                             (
                               pool_data &&
+                              !error &&
                               user_pools_data
                             ) ?
                               number_format(
@@ -479,6 +511,7 @@ export default ({
                               ) :
                               selected &&
                               !no_pool &&
+                              !error &&
                               (
                                 position_loading ?
                                   <div className="mt-0.5">

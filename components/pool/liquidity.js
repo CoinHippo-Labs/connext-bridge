@@ -883,6 +883,7 @@ export default ({
     decimals,
     symbol,
     symbols,
+    error,
   } = { ...pool_data }
   let {
     rate,
@@ -957,6 +958,7 @@ export default ({
 
   const pool_loading = selected &&
     !no_pool &&
+    !error &&
     !pool_data
 
   const user_pool_data = pool_data &&
@@ -970,6 +972,7 @@ export default ({
 
   const position_loading = selected &&
     !no_pool &&
+    !error &&
     (
       !user_pools_data ||
       pool_loading
@@ -987,7 +990,9 @@ export default ({
     !callResponse
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
 
-  const disabled = !pool_data ||
+  const disabled =
+    !pool_data ||
+    error ||
     calling ||
     approving
 
@@ -1718,6 +1723,7 @@ export default ({
                     </span> :
                     selected &&
                     !no_pool &&
+                    !error &&
                     (
                       position_loading ?
                         <TailSpin
@@ -1760,6 +1766,7 @@ export default ({
                     </span> :
                     selected &&
                     !no_pool &&
+                    !error &&
                     (
                       position_loading ?
                         <TailSpin

@@ -378,13 +378,15 @@ export default () => {
   useEffect(() => {
     if (pools_data) {
       const chains = _.uniq(
-        pools_data.map(p => p?.chain_data?.id)
-        .filter(c => c)
+        pools_data
+          .map(p => p?.chain_data?.id)
+          .filter(c => c)
       )
 
-      chains.forEach(c =>
-        getBalances(c)
-      )
+      chains
+        .forEach(c =>
+          getBalances(c)
+        )
     }
   }, [pools_data])
 
@@ -400,7 +402,10 @@ export default () => {
         chain
       ) {
         try {
-          if (pair === undefined) {
+          if (
+            pair === undefined ||
+            pair?.error
+          ) {
             setPair(null)
           }
 
@@ -428,12 +433,14 @@ export default () => {
           const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_id)
           const {
             contract_address,
+            is_pool,
           } = { ...contract_data }
 
-          const pool = await sdk.nxtpSdkPool.getPool(
-            domain_id,
-            contract_address,
-          )
+          const pool = is_pool &&
+            await sdk.nxtpSdkPool.getPool(
+              domain_id,
+              contract_address,
+            )
 
           const canonicals = pool &&
             await sdk.nxtpSdkPool.getCanonicalFromLocal(
@@ -450,7 +457,7 @@ export default () => {
               canonicalId,
             )
 
-         let _pair = (
+          let _pair = (
             pool ?
               [pool]
                 .map(p => {
@@ -495,10 +502,18 @@ export default () => {
               ),
             }
 
-          setPair(_pair)
+          setPair(
+            is_pool ?
+              _pair :
+              undefined
+          )
           calculateSwap(_pair)
         } catch (error) {
-          setPair(undefined)
+          setPair(
+            {
+              error,
+            }
+          )
           calculateSwap(null)
         }
       }
@@ -616,12 +631,13 @@ export default () => {
       'contract_address',
     )
 
-    contracts_data.forEach(c =>
-      getBalance(
-        chain_id,
-        c,
+    contracts_data
+      .forEach(c =>
+        getBalance(
+          chain_id,
+          c,
+        )
       )
-    )
   }
 
   const reset = async origin => {
@@ -1462,131 +1478,136 @@ export default () => {
                       Route not supported
                     </div> :
                     pair ?
-                      <div className="grid grid-cols-5 sm:grid-cols-5 gap-6 ml-1 sm:ml-3">
-                        <div className="col-span-2 sm:col-span-2 space-y-1">
-                          <div className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
-                            <span className="tracking-wider text-slate-600 dark:text-slate-200 text-sm sm:text-base sm:font-medium">
-                              Amount
-                            </span>
+                      pair.error ?
+                        <div className="w-fit tracking-wider text-red-600 dark:text-red-400 text-sm mx-auto">
+                          {pair.error.message}
+                        </div> :
+                        <div className="grid grid-cols-5 sm:grid-cols-5 gap-6 ml-1 sm:ml-3">
+                          <div className="col-span-2 sm:col-span-2 space-y-1">
+                            <div className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
+                              <span className="tracking-wider text-slate-600 dark:text-slate-200 text-sm sm:text-base sm:font-medium">
+                                Amount
+                              </span>
+                              {
+                                address &&
+                                (origin === 'x' ?
+                                  x_balance :
+                                  y_balance
+                                ) &&
+                                (
+                                  <button
+                                    onClick={() => {
+                                      setSwap({
+                                        ...swap,
+                                        amount: origin === 'x' ?
+                                          x_balance_amount :
+                                          y_balance_amount,
+                                      })
+                                    }}
+                                    className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
+                                  >
+                                    Max
+                                  </button>
+                                )
+                              }
+                            </div>
                             {
-                              address &&
+                              chain_data &&
+                              asset &&
                               (origin === 'x' ?
-                                x_balance :
-                                y_balance
+                                x_asset_data :
+                                y_asset_data
                               ) &&
                               (
-                                <button
-                                  onClick={() => {
-                                    setSwap({
-                                      ...swap,
-                                      amount: origin === 'x' ?
-                                        x_balance_amount :
-                                        y_balance_amount,
-                                    })
-                                  }}
-                                  className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
-                                >
-                                  Max
-                                </button>
+                                <div className="flex items-center space-x-1.5">
+                                  <div className="tracking-wider text-slate-400 dark:text-slate-600 text-xs">
+                                    Balance
+                                  </div>
+                                  <Balance
+                                    chainId={chain_id}
+                                    asset={asset}
+                                    contractAddress={(origin === 'x' ?
+                                      x_asset_data :
+                                      y_asset_data
+                                    ).contract_address}
+                                    symbol={(origin === 'x' ?
+                                      x_asset_data :
+                                      y_asset_data
+                                    ).symbol}
+                                  />
+                                </div>
                               )
                             }
                           </div>
-                          {
-                            chain_data &&
-                            asset &&
-                            (origin === 'x' ?
-                              x_asset_data :
-                              y_asset_data
-                            ) &&
-                            (
-                              <div className="flex items-center space-x-1.5">
-                                <div className="tracking-wider text-slate-400 dark:text-slate-600 text-xs">
-                                  Balance
-                                </div>
-                                <Balance
-                                  chainId={chain_id}
-                                  asset={asset}
-                                  contractAddress={(origin === 'x' ?
-                                    x_asset_data :
-                                    y_asset_data
-                                  ).contract_address}
-                                  symbol={(origin === 'x' ?
-                                    x_asset_data :
-                                    y_asset_data
-                                  ).symbol}
-                                />
-                              </div>
-                            )
-                          }
-                        </div>
-                        <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end">
-                          <DebounceInput
-                            debounceTimeout={300}
-                            size="small"
-                            type="number"
-                            placeholder="0.00"
-                            disabled={
-                              disabled ||
-                              !asset
-                            }
-                            value={typeof amount === 'number' && amount >= 0 ?
-                              amount :
-                              ''
-                            }
-                            onChange={e => {
-                              const regex = /^[0-9.\b]+$/
-
-                              let value
-
-                              if (
-                                e.target.value === '' ||
-                                regex.test(e.target.value)
-                              ) {
-                                value = e.target.value
+                          <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end">
+                            <DebounceInput
+                              debounceTimeout={300}
+                              size="small"
+                              type="number"
+                              placeholder="0.00"
+                              disabled={
+                                disabled ||
+                                !asset
                               }
+                              value={typeof amount === 'number' && amount >= 0 ?
+                                amount :
+                                ''
+                              }
+                              onChange={e => {
+                                const regex = /^[0-9.\b]+$/
 
-                              value = value < 0 ?
-                                0 :
-                                value
+                                let value
 
-                              setSwap({
-                                ...swap,
-                                amount: value && !isNaN(value) ?
-                                  Number(value) :
-                                  value,
-                              })
-                            }}
-                            onWheel={e => e.target.blur()}
-                            onKeyDown={e =>
-                              [
-                                'e',
-                                'E',
-                                '-',
-                              ].includes(e.key) &&
-                              e.preventDefault()
-                            }
-                            className={`w-36 sm:w-48 bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
-                          />
+                                if (
+                                  e.target.value === '' ||
+                                  regex.test(e.target.value)
+                                ) {
+                                  value = e.target.value
+                                }
+
+                                value = value < 0 ?
+                                  0 :
+                                  value
+
+                                setSwap({
+                                  ...swap,
+                                  amount: value && !isNaN(value) ?
+                                    Number(value) :
+                                    value,
+                                })
+                              }}
+                              onWheel={e => e.target.blur()}
+                              onKeyDown={e =>
+                                [
+                                  'e',
+                                  'E',
+                                  '-',
+                                ].includes(e.key) &&
+                                e.preventDefault()
+                              }
+                              className={`w-36 sm:w-48 bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
+                            />
+                          </div>
+                        </div> :
+                        <div className="flex items-center justify-center space-x-2">
+                          <div>
+                            <TailSpin
+                              color={loader_color(theme)}
+                              width="20"
+                              height="20"
+                            />
+                          </div>
+                          <span className="text-slate-400 dark:text-slate-200 text-lg">
+                            Fetching pair information ...
+                          </span>
                         </div>
-                      </div> :
-                      <div className="flex items-center justify-center space-x-2">
-                        <div>
-                          <TailSpin
-                            color={loader_color(theme)}
-                            width="20"
-                            height="20"
-                          />
-                        </div>
-                        <span className="text-slate-400 dark:text-slate-200 text-lg">
-                          Fetching pair information ...
-                        </span>
-                      </div>
                 )
               }
               {
                 chain &&
                 asset &&
                 pair &&
+                !pair.error &&
                 (
                   <Info
                     data={pair}

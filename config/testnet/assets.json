@@ -53,9 +53,14 @@
         "contract_address": "0x1E5341E4b7ed5D0680d9066aac0396F0b1bD1E69",
         "chain_id": 80001,
         "decimals": 18,
-        "symbol": "WETH",
+        "symbol": "nextWETH",
         "wrapable": true,
-        "is_pool": true
+        "is_pool": true,
+        "wrapped": {
+          "contract_address": "0x4DfAe612aaCB5b448C12A591cD0879bFa2e51d62",
+          "decimals": 18,
+          "symbol": "WETH"
+        }
       },
       {
         "contract_address": "0x39B061B7e41DE8B721f9aEcEB6b3f17ECB7ba63E",

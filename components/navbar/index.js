@@ -637,6 +637,15 @@ export default () => {
                 },
                 error,
               )
+
+              data.push({
+                id: `${chain_data.id}_${asset_data.id}`,
+                chain_id,
+                chain_data,
+                asset_data,
+                contract_data,
+                error,
+              })
             }
           }
         }
