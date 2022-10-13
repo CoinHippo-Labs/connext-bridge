@@ -157,14 +157,14 @@ export default ({
 
           try {
             console.log(
-              '[getCanonicalFromLocal]',
+              '[getCanonicalToken]',
               {
                 domainId,
                 tokenAddress: contract_address,
               },
             )
 
-            const canonicals = await sdk.nxtpSdkPool.getCanonicalFromLocal(
+            const canonicals = await sdk.nxtpSdkPool.getCanonicalToken(
               domainId,
               contract_address,
             )
@@ -467,26 +467,10 @@ export default ({
           if (!failed) {
             try {
               console.log(
-                '[getCanonicalFromLocal]',
-                {
-                  domainId,
-                  tokenAddress: contract_address,
-                },
-              )
-
-              const canonicals = await sdk.nxtpSdkPool.getCanonicalFromLocal(
-                domainId,
-                contract_address,
-              )
-
-              const canonicalDomain = _.head(canonicals),
-                canonicalId = _.last(canonicals)
-
-              console.log(
                 '[Add Liquidity]',
                 {
                   domainId,
-                  canonicalId,
+                  contract_address,
                   amounts,
                   minToMint,
                   deadline,
@@ -495,7 +479,7 @@ export default ({
 
               const add_request = await sdk.nxtpSdkPool.addLiquidity(
                 domainId,
-                canonicalId,
+                contract_address,
                 amounts,
                 minToMint,
                 deadline,
@@ -656,14 +640,14 @@ export default ({
           if (!failed) {
             try {
               console.log(
-                '[getCanonicalFromLocal]',
+                '[getCanonicalToken]',
                 {
                   domainId,
                   tokenAddress: contract_address,
                 },
               )
 
-              const canonicals = await sdk.nxtpSdkPool.getCanonicalFromLocal(
+              const canonicals = await sdk.nxtpSdkPool.getCanonicalToken(
                 domainId,
                 contract_address,
               )

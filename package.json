@@ -27,7 +27,6 @@
   "dependencies": {
     "@coinbase/wallet-sdk": "^3.5.2",
     "@connext/nxtp-sdk": "^0.2.0-alpha.26",
-    "@connext/nxtp-utils": "^0.2.0-alpha.26",
     "@popperjs/core": "^2.11.6",
     "@portis/web3": "^4.0.7",
     "@redux-devtools/extension": "^3.2.3",

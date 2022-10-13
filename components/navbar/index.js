@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import { create } from '@connext/nxtp-sdk'
-import { getCanonicalHash } from '@connext/nxtp-utils'
 import { BigNumber, providers, utils } from 'ethers'
 import Linkify from 'react-linkify'
 import parse from 'html-react-parser'
@@ -577,29 +576,12 @@ export default () => {
                 )
               }
 
-              const canonicals = pool &&
-                await sdk.nxtpSdkPool.getCanonicalFromLocal(
-                  domain_id,
-                  contract_address,
-                )
-
-              const canonicalDomain = _.head(canonicals),
-                canonicalId = _.last(canonicals)
-
-              const key =
-                canonicalDomain &&
-                canonicalId &&
-                getCanonicalHash(
-                  canonicalDomain,
-                  canonicalId,
-                )
-
               if (pool) {
                 console.log(
                   '[getVirtualPrice]',
                   {
                     domain_id,
-                    key,
+                    contract_address,
                   },
                 )
               }
@@ -607,7 +589,7 @@ export default () => {
               const rate = pool &&
                 await sdk.nxtpSdkPool.getVirtualPrice(
                   domain_id,
-                  key,
+                  contract_address,
                 )
 
               if (pool) {
@@ -615,7 +597,7 @@ export default () => {
                   '[VirtualPrice]',
                   {
                     domain_id,
-                    key,
+                    contract_address,
                     rate,
                   },
                 )
