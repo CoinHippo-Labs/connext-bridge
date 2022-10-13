@@ -835,26 +835,10 @@ export default () => {
       if (!failed) {
         try {
           console.log(
-            '[getCanonicalToken]',
-            {
-              domainId,
-              tokenAddress: contract_address,
-            },
-          )
-
-          const canonicals = await sdk.nxtpSdkPool.getCanonicalToken(
-            domainId,
-            contract_address,
-          )
-
-          const canonicalDomain = _.head(canonicals),
-            canonicalId = _.last(canonicals)
-
-          console.log(
             '[Swap]',
             {
               domainId,
-              canonicalId,
+              contract_address,
               from: (origin === 'x' ?
                 x_asset_data :
                 y_asset_data
@@ -871,7 +855,7 @@ export default () => {
 
           const swap_request = await sdk.nxtpSdkPool.swap(
             domainId,
-            canonicalId,
+            contract_address,
             (origin === 'x' ?
               x_asset_data :
               y_asset_data
@@ -1054,26 +1038,10 @@ export default () => {
 
         try {
           console.log(
-            '[getCanonicalToken]',
-            {
-              domainId,
-              tokenAddress: contract_address,
-            },
-          )
-
-          const canonicals = await sdk.nxtpSdkPool.getCanonicalToken(
-            domainId,
-            contract_address,
-          )
-
-          const canonicalDomain = _.head(canonicals),
-            canonicalId = _.last(canonicals)
-
-          console.log(
             '[getPoolTokenIndex]',
             {
               domainId,
-              canonicalId,
+              contract_address,
               tokenAddress: (origin === 'x' ?
                 x_asset_data :
                 y_asset_data
@@ -1083,7 +1051,7 @@ export default () => {
 
           const tokenIndexFrom = await sdk.nxtpSdkPool.getPoolTokenIndex(
             domainId,
-            canonicalId,
+            contract_address,
             (origin === 'x' ?
               x_asset_data :
               y_asset_data
@@ -1094,7 +1062,7 @@ export default () => {
             '[getPoolTokenIndex]',
             {
               domainId,
-              canonicalId,
+              contract_address,
               tokenAddress: (origin === 'x' ?
                 y_asset_data :
                 x_asset_data
@@ -1103,7 +1071,7 @@ export default () => {
 
           const tokenIndexTo = await sdk.nxtpSdkPool.getPoolTokenIndex(
             domainId,
-            canonicalId,
+            contract_address,
             (origin === 'x' ?
               y_asset_data :
               x_asset_data
@@ -1124,7 +1092,7 @@ export default () => {
             '[calculateSwap]',
             {
               domainId,
-              canonicalId,
+              contract_address,
               tokenIndexFrom,
               tokenIndexTo,
               amount,
@@ -1133,7 +1101,7 @@ export default () => {
  
           const _amount = await sdk.nxtpSdkPool.calculateSwap(
             domainId,
-            canonicalId,
+            contract_address,
             tokenIndexFrom,
             tokenIndexTo,
             amount,
