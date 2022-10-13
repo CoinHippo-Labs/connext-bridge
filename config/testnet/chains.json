@@ -93,14 +93,14 @@
           "decimals": 18
         },
         "blockExplorerUrls": [
-          "https://blockscout.com/optimism/goerli"
+          "https://goerli-optimism.etherscan.io"
         ]
       }
     ],
     "explorer": {
-      "name": "Optimism",
-      "url": "https://blockscout.com/optimism/goerli",
-      "icon": "/logos/explorers/optimism.png",
+      "name": "Etherscan",
+      "url": "https://goerli-optimism.etherscan.io",
+      "icon": "/logos/explorers/etherscan.png",
       "block_path": "/block/{block}",
       "address_path": "/address/{address}",
       "contract_path": "/token/{address}",
