@@ -1715,8 +1715,10 @@ export default () => {
                             </span>
                           </span>
                         </button> :
-                        callResponse ||
-                        approveResponse &&
+                        (
+                          callResponse ||
+                          approveResponse
+                        ) &&
                         (
                           [
                             callResponse ||
