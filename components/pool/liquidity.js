@@ -1163,7 +1163,7 @@ export default ({
   )
 
   return (
-    <div className="bg-slate-100 dark:bg-slate-900 bg-opacity-100 dark:bg-opacity-50 rounded-2xl space-y-4 p-6">
+    <div className="bg-slate-50 dark:bg-slate-900 bg-opacity-100 dark:bg-opacity-50 rounded-2xl space-y-4 p-6">
       <div className="flex flex-wrap items-center justify-between mr-1.5">
         <div className="flex items-center space-x-0.5">
           {ACTIONS

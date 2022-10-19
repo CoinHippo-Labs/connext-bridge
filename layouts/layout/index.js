@@ -171,8 +171,11 @@ export default ({
             className="main w-full bg-slate-50 dark:bg-black"
             style={{
               minHeight: 'calc(100vh - 44px)',
-              backgroundImage: `url("/images/background${theme === 'light' ? '_white' : ''}.png")`,
-              backgroundSize: 'cover',
+              backgroundColor: theme === 'light' ?
+                '#f5f5f5' :
+                '#111011',
+              // backgroundImage: `url("/images/background${theme === 'light' ? '_white' : ''}.png")`,
+              // backgroundSize: 'cover',
             }}
           >
             <Navbar />

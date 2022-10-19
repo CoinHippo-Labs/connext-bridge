@@ -576,6 +576,12 @@ export default () => {
                 )
               }
 
+              const {
+                liquidity,
+                volume,
+                fees,
+              } = { ...stats }
+
               if (pool) {
                 console.log(
                   '[getVirtualPrice]',
@@ -612,6 +618,15 @@ export default () => {
                 asset_data,
                 contract_data,
                 symbols,
+                liquidity: Number(
+                  liquidity,
+                ),
+                volume: Number(
+                  volume,
+                ),
+                fees: Number(
+                  fees,
+                ),
                 rate: Number(
                   utils.formatUnits(
                     BigNumber.from(rate || '0'),

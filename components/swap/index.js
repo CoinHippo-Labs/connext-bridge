@@ -1291,7 +1291,7 @@ export default () => {
               />
             </div>
             <div
-              className="bg-slate-100 dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-4 sm:pt-6 pb-6 sm:pb-8 px-4 sm:px-6"
+              className="bg-slate-50 dark:bg-slate-900 bg-opacity-100 dark:bg-opacity-50 rounded-3xl space-y-6 pt-4 sm:pt-6 pb-6 sm:pb-8 px-4 sm:px-6"
               style={valid_amount ?
                 {
                   boxShadow: `${color}ff 0px 8px 76px 6px`,
