@@ -1,12 +1,14 @@
 import Head from 'next/head'
 import Router from 'next/router'
+import { useRouter } from 'next/router'
+import { useEffect } from 'react'
 import { Provider } from 'react-redux'
-
 import NProgress from 'nprogress'
+import TagManager from 'react-gtm-module'
 
-import { useStore } from '../store'
 import Layout from '../layouts'
-
+import { useStore } from '../store'
+import * as ga from '../lib/ga'
 import '../styles/global.css'
 import '../styles/tailwind.css'
 import '../styles/animate.css'
@@ -18,14 +20,36 @@ import '../styles/components/button.css'
 import '../styles/components/dropdown.css'
 import '../styles/components/modals.css'
 import '../styles/components/forms.css'
-import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css'
 
-Router.events.on('routeChangeStart', () => NProgress.start())
-Router.events.on('routeChangeComplete', () => NProgress.done())
-Router.events.on('routeChangeError', () => NProgress.done())
-
-export default function App({ Component, pageProps }) {
+export default ({
+  Component,
+  pageProps,
+}) => {
+  const router = useRouter()
   const store = useStore(pageProps.initialReduxState)
+
+  useEffect(() => {
+    const handleRouteChange = url =>
+      ga.pageview(url)
+
+    router.events.on(
+      'routeChangeComplete',
+      handleRouteChange,
+    )
+
+    return () => router.events.off(
+      'routeChangeComplete',
+      handleRouteChange,
+    )
+  }, [router.events])
+
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_GTM_ID) {
+      TagManager.initialize({
+        gtmId: process.env.NEXT_PUBLIC_GTM_ID,
+      })
+    }
+  }, [])
 
   return (
     <>
@@ -37,37 +61,30 @@ export default function App({ Component, pageProps }) {
         <meta name="msapplication-TileColor" content="#050707" />
         <meta name="msapplication-TileImage" content="/icons/mstile-150x150.png" />
         <meta name="theme-color" content="#050707" />
-        {['mainnet'].includes(process.env.NEXT_PUBLIC_NETWORK) && (
-          <>
-            <script
-              defer
-              src="https://static.cloudflareinsights.com/beacon.min.js"
-              data-cf-beacon='{"token": "9d39c3893da043b496b4e2608df54643"}'
-            />
-            <script
-              defer
-              data-domain="connext.network"
-              src="https://plausible.io/js/plausible.js"
-            />
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `
-                  var _paq = window._paq = window._paq || [];
-                  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-                  _paq.push(['trackPageView']);
-                  _paq.push(['enableLinkTracking']);
-                  (function() {
-                    var u="https://connextnetwork.matomo.cloud/";
-                    _paq.push(['setTrackerUrl', u+'matomo.php']);
-                    _paq.push(['setSiteId', '4']);
-                    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-                    g.async=true; g.src='//cdn.matomo.cloud/connextnetwork.matomo.cloud/matomo.js'; s.parentNode.insertBefore(g,s);
-                  })();
-                `,
-              }}
-            />
-          </>
-        )}
+        {
+          process.env.NEXT_PUBLIC_GA_TRACKING_ID &&
+          (
+            <>
+              {/* Global Site Tag (gtag.js) - Google Analytics */}
+                <script
+                  async
+                  src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_TRACKING_ID}`}
+                />
+                <script
+                  dangerouslySetInnerHTML={{
+                    __html: `
+                      window.dataLayer = window.dataLayer || [];
+                      function gtag(){dataLayer.push(arguments);}
+                      gtag('js', new Date());
+                      gtag('config', '${process.env.NEXT_PUBLIC_GA_TRACKING_ID}', {
+                        page_path: window.location.pathname,
+                      });
+                    `,
+                  }}
+                />
+            </>
+          )
+        }
       </Head>
       <Provider store={store}>
         <Layout>
