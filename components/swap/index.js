@@ -1291,7 +1291,7 @@ export default () => {
               />
             </div>
             <div
-              className="bg-slate-50 dark:bg-slate-900 bg-opacity-100 dark:bg-opacity-50 rounded-3xl space-y-6 pt-4 sm:pt-6 pb-6 sm:pb-8 px-4 sm:px-6"
+              className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-4 sm:pt-6 pb-6 sm:pb-8 px-4 sm:px-6"
               style={valid_amount ?
                 {
                   boxShadow: `${color}ff 0px 8px 76px 6px`,
@@ -1366,7 +1366,7 @@ export default () => {
 
                           getBalances(chain)
                         }}
-                        className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
+                        className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
                       >
                         <HiSwitchHorizontal
                           size={28}
@@ -1375,7 +1375,7 @@ export default () => {
                     </div>
                     <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end">
                       <div className="w-32 sm:w-48 min-w-max h-10 sm:h-16 flex items-center justify-center">
-                        <div className="w-32 sm:w-48 min-w-max bg-white dark:bg-slate-900 rounded-xl flex items-center justify-center space-x-1 sm:space-x-1.5 py-1.5 sm:py-2 px-2 sm:px-3">
+                        <div className="w-32 sm:w-48 min-w-max bg-gray-100 dark:bg-slate-900 rounded-xl flex items-center justify-center space-x-1 sm:space-x-1.5 py-1.5 sm:py-2 px-2 sm:px-3">
                           {
                             (origin === 'x' ?
                               y_asset_data :
@@ -1463,7 +1463,7 @@ export default () => {
                                           y_balance_amount,
                                       })
                                     }}
-                                    className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
+                                    className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
                                   >
                                     Max
                                   </button>
@@ -1544,7 +1544,7 @@ export default () => {
                                 ].includes(e.key) &&
                                 e.preventDefault()
                               }
-                              className={`w-36 sm:w-48 bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
+                              className={`w-36 sm:w-48 bg-gray-200 focus:bg-gray-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
                             />
                           </div>
                         </div> :
@@ -1654,7 +1654,7 @@ export default () => {
                             !valid_amount
                           }
                           onClick={() => call()}
-                          className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
+                          className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-gray-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
                         >
                           <span className="flex items-center justify-center space-x-1.5">
                             {
@@ -1791,7 +1791,7 @@ export default () => {
                     <button
                       disabled={true}
                       onClick={() => call()}
-                      className="w-full bg-slate-200 dark:bg-slate-800 bg-opacity-75 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
+                      className="w-full bg-gray-200 dark:bg-slate-800 bg-opacity-75 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
                     >
                       Swap
                     </button> :

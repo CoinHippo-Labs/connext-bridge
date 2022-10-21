@@ -35,7 +35,7 @@ export default ({
           Swap Breakdown
         </span>
       </div>
-      <div className="w-full h-0.25 bg-slate-200 dark:bg-slate-700 sm:px-1" />
+      <div className="w-full h-0.25 bg-gray-200 dark:bg-slate-700 sm:px-1" />
       <div className="space-y-2.5 sm:mx-3">
         {
           data &&

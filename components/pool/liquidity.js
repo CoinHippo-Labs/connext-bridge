@@ -1077,7 +1077,7 @@ export default ({
                     ].includes(e.key) &&
                     e.preventDefault()
                   }
-                  className={`w-20 bg-slate-200 dark:bg-slate-900 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
+                  className={`w-20 bg-gray-200 dark:bg-slate-900 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
                 />
                 <div className="flex items-center space-x-2.5">
                   {[
@@ -1093,7 +1093,7 @@ export default ({
                           slippage: p,
                         })
                       }
-                      className={`${slippage === p ? 'bg-slate-200 dark:bg-slate-800 font-semibold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-medium'} rounded-lg cursor-pointer py-1 px-2`}
+                      className={`${slippage === p ? 'bg-gray-200 dark:bg-slate-800 font-semibold' : 'bg-gray-100 hover:bg-gray-200 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-medium'} rounded-lg cursor-pointer py-1 px-2`}
                     >
                       {p} %
                     </div>
@@ -1149,7 +1149,7 @@ export default ({
                     ].includes(e.key) &&
                     e.preventDefault()
                   }
-                  className={`w-20 bg-slate-200 dark:bg-slate-900 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
+                  className={`w-20 bg-gray-200 dark:bg-slate-900 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
                 />
                 <span className="font-medium">
                   minutes
@@ -1163,7 +1163,7 @@ export default ({
   )
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-900 bg-opacity-100 dark:bg-opacity-50 rounded-2xl space-y-4 p-6">
+    <div className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-2xl space-y-4 p-6">
       <div className="flex flex-wrap items-center justify-between mr-1.5">
         <div className="flex items-center space-x-0.5">
           {ACTIONS
@@ -1171,7 +1171,7 @@ export default ({
               <div
                 key={i}
                 onClick={() => setAction(a)}
-                className={`${action === a ? 'bg-blue-500 dark:bg-blue-600 font-bold text-white' : 'hover:bg-slate-200 dark:hover:bg-slate-900 font-medium hover:font-semibold'} rounded-lg cursor-pointer uppercase py-1 px-2.5`}
+                className={`${action === a ? 'bg-blue-500 dark:bg-blue-600 font-bold text-white' : 'hover:bg-gray-200 dark:hover:bg-slate-900 font-medium hover:font-semibold'} rounded-lg cursor-pointer uppercase py-1 px-2.5`}
               >
                 {a}
               </div>
@@ -1262,14 +1262,14 @@ export default ({
                       ].includes(e.key) &&
                       e.preventDefault()
                     }
-                    className={`w-full bg-slate-200 focus:bg-slate-300 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
+                    className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
                   />
                   {/*<div
                     onClick={() => {
                       setAmountX(x_balance_amount)
                       autoSetY(x_balance_amount)
                     }}
-                    className={`${disabled || typeof x_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-200 dark:bg-slate-900 rounded-lg text-blue-400 dark:text-slate-200 text-base font-medium py-0.5 px-2.5`}
+                    className={`${disabled || typeof x_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-gray-200 dark:bg-slate-900 rounded-lg text-blue-400 dark:text-slate-200 text-base font-medium py-0.5 px-2.5`}
                   >
                     Max
                   </div>*/}
@@ -1374,14 +1374,14 @@ export default ({
                       ].includes(e.key) &&
                       e.preventDefault()
                     }
-                    className={`w-full bg-slate-200 focus:bg-slate-300 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
+                    className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
                   />
                   {/*<div
                     onClick={() => {
                       setAmountY(y_balance_amount)
                       autoSetX(y_balance_amount)
                     }}
-                    className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-200 dark:bg-slate-900 rounded-lg text-blue-400 dark:text-slate-200 text-base font-medium py-0.5 px-2.5`}
+                    className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-gray-200 dark:bg-slate-900 rounded-lg text-blue-400 dark:text-slate-200 text-base font-medium py-0.5 px-2.5`}
                   >
                     Max
                   </div>*/}
@@ -1528,7 +1528,7 @@ export default ({
                         !valid_amount
                       }
                       onClick={() => call(pool_data)}
-                      className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-200 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
+                      className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-gray-200 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
                     >
                       <span className="flex items-center justify-center space-x-1.5">
                         {
@@ -1619,7 +1619,7 @@ export default ({
                     ].includes(e.key) &&
                     e.preventDefault()
                   }
-                  className={`w-full bg-slate-200 focus:bg-slate-300 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
+                  className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
                 />
                 {
                   typeof amount === 'number' &&
@@ -1670,7 +1670,7 @@ export default ({
 
                         setAmount(_amount)
                       }}
-                      className={`${disabled || !lpTokenBalance ? 'bg-slate-200 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-300 dark:bg-slate-800 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-slate-200 dark:bg-slate-900 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'} rounded-lg py-0.5 px-2`}
+                      className={`${disabled || !lpTokenBalance ? 'bg-gray-200 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-300 dark:bg-slate-800 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-gray-200 dark:bg-slate-900 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'} rounded-lg py-0.5 px-2`}
                     >
                       {p * 100} %
                     </div>
@@ -1678,7 +1678,7 @@ export default ({
                 }
               </div>
             </div>
-            <div className="bg-slate-200 dark:bg-slate-900 rounded-xl space-y-5 py-6 px-4">
+            <div className="bg-gray-200 dark:bg-slate-900 rounded-xl space-y-5 py-6 px-4">
               <div className="flex items-center justify-between space-x-3">
                 {
                   url &&
@@ -1891,7 +1891,7 @@ export default ({
                         !valid_amount
                       }
                       onClick={() => call(pool_data)}
-                      className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-slate-200 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
+                      className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-gray-200 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
                     >
                       <span className="flex items-center justify-center space-x-1.5">
                         {
