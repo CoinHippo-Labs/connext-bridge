@@ -158,46 +158,56 @@ export default function Wallet({ chainIdToConnect, main, hidden, disabled = fals
       //   }
       // }
 
-      if (window.clover) {
-        providerOptions['custom-clover'] = {
-          display: {
-            name: 'Clover',
-            logo: '/logos/wallets/clover.png',
-          },
-          package: async () => {
-            let provider = null
-            if (typeof window.clover !== 'undefined') {
-              provider = window.clover
-              try {
-                await provider.request({ method: 'eth_requestAccounts' })
-              } catch (error) {
-                throw new Error('User Rejected')
-              }
-            } else if (typeof window.ethereum !== 'undefined') {
-              provider = window.ethereum
-              try {
-                await provider.request({ method: 'eth_requestAccounts' })
-              } catch (error) {
-                throw new Error('User Rejected')
-              }
-            } else if (window.web3) {
-              provider = window.web3.currentProvider
-            } else if (window.celo) {
-              provider = window.celo
-            } else {
-              throw new Error('No Web3 Provider found')
-            }
-            return provider
-          },
-          connector: async (ProviderPackage, options) => {
-            const provider = new ProviderPackage(options)
-            try {
-              await provider.enable()
-            } catch (error) {}
-            return provider
-          },
-        }
-      }
+      // const isOpera =
+      //   (
+      //     !!window.opr &&
+      //     !!opr.addons
+      //   ) ||
+      //   !!window.opera ||
+      //   navigator.userAgent.indexOf(' OPR/') >= 0
+
+      // if (!isOpera) {
+      //   if (window.clover) {
+      //     providerOptions['custom-clover'] = {
+      //       display: {
+      //         name: 'Clover',
+      //         logo: '/logos/wallets/clover.png',
+      //       },
+      //       package: async () => {
+      //         let provider = null
+      //         if (typeof window.clover !== 'undefined') {
+      //           provider = window.clover
+      //           try {
+      //             await provider.request({ method: 'eth_requestAccounts' })
+      //           } catch (error) {
+      //             throw new Error('User Rejected')
+      //           }
+      //         } else if (typeof window.ethereum !== 'undefined') {
+      //           provider = window.ethereum
+      //           try {
+      //             await provider.request({ method: 'eth_requestAccounts' })
+      //           } catch (error) {
+      //             throw new Error('User Rejected')
+      //           }
+      //         } else if (window.web3) {
+      //           provider = window.web3.currentProvider
+      //         } else if (window.celo) {
+      //           provider = window.celo
+      //         } else {
+      //           throw new Error('No Web3 Provider found')
+      //         }
+      //         return provider
+      //       },
+      //       connector: async (ProviderPackage, options) => {
+      //         const provider = new ProviderPackage(options)
+      //         try {
+      //           await provider.enable()
+      //         } catch (error) {}
+      //         return provider
+      //       },
+      //     }
+      //   }
+      // }
 
       web3Modal = new Web3Modal({
         network: chainIdToNetwork(defaultChainId) || 'mainnet',
