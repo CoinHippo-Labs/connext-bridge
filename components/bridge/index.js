@@ -24,7 +24,7 @@ import Faucet from '../faucet'
 import Image from '../image'
 import Wallet from '../wallet'
 import Alert from '../alerts'
-import Popover from '../popover'
+// import Popover from '../popover'
 import Copy from '../copy'
 import meta from '../../lib/meta'
 import { params_to_obj, number_format, ellipse, equals_ignore_case, loader_color, sleep } from '../../lib/utils'
@@ -1477,7 +1477,19 @@ export default () => {
                           checkSupport() &&
                           source_balance &&
                           (
-                            <Popover
+                            <button
+                              disabled={disabled}
+                              onClick={() => {
+                                setBridge({
+                                  ...bridge,
+                                  amount: max_amount,
+                                })
+                              }}
+                              className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
+                            >
+                              Max
+                            </button>
+                            /*<Popover
                               placement="bottom"
                               disabled={disabled}
                               onClick={() => {
@@ -1551,7 +1563,7 @@ export default () => {
                               titleClassName="normal-case py-1.5"
                             >
                               Max
-                            </Popover>
+                            </Popover>*/
                           )
                         }
                       </div>

@@ -124,7 +124,7 @@ export default ({
                   {c.name}
                 </span>
               </div>
-              {
+              {/*
                 [
                   source,
                   destination,
@@ -134,11 +134,11 @@ export default ({
                     {_.uniq(
                       [
                         c.id === source ?
-                          's' :
+                          'o' :
                           'd',
                         id === destination ?
                           'd' :
-                          's',
+                          'o',
                       ]
                     ).map((o, i) => (
                       <div
@@ -150,7 +150,7 @@ export default ({
                     ))}
                   </div>
                 )
-              }
+              */}
             </>
           )
 
