@@ -1647,6 +1647,7 @@ export default () => {
                         feeEstimating ||
                         fee
                       ) &&
+                      !forceSlow &&
                       (
                         <div className="space-y-2">
                           <div className="flex items-center space-x-2 sm:mx-3">
