@@ -1,4 +1,5 @@
 import { useSelector, shallowEqual } from 'react-redux'
+import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, utils } from 'ethers'
 import { XTransferStatus } from '@connext/nxtp-utils'
@@ -63,6 +64,7 @@ export default ({
     destination_domain,
     destination_transacting_asset,
     destination_transacting_amount,
+    destination_local_amount,
     execute_transaction_hash,
     to,
     xcall_timestamp,
@@ -102,7 +104,8 @@ export default ({
     Number(
       utils.formatUnits(
         BigNumber.from(
-          BigInt(origin_transacting_amount).toString()
+          BigInt(origin_transacting_amount)
+            .toString()
         ),
         source_decimals,
       )
@@ -127,18 +130,28 @@ export default ({
     18
   const destination_asset_image = destination_contract_data?.image ||
     destination_asset_data?.image
-  const destination_amount = [
-    'number',
-    'string',
-  ].includes(typeof destination_transacting_amount) &&
-    Number(
-      utils.formatUnits(
-        BigNumber.from(
-          BigInt(destination_transacting_amount).toString()
-        ),
-        destination_decimals,
+  const destination_amount = _.head(
+    [
+      destination_transacting_amount,
+      destination_local_amount,
+    ]
+    .map(a =>
+      [
+        'number',
+        'string',
+      ].includes(typeof a) &&
+      Number(
+        utils.formatUnits(
+          BigNumber.from(
+            BigInt(a)
+              .toString()
+          ),
+          destination_decimals,
+        )
       )
     )
+    .filter(a => a)
+  )
 
   const pending = ![
     XTransferStatus.Executed,
