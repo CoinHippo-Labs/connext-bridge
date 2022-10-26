@@ -65,9 +65,16 @@ export default ({
     destination_transacting_amount,
     execute_transaction_hash,
     to,
-    force_slow,
     xcall_timestamp,
   } = { ...data }
+  let {
+    force_slow,
+  } = { ...data }
+
+  force_slow = force_slow ||
+    (status || '')
+      .toLowerCase()
+      .includes('slow')
 
   const source_chain_data = chains_data?.find(c =>
     c?.chain_id === Number(origin_chain) ||

@@ -33,7 +33,7 @@
     "@walletconnect/web3-provider": "^1.8.0",
     "base-64": "^1.0.0",
     "env-cmd": "^10.1.0",
-    "ethers": "^5.7.1",
+    "ethers": "^5.7.2",
     "html-react-parser": "^3.0.1",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
