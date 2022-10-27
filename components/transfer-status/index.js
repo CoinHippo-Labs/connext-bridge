@@ -60,10 +60,13 @@ export default ({
     origin_domain,
     origin_transacting_asset,
     origin_transacting_amount,
+    origin_bridged_asset,
+    origin_bridged_amount,
     destination_chain,
     destination_domain,
     destination_transacting_asset,
     destination_transacting_amount,
+    destination_local_asset,
     destination_local_amount,
     execute_transaction_hash,
     to,
@@ -85,7 +88,12 @@ export default ({
   const source_asset_data = assets_data?.find(a =>
     a?.contracts?.findIndex(c =>
       c?.chain_id === source_chain_data?.chain_id &&
-      equals_ignore_case(c?.contract_address, origin_transacting_asset)
+      [
+        origin_transacting_asset,
+        origin_bridged_asset,
+      ].findIndex(a =>
+        equals_ignore_case(c?.contract_address, a)
+      ) > -1
     ) > -1
   )
   const source_contract_data = source_asset_data?.contracts?.find(c =>
@@ -97,19 +105,28 @@ export default ({
     18
   const source_asset_image = source_contract_data?.image ||
     source_asset_data?.image
-  const source_amount = [
-    'number',
-    'string',
-  ].includes(typeof origin_transacting_amount) &&
-    Number(
-      utils.formatUnits(
-        BigNumber.from(
-          BigInt(origin_transacting_amount)
-            .toString()
-        ),
-        source_decimals,
+  const source_amount = _.head(
+    [
+      origin_transacting_amount,
+      origin_bridged_amount,
+    ]
+    .map(a =>
+      [
+        'number',
+        'string',
+      ].includes(typeof a) &&
+      Number(
+        utils.formatUnits(
+          BigNumber.from(
+            BigInt(a)
+              .toString()
+          ),
+          source_decimals,
+        )
       )
     )
+    .filter(a => a)
+  )
 
   const destination_chain_data = chains_data?.find(c =>
     c?.chain_id === Number(destination_chain) ||
@@ -118,7 +135,12 @@ export default ({
   const destination_asset_data = assets_data?.find(a =>
     a?.contracts?.findIndex(c =>
       c?.chain_id === destination_chain_data?.chain_id &&
-      equals_ignore_case(c?.contract_address, destination_transacting_asset)
+      [
+        destination_transacting_asset,
+        destination_local_asset,
+      ].findIndex(a =>
+        equals_ignore_case(c?.contract_address, a)
+      ) > -1
     ) > -1
   )
   const destination_contract_data = destination_asset_data?.contracts?.find(c =>
