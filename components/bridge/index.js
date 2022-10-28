@@ -27,14 +27,8 @@ import Alert from '../alerts'
 // import Popover from '../popover'
 import Copy from '../copy'
 import meta from '../../lib/meta'
-import { params_to_obj, number_format, ellipse, equals_ignore_case, loader_color, sleep } from '../../lib/utils'
+import { params_to_obj, number_format, ellipse, equals_ignore_case, loader_color, sleep, error_patterns } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
-
-const error_patterns =
-  [
-    '(',
-    '[',
-  ]
 
 const ROUTER_FEE_PERCENT =
   Number(
@@ -1250,7 +1244,7 @@ export default () => {
             success = true
           }
         } catch (error) {
-          const message = 
+          let message = 
             error?.data?.message ||
             error?.message
 
@@ -1263,6 +1257,10 @@ export default () => {
               2,
             )
             .join('_')
+
+          if (message?.includes('revert')) {
+            message = 'More than pool balance'
+          }
 
           switch (code) {
             case 'user_rejected':

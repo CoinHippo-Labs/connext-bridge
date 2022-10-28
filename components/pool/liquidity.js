@@ -17,15 +17,28 @@ import Image from '../image'
 import Wallet from '../wallet'
 import Alert from '../alerts'
 import Copy from '../copy'
-import { number_format, ellipse, equals_ignore_case, loader_color, switch_color, sleep } from '../../lib/utils'
+import { number_format, ellipse, equals_ignore_case, loader_color, switch_color, sleep, error_patterns } from '../../lib/utils'
 
-const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT) || 1
-const DEFAULT_POOL_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_POOL_SLIPPAGE_PERCENTAGE) || 3
-const DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES = Number(process.env.NEXT_PUBLIC_DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES) || 60
-const ACTIONS = [
-  'add',
-  'remove',
-]
+const GAS_LIMIT_ADJUSTMENT =
+  Number(
+    process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT
+  ) ||
+  1
+const DEFAULT_POOL_SLIPPAGE_PERCENTAGE =
+  Number(
+    process.env.NEXT_PUBLIC_DEFAULT_POOL_SLIPPAGE_PERCENTAGE
+  ) ||
+  3
+const DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES =
+  Number(
+    process.env.NEXT_PUBLIC_DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES
+  ) ||
+  60
+const ACTIONS =
+  [
+    'add',
+    'remove',
+  ]
 
 const DEFAULT_OPTIONS = {
   infiniteApprove: true,
@@ -1476,7 +1489,21 @@ export default ({
                         <div className="flex items-center justify-between space-x-2">
                           <span className={`leading-5 ${status === 'failed' ? 'break-all text-xs' : 'break-word'}`}>
                             {ellipse(
-                              message,
+                              (message || '')
+                                .substring(
+                                  0,
+                                  status === 'failed' &&
+                                  error_patterns.findIndex(c =>
+                                    message?.indexOf(c) > -1
+                                  ) > -1 ?
+                                    message.indexOf(
+                                      error_patterns.find(c =>
+                                        message.indexOf(c) > -1
+                                      )
+                                    ) :
+                                    undefined,
+                                )
+                                .trim(),
                               128,
                             )}
                           </span>
@@ -1838,7 +1865,21 @@ export default ({
                         <div className="flex items-center justify-between space-x-2">
                           <span className={`leading-5 ${status === 'failed' ? 'break-all text-xs' : 'break-word'}`}>
                             {ellipse(
-                              message,
+                              (message || '')
+                                .substring(
+                                  0,
+                                  status === 'failed' &&
+                                  error_patterns.findIndex(c =>
+                                    message?.indexOf(c) > -1
+                                  ) > -1 ?
+                                    message.indexOf(
+                                      error_patterns.find(c =>
+                                        message.indexOf(c) > -1
+                                      )
+                                    ) :
+                                    undefined,
+                                )
+                                .trim(),
                               128,
                             )}
                           </span>
