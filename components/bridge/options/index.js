@@ -10,7 +10,11 @@ import Modal from '../../modals'
 import Popover from '../../popover'
 import { switch_color } from '../../../lib/utils'
 
-const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE) || 3
+const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE =
+  Number(
+    process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE
+  ) ||
+  3
 
 export default ({
   disabled = false,
@@ -70,16 +74,16 @@ export default ({
       type: 'switch',
     },
     {
-      label: 'Receive Local',
+      label: 'Receive NextAsset',
       name: 'receiveLocal',
       type: 'switch',
     },
-    {
+    /*{
       label: 'Call Data',
       name: 'callData',
       type: 'textarea',
       placeholder: 'encoded calldata to execute on receiving chain',
-    },
+    },*/
   ]
 
   const changed = !_.isEqual(

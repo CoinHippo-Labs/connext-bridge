@@ -1443,13 +1443,15 @@ export default () => {
             </div>
             <div
               className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-8 sm:pt-10 pb-6 sm:pb-8 px-4 sm:px-6"
-              style={checkSupport() && amount > 0 ?
-                {
-                  boxShadow: `${color}ff 0px 8px 76px 6px`,
-                  WebkitBoxShadow: `${color}ff 0px 8px 76px 6px`,
-                  MozBoxShadow: `${color}ff 0px 8px 76px 6px`,
-                } :
-                undefined
+              style={
+                checkSupport() &&
+                amount > 0 ?
+                  {
+                    boxShadow: `${color}ff 0px 2px 48px 2px`,
+                    WebkitBoxShadow: `${color}ff 0px 2px 48px 2px`,
+                    MozBoxShadow: `${color}ff 0px 2px 48px 2px`,
+                  } :
+                  undefined
               }
             >
               <div className="space-y-2">
@@ -1818,7 +1820,7 @@ export default () => {
                                   </div>
                                   <div className="flex items-center justify-between space-x-1">
                                     <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
-                                      Gas Fee
+                                      Destination Gas Fee
                                     </div>
                                     {feeEstimating ?
                                       <div className="flex items-center space-x-1.5">
@@ -1972,9 +1974,9 @@ export default () => {
                         <button
                           disabled={disabled}
                           onClick={() => call()}
-                          className={`w-full ${disabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'} rounded-xl flex items-center ${calling && !approving && callProcessing ? 'justify-start' : 'justify-center sm:text-lg'} text-white text-base py-3 sm:py-4 px-2 sm:px-3`}
+                          className={`w-full ${disabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'} rounded-xl flex items-center ${calling && !approving && callProcessing ? 'justify-center' : 'justify-center sm:text-lg'} text-white text-base py-3 sm:py-4 px-2 sm:px-3`}
                         >
-                          <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-1.5'}`}>
+                          <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
                             {
                               disabled &&
                               (
