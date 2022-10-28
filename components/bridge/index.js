@@ -30,10 +30,32 @@ import meta from '../../lib/meta'
 import { params_to_obj, number_format, ellipse, equals_ignore_case, loader_color, sleep } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
-const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT) || 0.05
-const FEE_ESTIMATE_COOLDOWN = Number(process.env.NEXT_PUBLIC_FEE_ESTIMATE_COOLDOWN) || 30
-const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT) || 1
-const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE) || 3
+const error_patterns =
+  [
+    '(',
+    '[',
+  ]
+
+const ROUTER_FEE_PERCENT =
+  Number(
+    process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT
+  ) ||
+  0.05
+const FEE_ESTIMATE_COOLDOWN =
+  Number(
+    process.env.NEXT_PUBLIC_FEE_ESTIMATE_COOLDOWN
+  ) ||
+  30
+const GAS_LIMIT_ADJUSTMENT =
+  Number(
+    process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT
+  ) ||
+  1
+const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE =
+  Number(
+    process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE
+  ) ||
+  3
 const DEFAULT_OPTIONS = {
   to: '',
   infiniteApprove: true,
@@ -170,8 +192,12 @@ export default () => {
           'test' :
           'usdc'
 
-      const source_chain_data = chains_data?.find(c => c?.id === source_chain)
-      const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
+      const source_chain_data = chains_data?.find(c =>
+        c?.id === source_chain
+      )
+      const destination_chain_data = chains_data?.find(c =>
+        c?.id === destination_chain
+      )
       const asset_data = assets_data?.find(a =>
         a?.id === asset ||
         equals_ignore_case(a?.symbol, asset)
@@ -317,12 +343,16 @@ export default () => {
       )
     )
 
-    setOptions({
-      ...DEFAULT_OPTIONS,
-      forceSlow: destination_chain_data && asset_balances_data ?
-        amount > liquidity_amount :
-        false,
-    })
+    setOptions(
+      {
+        ...DEFAULT_OPTIONS,
+        forceSlow:
+          destination_chain_data &&
+          asset_balances_data ?
+            amount > liquidity_amount :
+            false,
+      }
+    )
 
     setEstimateTrigger(moment().valueOf())
     setApproveResponse(null)
@@ -386,19 +416,23 @@ export default () => {
         )?.id
     }
 
-    setBridge({
-      ...bridge,
-      source_chain,
-      destination_chain,
-    })
+    setBridge(
+      {
+        ...bridge,
+        source_chain,
+        destination_chain,
+      }
+    )
   }, [asPath, wallet_chain_id, chains_data])
 
   // update balances
   useEffect(() => {
-    dispatch({
-      type: BALANCES_DATA,
-      value: null,
-    })
+    dispatch(
+      {
+        type: BALANCES_DATA,
+        value: null,
+      }
+    )
 
     if (address) {
       const {
@@ -583,12 +617,16 @@ export default () => {
             setApproveResponse(null)
             setXcall(null)
             setXcallResponse(null)
+
+            reset('finish')
           }
           else if (transfer_data?.transfer_id) {
-            setXcall({
-              ...xcall,
-              transfer_id: transfer_data.transfer_id,
-            })
+            setXcall(
+              {
+                ...xcall,
+                transfer_id: transfer_data.transfer_id,
+              }
+            )
           }
         }
         else if (transfer_id) {
@@ -597,7 +635,9 @@ export default () => {
           )
 
           if (Array.isArray(response)) {
-            const transfer_data = response.find(t => equals_ignore_case(t?.transfer_id, transfer_id))
+            const transfer_data = response.find(t =>
+              equals_ignore_case(t?.transfer_id, transfer_id)
+            )
             const {
               status,
             } = { ...transfer_data }
@@ -612,6 +652,8 @@ export default () => {
               setApproveResponse(null)
               setXcall(null)
               setXcallResponse(null)
+
+              reset('finish')
             }
           }
         }
@@ -666,21 +708,23 @@ export default () => {
         }
       }
 
-      dispatch({
-        type: BALANCES_DATA,
-        value: {
-          [`${chain_id}`]: [{
-            ...contract_data,
-            amount: balance &&
-              Number(
-                utils.formatUnits(
-                  balance,
-                  decimals || 18,
-                )
-              ),
-          }],
-        },
-      })
+      dispatch(
+        {
+          type: BALANCES_DATA,
+          value: {
+            [`${chain_id}`]: [{
+              ...contract_data,
+              amount: balance &&
+                Number(
+                  utils.formatUnits(
+                    balance,
+                    decimals || 18,
+                  )
+                ),
+            }],
+          },
+        }
+      )
     }
 
     const {
@@ -747,23 +791,38 @@ export default () => {
   }
 
   const reset = async origin => {
-    const reset_bridge = origin !== 'address'
+    const reset_bridge =
+      ![
+        'address',
+        'user_rejected',
+      ].includes(origin)
 
     if (reset_bridge) {
-      setBridge({
-        ...bridge,
-        amount: null,
-      })
+      setBridge(
+        {
+          ...bridge,
+          amount: null,
+        }
+      )
 
       setXcall(null)
     }
 
-    setOptions(DEFAULT_OPTIONS)
+    if (
+      ![
+        'finish',
+      ].includes(origin) &&
+      reset_bridge
+    ) {
+      setOptions(DEFAULT_OPTIONS)
+    }
 
-    setFee(null)
-    setFeeEstimating(null)
-    setFeeEstimateCooldown(null)
-    setEstimateTrigger(null)
+    if (reset_bridge) {
+      setFee(null)
+      setFeeEstimating(null)
+      setFeeEstimateCooldown(null)
+      setEstimateTrigger(null)
+    }
 
     setApproving(null)
     setApproveProcessing(null)
@@ -773,7 +832,10 @@ export default () => {
     setCallProcessing(null)
     setXcallResponse(null)
 
-    setTransfersTrigger(moment().valueOf())
+    setTransfersTrigger(
+      moment()
+        .valueOf()
+    )
 
     const {
       source_chain,
@@ -868,10 +930,12 @@ export default () => {
               },
             )
 
-            setFee({
-              router: routerFee,
-              gas: gasFee,
-            })
+            setFee(
+              {
+                router: routerFee,
+                gas: gasFee,
+              }
+            )
           } catch (error) {}
         }
       }
@@ -897,9 +961,15 @@ export default () => {
         amount,
       } = { ...bridge }
 
-      const source_chain_data = chains_data?.find(c => c?.id === source_chain)
-      const source_asset_data = assets_data?.find(a => a?.id === asset)
-      const source_contract_data = source_asset_data?.contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
+      const source_chain_data = chains_data?.find(c =>
+        c?.id === source_chain
+      )
+      const source_asset_data = assets_data?.find(a =>
+        a?.id === asset
+      )
+      const source_contract_data = source_asset_data?.contracts?.find(c =>
+        c?.chain_id === source_chain_data?.chain_id
+      )
       let {
         symbol,
       } = { ...source_contract_data }
@@ -907,8 +977,12 @@ export default () => {
       symbol = symbol ||
         source_asset_data?.symbol
 
-      const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
-      const destination_contract_data = source_asset_data?.contracts?.find(c => c?.chain_id === destination_chain_data?.chain_id)
+      const destination_chain_data = chains_data?.find(c =>
+        c?.id === destination_chain
+      )
+      const destination_contract_data = source_asset_data?.contracts?.find(c =>
+        c?.chain_id === destination_chain_data?.chain_id
+      )
 
       const {
         to,
@@ -1039,11 +1113,13 @@ export default () => {
             hash,
           } = { ...approve_response }
 
-          setApproveResponse({
-            status: 'pending',
-            message: `Wait for ${symbol} approval`,
-            tx_hash: hash,
-          })
+          setApproveResponse(
+            {
+              status: 'pending',
+              message: `Wait for ${symbol} approval`,
+              tx_hash: hash,
+            }
+          )
 
           setApproveProcessing(true)
 
@@ -1076,11 +1152,27 @@ export default () => {
       } catch (error) {
         failed = true
 
-        setApproveResponse({
-          status: 'failed',
-          message: error?.data?.message ||
-            error?.message,
-        })
+        const message =
+          error?.data?.message ||
+          error?.message
+
+        const code =
+          _.slice(
+            (message || '')
+              .toLowerCase()
+              .split(' '),
+            0,
+            2,
+          )
+          .join('_')
+
+        setApproveResponse(
+          {
+            status: 'failed',
+            message,
+            code,
+          }
+        )
 
         setApproveProcessing(false)
         setApproving(false)
@@ -1143,24 +1235,49 @@ export default () => {
 
             failed = !status
 
-            setXcallResponse({
-              status: failed ?
-                'failed' :
-                'success',
-              message: failed ?
-                'Failed to send transaction' :
-                `Transferring ${symbol}. Please wait.`,
-              tx_hash: hash,
-            })
+            setXcallResponse(
+              {
+                status: failed ?
+                  'failed' :
+                  'success',
+                message: failed ?
+                  'Failed to send transaction' :
+                  `Transferring ${symbol}. Please wait.`,
+                tx_hash: hash,
+              }
+            )
 
             success = true
           }
         } catch (error) {
-          setXcallResponse({
-            status: 'failed',
-            message: error?.data?.message ||
-              error?.message,
-          })
+          const message = 
+            error?.data?.message ||
+            error?.message
+
+          const code =
+            _.slice(
+              (message || '')
+                .toLowerCase()
+                .split(' '),
+              0,
+              2,
+            )
+            .join('_')
+
+          switch (code) {
+            case 'user_rejected':
+              reset(code)
+              break
+            default:
+              setXcallResponse(
+                {
+                  status: 'failed',
+                  message,
+                  code,
+                }
+              )
+              break
+          }
 
           failed = true
         }
@@ -1354,11 +1471,13 @@ export default () => {
                           source_chain :
                           destination_chain
 
-                        setBridge({
-                          ...bridge,
-                          source_chain: _source_chain,
-                          destination_chain: _destination_chain,
-                        })
+                        setBridge(
+                          {
+                            ...bridge,
+                            source_chain: _source_chain,
+                            destination_chain: _destination_chain,
+                          }
+                        )
 
                         getBalances(_source_chain)
                         getBalances(_destination_chain)
@@ -1372,12 +1491,14 @@ export default () => {
                     <button
                       disabled={disabled}
                       onClick={() => {
-                        setBridge({
-                          ...bridge,
-                          source_chain: destination_chain,
-                          destination_chain: source_chain,
-                          amount: null,
-                        })
+                        setBridge(
+                          {
+                            ...bridge,
+                            source_chain: destination_chain,
+                            destination_chain: source_chain,
+                            amount: null,
+                          }
+                        )
 
                         getBalances(source_chain)
                         getBalances(destination_chain)
@@ -1420,11 +1541,13 @@ export default () => {
                           source_chain
                         const _destination_chain = c
 
-                        setBridge({
-                          ...bridge,
-                          source_chain: _source_chain,
-                          destination_chain: _destination_chain,
-                        })
+                        setBridge(
+                          {
+                            ...bridge,
+                            source_chain: _source_chain,
+                            destination_chain: _destination_chain,
+                          }
+                        )
 
                         getBalances(_source_chain)
                         getBalances(_destination_chain)
@@ -1443,10 +1566,12 @@ export default () => {
                     disabled={disabled}
                     value={asset}
                     onSelect={a => {
-                      setBridge({
-                        ...bridge,
-                        asset: a,
-                      })
+                      setBridge(
+                        {
+                          ...bridge,
+                          asset: a,
+                        }
+                      )
 
                       if (a !== asset) {
                         getBalances(source_chain)
@@ -1480,10 +1605,12 @@ export default () => {
                             <button
                               disabled={disabled}
                               onClick={() => {
-                                setBridge({
-                                  ...bridge,
-                                  amount: max_amount,
-                                })
+                                setBridge(
+                                  {
+                                    ...bridge,
+                                    amount: max_amount,
+                                  }
+                                )
                               }}
                               className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
                             >
@@ -1493,10 +1620,12 @@ export default () => {
                               placement="bottom"
                               disabled={disabled}
                               onClick={() => {
-                                setBridge({
-                                  ...bridge,
-                                  amount: max_amount,
-                                })
+                                setBridge(
+                                  {
+                                    ...bridge,
+                                    amount: max_amount,
+                                  }
+                                )
                               }}
                               title={<div className="flex items-center justify-between space-x-1">
                                 <span className="font-bold">
@@ -1613,12 +1742,16 @@ export default () => {
                             0 :
                             value
 
-                          setBridge({
-                            ...bridge,
-                            amount: value && !isNaN(value) ?
-                              Number(value) :
-                              value,
-                          })
+                          setBridge(
+                            {
+                              ...bridge,
+                              amount:
+                                value &&
+                                !isNaN(value) ?
+                                  Number(value) :
+                                  value,
+                            }
+                          )
                         }}
                         onWheel={e => e.target.blur()}
                         onKeyDown={e =>
@@ -1816,9 +1949,11 @@ export default () => {
                     ) ?
                       <Alert
                         color="bg-red-400 dark:bg-red-500 text-white text-base"
-                        icon={<BiMessageError
-                          className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                        />}
+                        icon={
+                          <BiMessageError
+                            className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                          />
+                        }
                         closeDisabled={true}
                         rounded={true}
                         className="rounded-xl p-4.5"
@@ -1884,6 +2019,7 @@ export default () => {
                             const {
                               status,
                               message,
+                              code,
                             } = { ...r }
 
                             return (
@@ -1917,7 +2053,21 @@ export default () => {
                                 <div className="flex items-center justify-between space-x-2">
                                   <span className="break-all">
                                     {ellipse(
-                                      message,
+                                      (message || '')
+                                        .substring(
+                                          0,
+                                          status === 'failed' &&
+                                          error_patterns.findIndex(c =>
+                                            message?.indexOf(c) > -1
+                                          ) > -1 ?
+                                            message.indexOf(
+                                              error_patterns.find(c =>
+                                                message.indexOf(c) > -1
+                                              )
+                                            ) :
+                                            undefined,
+                                        )
+                                        .trim(),
                                       128,
                                     )}
                                   </span>
@@ -1935,7 +2085,9 @@ export default () => {
                                     }
                                     {status === 'failed' ?
                                       <button
-                                        onClick={() => reset()}
+                                        onClick={() =>
+                                          reset(code)
+                                        }
                                         className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                                       >
                                         <MdClose
