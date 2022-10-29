@@ -156,6 +156,14 @@ body {
   @apply text-3xs sm:text-xs md:text-xs lg:text-xs xl:text-xs;
 }
 
+.w-68 {
+  width: 17rem;
+}
+
+.w-70 {
+  width: 17.5rem;
+}
+
 .max-w-8xl {
   max-width: 88rem;
 }

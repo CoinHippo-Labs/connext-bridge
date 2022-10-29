@@ -126,6 +126,7 @@ export default () => {
 
   const [bridge, setBridge] = useState({})
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
+  const [buttonDirection, setButtonDirection] = useState(1)
   const [controller, setController] = useState(null)
 
   const [fee, setFee] = useState(null)
@@ -887,10 +888,20 @@ export default () => {
             const {
               nativeCurrency,
             } = { ..._.head(provider_params) }
+            const {
+              decimals,
+            } = { ...nativeCurrency }
 
             const routerFee = forceSlow ?
               0 :
-              amount * ROUTER_FEE_PERCENT / 100
+              parseFloat(
+                (
+                  amount *
+                  ROUTER_FEE_PERCENT /
+                  100
+                )
+                .toFixed(12)
+              )
 
             const params = {
               originDomain: source_chain_data?.domain_id,
@@ -910,7 +921,8 @@ export default () => {
                 Number(
                   utils.formatUnits(
                     response,
-                    nativeCurrency?.decimals || 18,
+                    decimals ||
+                    18,
                   )
                 )
 
@@ -1410,7 +1422,7 @@ export default () => {
                   asPath.includes('to-') &&
                   title &&
                   (
-                    <h2 className="tracking-wider text-slate-600 dark:text-slate-400 text-xs">
+                    <h2 className="tracking-wider text-slate-500 dark:text-slate-300 text-xs">
                       {title.replace(
                         ' with Connext',
                         '',
@@ -1447,9 +1459,9 @@ export default () => {
                 checkSupport() &&
                 amount > 0 ?
                   {
-                    boxShadow: `${color}ff 0px 2px 48px 2px`,
-                    WebkitBoxShadow: `${color}ff 0px 2px 48px 2px`,
-                    MozBoxShadow: `${color}ff 0px 2px 48px 2px`,
+                    boxShadow: `${color}ff 0px 2px 16px 2px`,
+                    WebkitBoxShadow: `${color}ff 0px 2px 16px 2px`,
+                    MozBoxShadow: `${color}ff 0px 2px 16px 2px`,
                   } :
                   undefined
               }
@@ -1500,13 +1512,24 @@ export default () => {
                           }
                         )
 
+                        setButtonDirection(
+                          buttonDirection * -1
+                        )
+
                         getBalances(source_chain)
                         getBalances(destination_chain)
                       }}
-                      className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
+                      className={/*`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out */`bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
                     >
                       <HiSwitchHorizontal
                         size={28}
+                        style={
+                          buttonDirection < 0 ?
+                            {
+                              transform: 'scaleX(-1)',
+                            } :
+                            undefined
+                        }
                       />
                       {/*<div className="flex sm:hidden">
                         <Image
@@ -1646,7 +1669,7 @@ export default () => {
                                         source_amount,
                                         source_amount > 1000 ?
                                           '0,0.00' :
-                                          '0,0.000000',
+                                          '0,0.00000000',
                                         true,
                                       ) :
                                       'n/a'
@@ -1663,7 +1686,7 @@ export default () => {
                                         liquidity_amount,
                                         liquidity_amount > 1000 ?
                                           '0,0.00' :
-                                          '0,0.000000',
+                                          '0,0.00000000',
                                         true,
                                       ) :
                                       'n/a'
@@ -1680,7 +1703,7 @@ export default () => {
                                         max_amount,
                                         max_amount > 1000 ?
                                           '0,0.00' :
-                                          '0,0.000000',
+                                          '0,0.00000000',
                                         true,
                                       ) :
                                       'n/a'
@@ -1809,7 +1832,7 @@ export default () => {
                                       <span>
                                         {number_format(
                                           router_fee,
-                                          '0,0.000000',
+                                          '0,0.00000000',
                                           true,
                                         )}
                                       </span>
@@ -1837,7 +1860,7 @@ export default () => {
                                         <span>
                                           {number_format(
                                             gas_fee,
-                                            '0,0.000000',
+                                            '0,0.00000000',
                                             true,
                                           )}
                                         </span>
@@ -2134,7 +2157,7 @@ export default () => {
                 href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}${destination_chain_data?.id ? `/${destination_chain_data.id}` : ''}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center text-slate-600 dark:text-slate-500 space-x-1"
+                className="flex items-center text-slate-500 dark:text-slate-300 space-x-1"
               >
                 <HiOutlineDocumentSearch
                   size={18}

@@ -111,6 +111,7 @@ export default () => {
   const [swap, setSwap] = useState({})
   const [swapAmount, setSwapAmount] = useState(null)
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
+  const [buttonDirection, setButtonDirection] = useState(1)
 
   const [approving, setApproving] = useState(null)
   const [approveProcessing, setApproveProcessing] = useState(null)
@@ -1372,12 +1373,23 @@ export default () => {
                             amount: null,
                           })
 
+                          setButtonDirection(
+                            buttonDirection * -1
+                          )
+
                           getBalances(chain)
                         }}
-                        className={`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
+                        className={/*`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out */`bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 dark:hover:shadow-white flex items-center justify-center p-2.5`}
                       >
                         <HiSwitchHorizontal
                           size={28}
+                          style={
+                            buttonDirection < 0 ?
+                              {
+                                transform: 'scaleX(-1)',
+                              } :
+                              undefined
+                          }
                         />
                       </button>
                     </div>

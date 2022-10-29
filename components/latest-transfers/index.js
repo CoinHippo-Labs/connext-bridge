@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import moment from 'moment'
 import { XTransferStatus } from '@connext/nxtp-utils'
-import StackGrid from 'react-stack-grid'
 import { TiArrowRight } from 'react-icons/ti'
 import { BiChevronDown, BiChevronUp } from 'react-icons/bi'
 
 import TransferStatus from '../transfer-status'
 import { equals_ignore_case } from '../../lib/utils'
 
-const NUM_TRANSFER_DISPLAY = 4
+const NUM_TRANSFER_DISPLAY = 5
 
 export default ({
   trigger,
@@ -60,7 +58,9 @@ export default ({
 
           if (
             response.findIndex(t =>
-              transfers?.findIndex(_t => _t?.transfer_id) < 0 &&
+              transfers?.findIndex(_t =>
+                _t?.transfer_id
+              ) < 0 &&
               ![
                 XTransferStatus.Executed,
                 XTransferStatus.CompletedFast,
@@ -97,27 +97,14 @@ export default ({
     return () => clearInterval(interval)
   }, [sdk, address, trigger])
 
-  useEffect(() => {
-    const run = async () =>
-      setTimer(moment().unix())
-
-    if (!timer) {
-      run()
-    }
-
-    const interval = setInterval(() =>
-      run(),
-      0.5 * 1000,
-    )
-
-    return () => clearInterval(interval)
-  }, [timer])
-
   const transfersComponent = _.slice(
     (transfers || [])
       .map((t, i) => {
         return (
-          <div key={i}>
+          <div
+            key={i}
+            className="w-70 mx-auto"
+          >
             <TransferStatus
               data={t}
             />
@@ -133,7 +120,7 @@ export default ({
       <div className="lg:max-w-xs lg:ml-auto">
         <button
           onClick={() => setCollapse(!collapse)}
-          className={`w-full flex items-center justify-center ${collapse ? 'text-slate-300 hover:text-slate-800 dark:text-slate-700 dark:hover:text-slate-200 font-normal' : 'font-medium'} space-x-1 mb-2.5`}
+          className={`w-full flex items-center justify-center ${collapse ? 'text-slate-300 hover:text-slate-800 dark:text-slate-700 dark:hover:text-slate-200 font-normal' : 'font-medium'} space-x-1 mb-3`}
         >
           <span className="uppercase tracking-wider">
             Latest Transfers
@@ -149,15 +136,7 @@ export default ({
         </button>
         {!collapse && (
           <>
-            <StackGrid
-              columnWidth={272}
-              gutterWidth={16}
-              gutterHeight={16}
-              className="hidden sm:block max-w-xl mx-auto"
-            >
-              {transfersComponent}
-            </StackGrid>
-            <div className="block sm:hidden space-y-3">
+            <div className="max-w-xl grid sm:grid-cols-2 lg:grid-cols-1 gap-4 mx-auto">
               {transfersComponent}
             </div>
             {

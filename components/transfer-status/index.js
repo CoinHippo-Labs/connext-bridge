@@ -4,7 +4,6 @@ import moment from 'moment'
 import { BigNumber, utils } from 'ethers'
 import { XTransferStatus } from '@connext/nxtp-utils'
 import { TailSpin } from 'react-loader-spinner'
-import LightSpeed from 'react-reveal/LightSpeed'
 import Fade from 'react-reveal/Fade'
 import { TiArrowRight } from 'react-icons/ti'
 import { HiOutlineCheckCircle } from 'react-icons/hi'
@@ -255,44 +254,42 @@ export default ({
           </div>
         </div>
         <div className="flex items-start justify-between space-x-2 my-2.5">
-          <LightSpeed left>
-            <div className="flex flex-col space-y-1">
-              {
-                typeof source_amount === 'number' &&
-                (
-                  <span className="font-semibold">
-                    {number_format(
-                      source_amount,
-                      '0,0.000000',
-                      true,
-                    )}
-                  </span>
-                )
-              }
-              <div className="flex items-center justify-center space-x-1">
-                {source_asset_image && (
-                  <Image
-                    src={source_asset_image}
-                    alt=""
-                    width={16}
-                    height={16}
-                    className="rounded-full"
-                  />
-                )}
-                <span className="text-xs font-medium">
-                  {source_symbol}
+          <div className="flex flex-col space-y-1">
+            {
+              typeof source_amount === 'number' &&
+              (
+                <span className="font-semibold">
+                  {number_format(
+                    source_amount,
+                    '0,0.000000',
+                    true,
+                  )}
                 </span>
-                {source_asset_data && (
-                  <AddToken
-                    token_data={{
-                      ...source_asset_data,
-                      ...source_contract_data,
-                    }}
-                  />
-                )}
-              </div>
+              )
+            }
+            <div className="flex items-center justify-center space-x-1">
+              {source_asset_image && (
+                <Image
+                  src={source_asset_image}
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="rounded-full"
+                />
+              )}
+              <span className="text-xs font-medium">
+                {source_symbol}
+              </span>
+              {source_asset_data && (
+                <AddToken
+                  token_data={{
+                    ...source_asset_data,
+                    ...source_contract_data,
+                  }}
+                />
+              )}
             </div>
-          </LightSpeed>
+          </div>
           <div className="flex flex-col items-center">
             {
               !pending &&
@@ -310,47 +307,45 @@ export default ({
               )
             }
           </div>
-          <LightSpeed left>
-            <div
-              className="flex flex-col items-end space-y-1"
-              style={{ minWidth: '4rem' }}
-            >
-              {
-                typeof destination_amount === 'number' &&
-                (
-                  <span className="font-semibold">
-                    {number_format(
-                      destination_amount,
-                      '0,0.000000',
-                      true,
-                    )}
-                  </span>
-                )
-              }
-              <div className="flex items-center justify-center space-x-1">
-                {destination_asset_image && (
-                  <Image
-                    src={destination_asset_image}
-                    alt=""
-                    width={16}
-                    height={16}
-                    className="rounded-full"
-                  />
-                )}
-                <span className="text-xs font-medium">
-                  {destination_symbol}
+          <div
+            className="flex flex-col items-end space-y-1"
+            style={{ minWidth: '4rem' }}
+          >
+            {
+              typeof destination_amount === 'number' &&
+              (
+                <span className="font-semibold">
+                  {number_format(
+                    destination_amount,
+                    '0,0.000000',
+                    true,
+                  )}
                 </span>
-                {destination_asset_data && (
-                  <AddToken
-                    token_data={{
-                      ...destination_asset_data,
-                      ...destination_contract_data,
-                    }}
-                  />
-                )}
-              </div>
+              )
+            }
+            <div className="flex items-center justify-center space-x-1">
+              {destination_asset_image && (
+                <Image
+                  src={destination_asset_image}
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="rounded-full"
+                />
+              )}
+              <span className="text-xs font-medium">
+                {destination_symbol}
+              </span>
+              {destination_asset_data && (
+                <AddToken
+                  token_data={{
+                    ...destination_asset_data,
+                    ...destination_contract_data,
+                  }}
+                />
+              )}
             </div>
-          </LightSpeed>
+          </div>
         </div>
         {
           to &&
