@@ -145,10 +145,12 @@ export default ({
               key={id}
               href={path}
             >
-              <a className={className}>
-                {item}
-                {right_icon}
-              </a>
+            <a
+              className={className}
+            >
+              {item}
+              {right_icon}
+            </a>
             </Link>
         })
       }

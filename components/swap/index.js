@@ -334,10 +334,12 @@ export default () => {
 
   // update balances
   useEffect(() => {
-    dispatch({
-      type: BALANCES_DATA,
-      value: null,
-    })
+    dispatch(
+      {
+        type: BALANCES_DATA,
+        value: null,
+      }
+    )
 
     if (address) {
       const {
@@ -560,21 +562,33 @@ export default () => {
         }
       }
 
-      dispatch({
-        type: BALANCES_DATA,
-        value: {
-          [`${chain_id}`]: [{
-            ...contract_data,
-            amount: balance &&
-              Number(
-                utils.formatUnits(
-                  balance,
-                  decimals || 18,
-                )
-              ),
-          }],
-        },
-      })
+      if (
+        balance ||
+        !(
+          balances_data?.[`${chain_id}`]?.findIndex(c =>
+            equals_ignore_case(c?.contract_address, contract_address)
+          ) > -1
+        )
+      ) {
+        dispatch(
+          {
+            type: BALANCES_DATA,
+            value: {
+              [`${chain_id}`]: [{
+                ...contract_data,
+                amount: balance &&
+                  Number(
+                    utils.formatUnits(
+                      balance,
+                      decimals ||
+                      18,
+                    )
+                  ),
+              }],
+            },
+          }
+        )
+      }
     }
 
     const {
@@ -660,7 +674,10 @@ export default () => {
     setCallProcessing(null)
     setCallResponse(null)
 
-    setPairTrigger(moment().valueOf())
+    setPairTrigger(
+      moment()
+        .valueOf()
+    )
 
     const {
       chain,
@@ -964,7 +981,10 @@ export default () => {
     ) {
       await sleep(1 * 1000)
 
-      setPairTrigger(moment().valueOf())
+      setPairTrigger(
+        moment()
+          .valueOf()
+      )
     }
   }
 

@@ -30,6 +30,7 @@ export default () => {
         rpc_providers: state.rpc_providers,
         dev: state.dev,
         wallet: state.wallet,
+        balances: state.balances,
       }
     ),
     shallowEqual,
@@ -56,6 +57,9 @@ export default () => {
     chain_id,
     address,
   } = { ...wallet_data }
+  const {
+    balances_data,
+  } = { ...balances }
 
   const router = useRouter()
   const {
@@ -119,7 +123,10 @@ export default () => {
 
     if (updated) {
       setPool(pool)
-      setPoolsTrigger(moment().valueOf())
+      setPoolsTrigger(
+        moment()
+          .valueOf()
+      )
     }
   }, [asPath, chains_data, pool_assets_data])
 
@@ -242,10 +249,12 @@ export default () => {
 
   // update balances
   useEffect(() => {
-    dispatch({
-      type: BALANCES_DATA,
-      value: null,
-    })
+    dispatch(
+      {
+        type: BALANCES_DATA,
+        value: null,
+      }
+    )
 
     if (address) {
       const {
@@ -436,21 +445,33 @@ export default () => {
         }
       }
 
-      dispatch({
-        type: BALANCES_DATA,
-        value: {
-          [`${chain_id}`]: [{
-            ...contract_data,
-            amount: balance &&
-              Number(
-                utils.formatUnits(
-                  balance,
-                  decimals || 18,
-                )
-              ),
-          }],
-        },
-      })
+      if (
+        balance ||
+        !(
+          balances_data?.[`${chain_id}`]?.findIndex(c =>
+            equals_ignore_case(c?.contract_address, contract_address)
+          ) > -1
+        )
+      ) {
+        dispatch(
+          {
+            type: BALANCES_DATA,
+            value: {
+              [`${chain_id}`]: [{
+                ...contract_data,
+                amount: balance &&
+                  Number(
+                    utils.formatUnits(
+                      balance,
+                      decimals ||
+                      18,
+                    )
+                  ),
+              }],
+            },
+          }
+        )
+      }
     }
 
     const {
@@ -524,7 +545,10 @@ export default () => {
       })
     }
 
-    setPoolsTrigger(moment().valueOf())
+    setPoolsTrigger(
+      moment()
+        .valueOf()
+    )
 
     const {
       chain,
@@ -538,12 +562,13 @@ export default () => {
       <div className="flex justify-center">
         <div className="w-full flex flex-col space-y-4 my-6 my-4 sm:my-6 mx-1 sm:mx-4">
           <div className="flex items-center space-x-3">
-            {/*<Link href="/pools">
-              <a className="text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white">
-                <RiArrowLeftCircleFill
-                  size={36}
-                />
-              </a>
+            {/*<Link
+              href="/pools"
+              className="text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
+            >
+              <RiArrowLeftCircleFill
+                size={36}
+              />
             </Link>*/}
             <h1 className="uppercase tracking-widest text-2xl font-medium">
               Manage Pool
@@ -560,7 +585,12 @@ export default () => {
             <Liquidity
               pool={pool}
               user_pools_data={pools}
-              onFinish={() => setPoolsTrigger(moment().valueOf())}
+              onFinish={() =>
+                setPoolsTrigger(
+                  moment()
+                    .valueOf()
+                )
+              }
             />
           </div>
         </div>

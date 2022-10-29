@@ -97,13 +97,13 @@ export default ({
               key={id}
               href={path}
             >
-              <a
-                onClick={onClick}
-                className={className}
-              >
-                {item}
-                {right_icon}
-              </a>
+            <a
+              onClick={onClick}
+              className={className}
+            >
+              {item}
+              {right_icon}
+            </a>
             </Link>
         })
       }

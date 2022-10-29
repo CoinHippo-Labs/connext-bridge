@@ -134,9 +134,11 @@ export default ({
                       <Link
                         href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                       >
-                        <a className="h-6 flex items-center font-semibold">
-                          {name}
-                        </a>
+                      <a
+                        className="h-6 flex items-center font-semibold"
+                      >
+                        {name}
+                      </a>
                       </Link> :
                       <>
                         <div className="flex items-center space-x-2">
@@ -182,9 +184,11 @@ export default ({
                                   key={i}
                                   href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                 >
-                                  <a className="h-6 flex items-center font-semibold ml-8">
-                                    {name}
-                                  </a>
+                                <a
+                                  className="h-6 flex items-center font-semibold ml-8"
+                                >
+                                  {name}
+                                </a>
                                 </Link>
                               )
                             })
@@ -233,20 +237,22 @@ export default ({
                       <Link
                         href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                       >
-                        <a className="h-6 flex items-center space-x-2">
-                          {image && (
-                            <Image
-                              src={image}
-                              alt=""
-                              width={24}
-                              height={24}
-                              className="rounded-full"
-                            />
-                          )}
-                          <span className="text-base font-semibold">
-                            {name}
-                          </span>
-                        </a>
+                      <a
+                        className="h-6 flex items-center space-x-2"
+                      >
+                        {image && (
+                          <Image
+                            src={image}
+                            alt=""
+                            width={24}
+                            height={24}
+                            className="rounded-full"
+                          />
+                        )}
+                        <span className="text-base font-semibold">
+                          {name}
+                        </span>
+                      </a>
                       </Link> :
                       <>
                         <div
@@ -326,20 +332,22 @@ export default ({
                                   key={i}
                                   href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                 >
-                                  <a className="h-6 flex items-center space-x-2">
-                                    {image && (
-                                      <Image
-                                        src={image}
-                                        alt=""
-                                        width={24}
-                                        height={24}
-                                        className="rounded-full"
-                                      />
-                                    )}
-                                    <span className="text-base font-semibold">
-                                      {name}
-                                    </span>
-                                  </a>
+                                <a
+                                  className="h-6 flex items-center space-x-2"
+                                >
+                                  {image && (
+                                    <Image
+                                      src={image}
+                                      alt=""
+                                      width={24}
+                                      height={24}
+                                      className="rounded-full"
+                                    />
+                                  )}
+                                  <span className="text-base font-semibold">
+                                    {name}
+                                  </span>
+                                </a>
                                 </Link>
                               )
                             })
@@ -404,16 +412,18 @@ export default ({
                               key={i}
                               href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                             >
-                              <a className="h-6 text-base font-semibold text-right">
-                                <span className="uppercase">
-                                  {currency_symbol}
-                                  {number_format(
-                                    value,
-                                    '0,0.00',
-                                    true,
-                                  )}
-                                </span>
-                              </a>
+                            <a
+                              className="h-6 text-base font-semibold text-right"
+                            >
+                              <span className="uppercase">
+                                {currency_symbol}
+                                {number_format(
+                                  value,
+                                  '0,0.00',
+                                  true,
+                                )}
+                              </span>
+                            </a>
                             </Link>
                           )
                         })
@@ -477,16 +487,18 @@ export default ({
                               key={i}
                               href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                             >
-                              <a className="h-6 text-base font-semibold text-right">
-                                <span className="uppercase">
-                                  {currency_symbol}
-                                  {number_format(
-                                    value,
-                                    '0,0.00',
-                                    true,
-                                  )}
-                                </span>
-                              </a>
+                            <a
+                              className="h-6 text-base font-semibold text-right"
+                            >
+                              <span className="uppercase">
+                                {currency_symbol}
+                                {number_format(
+                                  value,
+                                  '0,0.00',
+                                  true,
+                                )}
+                              </span>
+                            </a>
                             </Link>
                           )
                         })
@@ -550,16 +562,18 @@ export default ({
                               key={i}
                               href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                             >
-                              <a className="h-6 text-base font-semibold text-right">
-                                <span className="uppercase">
-                                  {currency_symbol}
-                                  {number_format(
-                                    value,
-                                    '0,0.00',
-                                    true,
-                                  )}
-                                </span>
-                              </a>
+                            <a
+                              className="h-6 text-base font-semibold text-right"
+                            >
+                              <span className="uppercase">
+                                {currency_symbol}
+                                {number_format(
+                                  value,
+                                  '0,0.00',
+                                  true,
+                                )}
+                              </span>
+                            </a>
                             </Link>
                           )
                         })
@@ -623,16 +637,18 @@ export default ({
                               key={i}
                               href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                             >
-                              <a className="h-6 text-base font-semibold text-right">
-                                <span className="uppercase">
-                                  {number_format(
-                                    value,
-                                    '0,0.00',
-                                    true,
-                                  )}
-                                  %
-                                </span>
-                              </a>
+                            <a
+                              className="h-6 text-base font-semibold text-right"
+                            >
+                              <span className="uppercase">
+                                {number_format(
+                                  value,
+                                  '0,0.00',
+                                  true,
+                                )}
+                                %
+                              </span>
+                            </a>
                             </Link>
                           )
                         })

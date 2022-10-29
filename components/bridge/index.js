@@ -127,7 +127,6 @@ export default () => {
   const [bridge, setBridge] = useState({})
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [buttonDirection, setButtonDirection] = useState(1)
-  const [controller, setController] = useState(null)
 
   const [fee, setFee] = useState(null)
   const [feeEstimating, setFeeEstimating] = useState(null)
@@ -349,7 +348,10 @@ export default () => {
       }
     )
 
-    setEstimateTrigger(moment().valueOf())
+    setEstimateTrigger(
+      moment()
+        .valueOf()
+    )
     setApproveResponse(null)
     setXcall(null)
     setXcallResponse(null)
@@ -482,7 +484,10 @@ export default () => {
   useEffect(() => {
     if (typeof feeEstimateCooldown === 'number') {
       if (feeEstimateCooldown === 0) {
-        setEstimateTrigger(moment().valueOf())
+        setEstimateTrigger(
+          moment()
+            .valueOf()
+        )
       }
       else if (fee) {
         const interval = setInterval(() =>
@@ -526,14 +531,15 @@ export default () => {
       balances_data?.[chain_id] &&
       amount
     ) {
-      setEstimateTrigger(moment().valueOf())
+      setEstimateTrigger(
+        moment()
+          .valueOf()
+      )
     }
   }, [balances_data])
 
   // estimate trigger
   useEffect(() => {
-    let _controller
-
     if (
       estimateTrigger &&
       !(
@@ -543,16 +549,8 @@ export default () => {
         xcallResponse
       )
     ) {
-      controller?.abort()
-
-      _controller = new AbortController()
-
-      setController(_controller)
-
-      estimate(_controller)
+      estimate()
     }
-
-    return () => _controller?.abort()
   }, [estimateTrigger])
 
   // check transfer status
@@ -703,23 +701,33 @@ export default () => {
         }
       }
 
-      dispatch(
-        {
-          type: BALANCES_DATA,
-          value: {
-            [`${chain_id}`]: [{
-              ...contract_data,
-              amount: balance &&
-                Number(
-                  utils.formatUnits(
-                    balance,
-                    decimals || 18,
-                  )
-                ),
-            }],
-          },
-        }
-      )
+      if (
+        balance ||
+        !(
+          balances_data?.[`${chain_id}`]?.findIndex(c =>
+            equals_ignore_case(c?.contract_address, contract_address)
+          ) > -1
+        )
+      ) {
+        dispatch(
+          {
+            type: BALANCES_DATA,
+            value: {
+              [`${chain_id}`]: [{
+                ...contract_data,
+                amount: balance &&
+                  Number(
+                    utils.formatUnits(
+                      balance,
+                      decimals ||
+                      18,
+                    )
+                  ),
+              }],
+            },
+          }
+        )
+      }
     }
 
     const {
@@ -841,7 +849,7 @@ export default () => {
     getBalances(destination_chain)
   }
 
-  const estimate = async controller => {
+  const estimate = async () => {
     if (
       checkSupport() &&
       !xcall
@@ -868,10 +876,7 @@ export default () => {
         destination_contract_data &&
         !isNaN(amount)
       ) {
-        if (
-          sdk &&
-          !controller.signal.aborted
-        ) {
+        if (sdk) {
           setApproveResponse(null)
           setXcall(null)
           setCallProcessing(false)
@@ -1308,7 +1313,10 @@ export default () => {
     ) {
       await sleep(2 * 1000)
 
-      setTransfersTrigger(moment().valueOf())
+      setTransfersTrigger(
+        moment()
+          .valueOf()
+      )
     }
   }
 
@@ -1331,25 +1339,33 @@ export default () => {
 
   const source_chain_data = chains_data?.find(c => c?.id === source_chain)
   const source_asset_data = assets_data?.find(a => a?.id === asset)
-  const source_contract_data = source_asset_data?.contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
+  const source_contract_data = source_asset_data?.contracts?.find(c =>
+    c?.chain_id === source_chain_data?.chain_id
+  )
 
   const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
   const destination_asset_data = assets_data?.find(a => a?.id === asset)
-  const destination_contract_data = destination_asset_data?.contracts?.find(c => c?.chain_id === destination_chain_data?.chain_id)  
+  const destination_contract_data = destination_asset_data?.contracts?.find(c =>
+    c?.chain_id === destination_chain_data?.chain_id
+  )  
 
   const {
     color,
   } = { ...source_asset_data }
   const source_symbol = source_contract_data?.symbol ||
     source_asset_data?.symbol
-  const source_balance = balances_data?.[source_chain_data?.chain_id]?.find(b => equals_ignore_case(b?.contract_address, source_contract_data?.contract_address))
+  const source_balance = balances_data?.[source_chain_data?.chain_id]?.find(b =>
+    equals_ignore_case(b?.contract_address, source_contract_data?.contract_address)
+  )
   const source_amount = source_balance &&
     Number(source_balance.amount)
   const source_gas_native_token = _.head(source_chain_data?.provider_params)?.nativeCurrency
 
   const destination_symbol = destination_contract_data?.symbol ||
     destination_asset_data?.symbol
-  const destination_balance = balances_data?.[destination_chain_data?.chain_id]?.find(b => equals_ignore_case(b?.contract_address, destination_contract_data?.contract_address))
+  const destination_balance = balances_data?.[destination_chain_data?.chain_id]?.find(b =>
+    equals_ignore_case(b?.contract_address, destination_contract_data?.contract_address)
+  )
   const destination_amount = destination_balance &&
     Number(destination_balance.amount)
   const destination_decimals = destination_contract_data?.decimals ||
