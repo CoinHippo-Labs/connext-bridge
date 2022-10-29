@@ -21,6 +21,7 @@ export default () => {
     rpc_providers,
     dev,
     wallet,
+    balances,
   } = useSelector(state =>
     (
       {
