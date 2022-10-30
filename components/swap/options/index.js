@@ -9,7 +9,11 @@ import { MdSettingsSuggest } from 'react-icons/md'
 import Modal from '../../modals'
 import { switch_color } from '../../../lib/utils'
 
-const DEFAULT_SWAP_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_SWAP_SLIPPAGE_PERCENTAGE) || 3
+const DEFAULT_SWAP_SLIPPAGE_PERCENTAGE =
+  Number(
+    process.env.NEXT_PUBLIC_DEFAULT_SWAP_SLIPPAGE_PERCENTAGE
+  ) ||
+  3
 
 export default ({
   disabled = false,
@@ -54,6 +58,7 @@ export default ({
         3.0,
         2.0,
         1.0,
+        0.5,
       ],
       postfix: '%',
     },

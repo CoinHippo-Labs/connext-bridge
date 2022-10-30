@@ -1097,6 +1097,7 @@ export default ({
                     3.0,
                     2.0,
                     1.0,
+                    0.5,
                   ].map((p, i) => (
                     <div
                       key={i}
