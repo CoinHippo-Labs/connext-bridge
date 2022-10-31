@@ -7,6 +7,7 @@ import { XTransferStatus } from '@connext/nxtp-utils'
 import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
 import { TailSpin, Oval } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
+import { Tooltip } from '@material-tailwind/react'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
 import { HiSwitchHorizontal, HiOutlineDocumentSearch } from 'react-icons/hi'
@@ -1841,9 +1842,15 @@ export default () => {
                               (
                                 <>
                                   <div className="flex items-center justify-between space-x-1">
-                                    <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
-                                      Bridge Fee
-                                    </div>
+                                    <Tooltip
+                                      placement="top"
+                                      content="This supports our router users providing fast liquidity."
+                                      className="z-50 bg-black text-white text-xs"
+                                    >
+                                      <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
+                                        Bridge Fee
+                                      </div>
+                                    </Tooltip>
                                     <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
                                       <span>
                                         {number_format(
@@ -1858,9 +1865,15 @@ export default () => {
                                     </span>
                                   </div>
                                   <div className="flex items-center justify-between space-x-1">
-                                    <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
-                                      Destination Gas Fee
-                                    </div>
+                                    <Tooltip
+                                      placement="top"
+                                      content="This covers costs to execute your transfer on the destination chain."
+                                      className="z-50 bg-black text-white text-xs"
+                                    >
+                                      <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
+                                        Destination Gas Fee
+                                      </div>
+                                    </Tooltip>
                                     {feeEstimating ?
                                       <div className="flex items-center space-x-1.5">
                                         <span className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">

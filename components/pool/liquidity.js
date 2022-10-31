@@ -6,6 +6,7 @@ import { BigNumber, FixedNumber, utils } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
 import Switch from 'react-switch'
 import { TailSpin, Watch } from 'react-loader-spinner'
+import { Tooltip } from '@material-tailwind/react'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
 import { BiPlus, BiCaretUp, BiCaretDown, BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
@@ -1018,9 +1019,15 @@ export default ({
         (
           <div className="form">
             <div className="form-element">
-              <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
-                Infinite Approval
-              </div>
+              <Tooltip
+                placement="right"
+                content="This allows you to only need to pay for approval on your first transfer."
+                className="z-50 bg-black text-white text-xs"
+              >
+                <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 font-normal">
+                  Infinite Approval
+                </div>
+              </Tooltip>
               <div className="flex items-center space-x-3">
                 <Switch
                   checked={typeof infiniteApprove === 'boolean' ?
@@ -1043,9 +1050,15 @@ export default ({
               </div>
             </div>
             <div className="form-element">
-              <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
-                Slippage Tolerance
-              </div>
+              <Tooltip
+                placement="right"
+                content="The maximum percentage you are willing to lose due to market changes."
+                className="z-50 bg-black text-white text-xs"
+              >
+                <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 font-normal">
+                  Slippage Tolerance
+                </div>
+              </Tooltip>
               <div className="flex items-center space-x-3">
                 <DebounceInput
                   debounceTimeout={300}
@@ -1276,7 +1289,7 @@ export default ({
                       ].includes(e.key) &&
                       e.preventDefault()
                     }
-                    className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
+                    className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-gray-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
                   />
                   {/*<div
                     onClick={() => {
@@ -1388,7 +1401,7 @@ export default ({
                       ].includes(e.key) &&
                       e.preventDefault()
                     }
-                    className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
+                    className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-gray-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
                   />
                   {/*<div
                     onClick={() => {
@@ -1647,7 +1660,7 @@ export default ({
                     ].includes(e.key) &&
                     e.preventDefault()
                   }
-                  className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-slate-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
+                  className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-gray-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
                 />
                 {
                   typeof amount === 'number' &&

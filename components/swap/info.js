@@ -1,5 +1,6 @@
 import { useSelector, shallowEqual } from 'react-redux'
 import { Oval } from 'react-loader-spinner'
+import { Tooltip } from '@material-tailwind/react'
 
 import { number_format, loader_color } from '../../lib/utils'
 
@@ -90,9 +91,15 @@ export default ({
                 </span>
               </div>
               <div className="flex items-center justify-between space-x-1">
-                <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
-                  Slippage Tolerance
-                </div>
+                <Tooltip
+                  placement="top"
+                  content="The maximum percentage you are willing to lose due to market changes."
+                  className="z-50 bg-black text-white text-xs"
+                >
+                  <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
+                    Slippage Tolerance
+                  </div>
+                </Tooltip>
                 <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
                   <span>
                     {number_format(

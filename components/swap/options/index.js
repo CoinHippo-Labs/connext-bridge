@@ -3,6 +3,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import Switch from 'react-switch'
 import { DebounceInput } from 'react-debounce-input'
+import { Tooltip } from '@material-tailwind/react'
 import { RiSettings3Line } from 'react-icons/ri'
 import { MdSettingsSuggest } from 'react-icons/md'
 
@@ -46,11 +47,13 @@ export default ({
   const fields = [
     {
       label: 'Infinite Approval',
+      tooltip: 'This allows you to only need to pay for approval on your first transfer.',
       name: 'infiniteApprove',
       type: 'switch',
     },
     {
       label: 'Slippage Tolerance',
+      tooltip: 'The maximum percentage you are willing to lose due to market changes.',
       name: 'slippage',
       type: 'number',
       placeholder: '0.00',
@@ -93,6 +96,7 @@ export default ({
           .map((f, i) => {
             const {
               label,
+              tooltip,
               name,
               size,
               type,
@@ -107,11 +111,23 @@ export default ({
                 key={i}
                 className="form-element"
               >
-                {label && (
-                  <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
-                    {label}
-                  </div>
-                )}
+                {
+                  label &&
+                  (tooltip ?
+                    <Tooltip
+                      placement="right"
+                      content={tooltip}
+                      className="z-50 bg-black text-white text-xs"
+                    >
+                      <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 font-normal">
+                        {label}
+                      </div>
+                    </Tooltip> :
+                    <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
+                      {label}
+                    </div>
+                  )
+                }
                 {type === 'select' ?
                   <select
                     placeholder={placeholder}
