@@ -4,6 +4,7 @@ import moment from 'moment'
 import { BigNumber, utils } from 'ethers'
 import { XTransferStatus } from '@connext/nxtp-utils'
 import { TailSpin } from 'react-loader-spinner'
+import { Tooltip } from '@material-tailwind/react'
 import Fade from 'react-reveal/Fade'
 import { TiArrowRight } from 'react-icons/ti'
 import { HiOutlineCheckCircle } from 'react-icons/hi'
@@ -14,6 +15,12 @@ import AddToken from '../add-token'
 import Copy from '../copy'
 import { chainName } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
+
+const ROUTER_FEE_PERCENT =
+  Number(
+    process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT
+  ) ||
+  0.05
 
 export default ({
   data,
@@ -104,28 +111,29 @@ export default ({
     18
   const source_asset_image = source_contract_data?.image ||
     source_asset_data?.image
-  const source_amount = _.head(
-    [
-      origin_transacting_amount,
-      origin_bridged_amount,
-    ]
-    .map(a =>
+  const source_amount =
+    _.head(
       [
-        'number',
-        'string',
-      ].includes(typeof a) &&
-      Number(
-        utils.formatUnits(
-          BigNumber.from(
-            BigInt(a)
-              .toString()
-          ),
-          source_decimals,
+        origin_transacting_amount,
+        origin_bridged_amount,
+      ]
+      .map(a =>
+        [
+          'number',
+          'string',
+        ].includes(typeof a) &&
+        Number(
+          utils.formatUnits(
+            BigNumber.from(
+              BigInt(a)
+                .toString()
+            ),
+            source_decimals,
+          )
         )
       )
+      .filter(a => a)
     )
-    .filter(a => a)
-  )
 
   const destination_chain_data = chains_data?.find(c =>
     c?.chain_id === Number(destination_chain) ||
@@ -151,28 +159,34 @@ export default ({
     18
   const destination_asset_image = destination_contract_data?.image ||
     destination_asset_data?.image
-  const destination_amount = _.head(
-    [
-      destination_transacting_amount,
-      destination_local_amount,
-    ]
-    .map(a =>
+  const destination_amount =
+    _.head(
       [
-        'number',
-        'string',
-      ].includes(typeof a) &&
-      Number(
-        utils.formatUnits(
-          BigNumber.from(
-            BigInt(a)
-              .toString()
-          ),
-          destination_decimals,
+        destination_transacting_amount,
+        // destination_local_amount,
+      ]
+      .map(a =>
+        [
+          'number',
+          'string',
+        ].includes(typeof a) &&
+        Number(
+          utils.formatUnits(
+            BigNumber.from(
+              BigInt(a)
+                .toString()
+            ),
+            destination_decimals,
+          )
         )
       )
+      .filter(a => a)
+    ) ||
+    source_amount *
+    (
+      1 -
+      ROUTER_FEE_PERCENT / 100
     )
-    .filter(a => a)
-  )
 
   const pending = ![
     XTransferStatus.Executed,
@@ -393,12 +407,21 @@ export default ({
                   </div>
                 )}
               </span>
-              <span
-                title={moment(xcall_timestamp * 1000).format('MMM D, YYYY h:mm:ss A')}
-                className="text-slate-400 dark:text-slate-200 text-xs"
+              <Tooltip
+                placement="bottom"
+                content={
+                  moment(xcall_timestamp * 1000)
+                    .format('MMM D, YYYY h:mm:ss A')
+                }
+                className="z-50 bg-black text-white text-xs"
               >
-                {moment(xcall_timestamp * 1000).fromNow()}
-              </span>
+                <span className="text-slate-400 dark:text-slate-200 text-xs">
+                  {
+                    moment(xcall_timestamp * 1000)
+                    .fromNow()
+                  }
+                </span>
+              </Tooltip>
             </div>
           )
         }
