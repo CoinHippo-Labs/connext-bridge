@@ -1,7 +1,6 @@
 import { CgArrowRightR } from 'react-icons/cg'
 import { RiCopperCoinLine, RiQuestionAnswerLine } from 'react-icons/ri'
-import { MdSwapHoriz } from 'react-icons/md'
-import { HiOutlineDocumentSearch } from 'react-icons/hi'
+import { HiSwitchHorizontal, HiOutlineDocumentSearch } from 'react-icons/hi'
 import { BiBook, BiCommentDetail } from 'react-icons/bi'
 
 export default [
@@ -43,7 +42,7 @@ export default [
       '/swap/[swap]',
     ],
     icon: (
-      <MdSwapHoriz
+      <HiSwitchHorizontal
         size={20}
         className="stroke-current"
       />

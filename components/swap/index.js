@@ -130,7 +130,9 @@ export default () => {
 
     const params = params_to_obj(
       asPath?.indexOf('?') > -1 &&
-      asPath.substring(asPath.indexOf('?') + 1)
+      asPath.substring(
+        asPath.indexOf('?') + 1,
+      )
     )
 
     const {
@@ -164,7 +166,9 @@ export default () => {
           'eth' :
           'usdc'
 
-      const chain_data = chains_data?.find(c => c?.id === chain)
+      const chain_data = chains_data?.find(c =>
+        c?.id === chain
+      )
       const asset_data = pool_assets_data?.find(a =>
         a?.id === asset ||
         equals_ignore_case(a?.symbol, asset)
@@ -180,7 +184,10 @@ export default () => {
         updated = true
       }
 
-      if (amount) {
+      if (
+        !isNaN(amount) &&
+        Number(amount)
+      ) {
         swap.amount = Number(amount)
         updated = true
       }
@@ -200,6 +207,7 @@ export default () => {
         chain,
         asset,
         amount,
+        origin,
       } = { ...swap }
 
       if (
@@ -215,7 +223,9 @@ export default () => {
           pool_assets_data?.findIndex(a =>
             a?.id === asset &&
             a.contracts?.findIndex(c =>
-              c?.chain_id === chains_data.find(_c => _c?.id === chain)?.chain_id
+              c?.chain_id === chains_data.find(_c =>
+                _c?.id === chain
+              )?.chain_id
             ) > -1
           ) > -1
         ) {
@@ -225,37 +235,44 @@ export default () => {
 
       if (
         params.chain &&
-        params.asset &&
-        amount
+        params.asset
       ) {
-        params.amount = amount
+        if (
+          !isNaN(amount) &&
+          Number(amount)
+        ) {
+          params.amount = Number(amount)
+        }
       }
     }
 
-    if (
-      !(
-        params.chain ||
-        params.asset
-      ) &&
-      pool_assets_data?.length > 0
-    ) {
-      const {
-        id,
-        contracts,
-      } = { ..._.head(pool_assets_data) }
+    // if (
+    //   !(
+    //     params.chain ||
+    //     params.asset
+    //   ) &&
+    //   pool_assets_data?.length > 0
+    // ) {
+    //   const {
+    //     id,
+    //     contracts,
+    //   } = { ..._.head(pool_assets_data) }
 
-      params.chain = params.chain ||
-        chains_data?.find(c => c?.chain_id === _.head(contracts)?.chain_id)?.id
+    //   params.chain =
+    //     params.chain ||
+    //     chains_data?.find(c =>
+    //       c?.chain_id === _.head(contracts)?.chain_id
+    //     )?.id
 
-      params.asset = params.asset ||
-        id
-    }
+    //   params.asset =
+    //     params.asset ||
+    //     id
+    // }
 
     if (Object.keys(params).length > 0) {
       const {
         chain,
         asset,
-        amount,
       } = { ...params }
 
       delete params.chain
@@ -300,7 +317,9 @@ export default () => {
     ) {
       const params = params_to_obj(
         asPath.indexOf('?') > -1 &&
-        asPath.substring(asPath.indexOf('?') + 1)
+        asPath.substring(
+          asPath.indexOf('?') + 1,
+        )
       )
 
       if (
@@ -326,10 +345,12 @@ export default () => {
         )?.id
     }
 
-    setSwap({
-      ...swap,
-      chain,
-    })
+    setSwap(
+      {
+        ...swap,
+        chain,
+      }
+    )
   }, [asPath, wallet_chain_id, chains_data])
 
   // update balances
@@ -377,10 +398,11 @@ export default () => {
 
     getData()
 
-    const interval = setInterval(() =>
-      getData(),
-      0.25 * 60 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        getData(),
+        0.25 * 60 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [rpcs])
@@ -388,11 +410,12 @@ export default () => {
   // update balances
   useEffect(() => {
     if (pools_data) {
-      const chains = _.uniq(
-        pools_data
-          .map(p => p?.chain_data?.id)
-          .filter(c => c)
-      )
+      const chains =
+        _.uniq(
+          pools_data
+            .map(p => p?.chain_data?.id)
+            .filter(c => c)
+        )
 
       chains
         .forEach(c =>
@@ -410,7 +433,15 @@ export default () => {
 
       if (
         sdk &&
-        chain
+        chain &&
+        (
+          !pair?.updated_at ||
+          moment()
+            .diff(
+              moment(pair.updated_at),
+              'seconds',
+            ) > 30
+        )
       ) {
         try {
           if (
@@ -433,75 +464,100 @@ export default () => {
             setSwapAmount(null)
           }
 
-          const chain_data = chains_data.find(c => c?.id === chain)
+          const chain_data = chains_data.find(c =>
+            c?.id === chain
+          )
           const {
             chain_id,
             domain_id,
           } = { ...chain_data }
 
-          const asset_data = pool_assets_data.find(a => a?.id === asset)
+          const asset_data = pool_assets_data.find(a =>
+            a?.id === asset
+          )
+          const {
+            contracts,
+          } = { ...asset_data }
 
-          const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_id)
+          const contract_data = contracts?.find(c =>
+            c?.chain_id === chain_id
+          )
           const {
             contract_address,
             is_pool,
           } = { ...contract_data }
 
-          const pool = is_pool &&
+          const pool =
+            is_pool &&
             await sdk.nxtpSdkPool.getPool(
               domain_id,
               contract_address,
             )
 
-          const rate = pool &&
+          const rate =
+            pool &&
             await sdk.nxtpSdkPool.getVirtualPrice(
               domain_id,
               contract_address,
             )
 
-          let _pair = (
-            pool ?
-              [pool]
-                .map(p => {
-                  const {
-                    symbol,
-                  } = { ...p }
+          let _pair =
+            (
+              pool ?
+                [pool]
+                  .map(p => {
+                    const {
+                      symbol,
+                    } = { ...p }
 
-                  const symbols = (symbol || '')
-                    .split('-')
-                    .filter(s => s)
+                    const symbols = (symbol || '')
+                      .split('-')
+                      .filter(s => s)
 
-                  const asset_data = pool_assets_data.find(a =>
-                    symbols.findIndex(s => equals_ignore_case(s, a?.symbol)) > -1 ||
-                    a?.contracts?.findIndex(c =>
-                      c?.chain_id === chain_id &&
-                      symbols.findIndex(s => equals_ignore_case(s, c?.symbol)) > -1
-                    ) > -1
-                  )
+                    const asset_data = pool_assets_data.find(a =>
+                      symbols.findIndex(s =>
+                        equals_ignore_case(s, a?.symbol)
+                      ) > -1 ||
+                      a?.contracts?.findIndex(c =>
+                        c?.chain_id === chain_id &&
+                        symbols.findIndex(s =>
+                          equals_ignore_case(s, c?.symbol)
+                        ) > -1
+                      ) > -1
+                    )
 
-                  return {
-                    ...p,
-                    chain_data,
-                    asset_data,
-                    symbols,
-                  }
-                }) :
-              [pair]
-          ).find(p =>
-            equals_ignore_case(p?.domainId, domain_id) &&
-            equals_ignore_case(p?.asset_data?.id, asset)
-          )
+                    return {
+                      ...p,
+                      chain_data,
+                      asset_data,
+                      symbols,
+                    }
+                  }) :
+                [pair]
+            )
+            .find(p =>
+              equals_ignore_case(p?.domainId, domain_id) &&
+              equals_ignore_case(p?.asset_data?.id, asset)
+            )
 
-          _pair = _pair &&
+          _pair =
+            _pair &&
             {
               ..._pair,
               contract_data,
               rate: Number(
                 utils.formatUnits(
-                  BigNumber.from(rate || '0'),
-                  _.last(_pair.decimals) || 18,
+                  BigNumber.from(
+                    rate ||
+                    '0'
+                  ),
+                  _.last(_pair.decimals) ||
+                  18,
                 )
               ),
+              updated_at:
+                moment()
+                  .valueOf(),
             }
 
           setPair(
@@ -509,6 +565,7 @@ export default () => {
               _pair :
               undefined
           )
+
           calculateSwap(_pair)
         } catch (error) {
           setPair(
@@ -606,7 +663,9 @@ export default () => {
 
             return {
               ...a,
-              ...contracts?.find(c => c?.chain_id === chain_id),
+              ...contracts?.find(c =>
+                c?.chain_id === chain_id
+              ),
             }
           }),
         (pools_data || [])
@@ -658,10 +717,12 @@ export default () => {
     const reset_swap = origin !== 'address'
 
     if (reset_swap) {
-      setSwap({
-        ...swap,
-        amount: null,
-      })
+      setSwap(
+        {
+          ...swap,
+          amount: null,
+        }
+      )
     }
 
     setOptions(DEFAULT_OPTIONS)
@@ -698,7 +759,8 @@ export default () => {
         origin,
       } = { ...swap }
 
-      origin = origin ||
+      origin =
+        origin ||
         'x'
 
       const {
@@ -715,7 +777,8 @@ export default () => {
         contract_address,
       } = { ...contract_data }
 
-      const x_asset_data = _.head(tokens) &&
+      const x_asset_data =
+        _.head(tokens) &&
         {
           ...Object.fromEntries(
             Object.entries({ ...asset_data }).
@@ -733,7 +796,8 @@ export default () => {
           ),
         }
 
-      const y_asset_data = _.last(tokens) &&
+      const y_asset_data =
+        _.last(tokens) &&
         {
           ...Object.fromEntries(
             Object.entries({ ...asset_data })
@@ -758,8 +822,11 @@ export default () => {
         deadline,
       } = { ...options }
 
-      deadline = deadline &&
-        moment().add(deadline, 'minutes').valueOf()
+      deadline =
+        deadline &&
+        moment()
+          .add(deadline, 'minutes')
+          .valueOf()
 
       let failed = false
 
@@ -774,7 +841,8 @@ export default () => {
           (origin === 'x' ?
             x_asset_data :
             y_asset_data
-          )?.decimals || 18,
+          )?.decimals ||
+          18,
         )
         .toString()
       }
@@ -804,14 +872,16 @@ export default () => {
               hash,
             } = { ...approve_response }
 
-            setApproveResponse({
-              status: 'pending',
-              message: `Wait for ${(origin === 'x' ?
-                x_asset_data :
-                y_asset_data
-              )?.symbol} approval`,
-              tx_hash: hash,
-            })
+            setApproveResponse(
+              {
+                status: 'pending',
+                message: `Wait for ${(origin === 'x' ?
+                  x_asset_data :
+                  y_asset_data
+                )?.symbol} approval`,
+                tx_hash: hash,
+              }
+            )
 
             setApproveProcessing(true)
 
@@ -847,11 +917,14 @@ export default () => {
         } catch (error) {
           failed = true
 
-          setApproveResponse({
-            status: 'failed',
-            message: error?.data?.message ||
-              error?.message,
-          })
+          setApproveResponse(
+            {
+              status: 'failed',
+              message:
+                error?.data?.message ||
+                error?.message,
+            }
+          )
 
           setApproveProcessing(false)
           setApproving(false)
@@ -903,16 +976,21 @@ export default () => {
             if (gasLimit) {
               gasLimit =
                 FixedNumber.fromString(
-                  gasLimit.toString()
+                  gasLimit
+                    .toString()
                 )
                 .mulUnsafe(
                   FixedNumber.fromString(
-                    GAS_LIMIT_ADJUSTMENT.toString()
+                    GAS_LIMIT_ADJUSTMENT
+                      .toString()
                   )
                 )
                 .round(0)
                 .toString()
-                .replace('.0', '')
+                .replace(
+                  '.0',
+                  '',
+                )
 
               swap_request.gasLimit = gasLimit
             }
@@ -947,24 +1025,29 @@ export default () => {
               )
               .join('/')
 
-            setCallResponse({
-              status: failed ?
-                'failed' :
-                'success',
-              message: failed ?
-                `Failed to swap ${_symbol}` :
-                `Swap ${_symbol} successful`,
-              tx_hash: hash,
-            })
+            setCallResponse(
+              {
+                status: failed ?
+                  'failed' :
+                  'success',
+                message: failed ?
+                  `Failed to swap ${_symbol}` :
+                  `Swap ${_symbol} successful`,
+                tx_hash: hash,
+              }
+            )
 
             success = true
           }
         } catch (error) {
-          setCallResponse({
-            status: 'failed',
-            message: error?.data?.message ||
-              error?.message,
-          })
+          setCallResponse(
+            {
+              status: 'failed',
+              message:
+                error?.data?.message ||
+                error?.message,
+            }
+          )
 
           failed = true
         }
@@ -1006,7 +1089,8 @@ export default () => {
           origin,
         } = { ...swap }
 
-        origin = origin ||
+        origin =
+          origin ||
           'x'
 
         const {
@@ -1022,7 +1106,8 @@ export default () => {
           contract_address,
         } = { ...contract_data }
 
-        const x_asset_data = _.head(tokens) &&
+        const x_asset_data =
+          _.head(tokens) &&
           {
             ...Object.fromEntries(
               Object.entries({ ...asset_data })
@@ -1040,7 +1125,8 @@ export default () => {
             ),
           }
 
-        const y_asset_data = _.last(tokens) &&
+        const y_asset_data =
+          _.last(tokens) &&
           {
             ...Object.fromEntries(
               Object.entries({ ...asset_data })
@@ -1109,11 +1195,13 @@ export default () => {
  
           amount =
             utils.parseUnits(
-              amount.toString(),
+              amount
+                .toString(),
               (origin === 'x' ?
                 x_asset_data :
                 y_asset_data
-              )?.decimals || 18,
+              )?.decimals ||
+              18,
             )
             .toString()
  
@@ -1139,11 +1227,15 @@ export default () => {
           setSwapAmount(
             Number(
               utils.formatUnits(
-                BigNumber.from(_amount || '0'),
+                BigNumber.from(
+                  _amount ||
+                  '0'
+                ),
                 (origin === 'x' ?
                   y_asset_data :
                   x_asset_data
-                )?.decimals || 18,
+                )?.decimals ||
+                18,
               )
             )
           )
@@ -1157,12 +1249,13 @@ export default () => {
     }
   }
 
-  const headMeta = meta(
-    asPath,
-    null,
-    chains_data,
-    assets_data,
-  )
+  const headMeta =
+    meta(
+      asPath,
+      null,
+      chains_data,
+      assets_data,
+    )
   const {
     title,
   } = { ...headMeta }
@@ -1176,10 +1269,13 @@ export default () => {
     origin,
   } = { ...swap }
 
-  origin = origin ||
+  origin =
+    origin ||
     'x'
 
-  const chain_data = chains_data?.find(c => c?.id === chain)
+  const chain_data = chains_data?.find(c =>
+    c?.id === chain
+  )
   const {
     chain_id,
     name,
@@ -1210,7 +1306,8 @@ export default () => {
     contract_address,
   } = { ...contract_data }
 
-  const x_asset_data = _.head(tokens) &&
+  const x_asset_data =
+    _.head(tokens) &&
     {
       ...Object.fromEntries(
         Object.entries({ ...asset_data })
@@ -1228,49 +1325,59 @@ export default () => {
       ),
     }
 
-  const x_balance = x_asset_data &&
+  const x_balance =
+    x_asset_data &&
     balances_data?.[chain_id]?.find(b =>
       equals_ignore_case(b?.contract_address, x_asset_data.contract_address)
     )
-  const x_balance_amount = x_balance &&
+  const x_balance_amount =
+    x_balance &&
     Number(x_balance.amount)
 
-  const y_asset_data = _.last(tokens) && {
-    ...Object.fromEntries(
-      Object.entries({ ...asset_data })
-        .filter(([k, v]) => !['contracts'].includes(k))
-    ),
-    ...(
-      equals_ignore_case(_.last(tokens), contract_address) ?
-        contract_data :
-        {
-          chain_id,
-          contract_address: _.last(tokens),
-          decimals: _.last(decimals),
-          symbol: _.last(symbols),
-        }
-    ),
-  }
-  const y_balance = y_asset_data &&
+  const y_asset_data =
+    _.last(tokens) &&
+    {
+      ...Object.fromEntries(
+        Object.entries({ ...asset_data })
+          .filter(([k, v]) => !['contracts'].includes(k))
+      ),
+      ...(
+        equals_ignore_case(_.last(tokens), contract_address) ?
+          contract_data :
+          {
+            chain_id,
+            contract_address: _.last(tokens),
+            decimals: _.last(decimals),
+            symbol: _.last(symbols),
+          }
+      ),
+    }
+  const y_balance =
+    y_asset_data &&
     balances_data?.[chain_id]?.find(b =>
       equals_ignore_case(b?.contract_address, y_asset_data.contract_address)
     )
-  const y_balance_amount = y_balance &&
+  const y_balance_amount =
+    y_balance &&
     Number(y_balance.amount)
 
-  const valid_amount = amount &&
+  const valid_amount =
+    amount &&
     amount <= (
       origin === 'x' ?
         x_balance_amount :
         y_balance_amount
     )
 
-  const wrong_chain = chain_data &&
+  const wrong_chain =
+    chain_data &&
     wallet_chain_id !== chain_id &&
     !callResponse
+
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
 
-  const disabled = calling ||
+  const disabled =
+    calling ||
     approving
 
   return (
@@ -1288,7 +1395,7 @@ export default () => {
                   asPath?.includes('on-') &&
                   title &&
                   (
-                    <h2 className="tracking-wider text-slate-500 dark:text-slate-400 text-xs">
+                    <h2 className="tracking-wider text-slate-700 dark:text-slate-300 text-xs font-medium">
                       {title.replace(
                         ' with Connext',
                         '',
@@ -1321,11 +1428,11 @@ export default () => {
             </div>
             <div
               className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-4 sm:pt-6 pb-6 sm:pb-8 px-4 sm:px-6"
-              style={valid_amount ?
+              style={amount > 0 ?
                 {
-                  boxShadow: `${color}ff 0px 8px 76px 6px`,
-                  WebkitBoxShadow: `${color}ff 0px 8px 76px 6px`,
-                  MozBoxShadow: `${color}ff 0px 8px 76px 6px`,
+                  boxShadow: `${color}ff 0px 8px 128px 2px`,
+                  WebkitBoxShadow: `${color}ff 0px 8px 128px 2px`,
+                  MozBoxShadow: `${color}ff 0px 8px 128px 2px`,
                 } :
                 undefined
               }
@@ -1342,11 +1449,13 @@ export default () => {
                       disabled={disabled}
                       value={chain}
                       onSelect={c => {
-                        setSwap({
-                          ...swap,
-                          chain: c,
-                          amount: null,
-                        })
+                        setSwap(
+                          {
+                            ...swap,
+                            chain: c,
+                            amount: null,
+                          }
+                        )
 
                         getBalances(c)
                       }}
@@ -1364,11 +1473,13 @@ export default () => {
                         disabled={disabled}
                         value={asset}
                         onSelect={a => {
-                          setSwap({
-                            ...swap,
-                            asset: a,
-                            amount: null,
-                          })
+                          setSwap(
+                            {
+                              ...swap,
+                              asset: a,
+                              amount: null,
+                            }
+                          )
 
                           getBalances(chain)
                         }}
@@ -1383,15 +1494,20 @@ export default () => {
                     </div>
                     <div className="flex items-center justify-center">
                       <button
-                        disabled={disabled}
+                        disabled={
+                          disabled ||
+                          !pair
+                        }
                         onClick={() => {
-                          setSwap({
-                            ...swap,
-                            origin: origin === 'x' ?
-                              'y' :
-                              'x',
-                            amount: null,
-                          })
+                          setSwap(
+                            {
+                              ...swap,
+                              origin: origin === 'x' ?
+                                'y' :
+                                'x',
+                              amount: null,
+                            }
+                          )
 
                           setButtonDirection(
                             buttonDirection * -1
@@ -1496,12 +1612,14 @@ export default () => {
                                 (
                                   <button
                                     onClick={() => {
-                                      setSwap({
-                                        ...swap,
-                                        amount: origin === 'x' ?
-                                          x_balance_amount :
-                                          y_balance_amount,
-                                      })
+                                      setSwap(
+                                        {
+                                          ...swap,
+                                          amount: origin === 'x' ?
+                                            x_balance_amount :
+                                            y_balance_amount,
+                                        }
+                                      )
                                     }}
                                     className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
                                   >
@@ -1568,12 +1686,14 @@ export default () => {
                                   0 :
                                   value
 
-                                setSwap({
-                                  ...swap,
-                                  amount: value && !isNaN(value) ?
-                                    Number(value) :
-                                    value,
-                                })
+                                setSwap(
+                                  {
+                                    ...swap,
+                                    amount: value && !isNaN(value) ?
+                                      Number(value) :
+                                      value,
+                                  }
+                                )
                               }}
                               onWheel={e => e.target.blur()}
                               onKeyDown={e =>
@@ -1611,9 +1731,10 @@ export default () => {
                   <Info
                     data={pair}
                     amount_received={swapAmount}
-                    asset_data={origin === 'x' ?
-                      y_asset_data :
-                      x_asset_data
+                    asset_data={
+                      origin === 'x' ?
+                        y_asset_data :
+                        x_asset_data
                     }
                   />
                 )
@@ -1659,9 +1780,10 @@ export default () => {
                     </Wallet> :
                     !callResponse &&
                     (
-                      amount > (origin === 'x' ?
-                        x_balance_amount :
-                        y_balance_amount
+                      amount > (
+                        origin === 'x' ?
+                          x_balance_amount :
+                          y_balance_amount
                       ) ||
                       amount <= 0
                     ) ?
@@ -1675,10 +1797,12 @@ export default () => {
                         className="rounded-xl p-4.5"
                       >
                         <span>
-                          {amount > (origin === 'x' ?
-                            x_balance_amount :
-                            y_balance_amount
-                          ) ?
+                          {amount >
+                            (
+                              origin === 'x' ?
+                                x_balance_amount :
+                                y_balance_amount
+                            ) ?
                             'Insufficient Balance' :
                             amount <= 0 ?
                               'The transfer amount cannot be equal or less than 0.' :

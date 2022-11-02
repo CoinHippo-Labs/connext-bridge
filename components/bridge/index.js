@@ -151,7 +151,9 @@ export default () => {
 
     const params = params_to_obj(
       asPath?.indexOf('?') > -1 &&
-      asPath.substring(asPath.indexOf('?') + 1)
+      asPath.substring(
+        asPath.indexOf('?') + 1,
+      )
     )
 
     const {
@@ -213,7 +215,10 @@ export default () => {
         updated = true
       }
 
-      if (!isNaN(amount)) {
+      if (
+        !isNaN(amount) &&
+        Number(amount) > 0
+      ) {
         bridge.amount = Number(amount)
         updated = true
       }
@@ -249,7 +254,9 @@ export default () => {
           assets_data?.findIndex(a =>
             a?.id === asset &&
             a.contracts?.findIndex(c =>
-              c?.chain_id === chains_data.find(_c => _c?.id === source_chain)?.chain_id
+              c?.chain_id === chains_data.find(_c =>
+                _c?.id === source_chain
+              )?.chain_id
             ) > -1
           ) > -1
         ) {
@@ -270,7 +277,9 @@ export default () => {
           assets_data?.findIndex(a =>
             a?.id === asset &&
             a.contracts?.findIndex(c =>
-              c?.chain_id === chains_data.find(_c => _c?.id === destination_chain)?.chain_id
+              c?.chain_id === chains_data.find(_c =>
+                _c?.id === destination_chain
+              )?.chain_id
             ) > -1
           ) > -1
         ) {
@@ -292,7 +301,6 @@ export default () => {
         source_chain,
         destination_chain,
         asset,
-        amount,
       } = { ...params }
 
       delete params.source_chain
@@ -300,12 +308,14 @@ export default () => {
       delete params.asset
 
       router.push(
-        `/${source_chain && destination_chain ?
-          `${asset ?
-            `${asset.toUpperCase()}-` :
+        `/${
+          source_chain &&
+          destination_chain ?
+            `${asset ?
+              `${asset.toUpperCase()}-` :
+              ''
+            }from-${source_chain}-to-${destination_chain}` :
             ''
-          }from-${source_chain}-to-${destination_chain}` :
-          ''
         }${Object.keys(params).length > 0 ?
           `?${new URLSearchParams(params).toString()}` :
           ''
@@ -317,7 +327,9 @@ export default () => {
       )
     }
 
-    const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
+    const destination_chain_data = chains_data?.find(c =>
+      c?.id === destination_chain
+    )
     const {
       chain_id,
     } = { ...destination_chain_data }
@@ -331,7 +343,10 @@ export default () => {
         .filter(a => equals_ignore_case(a?.contract_address, contract_address))
         .map(a => Number(
           utils.formatUnits(
-            BigNumber.from(a?.amount || '0'),
+            BigNumber.from(
+              a?.amount ||
+              '0'
+            ),
             destination_decimals,
           )
         )
@@ -380,7 +395,9 @@ export default () => {
     ) {
       const params = params_to_obj(
         asPath.indexOf('?') > -1 &&
-        asPath.substring(asPath.indexOf('?') + 1)
+        asPath.substring(
+          asPath.indexOf('?') + 1,
+        )
       )
 
       if (
@@ -398,14 +415,17 @@ export default () => {
     }
 
     if (Object.keys(bridge).length > 0) {
-      source_chain = source_chain ||
+      source_chain =
+        source_chain ||
         _.head(
           chains_data?.filter(c =>
             !c?.disabled &&
             c?.id !== destination_chain
           )
         )?.id
-      destination_chain = destination_chain ||
+
+      destination_chain =
+        destination_chain ||
         _.head(
           chains_data?.filter(c =>
             !c?.disabled &&
@@ -473,10 +493,11 @@ export default () => {
 
     getData()
 
-    const interval = setInterval(() =>
-      getData(),
-      10 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        getData(),
+        10 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [rpcs])
@@ -579,7 +600,9 @@ export default () => {
             )
 
             if (Array.isArray(response)) {
-              transfer_data = response.find(t => equals_ignore_case(t?.xcall_transaction_hash, transactionHash))
+              transfer_data = response.find(t =>
+                equals_ignore_case(t?.xcall_transaction_hash, transactionHash)
+              )
             }
           } catch (error) {}
 
@@ -592,7 +615,9 @@ export default () => {
               )
 
               if (Array.isArray(response)) {
-                transfer_data = response.find(t => equals_ignore_case(t?.xcall_transaction_hash, transactionHash))
+                transfer_data = response.find(t =>
+                  equals_ignore_case(t?.xcall_transaction_hash, transactionHash)
+                )
               }
             } catch (error) {}
           }
@@ -656,10 +681,11 @@ export default () => {
 
     update()
 
-    const interval = setInterval(() =>
-      update(),
-      10 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        update(),
+        10 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [sdk, address, xcall])
@@ -714,17 +740,19 @@ export default () => {
           {
             type: BALANCES_DATA,
             value: {
-              [`${chain_id}`]: [{
-                ...contract_data,
-                amount: balance &&
-                  Number(
-                    utils.formatUnits(
-                      balance,
-                      decimals ||
-                      18,
-                    )
-                  ),
-              }],
+              [`${chain_id}`]: [
+                {
+                  ...contract_data,
+                  amount: balance &&
+                    Number(
+                      utils.formatUnits(
+                        balance,
+                        decimals ||
+                        18,
+                      )
+                    ),
+                }
+              ],
             },
           }
         )
@@ -735,37 +763,41 @@ export default () => {
       chain_id,
     } = { ...chains_data?.find(c => c?.id === chain) }
 
-    const contracts_data = (assets_data || [])
-      .map(a => {
-        const {
-          contracts,
-        } = { ...a }
+    const contracts_data =
+      (assets_data || [])
+        .map(a => {
+          const {
+            contracts,
+          } = { ...a }
 
-        return {
-          ...a,
-          ...contracts?.find(c => c?.chain_id === chain_id),
-        }
-      })
-      .filter(a => a?.contract_address)
-      .map(a => {
-        let {
-          contract_address,
-        } = {  ...a }
+          return {
+            ...a,
+            ...contracts?.find(c =>
+              c?.chain_id === chain_id
+            ),
+          }
+        })
+        .filter(a => a?.contract_address)
+        .map(a => {
+          let {
+            contract_address,
+          } = {  ...a }
 
-        contract_address = contract_address.toLowerCase()
+          contract_address = contract_address.toLowerCase()
 
-        return {
-          ...a,
-          contract_address,
-        }
-      })
+          return {
+            ...a,
+            contract_address,
+          }
+        })
 
-    contracts_data.forEach(c =>
-      getBalance(
-        chain_id,
-        c,
+    contracts_data
+      .forEach(c =>
+        getBalance(
+          chain_id,
+          c,
+        )
       )
-    )
   }
 
   const checkSupport = () => {
@@ -775,8 +807,12 @@ export default () => {
       asset,
     } = { ...bridge }
 
-    const source_asset_data = assets_data?.find(a => a?.id === asset)
-    const destination_asset_data = assets_data?.find(a => a?.id === asset)
+    const source_asset_data = assets_data?.find(a =>
+      a?.id === asset
+    )
+    const destination_asset_data = assets_data?.find(a =>
+      a?.id === asset
+    )
 
     return source_chain &&
       destination_chain &&
@@ -784,12 +820,16 @@ export default () => {
       destination_asset_data &&
       !(
         source_asset_data.contracts?.findIndex(c =>
-          c?.chain_id === chains_data?.find(_c => _c?.id === source_chain)?.chain_id
+          c?.chain_id === chains_data?.find(_c =>
+            _c?.id === source_chain
+          )?.chain_id
         ) < 0
       ) &&
       !(
         destination_asset_data.contracts?.findIndex(c =>
-          c?.chain_id === chains_data?.find(_c => _c?.id === destination_chain)?.chain_id
+          c?.chain_id === chains_data?.find(_c =>
+            _c?.id === destination_chain
+          )?.chain_id
         ) < 0
       )
   }
@@ -862,13 +902,25 @@ export default () => {
         amount,
       } = { ...bridge }
 
-      const source_chain_data = chains_data?.find(c => c?.id === source_chain)
-      const source_asset_data = assets_data?.find(a => a?.id === asset)
-      const source_contract_data = source_asset_data?.contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
+      const source_chain_data = chains_data?.find(c =>
+        c?.id === source_chain
+      )
+      const source_asset_data = assets_data?.find(a =>
+        a?.id === asset
+      )
+      const source_contract_data = source_asset_data?.contracts?.find(c =>
+        c?.chain_id === source_chain_data?.chain_id
+      )
 
-      const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
-      const destination_asset_data = assets_data?.find(a => a?.id === asset)
-      const destination_contract_data = destination_asset_data?.contracts?.find(c => c?.chain_id === destination_chain_data?.chain_id)
+      const destination_chain_data = chains_data?.find(c =>
+        c?.id === destination_chain
+      )
+      const destination_asset_data = assets_data?.find(a =>
+        a?.id === asset
+      )
+      const destination_contract_data = destination_asset_data?.contracts?.find(c =>
+        c?.chain_id === destination_chain_data?.chain_id
+      )
 
       setFeeEstimating(true)
 
@@ -986,7 +1038,8 @@ export default () => {
         symbol,
       } = { ...source_contract_data }
 
-      symbol = symbol ||
+      symbol =
+        symbol ||
         source_asset_data?.symbol
 
       const destination_chain_data = chains_data?.find(c =>
@@ -1211,11 +1264,13 @@ export default () => {
             if (gasLimit) {
               gasLimit =
                 FixedNumber.fromString(
-                  gasLimit.toString()
+                  gasLimit
+                    .toString()
                 )
                 .mulUnsafe(
                   FixedNumber.fromString(
-                    GAS_LIMIT_ADJUSTMENT.toString()
+                    GAS_LIMIT_ADJUSTMENT
+                      .toString()
                   )
                 )
                 .round(0)
@@ -1321,12 +1376,13 @@ export default () => {
     }
   }
 
-  const headMeta = meta(
-    asPath,
-    null,
-    chains_data,
-    assets_data,
-  )
+  const headMeta =
+    meta(
+      asPath,
+      null,
+      chains_data,
+      assets_data,
+    )
   const {
     title,
   } = { ...headMeta }
@@ -1338,14 +1394,22 @@ export default () => {
     amount,
   } = { ...bridge }
 
-  const source_chain_data = chains_data?.find(c => c?.id === source_chain)
-  const source_asset_data = assets_data?.find(a => a?.id === asset)
+  const source_chain_data = chains_data?.find(c =>
+    c?.id === source_chain
+  )
+  const source_asset_data = assets_data?.find(a =>
+    a?.id === asset
+  )
   const source_contract_data = source_asset_data?.contracts?.find(c =>
     c?.chain_id === source_chain_data?.chain_id
   )
 
-  const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
-  const destination_asset_data = assets_data?.find(a => a?.id === asset)
+  const destination_chain_data = chains_data?.find(c =>
+    c?.id === destination_chain
+  )
+  const destination_asset_data = assets_data?.find(a =>
+    a?.id === asset
+  )
   const destination_contract_data = destination_asset_data?.contracts?.find(c =>
     c?.chain_id === destination_chain_data?.chain_id
   )  
@@ -1353,23 +1417,28 @@ export default () => {
   const {
     color,
   } = { ...source_asset_data }
-  const source_symbol = source_contract_data?.symbol ||
+  const source_symbol =
+    source_contract_data?.symbol ||
     source_asset_data?.symbol
   const source_balance = balances_data?.[source_chain_data?.chain_id]?.find(b =>
     equals_ignore_case(b?.contract_address, source_contract_data?.contract_address)
   )
-  const source_amount = source_balance &&
+  const source_amount =
+    source_balance &&
     Number(source_balance.amount)
   const source_gas_native_token = _.head(source_chain_data?.provider_params)?.nativeCurrency
 
-  const destination_symbol = destination_contract_data?.symbol ||
+  const destination_symbol =
+    destination_contract_data?.symbol ||
     destination_asset_data?.symbol
   const destination_balance = balances_data?.[destination_chain_data?.chain_id]?.find(b =>
     equals_ignore_case(b?.contract_address, destination_contract_data?.contract_address)
   )
-  const destination_amount = destination_balance &&
+  const destination_amount =
+    destination_balance &&
     Number(destination_balance.amount)
-  const destination_decimals = destination_contract_data?.decimals ||
+  const destination_decimals =
+    destination_contract_data?.decimals ||
     18
 
   const {
@@ -1380,44 +1449,56 @@ export default () => {
     receiveLocal,
   } = { ...options }
 
-  const gas_fee = fee &&
+  const gas_fee =
+    fee &&
     (
       forceSlow ?
         0 :
-        fee.gas || 0
+        fee.gas ||
+        0
     )
-  const router_fee = fee &&
+  const router_fee =
+    fee &&
     (
       forceSlow ?
         0 :
-        fee.router || 0
+        fee.router ||
+        0
     )
 
-  const liquidity_amount = _.sum(
-    (asset_balances_data?.[destination_chain_data?.chain_id] || [])
-      .filter(a => equals_ignore_case(a?.contract_address, destination_contract_data?.contract_address))
-      .map(a =>
-        Number(
-          utils.formatUnits(
-            BigNumber.from(a?.amount || '0'),
-            destination_decimals,
+  const liquidity_amount =
+    _.sum(
+      (asset_balances_data?.[destination_chain_data?.chain_id] || [])
+        .filter(a => equals_ignore_case(a?.contract_address, destination_contract_data?.contract_address))
+        .map(a =>
+          Number(
+            utils.formatUnits(
+              BigNumber.from(
+                a?.amount ||
+                '0'
+              ),
+              destination_decimals,
+            )
           )
         )
-      )
-  )
+    )
 
   const min_amount = 0
   const max_amount = source_amount
 
-  const wrong_chain = source_chain_data &&
+  const wrong_chain =
+    source_chain_data &&
     wallet_chain_id !== source_chain_data.chain_id &&
     !xcall
+
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
 
-  const recipient_address = to ||
+  const recipient_address =
+    to ||
     address
 
-  const disabled = calling ||
+  const disabled =
+    calling ||
     approving
 
   return (

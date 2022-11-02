@@ -1,7 +1,9 @@
+import Link from 'next/link'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import { TailSpin } from 'react-loader-spinner'
 import { Tooltip } from '@material-tailwind/react'
+import { HiSwitchHorizontal } from 'react-icons/hi'
 
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, loader_color } from '../../lib/utils'
@@ -310,9 +312,30 @@ export default ({
                       _.head(symbols) &&
                       (
                         <div className={metricClassName}>
-                          <span className={titleClassName}>
-                            {_.head(symbols)}
-                          </span>
+                          <div className="flex items-center space-x-2">
+                            <span className={titleClassName}>
+                              {_.head(symbols)}
+                            </span>
+                            <Link
+                              href={`/swap/${asset.toUpperCase()}-on-${chain}?from=${_.last(symbols)}`}
+                            >
+                            <a
+                              className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
+                            >
+                              <Tooltip
+                                placement="top"
+                                content={`Click here to swap ${_.last(symbols)} into ${_.head(symbols)}`}
+                                className="z-50 bg-black text-white text-xs"
+                              >
+                                <div>
+                                  <HiSwitchHorizontal
+                                    size={18}
+                                  />
+                                </div>
+                              </Tooltip>
+                            </a>
+                            </Link>
+                          </div>
                           <span className={valueClassName}>
                             {
                               !isNaN(_.head(balances)) ||
@@ -322,7 +345,8 @@ export default ({
                                 user_pools_data
                               ) ?
                                 number_format(
-                                  _.head(balances) || 0,
+                                  _.head(balances) ||
+                                  0,
                                   '0,0.000000',
                                   true,
                                 ) :
@@ -349,9 +373,30 @@ export default ({
                       _.last(symbols) &&
                       (
                         <div className={metricClassName}>
-                          <span className={titleClassName}>
-                            {_.last(symbols)}
-                          </span>
+                          <div className="flex items-center space-x-2">
+                            <span className={titleClassName}>
+                              {_.last(symbols)}
+                            </span>
+                            <Link
+                              href={`/swap/${asset.toUpperCase()}-on-${chain}`}
+                            >
+                            <a
+                              className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
+                            >
+                              <Tooltip
+                                placement="top"
+                                content={`Click here to swap ${_.head(symbols)} into ${_.last(symbols)}`}
+                                className="z-50 bg-black text-white text-xs"
+                              >
+                                <div>
+                                  <HiSwitchHorizontal
+                                    size={18}
+                                  />
+                                </div>
+                              </Tooltip>
+                            </a>
+                            </Link>
+                          </div>
                           <span className={valueClassName}>
                             {
                               !isNaN(_.last(balances)) ||
@@ -361,7 +406,8 @@ export default ({
                                 user_pools_data
                               ) ?
                                 number_format(
-                                  _.last(balances) || 0,
+                                  _.last(balances) ||
+                                  0,
                                   '0,0.000000',
                                   true,
                                 ) :

@@ -42,18 +42,26 @@ export default ({
     balances_data,
   } = { ...balances }
 
-  const asset_data = assets_data?.find(a => a?.id === asset)
+  const asset_data = assets_data?.find(a =>
+    a?.id === asset
+  )
   const {
     contracts,
   } = { ...asset_data }
 
-  const contract_data = contracts?.find(c => c?.chain_id === chainId)
+  const contract_data = contracts?.find(c =>
+    c?.chain_id === chainId
+  )
   const {
     contract_address,
   } = { ...contract_data }
 
   const balance = balances_data?.[chainId]?.find(b =>
-    equals_ignore_case(b?.contract_address, contractAddress || contract_address)
+    equals_ignore_case(
+      b?.contract_address,
+      contractAddress ||
+      contract_address,
+    )
   )
   let {
     amount,
@@ -63,11 +71,13 @@ export default ({
     Number(amount) :
     null
 
-  symbol = symbol ||
+  symbol =
+    symbol ||
     contract_data?.symbol ||
     asset_data?.symbol
 
-  return chainId &&
+  return (
+    chainId &&
     asset &&
     (
       <div className={`flex items-center justify-center text-slate-600 dark:text-slate-200 text-xs space-x-1 ${className}`}>
@@ -76,9 +86,9 @@ export default ({
             <span className="font-bold">
               {number_format(
                 amount,
-                amount > 10000 ?
+                amount > 1000000 ?
                   '0,0' :
-                  amount > 100 ?
+                  amount > 10000 ?
                     '0,0.00' :
                     '0,0.000000',
                 true,
@@ -102,4 +112,5 @@ export default ({
         }
       </div>
     )
+  )
 }

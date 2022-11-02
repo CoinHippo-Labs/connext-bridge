@@ -189,7 +189,8 @@ export default () => {
           c?.chain_id === _.head(contracts)?.chain_id
         )?.id
 
-      params.asset = params.asset ||
+      params.asset =
+        params.asset ||
         id
     }
 
@@ -673,7 +674,7 @@ export default () => {
                 {
                   no_pool &&
                   (
-                    <div className="order-2 bg-slate-100 dark:bg-slate-800 bg-opacity-100 dark:bg-opacity-50 rounded-lg tracking-wider text-slate-400 dark:text-slate-400 text-base font-normal py-1.5 px-4">
+                    <div className="order-2 tracking-wider text-slate-400 dark:text-slate-400 text-base font-normal py-1.5 px-4">
                       Pool doesn't exist
                     </div>
                   )
@@ -686,7 +687,7 @@ export default () => {
                       href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="order-1 sm:order-2 w-fit bg-slate-100 dark:bg-slate-800 bg-opacity-100 dark:bg-opacity-50 rounded-2xl text-base font-semibold py-1.5 px-4"
+                      className="order-1 sm:order-2 w-fit underline text-base font-semibold py-1.5 px-4"
                     >
                       {name}
                     </a>

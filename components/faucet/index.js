@@ -23,7 +23,10 @@ const ABI = [
 
 export default ({
   token_id = 'test',
-  faucet_amount = Number(process.env.NEXT_PUBLIC_FAUCET_AMOUNT) || 1000,
+  faucet_amount =
+    Number(
+      process.env.NEXT_PUBLIC_FAUCET_AMOUNT
+    ) || 1000,
   contract_data,
 }) => {
   const {
@@ -73,16 +76,19 @@ export default ({
         id,
       } = { ...chains_data?.find(c => c?.chain_id === chain_id) }
 
-      chain = id ||
+      chain =
+        id ||
         chain
 
-      setData({
-        ...data,
-        address: data ?
-          data.address :
-          address,
-        chain,
-      })
+      setData(
+        {
+          ...data,
+          address: data ?
+            data.address :
+            address,
+          chain,
+        }
+      )
     }
   }, [chain_id, address])
 
@@ -95,13 +101,18 @@ export default ({
     setMintResponse(null)
 
     try {
-      const asset_data = assets_data?.find(a => a?.id === token_id)
+      const asset_data = assets_data?.find(a =>
+        a?.id === token_id
+      )
       const {
         contracts,
       } = { ...asset_data }
 
-      const _contract_data = contract_data ||
-        contracts?.find(c => c?.chain_id === chain_id)
+      const _contract_data =
+        contract_data ||
+        contracts?.find(c =>
+          c?.chain_id === chain_id
+        )
       const {
         contract_address,
         decimals,
@@ -129,7 +140,8 @@ export default ({
           .toString(),
           is_wrapped ?
             'ether' :
-            decimals || 18,
+            decimals ||
+            18,
         )
 
       const gasLimit = 500000
@@ -152,7 +164,8 @@ export default ({
           },
       )
 
-      const wrap_request = is_wrapped &&
+      const wrap_request =
+        is_wrapped &&
         await signer.populateTransaction(
           {
             to: _address,
@@ -182,38 +195,46 @@ export default ({
         status,
       } = { ...receipt }
 
-      setMintResponse({
-        status: !status ?
-          'failed' :
-          'success',
-        message: !status ?
-          `Failed to ${is_wrapped ?
-            'wrap' :
-            'faucet'
-          }` :
-          `${is_wrapped ?
-            'Wrap' :
-            'Faucet'
-          } Successful`,
-        ...response,
-      })
+      setMintResponse(
+        {
+          status: !status ?
+            'failed' :
+            'success',
+          message: !status ?
+            `Failed to ${is_wrapped ?
+              'wrap' :
+              'faucet'
+            }` :
+            `${is_wrapped ?
+              'Wrap' :
+              'Faucet'
+            } Successful`,
+          ...response,
+        }
+      )
     } catch (error) {
-      setMintResponse({
-        status: 'failed',
-        message: error?.data?.message ||
-          error?.message,
-      })
+      setMintResponse(
+        {
+          status: 'failed',
+          message:
+            error?.data?.message ||
+            error?.message,
+        }
+      )
     }
 
     setMinting(false)
   }
 
-  const asset_data = assets_data?.find(a => a?.id === token_id)
+  const asset_data = assets_data?.find(a =>
+    a?.id === token_id
+  )
   let {
     symbol,
   } = { ...asset_data }
 
-  symbol = contract_data?.wrapped?.symbol ||
+  symbol =
+    contract_data?.wrapped?.symbol ||
     symbol
 
   const is_wrapped =
@@ -268,7 +289,11 @@ export default ({
     hash,
   } = { ...mintResponse }
 
-  const hasAllFields = fields.length === fields.filter(f => data?.[f.name]).length
+  const hasAllFields =
+    fields.length === fields
+      .filter(f =>
+        data?.[f.name]
+      ).length
 
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
 
@@ -291,7 +316,7 @@ export default ({
           <span className="uppercase tracking-wider font-medium">
             {is_wrapped ?
               <>
-                Wrap {symbol}
+                Wrap or unwrap {symbol}
               </> :
               'Faucet'
             }
@@ -334,10 +359,12 @@ export default ({
                             disabled={disabled}
                             value={data?.[name]}
                             onSelect={c =>
-                              setData({
-                                ...data,
-                                [`${name}`]: c,
-                              })
+                              setData(
+                                {
+                                  ...data,
+                                  [`${name}`]: c,
+                                }
+                              )
                             }
                           />
                         </div> :
@@ -347,10 +374,12 @@ export default ({
                           placeholder={placeholder}
                           value={data?.[name]}
                           onChange={e =>
-                            setData({
-                              ...data,
-                              [`${f.name}`]: e.target.value,
-                            })
+                            setData(
+                              {
+                                ...data,
+                                [`${f.name}`]: e.target.value,
+                              }
+                            )
                           }
                           className="form-input border-0 focus:ring-0 rounded-lg"
                         />
@@ -372,11 +401,13 @@ export default ({
                         } = { ...chains_data?.find(c => c?.chain_id === chain_id) }
 
                         setCollapse(!collapse)
-                        setData({
-                          ...data,
-                          address,
-                          chain: id,
-                        })
+                        setData(
+                          {
+                            ...data,
+                            address,
+                            chain: id,
+                          }
+                        )
                       }}
                       className={`bg-transparent hover:bg-slate-100 dark:hover:bg-slate-900 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg font-medium py-2 px-3`}
                     >
@@ -393,15 +424,18 @@ export default ({
                             'Switch'
                           } to
                         </span>
-                        {image && (
-                          <Image
-                            src={image}
-                            alt=""
-                            width={24}
-                            height={24}
-                            className="rounded-full"
-                          />
-                        )}
+                        {
+                          image &&
+                          (
+                            <Image
+                              src={image}
+                              alt=""
+                              width={24}
+                              height={24}
+                              className="rounded-full"
+                            />
+                          )
+                        }
                         <span className="font-semibold">
                           {chain_data?.name}
                         </span>
@@ -437,14 +471,17 @@ export default ({
                             </span>
                           </>
                         }
-                        <span>
-                          {
-                            is_wrapped ?
-                              symbol :
-                            contract_data?.symbol ||
-                            symbol
-                          }
-                        </span>
+                        {
+                          !is_wrapped &&
+                          (
+                            <span>
+                              {
+                                contract_data?.symbol ||
+                                symbol
+                              }
+                            </span>
+                          )
+                        }
                       </button>
                     }
                   </div>
