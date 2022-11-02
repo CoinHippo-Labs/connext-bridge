@@ -61,8 +61,8 @@ export default [
     ),
   },
   {
-    id: 'doc',
-    title: 'Doc',
+    id: 'docs',
+    title: 'Docs',
     path: process.env.NEXT_PUBLIC_DOC_URL,
     external: true,
     icon: (

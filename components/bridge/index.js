@@ -11,7 +11,7 @@ import { Tooltip } from '@material-tailwind/react'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
 import { HiSwitchHorizontal, HiOutlineDocumentSearch } from 'react-icons/hi'
-import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit, BiEditAlt, BiCheckCircle } from 'react-icons/bi'
+import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit, BiEditAlt, BiCheckCircle, BiChevronDown, BiChevronUp } from 'react-icons/bi'
 import { GiPartyPopper } from 'react-icons/gi'
 
 import Announcement from '../announcement'
@@ -129,6 +129,7 @@ export default () => {
   const [bridge, setBridge] = useState({})
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [buttonDirection, setButtonDirection] = useState(1)
+  const [collapse, setCollapse] = useState(true)
 
   const [fee, setFee] = useState(null)
   const [feeEstimating, setFeeEstimating] = useState(null)
@@ -1486,6 +1487,7 @@ export default () => {
         fee.router ||
         0
     )
+  const price_impact = null
 
   const liquidity_amount =
     _.sum(
@@ -1508,6 +1510,11 @@ export default () => {
 
   const min_amount = 0
   const max_amount = source_amount
+  const estimate_received =
+    amount > 0 &&
+    typeof router_fee === 'number' ?
+      amount - router_fee :
+      null
 
   const wrong_chain =
     source_chain_data &&
@@ -1747,340 +1754,411 @@ export default () => {
                   <div className="tracking-wider text-slate-400 dark:text-slate-200 text-lg text-center ml-1 sm:ml-3">
                     Route not supported
                   </div> :
-                  <div className="grid grid-cols-5 sm:grid-cols-5 gap-6 ml-1 sm:ml-3">
-                    <div className="col-span-2 sm:col-span-2 space-y-1">
-                      <div className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
-                        <span className="tracking-wider text-slate-600 dark:text-slate-200 text-sm sm:text-base sm:font-medium">
-                          Amount
-                        </span>
+                  <>
+                    <div className="grid grid-cols-5 sm:grid-cols-5 gap-6 ml-1 sm:ml-3">
+                      <div className="col-span-2 sm:col-span-2 space-y-1">
+                        <div className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
+                          <span className="tracking-wider text-slate-600 dark:text-slate-200 text-sm sm:text-base sm:font-medium">
+                            Amount
+                          </span>
+                          {
+                            address &&
+                            checkSupport() &&
+                            source_balance &&
+                            (
+                              <button
+                                disabled={disabled}
+                                onClick={() => {
+                                  setBridge(
+                                    {
+                                      ...bridge,
+                                      amount: max_amount,
+                                    }
+                                  )
+                                }}
+                                className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
+                              >
+                                Max
+                              </button>
+                              /*<Popover
+                                placement="bottom"
+                                disabled={disabled}
+                                onClick={() => {
+                                  setBridge(
+                                    {
+                                      ...bridge,
+                                      amount: max_amount,
+                                    }
+                                  )
+                                }}
+                                title={<div className="flex items-center justify-between space-x-1">
+                                  <span className="font-bold">
+                                    {source_symbol}
+                                  </span>
+                                  <span className="font-semibold">
+                                    Transfers size
+                                  </span>
+                                </div>}
+                                content={<div className="flex flex-col space-y-1">
+                                  <div className="flex items-center justify-between space-x-2.5">
+                                    <span className="font-medium">
+                                      Balance:
+                                    </span>
+                                    <span className="font-semibold">
+                                      {typeof source_amount === 'number' ?
+                                        number_format(
+                                          source_amount,
+                                          source_amount > 1000 ?
+                                            '0,0.00' :
+                                            '0,0.00000000',
+                                          true,
+                                        ) :
+                                        'n/a'
+                                      }
+                                    </span>
+                                  </div>
+                                  <div className="flex items-start justify-between space-x-2.5 pb-1">
+                                    <span className="font-medium">
+                                      Liquidity:
+                                    </span>
+                                    <span className="font-semibold">
+                                      {typeof liquidity_amount === 'number' ?
+                                        number_format(
+                                          liquidity_amount,
+                                          liquidity_amount > 1000 ?
+                                            '0,0.00' :
+                                            '0,0.00000000',
+                                          true,
+                                        ) :
+                                        'n/a'
+                                      }
+                                    </span>
+                                  </div>
+                                  <div className="border-t flex items-center justify-between space-x-2.5 pt-2">
+                                    <span className="font-semibold">
+                                      Max:
+                                    </span>
+                                    <span className="font-semibold">
+                                      {typeof max_amount === 'number' ?
+                                        number_format(
+                                          max_amount,
+                                          max_amount > 1000 ?
+                                            '0,0.00' :
+                                            '0,0.00000000',
+                                          true,
+                                        ) :
+                                        'n/a'
+                                      }
+                                    </span>
+                                  </div>
+                                </div>}
+                                className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
+                                titleClassName="normal-case py-1.5"
+                              >
+                                Max
+                              </Popover>*/
+                            )
+                          }
+                        </div>
                         {
-                          address &&
-                          checkSupport() &&
-                          source_balance &&
+                          source_chain_data &&
+                          asset &&
                           (
-                            <button
-                              disabled={disabled}
-                              onClick={() => {
-                                setBridge(
-                                  {
-                                    ...bridge,
-                                    amount: max_amount,
-                                  }
-                                )
-                              }}
-                              className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
-                            >
-                              Max
-                            </button>
-                            /*<Popover
-                              placement="bottom"
-                              disabled={disabled}
-                              onClick={() => {
-                                setBridge(
-                                  {
-                                    ...bridge,
-                                    amount: max_amount,
-                                  }
-                                )
-                              }}
-                              title={<div className="flex items-center justify-between space-x-1">
-                                <span className="font-bold">
-                                  {source_symbol}
-                                </span>
-                                <span className="font-semibold">
-                                  Transfers size
-                                </span>
-                              </div>}
-                              content={<div className="flex flex-col space-y-1">
-                                <div className="flex items-center justify-between space-x-2.5">
-                                  <span className="font-medium">
-                                    Balance:
-                                  </span>
-                                  <span className="font-semibold">
-                                    {typeof source_amount === 'number' ?
-                                      number_format(
-                                        source_amount,
-                                        source_amount > 1000 ?
-                                          '0,0.00' :
-                                          '0,0.00000000',
-                                        true,
-                                      ) :
-                                      'n/a'
-                                    }
-                                  </span>
-                                </div>
-                                <div className="flex items-start justify-between space-x-2.5 pb-1">
-                                  <span className="font-medium">
-                                    Liquidity:
-                                  </span>
-                                  <span className="font-semibold">
-                                    {typeof liquidity_amount === 'number' ?
-                                      number_format(
-                                        liquidity_amount,
-                                        liquidity_amount > 1000 ?
-                                          '0,0.00' :
-                                          '0,0.00000000',
-                                        true,
-                                      ) :
-                                      'n/a'
-                                    }
-                                  </span>
-                                </div>
-                                <div className="border-t flex items-center justify-between space-x-2.5 pt-2">
-                                  <span className="font-semibold">
-                                    Max:
-                                  </span>
-                                  <span className="font-semibold">
-                                    {typeof max_amount === 'number' ?
-                                      number_format(
-                                        max_amount,
-                                        max_amount > 1000 ?
-                                          '0,0.00' :
-                                          '0,0.00000000',
-                                        true,
-                                      ) :
-                                      'n/a'
-                                    }
-                                  </span>
-                                </div>
-                              </div>}
-                              className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
-                              titleClassName="normal-case py-1.5"
-                            >
-                              Max
-                            </Popover>*/
+                            <div className="flex items-center space-x-1.5">
+                              <div className="tracking-wider text-slate-400 dark:text-slate-600 text-xs">
+                                Balance
+                              </div>
+                              <Balance
+                                chainId={source_chain_data.chain_id}
+                                asset={asset}
+                              />
+                            </div>
                           )
                         }
                       </div>
+                      <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end">
+                        <DebounceInput
+                          debounceTimeout={300}
+                          size="small"
+                          type="number"
+                          placeholder="0.00"
+                          disabled={
+                            disabled ||
+                            !asset
+                          }
+                          value={
+                            typeof amount === 'number' &&
+                            amount >= 0 ?
+                              number_format(
+                                amount,
+                                '0.00000000',
+                                true,
+                              ) :
+                              ''
+                          }
+                          onChange={e => {
+                            const regex = /^[0-9.\b]+$/
+
+                            let value
+
+                            if (
+                              e.target.value === '' ||
+                              regex.test(e.target.value)
+                            ) {
+                              value = e.target.value
+                            }
+
+                            value = value < 0 ?
+                              0 :
+                              !isNaN(value) ?
+                                parseFloat(
+                                  Number(value)
+                                    .toFixed(source_decimals)
+                                ) :
+                                value
+
+                            setBridge(
+                              {
+                                ...bridge,
+                                amount:
+                                  value &&
+                                  !isNaN(value) ?
+                                    Number(value) :
+                                    value,
+                              }
+                            )
+                          }}
+                          onWheel={e => e.target.blur()}
+                          onKeyDown={e =>
+                            [
+                              'e',
+                              'E',
+                              '-',
+                            ].includes(e.key) &&
+                            e.preventDefault()
+                          }
+                          className={`w-36 sm:w-48 bg-gray-200 focus:bg-gray-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
                       {
-                        source_chain_data &&
-                        asset &&
+                        typeof estimate_received === 'number' &&
                         (
-                          <div className="flex items-center space-x-1.5">
-                            <div className="tracking-wider text-slate-400 dark:text-slate-600 text-xs">
-                              Balance
+                          <div className="grid grid-cols-5 sm:grid-cols-5 gap-6 mx-1 sm:mx-3">
+                            <div className="col-span-2 sm:col-span-2 space-y-1">
+                              <button
+                                onClick={() => setCollapse(!collapse)}
+                                className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2"
+                              >
+                                <span className="tracking-wider whitespace-nowrap text-slate-600 dark:text-slate-200 text-sm sm:text-base sm:font-medium">
+                                  Estimate Received
+                                </span>
+                                {collapse ?
+                                  <BiChevronDown
+                                    size={20}
+                                    className="text-slate-600 dark:text-slate-200"
+                                  /> :
+                                  <BiChevronUp
+                                    size={20}
+                                    className="text-slate-600 dark:text-slate-200"
+                                  />
+                                }
+                              </button>
                             </div>
-                            <Balance
-                              chainId={source_chain_data.chain_id}
-                              asset={asset}
-                            />
+                            <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end space-x-2">
+                              <span className="text-base font-semibold">
+                                {
+                                  number_format(
+                                    estimate_received,
+                                    '0,0.00000000',
+                                    true,
+                                  )
+                                }
+                              </span>
+                              <span className="text-base font-medium">
+                                {destination_symbol}
+                              </span>
+                            </div>
                           </div>
                         )
                       }
-                    </div>
-                    <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end">
-                      <DebounceInput
-                        debounceTimeout={300}
-                        size="small"
-                        type="number"
-                        placeholder="0.00"
-                        disabled={
-                          disabled ||
-                          !asset
-                        }
-                        value={
-                          typeof amount === 'number' &&
-                          amount >= 0 ?
-                            number_format(
-                              amount,
-                              '0.00000000',
-                              true,
-                            ) :
-                            ''
-                        }
-                        onChange={e => {
-                          const regex = /^[0-9.\b]+$/
-
-                          let value
-
-                          if (
-                            e.target.value === '' ||
-                            regex.test(e.target.value)
-                          ) {
-                            value = e.target.value
-                          }
-
-                          value = value < 0 ?
-                            0 :
-                            !isNaN(value) ?
-                              parseFloat(
-                                Number(value)
-                                  .toFixed(source_decimals)
-                              ) :
-                              value
-
-                          setBridge(
+                      {
+                        checkSupport() &&
+                        (
+                          web3_provider ||
+                          amount > 0
+                        ) &&
+                        !collapse &&
+                        (
+                          <div className="space-y-4">
                             {
-                              ...bridge,
-                              amount:
-                                value &&
-                                !isNaN(value) ?
-                                  Number(value) :
-                                  value,
-                            }
-                          )
-                        }}
-                        onWheel={e => e.target.blur()}
-                        onKeyDown={e =>
-                          [
-                            'e',
-                            'E',
-                            '-',
-                          ].includes(e.key) &&
-                          e.preventDefault()
-                        }
-                        className={`w-36 sm:w-48 bg-gray-200 focus:bg-gray-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
-                      />
-                    </div>
-                  </div>
-              }
-              {
-                checkSupport() &&
-                (
-                  web3_provider ||
-                  amount > 0
-                ) &&
-                (
-                  <>
-                    {
-                      (
-                        feeEstimating ||
-                        fee
-                      ) &&
-                      !forceSlow &&
-                      (
-                        <div className="space-y-2">
-                          <div className="flex items-center space-x-2 sm:mx-3">
-                            <span className="tracking-wider text-slate-400 dark:text-slate-600 font-normal">
-                              Fees Breakdown
-                            </span>
-                            {/*feeEstimateCooldown > 0 &&
                               (
-                                <div className="bg-slate-100 dark:bg-slate-800 rounded-lg font-medium py-1 px-2">
-                                  {feeEstimateCooldown}s
-                                </div>
-                              )
-                            */}
-                          </div>
-                          <div className="w-full h-0.25 bg-slate-200 dark:bg-slate-700 sm:px-1" />
-                          <div className="space-y-2.5 sm:mx-3">
-                            {
+                                feeEstimating ||
+                                fee
+                              ) &&
                               !forceSlow &&
                               (
-                                <>
-                                  <div className="flex items-center justify-between space-x-1">
-                                    <Tooltip
-                                      placement="top"
-                                      content="This supports our router users providing fast liquidity."
-                                      className="z-50 bg-black text-white text-xs"
-                                    >
-                                      <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
-                                        Bridge Fee
-                                      </div>
-                                    </Tooltip>
-                                    <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
-                                      <span>
-                                        {number_format(
-                                          router_fee,
-                                          '0,0.00000000',
-                                          true,
-                                        )}
-                                      </span>
-                                      <span>
-                                        {source_symbol}
-                                      </span>
+                                <div className="space-y-2">
+                                  <div className="flex items-center space-x-2 sm:mx-3">
+                                    <span className="tracking-wider text-slate-400 dark:text-slate-600 font-normal">
+                                      Fees Breakdown
                                     </span>
+                                    {/*feeEstimateCooldown > 0 &&
+                                      (
+                                        <div className="bg-slate-100 dark:bg-slate-800 rounded-lg font-medium py-1 px-2">
+                                          {feeEstimateCooldown}s
+                                        </div>
+                                      )
+                                    */}
                                   </div>
-                                  <div className="flex items-center justify-between space-x-1">
-                                    <Tooltip
-                                      placement="top"
-                                      content="This covers costs to execute your transfer on the destination chain."
-                                      className="z-50 bg-black text-white text-xs"
-                                    >
-                                      <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
-                                        Destination Gas Fee
-                                      </div>
-                                    </Tooltip>
-                                    {feeEstimating ?
-                                      <div className="flex items-center space-x-1.5">
-                                        <span className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
-                                          estimating
-                                        </span>
-                                        <Oval
-                                          color={loader_color(theme)}
-                                          width="20"
-                                          height="20"
-                                        />
-                                      </div> :
-                                      <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
-                                        <span>
-                                          {number_format(
-                                            gas_fee,
-                                            '0,0.00000000',
-                                            true,
-                                          )}
-                                        </span>
-                                        <span>
-                                          {source_gas_native_token?.symbol}
-                                        </span>
-                                      </span>
+                                  <div className="w-full h-0.25 bg-slate-200 dark:bg-slate-700 sm:px-1" />
+                                  <div className="space-y-2.5 sm:mx-3">
+                                    {
+                                      !forceSlow &&
+                                      (
+                                        <>
+                                          <div className="flex items-center justify-between space-x-1">
+                                            <Tooltip
+                                              placement="top"
+                                              content="This supports our router users providing fast liquidity."
+                                              className="z-50 bg-black text-white text-xs"
+                                            >
+                                              <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
+                                                Bridge Fee
+                                              </div>
+                                            </Tooltip>
+                                            <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
+                                              <span>
+                                                {number_format(
+                                                  router_fee,
+                                                  '0,0.00000000',
+                                                  true,
+                                                )}
+                                              </span>
+                                              <span>
+                                                {source_symbol}
+                                              </span>
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center justify-between space-x-1">
+                                            <Tooltip
+                                              placement="top"
+                                              content="This covers costs to execute your transfer on the destination chain."
+                                              className="z-50 bg-black text-white text-xs"
+                                            >
+                                              <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
+                                                Destination Gas Fee
+                                              </div>
+                                            </Tooltip>
+                                            {feeEstimating ?
+                                              <div className="flex items-center space-x-1.5">
+                                                <span className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
+                                                  estimating
+                                                </span>
+                                                <Oval
+                                                  color={loader_color(theme)}
+                                                  width="20"
+                                                  height="20"
+                                                />
+                                              </div> :
+                                              <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
+                                                <span>
+                                                  {number_format(
+                                                    gas_fee,
+                                                    '0,0.00000000',
+                                                    true,
+                                                  )}
+                                                </span>
+                                                <span>
+                                                  {source_gas_native_token?.symbol}
+                                                </span>
+                                              </span>
+                                            }
+                                          </div>
+                                          {
+                                            typeof price_impact === 'number' &&
+                                            (
+                                              <div className="flex items-center justify-between space-x-1">
+                                                <Tooltip
+                                                  placement="top"
+                                                  content="Price Impact"
+                                                  className="z-50 bg-black text-white text-xs"
+                                                >
+                                                  <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
+                                                    Price Impact
+                                                  </div>
+                                                </Tooltip>
+                                                <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
+                                                  <span>
+                                                    {number_format(
+                                                      price_impact,
+                                                      '0,0.00',
+                                                      true,
+                                                    )}%
+                                                  </span>
+                                                </span>
+                                              </div>
+                                            )
+                                          }
+                                        </>
+                                      )
                                     }
                                   </div>
+                                </div>
+                              )
+                            }
+                            {
+                              amount > 0 &&
+                              (
+                                <>
+                                  {
+                                    asset_balances_data &&
+                                    amount > liquidity_amount &&
+                                    (
+                                      <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2 sm:mx-3">
+                                        <BiMessageEdit
+                                          size={20}
+                                          className="min-w-max"
+                                        />
+                                        <span className="text-base">
+                                          Insufficient router liquidity. Funds must transfer through the bridge directly.
+                                        </span>
+                                      </div>
+                                    )
+                                  }
+                                  {
+                                    amount < liquidity_amount &&
+                                    (
+                                      forceSlow ?
+                                        <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2 sm:mx-3">
+                                          <BiMessageDetail
+                                            size={20}
+                                            className="min-w-max"
+                                          />
+                                          <span className="text-base">
+                                            Use bridge only (wait 30-60 mins, no fees)
+                                          </span>
+                                        </div> :
+                                        <div className="flex items-center text-blue-500 dark:text-green-500 space-x-2 sm:mx-3">
+                                          <GiPartyPopper
+                                            size={20}
+                                            className="min-w-max"
+                                          />
+                                          <span className="text-base">
+                                            Fast liquidity available!
+                                          </span>
+                                        </div>
+                                    )
+                                  }
                                 </>
                               )
                             }
                           </div>
-                        </div>
-                      )
-                    }
-                    {
-                      amount > 0 &&
-                      (
-                        <>
-                          {
-                            asset_balances_data &&
-                            amount > liquidity_amount &&
-                            (
-                              <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2 sm:mx-3">
-                                <BiMessageEdit
-                                  size={20}
-                                  className="min-w-max"
-                                />
-                                <span className="text-base">
-                                  Insufficient router liquidity. Funds must transfer through the bridge directly.
-                                </span>
-                              </div>
-                            )
-                          }
-                          {
-                            amount < liquidity_amount &&
-                            (
-                              forceSlow ?
-                                <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2 sm:mx-3">
-                                  <BiMessageDetail
-                                    size={20}
-                                    className="min-w-max"
-                                  />
-                                  <span className="text-base">
-                                    Use bridge only (wait 30-60 mins, no fees)
-                                  </span>
-                                </div> :
-                                <div className="flex items-center text-blue-500 dark:text-green-500 space-x-2 sm:mx-3">
-                                  <GiPartyPopper
-                                    size={20}
-                                    className="min-w-max"
-                                  />
-                                  <span className="text-base">
-                                    Fast liquidity available!
-                                  </span>
-                                </div>
-                            )
-                          }
-                        </>
-                      )
-                    }
+                        )
+                      }
+                    </div>
                   </>
-                )
               }
               {
                 checkSupport() &&
