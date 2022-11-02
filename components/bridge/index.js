@@ -11,7 +11,7 @@ import { Tooltip } from '@material-tailwind/react'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
 import { HiSwitchHorizontal, HiOutlineDocumentSearch } from 'react-icons/hi'
-import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit, BiEditAlt, BiCheckCircle, BiChevronDown, BiChevronUp } from 'react-icons/bi'
+import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit, BiEditAlt, BiCheckCircle, BiChevronDown, BiChevronUp, BiBook } from 'react-icons/bi'
 import { GiPartyPopper } from 'react-icons/gi'
 
 import Announcement from '../announcement'
@@ -2130,9 +2130,8 @@ export default () => {
                                       <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2 sm:mx-3">
                                         <BiMessageEdit
                                           size={20}
-                                          className="min-w-fit"
                                         />
-                                        <span className="text-sm sm:text-base">
+                                        <span className="text-sm">
                                           Insufficient router liquidity. Funds must transfer through the bridge directly.
                                         </span>
                                       </div>
@@ -2145,16 +2144,14 @@ export default () => {
                                         <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2 sm:mx-3">
                                           <BiMessageDetail
                                             size={20}
-                                            className="min-w-fit"
                                           />
-                                          <span className="text-base">
+                                          <span className="text-sm sm:text-base">
                                             Use bridge only (wait 30-60 mins, no fees)
                                           </span>
                                         </div> :
                                         <div className="flex items-center text-blue-500 dark:text-green-500 space-x-2 sm:mx-3">
                                           <GiPartyPopper
                                             size={20}
-                                            className="min-w-fit"
                                           />
                                           <span className="text-sm sm:text-base">
                                             Fast liquidity available!
@@ -2397,7 +2394,25 @@ export default () => {
                     </Wallet>
               }
             </div>
-            <div className="flex items-center justify-end mr-3">
+            <div className="flex items-center justify-end space-x-4 mr-3">
+              {
+                process.env.NEXT_PUBLIC_DOCS_URL &&
+                (
+                  <a
+                    href={process.env.NEXT_PUBLIC_DOCS_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center text-slate-700 dark:text-slate-300 space-x-1"
+                  >
+                    <BiBook
+                      size={18}
+                    />
+                    <span className="text-sm font-medium">
+                      Docs
+                    </span>
+                  </a>
+                )
+              }
               <a
                 href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}${destination_chain_data?.id ? `/${destination_chain_data.id}` : ''}`}
                 target="_blank"

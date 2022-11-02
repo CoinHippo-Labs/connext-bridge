@@ -63,7 +63,7 @@ export default [
   {
     id: 'docs',
     title: 'Docs',
-    path: process.env.NEXT_PUBLIC_DOC_URL,
+    // path: process.env.NEXT_PUBLIC_DOCS_URL,
     external: true,
     icon: (
       <BiBook
