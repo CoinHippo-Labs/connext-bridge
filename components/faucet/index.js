@@ -449,19 +449,20 @@ export default ({
 
   return asset_data &&
     (
-      <div className="w-full max-w-lg bg-slate-200 dark:bg-slate-900 bg-opacity-50 rounded-3xl flex flex-col items-center justify-center space-y-2 p-3 sm:p-6">
+      <div className="w-full max-w-lg bg-slate-200 dark:bg-slate-900 bg-opacity-50 rounded-3xl flex flex-col items-center justify-center space-y-2 mx-auto p-3 sm:p-6">
         <button
           onClick={() => setCollapse(!collapse)}
           className="w-full flex items-center justify-center text-base font-semibold space-x-1.5"
         >
-          {!signer &&
+          {
+            !signer &&
             (
-              <span className="whitespace-nowrap">
+              <span className="whitespace-nowrap text-xs sm:text-base">
                 Connect wallet to
               </span>
             )
           }
-          <span className="tracking-wider font-medium">
+          <span className="tracking-wider whitespace-nowrap text-xs sm:text-base font-medium">
             {is_wrapped ?
               <>
                 Wrap or unwrap {symbol}
@@ -484,6 +485,7 @@ export default ({
             <div className="w-full">
               {
                 is_wrapped &&
+                signer &&
                 (
                   <div className="form-element">
                     <div className="form-label text-slate-600 dark:text-slate-200 font-normal">

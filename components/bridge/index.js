@@ -218,6 +218,7 @@ export default () => {
       }
 
       if (
+        bridge.source_chain &&
         !isNaN(amount) &&
         Number(amount) > 0
       ) {
@@ -1605,6 +1606,7 @@ export default () => {
                       </span>
                       <GasPrice
                         chainId={source_chain_data?.chain_id}
+                        dummy={true}
                         iconSize={18}
                         className="text-xs"
                       />
@@ -1691,6 +1693,7 @@ export default () => {
                       </span>
                       <GasPrice
                         chainId={destination_chain_data?.chain_id}
+                        dummy={true}
                         iconSize={18}
                         className="text-xs"
                       />
@@ -1948,26 +1951,34 @@ export default () => {
                           <div className="grid grid-cols-5 sm:grid-cols-5 gap-6 mx-1 sm:mx-3">
                             <div className="col-span-2 sm:col-span-2 space-y-1">
                               <button
-                                onClick={() => setCollapse(!collapse)}
-                                className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2"
+                                onClick={() => {
+                                  if (!forceSlow) {
+                                    setCollapse(!collapse)
+                                  }
+                                }}
+                                className={`${forceSlow ? 'cursor-default' : 'cursor-pointer'} flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2`}
                               >
                                 <span className="tracking-wider whitespace-nowrap text-slate-600 dark:text-slate-200 text-sm sm:text-base sm:font-medium">
                                   Estimate Received
                                 </span>
-                                {collapse ?
-                                  <BiChevronDown
-                                    size={20}
-                                    className="text-slate-600 dark:text-slate-200"
-                                  /> :
-                                  <BiChevronUp
-                                    size={20}
-                                    className="text-slate-600 dark:text-slate-200"
-                                  />
+                                {
+                                  !forceSlow &&
+                                  (
+                                    collapse ?
+                                      <BiChevronDown
+                                        size={20}
+                                        className="text-slate-600 dark:text-slate-200"
+                                      /> :
+                                      <BiChevronUp
+                                        size={20}
+                                        className="text-slate-600 dark:text-slate-200"
+                                      />
+                                  )
                                 }
                               </button>
                             </div>
                             <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end space-x-2">
-                              <span className="text-base font-semibold">
+                              <span className="text-sm sm:text-base font-semibold">
                                 {
                                   number_format(
                                     estimate_received,
@@ -1976,7 +1987,7 @@ export default () => {
                                   )
                                 }
                               </span>
-                              <span className="text-base font-medium">
+                              <span className="text-sm sm:text-base font-medium">
                                 {destination_symbol}
                               </span>
                             </div>
@@ -1989,7 +2000,6 @@ export default () => {
                           web3_provider ||
                           amount > 0
                         ) &&
-                        !collapse &&
                         (
                           <div className="space-y-4">
                             {
@@ -1998,6 +2008,7 @@ export default () => {
                                 fee
                               ) &&
                               !forceSlow &&
+                              !collapse &&
                               (
                                 <div className="space-y-2">
                                   <div className="flex items-center space-x-2 sm:mx-3">
@@ -2119,9 +2130,9 @@ export default () => {
                                       <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2 sm:mx-3">
                                         <BiMessageEdit
                                           size={20}
-                                          className="min-w-max"
+                                          className="min-w-fit"
                                         />
-                                        <span className="text-base">
+                                        <span className="text-sm sm:text-base">
                                           Insufficient router liquidity. Funds must transfer through the bridge directly.
                                         </span>
                                       </div>
@@ -2134,7 +2145,7 @@ export default () => {
                                         <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2 sm:mx-3">
                                           <BiMessageDetail
                                             size={20}
-                                            className="min-w-max"
+                                            className="min-w-fit"
                                           />
                                           <span className="text-base">
                                             Use bridge only (wait 30-60 mins, no fees)
@@ -2143,9 +2154,9 @@ export default () => {
                                         <div className="flex items-center text-blue-500 dark:text-green-500 space-x-2 sm:mx-3">
                                           <GiPartyPopper
                                             size={20}
-                                            className="min-w-max"
+                                            className="min-w-fit"
                                           />
-                                          <span className="text-base">
+                                          <span className="text-sm sm:text-base">
                                             Fast liquidity available!
                                           </span>
                                         </div>

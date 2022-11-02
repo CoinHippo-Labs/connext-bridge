@@ -36,9 +36,13 @@ export default () => {
     )
   }
 
-  return !ssr &&
-    ['/'].includes(asPath) &&
+  return (
+    !ssr &&
+    [
+      '/',
+    ].includes(_asPath) &&
     (
       <Bridge />
     )
+  )
 }

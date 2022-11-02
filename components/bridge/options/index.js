@@ -228,9 +228,9 @@ export default ({
                           /*<Popover
                             placement="top"
                             title="Slow Path (Nomad)"
-                            content="Use bridge only (wait 30-60 mins, no fees)"*/
+                            content="Use bridge only (wait 30-60 mins, no fees)"
+                            titleClassName="normal-case font-semibold py-1.5"*/
                           <div
-                            titleClassName="normal-case font-semibold py-1.5"
                           >
                             <span className="uppercase font-bold">
                               Slow
@@ -240,9 +240,9 @@ export default ({
                           /*<Popover
                             placement="top"
                             title="Fast Path"
-                            content="Connext Router (+ Nomad) (less than 3 mins, .05% fees)"*/
+                            content="Connext Router (+ Nomad) (less than 3 mins, .05% fees)"
+                            titleClassName="normal-case font-semibold py-1.5"*/
                           <div
-                            titleClassName="normal-case font-semibold py-1.5"
                           >
                             <span className="uppercase font-bold">
                               Fast

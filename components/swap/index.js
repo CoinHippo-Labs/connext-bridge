@@ -185,6 +185,7 @@ export default () => {
       }
 
       if (
+        swap.chain &&
         !isNaN(amount) &&
         Number(amount)
       ) {
