@@ -38,7 +38,7 @@
 }
 
 .table {
-  @apply shadow text-left;
+  @apply bg-slate-50 border text-left;
   thead tr th,
   tbody tr td {
     @apply text-left;
@@ -75,23 +75,23 @@
 
 [data-background="dark"] {
   .table {
-    @apply shadow-slate-400;
+    @apply bg-slate-900 bg-opacity-75 border-slate-900;
     thead tr th {
-      background: color(theme('colors.black') tint(5%));
-      border-color: color(theme('colors.black') tint(5%));
+      background: color(theme('colors.slate.900') tint(2%));
+      border-color: color(theme('colors.slate.900') tint(2%));
       @apply text-slate-200;
     }
     tbody tr td {
-      border-color: color(theme('colors.black') tint(0%));
+      border-color: color(theme('colors.slate.900') tint(0%));
     }
     &.striped {
       tbody tr:nth-child(odd) td {
-        background: color(theme('colors.black') tint(3%));
-        border-color: color(theme('colors.black') tint(3%));
+        background: color(theme('colors.slate.900') tint(3%));
+        border-color: color(theme('colors.slate.900') tint(3%));
       }
       tbody tr:nth-child(even) td {
-        background: color(theme('colors.black') tint(5%));
-        border-color: color(theme('colors.black') tint(5%));
+        background: color(theme('colors.slate.900') tint(2%));
+        border-color: color(theme('colors.slate.900') tint(2%));
       }
     }
   }
