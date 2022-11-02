@@ -1439,7 +1439,7 @@ export default () => {
                   asPath.includes('to-') &&
                   title &&
                   (
-                    <h2 className="tracking-wider text-slate-500 dark:text-slate-300 text-xs">
+                    <h2 className="tracking-wider text-slate-700 dark:text-slate-300 text-xs font-medium">
                       {title.replace(
                         ' with Connext',
                         '',
@@ -1476,9 +1476,9 @@ export default () => {
                 checkSupport() &&
                 amount > 0 ?
                   {
-                    boxShadow: `${color}ff 0px 2px 16px 2px`,
-                    WebkitBoxShadow: `${color}ff 0px 2px 16px 2px`,
-                    MozBoxShadow: `${color}ff 0px 2px 16px 2px`,
+                    boxShadow: `${color}ff 0px 16px 128px 8px`,
+                    WebkitBoxShadow: `${color}ff 0px 16px 128px 8px`,
+                    MozBoxShadow: `${color}ff 0px 16px 128px 8px`,
                   } :
                   undefined
               }
@@ -2186,12 +2186,12 @@ export default () => {
                 href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}${destination_chain_data?.id ? `/${destination_chain_data.id}` : ''}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center text-slate-500 dark:text-slate-300 space-x-1"
+                className="flex items-center text-slate-700 dark:text-slate-300 space-x-1"
               >
                 <HiOutlineDocumentSearch
                   size={18}
                 />
-                <span className="text-sm font-normal">
+                <span className="text-sm font-medium">
                   Explorer
                 </span>
               </a>

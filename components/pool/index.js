@@ -9,6 +9,8 @@ import { RiArrowLeftCircleFill } from 'react-icons/ri'
 
 import Info from './info'
 import Liquidity from './liquidity'
+import SelectChain from '../select/chain'
+import SelectAsset from '../select/asset'
 import { params_to_obj, equals_ignore_case } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
@@ -77,7 +79,9 @@ export default () => {
 
     const params = params_to_obj(
       asPath?.indexOf('?') > -1 &&
-      asPath.substring(asPath.indexOf('?') + 1)
+      asPath.substring(
+        asPath.indexOf('?') + 1,
+      )
     )
 
     let path = !asPath ?
@@ -105,7 +109,9 @@ export default () => {
         _.head(paths) :
         null
 
-      const chain_data = chains_data?.find(c => c?.id === chain)
+      const chain_data = chains_data?.find(c =>
+        c?.id === chain
+      )
       const asset_data = pool_assets_data?.find(a =>
         a?.id === asset ||
         equals_ignore_case(a?.symbol, asset)
@@ -154,7 +160,9 @@ export default () => {
           pool_assets_data?.findIndex(a =>
             a?.id === asset &&
             a.contracts?.findIndex(c =>
-              c?.chain_id === chains_data.find(_c => _c?.id === chain)?.chain_id
+              c?.chain_id === chains_data.find(_c =>
+                _c?.id === chain
+              )?.chain_id
             ) > -1
           ) > -1
         ) {
@@ -175,8 +183,11 @@ export default () => {
         contracts,
       } = { ..._.head(pool_assets_data) }
 
-      params.chain = params.chain ||
-        chains_data?.find(c => c?.chain_id === _.head(contracts)?.chain_id)?.id
+      params.chain =
+        params.chain ||
+        chains_data?.find(c =>
+          c?.chain_id === _.head(contracts)?.chain_id
+        )?.id
 
       params.asset = params.asset ||
         id
@@ -316,10 +327,13 @@ export default () => {
       if (
         sdk &&
         address &&
-        chain
+        chain &&
+        poolsTrigger
       ) {
         try {
-          const chain_data = chains_data?.find(c => c?.id === chain)
+          const chain_data = chains_data?.find(c =>
+            c?.id === chain
+          )
           const {
             chain_id,
             domain_id,
@@ -558,10 +572,57 @@ export default () => {
     getBalances(chain)
   }
 
+  const {
+    chain,
+    asset,
+  } = { ...pool }
+
+  const chain_data = chains_data?.find(c =>
+    c?.id === chain
+  )
+  const {
+    explorer,
+  } = { ...chain_data }
+  const {
+    url,
+    contract_path,
+  } = { ...explorer }
+
+  const selected =
+    !!(
+      chain &&
+      asset
+    )
+
+  const no_pool =
+    selected &&
+    pool_assets_data?.findIndex(a =>
+      a?.id === asset &&
+      a.contracts?.findIndex(a =>
+        a?.chain_id === chain_data?.chain_id
+      ) > -1
+    ) < 0
+
+  const pool_data = pools_data?.find(p =>
+    p?.chain_data?.id === chain &&
+    p.asset_data?.id === asset
+  )
+  const {
+    name,
+    lpTokenAddress,
+    liquidity,
+    volume,
+    fees,
+    apy,
+    symbol,
+    symbols,
+    error,
+  } = { ...pool_data }
+
   return (
     <div className="mb-4">
       <div className="flex justify-center">
-        <div className="w-full flex flex-col space-y-4 my-6 my-4 sm:my-6 mx-1 sm:mx-4">
+        <div className="w-full flex flex-col space-y-1 my-6 my-4 sm:my-6 mx-1 sm:mx-4">
           <div className="flex items-center space-x-3">
             {/*<Link
               href="/pools"
@@ -575,24 +636,91 @@ export default () => {
               Manage Pool
             </h1>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 xl:gap-6">
-            <div className="lg:col-span-2">
-              <Info
-                pool={pool}
-                user_pools_data={pools}
-                onSelect={p => setPool(p)}
-              />
-            </div>
-            <Liquidity
-              pool={pool}
-              user_pools_data={pools}
-              onFinish={() =>
-                setPoolsTrigger(
-                  moment()
-                    .valueOf()
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <div className="grid sm:flex sm:items-center sm:justify-between sm:space-x-2 gap-2">
+                <div className="order-2 sm:order-1 flex items-center space-x-4 sm:space-x-6">
+                  <SelectAsset
+                    value={asset}
+                    onSelect={a => {
+                      setPool(
+                        {
+                          ...pool,
+                          asset: a,
+                        }
+                      )
+                    }}
+                    chain={chain}
+                    origin=""
+                    is_pool={true}
+                  />
+                  <div className="uppercase text-xs sm:text-sm font-medium">
+                    on
+                  </div>
+                  <SelectChain
+                    value={chain}
+                    onSelect={c => {
+                      setPool(
+                        {
+                          ...pool,
+                          chain: c,
+                        }
+                      )
+                    }}
+                    origin=""
+                  />
+                </div>
+                {
+                  no_pool &&
+                  (
+                    <div className="order-2 bg-slate-100 dark:bg-slate-800 bg-opacity-100 dark:bg-opacity-50 rounded-lg tracking-wider text-slate-400 dark:text-slate-400 text-base font-normal py-1.5 px-4">
+                      Pool doesn't exist
+                    </div>
+                  )
+                }
+                {
+                  name &&
+                  url &&
+                  (
+                    <a
+                      href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="order-1 sm:order-2 w-fit bg-slate-100 dark:bg-slate-800 bg-opacity-100 dark:bg-opacity-50 rounded-2xl text-base font-semibold py-1.5 px-4"
+                    >
+                      {name}
+                    </a>
+                  )
+                }
+              </div>
+              {
+                error &&
+                (
+                  <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-100 dark:bg-opacity-50 rounded-lg tracking-wider text-red-600 dark:text-red-400 text-base font-normal py-1.5 px-4">
+                    {error.message}
+                  </div>
                 )
               }
-            />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-6">
+              <Liquidity
+                pool={pool}
+                user_pools_data={pools}
+                onFinish={() =>
+                  setPoolsTrigger(
+                    moment()
+                      .valueOf()
+                  )
+                }
+              />
+              <div className="lg:col-span-2">
+                <Info
+                  pool={pool}
+                  user_pools_data={pools}
+                  onSelect={p => setPool(p)}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
