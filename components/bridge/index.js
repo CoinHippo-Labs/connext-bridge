@@ -1512,6 +1512,8 @@ export default () => {
     calling ||
     approving
 
+  const boxShadow = `${color}${theme === 'light' ? '99' : 'ff'} 0px 16px 128px 8px`
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
       <div className="hidden lg:block col-span-0 lg:col-span-2" />
@@ -1568,9 +1570,9 @@ export default () => {
                 checkSupport() &&
                 amount > 0 ?
                   {
-                    boxShadow: `${color}ff 0px 16px 128px 8px`,
-                    WebkitBoxShadow: `${color}ff 0px 16px 128px 8px`,
-                    MozBoxShadow: `${color}ff 0px 16px 128px 8px`,
+                    boxShadow,
+                    WebkitBoxShadow: boxShadow,
+                    MozBoxShadow: boxShadow,
                   } :
                   undefined
               }
@@ -2027,7 +2029,7 @@ export default () => {
                             asset_balances_data &&
                             amount > liquidity_amount &&
                             (
-                              <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2 sm:mx-3">
+                              <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2 sm:mx-3">
                                 <BiMessageEdit
                                   size={20}
                                   className="min-w-max"
@@ -2042,7 +2044,7 @@ export default () => {
                             amount < liquidity_amount &&
                             (
                               forceSlow ?
-                                <div className="flex items-center text-blue-500 dark:text-yellow-500 space-x-2 sm:mx-3">
+                                <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2 sm:mx-3">
                                   <BiMessageDetail
                                     size={20}
                                     className="min-w-max"
@@ -2190,7 +2192,7 @@ export default () => {
                             return (
                               <Alert
                                 key={i}
-                                color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? xcallResponse ? 'bg-yellow-400 dark:bg-blue-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                                color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? xcallResponse ? 'bg-blue-500 dark:bg-blue-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
                                 icon={status === 'failed' ?
                                   <BiMessageError
                                     className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
@@ -2262,7 +2264,7 @@ export default () => {
                                       status === 'success' ?
                                         <button
                                           onClick={() => reset()}
-                                          className={`${xcallResponse ? 'bg-yellow-500 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
+                                          className={`${xcallResponse ? 'bg-blue-600 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
                                         >
                                           <MdClose
                                             size={20}

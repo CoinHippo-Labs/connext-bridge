@@ -1385,6 +1385,8 @@ export default () => {
     calling ||
     approving
 
+  const boxShadow = `${color}${theme === 'light' ? '99' : 'ff'} 0px 16px 128px 8px`
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
       <div className="hidden lg:block col-span-0 lg:col-span-2" />
@@ -1435,9 +1437,9 @@ export default () => {
               className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-4 sm:pt-6 pb-6 sm:pb-8 px-4 sm:px-6"
               style={amount > 0 ?
                 {
-                  boxShadow: `${color}ff 0px 8px 128px 2px`,
-                  WebkitBoxShadow: `${color}ff 0px 8px 128px 2px`,
-                  MozBoxShadow: `${color}ff 0px 8px 128px 2px`,
+                  boxShadow,
+                  WebkitBoxShadow: boxShadow,
+                  MozBoxShadow: boxShadow,
                 } :
                 undefined
               }
