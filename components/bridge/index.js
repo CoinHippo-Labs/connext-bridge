@@ -388,7 +388,11 @@ export default () => {
 
     const {
       id,
-    } = { ...chains_data?.find(c => c?.chain_id === chain_id) }
+    } = {
+      ...chains_data?.find(c =>
+        c?.chain_id === chain_id
+      ),
+    }
 
     if (
       asPath &&
@@ -553,7 +557,11 @@ export default () => {
 
     const {
       chain_id,
-    } = { ...chains_data?.find(c => c?.id === source_chain) }
+    } = {
+      ...chains_data?.find(c =>
+        c?.id === source_chain
+      ),
+    }
 
     if (
       balances_data?.[chain_id] &&
@@ -767,7 +775,11 @@ export default () => {
 
     const {
       chain_id,
-    } = { ...chains_data?.find(c => c?.id === chain) }
+    } = {
+      ...chains_data?.find(c =>
+        c?.id === chain
+      ),
+    }
 
     const contracts_data =
       (assets_data || [])

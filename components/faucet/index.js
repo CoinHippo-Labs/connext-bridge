@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { Contract, utils } from 'ethers'
-import { RotatingSquare } from 'react-loader-spinner'
+import moment from 'moment'
+import { Contract, constants, utils } from 'ethers'
+import { TailSpin } from 'react-loader-spinner'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiChevronDown, BiChevronUp } from 'react-icons/bi'
 
 import SelectChain from '../select/chain'
 import Wallet from '../wallet'
+import Balance from '../balance'
 import Image from '../image'
 import Alert from '../alerts'
 import { number_format } from '../../lib/utils'
@@ -19,6 +21,7 @@ const ABI = [
   // Authenticated Functions
   'function transfer(address to, uint amount) returns (boolean)',
   'function mint(address account, uint256 amount)',
+  'function withdraw(uint256 amount)',
 ]
 
 export default ({
@@ -26,7 +29,8 @@ export default ({
   faucet_amount =
     Number(
       process.env.NEXT_PUBLIC_FAUCET_AMOUNT
-    ) || 1000,
+    ) ||
+    1000,
   contract_data,
 }) => {
   const {
@@ -63,6 +67,13 @@ export default ({
   const [data, setData] = useState(null)
   const [minting, setMinting] = useState(null)
   const [mintResponse, setMintResponse] = useState(null)
+  const [withdrawing, setWithdrawing] = useState(null)
+  const [withdrawResponse, setWithdrawResponse] = useState(null)
+  const [trigger, setTrigger] =
+    useState(
+      moment()
+        .valueOf()
+    )
 
   useEffect(() => {
     if (
@@ -74,7 +85,11 @@ export default ({
       } = { ...data }
       const {
         id,
-      } = { ...chains_data?.find(c => c?.chain_id === chain_id) }
+      } = {
+        ...chains_data?.find(c =>
+          c?.chain_id === chain_id
+        ),
+      }
 
       chain =
         id ||
@@ -94,11 +109,16 @@ export default ({
 
   useEffect(() => {
     setMintResponse(null)
+    setWithdrawResponse(null)
   }, [data])
 
   const mint = async () => {
     setMinting(true)
     setMintResponse(null)
+    if (is_wrapped) {
+      setWithdrawing(false)
+      setWithdrawResponse(null)
+    }
 
     try {
       const asset_data = assets_data?.find(a =>
@@ -224,6 +244,119 @@ export default ({
     }
 
     setMinting(false)
+    if (is_wrapped) {
+      setTrigger(
+        moment()
+          .valueOf()
+      )
+    }
+  }
+
+  const withdraw = async () => {
+    setWithdrawing(true)
+    setWithdrawResponse(null)
+    setMinting(false)
+    setMintResponse(null)
+
+    try {
+      const asset_data = assets_data?.find(a =>
+        a?.id === token_id
+      )
+      const {
+        contracts,
+      } = { ...asset_data }
+
+      const _contract_data =
+        contract_data ||
+        contracts?.find(c =>
+          c?.chain_id === chain_id
+        )
+      const {
+        wrapped,
+      } = { ..._contract_data }
+      let {
+        contract_address,
+        decimals,
+      } = { ...wrapped }
+
+      contract_address =
+        contract_address ||
+        _contract_data?.contract_address
+
+      decimals =
+        decimals ||
+        _contract_data?.decimals ||
+        18
+
+      const contract = new Contract(
+        contract_address,
+        ABI,
+        signer,
+      )
+
+      const _amount =
+        utils.parseUnits(
+          (
+            data?.amount ||
+            0
+          )
+          .toString(),
+          'ether',
+        )
+
+      const gasLimit = 500000
+
+      console.log(
+        '[Unwrap]',
+        {
+          amount: _amount,
+        },
+      )
+
+      const response =
+        await contract.withdraw(
+          _amount,
+        )
+
+      const {
+        hash,
+      } = { ...response }
+
+      const receipt = await signer.provider.waitForTransaction(
+        hash,
+      )
+
+      const {
+        status,
+      } = { ...receipt }
+
+      setWithdrawResponse(
+        {
+          status: !status ?
+            'failed' :
+            'success',
+          message: !status ?
+            'Failed to unwrap' :
+            'Unwrap Successful',
+          ...response,
+        }
+      )
+    } catch (error) {
+      setWithdrawResponse(
+        {
+          status: 'failed',
+          message:
+            error?.data?.message ||
+            error?.message,
+        }
+      )
+    }
+
+    setWithdrawing(false)
+    setTrigger(
+      moment()
+        .valueOf()
+    )
   }
 
   const asset_data = assets_data?.find(a =>
@@ -233,13 +366,18 @@ export default ({
     symbol,
   } = { ...asset_data }
 
+  const {
+    wrapped,
+    wrapable,
+  } = { ...contract_data }
+
   symbol =
-    contract_data?.wrapped?.symbol ||
+    wrapped?.symbol ||
     symbol
 
   const is_wrapped =
-    contract_data?.wrapped ||
-    contract_data?.wrapable
+    wrapped ||
+    wrapable
 
   const fields = is_wrapped ?
     [
@@ -247,7 +385,7 @@ export default ({
         label: 'Amount',
         name: 'amount',
         type: 'number',
-        placeholder: `${symbol} amount to wrap`,
+        placeholder: 'Amount to wrap / unwrap',
       },
     ] :
     [
@@ -271,23 +409,31 @@ export default ({
 
   const chain_data = chains_data?.find(c =>
     is_wrapped ?
-      c?.chain_id === contract_data.chain_id :
+      c?.chain_id === contract_data?.chain_id :
       c?.id === chain
   )
   const {
+    provider_params,
     image,
     explorer,
   } = { ...chain_data }
+  const {
+    nativeCurrency,
+  } = { ..._.head(provider_params) }
   const {
     url,
     transaction_path,
   } = { ...explorer }
 
+  const callResponse =
+    mintResponse ||
+    withdrawResponse
+
   const {
     status,
     message,
     hash,
-  } = { ...mintResponse }
+  } = { ...callResponse }
 
   const hasAllFields =
     fields.length === fields
@@ -297,7 +443,9 @@ export default ({
 
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
 
-  const disabled = minting
+  const disabled =
+    minting ||
+    withdrawing
 
   return asset_data &&
     (
@@ -313,7 +461,7 @@ export default ({
               </span>
             )
           }
-          <span className="uppercase tracking-wider font-medium">
+          <span className="tracking-wider font-medium">
             {is_wrapped ?
               <>
                 Wrap or unwrap {symbol}
@@ -334,6 +482,58 @@ export default ({
           !collapse &&
           (
             <div className="w-full">
+              {
+                is_wrapped &&
+                (
+                  <div className="form-element">
+                    <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
+                      Balance
+                    </div>
+                    <div className="flex items-center justify-between space-x-2 mb-4">
+                      <Balance
+                        chainId={
+                          contract_data?.chain_id ||
+                          chain_id
+                        }
+                        asset={token_id}
+                        contractAddress={constants.AddressZero}
+                        decimals={
+                          nativeCurrency?.decimals ||
+                          18
+                        }
+                        symbol={
+                          nativeCurrency?.symbol ||
+                          asset_data?.symbol
+                        }
+                        trigger={trigger}
+                        className="bg-slate-200 dark:bg-slate-800 dark:bg-opacity-75 rounded-lg py-1.5 px-2.5"
+                      />
+                      <Balance
+                        chainId={
+                          contract_data?.chain_id ||
+                          chain_id
+                        }
+                        asset={token_id}
+                        contractAddress={
+                          wrapped?.contract_address ||
+                          contract_data?.contract_address
+                        }
+                        decimals={
+                          wrapped?.decimals ||
+                          contract_data?.decimals ||
+                          18
+                        }
+                        symbol={
+                          wrapped?.symbol ||
+                          contract_data?.symbol
+                        }
+                        trigger={trigger}
+                        className="bg-slate-200 dark:bg-slate-800 dark:bg-opacity-75 rounded-lg py-1.5 px-2.5"
+                      />
+                    </div>
+                  </div>
+                )
+              }
               {fields
                 .map((f, i) => {
                   const {
@@ -348,11 +548,14 @@ export default ({
                       key={i}
                       className="form-element"
                     >
-                      {label && (
-                        <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
-                          {label}
-                        </div>
-                      )}
+                      {
+                        label &&
+                        (
+                          <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
+                            {label}
+                          </div>
+                        )
+                      }
                       {type === 'select-chain' ?
                         <div className="-mt-2">
                           <SelectChain
@@ -398,7 +601,11 @@ export default ({
                       onClick={() => {
                         const {
                           id,
-                        } = { ...chains_data?.find(c => c?.chain_id === chain_id) }
+                        } = {
+                          ...chains_data?.find(c =>
+                            c?.chain_id === chain_id
+                          ),
+                        }
 
                         setCollapse(!collapse)
                         setData(
@@ -440,49 +647,75 @@ export default ({
                           {chain_data?.name}
                         </span>
                       </Wallet> :
-                      <button
-                        disabled={disabled}
-                        onClick={() => mint()}
-                        className={`bg-blue-600 hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
-                      >
-                        {
-                          minting &&
-                          (
-                            <RotatingSquare
-                              color="white"
-                              width="16"
-                              height="16"
-                            />
-                          )
-                        }
-                        {is_wrapped ?
-                          <span>
-                            Wrap
-                          </span> :
-                          <>
+                      <>
+                        <button
+                          disabled={disabled}
+                          onClick={() => mint()}
+                          className={`bg-blue-600 hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
+                        >
+                          {
+                            minting &&
+                            (
+                              <TailSpin
+                                color="white"
+                                width="18"
+                                height="18"
+                              />
+                            )
+                          }
+                          {is_wrapped ?
                             <span>
-                              Faucet
-                            </span>
-                            <span className="font-semibold">
-                              {number_format(
-                                faucet_amount,
-                                '0,0.00',
-                              )}
-                            </span>
-                          </>
-                        }
+                              Wrap
+                            </span> :
+                            <>
+                              <span>
+                                Faucet
+                              </span>
+                              <span className="font-semibold">
+                                {number_format(
+                                  faucet_amount,
+                                  '0,0.00',
+                                )}
+                              </span>
+                            </>
+                          }
+                          {
+                            !is_wrapped &&
+                            (
+                              <span>
+                                {
+                                  contract_data?.symbol ||
+                                  symbol
+                                }
+                              </span>
+                            )
+                          }
+                        </button>
                         {
-                          !is_wrapped &&
+                          is_wrapped &&
                           (
-                            <span>
+                            <button
+                              disabled={disabled}
+                              onClick={() => withdraw()}
+                              className={`bg-red-600 hover:bg-red-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
+                            >
                               {
-                                contract_data?.symbol ||
-                                symbol
+                                withdrawing &&
+                                (
+                                  <TailSpin
+                                    color="white"
+                                    width="18"
+                                    height="18"
+                                  />
+                                )
                               }
-                            </span>
+                              <span>
+                                Unwrap
+                              </span>
+                            </button>
                           )
                         }
-                      </button>
+                      </>
                     }
                   </div>
                 )
@@ -490,55 +723,58 @@ export default ({
             </div>
           )
         }
-        {mintResponse && (
-          <div className="w-full mx-2 sm:mx-4">
-            <Alert
-              color={`${status === 'failed' ?
-                'bg-red-400 dark:bg-red-500' :
-                status === 'success' ?
-                  'bg-green-400 dark:bg-green-500' :
-                  'bg-blue-400 dark:bg-blue-500'
-              } text-white mb-4 sm:mb-6`}
-              icon={status === 'failed' ?
-                <BiMessageError
-                  className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mt-0.5 mr-2.5"
-                /> :
-                status === 'success' ?
-                  <BiMessageCheck
+        {
+          callResponse &&
+          (
+            <div className="w-full mx-2 sm:mx-4">
+              <Alert
+                color={`${status === 'failed' ?
+                  'bg-red-400 dark:bg-red-500' :
+                  status === 'success' ?
+                    'bg-green-400 dark:bg-green-500' :
+                    'bg-blue-400 dark:bg-blue-500'
+                } text-white mb-4 sm:mb-6`}
+                icon={status === 'failed' ?
+                  <BiMessageError
                     className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mt-0.5 mr-2.5"
                   /> :
-                  <BiMessageDetail
-                    className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mt-0.5 mr-2.5"
-                  />
-              }
-              rounded={true}
-              className="mx-0"
-            >
-              <div className="flex items-center justify-between space-x-1">
-                <span className="break-all leading-5 text-xs">
-                  {message}
-                </span>
-                {
-                  ['success'].includes(status) &&
-                  hash &&
-                  url &&
-                  (
-                    <a
-                      href={`${url}${transaction_path?.replace('{tx}', hash)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="pr-1.5"
-                    >
-                      <span className="whitespace-nowrap font-semibold">
-                        View on {explorer.name}
-                      </span>
-                    </a>
-                  )
+                  status === 'success' ?
+                    <BiMessageCheck
+                      className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mt-0.5 mr-2.5"
+                    /> :
+                    <BiMessageDetail
+                      className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mt-0.5 mr-2.5"
+                    />
                 }
-              </div>
-            </Alert>
-          </div>
-        )}
+                rounded={true}
+                className="mx-0"
+              >
+                <div className="flex items-center justify-between space-x-1">
+                  <span className="break-all leading-5 text-xs">
+                    {message}
+                  </span>
+                  {
+                    ['success'].includes(status) &&
+                    hash &&
+                    url &&
+                    (
+                      <a
+                        href={`${url}${transaction_path?.replace('{tx}', hash)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="pr-1.5"
+                      >
+                        <span className="whitespace-nowrap font-semibold">
+                          View on {explorer.name}
+                        </span>
+                      </a>
+                    )
+                  }
+                </div>
+              </Alert>
+            </div>
+          )
+        }
       </div>
     )
 }

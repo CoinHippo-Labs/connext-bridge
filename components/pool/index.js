@@ -230,7 +230,11 @@ export default () => {
 
     const {
       id,
-    } = { ...chains_data?.find(c => c?.chain_id === chain_id) }
+    } = {
+      ...chains_data?.find(c =>
+        c?.chain_id === chain_id
+      ),
+    }
 
     if (
       asPath &&
@@ -493,7 +497,11 @@ export default () => {
     const {
       chain_id,
       domain_id,
-    } = { ...chains_data?.find(c => c?.id === chain) }
+    } = {
+      ...chains_data?.find(c =>
+        c?.id === chain
+      ),
+    }
 
     const contracts_data = _.uniqBy(
       _.concat(
@@ -505,11 +513,15 @@ export default () => {
 
             return {
               ...a,
-              ...contracts?.find(c => c?.chain_id === chain_id),
+              ...contracts?.find(c =>
+                c?.chain_id === chain_id
+              ),
             }
           }),
         (pools_data || [])
-          .filter(p => equals_ignore_case(p?.domainId, domain_id))
+          .filter(p =>
+            equals_ignore_case(p?.domainId, domain_id)
+          )
           .flatMap(p => {
             const {
               tokens,

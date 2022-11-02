@@ -173,7 +173,11 @@ export default ({
         try {
           const {
             provider_params,
-          } = { ...chains_data?.find(c => c.chain_id === chain_id) }
+          } = {
+            ...chains_data?.find(c =>
+              c.chain_id === chain_id
+            ),
+          }
 
           await web3.currentProvider.request(
             {
