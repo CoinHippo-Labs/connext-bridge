@@ -6,9 +6,12 @@ import { MdLocalGasStation } from 'react-icons/md'
 
 import { number_format, loader_color } from '../../lib/utils'
 
+const MIN_GAS_PRICE = 0.001
+
 export default ({
   chainId,
   dummy,
+  iconSize = 20,
   className = '',
 }) => {
   const {
@@ -66,16 +69,25 @@ export default ({
   return chainId ?
     <div className={`flex items-center justify-center text-blue-500 dark:text-blue-500 space-x-1 ${className}`}>
       <MdLocalGasStation
-        size={20}
+        size={iconSize}
       />
       {typeof gasPrice === 'number' ?
         <>
           <span className="whitespace-nowrap font-semibold">
-            {number_format(
-              gasPrice,
-              '0,0',
-              true,
-            )}
+            {gasPrice < MIN_GAS_PRICE ?
+              `< ${
+                number_format(
+                  MIN_GAS_PRICE,
+                  '0,0.000000',
+                  true,
+                )
+              }` :
+              number_format(
+                gasPrice,
+                '0,0',
+                true,
+              )
+            }
           </span>
           <span className="font-medium">
             Gwei

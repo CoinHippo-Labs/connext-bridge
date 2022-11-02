@@ -150,7 +150,9 @@ export default () => {
 
               return {
                 ...d,
-                contracts: contracts?.filter(c => c?.is_pool),
+                contracts: contracts?.filter(c =>
+                  c?.is_pool
+                ),
               }
             })
             .filter(d => d.contracts?.length > 0),
@@ -190,7 +192,11 @@ export default () => {
                     c.contract_address
                   ) > -1
                 )
-                .map(a => a.contracts.find(c => c?.chain_id === chain_id).contract_address)
+                .map(a =>
+                  a.contracts.find(c =>
+                    c?.chain_id === chain_id
+                  ).contract_address
+                )
 
               if (addresses.length > 0) {
                 const response = await getAssetsPrice(
@@ -212,7 +218,8 @@ export default () => {
 
                     if (asset_index > -1) {
                       const asset = assets_data[asset_index]
-                      asset.price = t?.price ||
+                      asset.price =
+                        t?.price ||
                         asset.price ||
                         0
 
@@ -234,10 +241,12 @@ export default () => {
           }
 
           if (updated) {
-            dispatch({
-              type: ASSETS_DATA,
-              value: _.cloneDeep(assets_data),
-            })
+            dispatch(
+              {
+                type: ASSETS_DATA,
+                value: _.cloneDeep(assets_data),
+              }
+            )
           }
         }
       }
@@ -308,7 +317,9 @@ export default () => {
     const init = async () => {
       if (
         chains_data &&
-        assets_data?.findIndex(a => typeof a.price !== 'number') < 0
+        assets_data?.findIndex(a =>
+          typeof a.price !== 'number'
+        ) < 0
       ) {
         const chains_config = {}
 
@@ -332,7 +343,9 @@ export default () => {
               chains_config[domain_id] = {
                 providers: rpc_urls,
                 assets: assets_data
-                  .filter(a => a?.contracts?.findIndex(c => c?.chain_id === chain_id) > -1)
+                  .filter(a => a?.contracts?.findIndex(c =>
+                    c?.chain_id === chain_id
+                  ) > -1)
                   .map(a => {
                     const {
                       contracts,
@@ -342,15 +355,19 @@ export default () => {
                       symbol,
                     } = { ...a }
 
-                    const contract_data = contracts.find(c => c?.chain_id === chain_id)
+                    const contract_data = contracts.find(c =>
+                      c?.chain_id === chain_id
+                    )
                     const {
                       contract_address,
                     } = { ...contract_data }
 
-                    symbol = contract_data?.symbol ||
+                    symbol =
+                      contract_data?.symbol ||
                       symbol
 
-                    name = name ||
+                    name =
+                      name ||
                       symbol
 
                     return {
@@ -377,12 +394,14 @@ export default () => {
           sdkConfig,
         )
 
-        dispatch({
-          type: SDK,
-          value: await create(
-            sdkConfig,
-          ),
-        })
+        dispatch(
+          {
+            type: SDK,
+            value: await create(
+              sdkConfig,
+            ),
+          }
+        )
       }
     }
 
@@ -416,10 +435,12 @@ export default () => {
           address,
         )
 
-        dispatch({
-          type: SDK,
-          value: sdk,
-        })
+        dispatch(
+          {
+            type: SDK,
+            value: sdk,
+          }
+        )
       }
     }
 
@@ -432,7 +453,9 @@ export default () => {
       if (
         sdk &&
         chains_data &&
-        assets_data?.findIndex(a => typeof a.price !== 'number') < 0
+        assets_data?.findIndex(a =>
+          typeof a.price !== 'number'
+        ) < 0
       ) {
         try {
           const response = await sdk.nxtpSdkUtils.getRoutersData()
@@ -447,7 +470,9 @@ export default () => {
                     balance,
                   } = { ...l }
 
-                  const chain_data = chains_data.find(c => c?.domain_id === domain)
+                  const chain_data = chains_data.find(c =>
+                    c?.domain_id === domain
+                  )
                   const {
                     chain_id,
                   } = { ...chain_data }
@@ -459,7 +484,12 @@ export default () => {
                     ) > -1
                   )
 
-                  const amount = BigInt(balance || 0).toString()
+                  const amount =
+                    BigInt(
+                      balance ||
+                      0
+                    )
+                    .toString()
 
                   return {
                     ...l,
@@ -473,10 +503,12 @@ export default () => {
               'chain_id',
             )
 
-            dispatch({
-              type: ASSET_BALANCES_DATA,
-              value: data,
-            })
+            dispatch(
+              {
+                type: ASSET_BALANCES_DATA,
+                value: data,
+              }
+            )
           }
         } catch (error) {}
       }
@@ -484,10 +516,11 @@ export default () => {
 
     getData()
 
-    const interval = setInterval(() =>
-      getData(),
-      1 * 60 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        getData(),
+        1 * 60 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [sdk, chains_data, assets_data])
@@ -511,7 +544,9 @@ export default () => {
             contracts,
           } = { ...asset_data }
 
-          const contract_data = contracts?.find(c => c?.chain_id === chain_id)
+          const contract_data = contracts?.find(c =>
+            c?.chain_id === chain_id
+          )
           const {
             contract_address,
           } = { ...contract_data }
@@ -545,9 +580,10 @@ export default () => {
                 decimals,
               } = { ...pool }
 
-              const symbols = (symbol || '')
-                .split('-')
-                .filter(s => s)
+              const symbols =
+                (symbol || '')
+                  .split('-')
+                  .filter(s => s)
 
               if (pool) {
                 console.log(
@@ -559,7 +595,8 @@ export default () => {
                 )
               }
 
-              const stats = pool &&
+              const stats =
+                pool &&
                 await sdk.nxtpSdkPool.getPoolStats(
                   domain_id,
                   contract_address,
@@ -592,7 +629,8 @@ export default () => {
                 )
               }
 
-              const rate = pool &&
+              const rate =
+                pool &&
                 await sdk.nxtpSdkPool.getVirtualPrice(
                   domain_id,
                   contract_address,
@@ -629,8 +667,12 @@ export default () => {
                 ),
                 rate: Number(
                   utils.formatUnits(
-                    BigNumber.from(rate || '0'),
-                    _.last(decimals) || 18,
+                    BigNumber.from(
+                      rate ||
+                      '0'
+                    ),
+                    _.last(decimals) ||
+                    18,
                   )
                 ),
               })
@@ -657,10 +699,12 @@ export default () => {
         }
 
         if (data.length > 0) {
-          dispatch({
-            type: POOLS_DATA,
-            value: data,
-          })
+          dispatch(
+            {
+              type: POOLS_DATA,
+              value: data,
+            }
+          )
         }
       }
     }
@@ -671,18 +715,20 @@ export default () => {
         chains_data &&
         pool_assets_data
       ) {
-        chains_data.forEach(c =>
-          getChainData(c)
-        )
+        chains_data
+          .forEach(c =>
+            getChainData(c)
+          )
       }
     }
 
     getData()
 
-    const interval = setInterval(() =>
-      getData(),
-      1 * 60 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        getData(),
+        1 * 60 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [asPath, sdk, chains_data, pool_assets_data])
@@ -693,22 +739,32 @@ export default () => {
       if (
         chains_data &&
         asset_balances_data &&
-        chains_data.filter(c => !c?.disabled).length <= Object.keys(asset_balances_data).length
+        chains_data
+          .filter(c =>
+            !c?.disabled
+          ).length <=
+          Object.keys(asset_balances_data).length
       ) {
-        const addresses = _.uniq(
-          Object.values(asset_balances_data)
-            .flatMap(a => a)
-            .map(a => a?.router_address)
-            .filter(a => a && !ens_data?.[a])
-        )
+        const addresses =
+          _.uniq(
+            Object.values(asset_balances_data)
+              .flatMap(a => a)
+              .map(a => a?.router_address)
+              .filter(a =>
+                a &&
+                !ens_data?.[a]
+              )
+          )
 
         const ens_data = await getEns(addresses)
 
         if (ens_data) {
-          dispatch({
-            type: ENS_DATA,
-            value: ens_data,
-          })
+          dispatch(
+            {
+              type: ENS_DATA,
+              value: ens_data,
+            }
+          )
         }
       }
     }
@@ -742,7 +798,7 @@ export default () => {
               web3_provider &&
               address &&
               (
-                <div className="hidden sm:flex flex-col space-y-0.5 mx-2">
+                <div className="hidden sm:flex lg:hidden xl:flex flex-col space-y-0.5 mx-2">
                   <EnsProfile
                     address={address}
                     fallback={address &&
@@ -759,7 +815,7 @@ export default () => {
                             <span className="hidden xl:block">
                               {ellipse(
                                 address,
-                                8,
+                                6,
                               )}
                             </span>
                           </span>}

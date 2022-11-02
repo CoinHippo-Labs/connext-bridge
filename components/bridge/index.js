@@ -19,6 +19,7 @@ import PoweredBy from '../powered-by'
 import Options from './options'
 import SelectChain from '../select/chain'
 import SelectBridgeAsset from '../select/asset/bridge'
+import GasPrice from '../gas-price'
 import Balance from '../balance'
 import LatestTransfers from '../latest-transfers'
 import Faucet from '../faucet'
@@ -292,7 +293,12 @@ export default () => {
         params.asset &&
         amount
       ) {
-        params.amount = amount
+        params.amount =
+          number_format(
+            Number(amount),
+            '0.00000000',
+            true,
+          )
       }
     }
 
@@ -1426,6 +1432,9 @@ export default () => {
   const source_amount =
     source_balance &&
     Number(source_balance.amount)
+  const source_decimals =
+    source_contract_data?.decimals ||
+    18
   const source_gas_native_token = _.head(source_chain_data?.provider_params)?.nativeCurrency
 
   const destination_symbol =
@@ -1469,7 +1478,9 @@ export default () => {
   const liquidity_amount =
     _.sum(
       (asset_balances_data?.[destination_chain_data?.chain_id] || [])
-        .filter(a => equals_ignore_case(a?.contract_address, destination_contract_data?.contract_address))
+        .filter(a =>
+          equals_ignore_case(a?.contract_address, destination_contract_data?.contract_address)
+        )
         .map(a =>
           Number(
             utils.formatUnits(
@@ -1567,10 +1578,15 @@ export default () => {
               <div className="space-y-2">
                 <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
                   <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start">
-                    <div className="w-32 sm:w-48 flex sm:flex-col items-center justify-center space-x-1.5">
+                    <div className="w-32 sm:w-48 flex flex-col sm:flex-row items-center justify-center space-x-1.5">
                       <span className="tracking-wider text-slate-600 dark:text-slate-200 text-lg font-medium text-center">
                         Origin
                       </span>
+                      <GasPrice
+                        chainId={source_chain_data?.chain_id}
+                        iconSize={18}
+                        className="text-xs"
+                      />
                     </div>
                     <SelectChain
                       disabled={disabled}
@@ -1648,10 +1664,15 @@ export default () => {
                     </button>
                   </div>
                   <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end">
-                    <div className="w-32 sm:w-48 flex sm:flex-col items-center justify-center space-x-1.5">
+                    <div className="w-32 sm:w-48 flex flex-col sm:flex-row items-center justify-center space-x-1.5">
                       <span className="tracking-wider text-slate-600 dark:text-slate-200 text-lg font-medium text-center">
                         Destination
                       </span>
+                      <GasPrice
+                        chainId={destination_chain_data?.chain_id}
+                        iconSize={18}
+                        className="text-xs"
+                      />
                     </div>
                     <SelectChain
                       disabled={disabled}
@@ -1843,9 +1864,15 @@ export default () => {
                           disabled ||
                           !asset
                         }
-                        value={typeof amount === 'number' && amount >= 0 ?
-                          amount :
-                          ''
+                        value={
+                          typeof amount === 'number' &&
+                          amount >= 0 ?
+                            number_format(
+                              amount,
+                              '0.00000000',
+                              true,
+                            ) :
+                            ''
                         }
                         onChange={e => {
                           const regex = /^[0-9.\b]+$/
@@ -1861,7 +1888,12 @@ export default () => {
 
                           value = value < 0 ?
                             0 :
-                            value
+                            !isNaN(value) ?
+                              parseFloat(
+                                Number(value)
+                                  .toFixed(source_decimals)
+                              ) :
+                              value
 
                           setBridge(
                             {

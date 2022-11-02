@@ -84,6 +84,7 @@
       }
     ],
     "color": "#636890",
-    "preset": true
+    "preset": true,
+    "is_staging": true
   }
 ]

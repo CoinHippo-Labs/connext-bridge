@@ -46,14 +46,16 @@ const providerOptions = {
       },
     },
   },
-  portis: process.env.NEXT_PUBLIC_PORTIS_ID &&
+  portis:
+    process.env.NEXT_PUBLIC_PORTIS_ID &&
     {
       package: Portis,
       options: {
         id: process.env.NEXT_PUBLIC_PORTIS_ID,
       },
     },
-  walletlink: process.env.NEXT_PUBLIC_INFURA_ID &&
+  walletlink:
+    process.env.NEXT_PUBLIC_INFURA_ID &&
     {
       package: Coinbase,
       options: {
@@ -150,15 +152,17 @@ export default ({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       if (web3_provider) {
-        dispatch({
-          type: WALLET_DATA,
-          value: {
-            default_chain_id: defaultChainId,
-          },
-        })
+        dispatch(
+          {
+            type: WALLET_DATA,
+            value: {
+              default_chain_id: defaultChainId,
+            },
+          }
+        )
       }
 
-      if (window.clover) {
+      /*if (window.clover) {
         providerOptions['custom-clover'] = {
           package: async () => {
             let provider = null
@@ -220,12 +224,16 @@ export default ({
             logo: '/logos/wallets/clover.png',
           },
         }
-      }
+      }*/
 
       web3Modal = new Web3Modal(
         {
-          network: getNetwork(defaultChainId) ||
-            'mainnet',
+          network:
+            getNetwork(defaultChainId) ||
+            (process.env.NETWORK === 'testnet' ?
+              'goerli' :
+              'mainnet'
+            ),
           cacheProvider: true,
           providerOptions,
         }
@@ -261,16 +269,18 @@ export default ({
         chainId,
       } = { ...network }
 
-      dispatch({
-        type: WALLET_DATA,
-        value: {
-          chain_id: chainId,
-          provider,
-          web3_provider: web3Provider,
-          address,
-          signer,
-        },
-      })
+      dispatch(
+        {
+          type: WALLET_DATA,
+          value: {
+            chain_id: chainId,
+            provider,
+            web3_provider: web3Provider,
+            address,
+            signer,
+          },
+        }
+      )
     },
     [web3Modal],
   )
@@ -293,9 +303,11 @@ export default ({
       await provider.disconnect()
     }
 
-    dispatch({
-      type: WALLET_RESET,
-    })
+    dispatch(
+      {
+        type: WALLET_RESET,
+      }
+    )
   }, [web3Modal, provider])
 
   const switchChain = async () => {
@@ -324,7 +336,11 @@ export default ({
           try {
             const {
               provider_params,
-            } = { ...chains_data?.find(c => c.chain_id === connectChainId) }
+            } = {
+              ...chains_data?.find(c =>
+                c.chain_id === connectChainId
+              ),
+            }
 
             await provider.request(
               {
@@ -354,12 +370,14 @@ export default ({
           disconnect()
         }
         else {
-          dispatch({
-            type: WALLET_DATA,
-            value: {
-              address: _.head(accounts),
-            },
-          })
+          dispatch(
+            {
+              type: WALLET_DATA,
+              value: {
+                address: _.head(accounts),
+              },
+            }
+          )
         }
       }
 

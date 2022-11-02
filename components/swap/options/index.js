@@ -224,9 +224,11 @@ export default ({
                             }
                             type={type}
                             placeholder={placeholder}
-                            value={typeof data?.[name] === 'number' && data[name] >= 0 ?
-                              data[name] :
-                              ''
+                            value={
+                              typeof data?.[name] === 'number' &&
+                              data[name] >= 0 ?
+                                data[name] :
+                                ''
                             }
                             onChange={e => {
                               const regex = /^[0-9.\b]+$/
@@ -250,8 +252,13 @@ export default ({
 
                               const _data = {
                                 ...data,
-                                [`${name}`]: value && !isNaN(value) ?
-                                  Number(value) :
+                                [`${name}`]:
+                                  value &&
+                                  !isNaN(value) ?
+                                  parseFloat(
+                                    Number(value)
+                                      .toFixed(2)
+                                  ) :
                                   value,
                               }
 

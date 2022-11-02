@@ -241,7 +241,12 @@ export default () => {
           !isNaN(amount) &&
           Number(amount)
         ) {
-          params.amount = Number(amount)
+          params.amount =
+            number_format(
+              Number(amount),
+              '0.00000000',
+              true,
+            )
         }
       }
     }
@@ -1666,9 +1671,15 @@ export default () => {
                                 disabled ||
                                 !asset
                               }
-                              value={typeof amount === 'number' && amount >= 0 ?
-                                amount :
-                                ''
+                              value={
+                                typeof amount === 'number' &&
+                                amount >= 0 ?
+                                  number_format(
+                                    amount,
+                                    '0.00000000',
+                                    true,
+                                  ) :
+                                  ''
                               }
                               onChange={e => {
                                 const regex = /^[0-9.\b]+$/
@@ -1689,9 +1700,11 @@ export default () => {
                                 setSwap(
                                   {
                                     ...swap,
-                                    amount: value && !isNaN(value) ?
-                                      Number(value) :
-                                      value,
+                                    amount:
+                                      value &&
+                                      !isNaN(value) ?
+                                        Number(value) :
+                                        value,
                                   }
                                 )
                               }}

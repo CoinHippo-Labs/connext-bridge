@@ -146,7 +146,9 @@ export default ({
             asset,
           } = { ...pool }
 
-          const chain_data = chains_data?.find(c => c?.id === chain)
+          const chain_data = chains_data?.find(c =>
+            c?.id === chain
+          )
 
           const pool_data = pools_data?.find(p =>
             p?.chain_data?.id === chain &&
@@ -164,8 +166,10 @@ export default ({
 
           const _amount =
             utils.parseUnits(
-              amount.toString(),
-              _.last(decimals) || 18,
+              amount
+                .toString(),
+              _.last(decimals) ||
+              18,
             )
             .toString()
 
@@ -206,8 +210,12 @@ export default ({
                 .map((a, i) =>
                   Number(
                     utils.formatUnits(
-                      BigNumber.from(a || '0'),
-                      decimals?.[i] || 18,
+                      BigNumber.from(
+                        a ||
+                        '0'
+                      ),
+                      decimals?.[i] ||
+                      18,
                     )
                   )
                 )
@@ -269,11 +277,14 @@ export default ({
         contract_address,
       } = { ...contract_data }
 
-      const x_asset_data = _.head(tokens) &&
+      const x_asset_data =
+        _.head(tokens) &&
         {
           ...Object.fromEntries(
             Object.entries({ ...asset_data })
-              .filter(([k, v]) => !['contracts'].includes(k))
+              .filter(([k, v]) =>
+                !['contracts'].includes(k)
+              )
           ),
           ...(
             equals_ignore_case(_.head(tokens), contract_address) ?
@@ -287,11 +298,14 @@ export default ({
           ),
         }
 
-      const y_asset_data = _.last(tokens) &&
+      const y_asset_data =
+        _.last(tokens) &&
         {
           ...Object.fromEntries(
             Object.entries({ ...asset_data })
-              .filter(([k, v]) => !['contracts'].includes(k))
+              .filter(([k, v]) =>
+                !['contracts'].includes(k)
+              )
           ),
           ...(
             equals_ignore_case(_.last(tokens), contract_address) ?
@@ -312,8 +326,14 @@ export default ({
         deadline,
       } = { ...options }
 
-      deadline = deadline &&
-        moment().add(deadline, 'minutes').valueOf()
+      deadline =
+        deadline &&
+        moment()
+          .add(
+            deadline,
+            'minutes',
+          )
+          .valueOf()
 
       let failed = false
 
@@ -331,13 +351,17 @@ export default ({
 
           const amounts = [
             utils.parseUnits(
-              amountX.toString(),
-              x_asset_data?.decimals || 18,
+              amountX
+                .toString(),
+              x_asset_data?.decimals ||
+              18,
             )
             .toString(),
             utils.parseUnits(
-              amountY.toString(),
-              y_asset_data?.decimals || 18,
+              amountY
+                .toString(),
+              y_asset_data?.decimals ||
+              18,
             )
             .toString(),
           ]
@@ -364,11 +388,13 @@ export default ({
                   hash,
                 } = { ...approve_response }
 
-                setApproveResponse({
-                  status: 'pending',
-                  message: `Wait for ${x_asset_data?.symbol} approval`,
-                  tx_hash: hash,
-                })
+                setApproveResponse(
+                  {
+                    status: 'pending',
+                    message: `Wait for ${x_asset_data?.symbol} approval`,
+                    tx_hash: hash,
+                  }
+                )
 
                 setApproveProcessing(true)
 
@@ -398,11 +424,14 @@ export default ({
                 setApproving(false)
               }
             } catch (error) {
-              setApproveResponse({
-                status: 'failed',
-                message: error?.data?.message ||
-                  error?.message,
-              })
+              setApproveResponse(
+                {
+                  status: 'failed',
+                  message:
+                    error?.data?.message ||
+                    error?.message,
+                }
+              )
 
               failed = true
 
@@ -430,11 +459,13 @@ export default ({
                     hash,
                   } = { ...approve_response }
 
-                  setApproveResponse({
-                    status: 'pending',
-                    message: `Wait for ${y_asset_data?.symbol} approval`,
-                    tx_hash: hash,
-                  })
+                  setApproveResponse(
+                    {
+                      status: 'pending',
+                      message: `Wait for ${y_asset_data?.symbol} approval`,
+                      tx_hash: hash,
+                    }
+                  )
 
                   setApproveProcessing(true)
 
@@ -464,11 +495,14 @@ export default ({
                   setApproving(false)
                 }
               } catch (error) {
-                setApproveResponse({
-                  status: 'failed',
-                  message: error?.data?.message ||
-                    error?.message,
-                })
+                setApproveResponse(
+                  {
+                    status: 'failed',
+                    message:
+                      error?.data?.message ||
+                      error?.message,
+                  }
+                )
 
                 failed = true
 
@@ -507,16 +541,21 @@ export default ({
                 if (gasLimit) {
                   gasLimit =
                     FixedNumber.fromString(
-                      gasLimit.toString()
+                      gasLimit
+                        .toString()
                     )
                     .mulUnsafe(
                       FixedNumber.fromString(
-                        GAS_LIMIT_ADJUSTMENT.toString()
+                        GAS_LIMIT_ADJUSTMENT
+                          .toString()
                       )
                     )
                     .round(0)
                     .toString()
-                    .replace('.0', '')
+                    .replace(
+                      '.0',
+                      '',
+                    )
 
                   add_request.gasLimit = gasLimit
                 }
@@ -541,24 +580,29 @@ export default ({
 
                 failed = !status
 
-                setCallResponse({
-                  status: failed ?
-                    'failed' :
-                    'success',
-                  message: failed ?
-                    `Failed to add ${symbol} liquidity` :
-                    `Add ${symbol} liquidity successful`,
-                  tx_hash: hash,
-                })
+                setCallResponse(
+                  {
+                    status: failed ?
+                      'failed' :
+                      'success',
+                    message: failed ?
+                      `Failed to add ${symbol} liquidity` :
+                      `Add ${symbol} liquidity successful`,
+                    tx_hash: hash,
+                  }
+                )
 
                 success = true
               }
             } catch (error) {
-              setCallResponse({
-                status: 'failed',
-                message: error?.data?.message ||
-                  error?.message,
-              })
+              setCallResponse(
+                {
+                  status: 'failed',
+                  message:
+                    error?.data?.message ||
+                    error?.message,
+                }
+              )
 
               failed = true
             }
@@ -574,8 +618,10 @@ export default ({
 
           const _amount =
             utils.parseUnits(
-              amount.toString(),
-              y_asset_data?.decimals || 18,
+              amount
+                .toString(),
+              y_asset_data?.decimals ||
+              18,
             )
             .toString()
 
@@ -604,11 +650,13 @@ export default ({
                   hash,
                 } = { ...approve_response }
 
-                setApproveResponse({
-                  status: 'pending',
-                  message: `Wait for ${symbol} approval`,
-                  tx_hash: hash,
-                })
+                setApproveResponse(
+                  {
+                    status: 'pending',
+                    message: `Wait for ${symbol} approval`,
+                    tx_hash: hash,
+                  }
+                )
 
                 setApproveProcessing(true)
 
@@ -638,11 +686,14 @@ export default ({
                 setApproving(false)
               }
             } catch (error) {
-              setApproveResponse({
-                status: 'failed',
-                message: error?.data?.message ||
-                  error?.message,
-              })
+              setApproveResponse(
+                {
+                  status: 'failed',
+                  message:
+                    error?.data?.message ||
+                    error?.message,
+                }
+              )
 
               failed = true
 
@@ -694,11 +745,13 @@ export default ({
                 if (gasLimit) {
                   gasLimit =
                     FixedNumber.fromString(
-                      gasLimit.toString()
+                      gasLimit
+                        .toString()
                     )
                     .mulUnsafe(
                       FixedNumber.fromString(
-                        GAS_LIMIT_ADJUSTMENT.toString()
+                        GAS_LIMIT_ADJUSTMENT
+                          .toString()
                       )
                     )
                     .round(0)
@@ -728,24 +781,29 @@ export default ({
 
                 failed = !status
 
-                setCallResponse({
-                  status: failed ?
-                    'failed' :
-                    'success',
-                  message: failed ?
-                    `Failed to remove ${symbol} liquidity` :
-                    `Remove ${symbol} liquidity successful`,
-                  tx_hash: hash,
-                })
+                setCallResponse(
+                  {
+                    status: failed ?
+                      'failed' :
+                      'success',
+                    message: failed ?
+                      `Failed to remove ${symbol} liquidity` :
+                      `Remove ${symbol} liquidity successful`,
+                    tx_hash: hash,
+                  }
+                )
 
                 success = true
               }
             } catch (error) {
-              setCallResponse({
-                status: 'failed',
-                message: error?.data?.message ||
-                  error?.message,
-              })
+              setCallResponse(
+                {
+                  status: 'failed',
+                  message:
+                    error?.data?.message ||
+                    error?.message,
+                }
+              )
 
               failed = true
             }
@@ -780,11 +838,13 @@ export default ({
         try {
           _amount = Number(
             FixedNumber.fromString(
-              value.toString()
+              value
+                .toString()
             )
             .mulUnsafe(
               FixedNumber.fromString(
-                rate.toString()
+                rate
+                  .toString()
               )
             )
             .toString()
@@ -812,11 +872,13 @@ export default ({
         try {
           _amount = Number(
             FixedNumber.fromString(
-              value.toString()
+              value
+                .toString()
             )
             .divUnsafe(
               FixedNumber.fromString(
-                rate.toString()
+                rate
+                  .toString()
               )
             )
             .toString()
@@ -859,15 +921,19 @@ export default ({
     slippage,
   } = { ...options }
 
-  const selected = !!(
-    chain &&
-    asset
-  )
+  const selected =
+    !!(
+      chain &&
+      asset
+    )
 
-  const no_pool = selected &&
+  const no_pool =
+    selected &&
     pool_assets_data?.findIndex(a =>
       a?.id === asset &&
-      a.contracts?.findIndex(a => a?.chain_id === chain_id) > -1
+      a.contracts?.findIndex(a =>
+        a?.chain_id === chain_id
+      ) > -1
     ) < 0
 
   const pool_data = pools_data?.find(p =>
@@ -890,14 +956,18 @@ export default ({
     contract_address,
   } = { ...contract_data }
 
-  rate = rate ||
+  rate =
+    rate ||
     1
 
-  const x_asset_data = _.head(tokens) &&
+  const x_asset_data =
+    _.head(tokens) &&
     {
       ...Object.fromEntries(
         Object.entries({ ...asset_data })
-          .filter(([k, v]) => !['contracts'].includes(k))
+          .filter(([k, v]) =>
+            !['contracts'].includes(k)
+          )
       ),
       ...(
         equals_ignore_case(_.head(tokens), contract_address) ?
@@ -911,18 +981,23 @@ export default ({
       ),
     }
 
-  const x_balance = x_asset_data &&
+  const x_balance =
+    x_asset_data &&
     balances_data?.[chain_id]?.find(b =>
       equals_ignore_case(b?.contract_address, x_asset_data.contract_address)
     )
-  const x_balance_amount = x_balance &&
+  const x_balance_amount =
+    x_balance &&
     Number(x_balance.amount)
 
-  const y_asset_data = _.last(tokens) &&
+  const y_asset_data =
+    _.last(tokens) &&
     {
       ...Object.fromEntries(
         Object.entries({ ...asset_data })
-          .filter(([k, v]) => !['contracts'].includes(k))
+          .filter(([k, v]) =>
+            !['contracts'].includes(k)
+          )
       ),
       ...(
         equals_ignore_case(_.last(tokens), contract_address) ?
@@ -935,31 +1010,41 @@ export default ({
             mintable: [
               'next',
               'mad',
-            ].findIndex(s => _.last(symbols)?.startsWith(s)) > -1 ||
+            ].findIndex(s =>
+              _.last(symbols)?.startsWith(s)
+            ) > -1 ||
               [
                 'TEST',
-              ].findIndex(s => equals_ignore_case(s, _.last(symbols))) > -1,
+              ].findIndex(s =>
+                equals_ignore_case(s, _.last(symbols))
+              ) > -1,
             wrapable:
               [
                 'WETH',
-              ].findIndex(s => equals_ignore_case(s, _.last(symbols))) > -1,
+              ].findIndex(s =>
+                equals_ignore_case(s, _.last(symbols))
+              ) > -1,
           }
       ),
     }
 
-  const y_balance = y_asset_data &&
+  const y_balance =
+    y_asset_data &&
     balances_data?.[chain_id]?.find(b =>
       equals_ignore_case(b?.contract_address, y_asset_data.contract_address)
     )
-  const y_balance_amount = y_balance &&
+  const y_balance_amount =
+    y_balance &&
     Number(y_balance.amount)
 
-  const pool_loading = selected &&
+  const pool_loading =
+    selected &&
     !no_pool &&
     !error &&
     !pool_data
 
-  const user_pool_data = pool_data &&
+  const user_pool_data =
+    pool_data &&
     user_pools_data?.find(p =>
       p?.chain_data?.id === chain &&
       p.asset_data?.id === asset
@@ -968,7 +1053,8 @@ export default ({
     lpTokenBalance,
   } = { ...user_pool_data }
 
-  const position_loading = selected &&
+  const position_loading =
+    selected &&
     !no_pool &&
     !error &&
     (
@@ -976,16 +1062,19 @@ export default ({
       pool_loading
     )
 
-  const valid_amount = action === 'remove' ?
-    amount &&
-    amount <= lpTokenBalance :
-    amountX &&
-    amountY &&
-    amountX <= x_balance_amount &&
-    amountY <= y_balance_amount
+  const valid_amount =
+    action === 'remove' ?
+      amount &&
+      amount <= lpTokenBalance :
+      amountX &&
+      amountY &&
+      amountX <= x_balance_amount &&
+      amountY <= y_balance_amount
 
-  const wrong_chain = wallet_chain_id !== chain_id &&
+  const wrong_chain =
+    wallet_chain_id !== chain_id &&
     !callResponse
+
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
 
   const disabled =
@@ -1030,15 +1119,18 @@ export default ({
               </Tooltip>
               <div className="flex items-center space-x-3">
                 <Switch
-                  checked={typeof infiniteApprove === 'boolean' ?
-                    infiniteApprove :
-                    false
+                  checked={
+                    typeof infiniteApprove === 'boolean' ?
+                      infiniteApprove :
+                      false
                   }
                   onChange={() => {
-                    setOptions({
-                      ...options,
-                      infiniteApprove: !infiniteApprove,
-                    })
+                    setOptions(
+                      {
+                        ...options,
+                        infiniteApprove: !infiniteApprove,
+                      }
+                    )
                   }}
                   checkedIcon={false}
                   uncheckedIcon={false}
@@ -1065,9 +1157,11 @@ export default ({
                   size="small"
                   type="number"
                   placeholder="Slippage Tolerance"
-                  value={typeof slippage === 'number' && slippage >= 0 ?
-                    slippage :
-                    ''
+                  value={
+                    typeof slippage === 'number' &&
+                    slippage >= 0 ?
+                      slippage :
+                      ''
                   }
                   onChange={e => {
                     const regex = /^[0-9.\b]+$/
@@ -1081,14 +1175,21 @@ export default ({
                       value = e.target.value
                     }
 
-                    value = value <= 0 || value > 100 ?
-                      DEFAULT_POOL_SLIPPAGE_PERCENTAGE :
-                      value
+                    value =
+                      value <= 0 ||
+                      value > 100 ?
+                        DEFAULT_POOL_SLIPPAGE_PERCENTAGE :
+                        value
 
                     const _data = {
                       ...options,
-                      slippage: value && !isNaN(value) ?
-                        Number(value) :
+                      slippage:
+                        value &&
+                        !isNaN(value) ?
+                        parseFloat(
+                          Number(value)
+                            .toFixed(2)
+                        ) :
                         value,
                     }
 
@@ -1115,10 +1216,12 @@ export default ({
                     <div
                       key={i}
                       onClick={() =>
-                        setOptions({
-                          ...options,
-                          slippage: p,
-                        })
+                        setOptions(
+                          {
+                            ...options,
+                            slippage: p,
+                          }
+                        )
                       }
                       className={`${slippage === p ? 'bg-gray-200 dark:bg-slate-800 font-semibold' : 'bg-gray-100 hover:bg-gray-200 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-medium'} rounded-lg cursor-pointer py-1 px-2`}
                     >
@@ -1138,9 +1241,11 @@ export default ({
                   size="small"
                   type="number"
                   placeholder="Transaction Deadline (minutes)"
-                  value={typeof options?.deadline === 'number' && options.deadline >= 0 ?
-                    options.deadline :
-                    ''
+                  value={
+                    typeof options?.deadline === 'number' &&
+                    options.deadline >= 0 ?
+                      options.deadline :
+                      ''
                   }
                   onChange={e => {
                     const regex = /^[0-9.\b]+$/
@@ -1154,14 +1259,20 @@ export default ({
                       value = e.target.value
                     }
 
-                    value = value < 0 ?
-                      DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES :
-                      value
+                    value =
+                      value < 0 ?
+                        DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES :
+                        value
 
                     const _data = {
                       ...options,
-                      deadline: value && !isNaN(value) ?
-                        Number(value) :
+                      deadline:
+                        value &&
+                        !isNaN(value) ?
+                        parseFloat(
+                          Number(value)
+                            .toFixed(2)
+                        ) :
                         value,
                     }
 
@@ -1253,9 +1364,11 @@ export default ({
                     type="number"
                     placeholder="0.00"
                     disabled={disabled}
-                    value={typeof amountX === 'number' && amountX >= 0 ?
-                      amountX :
-                      ''
+                    value={
+                      typeof amountX === 'number' &&
+                      amountX >= 0 ?
+                        amountX :
+                        ''
                     }
                     onChange={e => {
                       const regex = /^[0-9.\b]+$/
@@ -1271,11 +1384,21 @@ export default ({
 
                       value = value < 0 ?
                         0 :
-                        value
+                        !isNaN(value) ?
+                          parseFloat(
+                            Number(value)
+                              .toFixed(
+                                _.last(decimals) ||
+                                18
+                              )
+                          ) :
+                          value
 
-                      value = value && !isNaN(value) ?
-                        Number(value) :
-                        value
+                      value =
+                        value &&
+                        !isNaN(value) ?
+                          Number(value) :
+                          value
 
                       setAmountX(value)
                       autoSetY(value)
@@ -1365,9 +1488,11 @@ export default ({
                     type="number"
                     placeholder="0.00"
                     disabled={disabled}
-                    value={typeof amountY === 'number' && amountY >= 0 ?
-                      amountY :
-                      ''
+                    value={
+                      typeof amountY === 'number' &&
+                      amountY >= 0 ?
+                        amountY :
+                        ''
                     }
                     onChange={e => {
                       const regex = /^[0-9.\b]+$/
@@ -1383,10 +1508,23 @@ export default ({
 
                       value = value < 0 ?
                         0 :
-                        value
+                        !isNaN(value) ?
+                          parseFloat(
+                            Number(value)
+                              .toFixed(
+                                y_asset_data?.decimals ||
+                                18
+                              )
+                          ) :
+                          value
 
-                      value = value && !isNaN(value) ?
-                        Number(value) :
+                      value =
+                        value &&
+                        !isNaN(value) ?
+                          Number(value) :
+                          value
+                      value = value < 0 ?
+                        0 :
                         value
 
                       setAmountY(value)
@@ -1626,9 +1764,11 @@ export default ({
                   type="number"
                   placeholder="0.00"
                   disabled={disabled}
-                  value={typeof amount === 'number' && amount >= 0 ?
-                    amount :
-                    ''
+                  value={
+                    typeof amount === 'number' &&
+                    amount >= 0 ?
+                      amount :
+                      ''
                   }
                   onChange={e => {
                     const regex = /^[0-9.\b]+$/
@@ -1644,12 +1784,23 @@ export default ({
 
                     value = value < 0 ?
                       0 :
-                      value
+                      !isNaN(value) ?
+                        parseFloat(
+                          Number(value)
+                            .toFixed(
+                              x_asset_data?.decimals ||
+                              18
+                            )
+                        ) :
+                        value
 
-                    setAmount(value && !isNaN(value) ?
-                      Number(value) :
-                      value
-                    )
+                    value =
+                      value &&
+                      !isNaN(value) ?
+                        Number(value) :
+                        value
+
+                    setAmount(value)
                   }}
                   onWheel={e => e.target.blur()}
                   onKeyDown={e =>
