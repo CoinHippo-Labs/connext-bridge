@@ -1329,7 +1329,7 @@ export default () => {
                   'success',
                 message: failed ?
                   'Failed to send transaction' :
-                  `Transferring ${symbol}. Please wait.`,
+                  `Transferring ${symbol}. (it’s ok to close the browser)`,
                 tx_hash: hash,
               }
             )
@@ -1871,10 +1871,24 @@ export default () => {
                               <div className="tracking-wider text-slate-400 dark:text-slate-600 text-xs">
                                 Balance
                               </div>
-                              <Balance
-                                chainId={source_chain_data.chain_id}
-                                asset={asset}
-                              />
+                              <button
+                                disabled={disabled}
+                                onClick={() => {
+                                  if (max_amount > 0) {
+                                    setBridge(
+                                      {
+                                        ...bridge,
+                                        amount: max_amount,
+                                      }
+                                    )
+                                  }
+                                }}
+                              >
+                                <Balance
+                                  chainId={source_chain_data.chain_id}
+                                  asset={asset}
+                                />
+                              </button>
                             </div>
                           )
                         }

@@ -137,6 +137,7 @@ export default () => {
 
     const {
       amount,
+      from,
     } = { ...params }
 
     let path = !asPath ?
@@ -184,13 +185,19 @@ export default () => {
         updated = true
       }
 
-      if (
-        swap.chain &&
-        !isNaN(amount) &&
-        Number(amount)
-      ) {
-        swap.amount = Number(amount)
-        updated = true
+      if (swap.chain) {
+        if (
+          !isNaN(amount) &&
+          Number(amount)
+        ) {
+          swap.amount = Number(amount)
+          updated = true
+        }
+
+        if (from) {
+          swap.origin = 'y'
+          updated = true
+        }
       }
     }
 
@@ -249,31 +256,38 @@ export default () => {
               true,
             )
         }
+
+        if (
+          origin === 'y' &&
+          _.last(symbols)
+        ) {
+          params.from = _.last(symbols)
+        }
       }
     }
 
-    // if (
-    //   !(
-    //     params.chain ||
-    //     params.asset
-    //   ) &&
-    //   pool_assets_data?.length > 0
-    // ) {
-    //   const {
-    //     id,
-    //     contracts,
-    //   } = { ..._.head(pool_assets_data) }
+    /*if (
+      !(
+        params.chain ||
+        params.asset
+      ) &&
+      pool_assets_data?.length > 0
+    ) {
+      const {
+        id,
+        contracts,
+      } = { ..._.head(pool_assets_data) }
 
-    //   params.chain =
-    //     params.chain ||
-    //     chains_data?.find(c =>
-    //       c?.chain_id === _.head(contracts)?.chain_id
-    //     )?.id
+      params.chain =
+        params.chain ||
+        chains_data?.find(c =>
+          c?.chain_id === _.head(contracts)?.chain_id
+        )?.id
 
-    //   params.asset =
-    //     params.asset ||
-    //     id
-    // }
+      params.asset =
+        params.asset ||
+        id
+    }*/
 
     if (Object.keys(params).length > 0) {
       const {
@@ -347,11 +361,21 @@ export default () => {
     }
 
     if (Object.keys(swap).length > 0) {
-      chain = chain ||
+      console.log(pool_assets_data)
+      chain =
+        chain ||
         _.head(
-          chains_data?.filter(c =>
-            !c?.disabled
-          )
+          (chains_data || [])
+            .filter(c =>
+              !c?.disabled &&
+              (pool_assets_data || [])
+                .findIndex(a =>
+                  (a?.contracts || [])
+                    .findIndex(_c =>
+                      _c?.chain_id === c?.chain_id
+                    ) > -1
+                ) > -1
+            )
         )?.id
     }
 
@@ -1629,6 +1653,7 @@ export default () => {
                                 ) &&
                                 (
                                   <button
+                                    disabled={disabled}
                                     onClick={() => {
                                       setSwap(
                                         {
@@ -1658,18 +1683,40 @@ export default () => {
                                   <div className="tracking-wider text-slate-400 dark:text-slate-600 text-xs">
                                     Balance
                                   </div>
-                                  <Balance
-                                    chainId={chain_id}
-                                    asset={asset}
-                                    contractAddress={(origin === 'x' ?
-                                      x_asset_data :
-                                      y_asset_data
-                                    ).contract_address}
-                                    symbol={(origin === 'x' ?
-                                      x_asset_data :
-                                      y_asset_data
-                                    ).symbol}
-                                  />
+                                  <button
+                                    disabled={disabled}
+                                    onClick={() => {
+                                      const amount = origin === 'x' ?
+                                        x_balance_amount :
+                                        y_balance_amount
+
+                                      if (amount > 0) {
+                                        setSwap(
+                                          {
+                                            ...swap,
+                                            amount,
+                                          }
+                                        )
+                                      }
+                                    }}
+                                  >
+                                    <Balance
+                                      chainId={chain_id}
+                                      asset={asset}
+                                      contractAddress={
+                                        (origin === 'x' ?
+                                          x_asset_data :
+                                          y_asset_data
+                                        ).contract_address
+                                      }
+                                      symbol={
+                                        (origin === 'x' ?
+                                          x_asset_data :
+                                          y_asset_data
+                                        ).symbol
+                                      }
+                                    />
+                                  </button>
                                 </div>
                               )
                             }
@@ -1734,18 +1781,18 @@ export default () => {
                             />
                           </div>
                         </div> :
-                        <div className="flex items-center justify-center space-x-2">
-                          <div>
-                            <TailSpin
-                              color={loader_color(theme)}
-                              width="20"
-                              height="20"
-                            />
-                          </div>
-                          <span className="text-slate-400 dark:text-slate-200 text-lg">
-                            Fetching pair information ...
-                          </span>
+                      <div className="flex items-center justify-center space-x-2">
+                        <div>
+                          <TailSpin
+                            color={loader_color(theme)}
+                            width="20"
+                            height="20"
+                          />
                         </div>
+                        <span className="text-slate-400 dark:text-slate-200 text-lg">
+                          Fetching pair information ...
+                        </span>
+                      </div>
                 )
               }
               {
@@ -1997,7 +2044,12 @@ export default () => {
                       onClick={() => call()}
                       className="w-full bg-gray-200 dark:bg-slate-800 bg-opacity-75 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
                     >
-                      Swap
+                      {
+                        pair &&
+                        !pair.error ?
+                          'Enter Amount' :
+                          'Swap'
+                      }
                     </button> :
                     <Wallet
                       connectChainId={chain_id}
