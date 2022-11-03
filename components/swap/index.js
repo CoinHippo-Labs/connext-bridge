@@ -123,6 +123,7 @@ export default () => {
 
   const [pair, setPair] = useState(null)
   const [pairTrigger, setPairTrigger] = useState(null)
+  const [balanceTrigger, setBalanceTrigger] = useState(null)
 
   // get swap from path
   useEffect(() => {
@@ -314,6 +315,11 @@ export default () => {
           shallow: true,
         },
       )
+
+      setBalanceTrigger(
+        moment()
+          .valueOf()
+      )
     }
 
     setApproveResponse(null)
@@ -361,7 +367,6 @@ export default () => {
     }
 
     if (Object.keys(swap).length > 0) {
-      console.log(pool_assets_data)
       chain =
         chain ||
         _.head(
@@ -630,6 +635,7 @@ export default () => {
       let balance
 
       if (
+        address &&
         provider &&
         contract_address
       ) {
@@ -776,6 +782,10 @@ export default () => {
     setCallResponse(null)
 
     setPairTrigger(
+      moment()
+        .valueOf()
+    )
+    setBalanceTrigger(
       moment()
         .valueOf()
     )
@@ -1108,6 +1118,10 @@ export default () => {
         moment()
           .valueOf()
       )
+      setBalanceTrigger(
+        moment()
+          .valueOf()
+      )
     }
   }
 
@@ -1313,9 +1327,10 @@ export default () => {
     origin ||
     'x'
 
-  const chain_data = chains_data?.find(c =>
-    c?.id === chain
-  )
+  const chain_data = (chains_data || [])
+    .find(c =>
+      c?.id === chain
+    )
   const {
     chain_id,
     name,
@@ -1709,12 +1724,19 @@ export default () => {
                                           y_asset_data
                                         ).contract_address
                                       }
+                                      decimals={
+                                        (origin === 'x' ?
+                                          x_asset_data :
+                                          y_asset_data
+                                        ).decimals
+                                      }
                                       symbol={
                                         (origin === 'x' ?
                                           x_asset_data :
                                           y_asset_data
                                         ).symbol
                                       }
+                                      trigger={balanceTrigger}
                                     />
                                   </button>
                                 </div>

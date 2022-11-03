@@ -442,6 +442,7 @@ export default () => {
       let balance
 
       if (
+        address &&
         provider &&
         contract_address
       ) {

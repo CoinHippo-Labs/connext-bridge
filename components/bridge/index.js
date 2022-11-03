@@ -721,6 +721,7 @@ export default () => {
       let balance
 
       if (
+        address &&
         provider &&
         contract_address
       ) {
@@ -1887,6 +1888,10 @@ export default () => {
                                 <Balance
                                   chainId={source_chain_data.chain_id}
                                   asset={asset}
+                                  contractAddress={source_contract_data?.contract_address}
+                                  decimals={source_decimals}
+                                  symbol={source_symbol}
+                                  trigger={transfersTrigger}
                                 />
                               </button>
                             </div>
