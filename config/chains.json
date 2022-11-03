@@ -251,7 +251,7 @@
       {
         "chainId": "0xa",
         "chainName": "Optimism Mainnet",
-        "rpcUrls": ["https://mainnet.optimism.io"],
+        "rpcUrls": ["https://rpc.ankr.com/optimism", "https://mainnet.optimism.io"],
         "nativeCurrency": {
           "name": "Ether",
           "symbol": "OETH",
