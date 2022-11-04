@@ -145,6 +145,7 @@ export default () => {
   const [callProcessing, setCallProcessing] = useState(null)
   const [xcallResponse, setXcallResponse] = useState(null)
 
+  const [balanceTrigger, setBalanceTrigger] = useState(null)
   const [transfersTrigger, setTransfersTrigger] = useState(null)
 
   // get bridge from path
@@ -191,16 +192,22 @@ export default () => {
           'test' :
           'usdc'
 
-      const source_chain_data = chains_data?.find(c =>
-        c?.id === source_chain
-      )
-      const destination_chain_data = chains_data?.find(c =>
-        c?.id === destination_chain
-      )
-      const asset_data = assets_data?.find(a =>
-        a?.id === asset ||
-        equals_ignore_case(a?.symbol, asset)
-      )
+      const source_chain_data = (chains_data || [])
+        .find(c =>
+          c?.id === source_chain
+        )
+      const destination_chain_data = (chains_data || [])
+        .find(c =>
+          c?.id === destination_chain
+        )
+      const asset_data = (assets_data || [])
+        .find(a =>
+          a?.id === asset ||
+          equals_ignore_case(
+            a?.symbol,
+            asset,
+          )
+        )
 
       if (source_chain_data) {
         bridge.source_chain = source_chain
@@ -245,46 +252,54 @@ export default () => {
       } = { ...bridge }
 
       if (
-        chains_data?.findIndex(c =>
-          !c?.disabled &&
-          c?.id === source_chain
-        ) > -1
+        (chains_data || [])
+          .findIndex(c =>
+            !c?.disabled &&
+            c?.id === source_chain
+          ) > -1
       ) {
         params.source_chain = source_chain
 
         if (
           asset &&
-          assets_data?.findIndex(a =>
-            a?.id === asset &&
-            a.contracts?.findIndex(c =>
-              c?.chain_id === chains_data.find(_c =>
-                _c?.id === source_chain
-              )?.chain_id
+          (assets_data || [])
+            .findIndex(a =>
+              a?.id === asset &&
+              (a.contracts || [])
+                .findIndex(c =>
+                  c?.chain_id === chains_data
+                    .find(_c =>
+                      _c?.id === source_chain
+                    )?.chain_id
+                ) > -1
             ) > -1
-          ) > -1
         ) {
           params.asset = asset
         }
       }
 
       if (
-        chains_data?.findIndex(c =>
-          !c?.disabled &&
-          c?.id === destination_chain
-        ) > -1
+        (chains_data || [])
+          .findIndex(c =>
+            !c?.disabled &&
+            c?.id === destination_chain
+          ) > -1
       ) {
         params.destination_chain = destination_chain
 
         if (
           asset &&
-          assets_data?.findIndex(a =>
-            a?.id === asset &&
-            a.contracts?.findIndex(c =>
-              c?.chain_id === chains_data.find(_c =>
-                _c?.id === destination_chain
-              )?.chain_id
+          (assets_data || [])
+            .findIndex(a =>
+              a?.id === asset &&
+              (a.contracts || [])
+                .findIndex(c =>
+                  c?.chain_id === chains_data
+                    .find(_c =>
+                      _c?.id === destination_chain
+                    )?.chain_id
+                ) > -1
             ) > -1
-          ) > -1
         ) {
           params.asset = asset
         }
@@ -333,11 +348,17 @@ export default () => {
           shallow: true,
         },
       )
+
+      setBalanceTrigger(
+        moment()
+          .valueOf()
+      )
     }
 
-    const destination_chain_data = chains_data?.find(c =>
-      c?.id === destination_chain
-    )
+    const destination_chain_data = (chains_data || [])
+      .find(c =>
+        c?.id === destination_chain
+      )
     const {
       chain_id,
     } = { ...destination_chain_data }
@@ -346,20 +367,27 @@ export default () => {
       contract_address,
     } = { ...destination_contract_data }
 
-    const liquidity_amount = _.sum(
-      (asset_balances_data?.[chain_id] || [])
-        .filter(a => equals_ignore_case(a?.contract_address, contract_address))
-        .map(a => Number(
-          utils.formatUnits(
-            BigNumber.from(
-              a?.amount ||
-              '0'
-            ),
-            destination_decimals,
+    const liquidity_amount =
+      _.sum(
+        (asset_balances_data?.[chain_id] || [])
+          .filter(a =>
+            equals_ignore_case(
+              a?.contract_address,
+              contract_address,
+            )
           )
-        )
+          .map(a =>
+            Number(
+              utils.formatUnits(
+                BigNumber.from(
+                  a?.amount ||
+                  '0'
+                ),
+                destination_decimals,
+              )
+            )
+          )
       )
-    )
 
     setOptions(
       {
@@ -388,37 +416,51 @@ export default () => {
       destination_chain,
     } = { ...bridge }
 
+    const chain_data = (chains_data || [])
+      .find(c =>
+        c?.chain_id === wallet_chain_id
+      )
     const {
       id,
-    } = {
-      ...chains_data?.find(c =>
-        c?.chain_id === chain_id
-      ),
-    }
+    } = { ...chain_data }
 
     if (
       asPath &&
-      id &&
-      !(
-        source_chain &&
-        destination_chain
-      ) &&
-      destination_chain !== id
+      id
     ) {
-      const params = params_to_obj(
-        asPath.indexOf('?') > -1 &&
-        asPath.substring(
-          asPath.indexOf('?') + 1,
-        )
-      )
-
       if (
-        !params?.source_chain &&
-        !asPath.includes('from-') &&
-        chains_data?.findIndex(c =>
-          !c?.disabled &&
-          c?.id === id
-        ) > -1
+        !(
+          source_chain &&
+          destination_chain
+        ) &&
+        !equals_ignore_case(
+          id,
+          destination_chain,
+        )
+      ) {
+        const params = params_to_obj(
+          asPath.indexOf('?') > -1 &&
+          asPath.substring(
+            asPath.indexOf('?') + 1,
+          )
+        )
+
+        if (
+          !params?.source_chain &&
+          !asPath.includes('from-') &&
+          chains_data?.findIndex(c =>
+            !c?.disabled &&
+            c?.id === id
+          ) > -1
+        ) {
+          source_chain = id
+        }
+      }
+      else if (
+        !equals_ignore_case(
+          id,
+          source_chain,
+        )
       ) {
         source_chain = id
       }
@@ -426,24 +468,42 @@ export default () => {
       getBalances(id)
     }
 
-    if (Object.keys(bridge).length > 0) {
+    if (
+      Object.keys(bridge).length > 0 ||
+      [
+        '/',
+      ].includes(asPath)
+    ) {
       source_chain =
         source_chain ||
         _.head(
-          chains_data?.filter(c =>
-            !c?.disabled &&
-            c?.id !== destination_chain
-          )
+          (chains_data || [])
+            .filter(c =>
+              !c?.disabled &&
+              c?.id !== destination_chain
+            )
         )?.id
 
       destination_chain =
-        destination_chain ||
-        _.head(
-          chains_data?.filter(c =>
-            !c?.disabled &&
-            c?.id !== source_chain
-          )
-        )?.id
+        destination_chain &&
+        !equals_ignore_case(
+          destination_chain,
+          source_chain,
+        ) ?
+          destination_chain :
+          bridge.source_chain &&
+          !equals_ignore_case(
+            bridge.source_chain,
+            source_chain,
+          ) ?
+            bridge.source_chain :
+            _.head(
+              (chains_data || [])
+                .filter(c =>
+                  !c?.disabled &&
+                  c?.id !== source_chain
+                )
+            )?.id
     }
 
     setBridge(
@@ -897,6 +957,10 @@ export default () => {
     setCallProcessing(null)
     setXcallResponse(null)
 
+    setBalanceTrigger(
+      moment()
+        .valueOf()
+    )
     setTransfersTrigger(
       moment()
         .valueOf()
@@ -1390,6 +1454,10 @@ export default () => {
     ) {
       await sleep(2 * 1000)
 
+      setBalanceTrigger(
+        moment()
+          .valueOf()
+      )
       setTransfersTrigger(
         moment()
           .valueOf()
@@ -1546,10 +1614,11 @@ export default () => {
           <div className="w-full max-w-lg space-y-3">
             <div className="flex items-center justify-between space-x-2 pb-1">
               <div className="space-y-1 ml-1 sm:ml-2">
-                <h1 className="tracking-widest text-base sm:text-xl font-semibold">
+                <h1 className="tracking-wider text-base sm:text-xl font-semibold">
                   Bridge
                 </h1>
                 {
+                  false &&
                   asPath?.includes('from-') &&
                   asPath.includes('to-') &&
                   title &&
@@ -1588,8 +1657,7 @@ export default () => {
             <div
               className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-8 sm:pt-10 pb-6 sm:pb-8 px-4 sm:px-6"
               style={
-                checkSupport() &&
-                amount > 0 ?
+                checkSupport() ?
                   {
                     boxShadow,
                     WebkitBoxShadow: boxShadow,
@@ -1737,6 +1805,10 @@ export default () => {
                         {
                           ...bridge,
                           asset: a,
+                          amount:
+                            a !== asset ?
+                              null :
+                              amount,
                         }
                       )
 
@@ -1891,7 +1963,7 @@ export default () => {
                                   contractAddress={source_contract_data?.contract_address}
                                   decimals={source_decimals}
                                   symbol={source_symbol}
-                                  trigger={transfersTrigger}
+                                  trigger={balanceTrigger}
                                 />
                               </button>
                             </div>
@@ -2015,10 +2087,8 @@ export default () => {
                       }
                       {
                         checkSupport() &&
-                        (
-                          web3_provider ||
-                          amount > 0
-                        ) &&
+                        web3_provider &&
+                        amount > 0 &&
                         (
                           <div className="space-y-4">
                             {
@@ -2030,19 +2100,12 @@ export default () => {
                               !collapse &&
                               (
                                 <div className="space-y-2">
-                                  <div className="flex items-center space-x-2 sm:mx-3">
+                                  {/*<div className="flex items-center space-x-2 sm:mx-3">
                                     <span className="tracking-wider text-slate-400 dark:text-slate-600 font-normal">
                                       Fees Breakdown
                                     </span>
-                                    {/*feeEstimateCooldown > 0 &&
-                                      (
-                                        <div className="bg-slate-100 dark:bg-slate-800 rounded-lg font-medium py-1 px-2">
-                                          {feeEstimateCooldown}s
-                                        </div>
-                                      )
-                                    */}
                                   </div>
-                                  <div className="w-full h-0.25 bg-slate-200 dark:bg-slate-700 sm:px-1" />
+                                  <div className="w-full h-0.25 bg-slate-200 dark:bg-slate-700 sm:px-1" />*/}
                                   <div className="space-y-2.5 sm:mx-3">
                                     {
                                       !forceSlow &&
@@ -2081,7 +2144,7 @@ export default () => {
                                                 Destination Gas Fee
                                               </div>
                                             </Tooltip>
-                                            {feeEstimating ?
+                                            {false && feeEstimating ?
                                               <div className="flex items-center space-x-1.5">
                                                 <span className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
                                                   estimating
@@ -2341,13 +2404,15 @@ export default () => {
                                         .substring(
                                           0,
                                           status === 'failed' &&
-                                          error_patterns.findIndex(c =>
-                                            message?.indexOf(c) > -1
-                                          ) > -1 ?
+                                          error_patterns
+                                            .findIndex(c =>
+                                              message?.indexOf(c) > -1
+                                            ) > -1 ?
                                             message.indexOf(
-                                              error_patterns.find(c =>
-                                                message.indexOf(c) > -1
-                                              )
+                                              error_patterns
+                                                .find(c =>
+                                                  message.indexOf(c) > -1
+                                                )
                                             ) :
                                             undefined,
                                         )

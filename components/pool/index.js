@@ -228,18 +228,17 @@ export default () => {
       chain,
     } = { ...pool }
 
+    const chain_data = (chains_data || [])
+      .find(c =>
+        c?.chain_id === chain_id
+      )
     const {
       id,
-    } = {
-      ...chains_data?.find(c =>
-        c?.chain_id === chain_id
-      ),
-    }
+    } = { ...chain_data }
 
     if (
       asPath &&
-      id &&
-      !chain
+      id
     ) {
       const params = params_to_obj(
         asPath.indexOf('?') > -1 &&
@@ -248,16 +247,18 @@ export default () => {
 
       if (
         !params?.chain &&
-        !asPath.includes('on-') &&
-        chains_data?.findIndex(c =>
-          !c?.disabled &&
-          c?.id === id
-        ) > -1
+        (chains_data || [])
+          .findIndex(c =>
+            !c?.disabled &&
+            c?.id === id
+          ) > -1
       ) {
-        setPool({
-          ...pool,
-          chain: id,
-        })
+        setPool(
+          {
+            ...pool,
+            chain: id,
+          }
+        )
       }
 
       getBalances(id)

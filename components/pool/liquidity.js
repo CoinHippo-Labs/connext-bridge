@@ -1209,7 +1209,6 @@ export default ({
                 <div className="flex items-center space-x-2.5">
                   {[
                     3.0,
-                    2.0,
                     1.0,
                     0.5,
                   ].map((p, i) => (
@@ -1645,13 +1644,15 @@ export default ({
                                 .substring(
                                   0,
                                   status === 'failed' &&
-                                  error_patterns.findIndex(c =>
-                                    message?.indexOf(c) > -1
-                                  ) > -1 ?
+                                  error_patterns
+                                    .findIndex(c =>
+                                      message?.indexOf(c) > -1
+                                    ) > -1 ?
                                     message.indexOf(
-                                      error_patterns.find(c =>
-                                        message.indexOf(c) > -1
-                                      )
+                                      error_patterns
+                                        .find(c =>
+                                          message.indexOf(c) > -1
+                                        )
                                     ) :
                                     undefined,
                                 )

@@ -15,10 +15,12 @@ export default ({
   className = '',
 }) => {
   const {
+    preferences,
     rpc_providers,
   } = useSelector(state =>
     (
       {
+        preferences: state.preferences,
         rpc_providers: state.rpc_providers,
       }
     ),
@@ -27,6 +29,9 @@ export default ({
   const {
     rpcs,
   } = { ...rpc_providers }
+  const {
+    theme,
+  } = { ...preferences }
 
   const [gasPrice, setGasPrice] = useState(null)
 
@@ -67,7 +72,7 @@ export default ({
   }, [chainId, rpcs])
 
   return chainId ?
-    <div className={`flex items-center justify-center text-blue-500 dark:text-blue-500 space-x-1 ${className}`}>
+    <div className={`flex items-center justify-center text-slate-400 dark:text-slate-600 space-x-1 ${className}`}>
       <MdLocalGasStation
         size={iconSize}
       />
@@ -98,7 +103,11 @@ export default ({
             -
           </span> :
           <RotatingSquare
-            color={loader_color('light')}
+            color={
+              theme === 'light' ?
+                '#94a3b8' :
+                '#475569'
+            }
             width="16"
             height="16"
           />

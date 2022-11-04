@@ -61,13 +61,12 @@ export default ({
     },
     {
       label: 'Slippage Tolerance',
-      tooltip: 'The maximum percentage you are willing to lose due to market changes.',
+      tooltip: 'Your transfer will not complete if the asset price changes by more than this percentage.',
       name: 'slippage',
       type: 'number',
       placeholder: '0.00',
       presets: [
         3.0,
-        2.0,
         1.0,
         0.5,
       ],

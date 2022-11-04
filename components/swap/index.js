@@ -332,18 +332,17 @@ export default () => {
       chain,
     } = { ...swap }
 
+    const chain_data = (chains_data || [])
+      .find(c =>
+        c?.chain_id === wallet_chain_id
+      )
     const {
       id,
-    } = {
-      ...chains_data?.find(c =>
-        c?.chain_id === chain_id
-      ),
-    }
+    } = { ...chain_data }
 
     if (
       asPath &&
-      id &&
-      !chain
+      id
     ) {
       const params = params_to_obj(
         asPath.indexOf('?') > -1 &&
@@ -354,11 +353,11 @@ export default () => {
 
       if (
         !params?.chain &&
-        !asPath.includes('on-') &&
-        chains_data?.findIndex(c =>
-          !c?.disabled &&
-          c?.id === id
-        ) > -1
+        (chains_data || [])
+          .findIndex(c =>
+            !c?.disabled &&
+            c?.id === id
+          ) > -1
       ) {
         chain = id
       }
@@ -1445,10 +1444,11 @@ export default () => {
           <div className="w-full max-w-lg space-y-3">
             <div className="flex items-center justify-between space-x-2 pb-1">
               <div className="space-y-1 ml-1 sm:ml-2">
-                <h1 className="tracking-widest text-base sm:text-xl font-semibold">
+                <h1 className="tracking-wider text-base sm:text-xl font-semibold">
                   Swap
                 </h1>
                 {
+                  false &&
                   asPath?.includes('on-') &&
                   title &&
                   (
@@ -1485,13 +1485,15 @@ export default () => {
             </div>
             <div
               className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-4 sm:pt-6 pb-6 sm:pb-8 px-4 sm:px-6"
-              style={amount > 0 ?
-                {
-                  boxShadow,
-                  WebkitBoxShadow: boxShadow,
-                  MozBoxShadow: boxShadow,
-                } :
-                undefined
+              style={
+                chain &&
+                amount ?
+                  {
+                    boxShadow,
+                    WebkitBoxShadow: boxShadow,
+                    MozBoxShadow: boxShadow,
+                  } :
+                  undefined
               }
             >
               <div className="space-y-2">
@@ -1992,13 +1994,15 @@ export default () => {
                                         .substring(
                                           0,
                                           status === 'failed' &&
-                                          error_patterns.findIndex(c =>
-                                            message?.indexOf(c) > -1
-                                          ) > -1 ?
+                                          error_patterns
+                                            .findIndex(c =>
+                                              message?.indexOf(c) > -1
+                                            ) > -1 ?
                                             message.indexOf(
-                                              error_patterns.find(c =>
-                                                message.indexOf(c) > -1
-                                              )
+                                              error_patterns
+                                                .find(c =>
+                                                  message.indexOf(c) > -1
+                                                )
                                             ) :
                                             undefined,
                                         )

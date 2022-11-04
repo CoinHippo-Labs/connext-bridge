@@ -343,9 +343,12 @@ export default () => {
               chains_config[domain_id] = {
                 providers: rpc_urls,
                 assets: assets_data
-                  .filter(a => a?.contracts?.findIndex(c =>
-                    c?.chain_id === chain_id
-                  ) > -1)
+                  .filter(a =>
+                    (a?.contracts || [])
+                    .findIndex(c =>
+                      c?.chain_id === chain_id
+                    ) > -1
+                  )
                   .map(a => {
                     const {
                       contracts,
@@ -355,9 +358,10 @@ export default () => {
                       symbol,
                     } = { ...a }
 
-                    const contract_data = contracts.find(c =>
-                      c?.chain_id === chain_id
-                    )
+                    const contract_data = contracts
+                      .find(c =>
+                        c?.chain_id === chain_id
+                      )
                     const {
                       contract_address,
                     } = { ...contract_data }
@@ -470,19 +474,25 @@ export default () => {
                     balance,
                   } = { ...l }
 
-                  const chain_data = chains_data.find(c =>
-                    c?.domain_id === domain
-                  )
+                  const chain_data = chains_data
+                    .find(c =>
+                      c?.domain_id === domain
+                    )
                   const {
                     chain_id,
                   } = { ...chain_data }
 
-                  const asset_data = assets_data.find(a =>
-                    a?.contracts?.findIndex(c =>
-                      c?.chain_id === chain_id &&
-                      equals_ignore_case(c?.contract_address, local)
-                    ) > -1
-                  )
+                  const asset_data = assets_data
+                    .find(a =>
+                      (a?.contracts || [])
+                        .findIndex(c =>
+                          c?.chain_id === chain_id &&
+                          equals_ignore_case(
+                            c?.contract_address,
+                            local,
+                          )
+                        ) > -1
+                    )
 
                   const amount =
                     BigInt(
@@ -544,9 +554,10 @@ export default () => {
             contracts,
           } = { ...asset_data }
 
-          const contract_data = contracts?.find(c =>
-            c?.chain_id === chain_id
-          )
+          const contract_data = (contracts || [])
+            .find(c =>
+              c?.chain_id === chain_id
+            )
           const {
             contract_address,
           } = { ...contract_data }
@@ -656,25 +667,29 @@ export default () => {
                 asset_data,
                 contract_data,
                 symbols,
-                liquidity: Number(
-                  liquidity,
-                ),
-                volume: Number(
-                  volume,
-                ),
-                fees: Number(
-                  fees,
-                ),
-                rate: Number(
-                  utils.formatUnits(
-                    BigNumber.from(
-                      rate ||
-                      '0'
-                    ),
-                    _.last(decimals) ||
-                    18,
-                  )
-                ),
+                liquidity:
+                  Number(
+                    liquidity,
+                  ),
+                volume:
+                  Number(
+                    volume,
+                  ),
+                fees:
+                  Number(
+                    fees,
+                  ),
+                rate:
+                  Number(
+                    utils.formatUnits(
+                      BigNumber.from(
+                        rate ||
+                        '0'
+                      ),
+                      _.last(decimals) ||
+                      18,
+                    )
+                  ),
               })
             } catch (error) {
               console.log(
@@ -832,11 +847,14 @@ export default () => {
                 connectChainId={default_chain_id}
               />
             </div>
-            {web3_provider && (
-              <Chains
-                chain_id={chain_id}
-              />
-            )}
+            {
+              web3_provider &&
+              (
+                <Chains
+                  chain_id={chain_id}
+                />
+              )
+            }
             <Theme />
           </div>
         </div>
