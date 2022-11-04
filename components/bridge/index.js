@@ -515,7 +515,114 @@ export default () => {
         destination_chain,
       }
     )
-  }, [asPath, wallet_chain_id, chains_data])
+  }, [asPath, chains_data])
+
+  // update balances
+  useEffect(() => {
+    let {
+      source_chain,
+      destination_chain,
+    } = { ...bridge }
+
+    const chain_data = (chains_data || [])
+      .find(c =>
+        c?.chain_id === wallet_chain_id
+      )
+    const {
+      id,
+    } = { ...chain_data }
+
+    if (
+      asPath &&
+      id
+    ) {
+      if (
+        !(
+          source_chain &&
+          destination_chain
+        ) &&
+        !equals_ignore_case(
+          id,
+          destination_chain,
+        )
+      ) {
+        const params = params_to_obj(
+          asPath.indexOf('?') > -1 &&
+          asPath.substring(
+            asPath.indexOf('?') + 1,
+          )
+        )
+
+        if (
+          !params?.source_chain &&
+          !asPath.includes('from-') &&
+          (chains_data || [])
+            .findIndex(c =>
+              !c?.disabled &&
+              c?.id === id
+            ) > -1
+        ) {
+          source_chain = id
+        }
+      }
+      else if (
+        !equals_ignore_case(
+          id,
+          source_chain,
+        )
+      ) {
+        source_chain = id
+      }
+
+      getBalances(id)
+    }
+
+    if (
+      Object.keys(bridge).length > 0 ||
+      [
+        '/',
+      ].includes(asPath)
+    ) {
+      source_chain =
+        source_chain ||
+        _.head(
+          (chains_data || [])
+            .filter(c =>
+              !c?.disabled &&
+              c?.id !== destination_chain
+            )
+        )?.id
+
+      destination_chain =
+        destination_chain &&
+        !equals_ignore_case(
+          destination_chain,
+          source_chain,
+        ) ?
+          destination_chain :
+          bridge.source_chain &&
+          !equals_ignore_case(
+            bridge.source_chain,
+            source_chain,
+          ) ?
+            bridge.source_chain :
+            _.head(
+              (chains_data || [])
+                .filter(c =>
+                  !c?.disabled &&
+                  c?.id !== source_chain
+                )
+            )?.id
+    }
+
+    setBridge(
+      {
+        ...bridge,
+        source_chain,
+        destination_chain,
+      }
+    )
+  }, [wallet_chain_id, chains_data])
 
   // update balances
   useEffect(() => {

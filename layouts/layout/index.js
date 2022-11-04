@@ -171,9 +171,10 @@ export default ({
             className="main w-full bg-slate-50 dark:bg-black"
             style={{
               minHeight: 'calc(100vh - 44px)',
-              backgroundColor: theme === 'light' ?
-                '#f5f5f5' :
-                '#121111',
+              backgroundColor:
+                theme === 'light' ?
+                  '#f5f5f5' :
+                  '#111111',
               // backgroundImage: `url("/images/background${theme === 'light' ? '_white' : ''}.png")`,
               // backgroundSize: 'cover',
             }}
