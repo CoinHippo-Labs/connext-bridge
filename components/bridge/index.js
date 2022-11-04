@@ -1604,7 +1604,7 @@ export default () => {
   const boxShadow = `${color}${theme === 'light' ? '99' : 'ff'} 0px 16px 128px 8px`
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
+    <div className="overflow-y-auto grid grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
       <div className="hidden lg:block col-span-0 lg:col-span-2" />
       <div className="col-span-1 lg:col-span-4">
         <div className="mt-4 sm:mt-8">
@@ -1972,7 +1972,7 @@ export default () => {
                       </div>
                       <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end">
                         <DebounceInput
-                          debounceTimeout={300}
+                          debounceTimeout={500}
                           size="small"
                           type="number"
                           placeholder="0.00"
@@ -2004,6 +2004,7 @@ export default () => {
 
                             value = value < 0 ?
                               0 :
+                              value &&
                               !isNaN(value) ?
                                 parseFloat(
                                   Number(value)
@@ -2015,10 +2016,9 @@ export default () => {
                               {
                                 ...bridge,
                                 amount:
-                                  value &&
-                                  !isNaN(value) ?
-                                    Number(value) :
-                                    value,
+                                  typeof value === 'number' ?
+                                    value :
+                                    null,
                               }
                             )
                           }}

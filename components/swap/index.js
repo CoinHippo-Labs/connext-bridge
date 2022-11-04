@@ -1747,7 +1747,7 @@ export default () => {
                           </div>
                           <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end">
                             <DebounceInput
-                              debounceTimeout={300}
+                              debounceTimeout={500}
                               size="small"
                               type="number"
                               placeholder="0.00"

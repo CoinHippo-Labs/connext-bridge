@@ -57,16 +57,18 @@ export default ({
           }
 
           if (
-            response.findIndex(t =>
-              transfers?.findIndex(_t =>
-                _t?.transfer_id
-              ) < 0 &&
-              ![
-                XTransferStatus.Executed,
-                XTransferStatus.CompletedFast,
-                XTransferStatus.CompletedSlow,
-              ].includes(t?.status)
-            ) > -1
+            response
+              .findIndex(t =>
+                (transfers || [])
+                  .findIndex(_t =>
+                    _t?.transfer_id
+                  ) < 0 &&
+                ![
+                  XTransferStatus.Executed,
+                  XTransferStatus.CompletedFast,
+                  XTransferStatus.CompletedSlow,
+                ].includes(t?.status)
+              ) > -1
           ) {
             setCollapse(false)
           }
@@ -97,23 +99,24 @@ export default ({
     return () => clearInterval(interval)
   }, [sdk, address, trigger])
 
-  const transfersComponent = _.slice(
-    (transfers || [])
-      .map((t, i) => {
-        return (
-          <div
-            key={i}
-            className="w-70 mx-auto"
-          >
-            <TransferStatus
-              data={t}
-            />
-          </div>
-        )
-      }),
-    0,
-    NUM_TRANSFER_DISPLAY,
-  )
+  const transfersComponent =
+    _.slice(
+      (transfers || [])
+        .map((t, i) => {
+          return (
+            <div
+              key={i}
+              className="w-70 mx-auto"
+            >
+              <TransferStatus
+                data={t}
+              />
+            </div>
+          )
+        }),
+      0,
+      NUM_TRANSFER_DISPLAY,
+    )
 
   return transfers?.length > 0 &&
     (

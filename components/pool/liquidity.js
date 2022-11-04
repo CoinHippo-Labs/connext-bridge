@@ -1153,7 +1153,7 @@ export default ({
               </Tooltip>
               <div className="flex items-center space-x-3">
                 <DebounceInput
-                  debounceTimeout={300}
+                  debounceTimeout={500}
                   size="small"
                   type="number"
                   placeholder="Slippage Tolerance"
@@ -1236,7 +1236,7 @@ export default ({
               </div>
               <div className="flex items-center space-x-3">
                 <DebounceInput
-                  debounceTimeout={300}
+                  debounceTimeout={500}
                   size="small"
                   type="number"
                   placeholder="Transaction Deadline (minutes)"
@@ -1358,7 +1358,7 @@ export default ({
               <div className="space-y-1">
                 <div className="flex items-center justify-between space-x-3">
                   <DebounceInput
-                    debounceTimeout={300}
+                    debounceTimeout={500}
                     size="small"
                     type="number"
                     placeholder="0.00"
@@ -1482,7 +1482,7 @@ export default ({
               <div className="space-y-1">
                 <div className="flex items-center justify-between space-x-3">
                   <DebounceInput
-                    debounceTimeout={300}
+                    debounceTimeout={500}
                     size="small"
                     type="number"
                     placeholder="0.00"
@@ -1760,7 +1760,7 @@ export default ({
               </div>
               <div className="space-y-1">
                 <DebounceInput
-                  debounceTimeout={300}
+                  debounceTimeout={500}
                   size="small"
                   type="number"
                   placeholder="0.00"

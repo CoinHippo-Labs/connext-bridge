@@ -299,7 +299,7 @@ export default ({
                       type === 'number' ?
                         <div className="flex items-center space-x-3">
                           <DebounceInput
-                            debounceTimeout={300}
+                            debounceTimeout={500}
                             size={
                               size ||
                               'small'

@@ -88,7 +88,7 @@ export default () => {
 
   const router = useRouter()
   const {
-    asPath,
+    pathname,
   } = { ...router }
 
   const [hiddenStatus, setHiddenStatus] = useState(false)
@@ -746,7 +746,7 @@ export default () => {
       )
 
     return () => clearInterval(interval)
-  }, [asPath, sdk, chains_data, pool_assets_data])
+  }, [pathname, sdk, chains_data, pool_assets_data])
 
   // ens
   useEffect(() => {
