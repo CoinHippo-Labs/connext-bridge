@@ -448,15 +448,17 @@ export default () => {
         if (
           !params?.source_chain &&
           !asPath.includes('from-') &&
-          chains_data?.findIndex(c =>
-            !c?.disabled &&
-            c?.id === id
-          ) > -1
+          (chains_data || [])
+            .findIndex(c =>
+              !c?.disabled &&
+              c?.id === id
+            ) > -1
         ) {
           source_chain = id
         }
       }
       else if (
+        !asPath.includes('from-') &&
         !equals_ignore_case(
           id,
           source_chain,
