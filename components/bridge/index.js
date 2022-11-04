@@ -1226,9 +1226,12 @@ export default () => {
         slippage:
           (
             !receiveLocal &&
-            typeof slippage === 'number' ?
-              slippage :
-              DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE
+            (
+              typeof slippage === 'number' ?
+                slippage :
+                DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE
+            ) *
+            100
           )
           .toString(),
         callData:
@@ -1604,7 +1607,7 @@ export default () => {
   const boxShadow = `${color}${theme === 'light' ? '99' : 'ff'} 0px 16px 128px 8px`
 
   return (
-    <div className="overflow-y-auto grid grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
+    <div className="grid grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
       <div className="hidden lg:block col-span-0 lg:col-span-2" />
       <div className="col-span-1 lg:col-span-4">
         <div className="mt-4 sm:mt-8">

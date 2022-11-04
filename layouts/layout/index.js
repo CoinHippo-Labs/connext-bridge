@@ -179,7 +179,7 @@ export default ({
             }}
           >
             <Navbar />
-            <div className="w-full px-2 sm:px-4">
+            <div className="w-full px-2 sm:px-4 overflow-y-scroll">
               {children}
             </div>
           </div>

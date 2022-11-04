@@ -247,6 +247,7 @@ export default () => {
 
       if (
         !params?.chain &&
+        !asPath.includes('on-') &&
         (chains_data || [])
           .findIndex(c =>
             !c?.disabled &&
