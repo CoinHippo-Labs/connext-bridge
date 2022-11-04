@@ -164,7 +164,7 @@ export default ({
         data-layout="layout"
         data-background={theme}
         data-navbar={theme}
-        className={`antialiased disable-scrollbars font-sans text-sm ${theme}`}
+        className={`antialiased ${'overflow-y-scroll' || 'disable-scrollbars'} font-sans text-sm ${theme}`}
       >
         <div className="wrapper">
           <div
@@ -180,7 +180,7 @@ export default ({
             }}
           >
             <Navbar />
-            <div className="w-full px-2 sm:px-4 overflow-y-scroll">
+            <div className="w-full px-2 sm:px-4">
               {children}
             </div>
           </div>
