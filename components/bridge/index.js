@@ -130,6 +130,7 @@ export default () => {
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [buttonDirection, setButtonDirection] = useState(1)
   const [collapse, setCollapse] = useState(true)
+  const [slippageEditing, setSlippageEditing] = useState(false)
 
   const [fee, setFee] = useState(null)
   const [feeEstimating, setFeeEstimating] = useState(null)
@@ -1751,6 +1752,7 @@ export default () => {
                     Object.entries(options)
                       .filter(([k, v]) =>
                         ![
+                          'slippage',
                         ].includes(k)
                       )
                   ),
@@ -1758,6 +1760,7 @@ export default () => {
                     Object.entries(DEFAULT_OPTIONS)
                       .filter(([k, v]) =>
                         ![
+                          'slippage',
                         ].includes(k)
                       )
                   ),
@@ -2318,6 +2321,144 @@ export default () => {
                               (
                                 <>
                                   {
+                                    !receiveLocal &&
+                                    (
+                                      <div className="flex items-start justify-between space-x-1 sm:mx-3">
+                                        <Tooltip
+                                          placement="top"
+                                          content="Your transfer will not complete if the asset price changes by more than this percentage."
+                                          className="z-50 bg-black text-white text-xs"
+                                        >
+                                          <div className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
+                                            Slippage Tolerance
+                                          </div>
+                                        </Tooltip>
+                                        <div className="flex flex-col sm:items-end space-y-1.5">
+                                          {slippageEditing ?
+                                            <>
+                                              <div className="flex items-center space-x-1.5">
+                                                <DebounceInput
+                                                  debounceTimeout={500}
+                                                  size="small"
+                                                  type="number"
+                                                  placeholder="0.00"
+                                                  value={
+                                                    typeof slippage === 'number' &&
+                                                    slippage >= 0 ?
+                                                      slippage :
+                                                      ''
+                                                  }
+                                                  onChange={e => {
+                                                    const regex = /^[0-9.\b]+$/
+
+                                                    let value
+
+                                                    if (
+                                                      e.target.value === '' ||
+                                                      regex.test(e.target.value)
+                                                    ) {
+                                                      value = e.target.value
+                                                    }
+
+                                                    value =
+                                                      value <= 0 ||
+                                                      value > 100 ?
+                                                        DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
+                                                        value
+
+                                                    const _data = {
+                                                      ...options,
+                                                      slippage:
+                                                        value &&
+                                                        !isNaN(value) ?
+                                                        parseFloat(
+                                                          Number(value)
+                                                            .toFixed(2)
+                                                        ) :
+                                                        value,
+                                                    }
+
+                                                    console.log(
+                                                      '[Options]',
+                                                      _data,
+                                                    )
+
+                                                    setOptions(_data)
+                                                  }}
+                                                  onWheel={e => e.target.blur()}
+                                                  onKeyDown={e =>
+                                                    [
+                                                      'e',
+                                                      'E',
+                                                      '-',
+                                                    ].includes(e.key) &&
+                                                    e.preventDefault()
+                                                  }
+                                                  className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1 px-2`}
+                                                />
+                                                <button
+                                                  onClick={() => setSlippageEditing(false)}
+                                                  className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                                                >
+                                                  <BiCheckCircle
+                                                    size={16}
+                                                  />
+                                                </button>
+                                              </div>
+                                              <div className="flex items-center space-x-1.5 -mr-1.5">
+                                                {
+                                                  [
+                                                    3.0,
+                                                    1.0,
+                                                    0.5,
+                                                  ]
+                                                  .map((s, i) => (
+                                                    <div
+                                                      key={i}
+                                                      onClick={() => {
+                                                        const _data = {
+                                                          ...options,
+                                                          slippage: s,
+                                                        }
+
+                                                        console.log(
+                                                          '[Options]',
+                                                          _data,
+                                                        )
+
+                                                        setOptions(_data)
+                                                        setSlippageEditing(false)
+                                                      }}
+                                                      className={`${slippage === s ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-semibold'} rounded cursor-pointer text-xs py-0.5 px-1.5`}
+                                                    >
+                                                      {s} %
+                                                    </div>
+                                                  ))
+                                                }
+                                              </div>
+                                            </> :
+                                            <div className="flex items-center space-x-1.5">
+                                              <span className="font-semibold">
+                                                {number_format(
+                                                  slippage,
+                                                  '0,0.00',
+                                                )}%
+                                              </span>
+                                              <button
+                                                onClick={() => setSlippageEditing(true)}
+                                                className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                                              >
+                                                <BiEditAlt
+                                                  size={16}
+                                                />
+                                              </button>
+                                            </div>
+                                          }
+                                        </div>
+                                      </div>
+                                    )
+                                  }
+                                  {
                                     asset_balances_data &&
                                     amount > liquidity_amount &&
                                     (
@@ -2432,7 +2573,10 @@ export default () => {
                       !xcallResponse ?
                         <button
                           disabled={disabled}
-                          onClick={() => call()}
+                          onClick={() => {
+                            setSlippageEditing(false)
+                            call()
+                          }}
                           className={`w-full ${disabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'} rounded-xl flex items-center ${calling && !approving && callProcessing ? 'justify-center' : 'justify-center sm:text-lg'} text-white text-base py-3 sm:py-4 px-2 sm:px-3`}
                         >
                           <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>

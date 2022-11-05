@@ -59,7 +59,7 @@ export default ({
       name: 'infiniteApprove',
       type: 'switch',
     },
-    {
+    /*{
       label: 'Slippage Tolerance',
       tooltip: 'Your transfer will not complete if the asset price changes by more than this percentage.',
       name: 'slippage',
@@ -71,7 +71,7 @@ export default ({
         0.5,
       ],
       postfix: '%',
-    },
+    },*/
     {
       label: 'Bridge Path',
       name: 'forceSlow',
