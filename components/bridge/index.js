@@ -153,26 +153,30 @@ export default () => {
   useEffect(() => {
     let updated = false
 
-    const params = params_to_obj(
-      asPath?.indexOf('?') > -1 &&
-      asPath.substring(
-        asPath.indexOf('?') + 1,
+    const params =
+      params_to_obj(
+        asPath?.indexOf('?') > -1 &&
+        asPath.substring(
+          asPath.indexOf('?') + 1,
+        )
       )
-    )
 
     const {
       amount,
     } = { ...params }
 
-    let path = !asPath ?
-      '/' :
-      asPath.toLowerCase()
-    path = path.includes('?') ?
-      path.substring(
-        0,
-        path.indexOf('?'),
-      ) :
-      path
+    let path =
+      !asPath ?
+        '/' :
+        asPath.toLowerCase()
+
+    path =
+      path.includes('?') ?
+        path.substring(
+          0,
+          path.indexOf('?'),
+        ) :
+        path
 
     if (
       path.includes('from-') &&
@@ -187,11 +191,12 @@ export default () => {
 
       const source_chain = paths[paths.indexOf('from') + 1]
       const destination_chain = paths[paths.indexOf('to') + 1]
-      const asset = _.head(paths) !== 'from' ?
-        _.head(paths) :
-        process.env.NEXT_PUBLIC_NETWORK === 'testnet' ?
-          'test' :
-          'usdc'
+      const asset =
+        _.head(paths) !== 'from' ?
+          _.head(paths) :
+          process.env.NEXT_PUBLIC_NETWORK === 'testnet' ?
+            'test' :
+            'usdc'
 
       const source_chain_data = (chains_data || [])
         .find(c =>
@@ -421,6 +426,7 @@ export default () => {
       .find(c =>
         c?.chain_id === wallet_chain_id
       )
+
     const {
       id,
     } = { ...chain_data }
@@ -439,12 +445,13 @@ export default () => {
           destination_chain,
         )
       ) {
-        const params = params_to_obj(
-          asPath.indexOf('?') > -1 &&
-          asPath.substring(
-            asPath.indexOf('?') + 1,
+        const params =
+          params_to_obj(
+            asPath.indexOf('?') > -1 &&
+            asPath.substring(
+              asPath.indexOf('?') + 1,
+            )
           )
-        )
 
         if (
           !params?.source_chain &&
@@ -529,6 +536,7 @@ export default () => {
       .find(c =>
         c?.chain_id === wallet_chain_id
       )
+
     const {
       id,
     } = { ...chain_data }
@@ -547,12 +555,13 @@ export default () => {
           destination_chain,
         )
       ) {
-        const params = params_to_obj(
-          asPath.indexOf('?') > -1 &&
-          asPath.substring(
-            asPath.indexOf('?') + 1,
+        const params =
+          params_to_obj(
+            asPath.indexOf('?') > -1 &&
+            asPath.substring(
+              asPath.indexOf('?') + 1,
+            )
           )
-        )
 
         if (
           !params?.source_chain &&
@@ -694,16 +703,17 @@ export default () => {
         )
       }
       else if (fee) {
-        const interval = setInterval(() =>
-          {
-            const cooldown = feeEstimateCooldown - 1
+        const interval =
+          setInterval(() =>
+            {
+              const cooldown = feeEstimateCooldown - 1
 
-            if (cooldown > -1) {
-              setFeeEstimateCooldown(cooldown)
-            }
-          },
-          1000,
-        )
+              if (cooldown > -1) {
+                setFeeEstimateCooldown(cooldown)
+              }
+            },
+            1000,
+          )
 
         return () => clearInterval(interval)
       }
@@ -730,8 +740,11 @@ export default () => {
     const {
       chain_id,
     } = {
-      ...chains_data?.find(c =>
-        c?.id === source_chain
+      ...(
+        (chains_data || [])
+        .find(c =>
+          c?.id === source_chain
+        )
       ),
     }
 
@@ -781,29 +794,41 @@ export default () => {
           let transfer_data
 
           try {
-            const response = await sdk.nxtpSdkUtils.getTransferByTransactionHash(
-              transactionHash,
-            )
+            const response =
+            await sdk.nxtpSdkUtils
+              .getTransferByTransactionHash(
+                transactionHash,
+              )
 
             if (Array.isArray(response)) {
-              transfer_data = response.find(t =>
-                equals_ignore_case(t?.xcall_transaction_hash, transactionHash)
-              )
+              transfer_data = response
+                .find(t =>
+                  equals_ignore_case(
+                    t?.xcall_transaction_hash,
+                    transactionHash,
+                  )
+                )
             }
           } catch (error) {}
 
           if (address) {
             try {
-              const response = await sdk.nxtpSdkUtils.getTransfersByUser(
-                {
-                  userAddress: address,
-                },
-              )
+              const response =
+                await sdk.nxtpSdkUtils
+                  .getTransfersByUser(
+                    {
+                      userAddress: address,
+                    },
+                  )
 
               if (Array.isArray(response)) {
-                transfer_data = response.find(t =>
-                  equals_ignore_case(t?.xcall_transaction_hash, transactionHash)
-                )
+                transfer_data = response
+                  .find(t =>
+                    equals_ignore_case(
+                      t?.xcall_transaction_hash,
+                      transactionHash,
+                    )
+                  )
               }
             } catch (error) {}
           }
@@ -835,14 +860,21 @@ export default () => {
           }
         }
         else if (transfer_id) {
-          const response = await sdk.nxtpSdkUtils.getTransferById(
-            transfer_id,
-          )
+          const response =
+            await sdk.nxtpSdkUtils
+              .getTransferById(
+                transfer_id,
+              )
 
           if (Array.isArray(response)) {
-            const transfer_data = response.find(t =>
-              equals_ignore_case(t?.transfer_id, transfer_id)
-            )
+            const transfer_data = response
+              .find(t =>
+                equals_ignore_case(
+                  t?.transfer_id,
+                  transfer_id,
+                )
+              )
+
             const {
               status,
             } = { ...transfer_data }
@@ -896,50 +928,61 @@ export default () => {
         contract_address
       ) {
         if (contract_address === constants.AddressZero) {
-          balance = await provider.getBalance(
-            address,
-          )
+          balance =
+            await provider
+              .getBalance(
+                address,
+              )
         }
         else {
-          const contract = new Contract(
-            contract_address,
-            [
-              'function balanceOf(address owner) view returns (uint256)',
-            ],
-            provider,
-          )
+          const contract =
+            new Contract(
+              contract_address,
+              [
+                'function balanceOf(address owner) view returns (uint256)',
+              ],
+              provider,
+            )
 
-          balance = await contract.balanceOf(
-            address,
-          )
+          balance =
+            await contract
+              .balanceOf(
+                address,
+              )
         }
       }
 
       if (
         balance ||
         !(
-          balances_data?.[`${chain_id}`]?.findIndex(c =>
-            equals_ignore_case(c?.contract_address, contract_address)
-          ) > -1
+          (balances_data?.[`${chain_id}`] || [])
+            .findIndex(c =>
+              equals_ignore_case(
+                c?.contract_address,
+                contract_address,
+              )
+            ) > -1
         )
       ) {
         dispatch(
           {
             type: BALANCES_DATA,
             value: {
-              [`${chain_id}`]: [
-                {
-                  ...contract_data,
-                  amount: balance &&
-                    Number(
-                      utils.formatUnits(
-                        balance,
-                        decimals ||
-                        18,
-                      )
-                    ),
-                }
-              ],
+              [`${chain_id}`]:
+                [
+                  {
+                    ...contract_data,
+                    amount:
+                      balance &&
+                      Number(
+                        utils.formatUnits(
+                          balance,
+                          decimals ||
+                          18,
+                        )
+                      ),
+                  }
+                ],
             },
           }
         )
@@ -949,8 +992,11 @@ export default () => {
     const {
       chain_id,
     } = {
-      ...chains_data?.find(c =>
-        c?.id === chain
+      ...(
+        (chains_data || [])
+          .find(c =>
+            c?.id === chain
+          )
       ),
     }
 
@@ -963,8 +1009,11 @@ export default () => {
 
           return {
             ...a,
-            ...contracts?.find(c =>
-              c?.chain_id === chain_id
+            ...(
+              (contracts || [])
+              .find(c =>
+                c?.chain_id === chain_id
+              )
             ),
           }
         })
@@ -998,31 +1047,42 @@ export default () => {
       asset,
     } = { ...bridge }
 
-    const source_asset_data = assets_data?.find(a =>
-      a?.id === asset
-    )
-    const destination_asset_data = assets_data?.find(a =>
-      a?.id === asset
-    )
+    const source_asset_data = (assets_data || [])
+      .find(a =>
+        a?.id === asset
+      )
 
-    return source_chain &&
+    const destination_asset_data = (assets_data || [])
+      .find(a =>
+        a?.id === asset
+      )
+
+    return (
+      source_chain &&
       destination_chain &&
       source_asset_data &&
       destination_asset_data &&
       !(
-        source_asset_data.contracts?.findIndex(c =>
-          c?.chain_id === chains_data?.find(_c =>
-            _c?.id === source_chain
-          )?.chain_id
-        ) < 0
+        (source_asset_data.contracts || [])
+          .findIndex(c =>
+            c?.chain_id ===
+            (chains_data || [])
+              .find(_c =>
+                _c?.id === source_chain
+              )?.chain_id
+          ) < 0
       ) &&
       !(
-        destination_asset_data.contracts?.findIndex(c =>
-          c?.chain_id === chains_data?.find(_c =>
-            _c?.id === destination_chain
-          )?.chain_id
-        ) < 0
+        (destination_asset_data.contracts || [])
+          .findIndex(c =>
+            c?.chain_id ===
+            (chains_data || [])
+              .find(_c =>
+                _c?.id === destination_chain
+              )?.chain_id
+          ) < 0
       )
+    )
   }
 
   const reset = async origin => {
@@ -1097,25 +1157,31 @@ export default () => {
         amount,
       } = { ...bridge }
 
-      const source_chain_data = chains_data?.find(c =>
-        c?.id === source_chain
-      )
-      const source_asset_data = assets_data?.find(a =>
-        a?.id === asset
-      )
-      const source_contract_data = source_asset_data?.contracts?.find(c =>
-        c?.chain_id === source_chain_data?.chain_id
-      )
+      const source_chain_data = (chains_data || [])
+        .find(c =>
+          c?.id === source_chain
+        )
+      const source_asset_data = (assets_data || [])
+        .find(a =>
+          a?.id === asset
+        )
+      const source_contract_data = (source_asset_data?.contracts || [])
+        .find(c =>
+          c?.chain_id === source_chain_data?.chain_id
+        )
 
-      const destination_chain_data = chains_data?.find(c =>
-        c?.id === destination_chain
-      )
-      const destination_asset_data = assets_data?.find(a =>
-        a?.id === asset
-      )
-      const destination_contract_data = destination_asset_data?.contracts?.find(c =>
-        c?.chain_id === destination_chain_data?.chain_id
-      )
+      const destination_chain_data = (chains_data || [])
+        .find(c =>
+          c?.id === destination_chain
+        )
+      const destination_asset_data = (assets_data || [])
+        .find(a =>
+          a?.id === asset
+        )
+      const destination_contract_data = (destination_asset_data?.contracts || [])
+        .find(c =>
+          c?.chain_id === destination_chain_data?.chain_id
+        )
 
       setFeeEstimating(true)
 
@@ -1145,16 +1211,17 @@ export default () => {
               decimals,
             } = { ...nativeCurrency }
 
-            const routerFee = forceSlow ?
-              0 :
-              parseFloat(
-                (
-                  amount *
-                  ROUTER_FEE_PERCENT /
-                  100
+            const routerFee =
+              forceSlow ?
+                0 :
+                parseFloat(
+                  (
+                    amount *
+                    ROUTER_FEE_PERCENT /
+                    100
+                  )
+                  .toFixed(12)
                 )
-                .toFixed(12)
-              )
 
             const params = {
               originDomain: source_chain_data?.domain_id,
@@ -1162,15 +1229,18 @@ export default () => {
               isHighPriority: !forceSlow,
             }
 
-            const response = forceSlow ?
-              0 :
-              await sdk.nxtpSdkBase.estimateRelayerFee(
-                params,
-              )
+            const response =
+              forceSlow ?
+                0 :
+                await sdk.nxtpSdkBase
+                  .estimateRelayerFee(
+                    params,
+                  )
 
-            const gasFee = forceSlow ?
-              0 :
-              response &&
+            const gasFee =
+              forceSlow ?
+                0 :
+                response &&
                 Number(
                   utils.formatUnits(
                     response,
@@ -1220,15 +1290,19 @@ export default () => {
         amount,
       } = { ...bridge }
 
-      const source_chain_data = chains_data?.find(c =>
-        c?.id === source_chain
-      )
-      const source_asset_data = assets_data?.find(a =>
-        a?.id === asset
-      )
-      const source_contract_data = source_asset_data?.contracts?.find(c =>
-        c?.chain_id === source_chain_data?.chain_id
-      )
+      const source_chain_data = (chains_data || [])
+        .find(c =>
+          c?.id === source_chain
+        )
+      const source_asset_data = (assets_data || [])
+        .find(a =>
+          a?.id === asset
+        )
+      const source_contract_data = (source_asset_data?.contracts || [])
+        .find(c =>
+          c?.chain_id === source_chain_data?.chain_id
+        )
+
       let {
         symbol,
       } = { ...source_contract_data }
@@ -1237,12 +1311,14 @@ export default () => {
         symbol ||
         source_asset_data?.symbol
 
-      const destination_chain_data = chains_data?.find(c =>
-        c?.id === destination_chain
-      )
-      const destination_contract_data = source_asset_data?.contracts?.find(c =>
-        c?.chain_id === destination_chain_data?.chain_id
-      )
+      const destination_chain_data = (chains_data || [])
+        .find(c =>
+          c?.id === destination_chain
+        )
+      const destination_contract_data = (source_asset_data?.contracts || [])
+        .find(c =>
+          c?.chain_id === destination_chain_data?.chain_id
+        )
 
       const {
         to,
@@ -1257,7 +1333,8 @@ export default () => {
       } = { ...fee }
 
       /*
-      const minAmount = (amount || 0) *
+      const minAmount =
+        (amount || 0) *
         (
           100 -
           (
@@ -1272,44 +1349,64 @@ export default () => {
 
       /*const xcallParams = {
         params: {
-          to: to ||
+          to:
+            to ||
             address,
-          callData: callData ||
+          callData:
+            callData ||
             '0x',
           originDomain: source_chain_data?.domain_id,
           destinationDomain: destination_chain_data?.domain_id,
-          agent: to ||
+          agent:
+            to ||
             address,
           callback: constants.AddressZero,
           recovery: address,
-          forceSlow: forceSlow ||
+          forceSlow:
+            forceSlow ||
             false,
-          receiveLocal: receiveLocal ||
+          receiveLocal:
+            receiveLocal ||
             false,
-          relayerFee: !forceSlow && gas ?
+          relayerFee:
+            !forceSlow &&
+            gas ?
+              utils.parseUnits(
+                gas
+                  .toString(),
+                'ether',
+              )
+              .toString() :
+              '0',
+          destinationMinOut:
             utils.parseUnits(
-              gas.toString(),
-              'ether',
+              minAmount
+                .toString(),
+              destination_contract_data?.decimals ||
+              18,
             )
-            .toString() :
-            '0',
-          destinationMinOut: utils.parseUnits(
-            minAmount.toString(),
-            destination_contract_data?.decimals || 18,
-          )
-          .toString(),
+            .toString(),
         },
         transactingAsset: source_contract_data?.contract_address,
-        transactingAmount: utils.parseUnits(
-          (amount || 0).toString(),
-          source_contract_data?.decimals || 18,
-        )
-        .toString(),
-        originMinOut: utils.parseUnits(
-          minAmount.toString(),
-          source_contract_data?.decimals || 18,
-        )
-        .toString(),
+        transactingAmount:
+          utils.parseUnits(
+            (
+              amount ||
+              0
+            )
+            .toString(),
+            source_contract_data?.decimals ||
+            18,
+          )
+          .toString(),
+        originMinOut:
+          utils.parseUnits(
+            minAmount
+              .toString(),
+            source_contract_data?.decimals ||
+            18,
+          )
+          .toString(),
       }*/
 
       const xcallParams = {
@@ -1358,19 +1455,23 @@ export default () => {
           xcallParams.transactingAmount,
           infiniteApprove,
         )*/
-        const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
-          xcallParams.origin,
-          xcallParams.asset,
-          xcallParams.amount,
-          infiniteApprove,
-        )
+        const approve_request =
+          await sdk.nxtpSdkBase
+            .approveIfNeeded(
+              xcallParams.origin,
+              xcallParams.asset,
+              xcallParams.amount,
+              infiniteApprove,
+            )
 
         if (approve_request) {
           setApproving(true)
 
-          const approve_response = await signer.sendTransaction(
-            approve_request,
-          )
+          const approve_response =
+            await signer
+              .sendTransaction(
+                approve_request,
+              )
 
           const {
             hash,
@@ -1386,9 +1487,11 @@ export default () => {
 
           setApproveProcessing(true)
 
-          const approve_receipt = await signer.provider.waitForTransaction(
-            hash,
-          )
+          const approve_receipt =
+            await signer.provider
+              .waitForTransaction(
+                hash,
+              )
 
           const {
             status,
@@ -1450,14 +1553,18 @@ export default () => {
             },
           )
 
-          const xcall_request = await sdk.nxtpSdkBase.xcall(
-            xcallParams,
-          )
+          const xcall_request =
+            await sdk.nxtpSdkBase
+              .xcall(
+                xcallParams,
+              )
 
           if (xcall_request) {
-            let gasLimit = await signer.estimateGas(
-              xcall_request,
-            )
+            let gasLimit =
+              await signer
+                .estimateGas(
+                  xcall_request,
+                )
 
             if (gasLimit) {
               gasLimit =
@@ -1473,14 +1580,19 @@ export default () => {
                 )
                 .round(0)
                 .toString()
-                .replace('.0', '')
+                .replace(
+                  '.0',
+                  '',
+                )
 
               xcall_request.gasLimit = gasLimit
             }
 
-            const xcall_response = await signer.sendTransaction(
-              xcall_request,
-            )
+            const xcall_response =
+              await signer
+                .sendTransaction(
+                  xcall_request,
+                )
 
             const {
               hash,
@@ -1488,9 +1600,11 @@ export default () => {
 
             setCallProcessing(true)
 
-            const xcall_receipt = await signer.provider.waitForTransaction(
-              hash,
-            )
+            const xcall_receipt =
+              await signer.provider
+                .waitForTransaction(
+                  hash,
+                )
 
             setXcall(xcall_receipt)
 
@@ -1623,7 +1737,10 @@ export default () => {
     source_contract_data?.symbol ||
     source_asset_data?.symbol
   const source_balance = balances_data?.[source_chain_data?.chain_id]?.find(b =>
-    equals_ignore_case(b?.contract_address, source_contract_data?.contract_address)
+    equals_ignore_case(
+      b?.contract_address,
+      source_contract_data?.contract_address,
+    )
   )
   const source_amount =
     source_balance &&
@@ -1637,7 +1754,10 @@ export default () => {
     destination_contract_data?.symbol ||
     destination_asset_data?.symbol
   const destination_balance = balances_data?.[destination_chain_data?.chain_id]?.find(b =>
-    equals_ignore_case(b?.contract_address, destination_contract_data?.contract_address)
+    equals_ignore_case(
+      b?.contract_address,
+      destination_contract_data?.contract_address,
+    )
   )
   const destination_amount =
     destination_balance &&
@@ -1676,7 +1796,10 @@ export default () => {
     _.sum(
       (asset_balances_data?.[destination_chain_data?.chain_id] || [])
         .filter(a =>
-          equals_ignore_case(a?.contract_address, destination_contract_data?.contract_address)
+          equals_ignore_case(
+            a?.contract_address,
+            destination_contract_data?.contract_address,
+          )
         )
         .map(a =>
           Number(
