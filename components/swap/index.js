@@ -2134,7 +2134,7 @@ export default () => {
                             ) ?
                             'Insufficient Balance' :
                             amount <= 0 ?
-                              'The transfer amount cannot be equal to or less than 0.' :
+                              'The amount cannot be equal to or less than 0.' :
                               ''
                           }
                         </span>

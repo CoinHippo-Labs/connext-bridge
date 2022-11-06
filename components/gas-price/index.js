@@ -48,7 +48,8 @@ export default ({
           setGasPrice(
             Number(
               utils.formatUnits(
-                await provider.getGasPrice(),
+                await provider
+                  .getGasPrice(),
                 'gwei',
               )
             )
@@ -63,10 +64,11 @@ export default ({
 
     getData()
 
-    const interval = setInterval(() =>
-      getData(true),
-      0.5 * 60 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        getData(true),
+        0.5 * 60 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [chainId, rpcs])
@@ -113,7 +115,8 @@ export default ({
           />
       }
     </div> :
-    dummy && (
+    dummy &&
+    (
       <div className="h-5" />
     )
 }

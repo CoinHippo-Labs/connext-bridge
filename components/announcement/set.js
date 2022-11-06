@@ -48,16 +48,19 @@ export default () => {
           .filter(s => s)
           .join('<br>'),
       },
-      address && {
+      address &&
+      {
         username: new URL(process.env.NEXT_PUBLIC_SITE_URL)?.hostname,
         password: address,
       },
     )
 
-    dispatch({
-      type: ANNOUNCEMENT_DATA,
-      value: await getAnnouncement(),
-    })
+    dispatch(
+      {
+        type: ANNOUNCEMENT_DATA,
+        value: await getAnnouncement(),
+      }
+    )
 
     setUpdating(false)
   }

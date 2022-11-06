@@ -2711,9 +2711,9 @@ export default () => {
                           {amount > source_amount ?
                             'Insufficient Balance' :
                             amount < min_amount ?
-                              'The transfer amount cannot be less than the transfer fee.' :
+                              'The amount cannot be less than the transfer fee.' :
                               amount <= 0 ?
-                                'The transfer amount cannot be equal to or less than 0.' :
+                                'The amount cannot be equal to or less than 0.' :
                                 ''
                           }
                         </span>

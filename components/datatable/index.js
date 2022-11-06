@@ -15,7 +15,8 @@ const IndeterminateCheckbox = forwardRef(
   ) => {
     const defaultRef = useRef()
 
-    const resolvedRef = ref ||
+    const resolvedRef =
+      ref ||
       defaultRef
 
     useEffect(() => {

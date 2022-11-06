@@ -15,6 +15,7 @@ export default ({
     chains,
     assets,
     pool_assets,
+    pools,
     balances,
   } = useSelector(state =>
     (
@@ -22,6 +23,7 @@ export default ({
         chains: state.chains,
         assets: state.assets,
         pool_assets: state.pool_assets,
+        pools: state.pools,
         balances: state.balances,
       }
     ),
@@ -36,6 +38,9 @@ export default ({
   const {
     pool_assets_data,
   } = { ...pool_assets }
+  const {
+    pools_data,
+  } = { ...pools }
   const {
     balances_data,
   } = { ...balances }
@@ -63,26 +68,27 @@ export default ({
         .map(a => {
           return {
             ...a,
-            scores: [
-              'symbol',
-              'name',
-              'id',
-            ]
-            .map(f =>
-              (a[f] || '')
-                .toLowerCase()
-                .includes(
-                  inputSearch
-                    .toLowerCase()
-                ) ?
-                inputSearch.length > 1 ?
-                  (
-                    inputSearch.length /
-                    a[f].length
-                  ) :
-                  .5 :
-                -1
-            ),
+            scores:
+              [
+                'symbol',
+                'name',
+                'id',
+              ]
+              .map(f =>
+                (a[f] || '')
+                  .toLowerCase()
+                  .includes(
+                    inputSearch
+                      .toLowerCase()
+                  ) ?
+                  inputSearch.length > 1 ?
+                    (
+                      inputSearch.length /
+                      a[f].length
+                    ) :
+                    .5 :
+                  -1
+              ),
           }
         })
         .map(a => {

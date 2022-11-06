@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { useSelector, shallowEqual } from 'react-redux'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { Contract, constants, utils } from 'ethers'
 import moment from 'moment'
 import { RotatingSquare } from 'react-loader-spinner'
 
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
+import { BALANCES_DATA } from '../../reducers/types'
 
 export default ({
   chainId,
@@ -15,6 +16,7 @@ export default ({
   trigger,
   className = '',
 }) => {
+  const dispatch = useDispatch()
   const {
     preferences,
     assets,
@@ -66,14 +68,34 @@ export default ({
           _trigger
         )
       ) {
-        setBalance(
+        const contract_data = {
+          contract_address: contractAddress,
+          chain_id: chainId,
+          decimals,
+          symbol,
+        }
+
+        const balance =
           await getBalance(
             chainId,
-            {
-              contract_address: contractAddress,
-              decimals,
-            },
+            contract_data,
           )
+
+        setBalance(balance)
+
+        dispatch(
+          {
+            type: BALANCES_DATA,
+            value: {
+              [`${chainId}`]:
+                [
+                  {
+                    ...contract_data,
+                    amount: balance,
+                  }
+                ],
+            },
+          }
         )
       }
     }
@@ -118,22 +140,27 @@ export default ({
       contract_address
     ) {
       if (contract_address === constants.AddressZero) {
-        balance = await provider.getBalance(
-          address,
-        )
+        balance =
+          await provider
+            .getBalance(
+              address,
+            )
       }
       else {
-        const contract = new Contract(
-          contract_address,
-          [
-            'function balanceOf(address owner) view returns (uint256)',
-          ],
-          provider,
-        )
+        const contract =
+          new Contract(
+            contract_address,
+            [
+              'function balanceOf(address owner) view returns (uint256)',
+            ],
+            provider,
+          )
 
-        balance = await contract.balanceOf(
-          address,
-        )
+        balance =
+          await contract
+            .balanceOf(
+              address,
+            )
       }
     }
 
@@ -149,36 +176,43 @@ export default ({
     )
   }
 
-  const asset_data = assets_data?.find(a =>
-    a?.id === asset
-  )
+  const asset_data = (assets_data || [])
+    .find(a =>
+      a?.id === asset
+    )
+
   const {
     contracts,
   } = { ...asset_data }
 
-  const contract_data = contracts?.find(c =>
-    c?.chain_id === chainId
-  )
+  const contract_data = (contracts || [])
+    .find(c =>
+      c?.chain_id === chainId
+    )
+
   const {
     contract_address,
   } = { ...contract_data }
 
-  const _balance = balances_data?.[chainId]?.find(b =>
-    equals_ignore_case(
-      b?.contract_address,
-      contractAddress ||
-      contract_address,
+  const _balance = (balances_data?.[chainId] || [])
+    .find(b =>
+      equals_ignore_case(
+        b?.contract_address,
+        contractAddress ||
+        contract_address,
+      )
     )
-  )
+
   let {
     amount,
   } = { ..._balance }
 
-  amount = trigger ?
-    balance :
-    !isNaN(amount) ?
-      Number(amount) :
-      null
+  amount =
+    trigger ?
+      balance :
+      !isNaN(amount) ?
+        Number(amount) :
+        null
 
   symbol =
     symbol ||

@@ -13,23 +13,27 @@ export default ({
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    const timeout = copied ?
-      setTimeout(() =>
-        setCopied(false),
-        1 * 1000,
-      ) :
-      undefined
+    const timeout =
+      copied ?
+        setTimeout(() =>
+          setCopied(false),
+          1 * 1000,
+        ) :
+        undefined
 
     return () => clearTimeout(timeout)
   }, [copied])
 
   return copied ?
     <div className={`${title ? 'min-w-max' : ''} flex items-center space-x-1`}>
-      {title && (
-        <span>
-          {title}
-        </span>
-      )}
+      {
+        title &&
+        (
+          <span>
+            {title}
+          </span>
+        )
+      }
       <HiCheckCircle
         size={size}
         className={
@@ -49,11 +53,14 @@ export default ({
       }}
     >
       <div className={`${title ? 'min-w-max' : ''} flex items-center space-x-1`}>
-        {title && (
-          <span>
-            {title}
-          </span>
-        )}
+        {
+          title &&
+          (
+            <span>
+              {title}
+            </span>
+          )
+        }
         <IoMdCopy
           size={size}
           className={

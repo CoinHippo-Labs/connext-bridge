@@ -48,19 +48,22 @@ export default ({
       localStorage.getItem(THEME) &&
       localStorage.getItem(THEME) !== theme
     ) {
-      dispatch({
-        type: THEME,
-        value: localStorage.getItem(THEME),
-      })
+      dispatch(
+        {
+          type: THEME,
+          value: localStorage.getItem(THEME),
+        }
+      )
     }
   }, [theme])
 
-  const headMeta = meta(
-    asPath,
-    null,
-    chains_data,
-    assets_data,
-  )
+  const headMeta =
+    meta(
+      asPath,
+      null,
+      chains_data,
+      assets_data,
+    )
 
   const {
     title,

@@ -46,11 +46,13 @@ export default ({
         address
       ) {
         try {
-          let response = await sdk.nxtpSdkUtils.getTransfersByUser(
-            {
-              userAddress: address,
-            },
-          )
+          let response =
+            await sdk.nxtpSdkUtils
+              .getTransfersByUser(
+                {
+                  userAddress: address,
+                },
+              )
 
           if (!Array.isArray(response)) {
             response = []
@@ -91,10 +93,11 @@ export default ({
 
     getData()
 
-    const interval = setInterval(() =>
-      getData(),
-      10 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        getData(),
+        10 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [sdk, address, trigger])

@@ -53,7 +53,10 @@ export default ({
     setHidden(!hidden)
   }
 
-  const chain_data = chains_data?.find(c => c?.id === value)
+  const chain_data = (chains_data || [])
+    .find(c =>
+      c?.id === value
+    )
   const {
     image,
   } = { ...chain_data }
@@ -67,28 +70,31 @@ export default ({
       onClick={open => setHidden(!open)}
       buttonTitle={chains_data ?
         <div className="w-32 sm:w-48 min-w-max bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl flex items-center justify-center space-x-1 sm:space-x-1.5 py-1.5 sm:py-2 px-2 sm:px-3">
-          {image && (
-            <>
-              <div className="flex sm:hidden">
-                <Image
-                  src={image}
-                  alt=""
-                  width={18}
-                  height={18}
-                  className="rounded-full"
-                />
-              </div>
-              <div className="hidden sm:flex">
-                <Image
-                  src={image}
-                  alt=""
-                  width={24}
-                  height={24}
-                  className="rounded-full"
-                />
-              </div>
-            </>
-          )}
+          {
+            image &&
+            (
+              <>
+                <div className="flex sm:hidden">
+                  <Image
+                    src={image}
+                    alt=""
+                    width={18}
+                    height={18}
+                    className="rounded-full"
+                  />
+                </div>
+                <div className="hidden sm:flex">
+                  <Image
+                    src={image}
+                    alt=""
+                    width={24}
+                    height={24}
+                    className="rounded-full"
+                  />
+                </div>
+              </>
+            )
+          }
           <span className="whitespace-nowrap text-xs sm:text-base font-semibold">
             {
               chainName(chain_data) ||

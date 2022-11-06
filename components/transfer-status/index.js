@@ -87,29 +87,39 @@ export default ({
       .toLowerCase()
       .includes('slow')
 
-  const source_chain_data = chains_data?.find(c =>
-    c?.chain_id === Number(origin_chain) ||
-    c?.domain_id === origin_domain
-  )
-  const source_asset_data = assets_data?.find(a =>
-    a?.contracts?.findIndex(c =>
-      c?.chain_id === source_chain_data?.chain_id &&
-      [
-        origin_transacting_asset,
-        origin_bridged_asset,
-      ].findIndex(a =>
-        equals_ignore_case(c?.contract_address, a)
-      ) > -1
-    ) > -1
-  )
-  const source_contract_data = source_asset_data?.contracts?.find(c =>
-    c?.chain_id === source_chain_data?.chain_id
-  )
-  const source_symbol = source_contract_data?.symbol ||
+  const source_chain_data = (chains_data || [])
+    .find(c =>
+      c?.chain_id === Number(origin_chain) ||
+      c?.domain_id === origin_domain
+    )
+  const source_asset_data = (assets_data || [])
+    .find(a =>
+      (a?.contracts || [])
+        .findIndex(c =>
+          c?.chain_id === source_chain_data?.chain_id &&
+          [
+            origin_transacting_asset,
+            origin_bridged_asset,
+          ].findIndex(a =>
+            equals_ignore_case(
+              c?.contract_address,
+              a,
+            )
+          ) > -1
+        ) > -1
+    )
+  const source_contract_data = (source_asset_data?.contracts || [])
+    .find(c =>
+      c?.chain_id === source_chain_data?.chain_id
+    )
+  const source_symbol =
+    source_contract_data?.symbol ||
     source_asset_data?.symbol
-  const source_decimals = source_contract_data?.decimals ||
+  const source_decimals =
+    source_contract_data?.decimals ||
     18
-  const source_asset_image = source_contract_data?.image ||
+  const source_asset_image =
+    source_contract_data?.image ||
     source_asset_data?.image
   const source_amount =
     _.head(
@@ -135,29 +145,39 @@ export default ({
       .filter(a => a)
     )
 
-  const destination_chain_data = chains_data?.find(c =>
-    c?.chain_id === Number(destination_chain) ||
-    c?.domain_id === destination_domain
-  )
-  const destination_asset_data = assets_data?.find(a =>
-    a?.contracts?.findIndex(c =>
-      c?.chain_id === destination_chain_data?.chain_id &&
-      [
-        destination_transacting_asset,
-        destination_local_asset,
-      ].findIndex(a =>
-        equals_ignore_case(c?.contract_address, a)
-      ) > -1
-    ) > -1
-  )
-  const destination_contract_data = destination_asset_data?.contracts?.find(c =>
-    c?.chain_id === destination_chain_data?.chain_id
-  )
-  const destination_symbol = destination_contract_data?.symbol ||
+  const destination_chain_data = (chains_data || [])
+    .find(c =>
+      c?.chain_id === Number(destination_chain) ||
+      c?.domain_id === destination_domain
+    )
+  const destination_asset_data = (assets_data || [])
+    .find(a =>
+      (a?.contracts || [])
+        .findIndex(c =>
+          c?.chain_id === destination_chain_data?.chain_id &&
+          [
+            destination_transacting_asset,
+            destination_local_asset,
+          ].findIndex(a =>
+            equals_ignore_case(
+              c?.contract_address,
+              a,
+            )
+          ) > -1
+        ) > -1
+    )
+  const destination_contract_data = (destination_asset_data?.contracts || [])
+    .find(c =>
+      c?.chain_id === destination_chain_data?.chain_id
+    )
+  const destination_symbol =
+    destination_contract_data?.symbol ||
     destination_asset_data?.symbol
-  const destination_decimals = destination_contract_data?.decimals ||
+  const destination_decimals =
+    destination_contract_data?.decimals ||
     18
-  const destination_asset_image = destination_contract_data?.image ||
+  const destination_asset_image =
+    destination_contract_data?.image ||
     destination_asset_data?.image
   const destination_amount =
     _.head(
@@ -188,11 +208,12 @@ export default ({
       ROUTER_FEE_PERCENT / 100
     )
 
-  const pending = ![
-    XTransferStatus.Executed,
-    XTransferStatus.CompletedFast,
-    XTransferStatus.CompletedSlow,
-  ].includes(status)
+  const pending =
+    ![
+      XTransferStatus.Executed,
+      XTransferStatus.CompletedFast,
+      XTransferStatus.CompletedSlow,
+    ].includes(status)
 
   return data &&
     (
@@ -215,15 +236,18 @@ export default ({
         </div>
         <div className="flex items-center justify-between mt-2.5">
           <div className="flex items-center space-x-1.5">
-            {source_chain_data?.image && (
-              <Image
-                src={source_chain_data.image}
-                alt=""
-                width={20}
-                height={20}
-                className="rounded-full"
-              />
-            )}
+            {
+              source_chain_data?.image &&
+              (
+                <Image
+                  src={source_chain_data.image}
+                  alt=""
+                  width={20}
+                  height={20}
+                  className="rounded-full"
+                />
+              )
+            }
             <span className="text-xs font-medium">
               {chainName(source_chain_data)}
             </span>
@@ -244,7 +268,8 @@ export default ({
                   <div
                     className="w-2 h-2 rounded-full"
                     style={{
-                      background: `${source_asset_data?.color ||
+                      background:
+                        `${source_asset_data?.color ||
                         loader_color(theme)}aa`,
                     }}
                   />
@@ -253,15 +278,18 @@ export default ({
             )
           }
           <div className="flex items-center justify-end space-x-1.5">
-            {destination_chain_data?.image && (
-              <Image
-                src={destination_chain_data.image}
-                alt=""
-                width={20}
-                height={20}
-                className="rounded-full"
-              />
-            )}
+            {
+              destination_chain_data?.image &&
+              (
+                <Image
+                  src={destination_chain_data.image}
+                  alt=""
+                  width={20}
+                  height={20}
+                  className="rounded-full"
+                />
+              )
+            }
             <span className="text-xs font-medium">
               {chainName(destination_chain_data)}
             </span>
@@ -282,26 +310,32 @@ export default ({
               )
             }
             <div className="flex items-center justify-center space-x-1">
-              {source_asset_image && (
-                <Image
-                  src={source_asset_image}
-                  alt=""
-                  width={16}
-                  height={16}
-                  className="rounded-full"
-                />
-              )}
+              {
+                source_asset_image &&
+                (
+                  <Image
+                    src={source_asset_image}
+                    alt=""
+                    width={16}
+                    height={16}
+                    className="rounded-full"
+                  />
+                )
+              }
               <span className="text-xs font-medium">
                 {source_symbol}
               </span>
-              {source_asset_data && (
-                <AddToken
-                  token_data={{
-                    ...source_asset_data,
-                    ...source_contract_data,
-                  }}
-                />
-              )}
+              {
+                source_asset_data &&
+                (
+                  <AddToken
+                    token_data={{
+                      ...source_asset_data,
+                      ...source_contract_data,
+                    }}
+                  />
+                )
+              }
             </div>
           </div>
           <div className="flex flex-col items-center">
@@ -338,32 +372,41 @@ export default ({
               )
             }
             <div className="flex items-center justify-center space-x-1">
-              {destination_asset_image && (
-                <Image
-                  src={destination_asset_image}
-                  alt=""
-                  width={16}
-                  height={16}
-                  className="rounded-full"
-                />
-              )}
+              {
+                destination_asset_image &&
+                (
+                  <Image
+                    src={destination_asset_image}
+                    alt=""
+                    width={16}
+                    height={16}
+                    className="rounded-full"
+                  />
+                )
+              }
               <span className="text-xs font-medium">
                 {destination_symbol}
               </span>
-              {destination_asset_data && (
-                <AddToken
-                  token_data={{
-                    ...destination_asset_data,
-                    ...destination_contract_data,
-                  }}
-                />
-              )}
+              {
+                destination_asset_data &&
+                (
+                  <AddToken
+                    token_data={{
+                      ...destination_asset_data,
+                      ...destination_contract_data,
+                    }}
+                  />
+                )
+              }
             </div>
           </div>
         </div>
         {
           to &&
-          !equals_ignore_case(to, address) &&
+          !equals_ignore_case(
+            to,
+            address,
+          ) &&
           (
             <div className="flex items-center justify-between space-x-2">
               <span className="text-sm font-normal">
@@ -399,13 +442,16 @@ export default ({
           (
             <div className="flex items-center justify-between">
               <span>
-                {force_slow && (
-                  <div className={`rounded-lg border ${status === XTransferStatus.CompletedSlow ? 'border-green-500 dark:border-green-500 text-green-400 dark:text-green-400' : 'border-blue-500 dark:border-blue-500 text-blue-400 dark:text-blue-400'} flex items-center space-x-1 py-0.5 px-1.5`}>
-                    <span className="uppercase text-xs font-bold">
-                      Slow
-                    </span>
-                  </div>
-                )}
+                {
+                  force_slow &&
+                  (
+                    <div className={`rounded-lg border ${status === XTransferStatus.CompletedSlow ? 'border-green-500 dark:border-green-500 text-green-400 dark:text-green-400' : 'border-blue-500 dark:border-blue-500 text-blue-400 dark:text-blue-400'} flex items-center space-x-1 py-0.5 px-1.5`}>
+                      <span className="uppercase text-xs font-bold">
+                        Slow
+                      </span>
+                    </div>
+                  )
+                }
               </span>
               <Tooltip
                 placement="bottom"
@@ -418,7 +464,7 @@ export default ({
                 <span className="text-slate-400 dark:text-slate-200 text-xs">
                   {
                     moment(xcall_timestamp * 1000)
-                    .fromNow()
+                      .fromNow()
                   }
                 </span>
               </Tooltip>
