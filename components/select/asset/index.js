@@ -104,8 +104,12 @@ export default ({
       asset_data?.symbol ||
       'Token'
   image =
-    image ||
-    asset_data?.image
+    is_pool &&
+    !data ?
+      asset_data?.image ||
+      image :
+      image ||
+      asset_data?.image
 
   return (
     <Modal
@@ -156,7 +160,10 @@ export default ({
       title={<div className="flex items-center justify-between">
         <span className="flex items-center uppercase space-x-1">
           <span>
-            {origin}
+            {
+              origin ||
+              'select'
+            }
           </span>
           <span>
             Token

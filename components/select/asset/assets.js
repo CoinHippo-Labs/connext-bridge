@@ -64,96 +64,98 @@ export default ({
     is_pool ?
       _.concat(
         pool_assets_data,
-        (pools_data || [])
-          .filter(p =>
-            equals_ignore_case(
-              p?.domainId,
-              domain_id,
-            )
-          )
-          .map(p => {
-            const {
-              asset_data,
-              contract_data,
-              tokens,
-              decimals,
-              symbols,
-            } = { ...p }
-            const {
-              contracts,
-            } = { ...asset_data }
-            const {
-              contract_address,
-              image,
-            } = { ...contract_data }
-
-            const _contracts = _.cloneDeep(contracts)
-
-            const contract_index = (contracts || [])
-              .findIndex(c =>
-                equals_ignore_case(
-                  c?.contract_address,
-                  contract_address,
-                )
+        data ?
+          (pools_data || [])
+            .filter(p =>
+              equals_ignore_case(
+                p?.domainId,
+                domain_id,
               )
+            )
+            .map(p => {
+              const {
+                asset_data,
+                contract_data,
+                tokens,
+                decimals,
+                symbols,
+              } = { ...p }
+              const {
+                contracts,
+              } = { ...asset_data }
+              const {
+                contract_address,
+                image,
+              } = { ...contract_data }
 
-            if (contract_index > -1) {
-              const pool_token_index = (tokens || [])
-                .findIndex(a =>
-                  !equals_ignore_case(
-                    a,
+              const _contracts = _.cloneDeep(contracts)
+
+              const contract_index = (contracts || [])
+                .findIndex(c =>
+                  equals_ignore_case(
+                    c?.contract_address,
                     contract_address,
                   )
                 )
 
-              if (pool_token_index > -1) {
-                const symbol = symbols?.[pool_token_index]
-                const image_paths =
-                  (image || '')
-                    .split('/')
-                const image_name = _.last(image_paths)
+              if (contract_index > -1) {
+                const pool_token_index = (tokens || [])
+                  .findIndex(a =>
+                    !equals_ignore_case(
+                      a,
+                      contract_address,
+                    )
+                  )
 
-                _contracts[contract_index] = {
-                  contract_address: tokens[pool_token_index],
-                  chain_id,
-                  decimals: decimals?.[pool_token_index],
-                  symbol,
-                  image:
-                    image ?
-                      !symbol ?
-                        image :
-                        symbol.startsWith(WRAPPED_PREFIX) ?
-                          !image_name.startsWith(WRAPPED_PREFIX) ?
-                            image_paths
-                              .map((s, i) =>
-                                i === image_paths.length - 1 ?
-                                  `${WRAPPED_PREFIX}${s}` :
-                                  s
-                              )
-                              .join('/') :
-                            image :
-                          !image_name.startsWith(WRAPPED_PREFIX) ?
-                            image :
-                            image_paths
-                              .map((s, i) =>
-                                i === image_paths.length - 1 ?
-                                  s
-                                    .substring(
-                                      WRAPPED_PREFIX.length,
-                                    ) :
-                                  s
-                              )
-                              .join('/') :
-                      undefined,
+                if (pool_token_index > -1) {
+                  const symbol = symbols?.[pool_token_index]
+                  const image_paths =
+                    (image || '')
+                      .split('/')
+                  const image_name = _.last(image_paths)
+
+                  _contracts[contract_index] = {
+                    contract_address: tokens[pool_token_index],
+                    chain_id,
+                    decimals: decimals?.[pool_token_index],
+                    symbol,
+                    image:
+                      image ?
+                        !symbol ?
+                          image :
+                          symbol.startsWith(WRAPPED_PREFIX) ?
+                            !image_name.startsWith(WRAPPED_PREFIX) ?
+                              image_paths
+                                .map((s, i) =>
+                                  i === image_paths.length - 1 ?
+                                    `${WRAPPED_PREFIX}${s}` :
+                                    s
+                                )
+                                .join('/') :
+                              image :
+                            !image_name.startsWith(WRAPPED_PREFIX) ?
+                              image :
+                              image_paths
+                                .map((s, i) =>
+                                  i === image_paths.length - 1 ?
+                                    s
+                                      .substring(
+                                        WRAPPED_PREFIX.length,
+                                      ) :
+                                    s
+                                )
+                                .join('/') :
+                        undefined,
+                  }
                 }
               }
-            }
 
-            return {
-              ...asset_data,
-              contracts: _contracts,
-            }
-          }),
+              return {
+                ...asset_data,
+                contracts: _contracts,
+              }
+            }) :
+          [],
       ) :
       assets_data
 
@@ -165,28 +167,60 @@ export default ({
           a
         )
         .map(a => {
+          const {
+            contracts,
+          } = { ...a }
+
+          const contract_data = (contracts || [])
+            .find(c =>
+              c?.chain_id === chain_id
+            )
+
           return {
             ...a,
             scores:
-              [
-                'symbol',
-                'name',
-                'id',
-              ]
-              .map(f =>
-                (a[f] || '')
-                  .toLowerCase()
-                  .includes(
-                    inputSearch
+              _.concat(
+                [
+                  'symbol',
+                  'name',
+                  'id',
+                ]
+                .map(f =>
+                  (a[f] || '')
+                    .toLowerCase()
+                    .includes(
+                      inputSearch
+                        .toLowerCase()
+                    ) ?
+                    inputSearch.length > 1 ?
+                      (
+                        inputSearch.length /
+                        a[f].length
+                      ) :
+                      .5 :
+                    -1
+                ),
+                contract_data ?
+                  [
+                    'symbol',
+                    'name',
+                  ]
+                  .map(f =>
+                    (contract_data[f] || '')
                       .toLowerCase()
-                  ) ?
-                  inputSearch.length > 1 ?
-                    (
-                      inputSearch.length /
-                      a[f].length
-                    ) :
-                    .5 :
-                  -1
+                      .includes(
+                        inputSearch
+                          .toLowerCase()
+                      ) ?
+                      inputSearch.length > 1 ?
+                        (
+                          inputSearch.length /
+                          contract_data[f].length
+                        ) :
+                        .5 :
+                      -1
+                  ) :
+                  [],
               ),
           }
         })

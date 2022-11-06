@@ -1712,7 +1712,7 @@ export default ({
                         !valid_amount
                       }
                       onClick={() => call(pool_data)}
-                      className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-gray-200 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
+                      className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
                     >
                       <span className="flex items-center justify-center space-x-1.5">
                         {
@@ -1868,7 +1868,7 @@ export default ({
 
                         setAmount(_amount)
                       }}
-                      className={`${disabled || !lpTokenBalance ? 'bg-gray-200 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-300 dark:bg-slate-800 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-gray-200 dark:bg-slate-900 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'} rounded-lg py-0.5 px-2`}
+                      className={`${disabled || !lpTokenBalance ? 'bg-gray-200 dark:bg-gray-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-gray-200 dark:bg-gray-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'} rounded-lg py-0.5 px-2`}
                     >
                       {p * 100} %
                     </div>

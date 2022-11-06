@@ -1531,7 +1531,7 @@ export default () => {
     contract_address,
   } = { ...contract_data }
 
-  const _image = contract_address?.image
+  const _image = contract_data?.image
   const image_paths =
     (_image || '')
       .split('/')
