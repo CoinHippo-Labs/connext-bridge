@@ -1974,7 +1974,7 @@ export default () => {
                         getBalances(source_chain)
                         getBalances(destination_chain)
                       }}
-                      className={/*`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out */`bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 flex items-center justify-center p-1.5 sm:p-2.5`}
+                      className={/*`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out */`bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full sm:border dark:border-slate-800 flex items-center justify-center p-1.5 sm:p-2.5`}
                     >
                       <HiSwitchHorizontal
                         size={24}
@@ -2191,7 +2191,7 @@ export default () => {
                           (
                             <div className="flex items-center space-x-1.5">
                               <div className="tracking-wider text-slate-400 dark:text-slate-600 text-xs">
-                                Balance
+                                Balance:
                               </div>
                               <button
                                 disabled={disabled}

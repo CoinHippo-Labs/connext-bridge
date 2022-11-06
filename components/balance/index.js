@@ -13,6 +13,7 @@ export default ({
   contractAddress,
   decimals = 18,
   symbol,
+  hideSymbol = false,
   trigger,
   className = '',
 }) => {
@@ -237,9 +238,14 @@ export default ({
                 true,
               )}
             </span>
-            <span className="hidden sm:block font-semibold">
-              {symbol}
-            </span>
+            {
+              !hideSymbol &&
+              (
+                <span className="hidden sm:block font-semibold">
+                  {symbol}
+                </span>
+              )
+            }
           </> :
           typeof amount === 'string' ?
             <span>

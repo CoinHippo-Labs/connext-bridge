@@ -4,7 +4,7 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
-import { TailSpin, Watch } from 'react-loader-spinner'
+import { TailSpin, Watch, Oval } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
@@ -461,176 +461,190 @@ export default () => {
     const getData = async () => {
       const {
         chain,
+        amount,
       } = { ...swap }
+
+      let failed,
+        _pair
 
       if (
         sdk &&
-        chain &&
-        (
+        chain
+      ) {
+        if (typeof amount === 'number') {
+          setSwapAmount(true)
+        }
+        else if (typeof swapAmount === 'number') {
+          setSwapAmount(null)
+        }
+
+        if (
           !pair?.updated_at ||
           moment()
             .diff(
               moment(pair.updated_at),
               'seconds',
             ) > 30
-        )
-      ) {
-        try {
-          if (
-            pair === undefined ||
-            pair?.error
-          ) {
-            setPair(null)
-          }
-
-          const {
-            chain,
-            asset,
-            amount,
-          } = { ...swap }
-
-          if (typeof amount === 'number') {
-            setSwapAmount(true)
-          }
-          else if (typeof swapAmount === 'number') {
-            setSwapAmount(null)
-          }
-
-          const chain_data = chains_data
-            .find(c =>
-              c?.id === chain
-            )
-
-          const {
-            chain_id,
-            domain_id,
-          } = { ...chain_data }
-
-          const asset_data = pool_assets_data
-            .find(a =>
-              a?.id === asset
-            )
-
-          const {
-            contracts,
-          } = { ...asset_data }
-
-          const contract_data = (contracts || [])
-            .find(c =>
-              c?.chain_id === chain_id
-            )
-
-          const {
-            contract_address,
-            is_pool,
-          } = { ...contract_data }
-
-          const pool =
-            is_pool &&
-            await sdk.nxtpSdkPool
-              .getPool(
-                domain_id,
-                contract_address,
-              )
-
-          const rate =
-            pool &&
-            await sdk.nxtpSdkPool
-              .getVirtualPrice(
-                domain_id,
-                contract_address,
-              )
-
-          let _pair =
-            (
-              pool ?
-                [pool]
-                  .map(p => {
-                    const {
-                      symbol,
-                    } = { ...p }
-
-                    const symbols = (symbol || '')
-                      .split('-')
-                      .filter(s => s)
-
-                    const asset_data = pool_assets_data
-                      .find(a =>
-                        symbols
-                          .findIndex(s =>
-                            equals_ignore_case(
-                              s,
-                              a?.symbol,
-                            )
-                          ) > -1 ||
-                        (a?.contracts || [])
-                          .findIndex(c =>
-                            c?.chain_id === chain_id &&
-                            symbols
-                              .findIndex(s =>
-                                equals_ignore_case(
-                                  s,
-                                  c?.symbol,
-                                )
-                              ) > -1
-                          ) > -1
-                      )
-
-                    return {
-                      ...p,
-                      chain_data,
-                      asset_data,
-                      symbols,
-                    }
-                  }) :
-                [pair]
-            )
-            .find(p =>
-              equals_ignore_case(
-                p?.domainId,
-                domain_id,
-              ) &&
-              equals_ignore_case(
-                p?.asset_data?.id,
-                asset,
-              )
-            )
-
-          _pair =
-            _pair &&
-            {
-              ..._pair,
-              contract_data,
-              rate:
-                Number(
-                  utils.formatUnits(
-                    BigNumber.from(
-                      rate ||
-                      '0'
-                    ),
-                    _.last(_pair.decimals) ||
-                    18,
-                  )
-                ),
-              updated_at:
-                moment()
-                  .valueOf(),
+        ) {
+          try {
+            if (
+              pair === undefined ||
+              pair?.error
+            ) {
+              setPair(null)
             }
 
-          setPair(
-            is_pool ?
-              _pair :
-              undefined
-          )
+            const {
+              chain,
+              asset,
+              amount,
+            } = { ...swap }
 
+            const chain_data = chains_data
+              .find(c =>
+                c?.id === chain
+              )
+
+            const {
+              chain_id,
+              domain_id,
+            } = { ...chain_data }
+
+            const asset_data = pool_assets_data
+              .find(a =>
+                a?.id === asset
+              )
+
+            const {
+              contracts,
+            } = { ...asset_data }
+
+            const contract_data = (contracts || [])
+              .find(c =>
+                c?.chain_id === chain_id
+              )
+
+            const {
+              contract_address,
+              is_pool,
+            } = { ...contract_data }
+
+            const pool =
+              is_pool &&
+              await sdk.nxtpSdkPool
+                .getPool(
+                  domain_id,
+                  contract_address,
+                )
+
+            const rate =
+              pool &&
+              await sdk.nxtpSdkPool
+                .getVirtualPrice(
+                  domain_id,
+                  contract_address,
+                )
+
+            _pair =
+              (
+                pool ?
+                  [pool]
+                    .map(p => {
+                      const {
+                        symbol,
+                      } = { ...p }
+
+                      const symbols =
+                        (symbol || '')
+                          .split('-')
+                          .filter(s => s)
+
+                      const asset_data = pool_assets_data
+                        .find(a =>
+                          symbols
+                            .findIndex(s =>
+                              equals_ignore_case(
+                                s,
+                                a?.symbol,
+                              )
+                            ) > -1 ||
+                          (a?.contracts || [])
+                            .findIndex(c =>
+                              c?.chain_id === chain_id &&
+                              symbols
+                                .findIndex(s =>
+                                  equals_ignore_case(
+                                    s,
+                                    c?.symbol,
+                                  )
+                                ) > -1
+                            ) > -1
+                        )
+
+                      return {
+                        ...p,
+                        chain_data,
+                        asset_data,
+                        symbols,
+                      }
+                    }) :
+                  [pair]
+              )
+              .find(p =>
+                equals_ignore_case(
+                  p?.domainId,
+                  domain_id,
+                ) &&
+                equals_ignore_case(
+                  p?.asset_data?.id,
+                  asset,
+                )
+              )
+
+            _pair =
+              _pair &&
+              {
+                ..._pair,
+                contract_data,
+                rate:
+                  Number(
+                    utils.formatUnits(
+                      BigNumber.from(
+                        rate ||
+                        '0'
+                      ),
+                      _.last(_pair.decimals) ||
+                      18,
+                    )
+                  ),
+                updated_at:
+                  moment()
+                    .valueOf(),
+              }
+
+            setPair(
+              is_pool ?
+                _pair :
+                undefined
+            )
+          } catch (error) {
+            setPair(
+              {
+                error,
+              }
+            )
+
+            calculateSwap(null)
+
+            failed = true
+          }
+        }
+        else {
+          _pair = pair
+        }
+
+        if (!failed) {
           calculateSwap(_pair)
-        } catch (error) {
-          setPair(
-            {
-              error,
-            }
-          )
-          calculateSwap(null)
         }
       }
     }
@@ -1419,6 +1433,17 @@ export default () => {
                 amount,
               )
  
+          console.log(
+            '[amountToReceive]',
+            {
+              domainId,
+              contract_address,
+              tokenIndexFrom,
+              tokenIndexTo,
+              amount: _amount,
+            },
+          )
+
           setSwapAmount(
             Number(
               utils.formatUnits(
@@ -1563,6 +1588,7 @@ export default () => {
           }
       ),
     }
+
   const y_balance =
     y_asset_data &&
     (balances_data?.[chain_id] || [])
@@ -1592,6 +1618,7 @@ export default () => {
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
 
   const disabled =
+    swapAmount === true ||
     calling ||
     approving
 
@@ -1717,12 +1744,36 @@ export default () => {
                       <SelectAsset
                         disabled={disabled}
                         value={asset}
-                        onSelect={a => {
+                        onSelect={(a, c) => {
                           setSwap(
                             {
                               ...swap,
                               asset: a,
                               amount: null,
+                              origin:
+                                [
+                                  x_asset_data?.contract_address,
+                                  y_asset_data?.contract_address,
+                                ].findIndex(_c =>
+                                  equals_ignore_case(
+                                    _c,
+                                    c,
+                                  )
+                                ) > -1 ?
+                                  origin === 'x' ?
+                                    equals_ignore_case(
+                                      c,
+                                      y_asset_data?.contract_address,
+                                    ) ?
+                                      'y' :
+                                      origin :
+                                    equals_ignore_case(
+                                      c,
+                                      x_asset_data?.contract_address,
+                                    ) ?
+                                      'x' :
+                                      origin :
+                                  origin,
                             }
                           )
 
@@ -1784,6 +1835,8 @@ export default () => {
                               amount: value,
                             }
                           )
+
+                          setSwapAmount(true)
                         }}
                         onWheel={e => e.target.blur()}
                         onKeyDown={e =>
@@ -1807,7 +1860,7 @@ export default () => {
                       (
                         <div className="flex items-center space-x-1.5 sm:ml-1.5">
                           <div className="tracking-wider text-slate-400 dark:text-slate-600 text-xs">
-                            Balance
+                            Balance:
                           </div>
                           <button
                             disabled={disabled}
@@ -1817,13 +1870,15 @@ export default () => {
                                   x_balance_amount :
                                   y_balance_amount
 
-                              if (amount > 0) {
+                              if (typeof amount === 'number') {
                                 setSwap(
                                   {
                                     ...swap,
                                     amount,
                                   }
                                 )
+
+                                setSwapAmount(true)
                               }
                             }}
                           >
@@ -1848,6 +1903,7 @@ export default () => {
                                   y_asset_data
                                 ).symbol
                               }
+                              hideSymbol={true}
                               trigger={balanceTrigger}
                             />
                           </button>
@@ -1873,6 +1929,8 @@ export default () => {
                           amount: null,
                         }
                       )
+
+                      setSwapAmount(null)
 
                       setButtonDirection(
                         buttonDirection * -1
@@ -1903,12 +1961,36 @@ export default () => {
                       <SelectAsset
                         disabled={disabled}
                         value={asset}
-                        onSelect={a => {
+                        onSelect={(a, c) => {
                           setSwap(
                             {
                               ...swap,
                               asset: a,
                               amount: null,
+                              origin:
+                                [
+                                  x_asset_data?.contract_address,
+                                  y_asset_data?.contract_address,
+                                ].findIndex(_c =>
+                                  equals_ignore_case(
+                                    _c,
+                                    c,
+                                  )
+                                ) > -1 ?
+                                  origin === 'x' ?
+                                    equals_ignore_case(
+                                      c,
+                                      x_asset_data?.contract_address,
+                                    ) ?
+                                      'y' :
+                                      origin :
+                                    equals_ignore_case(
+                                      c,
+                                      y_asset_data?.contract_address,
+                                    ) ?
+                                      'x' :
+                                      origin :
+                                  origin,
                             }
                           )
 
@@ -1923,69 +2005,81 @@ export default () => {
                             x_asset_data
                         }
                       />
-                      <DebounceInput
-                        debounceTimeout={500}
-                        size="small"
-                        type="number"
-                        placeholder="0.00"
-                        disabled={
-                          disabled ||
-                          !asset
-                        }
-                        value={
-                          typeof swapAmount === 'number' &&
-                          swapAmount >= 0 ?
-                            number_format(
-                              swapAmount,
-                              '0.00000000',
-                              true,
-                            ) :
-                            ''
-                        }
-                        onChange={e => {
-                          const regex = /^[0-9.\b]+$/
-
-                          let value
-
-                          if (
-                            e.target.value === '' ||
-                            regex.test(e.target.value)
-                          ) {
-                            value = e.target.value
-                          }
-
-                          value =
-                            value < 0 ?
-                              0 :
-                              value
-
-                          value =
-                            value &&
-                              !isNaN(value) ?
-                                Number(value) :
-                                value
-
-                          setSwap(
-                            {
-                              ...swap,
-                              amount:
-                                origin === 'x' ?
-                                  value / rate :
-                                  value * rate,
+                      {
+                        swapAmount === true ?
+                          <div className="w-36 sm:w-48 flex items-center justify-end py-1.5 sm:py-2">
+                            <div>
+                              <Oval
+                                color={loader_color(theme)}
+                                width="20"
+                                height="20"
+                              />
+                            </div>
+                          </div> :
+                          <DebounceInput
+                            debounceTimeout={500}
+                            size="small"
+                            type="number"
+                            placeholder="0.00"
+                            disabled={
+                              disabled ||
+                              !asset
                             }
-                          )
-                        }}
-                        onWheel={e => e.target.blur()}
-                        onKeyDown={e =>
-                          [
-                            'e',
-                            'E',
-                            '-',
-                          ].includes(e.key) &&
-                          e.preventDefault()
-                        }
-                        className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2`}
-                      />
+                            value={
+                              typeof swapAmount === 'number' &&
+                              swapAmount >= 0 ?
+                                number_format(
+                                  swapAmount,
+                                  '0.00000000',
+                                  true,
+                                ) :
+                                ''
+                            }
+                            onChange={e => {
+                              const regex = /^[0-9.\b]+$/
+
+                              let value
+
+                              if (
+                                e.target.value === '' ||
+                                regex.test(e.target.value)
+                              ) {
+                                value = e.target.value
+                              }
+
+                              value =
+                                value < 0 ?
+                                  0 :
+                                  value
+
+                              value =
+                                value &&
+                                  !isNaN(value) ?
+                                    Number(value) :
+                                    value
+
+                              setSwap(
+                                {
+                                  ...swap,
+                                  amount:
+                                    origin === 'x' ?
+                                      value / rate :
+                                      value * rate,
+                                }
+                              )
+                            }}
+                            onWheel={e => e.target.blur()}
+                            onKeyDown={e =>
+                              [
+                                'e',
+                                'E',
+                                '-',
+                              ].includes(e.key) &&
+                              e.preventDefault()
+                            }
+                            className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2`}
+                          />
+                      }
                     </div>
                     {
                       chain_data &&
@@ -1997,7 +2091,7 @@ export default () => {
                       (
                         <div className="flex items-center space-x-1.5 sm:ml-1.5">
                           <div className="tracking-wider text-slate-400 dark:text-slate-600 text-xs">
-                            Balance
+                            Balance:
                           </div>
                           <button
                             disabled={disabled}
@@ -2041,6 +2135,7 @@ export default () => {
                                   x_asset_data
                                 ).symbol
                               }
+                              hideSymbol={true}
                               trigger={balanceTrigger}
                             />
                           </button>

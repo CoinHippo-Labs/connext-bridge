@@ -8,6 +8,7 @@ export default ({
   onSelect,
   chain,
   is_pool = false,
+  data,
 }) => {
   const [inputSearch, setInputSearch] = useState('')
 
@@ -30,13 +31,17 @@ export default ({
           <Assets
             value={value}
             inputSearch={inputSearch}
-            onSelect={a => {
+            onSelect={(a, c) => {
               if (onSelect) {
-                onSelect(a)
+                onSelect(
+                  a,
+                  c,
+                )
               }
             }}
             chain={chain}
             is_pool={is_pool}
+            data={data}
           />
         </div>
       </div>

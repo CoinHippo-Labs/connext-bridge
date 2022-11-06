@@ -49,9 +49,15 @@ export default ({
 
   const [hidden, setHidden] = useState(true)
 
-  const onClick = id => {
+  const onClick = (
+    id,
+    address,
+  ) => {
     if (onSelect) {
-      onSelect(id)
+      onSelect(
+        id,
+        address,
+      )
     }
 
     setHidden(!hidden)
@@ -182,9 +188,15 @@ export default ({
       body={(
         <Search
           value={value}
-          onSelect={id => onClick(id)}
+          onSelect={(a, c) =>
+            onClick(
+              a,
+              c,
+            )
+          }
           chain={chain}
           is_pool={is_pool}
+          data={data}
         />
       )}
     />

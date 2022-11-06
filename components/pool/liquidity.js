@@ -1343,7 +1343,7 @@ export default ({
                     }
                     <div className="space-y-0.5">
                       <div className="text-slate-400 dark:text-slate-600 text-xs font-medium text-right">
-                        Balance
+                        Balance:
                       </div>
                       <Balance
                         chainId={chain_id}
@@ -1468,7 +1468,7 @@ export default ({
                     }
                     <div className="space-y-0.5">
                       <div className="text-slate-400 dark:text-slate-600 text-xs font-medium text-right">
-                        Balance
+                        Balance:
                       </div>
                       <Balance
                         chainId={chain_id}

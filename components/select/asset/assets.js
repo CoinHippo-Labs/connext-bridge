@@ -10,6 +10,7 @@ export default ({
   onSelect,
   chain,
   is_pool = false,
+  data,
 }) => {
   const {
     chains,
@@ -49,13 +50,73 @@ export default ({
     .find(c =>
       c?.id === chain
     )
+
   const {
     chain_id,
+    domain_id,
   } = { ...chain_data }
 
   const _assets_data =
     is_pool ?
-      pool_assets_data :
+      _.concat(
+        pool_assets_data,
+        (pools_data || [])
+          .filter(p =>
+            equals_ignore_case(
+              p?.domainId,
+              domain_id,
+            )
+          )
+          .map(p => {
+            const {
+              asset_data,
+              contract_data,
+              tokens,
+              decimals,
+              symbols,
+            } = { ...p }
+            const {
+              contracts,
+            } = { ...asset_data }
+            const {
+              contract_address,
+            } = { ...contract_data }
+
+            const _contracts = _.cloneDeep(contracts)
+
+            const contract_index = (contracts || [])
+              .findIndex(c =>
+                equals_ignore_case(
+                  c?.contract_address,
+                  contract_address,
+                )
+              )
+
+            if (contract_index > -1) {
+              const pool_token_index = (tokens || [])
+                .findIndex(a =>
+                  !equals_ignore_case(
+                    a,
+                    contract_address,
+                  )
+                )
+
+              if (pool_token_index > -1) {
+                _contracts[contract_index] = {
+                  contract_address: tokens[pool_token_index],
+                  chain_id,
+                  decimals: decimals?.[pool_token_index],
+                  symbol: symbols?.[pool_token_index],
+                }
+              }
+            }
+
+            return {
+              ...asset_data,
+              contracts: _contracts,
+            }
+          }),
+      ) :
       assets_data
 
   const assets_data_sorted =
@@ -111,17 +172,23 @@ export default ({
       ['desc'],
     )
 
+  const preset_assets_data =
+    _.uniqBy(
+      (_assets_data || [])
+        .filter(a =>
+          a?.preset
+        ),
+      'id',
+    )
+
   return (
     <div>
       {
-        (_assets_data || [])
-          .filter(a => a?.preset)
-          .length > 0 &&
+        preset_assets_data.length > 0 &&
         (
           <div className="flex flex-wrap items-center mb-2">
             {
-              _assets_data
-                .filter(a => a?.preset)
+              preset_assets_data
                 .map((a, i) => (
                   <div
                     key={i}
@@ -163,8 +230,6 @@ export default ({
                 contracts,
               } = { ...a }
 
-              const selected = id === value
-
               const contract_data = (contracts || [])
                 .find(c =>
                   c?.chain_id === chain_id
@@ -177,6 +242,14 @@ export default ({
                 symbol,
                 image,
               } = { ...contract_data }
+
+              const selected =
+                data?.contract_address ?
+                  equals_ignore_case(
+                    contract_address,
+                    data?.contract_address,
+                  ) :
+                  id === value
 
               symbol =
                 symbol ||
@@ -213,6 +286,7 @@ export default ({
                     contract_address,
                   )
                 )
+
               let {
                 amount,
               } = { ...balance }
@@ -254,7 +328,12 @@ export default ({
                 </div> :
                 <div
                   key={i}
-                  onClick={() => onSelect(id)}
+                  onClick={() =>
+                    onSelect(
+                      id,
+                      contract_address,
+                    )
+                  }
                   className={className}
                 >
                   {item}

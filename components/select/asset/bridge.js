@@ -115,7 +115,7 @@ export default ({
               (
                 <>
                   <div className="text-slate-400 dark:text-slate-600 text-xs font-medium">
-                    Balance
+                    Balance:
                   </div>
                   <Balance
                     chainId={source_chain_data?.chain_id}
@@ -165,7 +165,7 @@ export default ({
               (
                 <>
                   <div className="text-slate-400 dark:text-slate-600 text-xs font-medium">
-                    Balance
+                    Balance:
                   </div>
                   <Balance
                     chainId={destination_chain_data?.chain_id}
