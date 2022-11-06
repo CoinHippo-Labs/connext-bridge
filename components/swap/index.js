@@ -24,6 +24,9 @@ import meta from '../../lib/meta'
 import { params_to_obj, number_format, ellipse, equals_ignore_case, loader_color, sleep, error_patterns } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
+const WRAPPED_PREFIX =
+  process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
+  'next'
 const GAS_LIMIT_ADJUSTMENT =
   Number(
     process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT
@@ -1528,6 +1531,12 @@ export default () => {
     contract_address,
   } = { ...contract_data }
 
+  const _image = contract_address?.image
+  const image_paths =
+    (_image || '')
+      .split('/')
+  const image_name = _.last(image_paths)
+
   const x_asset_data =
     _.head(tokens) &&
     {
@@ -1548,6 +1557,33 @@ export default () => {
             contract_address: _.head(tokens),
             decimals: _.head(decimals),
             symbol: _.head(symbols),
+            image:
+              _image ?
+                !_.head(symbols) ?
+                  _image :
+                  _.head(symbols).startsWith(WRAPPED_PREFIX) ?
+                    !image_name.startsWith(WRAPPED_PREFIX) ?
+                      image_paths
+                        .map((s, i) =>
+                          i === image_paths.length - 1 ?
+                            `${WRAPPED_PREFIX}${s}` :
+                            s
+                        )
+                        .join('/') :
+                      _image :
+                    !image_name.startsWith(WRAPPED_PREFIX) ?
+                      _image :
+                      image_paths
+                        .map((s, i) =>
+                          i === image_paths.length - 1 ?
+                            s
+                              .substring(
+                                WRAPPED_PREFIX.length,
+                              ) :
+                            s
+                        )
+                        .join('/') :
+                undefined,
           }
       ),
     }
@@ -1585,6 +1621,33 @@ export default () => {
             contract_address: _.last(tokens),
             decimals: _.last(decimals),
             symbol: _.last(symbols),
+            image:
+              _image ?
+                !_.head(symbols) ?
+                  _image :
+                  _.head(symbols).startsWith(WRAPPED_PREFIX) ?
+                    !image_name.startsWith(WRAPPED_PREFIX) ?
+                      image_paths
+                        .map((s, i) =>
+                          i === image_paths.length - 1 ?
+                            `${WRAPPED_PREFIX}${s}` :
+                            s
+                        )
+                        .join('/') :
+                      _image :
+                    !image_name.startsWith(WRAPPED_PREFIX) ?
+                      _image :
+                      image_paths
+                        .map((s, i) =>
+                          i === image_paths.length - 1 ?
+                            s
+                              .substring(
+                                WRAPPED_PREFIX.length,
+                              ) :
+                            s
+                        )
+                        .join('/') :
+                undefined,
           }
       ),
     }

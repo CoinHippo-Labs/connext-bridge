@@ -97,18 +97,21 @@ export default () => {
   // annoucement
   useEffect(() => {
     const getData = async () => {
-      dispatch({
-        type: ANNOUNCEMENT_DATA,
-        value: await getAnnouncement(),
-      })
+      dispatch(
+        {
+          type: ANNOUNCEMENT_DATA,
+          value: await getAnnouncement(),
+        }
+      )
     }
 
     getData()
 
-    const interval = setInterval(() =>
-      getData(),
-      1 * 60 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        getData(),
+        1 * 60 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [])
@@ -119,10 +122,12 @@ export default () => {
       const response = await getChains()
 
       if (Array.isArray(response)) {
-        dispatch({
-          type: CHAINS_DATA,
-          value: response,
-        })
+        dispatch(
+          {
+            type: CHAINS_DATA,
+            value: response,
+          }
+        )
       }
     }
 
@@ -135,28 +140,37 @@ export default () => {
       const response = await getAssets()
 
       if (Array.isArray(response)) {
-        dispatch({
-          type: ASSETS_DATA,
-          value: response,
-        })
+        dispatch(
+          {
+            type: ASSETS_DATA,
+            value: response,
+          }
+        )
 
-        dispatch({
-          type: POOL_ASSETS_DATA,
-          value: response
-            .map(d => {
-              const {
-                contracts,
-              } = { ...d }
+        dispatch(
+          {
+            type: POOL_ASSETS_DATA,
+            value:
+              response
+                .map(d => {
+                  const {
+                    contracts,
+                  } = { ...d }
 
-              return {
-                ...d,
-                contracts: contracts?.filter(c =>
-                  c?.is_pool
+                  return {
+                    ...d,
+                    contracts:
+                      (contracts || [])
+                        .filter(c =>
+                          c?.is_pool
+                        ),
+                  }
+                })
+                .filter(d =>
+                  d.contracts.length > 0
                 ),
-              }
-            })
-            .filter(d => d.contracts?.length > 0),
-        })
+          }
+        )
       }
     }
 
@@ -170,10 +184,14 @@ export default () => {
         chains_data &&
         assets_data
       ) {
-        let updated_ids = is_interval ? [] :
-          assets_data
-            .filter(a => typeof a.price === 'number')
-            .map(a => a.id)
+        let updated_ids =
+          is_interval ?
+            [] :
+            assets_data
+              .filter(a =>
+                typeof a.price === 'number'
+              )
+              .map(a => a.id)
 
         if (updated_ids.length < assets_data.length) {
           let updated = false
@@ -184,57 +202,69 @@ export default () => {
             } = { ...chain_data }
 
             if (chain_id) {
-              const addresses = assets_data
-                .filter(a =>
-                  !updated_ids.includes(a?.id) &&
-                  a?.contracts?.findIndex(c =>
-                    c?.chain_id === chain_id &&
-                    c.contract_address
-                  ) > -1
-                )
-                .map(a =>
-                  a.contracts.find(c =>
-                    c?.chain_id === chain_id
-                  ).contract_address
-                )
+              const addresses =
+                assets_data
+                  .filter(a =>
+                    !updated_ids.includes(a?.id) &&
+                    (a?.contracts || [])
+                      .findIndex(c =>
+                        c?.chain_id === chain_id &&
+                        c.contract_address
+                      ) > -1
+                  )
+                  .map(a =>
+                    a.contracts
+                      .find(c =>
+                        c?.chain_id === chain_id
+                      ).contract_address
+                  )
 
               if (addresses.length > 0) {
-                const response = await getAssetsPrice(
-                  {
-                    chain_id,
-                    addresses,
-                  },
-                )
+                const response =
+                  await getAssetsPrice(
+                    {
+                      chain_id,
+                      addresses,
+                    },
+                  )
 
                 if (Array.isArray(response)) {
-                  response.forEach(t => {
-                    const asset_index = assets_data.findIndex(a =>
-                      a?.id &&
-                      a.contracts?.findIndex(c =>
-                        c?.chain_id === t?.chain_id &&
-                        equals_ignore_case(c.contract_address, t?.contract_address)
-                      ) > -1
-                    )
-
-                    if (asset_index > -1) {
-                      const asset = assets_data[asset_index]
-                      asset.price =
-                        t?.price ||
-                        asset.price ||
-                        0
-
-                      assets_data[asset_index] = asset
-
-                      updated_ids = _.uniq(
-                        _.concat(
-                          updated_ids,
-                          asset.id,
+                  response
+                    .forEach(t => {
+                      const asset_index = assets_data
+                        .findIndex(a =>
+                          a?.id &&
+                          (a.contracts || [])
+                            .findIndex(c =>
+                              c?.chain_id === t?.chain_id &&
+                              equals_ignore_case(
+                                c.contract_address,
+                                t?.contract_address,
+                              )
+                            ) > -1
                         )
-                      )
 
-                      updated = true
-                    }
-                  })
+                      if (asset_index > -1) {
+                        const asset = assets_data[asset_index]
+
+                        asset.price =
+                          t?.price ||
+                          asset.price ||
+                          0
+
+                        assets_data[asset_index] = asset
+
+                        updated_ids =
+                          _.uniq(
+                            _.concat(
+                              updated_ids,
+                              asset.id,
+                            )
+                          )
+
+                        updated = true
+                      }
+                    })
                 }
               }
             }
@@ -254,12 +284,13 @@ export default () => {
 
     getData()
 
-    return () => clearInterval(
+    const interval =
       setInterval(() =>
         getData(true),
         5 * 60 * 1000,
       )
-    )
+
+    return () => clearInterval(interval)
   }, [chains_data, assets_data])
 
   // rpcs
@@ -280,31 +311,36 @@ export default () => {
               rpcUrls,
             } = { ..._.head(provider_params) }
  
-            const rpc_urls = (rpcUrls || [])
-              .filter(url => url)
+            const rpc_urls =
+              (rpcUrls || [])
+                .filter(url => url)
 
-            const provider = rpc_urls.length === 1 ?
-              new providers.JsonRpcProvider(rpc_urls[0]) :
-              new providers.FallbackProvider(
-                rpc_urls.map((url, i) => {
-                  return {
-                    provider: new providers.JsonRpcProvider(url),
-                    priority: i + 1,
-                    stallTimeout: 1000,
-                  }
-                }),
-                rpc_urls.length / 3,
-              )
+            const provider =
+              rpc_urls.length === 1 ?
+                new providers.JsonRpcProvider(rpc_urls[0]) :
+                new providers.FallbackProvider(
+                  rpc_urls
+                    .map((url, i) => {
+                      return {
+                        provider: new providers.JsonRpcProvider(url),
+                        priority: i + 1,
+                        stallTimeout: 1000,
+                      }
+                    }),
+                  rpc_urls.length / 3,
+                )
 
             _rpcs[chain_id] = provider
           }
         }
 
         if (!rpcs) {
-          dispatch({
-            type: RPCS,
-            value: _rpcs,
-          })
+          dispatch(
+            {
+              type: RPCS,
+              value: _rpcs,
+            }
+          )
         }
       }
     }
@@ -317,9 +353,10 @@ export default () => {
     const init = async () => {
       if (
         chains_data &&
-        assets_data?.findIndex(a =>
-          typeof a.price !== 'number'
-        ) < 0
+        (assets_data || [])
+          .findIndex(a =>
+            typeof a.price !== 'number'
+          ) < 0
       ) {
         const chains_config = {}
 
@@ -336,50 +373,52 @@ export default () => {
               rpcUrls,
             } = { ..._.head(provider_params) }
  
-            const rpc_urls = (rpcUrls || [])
-              .filter(url => url)
+            const rpc_urls =
+              (rpcUrls || [])
+                .filter(url => url)
 
             if (domain_id) {
               chains_config[domain_id] = {
                 providers: rpc_urls,
-                assets: assets_data
-                  .filter(a =>
-                    (a?.contracts || [])
-                    .findIndex(c =>
-                      c?.chain_id === chain_id
-                    ) > -1
-                  )
-                  .map(a => {
-                    const {
-                      contracts,
-                    } = { ...a }
-                    let {
-                      name,
-                      symbol,
-                    } = { ...a }
+                assets:
+                  assets_data
+                    .filter(a =>
+                      (a?.contracts || [])
+                        .findIndex(c =>
+                          c?.chain_id === chain_id
+                        ) > -1
+                    )
+                    .map(a => {
+                      const {
+                        contracts,
+                      } = { ...a }
+                      let {
+                        name,
+                        symbol,
+                      } = { ...a }
 
-                    const contract_data = contracts
-                      .find(c =>
-                        c?.chain_id === chain_id
-                      )
-                    const {
-                      contract_address,
-                    } = { ...contract_data }
+                      const contract_data = contracts
+                        .find(c =>
+                          c?.chain_id === chain_id
+                        )
+                      const {
+                        contract_address,
+                      } = { ...contract_data }
 
-                    symbol =
-                      contract_data?.symbol ||
-                      symbol
+                      symbol =
+                        contract_data?.symbol ||
+                        symbol
 
-                    name =
-                      name ||
-                      symbol
+                      name =
+                        name ||
+                        symbol
 
-                    return {
-                      name,
-                      symbol,
-                      address: contract_address,
-                    }
-                  }),
+                      return {
+                        name,
+                        symbol,
+                        address: contract_address,
+                      }
+                    }),
               }
             }
           }
@@ -418,18 +457,23 @@ export default () => {
       if (
         sdk &&
         address &&
-        !equals_ignore_case(address, currentAddress)
+        !equals_ignore_case(
+          address,
+          currentAddress,
+        )
       ) {
         if (sdk.nxtpSdkBase) {
-          await sdk.nxtpSdkBase.changeSignerAddress(
-            address,
-          )
+          await sdk.nxtpSdkBase
+            .changeSignerAddress(
+              address,
+            )
         }
 
         if (sdk.nxtpSdkRouter) {
-          await sdk.nxtpSdkRouter.changeSignerAddress(
-            address,
-          )
+          await sdk.nxtpSdkRouter
+            .changeSignerAddress(
+              address,
+            )
         }
 
         setCurrentAddress(address)
@@ -457,61 +501,65 @@ export default () => {
       if (
         sdk &&
         chains_data &&
-        assets_data?.findIndex(a =>
-          typeof a.price !== 'number'
-        ) < 0
+        (assets_data || [])
+          .findIndex(a =>
+            typeof a.price !== 'number'
+          ) < 0
       ) {
         try {
-          const response = await sdk.nxtpSdkUtils.getRoutersData()
+          const response =
+            await sdk.nxtpSdkUtils
+              .getRoutersData()
 
           if (response) {
-            const data = _.groupBy(
-              response
-                .map(l => {
-                  const {
-                    domain,
-                    local,
-                    balance,
-                  } = { ...l }
+            const data =
+              _.groupBy(
+                response
+                  .map(l => {
+                    const {
+                      domain,
+                      local,
+                      balance,
+                    } = { ...l }
 
-                  const chain_data = chains_data
-                    .find(c =>
-                      c?.domain_id === domain
-                    )
-                  const {
-                    chain_id,
-                  } = { ...chain_data }
+                    const chain_data = chains_data
+                      .find(c =>
+                        c?.domain_id === domain
+                      )
+                    const {
+                      chain_id,
+                    } = { ...chain_data }
 
-                  const asset_data = assets_data
-                    .find(a =>
-                      (a?.contracts || [])
-                        .findIndex(c =>
-                          c?.chain_id === chain_id &&
-                          equals_ignore_case(
-                            c?.contract_address,
-                            local,
-                          )
-                        ) > -1
-                    )
+                    const asset_data = assets_data
+                      .find(a =>
+                        (a?.contracts || [])
+                          .findIndex(c =>
+                            c?.chain_id === chain_id &&
+                            equals_ignore_case(
+                              c?.contract_address,
+                              local,
+                            )
+                          ) > -1
+                      )
 
-                  const amount =
-                    BigInt(
-                      balance ||
-                      0
-                    )
-                    .toString()
+                    const amount =
+                      BigInt(
+                        balance ||
+                        0
+                      )
+                      .toString()
 
-                  return {
-                    ...l,
-                    chain_id,
-                    chain_data,
-                    contract_address: local,
-                    asset_data,
-                    amount,
-                  }
-                }),
-              'chain_id',
-            )
+                    return {
+                      ...l,
+                      chain_id,
+                      chain_data,
+                      contract_address: local,
+                      asset_data,
+                      amount,
+                    }
+                  }),
+                'chain_id',
+              )
 
             dispatch(
               {
@@ -572,10 +620,12 @@ export default () => {
                 },
               )
 
-              const pool = await sdk.nxtpSdkPool.getPool(
-                domain_id,
-                contract_address,
-              )
+              const pool =
+                await sdk.nxtpSdkPool
+                  .getPool(
+                    domain_id,
+                    contract_address,
+                  )
 
               console.log(
                 '[Pool]',
@@ -608,10 +658,11 @@ export default () => {
 
               const stats =
                 pool &&
-                await sdk.nxtpSdkPool.getPoolStats(
-                  domain_id,
-                  contract_address,
-                )
+                await sdk.nxtpSdkPool
+                  .getPoolStats(
+                    domain_id,
+                    contract_address,
+                  )
 
               if (pool) {
                 console.log(
@@ -642,10 +693,11 @@ export default () => {
 
               const rate =
                 pool &&
-                await sdk.nxtpSdkPool.getVirtualPrice(
-                  domain_id,
-                  contract_address,
-                )
+                await sdk.nxtpSdkPool
+                  .getVirtualPrice(
+                    domain_id,
+                    contract_address,
+                  )
 
               if (pool) {
                 console.log(

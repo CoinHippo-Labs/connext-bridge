@@ -4,6 +4,10 @@ import _ from 'lodash'
 import Image from '../../image'
 import { number_format, equals_ignore_case } from '../../../lib/utils'
 
+const WRAPPED_PREFIX =
+  process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
+  'next'
+
 export default ({
   value,
   inputSearch,
@@ -80,6 +84,7 @@ export default ({
             } = { ...asset_data }
             const {
               contract_address,
+              image,
             } = { ...contract_data }
 
             const _contracts = _.cloneDeep(contracts)
@@ -102,11 +107,44 @@ export default ({
                 )
 
               if (pool_token_index > -1) {
+                const symbol = symbols?.[pool_token_index]
+                const image_paths =
+                  (image || '')
+                    .split('/')
+                const image_name = _.last(image_paths)
+
                 _contracts[contract_index] = {
                   contract_address: tokens[pool_token_index],
                   chain_id,
                   decimals: decimals?.[pool_token_index],
-                  symbol: symbols?.[pool_token_index],
+                  symbol,
+                  image:
+                    image ?
+                      !symbol ?
+                        image :
+                        symbol.startsWith(WRAPPED_PREFIX) ?
+                          !image_name.startsWith(WRAPPED_PREFIX) ?
+                            image_paths
+                              .map((s, i) =>
+                                i === image_paths.length - 1 ?
+                                  `${WRAPPED_PREFIX}${s}` :
+                                  s
+                              )
+                              .join('/') :
+                            image :
+                          !image_name.startsWith(WRAPPED_PREFIX) ?
+                            image :
+                            image_paths
+                              .map((s, i) =>
+                                i === image_paths.length - 1 ?
+                                  s
+                                    .substring(
+                                      WRAPPED_PREFIX.length,
+                                    ) :
+                                  s
+                              )
+                              .join('/') :
+                      undefined,
                 }
               }
             }

@@ -48,6 +48,7 @@
         "chain_id": 5,
         "decimals": 18,
         "symbol": "WETH",
+        "image": "/logos/assets/weth.png",
         "wrapable": true
       },
       {
@@ -55,12 +56,14 @@
         "chain_id": 80001,
         "decimals": 18,
         "symbol": "nextWETH",
+        "image": "/logos/assets/nextweth.png",
         "wrapable": true,
         "is_pool": true,
         "wrapped": {
           "contract_address": "0x4DfAe612aaCB5b448C12A591cD0879bFa2e51d62",
           "decimals": 18,
-          "symbol": "WETH"
+          "symbol": "WETH",
+          "image": "/logos/assets/weth.png"
         }
       },
       {
@@ -68,12 +71,14 @@
         "chain_id": 420,
         "decimals": 18,
         "symbol": "nextWETH",
+        "image": "/logos/assets/nextweth.png",
         "mintable": true,
         "is_pool": true,
         "wrapped": {
           "contract_address": "0x74c6FD7D2Bc6a8F0Ebd7D78321A95471b8C2B806",
           "decimals": 18,
-          "symbol": "WETH"
+          "symbol": "WETH",
+          "image": "/logos/assets/weth.png"
         }
       },
       {
@@ -81,6 +86,7 @@
         "chain_id": 421613,
         "decimals": 18,
         "symbol": "WETH",
+        "image": "/logos/assets/weth.png",
         "wrapable": true
       }
     ],
