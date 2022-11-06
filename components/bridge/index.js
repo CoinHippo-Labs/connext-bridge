@@ -2677,15 +2677,18 @@ export default () => {
                           'Switch'
                         } to
                       </span>
-                      {source_chain_data?.image && (
-                        <Image
-                          src={source_chain_data.image}
-                          alt=""
-                          width={32}
-                          height={32}
-                          className="rounded-full"
-                        />
-                      )}
+                      {
+                        source_chain_data?.image &&
+                        (
+                          <Image
+                            src={source_chain_data.image}
+                            alt=""
+                            width={32}
+                            height={32}
+                            className="rounded-full"
+                          />
+                        )
+                      }
                       <span className="font-semibold">
                         {source_chain_data?.name}
                       </span>

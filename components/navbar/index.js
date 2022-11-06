@@ -94,7 +94,7 @@ export default () => {
   const [hiddenStatus, setHiddenStatus] = useState(false)
   const [currentAddress, setCurrentAddress] = useState(null)
 
-  // annoucement
+  // annoncement
   useEffect(() => {
     const getData = async () => {
       dispatch(

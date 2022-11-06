@@ -98,7 +98,10 @@ export default ({
           <span className="whitespace-nowrap text-xs sm:text-base font-semibold">
             {
               chainName(chain_data) ||
-              'Chain'
+              (origin ?
+                'Chain' :
+                'Select chain'
+              )
             }
           </span>
         </div> :

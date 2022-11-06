@@ -1576,6 +1576,7 @@ export default ({
           {/*advancedOptions*/}
           <div className="flex items-end">
             {
+              chain &&
               web3_provider &&
               wrong_chain ?
                 <Wallet
@@ -1588,15 +1589,18 @@ export default ({
                       'Switch'
                     } to
                   </span>
-                  {image && (
-                    <Image
-                      src={image}
-                      alt=""
-                      width={28}
-                      height={28}
-                      className="rounded-full"
-                    />
-                  )}
+                  {
+                    image &&
+                    (
+                      <Image
+                        src={image}
+                        alt=""
+                        width={28}
+                        height={28}
+                        className="rounded-full"
+                      />
+                    )
+                  }
                   <span className="font-semibold">
                     {name}
                   </span>
