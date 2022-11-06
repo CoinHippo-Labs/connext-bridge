@@ -265,22 +265,39 @@ export default ({
       const signer = web3Provider.getSigner()
       const address = await signer.getAddress()
 
-      const {
-        chainId,
-      } = { ...network }
+      if (
+        blocked_addresses
+          .findIndex(a =>
+            equals_ignore_case(
+              a,
+              address,
+            )
+          ) > -1
+      ) {
+        dispatch(
+          {
+            type: WALLET_RESET,
+          }
+        )
+      }
+      else {
+        const {
+          chainId,
+        } = { ...network }
 
-      dispatch(
-        {
-          type: WALLET_DATA,
-          value: {
-            chain_id: chainId,
-            provider,
-            web3_provider: web3Provider,
-            address,
-            signer,
-          },
-        }
-      )
+        dispatch(
+          {
+            type: WALLET_DATA,
+            value: {
+              chain_id: chainId,
+              provider,
+              web3_provider: web3Provider,
+              address,
+              signer,
+            },
+          }
+        )
+      }
     },
     [web3Modal],
   )
