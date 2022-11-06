@@ -129,27 +129,31 @@ export default () => {
   useEffect(() => {
     let updated = false
 
-    const params = params_to_obj(
-      asPath?.indexOf('?') > -1 &&
-      asPath.substring(
-        asPath.indexOf('?') + 1,
+    const params =
+      params_to_obj(
+        asPath?.indexOf('?') > -1 &&
+        asPath.substring(
+          asPath.indexOf('?') + 1,
+        )
       )
-    )
 
     const {
       amount,
       from,
     } = { ...params }
 
-    let path = !asPath ?
-      '/' :
-      asPath.toLowerCase()
-    path = path.includes('?') ?
-      path.substring(
-        0,
-        path.indexOf('?'),
-      ) :
-      path
+    let path =
+      !asPath ?
+        '/' :
+        asPath.toLowerCase()
+
+    path =
+      path.includes('?') ?
+        path.substring(
+          0,
+          path.indexOf('?'),
+        ) :
+        path
 
     if (
       path.includes('on-')
@@ -162,19 +166,25 @@ export default () => {
         .split('-')
 
       const chain = paths[paths.indexOf('on') + 1]
-      const asset = _.head(paths) !== 'on' ?
-        _.head(paths) :
-        process.env.NEXT_PUBLIC_NETWORK === 'testnet' ?
-          'eth' :
-          'usdc'
+      const asset =
+        _.head(paths) !== 'on' ?
+          _.head(paths) :
+          process.env.NEXT_PUBLIC_NETWORK === 'testnet' ?
+            'eth' :
+            'usdc'
 
-      const chain_data = chains_data?.find(c =>
-        c?.id === chain
-      )
-      const asset_data = pool_assets_data?.find(a =>
-        a?.id === asset ||
-        equals_ignore_case(a?.symbol, asset)
-      )
+      const chain_data = (chains_data || [])
+        .find(c =>
+          c?.id === chain
+        )
+      const asset_data = (pool_assets_data || [])
+        .find(a =>
+          a?.id === asset ||
+          equals_ignore_case(
+            a?.symbol,
+            asset,
+          )
+        )
 
       if (chain_data) {
         swap.chain = chain
@@ -220,23 +230,28 @@ export default () => {
       } = { ...swap }
 
       if (
-        chains_data?.findIndex(c =>
-          !c?.disabled &&
-          c?.id === chain
-        ) > -1
+        (chains_data || [])
+          .findIndex(c =>
+            !c?.disabled &&
+            c?.id === chain
+          ) > -1
       ) {
         params.chain = chain
 
         if (
           asset &&
-          pool_assets_data?.findIndex(a =>
-            a?.id === asset &&
-            a.contracts?.findIndex(c =>
-              c?.chain_id === chains_data.find(_c =>
-                _c?.id === chain
-              )?.chain_id
+          (pool_assets_data || [])
+            .findIndex(a =>
+              a?.id === asset &&
+              (a.contracts || [])
+                .findIndex(c =>
+                  c?.chain_id ===
+                  chains_data
+                    .find(_c =>
+                      _c?.id === chain
+                    )?.chain_id
+                ) > -1
             ) > -1
-          ) > -1
         ) {
           params.asset = asset
         }
@@ -266,29 +281,6 @@ export default () => {
         }
       }
     }
-
-    /*if (
-      !(
-        params.chain ||
-        params.asset
-      ) &&
-      pool_assets_data?.length > 0
-    ) {
-      const {
-        id,
-        contracts,
-      } = { ..._.head(pool_assets_data) }
-
-      params.chain =
-        params.chain ||
-        chains_data?.find(c =>
-          c?.chain_id === _.head(contracts)?.chain_id
-        )?.id
-
-      params.asset =
-        params.asset ||
-        id
-    }*/
 
     if (Object.keys(params).length > 0) {
       const {
@@ -336,6 +328,7 @@ export default () => {
       .find(c =>
         c?.chain_id === wallet_chain_id
       )
+
     const {
       id,
     } = { ...chain_data }
@@ -344,12 +337,13 @@ export default () => {
       asPath &&
       id
     ) {
-      const params = params_to_obj(
-        asPath.indexOf('?') > -1 &&
-        asPath.substring(
-          asPath.indexOf('?') + 1,
+      const params =
+        params_to_obj(
+          asPath.indexOf('?') > -1 &&
+          asPath.substring(
+            asPath.indexOf('?') + 1,
+          )
         )
-      )
 
       if (
         !params?.chain &&
@@ -502,24 +496,30 @@ export default () => {
             setSwapAmount(null)
           }
 
-          const chain_data = chains_data.find(c =>
-            c?.id === chain
-          )
+          const chain_data = chains_data
+            .find(c =>
+              c?.id === chain
+            )
+
           const {
             chain_id,
             domain_id,
           } = { ...chain_data }
 
-          const asset_data = pool_assets_data.find(a =>
-            a?.id === asset
-          )
+          const asset_data = pool_assets_data
+            .find(a =>
+              a?.id === asset
+            )
+
           const {
             contracts,
           } = { ...asset_data }
 
-          const contract_data = contracts?.find(c =>
-            c?.chain_id === chain_id
-          )
+          const contract_data = (contracts || [])
+            .find(c =>
+              c?.chain_id === chain_id
+            )
+
           const {
             contract_address,
             is_pool,
@@ -527,17 +527,19 @@ export default () => {
 
           const pool =
             is_pool &&
-            await sdk.nxtpSdkPool.getPool(
-              domain_id,
-              contract_address,
-            )
+            await sdk.nxtpSdkPool
+              .getPool(
+                domain_id,
+                contract_address,
+              )
 
           const rate =
             pool &&
-            await sdk.nxtpSdkPool.getVirtualPrice(
-              domain_id,
-              contract_address,
-            )
+            await sdk.nxtpSdkPool
+              .getVirtualPrice(
+                domain_id,
+                contract_address,
+              )
 
           let _pair =
             (
@@ -552,17 +554,27 @@ export default () => {
                       .split('-')
                       .filter(s => s)
 
-                    const asset_data = pool_assets_data.find(a =>
-                      symbols.findIndex(s =>
-                        equals_ignore_case(s, a?.symbol)
-                      ) > -1 ||
-                      a?.contracts?.findIndex(c =>
-                        c?.chain_id === chain_id &&
-                        symbols.findIndex(s =>
-                          equals_ignore_case(s, c?.symbol)
-                        ) > -1
-                      ) > -1
-                    )
+                    const asset_data = pool_assets_data
+                      .find(a =>
+                        symbols
+                          .findIndex(s =>
+                            equals_ignore_case(
+                              s,
+                              a?.symbol,
+                            )
+                          ) > -1 ||
+                        (a?.contracts || [])
+                          .findIndex(c =>
+                            c?.chain_id === chain_id &&
+                            symbols
+                              .findIndex(s =>
+                                equals_ignore_case(
+                                  s,
+                                  c?.symbol,
+                                )
+                              ) > -1
+                          ) > -1
+                      )
 
                     return {
                       ...p,
@@ -574,8 +586,14 @@ export default () => {
                 [pair]
             )
             .find(p =>
-              equals_ignore_case(p?.domainId, domain_id) &&
-              equals_ignore_case(p?.asset_data?.id, asset)
+              equals_ignore_case(
+                p?.domainId,
+                domain_id,
+              ) &&
+              equals_ignore_case(
+                p?.asset_data?.id,
+                asset,
+              )
             )
 
           _pair =
@@ -639,48 +657,61 @@ export default () => {
         contract_address
       ) {
         if (contract_address === constants.AddressZero) {
-          balance = await provider.getBalance(
-            address,
-          )
+          balance =
+            await provider
+              .getBalance(
+                address,
+              )
         }
         else {
-          const contract = new Contract(
-            contract_address,
-            [
-              'function balanceOf(address owner) view returns (uint256)',
-            ],
-            provider,
-          )
+          const contract =
+            new Contract(
+              contract_address,
+              [
+                'function balanceOf(address owner) view returns (uint256)',
+              ],
+              provider,
+            )
 
-          balance = await contract.balanceOf(
-            address,
-          )
+          balance =
+            await contract
+              .balanceOf(
+                address,
+              )
         }
       }
 
       if (
         balance ||
         !(
-          balances_data?.[`${chain_id}`]?.findIndex(c =>
-            equals_ignore_case(c?.contract_address, contract_address)
-          ) > -1
+          (balances_data?.[`${chain_id}`] || [])
+            .findIndex(c =>
+              equals_ignore_case(
+                c?.contract_address,
+                contract_address,
+              )
+            ) > -1
         )
       ) {
         dispatch(
           {
             type: BALANCES_DATA,
             value: {
-              [`${chain_id}`]: [{
-                ...contract_data,
-                amount: balance &&
-                  Number(
-                    utils.formatUnits(
-                      balance,
-                      decimals ||
-                      18,
-                    )
-                  ),
-              }],
+              [`${chain_id}`]:
+                [
+                  {
+                    ...contract_data,
+                    amount:
+                      balance &&
+                      Number(
+                        utils.formatUnits(
+                          balance,
+                          decimals ||
+                          18,
+                        )
+                      ),
+                  },
+                ],
             },
           }
         )
@@ -691,63 +722,73 @@ export default () => {
       chain_id,
       domain_id,
     } = { 
-      ...chains_data?.find(c =>
-        c?.id === chain
+      ...(
+        (chains_data || [])
+          .find(c =>
+            c?.id === chain
+          )
       ),
     }
 
-    const contracts_data = _.uniqBy(
-      _.concat(
-        (pool_assets_data || [])
-          .map(a => {
-            const {
-              contracts,
-            } = { ...a }
+    const contracts_data =
+      _.uniqBy(
+        _.concat(
+          (pool_assets_data || [])
+            .map(a => {
+              const {
+                contracts,
+              } = { ...a }
 
-            return {
-              ...a,
-              ...contracts?.find(c =>
-                c?.chain_id === chain_id
-              ),
-            }
-          }),
-        (pools_data || [])
-          .filter(p =>
-            equals_ignore_case(p?.domainId, domain_id)
-          )
-          .flatMap(p => {
-            const {
-              tokens,
-              symbols,
-              decimals,
-            } = { ...p }
+              return {
+                ...a,
+                ...(
+                  (contracts || [])
+                  .find(c =>
+                    c?.chain_id === chain_id
+                  )
+                ),
+              }
+            }),
+          (pools_data || [])
+            .filter(p =>
+              equals_ignore_case(
+                p?.domainId,
+                domain_id,
+              )
+            )
+            .flatMap(p => {
+              const {
+                tokens,
+                symbols,
+                decimals,
+              } = { ...p }
 
-            return (tokens || [])
-              .map((t, i) => {
-                return {
-                  chain_id,
-                  contract_address: t,
-                  decimals: decimals?.[i],
-                  symbol: symbols?.[i],
-                }
-              })
-          }),
+              return (tokens || [])
+                .map((t, i) => {
+                  return {
+                    chain_id,
+                    contract_address: t,
+                    decimals: decimals?.[i],
+                    symbol: symbols?.[i],
+                  }
+                })
+            }),
+        )
+        .filter(a => a?.contract_address)
+        .map(a => {
+          let {
+            contract_address,
+          } = {  ...a }
+
+          contract_address = contract_address.toLowerCase()
+
+          return {
+            ...a,
+            contract_address,
+          }
+        }),
+        'contract_address',
       )
-      .filter(a => a?.contract_address)
-      .map(a => {
-        let {
-          contract_address,
-        } = {  ...a }
-
-        contract_address = contract_address.toLowerCase()
-
-        return {
-          ...a,
-          contract_address,
-        }
-      }),
-      'contract_address',
-    )
 
     contracts_data
       .forEach(c =>
@@ -831,10 +872,15 @@ export default () => {
         {
           ...Object.fromEntries(
             Object.entries({ ...asset_data }).
-              filter(([k, v]) => !['contracts'].includes(k))
+              filter(([k, v]) =>
+                !['contracts'].includes(k)
+              )
           ),
           ...(
-            equals_ignore_case(_.head(tokens), contract_address) ?
+            equals_ignore_case(
+              _.head(tokens),
+              contract_address
+            ) ?
               contract_data :
               {
                 chain_id,
@@ -850,10 +896,15 @@ export default () => {
         {
           ...Object.fromEntries(
             Object.entries({ ...asset_data })
-              .filter(([k, v]) => !['contracts'].includes(k))
+              .filter(([k, v]) =>
+                !['contracts'].includes(k)
+              )
           ),
           ...(
-            equals_ignore_case(_.last(tokens), contract_address) ?
+            equals_ignore_case(
+              _.last(tokens),
+              contract_address,
+            ) ?
               contract_data :
               {
                 chain_id,
@@ -885,37 +936,43 @@ export default () => {
         setApproving(false)
       }
       else {
-        amount = utils.parseUnits(
-          amount.toString(),
-          (origin === 'x' ?
-            x_asset_data :
-            y_asset_data
-          )?.decimals ||
-          18,
-        )
-        .toString()
+        amount =
+          utils.parseUnits(
+            amount
+              .toString(),
+            (origin === 'x' ?
+              x_asset_data :
+              y_asset_data
+            )?.decimals ||
+            18,
+          )
+          .toString()
       }
 
       const minDy = 0
 
       if (!failed) {
         try {
-          const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
-            domainId,
-            (origin === 'x' ?
-              x_asset_data :
-              y_asset_data
-            )?.contract_address,
-            amount,
-            infiniteApprove,
-          )
+          const approve_request =
+            await sdk.nxtpSdkBase
+              .approveIfNeeded(
+                domainId,
+                (origin === 'x' ?
+                  x_asset_data :
+                  y_asset_data
+                )?.contract_address,
+                amount,
+                infiniteApprove,
+              )
 
           if (approve_request) {
             setApproving(true)
 
-            const approve_response = await signer.sendTransaction(
-              approve_request,
-            )
+            const approve_response =
+              await signer
+                .sendTransaction(
+                  approve_request,
+                )
 
             const {
               hash,
@@ -934,9 +991,11 @@ export default () => {
 
             setApproveProcessing(true)
 
-            const approve_receipt = await signer.provider.waitForTransaction(
-              hash,
-            )
+            const approve_receipt =
+              await signer.provider
+                .waitForTransaction(
+                  hash,
+                )
 
             const {
               status,
@@ -1001,26 +1060,30 @@ export default () => {
             },
           )
 
-          const swap_request = await sdk.nxtpSdkPool.swap(
-            domainId,
-            contract_address,
-            (origin === 'x' ?
-              x_asset_data :
-              y_asset_data
-            )?.contract_address,
-            (origin === 'x' ?
-              y_asset_data :
-              x_asset_data
-            )?.contract_address,
-            amount,
-            minDy,
-            deadline,
-          )
+          const swap_request =
+            await sdk.nxtpSdkPool
+              .swap(
+                domainId,
+                contract_address,
+                (origin === 'x' ?
+                  x_asset_data :
+                  y_asset_data
+                )?.contract_address,
+                (origin === 'x' ?
+                  y_asset_data :
+                  x_asset_data
+                )?.contract_address,
+                amount,
+                minDy,
+                deadline,
+              )
 
           if (swap_request) {
-            let gasLimit = await signer.estimateGas(
-              swap_request,
-            )
+            let gasLimit =
+              await signer
+                .estimateGas(
+                  swap_request,
+                )
 
             if (gasLimit) {
               gasLimit =
@@ -1044,9 +1107,11 @@ export default () => {
               swap_request.gasLimit = gasLimit
             }
 
-            const swap_response = await signer.sendTransaction(
-              swap_request,
-            )
+            const swap_response =
+              await signer
+                .sendTransaction(
+                  swap_request,
+                )
 
             const {
               hash,
@@ -1054,9 +1119,11 @@ export default () => {
 
             setCallProcessing(true)
 
-            const swap_receipt = await signer.provider.waitForTransaction(
-              hash,
-            )
+            const swap_receipt =
+              await signer.provider
+                .waitForTransaction(
+                  hash,
+                )
 
             const {
               status,
@@ -1164,10 +1231,15 @@ export default () => {
           {
             ...Object.fromEntries(
               Object.entries({ ...asset_data })
-                .filter(([k, v]) => !['contracts'].includes(k))
+                .filter(([k, v]) =>
+                  !['contracts'].includes(k)
+                )
             ),
             ...(
-              equals_ignore_case(_.head(tokens), contract_address) ?
+              equals_ignore_case(
+                _.head(tokens),
+                contract_address,
+              ) ?
                 contract_data :
                 {
                   chain_id,
@@ -1183,10 +1255,15 @@ export default () => {
           {
             ...Object.fromEntries(
               Object.entries({ ...asset_data })
-                .filter(([k, v]) => !['contracts'].includes(k))
+                .filter(([k, v]) =>
+                  !['contracts'].includes(k)
+                )
             ),
             ...(
-              equals_ignore_case(_.last(tokens), contract_address) ?
+              equals_ignore_case(
+                _.last(tokens),
+                contract_address,
+              ) ?
                 contract_data :
                 {
                   chain_id,
@@ -1198,8 +1275,16 @@ export default () => {
           }
 
         if (
-          !(equals_ignore_case(domainId, pair?.domainId) &&
-            equals_ignore_case(lpTokenAddress, pair?.lpTokenAddress))
+          !(
+            equals_ignore_case(
+              domainId,
+              pair?.domainId,
+            ) &&
+            equals_ignore_case(
+              lpTokenAddress,
+              pair?.lpTokenAddress,
+            )
+          )
         ) {
           setSwapAmount(true)
         }
@@ -1217,14 +1302,16 @@ export default () => {
             },
           )
 
-          const tokenIndexFrom = await sdk.nxtpSdkPool.getPoolTokenIndex(
-            domainId,
-            contract_address,
-            (origin === 'x' ?
-              x_asset_data :
-              y_asset_data
-            )?.contract_address,
-          )
+          const tokenIndexFrom =
+            await sdk.nxtpSdkPool
+              .getPoolTokenIndex(
+                domainId,
+                contract_address,
+                (origin === 'x' ?
+                  x_asset_data :
+                  y_asset_data
+                )?.contract_address,
+              )
 
           console.log(
             '[getPoolTokenIndex]',
@@ -1237,14 +1324,16 @@ export default () => {
               )?.contract_address,
             })
 
-          const tokenIndexTo = await sdk.nxtpSdkPool.getPoolTokenIndex(
-            domainId,
-            contract_address,
-            (origin === 'x' ?
-              y_asset_data :
-              x_asset_data
-            )?.contract_address,
-          )
+          const tokenIndexTo =
+            await sdk.nxtpSdkPool
+              .getPoolTokenIndex(
+                domainId,
+                contract_address,
+                (origin === 'x' ?
+                  y_asset_data :
+                  x_asset_data
+                )?.contract_address,
+              )
  
           amount =
             utils.parseUnits(
@@ -1269,13 +1358,15 @@ export default () => {
             },
           )
  
-          const _amount = await sdk.nxtpSdkPool.calculateSwap(
-            domainId,
-            contract_address,
-            tokenIndexFrom,
-            tokenIndexTo,
-            amount,
-          )
+          const _amount =
+            await sdk.nxtpSdkPool
+              .calculateSwap(
+                domainId,
+                contract_address,
+                tokenIndexFrom,
+                tokenIndexTo,
+                amount,
+              )
  
           setSwapAmount(
             Number(
@@ -1365,10 +1456,15 @@ export default () => {
     {
       ...Object.fromEntries(
         Object.entries({ ...asset_data })
-          .filter(([k, v]) => !['contracts'].includes(k))
+          .filter(([k, v]) =>
+            !['contracts'].includes(k)
+          )
       ),
       ...(
-        equals_ignore_case(_.head(tokens), contract_address) ?
+        equals_ignore_case(
+          _.head(tokens),
+          contract_address,
+        ) ?
           contract_data :
           {
             chain_id,
@@ -1381,9 +1477,13 @@ export default () => {
 
   const x_balance =
     x_asset_data &&
-    balances_data?.[chain_id]?.find(b =>
-      equals_ignore_case(b?.contract_address, x_asset_data.contract_address)
-    )
+    (balances_data?.[chain_id] || [])
+      .find(b =>
+        equals_ignore_case(
+          b?.contract_address,
+          x_asset_data.contract_address,
+        )
+      )
   const x_balance_amount =
     x_balance &&
     Number(x_balance.amount)
@@ -1393,10 +1493,15 @@ export default () => {
     {
       ...Object.fromEntries(
         Object.entries({ ...asset_data })
-          .filter(([k, v]) => !['contracts'].includes(k))
+          .filter(([k, v]) =>
+            !['contracts'].includes(k)
+          )
       ),
       ...(
-        equals_ignore_case(_.last(tokens), contract_address) ?
+        equals_ignore_case(
+          _.last(tokens),
+          contract_address,
+        ) ?
           contract_data :
           {
             chain_id,
@@ -1408,9 +1513,13 @@ export default () => {
     }
   const y_balance =
     y_asset_data &&
-    balances_data?.[chain_id]?.find(b =>
-      equals_ignore_case(b?.contract_address, y_asset_data.contract_address)
-    )
+    (balances_data?.[chain_id] || [])
+      .find(b =>
+        equals_ignore_case(
+          b?.contract_address,
+          y_asset_data.contract_address,
+        )
+      )
   const y_balance_amount =
     y_balance &&
     Number(y_balance.amount)
@@ -1444,19 +1553,62 @@ export default () => {
           <div className="w-full max-w-lg space-y-3">
             <div className="flex items-center justify-between space-x-2 pb-1">
               <div className="space-y-1 ml-1 sm:ml-2">
-                <h1 className="tracking-wider text-base sm:text-xl font-semibold">
-                  Swap
-                </h1>
+                <div className="flex items-center space-x-1.5">
+                  <h1 className="tracking-wider text-base sm:text-xl font-semibold">
+                    Swap
+                  </h1>
+                  {
+                    name &&
+                    (
+                      <div className="flex items-center space-x-1.5">
+                        <span className="tracking-wider text-base sm:text-xl font-semibold">
+                          on
+                        </span>
+                        {
+                          image &&
+                          (
+                            <>
+                              <div className="flex sm:hidden">
+                                <Image
+                                  src={image}
+                                  alt=""
+                                  width={18}
+                                  height={18}
+                                  className="rounded-full"
+                                />
+                              </div>
+                              <div className="hidden sm:flex">
+                                <Image
+                                  src={image}
+                                  alt=""
+                                  width={24}
+                                  height={24}
+                                  className="rounded-full"
+                                />
+                              </div>
+                            </>
+                          )
+                        }
+                        <span className="whitespace-nowrap tracking-wider text-base sm:text-xl font-semibold">
+                          {name}
+                        </span>
+                      </div>
+                    )
+                  }
+                </div>
                 {
                   false &&
                   asPath?.includes('on-') &&
                   title &&
                   (
                     <h2 className="tracking-wider text-slate-700 dark:text-slate-300 text-xs font-medium">
-                      {title.replace(
-                        ' with Connext',
-                        '',
-                      )}
+                      {
+                        title
+                          .replace(
+                            ' with Connext',
+                            '',
+                          )
+                      }
                     </h2>
                   )
                 }
@@ -1487,7 +1639,7 @@ export default () => {
               className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-4 sm:pt-6 pb-6 sm:pb-8 px-4 sm:px-6"
               style={
                 chain &&
-                amount ?
+                color ?
                   {
                     boxShadow,
                     WebkitBoxShadow: boxShadow,
@@ -1497,31 +1649,6 @@ export default () => {
               }
             >
               <div className="space-y-2">
-                <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
-                  <div className="col-span-2 sm:col-span-2 flex items-center justify-start">
-                    <span className="tracking-wider text-slate-600 dark:text-slate-200 text-lg font-medium ml-1 sm:ml-3">
-                      Chain
-                    </span>
-                  </div>
-                  <div className="col-span-3 sm:col-span-3 flex items-center justify-end">
-                    <SelectChain
-                      disabled={disabled}
-                      value={chain}
-                      onSelect={c => {
-                        setSwap(
-                          {
-                            ...swap,
-                            chain: c,
-                            amount: null,
-                          }
-                        )
-
-                        getBalances(c)
-                      }}
-                      origin=""
-                    />
-                  </div>
-                </div>
                 <div className="space-y-0">
                   <div className="tracking-wider text-slate-600 dark:text-slate-200 text-lg font-medium ml-1 sm:ml-3">
                     Asset

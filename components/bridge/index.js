@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router'
+ import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
@@ -1710,25 +1710,31 @@ export default () => {
     amount,
   } = { ...bridge }
 
-  const source_chain_data = chains_data?.find(c =>
-    c?.id === source_chain
-  )
-  const source_asset_data = assets_data?.find(a =>
-    a?.id === asset
-  )
-  const source_contract_data = source_asset_data?.contracts?.find(c =>
-    c?.chain_id === source_chain_data?.chain_id
-  )
+  const source_chain_data = (chains_data || [])
+    .find(c =>
+      c?.id === source_chain
+    )
+  const source_asset_data = (assets_data || [])
+    .find(a =>
+      a?.id === asset
+    )
+  const source_contract_data = (source_asset_data?.contracts || [])
+    .find(c =>
+      c?.chain_id === source_chain_data?.chain_id
+    )
 
-  const destination_chain_data = chains_data?.find(c =>
-    c?.id === destination_chain
-  )
-  const destination_asset_data = assets_data?.find(a =>
-    a?.id === asset
-  )
-  const destination_contract_data = destination_asset_data?.contracts?.find(c =>
-    c?.chain_id === destination_chain_data?.chain_id
-  )  
+  const destination_chain_data = (chains_data || [])
+    .find(c =>
+      c?.id === destination_chain
+    )
+  const destination_asset_data = (assets_data || [])
+    .find(a =>
+      a?.id === asset
+    )
+  const destination_contract_data = (destination_asset_data?.contracts || [])
+    .find(c =>
+      c?.chain_id === destination_chain_data?.chain_id
+    )  
 
   const {
     color,
@@ -1736,12 +1742,13 @@ export default () => {
   const source_symbol =
     source_contract_data?.symbol ||
     source_asset_data?.symbol
-  const source_balance = balances_data?.[source_chain_data?.chain_id]?.find(b =>
-    equals_ignore_case(
-      b?.contract_address,
-      source_contract_data?.contract_address,
+  const source_balance = (balances_data?.[source_chain_data?.chain_id] || [])
+    .find(b =>
+      equals_ignore_case(
+        b?.contract_address,
+        source_contract_data?.contract_address,
+      )
     )
-  )
   const source_amount =
     source_balance &&
     Number(source_balance.amount)
@@ -1753,12 +1760,13 @@ export default () => {
   const destination_symbol =
     destination_contract_data?.symbol ||
     destination_asset_data?.symbol
-  const destination_balance = balances_data?.[destination_chain_data?.chain_id]?.find(b =>
-    equals_ignore_case(
-      b?.contract_address,
-      destination_contract_data?.contract_address,
+  const destination_balance = (balances_data?.[destination_chain_data?.chain_id] || [])
+    .find(b =>
+      equals_ignore_case(
+        b?.contract_address,
+        destination_contract_data?.contract_address,
+      )
     )
-  )
   const destination_amount =
     destination_balance &&
     Number(destination_balance.amount)
@@ -1860,10 +1868,13 @@ export default () => {
                   title &&
                   (
                     <h2 className="tracking-wider text-slate-700 dark:text-slate-300 text-xs font-medium">
-                      {title.replace(
-                        ' with Connext',
-                        '',
-                      )}
+                      {
+                        title
+                          .replace(
+                            ' with Connext',
+                            '',
+                          )
+                      }
                     </h2>
                   )
                 }
