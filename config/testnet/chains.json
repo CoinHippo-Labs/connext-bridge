@@ -110,6 +110,6 @@
     },
     "image": "/logos/chains/optimism.png",
     "color": "#dc2626",
-    "group" : "evm"
+    "group" : "optimistic_rollups"
   }
 ]
