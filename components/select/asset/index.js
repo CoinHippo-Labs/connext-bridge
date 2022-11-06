@@ -99,7 +99,7 @@ export default ({
     is_pool ?
       data?.symbol ||
       asset_data?.symbol ||
-      'From Token' :
+      'Select Token' :
       symbol ||
       asset_data?.symbol ||
       'Token'
