@@ -1768,18 +1768,20 @@ export default () => {
                             value = e.target.value
                           }
 
-                          value = value < 0 ?
-                            0 :
+                          value =
+                            value < 0 ?
+                              0 :
+                              value
+
+                          value &&
+                          !isNaN(value) ?
+                            Number(value) :
                             value
 
                           setSwap(
                             {
                               ...swap,
-                              amount:
-                                value &&
-                                !isNaN(value) ?
-                                  Number(value) :
-                                  value,
+                              amount: value,
                             }
                           )
                         }}
@@ -1931,10 +1933,10 @@ export default () => {
                           !asset
                         }
                         value={
-                          typeof amount === 'number' &&
-                          amount >= 0 ?
+                          typeof swapAmount === 'number' &&
+                          swapAmount >= 0 ?
                             number_format(
-                              amount,
+                              swapAmount,
                               '0.00000000',
                               true,
                             ) :
@@ -1952,18 +1954,24 @@ export default () => {
                             value = e.target.value
                           }
 
-                          value = value < 0 ?
-                            0 :
-                            value
+                          value =
+                            value < 0 ?
+                              0 :
+                              value
+
+                          value =
+                            value &&
+                              !isNaN(value) ?
+                                Number(value) :
+                                value
 
                           setSwap(
                             {
                               ...swap,
                               amount:
-                                value &&
-                                !isNaN(value) ?
-                                  Number(value) :
-                                  value,
+                                origin === 'x' ?
+                                  value / rate :
+                                  value * rate,
                             }
                           )
                         }}
@@ -2003,7 +2011,10 @@ export default () => {
                                 setSwap(
                                   {
                                     ...swap,
-                                    amount,
+                                    amount:
+                                      origin === 'x' ?
+                                        amount / rate :
+                                        amount * rate,
                                   }
                                 )
                               }
@@ -2038,66 +2049,13 @@ export default () => {
                     }
                   </div>
                 </div>
-                {/*<div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
-                  <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end">
-                    <div className="w-32 sm:w-48 min-w-max h-10 sm:h-16 flex items-center justify-center">
-                      <div className="w-32 sm:w-48 min-w-max bg-gray-100 dark:bg-slate-900 rounded-xl flex items-center justify-center space-x-1 sm:space-x-1.5 py-1.5 sm:py-2 px-2 sm:px-3">
-                        {
-                          (origin === 'x' ?
-                            y_asset_data :
-                            x_asset_data
-                          )?.image && (
-                            <>
-                              <div className="flex sm:hidden">
-                                <Image
-                                  src={(origin === 'x' ?
-                                    y_asset_data :
-                                    x_asset_data
-                                  ).image}
-                                  alt=""
-                                  width={18}
-                                  height={18}
-                                  className="rounded-full"
-                                />
-                              </div>
-                              <div className="hidden sm:flex">
-                                <Image
-                                  src={(origin === 'x' ?
-                                    y_asset_data :
-                                    x_asset_data
-                                  ).image}
-                                  alt=""
-                                  width={24}
-                                  height={24}
-                                  className="rounded-full"
-                                />
-                              </div>
-                            </>
-                          )
-                        }
-                        <span className="whitespace-nowrap text-sm sm:text-base font-semibold">
-                          {
-                            (origin === 'x' ?
-                              y_asset_data :
-                              x_asset_data
-                            )?.symbol ||
-                            (origin === 'x' ?
-                              y_asset_data :
-                              x_asset_data
-                            )?.name ||
-                            'To Token'
-                          }
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>*/}
               </div>
-              {/*
+              {
                 chain &&
                 asset &&
                 pair &&
                 !pair.error &&
+                amount > 0 &&
                 (
                   <Info
                     data={pair}
@@ -2109,7 +2067,7 @@ export default () => {
                     }
                   />
                 )
-              */}
+              }
               {
                 chain &&
                 asset &&

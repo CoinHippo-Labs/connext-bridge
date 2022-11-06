@@ -1381,17 +1381,18 @@ export default ({
                         value = e.target.value
                       }
 
-                      value = value < 0 ?
-                        0 :
-                        !isNaN(value) ?
-                          parseFloat(
-                            Number(value)
-                              .toFixed(
-                                _.last(decimals) ||
-                                18
-                              )
-                          ) :
-                          value
+                      value =
+                        value < 0 ?
+                          0 :
+                          !isNaN(value) ?
+                            parseFloat(
+                              Number(value)
+                                .toFixed(
+                                  _.last(decimals) ||
+                                  18
+                                )
+                            ) :
+                            value
 
                       value =
                         value &&
@@ -1505,26 +1506,29 @@ export default ({
                         value = e.target.value
                       }
 
-                      value = value < 0 ?
-                        0 :
-                        !isNaN(value) ?
-                          parseFloat(
-                            Number(value)
-                              .toFixed(
-                                y_asset_data?.decimals ||
-                                18
-                              )
-                          ) :
-                          value
+                      value =
+                        value < 0 ?
+                          0 :
+                          !isNaN(value) ?
+                            parseFloat(
+                              Number(value)
+                                .toFixed(
+                                  y_asset_data?.decimals ||
+                                  18
+                                )
+                            ) :
+                            value
 
                       value =
                         value &&
                         !isNaN(value) ?
                           Number(value) :
                           value
-                      value = value < 0 ?
-                        0 :
-                        value
+
+                      value =
+                        value < 0 ?
+                          0 :
+                          value
 
                       setAmountY(value)
                       autoSetX(value)
@@ -1783,17 +1787,18 @@ export default ({
                       value = e.target.value
                     }
 
-                    value = value < 0 ?
-                      0 :
-                      !isNaN(value) ?
-                        parseFloat(
-                          Number(value)
-                            .toFixed(
-                              x_asset_data?.decimals ||
-                              18
-                            )
-                        ) :
-                        value
+                    value =
+                      value < 0 ?
+                        0 :
+                        !isNaN(value) ?
+                          parseFloat(
+                            Number(value)
+                              .toFixed(
+                                x_asset_data?.decimals ||
+                                18
+                              )
+                          ) :
+                          value
 
                     value =
                       value &&

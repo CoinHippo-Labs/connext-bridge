@@ -86,8 +86,11 @@ export default ({
       const {
         id,
       } = {
-        ...chains_data?.find(c =>
-          c?.chain_id === chain_id
+        ...(
+          (chains_data || [])
+          .find(c =>
+            c?.chain_id === chain_id
+          )
         ),
       }
 
@@ -98,9 +101,10 @@ export default ({
       setData(
         {
           ...data,
-          address: data ?
-            data.address :
-            address,
+          address:
+            data ?
+              data.address :
+              address,
           chain,
         }
       )
@@ -121,34 +125,38 @@ export default ({
     }
 
     try {
-      const asset_data = assets_data?.find(a =>
-        a?.id === token_id
-      )
+      const asset_data = (assets_data || [])
+        .find(a =>
+          a?.id === token_id
+        )
       const {
         contracts,
       } = { ...asset_data }
 
       const _contract_data =
         contract_data ||
-        contracts?.find(c =>
-          c?.chain_id === chain_id
-        )
+        (contracts || [])
+          .find(c =>
+            c?.chain_id === chain_id
+          )
       const {
         contract_address,
         decimals,
         wrapped,
       } = { ..._contract_data }
 
-      const contract = new Contract(
-        contract_address,
-        ABI,
-        signer,
-      )
+      const contract =
+        new Contract(
+          contract_address,
+          ABI,
+          signer,
+        )
 
-      const _address = is_wrapped ?
-        wrapped?.contract_address ||
+      const _address =
+        is_wrapped ?
+          wrapped?.contract_address ||
           contract_address :
-        data?.address ||
+          data?.address ||
           address
 
       const _amount =
@@ -186,30 +194,36 @@ export default ({
 
       const wrap_request =
         is_wrapped &&
-        await signer.populateTransaction(
-          {
-            to: _address,
-            value: _amount,
-            gasLimit,
-          },
-        )
+        await signer
+          .populateTransaction(
+            {
+              to: _address,
+              value: _amount,
+              gasLimit,
+            },
+          )
 
-      const response = is_wrapped ?
-        await signer.sendTransaction(
-          wrap_request,
-        ) :
-        await contract.mint(
-          _address,
-          _amount,
-        )
+      const response =
+        is_wrapped ?
+          await signer
+            .sendTransaction(
+              wrap_request,
+            ) :
+          await contract
+            .mint(
+              _address,
+              _amount,
+            )
 
       const {
         hash,
       } = { ...response }
 
-      const receipt = await signer.provider.waitForTransaction(
-        hash,
-      )
+      const receipt =
+        await signer.provider
+          .waitForTransaction(
+            hash,
+          )
 
       const {
         status,
@@ -220,15 +234,16 @@ export default ({
           status: !status ?
             'failed' :
             'success',
-          message: !status ?
-            `Failed to ${is_wrapped ?
-              'wrap' :
-              'faucet'
-            }` :
-            `${is_wrapped ?
-              'Wrap' :
-              'Faucet'
-            } Successful`,
+          message:
+            !status ?
+              `Failed to ${is_wrapped ?
+                'wrap' :
+                'faucet'
+              }` :
+              `${is_wrapped ?
+                'Wrap' :
+                'Faucet'
+              } Successful`,
           ...response,
         }
       )
@@ -259,18 +274,20 @@ export default ({
     setMintResponse(null)
 
     try {
-      const asset_data = assets_data?.find(a =>
-        a?.id === token_id
-      )
+      const asset_data = (assets_data || [])
+        .find(a =>
+          a?.id === token_id
+        )
       const {
         contracts,
       } = { ...asset_data }
 
       const _contract_data =
         contract_data ||
-        contracts?.find(c =>
-          c?.chain_id === chain_id
-        )
+        (contracts || [])
+          .find(c =>
+            c?.chain_id === chain_id
+          )
       const {
         wrapped,
       } = { ..._contract_data }
@@ -288,11 +305,12 @@ export default ({
         _contract_data?.decimals ||
         18
 
-      const contract = new Contract(
-        contract_address,
-        ABI,
-        signer,
-      )
+      const contract =
+        new Contract(
+          contract_address,
+          ABI,
+          signer,
+        )
 
       const _amount =
         utils.parseUnits(
@@ -314,17 +332,20 @@ export default ({
       )
 
       const response =
-        await contract.withdraw(
-          _amount,
-        )
+        await contract
+          .withdraw(
+            _amount,
+          )
 
       const {
         hash,
       } = { ...response }
 
-      const receipt = await signer.provider.waitForTransaction(
-        hash,
-      )
+      const receipt =
+        await signer.provider
+          .waitForTransaction(
+            hash,
+          )
 
       const {
         status,
@@ -359,9 +380,11 @@ export default ({
     )
   }
 
-  const asset_data = assets_data?.find(a =>
-    a?.id === token_id
-  )
+  const asset_data = (assets_data || [])
+    .find(a =>
+      a?.id === token_id
+    )
+
   let {
     symbol,
   } = { ...asset_data }
@@ -379,39 +402,41 @@ export default ({
     wrapped ||
     wrapable
 
-  const fields = is_wrapped ?
-    [
-      {
-        label: 'Amount',
-        name: 'amount',
-        type: 'number',
-        placeholder: 'Amount to wrap / unwrap',
-      },
-    ] :
-    [
-      {
-        label: 'Chain',
-        name: 'chain',
-        type: 'select-chain',
-        placeholder: 'Select chain to faucet',
-      },
-      {
-        label: 'Recipient Address',
-        name: 'address',
-        type: 'text',
-        placeholder: 'Faucet token to an address',
-      },
-    ]
+  const fields =
+    is_wrapped ?
+      [
+        {
+          label: 'Amount',
+          name: 'amount',
+          type: 'number',
+          placeholder: 'Amount to wrap / unwrap',
+        },
+      ] :
+      [
+        {
+          label: 'Chain',
+          name: 'chain',
+          type: 'select-chain',
+          placeholder: 'Select chain to faucet',
+        },
+        {
+          label: 'Recipient Address',
+          name: 'address',
+          type: 'text',
+          placeholder: 'Faucet token to an address',
+        },
+      ]
 
   const {
     chain,
   } = { ...data }
 
-  const chain_data = chains_data?.find(c =>
-    is_wrapped ?
-      c?.chain_id === contract_data?.chain_id :
-      c?.id === chain
-  )
+  const chain_data = (chains_data || [])
+    .find(c =>
+      is_wrapped ?
+        c?.chain_id === contract_data?.chain_id :
+        c?.id === chain
+    )
   const {
     provider_params,
     image,
@@ -487,11 +512,11 @@ export default ({
                 is_wrapped &&
                 signer &&
                 (
-                  <div className="form-element">
+                  <div className="form-element mt-2">
                     <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
                       Balance
                     </div>
-                    <div className="flex items-center justify-between space-x-2 mb-4">
+                    <div className="flex items-center justify-between space-x-2">
                       <Balance
                         chainId={
                           contract_data?.chain_id ||

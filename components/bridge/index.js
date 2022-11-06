@@ -2251,15 +2251,16 @@ export default () => {
                               value = e.target.value
                             }
 
-                            value = value < 0 ?
-                              0 :
-                              value &&
-                              !isNaN(value) ?
-                                parseFloat(
-                                  Number(value)
-                                    .toFixed(source_decimals)
-                                ) :
-                                value
+                            value =
+                              value < 0 ?
+                                0 :
+                                value &&
+                                !isNaN(value) ?
+                                  parseFloat(
+                                    Number(value)
+                                      .toFixed(source_decimals)
+                                  ) :
+                                  value
 
                             setBridge(
                               {

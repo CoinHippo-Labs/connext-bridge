@@ -31,18 +31,18 @@ export default ({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center space-x-2 sm:mx-3">
+      {/*<div className="flex items-center space-x-2 sm:mx-3">
         <span className="tracking-wider whitespace-nowrap text-slate-400 dark:text-slate-600 font-normal">
           Swap Breakdown
         </span>
       </div>
-      <div className="w-full h-0.25 bg-gray-200 dark:bg-slate-700 sm:px-1" />
+      <div className="w-full h-0.25 bg-gray-200 dark:bg-slate-700 sm:px-1" />*/}
       <div className="space-y-2.5 sm:mx-3">
         {
           data &&
           (
             <>
-              <div className="flex items-center justify-between space-x-1">
+              {/*<div className="flex items-center justify-between space-x-1">
                 <div className="tracking-wider whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
                   Minimum Received
                 </div>
@@ -75,7 +75,7 @@ export default ({
                     </span>
                   </span>
                 }
-              </div>
+              </div>*/}
               <div className="flex items-center justify-between space-x-1">
                 <div className="tracking-wider whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
                   Rate
@@ -87,6 +87,21 @@ export default ({
                       '0,0.000000',
                       true,
                     )}
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center justify-between space-x-1">
+                <div className="tracking-wider whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
+                  Price Impact
+                </div>
+                <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
+                  <span>
+                    {number_format(
+                      price_impact,
+                      '0,0.000000',
+                      true,
+                    )}
+                    %
                   </span>
                 </span>
               </div>
@@ -104,21 +119,6 @@ export default ({
                   <span>
                     {number_format(
                       slippage,
-                      '0,0.000000',
-                      true,
-                    )}
-                    %
-                  </span>
-                </span>
-              </div>
-              <div className="flex items-center justify-between space-x-1">
-                <div className="tracking-wider whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
-                  Price Impact
-                </div>
-                <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
-                  <span>
-                    {number_format(
-                      price_impact,
                       '0,0.000000',
                       true,
                     )}
