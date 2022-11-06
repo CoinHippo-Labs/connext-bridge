@@ -154,7 +154,7 @@ export default ({
             <span className="tracking-wider text-sm sm:text-lg font-medium">
               {
                 name ||
-                'Select Token'
+                'Select token'
               }
             </span>
           </div>
@@ -187,7 +187,7 @@ export default ({
       buttonClassName={`w-full min-w-max h-16 bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl ${disabled ? 'cursor-not-allowed' : ''} grid grid-cols-2 sm:grid-cols-3 items-center gap-2 py-2 px-3`}
       title={<div className="flex items-center justify-between">
         <span>
-          Select Token
+          Select token
         </span>
         {
           source_chain_data &&

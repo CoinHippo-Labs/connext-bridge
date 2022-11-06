@@ -2462,26 +2462,28 @@ export default () => {
                       className="w-full bg-gray-200 dark:bg-slate-800 bg-opacity-75 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
                     >
                       {
-                        pair === undefined ?
-                          `Route doesn't exist` :
-                          pair ?
-                            pair.error ?
-                              <div className="w-fit tracking-wider text-red-600 dark:text-red-400 text-sm mx-auto">
-                                {pair.error.message}
-                              </div> :
-                              'Enter amount' :
-                            <div className="flex items-center justify-center space-x-2">
-                              <div>
-                                <TailSpin
-                                  color={loader_color(theme)}
-                                  width="20"
-                                  height="20"
-                                />
+                        !asset ?
+                          'Swap' :
+                          pair === undefined ?
+                            `Route doesn't exist` :
+                            pair ?
+                              pair.error ?
+                                <div className="w-fit tracking-wider text-red-600 dark:text-red-400 text-sm mx-auto">
+                                  {pair.error.message}
+                                </div> :
+                                'Enter amount' :
+                              <div className="flex items-center justify-center space-x-2">
+                                <div>
+                                  <TailSpin
+                                    color={loader_color(theme)}
+                                    width="20"
+                                    height="20"
+                                  />
+                                </div>
+                                <span className="text-slate-400 dark:text-slate-500 text-lg">
+                                  Fetching pair information ...
+                                </span>
                               </div>
-                              <span className="text-slate-400 dark:text-slate-500 text-lg">
-                                Fetching pair information ...
-                              </span>
-                            </div>
                       }
                     </button> :
                     <Wallet
