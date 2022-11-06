@@ -60,27 +60,43 @@ export default ({
     setHidden(!hidden)
   }
 
-  const source_chain_data = chains_data?.find(c => c?.id === source_chain)
-  const destination_chain_data = chains_data?.find(c => c?.id === destination_chain)
+  const source_chain_data = (chains_data || [])
+    .find(c =>
+      c?.id === source_chain
+    )
+  const destination_chain_data = (chains_data || [])
+    .find(c =>
+      c?.id === destination_chain
+    )
 
-  const asset_data = assets_data?.find(c => c?.id === value)
+  const asset_data = (assets_data || [])
+    .find(c =>
+      c?.id === value
+    )
   const {
     contracts,
   } = { ...asset_data }
 
-  const source_contract_data = contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
-  const destination_contract_data = contracts?.find(c => c?.chain_id === destination_chain_data?.chain_id)
+  const source_contract_data = (contracts || [])
+    .find(c =>
+      c?.chain_id === source_chain_data?.chain_id
+    )
+  const destination_contract_data = (contracts || [])
+    .find(c =>
+      c?.chain_id === destination_chain_data?.chain_id
+    )
 
   const {
     name,
     symbol,
     image,
-    color,
   } = { ...asset_data }
 
-  const source_image = source_contract_data?.image ||
+  const source_image =
+    source_contract_data?.image ||
     image
-  const destination_image = destination_contract_data?.image ||
+  const destination_image =
+    destination_contract_data?.image ||
     image
 
   return (
@@ -110,28 +126,31 @@ export default ({
             }
           </div>*/}
           <div className="col-span-2 sm:col-span-3 w-full min-w-max flex items-center justify-center space-x-2">
-            {image && (
-              <div>
-                <div className="hidden sm:flex">
-                  <Image
-                    src={image}
-                    alt=""
-                    width={28}
-                    height={28}
-                    className="rounded-full"
-                  />
+            {
+              image &&
+              (
+                <div>
+                  <div className="hidden sm:flex">
+                    <Image
+                      src={image}
+                      alt=""
+                      width={28}
+                      height={28}
+                      className="rounded-full"
+                    />
+                  </div>
+                  <div className="flex sm:hidden">
+                    <Image
+                      src={image}
+                      alt=""
+                      width={24}
+                      height={24}
+                      className="rounded-full"
+                    />
+                  </div>
                 </div>
-                <div className="flex sm:hidden">
-                  <Image
-                    src={image}
-                    alt=""
-                    width={24}
-                    height={24}
-                    className="rounded-full"
-                  />
-                </div>
-              </div>
-            )}
+              )
+            }
             <span className="tracking-wider text-sm sm:text-lg font-medium">
               {
                 name ||
@@ -165,13 +184,7 @@ export default ({
           />
         </div>
       }
-      buttonClassName={`w-full min-w-max h-20 bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl ${disabled ? 'cursor-not-allowed' : ''} grid grid-cols-2 sm:grid-cols-3 items-center gap-2 py-2 px-3`}
-      buttonStyle={{
-        // background: color ?
-        //   `${color}28` :
-        //   null,
-        // boxShadow: `${color}aa -2px 4px 32px 2px`,
-      }}
+      buttonClassName={`w-full min-w-max h-16 bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl ${disabled ? 'cursor-not-allowed' : ''} grid grid-cols-2 sm:grid-cols-3 items-center gap-2 py-2 px-3`}
       title={<div className="flex items-center justify-between">
         <span>
           Select Token
@@ -181,41 +194,53 @@ export default ({
           destination_chain_data &&
           (
             <div className="flex items-center space-x-2">
-              {source_chain_data && (
-                <div className="flex items-center space-x-2">
-                  {source_chain_data.image && (
-                    <Image
-                      src={source_chain_data.image}
-                      alt=""
-                      width={20}
-                      height={20}
-                      className="rounded-full"
-                    />
-                  )}
-                  <span className="text-xs font-semibold">
-                    {chainName(source_chain_data)}
-                  </span>
-                </div>
-              )}
+              {
+                source_chain_data &&
+                (
+                  <div className="flex items-center space-x-2">
+                    {
+                      source_chain_data.image &&
+                      (
+                        <Image
+                          src={source_chain_data.image}
+                          alt=""
+                          width={20}
+                          height={20}
+                          className="rounded-full"
+                        />
+                      )
+                    }
+                    <span className="text-xs font-semibold">
+                      {chainName(source_chain_data)}
+                    </span>
+                  </div>
+                )
+              }
               <BiCode
                 size={20}
               />
-              {destination_chain_data && (
-                <div className="flex items-center space-x-2">
-                  {destination_chain_data.image && (
-                    <Image
-                      src={destination_chain_data.image}
-                      alt=""
-                      width={20}
-                      height={20}
-                      className="rounded-full"
-                    />
-                  )}
-                  <span className="text-xs font-semibold">
-                    {chainName(destination_chain_data)}
-                  </span>
-                </div>
-              )}
+              {
+                destination_chain_data &&
+                (
+                  <div className="flex items-center space-x-2">
+                    {
+                      destination_chain_data.image &&
+                      (
+                        <Image
+                          src={destination_chain_data.image}
+                          alt=""
+                          width={20}
+                          height={20}
+                          className="rounded-full"
+                        />
+                      )
+                    }
+                    <span className="text-xs font-semibold">
+                      {chainName(destination_chain_data)}
+                    </span>
+                  </div>
+                )
+              }
             </div>
           )
         }

@@ -8,12 +8,12 @@ import { TailSpin, Watch } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
-import { HiSwitchHorizontal } from 'react-icons/hi'
+import { HiSwitchVertical } from 'react-icons/hi'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiEditAlt, BiCheckCircle } from 'react-icons/bi'
 
 import Info from './info'
 import Options from './options'
-import SelectChain from '../select/chain'
+import GasPrice from '../gas-price'
 import SelectAsset from '../select/asset'
 import Balance from '../balance'
 import Image from '../image'
@@ -601,16 +601,17 @@ export default () => {
             {
               ..._pair,
               contract_data,
-              rate: Number(
-                utils.formatUnits(
-                  BigNumber.from(
-                    rate ||
-                    '0'
-                  ),
-                  _.last(_pair.decimals) ||
-                  18,
-                )
-              ),
+              rate:
+                Number(
+                  utils.formatUnits(
+                    BigNumber.from(
+                      rate ||
+                      '0'
+                    ),
+                    _.last(_pair.decimals) ||
+                    18,
+                  )
+                ),
               updated_at:
                 moment()
                   .valueOf(),
@@ -800,7 +801,11 @@ export default () => {
   }
 
   const reset = async origin => {
-    const reset_swap = origin !== 'address'
+    const reset_swap =
+      ![
+        'address',
+        'user_rejected',
+      ].includes(origin)
 
     if (reset_swap) {
       setSwap(
@@ -925,7 +930,10 @@ export default () => {
       deadline =
         deadline &&
         moment()
-          .add(deadline, 'minutes')
+          .add(
+            deadline,
+            'minutes',
+          )
           .valueOf()
 
       let failed = false
@@ -981,10 +989,11 @@ export default () => {
             setApproveResponse(
               {
                 status: 'pending',
-                message: `Wait for ${(origin === 'x' ?
-                  x_asset_data :
-                  y_asset_data
-                )?.symbol} approval`,
+                message:
+                  `Wait for ${(origin === 'x' ?
+                    x_asset_data :
+                    y_asset_data
+                  )?.symbol} approval`,
                 tx_hash: hash,
               }
             )
@@ -1006,10 +1015,11 @@ export default () => {
                 null :
                 {
                   status: 'failed',
-                  message: `Failed to approve ${(origin === 'x' ?
-                    x_asset_data :
-                    y_asset_data
-                  )?.symbol}`,
+                  message:
+                    `Failed to approve ${(origin === 'x' ?
+                      x_asset_data :
+                      y_asset_data
+                    )?.symbol}`,
                   tx_hash: hash,
                 }
             )
@@ -1025,12 +1035,25 @@ export default () => {
         } catch (error) {
           failed = true
 
+          const message =
+            error?.data?.message ||
+            error?.message
+
+          const code =
+            _.slice(
+              (message || '')
+                .toLowerCase()
+                .split(' '),
+              0,
+              2,
+            )
+            .join('_')
+
           setApproveResponse(
             {
               status: 'failed',
-              message:
-                error?.data?.message ||
-                error?.message,
+              message,
+              code,
             }
           )
 
@@ -1046,14 +1069,16 @@ export default () => {
             {
               domainId,
               contract_address,
-              from: (origin === 'x' ?
-                x_asset_data :
-                y_asset_data
-              )?.contract_address,
-              to: (origin === 'x' ?
-                y_asset_data :
-                x_asset_data
-              )?.contract_address,
+              from:
+                (origin === 'x' ?
+                  x_asset_data :
+                  y_asset_data
+                )?.contract_address,
+              to:
+                (origin === 'x' ?
+                  y_asset_data :
+                  x_asset_data
+                )?.contract_address,
               amount,
               minDy,
               deadline,
@@ -1156,14 +1181,38 @@ export default () => {
             success = true
           }
         } catch (error) {
-          setCallResponse(
-            {
-              status: 'failed',
-              message:
-                error?.data?.message ||
-                error?.message,
-            }
-          )
+          let message = 
+            error?.data?.message ||
+            error?.message
+
+          const code =
+            _.slice(
+              (message || '')
+                .toLowerCase()
+                .split(' '),
+              0,
+              2,
+            )
+            .join('_')
+
+          if (message?.includes('revert')) {
+            message = 'More than pool balance'
+          }
+
+          switch (code) {
+            case 'user_rejected':
+              reset(code)
+              break
+            default:
+              setCallResponse(
+                {
+                  status: 'failed',
+                  message,
+                  code,
+                }
+              )
+              break
+          }
 
           failed = true
         }
@@ -1295,10 +1344,11 @@ export default () => {
             {
               domainId,
               contract_address,
-              tokenAddress: (origin === 'x' ?
-                x_asset_data :
-                y_asset_data
-              )?.contract_address,
+              tokenAddress:
+                (origin === 'x' ?
+                  x_asset_data :
+                  y_asset_data
+                )?.contract_address,
             },
           )
 
@@ -1318,10 +1368,11 @@ export default () => {
             {
               domainId,
               contract_address,
-              tokenAddress: (origin === 'x' ?
-                y_asset_data :
-                x_asset_data
-              )?.contract_address,
+              tokenAddress:
+                (origin === 'x' ?
+                  y_asset_data :
+                  x_asset_data
+                )?.contract_address,
             })
 
           const tokenIndexTo =
@@ -1443,6 +1494,7 @@ export default () => {
     decimals,
     symbol,
     symbols,
+    rate,
   } = { ...pair }
   const {
     color,
@@ -1648,13 +1700,20 @@ export default () => {
                   undefined
               }
             >
-              <div className="space-y-2">
-                <div className="space-y-0">
-                  <div className="tracking-wider text-slate-600 dark:text-slate-200 text-lg font-medium ml-1 sm:ml-3">
-                    Asset
+              <div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between space-x-2">
+                    <span className="sm:text-base font-medium">
+                      Pay with
+                    </span>
+                    <GasPrice
+                      chainId={chain_id}
+                      iconSize={18}
+                      className="text-xs pr-1"
+                    />
                   </div>
-                  <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
-                    <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start">
+                  <div className="bg-slate-100 dark:bg-gray-800 dark:bg-opacity-50 rounded-xl py-3 px-4">
+                    <div className="flex items-center justify-between space-x-2">
                       <SelectAsset
                         disabled={disabled}
                         value={asset}
@@ -1672,281 +1731,369 @@ export default () => {
                         chain={chain}
                         origin=""
                         is_pool={true}
-                        data={origin === 'x' ?
-                          x_asset_data :
-                          y_asset_data
+                        data={
+                          origin === 'x' ?
+                            x_asset_data :
+                            y_asset_data
                         }
                       />
-                    </div>
-                    <div className="flex items-center justify-center">
-                      <button
+                      <DebounceInput
+                        debounceTimeout={500}
+                        size="small"
+                        type="number"
+                        placeholder="0.00"
                         disabled={
                           disabled ||
-                          !pair
+                          !asset
                         }
-                        onClick={() => {
+                        value={
+                          typeof amount === 'number' &&
+                          amount >= 0 ?
+                            number_format(
+                              amount,
+                              '0.00000000',
+                              true,
+                            ) :
+                            ''
+                        }
+                        onChange={e => {
+                          const regex = /^[0-9.\b]+$/
+
+                          let value
+
+                          if (
+                            e.target.value === '' ||
+                            regex.test(e.target.value)
+                          ) {
+                            value = e.target.value
+                          }
+
+                          value = value < 0 ?
+                            0 :
+                            value
+
                           setSwap(
                             {
                               ...swap,
-                              origin: origin === 'x' ?
-                                'y' :
-                                'x',
+                              amount:
+                                value &&
+                                !isNaN(value) ?
+                                  Number(value) :
+                                  value,
+                            }
+                          )
+                        }}
+                        onWheel={e => e.target.blur()}
+                        onKeyDown={e =>
+                          [
+                            'e',
+                            'E',
+                            '-',
+                          ].includes(e.key) &&
+                          e.preventDefault()
+                        }
+                        className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2`}
+                      />
+                    </div>
+                    {
+                      chain_data &&
+                      asset &&
+                      (origin === 'x' ?
+                        x_asset_data :
+                        y_asset_data
+                      ) &&
+                      (
+                        <div className="flex items-center space-x-1.5 sm:ml-1.5">
+                          <div className="tracking-wider text-slate-400 dark:text-slate-600 text-xs">
+                            Balance
+                          </div>
+                          <button
+                            disabled={disabled}
+                            onClick={() => {
+                              const amount =
+                                origin === 'x' ?
+                                  x_balance_amount :
+                                  y_balance_amount
+
+                              if (amount > 0) {
+                                setSwap(
+                                  {
+                                    ...swap,
+                                    amount,
+                                  }
+                                )
+                              }
+                            }}
+                          >
+                            <Balance
+                              chainId={chain_id}
+                              asset={asset}
+                              contractAddress={
+                                (origin === 'x' ?
+                                  x_asset_data :
+                                  y_asset_data
+                                ).contract_address
+                              }
+                              decimals={
+                                (origin === 'x' ?
+                                  x_asset_data :
+                                  y_asset_data
+                                ).decimals
+                              }
+                              symbol={
+                                (origin === 'x' ?
+                                  x_asset_data :
+                                  y_asset_data
+                                ).symbol
+                              }
+                              trigger={balanceTrigger}
+                            />
+                          </button>
+                        </div>
+                      )
+                    }
+                  </div>
+                </div>
+                <div className="flex items-center justify-center mt-0.5 sm:-mt-2 -mb-6 sm:-mb-12">
+                  <button
+                    disabled={
+                      disabled ||
+                      !pair
+                    }
+                    onClick={() => {
+                      setSwap(
+                        {
+                          ...swap,
+                          origin:
+                            origin === 'x' ?
+                              'y' :
+                              'x',
+                          amount: null,
+                        }
+                      )
+
+                      setButtonDirection(
+                        buttonDirection * -1
+                      )
+
+                      getBalances(chain)
+                    }}
+                    className={`bg-gray-200 hover:bg-gray-300 dark:bg-gray-900 dark:hover:bg-gray-800 ${disabled ? 'cursor-not-allowed' : ''} rounded-full sm:border dark:border-slate-800 flex items-center justify-center p-1.5 sm:p-4`}
+                  >
+                    <HiSwitchVertical
+                      size={28}
+                      style={
+                        buttonDirection < 0 ?
+                          {
+                            transform: 'scaleX(-1)',
+                          } :
+                          undefined
+                      }
+                    />
+                  </button>
+                </div>
+                <div className="space-y-2 -mt-0.5 sm:mt-1.5">
+                  <span className="sm:text-base font-medium">
+                    Receive
+                  </span>
+                  <div className="bg-slate-100 dark:bg-gray-800 dark:bg-opacity-50 rounded-xl py-3 px-4">
+                    <div className="flex items-center justify-between space-x-2">
+                      <SelectAsset
+                        disabled={disabled}
+                        value={asset}
+                        onSelect={a => {
+                          setSwap(
+                            {
+                              ...swap,
+                              asset: a,
                               amount: null,
                             }
                           )
 
-                          setButtonDirection(
-                            buttonDirection * -1
-                          )
-
                           getBalances(chain)
                         }}
-                        className={/*`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out */`bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full shadow dark:shadow-slate-700 flex items-center justify-center p-1.5 sm:p-2.5`}
-                      >
-                        <HiSwitchHorizontal
-                          size={24}
-                          style={
-                            buttonDirection < 0 ?
-                              {
-                                transform: 'scaleX(-1)',
-                              } :
-                              undefined
+                        chain={chain}
+                        origin=""
+                        is_pool={true}
+                        data={
+                          origin === 'x' ?
+                            y_asset_data :
+                            x_asset_data
+                        }
+                      />
+                      <DebounceInput
+                        debounceTimeout={500}
+                        size="small"
+                        type="number"
+                        placeholder="0.00"
+                        disabled={
+                          disabled ||
+                          !asset
+                        }
+                        value={
+                          typeof amount === 'number' &&
+                          amount >= 0 ?
+                            number_format(
+                              amount,
+                              '0.00000000',
+                              true,
+                            ) :
+                            ''
+                        }
+                        onChange={e => {
+                          const regex = /^[0-9.\b]+$/
+
+                          let value
+
+                          if (
+                            e.target.value === '' ||
+                            regex.test(e.target.value)
+                          ) {
+                            value = e.target.value
                           }
-                        />
-                      </button>
+
+                          value = value < 0 ?
+                            0 :
+                            value
+
+                          setSwap(
+                            {
+                              ...swap,
+                              amount:
+                                value &&
+                                !isNaN(value) ?
+                                  Number(value) :
+                                  value,
+                            }
+                          )
+                        }}
+                        onWheel={e => e.target.blur()}
+                        onKeyDown={e =>
+                          [
+                            'e',
+                            'E',
+                            '-',
+                          ].includes(e.key) &&
+                          e.preventDefault()
+                        }
+                        className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2`}
+                      />
                     </div>
-                    <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end">
-                      <div className="w-32 sm:w-48 min-w-max h-10 sm:h-16 flex items-center justify-center">
-                        <div className="w-32 sm:w-48 min-w-max bg-gray-100 dark:bg-slate-900 rounded-xl flex items-center justify-center space-x-1 sm:space-x-1.5 py-1.5 sm:py-2 px-2 sm:px-3">
+                    {
+                      chain_data &&
+                      asset &&
+                      (origin === 'x' ?
+                        y_asset_data :
+                        x_asset_data
+                      ) &&
+                      (
+                        <div className="flex items-center space-x-1.5 sm:ml-1.5">
+                          <div className="tracking-wider text-slate-400 dark:text-slate-600 text-xs">
+                            Balance
+                          </div>
+                          <button
+                            disabled={disabled}
+                            onClick={() => {
+                              const amount =
+                                origin === 'x' ?
+                                  y_balance_amount :
+                                  x_balance_amount
+
+                              if (amount > 0) {
+                                setSwap(
+                                  {
+                                    ...swap,
+                                    amount,
+                                  }
+                                )
+                              }
+                            }}
+                          >
+                            <Balance
+                              chainId={chain_id}
+                              asset={asset}
+                              contractAddress={
+                                (origin === 'x' ?
+                                  y_asset_data :
+                                  x_asset_data
+                                ).contract_address
+                              }
+                              decimals={
+                                (origin === 'x' ?
+                                  y_asset_data :
+                                  x_asset_data
+                                ).decimals
+                              }
+                              symbol={
+                                (origin === 'x' ?
+                                  y_asset_data :
+                                  x_asset_data
+                                ).symbol
+                              }
+                              trigger={balanceTrigger}
+                            />
+                          </button>
+                        </div>
+                      )
+                    }
+                  </div>
+                </div>
+                {/*<div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
+                  <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end">
+                    <div className="w-32 sm:w-48 min-w-max h-10 sm:h-16 flex items-center justify-center">
+                      <div className="w-32 sm:w-48 min-w-max bg-gray-100 dark:bg-slate-900 rounded-xl flex items-center justify-center space-x-1 sm:space-x-1.5 py-1.5 sm:py-2 px-2 sm:px-3">
+                        {
+                          (origin === 'x' ?
+                            y_asset_data :
+                            x_asset_data
+                          )?.image && (
+                            <>
+                              <div className="flex sm:hidden">
+                                <Image
+                                  src={(origin === 'x' ?
+                                    y_asset_data :
+                                    x_asset_data
+                                  ).image}
+                                  alt=""
+                                  width={18}
+                                  height={18}
+                                  className="rounded-full"
+                                />
+                              </div>
+                              <div className="hidden sm:flex">
+                                <Image
+                                  src={(origin === 'x' ?
+                                    y_asset_data :
+                                    x_asset_data
+                                  ).image}
+                                  alt=""
+                                  width={24}
+                                  height={24}
+                                  className="rounded-full"
+                                />
+                              </div>
+                            </>
+                          )
+                        }
+                        <span className="whitespace-nowrap text-sm sm:text-base font-semibold">
                           {
                             (origin === 'x' ?
                               y_asset_data :
                               x_asset_data
-                            )?.image && (
-                              <>
-                                <div className="flex sm:hidden">
-                                  <Image
-                                    src={(origin === 'x' ?
-                                      y_asset_data :
-                                      x_asset_data
-                                    ).image}
-                                    alt=""
-                                    width={18}
-                                    height={18}
-                                    className="rounded-full"
-                                  />
-                                </div>
-                                <div className="hidden sm:flex">
-                                  <Image
-                                    src={(origin === 'x' ?
-                                      y_asset_data :
-                                      x_asset_data
-                                    ).image}
-                                    alt=""
-                                    width={24}
-                                    height={24}
-                                    className="rounded-full"
-                                  />
-                                </div>
-                              </>
-                            )
+                            )?.symbol ||
+                            (origin === 'x' ?
+                              y_asset_data :
+                              x_asset_data
+                            )?.name ||
+                            'To Token'
                           }
-                          <span className="whitespace-nowrap text-sm sm:text-base font-semibold">
-                            {
-                              (origin === 'x' ?
-                                y_asset_data :
-                                x_asset_data
-                              )?.symbol ||
-                              (origin === 'x' ?
-                                y_asset_data :
-                                x_asset_data
-                              )?.name ||
-                              'To Token'
-                            }
-                          </span>
-                        </div>
+                        </span>
                       </div>
                     </div>
                   </div>
-                </div>
+                </div>*/}
               </div>
-              {
-                chain &&
-                asset &&
-                (
-                  pair === undefined ?
-                    <div className="tracking-wider text-slate-400 dark:text-slate-200 text-lg text-center ml-1 sm:ml-3">
-                      Route not supported
-                    </div> :
-                    pair ?
-                      pair.error ?
-                        <div className="w-fit tracking-wider text-red-600 dark:text-red-400 text-sm mx-auto">
-                          {pair.error.message}
-                        </div> :
-                        <div className="grid grid-cols-5 sm:grid-cols-5 gap-6 ml-1 sm:ml-3">
-                          <div className="col-span-2 sm:col-span-2 space-y-1">
-                            <div className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
-                              <span className="tracking-wider text-slate-600 dark:text-slate-200 text-sm sm:text-base sm:font-medium">
-                                Amount
-                              </span>
-                              {
-                                address &&
-                                (origin === 'x' ?
-                                  x_balance :
-                                  y_balance
-                                ) &&
-                                (
-                                  <button
-                                    disabled={disabled}
-                                    onClick={() => {
-                                      setSwap(
-                                        {
-                                          ...swap,
-                                          amount: origin === 'x' ?
-                                            x_balance_amount :
-                                            y_balance_amount,
-                                        }
-                                      )
-                                    }}
-                                    className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
-                                  >
-                                    Max
-                                  </button>
-                                )
-                              }
-                            </div>
-                            {
-                              chain_data &&
-                              asset &&
-                              (origin === 'x' ?
-                                x_asset_data :
-                                y_asset_data
-                              ) &&
-                              (
-                                <div className="flex items-center space-x-1.5">
-                                  <div className="tracking-wider text-slate-400 dark:text-slate-600 text-xs">
-                                    Balance
-                                  </div>
-                                  <button
-                                    disabled={disabled}
-                                    onClick={() => {
-                                      const amount = origin === 'x' ?
-                                        x_balance_amount :
-                                        y_balance_amount
-
-                                      if (amount > 0) {
-                                        setSwap(
-                                          {
-                                            ...swap,
-                                            amount,
-                                          }
-                                        )
-                                      }
-                                    }}
-                                  >
-                                    <Balance
-                                      chainId={chain_id}
-                                      asset={asset}
-                                      contractAddress={
-                                        (origin === 'x' ?
-                                          x_asset_data :
-                                          y_asset_data
-                                        ).contract_address
-                                      }
-                                      decimals={
-                                        (origin === 'x' ?
-                                          x_asset_data :
-                                          y_asset_data
-                                        ).decimals
-                                      }
-                                      symbol={
-                                        (origin === 'x' ?
-                                          x_asset_data :
-                                          y_asset_data
-                                        ).symbol
-                                      }
-                                      trigger={balanceTrigger}
-                                    />
-                                  </button>
-                                </div>
-                              )
-                            }
-                          </div>
-                          <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end">
-                            <DebounceInput
-                              debounceTimeout={500}
-                              size="small"
-                              type="number"
-                              placeholder="0.00"
-                              disabled={
-                                disabled ||
-                                !asset
-                              }
-                              value={
-                                typeof amount === 'number' &&
-                                amount >= 0 ?
-                                  number_format(
-                                    amount,
-                                    '0.00000000',
-                                    true,
-                                  ) :
-                                  ''
-                              }
-                              onChange={e => {
-                                const regex = /^[0-9.\b]+$/
-
-                                let value
-
-                                if (
-                                  e.target.value === '' ||
-                                  regex.test(e.target.value)
-                                ) {
-                                  value = e.target.value
-                                }
-
-                                value = value < 0 ?
-                                  0 :
-                                  value
-
-                                setSwap(
-                                  {
-                                    ...swap,
-                                    amount:
-                                      value &&
-                                      !isNaN(value) ?
-                                        Number(value) :
-                                        value,
-                                  }
-                                )
-                              }}
-                              onWheel={e => e.target.blur()}
-                              onKeyDown={e =>
-                                [
-                                  'e',
-                                  'E',
-                                  '-',
-                                ].includes(e.key) &&
-                                e.preventDefault()
-                              }
-                              className={`w-36 sm:w-48 bg-gray-200 focus:bg-gray-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
-                            />
-                          </div>
-                        </div> :
-                      <div className="flex items-center justify-center space-x-2">
-                        <div>
-                          <TailSpin
-                            color={loader_color(theme)}
-                            width="20"
-                            height="20"
-                          />
-                        </div>
-                        <span className="text-slate-400 dark:text-slate-200 text-lg">
-                          Fetching pair information ...
-                        </span>
-                      </div>
-                )
-              }
-              {
+              {/*
                 chain &&
                 asset &&
                 pair &&
@@ -1962,7 +2109,7 @@ export default () => {
                     }
                   />
                 )
-              }
+              */}
               {
                 chain &&
                 asset &&
@@ -2029,7 +2176,7 @@ export default () => {
                             ) ?
                             'Insufficient Balance' :
                             amount <= 0 ?
-                              'The transfer amount cannot be equal or less than 0.' :
+                              'The transfer amount cannot be equal to or less than 0.' :
                               ''
                           }
                         </span>
@@ -2083,6 +2230,7 @@ export default () => {
                             const {
                               status,
                               message,
+                              code,
                               tx_hash,
                             } = { ...r }
 
@@ -2167,7 +2315,7 @@ export default () => {
                                     }
                                     {status === 'failed' ?
                                       <button
-                                        onClick={() => reset()}
+                                        onClick={() => reset(code)}
                                         className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                                       >
                                         <MdClose
@@ -2198,10 +2346,26 @@ export default () => {
                       className="w-full bg-gray-200 dark:bg-slate-800 bg-opacity-75 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
                     >
                       {
-                        pair &&
-                        !pair.error ?
-                          'Enter Amount' :
-                          'Swap'
+                        pair === undefined ?
+                          `Route doesn't exist` :
+                          pair ?
+                            pair.error ?
+                              <div className="w-fit tracking-wider text-red-600 dark:text-red-400 text-sm mx-auto">
+                                {pair.error.message}
+                              </div> :
+                              'Enter amount' :
+                            <div className="flex items-center justify-center space-x-2">
+                              <div>
+                                <TailSpin
+                                  color={loader_color(theme)}
+                                  width="20"
+                                  height="20"
+                                />
+                              </div>
+                              <span className="text-slate-400 dark:text-slate-500 text-lg">
+                                Fetching pair information ...
+                              </span>
+                            </div>
                       }
                     </button> :
                     <Wallet
