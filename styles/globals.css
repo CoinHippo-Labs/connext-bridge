@@ -1,5 +1,8 @@
+@import url("https://fonts.googleapis.com/css?family=Manrope:300,400,500,600,700,800,900&display=swap");
+
 html {
   scroll-behavior: smooth;
+  font-family: 'Manrope', sans-serif !important;
 }
 
 h1 {
@@ -26,7 +29,7 @@ h3,
 h4,
 h5,
 h6 {
-  @apply font-sans;
+  /*@apply font-sans;*/
 }
 
 code {
@@ -77,7 +80,7 @@ button {
 }
 
 body {
-  @apply font-sans antialiased text-sm /*disable-scrollbars*/;
+  @apply /*font-sans */antialiased text-sm /*disable-scrollbars*/;
 }
 
 [data-background="light"] {

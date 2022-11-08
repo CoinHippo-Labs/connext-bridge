@@ -1696,14 +1696,14 @@ export default () => {
             <div className="flex items-center justify-between space-x-2 pb-1">
               <div className="space-y-1 ml-1 sm:ml-2">
                 <div className="flex items-center space-x-1.5">
-                  <h1 className="tracking-wider text-base sm:text-xl font-semibold">
+                  <h1 className="tracking-normal text-base sm:text-xl font-semibold">
                     Swap
                   </h1>
                   {
                     name &&
                     (
                       <div className="flex items-center space-x-1.5">
-                        <span className="tracking-wider text-base sm:text-xl font-semibold">
+                        <span className="text-base sm:text-xl font-semibold">
                           on
                         </span>
                         {
@@ -1731,7 +1731,7 @@ export default () => {
                             </>
                           )
                         }
-                        <span className="whitespace-nowrap tracking-wider text-base sm:text-xl font-semibold">
+                        <span className="tracking-normal whitespace-nowrap text-base sm:text-xl font-semibold">
                           {name}
                         </span>
                       </div>
@@ -1743,7 +1743,7 @@ export default () => {
                   asPath?.includes('on-') &&
                   title &&
                   (
-                    <h2 className="tracking-wider text-slate-700 dark:text-slate-300 text-xs font-medium">
+                    <h2 className="tracking-normal text-slate-700 dark:text-slate-300 text-xs font-medium">
                       {
                         title
                           .replace(
@@ -1922,7 +1922,7 @@ export default () => {
                       ) &&
                       (
                         <div className="flex items-center space-x-1.5 sm:ml-1.5">
-                          <div className="tracking-wider text-slate-400 dark:text-slate-600 text-xs">
+                          <div className="tracking-normal text-slate-400 dark:text-slate-600 text-xs">
                             Balance:
                           </div>
                           <button
@@ -2153,7 +2153,7 @@ export default () => {
                       ) &&
                       (
                         <div className="flex items-center space-x-1.5 sm:ml-1.5">
-                          <div className="tracking-wider text-slate-400 dark:text-slate-600 text-xs">
+                          <div className="tracking-normal text-slate-400 dark:text-slate-600 text-xs">
                             Balance:
                           </div>
                           <button
@@ -2468,7 +2468,7 @@ export default () => {
                             `Route doesn't exist` :
                             pair ?
                               pair.error ?
-                                <div className="w-fit tracking-wider text-red-600 dark:text-red-400 text-sm mx-auto">
+                                <div className="w-fit tracking-normal text-red-600 dark:text-red-400 text-sm mx-auto">
                                   {pair.error.message}
                                 </div> :
                                 'Enter amount' :

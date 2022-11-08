@@ -648,7 +648,7 @@ export default () => {
                 size={36}
               />
             </Link>*/}
-            <h1 className="uppercase tracking-widest text-2xl font-medium">
+            <h1 className="uppercase tracking-wider text-2xl font-medium">
               Manage Pool
             </h1>
           </div>
@@ -689,7 +689,7 @@ export default () => {
                 {
                   no_pool &&
                   (
-                    <div className="order-2 tracking-wider text-slate-400 dark:text-slate-400 text-base font-normal py-1.5 px-4">
+                    <div className="order-2 tracking-normal text-slate-400 dark:text-slate-400 text-base font-normal py-1.5 px-4">
                       Pool doesn't exist
                     </div>
                   )

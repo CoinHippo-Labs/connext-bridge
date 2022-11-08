@@ -32,7 +32,7 @@ export default ({
   return (
     <div className="space-y-2">
       {/*<div className="flex items-center space-x-2 sm:mx-3">
-        <span className="tracking-wider whitespace-nowrap text-slate-400 dark:text-slate-600 font-normal">
+        <span className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-600 font-normal">
           Swap Breakdown
         </span>
       </div>
@@ -43,12 +43,12 @@ export default ({
           (
             <>
               {/*<div className="flex items-center justify-between space-x-1">
-                <div className="tracking-wider whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
+                <div className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
                   Minimum Received
                 </div>
                 {typeof amount_received === 'boolean' ?
                   <div className="flex items-center space-x-1.5">
-                    <span className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
+                    <span className="tracking-normal text-slate-600 dark:text-slate-200 font-medium">
                       estimating
                     </span>
                     <Oval
@@ -57,7 +57,7 @@ export default ({
                       height="20"
                     />
                   </div> :
-                  <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
+                  <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
                     <span>
                       {number_format(
                         amount_received *
@@ -77,10 +77,10 @@ export default ({
                 }
               </div>*/}
               <div className="flex items-center justify-between space-x-1">
-                <div className="tracking-wider whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
+                <div className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
                   Rate
                 </div>
-                <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
+                <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
                   <span>
                     {number_format(
                       rate,
@@ -91,10 +91,10 @@ export default ({
                 </span>
               </div>
               <div className="flex items-center justify-between space-x-1">
-                <div className="tracking-wider whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
+                <div className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
                   Price Impact
                 </div>
-                <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
+                <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
                   <span>
                     {number_format(
                       price_impact,
@@ -111,11 +111,11 @@ export default ({
                   content="The maximum percentage you are willing to lose due to market changes."
                   className="z-50 bg-black text-white text-xs"
                 >
-                  <div className="tracking-wider whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
+                  <div className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
                     Slippage Tolerance
                   </div>
                 </Tooltip>
-                <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
+                <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
                   <span>
                     {number_format(
                       slippage,

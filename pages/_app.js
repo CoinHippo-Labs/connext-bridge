@@ -54,17 +54,20 @@ export default ({
       handleRouteChange,
     )
 
-    return () => router.events.off(
-      'routeChangeComplete',
-      handleRouteChange,
-    )
+    return () =>
+      router.events.off(
+        'routeChangeComplete',
+        handleRouteChange,
+      )
   }, [router.events])
 
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_GTM_ID) {
-      TagManager.initialize({
-        gtmId: process.env.NEXT_PUBLIC_GTM_ID,
-      })
+      TagManager.initialize(
+        {
+          gtmId: process.env.NEXT_PUBLIC_GTM_ID,
+        }
+      )
     }
   }, [])
 

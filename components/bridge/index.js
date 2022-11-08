@@ -1858,7 +1858,7 @@ export default () => {
           <div className="w-full max-w-lg space-y-3">
             <div className="flex items-center justify-between space-x-2 pb-1">
               <div className="space-y-1 ml-1 sm:ml-2">
-                <h1 className="tracking-wider text-base sm:text-xl font-semibold">
+                <h1 className="tracking-normal text-base sm:text-xl font-semibold">
                   Bridge
                 </h1>
                 {
@@ -1867,7 +1867,7 @@ export default () => {
                   asPath.includes('to-') &&
                   title &&
                   (
-                    <h2 className="tracking-wider text-slate-700 dark:text-slate-300 text-xs font-medium">
+                    <h2 className="text-slate-700 dark:text-slate-300 text-xs font-medium">
                       {
                         title
                           .replace(
@@ -1919,7 +1919,7 @@ export default () => {
                 <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
                   <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start">
                     <div className="w-32 sm:w-48 flex flex-col sm:flex-row items-center justify-center space-x-1.5">
-                      <span className="tracking-wider text-slate-600 dark:text-slate-200 text-lg font-medium text-center">
+                      <span className="tracking-normal text-slate-600 dark:text-slate-200 text-lg font-medium text-center">
                         Origin
                       </span>
                       <GasPrice
@@ -2006,7 +2006,7 @@ export default () => {
                   </div>
                   <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end">
                     <div className="w-32 sm:w-48 flex flex-col sm:flex-row items-center justify-center space-x-1.5">
-                      <span className="tracking-wider text-slate-600 dark:text-slate-200 text-lg font-medium text-center">
+                      <span className="tracking-normal text-slate-600 dark:text-slate-200 text-lg font-medium text-center">
                         Destination
                       </span>
                       <GasPrice
@@ -2043,7 +2043,7 @@ export default () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="tracking-wider text-slate-600 dark:text-slate-200 text-lg font-medium">
+                  <div className="tracking-normal text-slate-600 dark:text-slate-200 text-lg font-medium">
                     Asset
                   </div>
                   <SelectBridgeAsset
@@ -2076,14 +2076,14 @@ export default () => {
                 destination_chain &&
                 asset &&
                 !checkSupport() ?
-                  <div className="tracking-wider text-slate-400 dark:text-slate-200 text-lg text-center">
+                  <div className="tracking-normal text-slate-400 dark:text-slate-200 text-lg text-center">
                     Route not supported
                   </div> :
                   <>
                     <div className="grid grid-cols-5 sm:grid-cols-5 gap-6">
                       <div className="col-span-2 sm:col-span-2 space-y-1">
                         <div className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
-                          <span className="tracking-wider text-slate-600 dark:text-slate-200 text-sm sm:text-base sm:font-medium">
+                          <span className="tracking-normal text-slate-600 dark:text-slate-200 text-sm sm:text-base sm:font-medium">
                             Amount
                           </span>
                           {
@@ -2190,7 +2190,7 @@ export default () => {
                           asset &&
                           (
                             <div className="flex items-center space-x-1.5">
-                              <div className="tracking-wider text-slate-400 dark:text-slate-600 text-xs">
+                              <div className="tracking-normal text-slate-400 dark:text-slate-600 text-xs">
                                 Balance:
                               </div>
                               <button
@@ -2309,7 +2309,7 @@ export default () => {
                                     }}
                                     className={`${forceSlow ? 'cursor-default' : 'cursor-pointer'} flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2`}
                                   >
-                                    <span className="tracking-wider whitespace-nowrap text-slate-600 dark:text-slate-200 text-sm sm:text-base font-medium">
+                                    <span className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 text-sm sm:text-base font-medium">
                                       Estimate Received
                                     </span>
                                     {
@@ -2361,7 +2361,7 @@ export default () => {
                                   (
                                     <div className="space-y-2">
                                       {/*<div className="flex items-center space-x-2">
-                                        <span className="tracking-wider whitespace-nowrap text-slate-400 dark:text-slate-600 font-normal">
+                                        <span className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-600 font-normal">
                                           Fees Breakdown
                                         </span>
                                       </div>
@@ -2377,11 +2377,11 @@ export default () => {
                                                   content="This supports our router users providing fast liquidity."
                                                   className="z-50 bg-black text-white text-xs"
                                                 >
-                                                  <div className="tracking-wider whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
+                                                  <div className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
                                                     Bridge Fee
                                                   </div>
                                                 </Tooltip>
-                                                <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
+                                                <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
                                                   <span>
                                                     {number_format(
                                                       router_fee,
@@ -2400,7 +2400,7 @@ export default () => {
                                                   content="This covers costs to execute your transfer on the destination chain."
                                                   className="z-50 bg-black text-white text-xs"
                                                 >
-                                                  <div className="tracking-wider whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
+                                                  <div className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
                                                     Destination Gas Fee
                                                   </div>
                                                 </Tooltip>
@@ -2408,7 +2408,7 @@ export default () => {
                                                   false &&
                                                   feeEstimating ?
                                                     <div className="flex items-center space-x-1.5">
-                                                      <span className="tracking-wider text-slate-600 dark:text-slate-200 font-medium">
+                                                      <span className="tracking-normal text-slate-600 dark:text-slate-200 font-medium">
                                                         estimating
                                                       </span>
                                                       <Oval
@@ -2417,7 +2417,7 @@ export default () => {
                                                         height="20"
                                                       />
                                                     </div> :
-                                                    <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
+                                                    <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
                                                       <span>
                                                         {number_format(
                                                           gas_fee,
@@ -2440,11 +2440,11 @@ export default () => {
                                                       content="Price Impact"
                                                       className="z-50 bg-black text-white text-xs"
                                                     >
-                                                      <div className="tracking-wider whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
+                                                      <div className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
                                                         Price Impact
                                                       </div>
                                                     </Tooltip>
-                                                    <span className="whitespace-nowrap tracking-wider text-xs font-semibold space-x-1.5">
+                                                    <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
                                                       <span>
                                                         {number_format(
                                                           price_impact,
@@ -2476,7 +2476,7 @@ export default () => {
                                               content="Your transfer will not complete if the asset price changes by more than this percentage."
                                               className="z-50 bg-black text-white text-xs"
                                             >
-                                              <div className="tracking-wider whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
+                                              <div className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
                                                 Slippage Tolerance
                                               </div>
                                             </Tooltip>
@@ -2753,7 +2753,7 @@ export default () => {
                                     typeof approving === 'boolean' ?
                                       'Please Confirm' :
                                       'Checking Approval' :
-                                'Transfer'
+                                'Send'
                               }
                             </span>
                           </span>
@@ -2871,7 +2871,7 @@ export default () => {
                       disabled={true}
                       className="w-full bg-gray-200 dark:bg-slate-800 bg-opacity-75 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
                     >
-                      Transfer
+                      Send
                     </button> :
                     <Wallet
                       connectChainId={source_chain_data?.chain_id}
@@ -2884,7 +2884,7 @@ export default () => {
                     </Wallet>
               }
             </div>
-            <div className="flex items-center justify-end space-x-4 mr-3">
+            {/*<div className="flex items-center justify-end space-x-4 mr-3">
               {
                 process.env.NEXT_PUBLIC_DOCS_URL &&
                 (
@@ -2916,7 +2916,7 @@ export default () => {
                   Explorer
                 </span>
               </a>
-            </div>
+            </div>*/}
           </div>
           {
             (
