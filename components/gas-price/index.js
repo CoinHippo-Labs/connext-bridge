@@ -6,7 +6,7 @@ import { MdLocalGasStation } from 'react-icons/md'
 
 import { number_format, loader_color } from '../../lib/utils'
 
-const MIN_GAS_PRICE = 0.001
+const MIN_GAS_PRICE = 0.000001
 
 export default ({
   chainId,
@@ -85,7 +85,7 @@ export default ({
               `< ${
                 number_format(
                   MIN_GAS_PRICE,
-                  '0,0.000000',
+                  '0,0.00000000',
                   true,
                 )
               }` :

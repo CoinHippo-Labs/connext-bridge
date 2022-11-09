@@ -5,7 +5,6 @@ import Switch from 'react-switch'
 import { DebounceInput } from 'react-debounce-input'
 import { Tooltip } from '@material-tailwind/react'
 import { RiSettings3Line } from 'react-icons/ri'
-import { MdSettingsSuggest } from 'react-icons/md'
 
 import Modal from '../../modals'
 import Popover from '../../popover'
@@ -102,21 +101,15 @@ export default ({
   return (
     <Modal
       disabled={disabled}
-      buttonTitle={<div className={`bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg flex items-center ${applied ? 'text-green-600 hover:text-green-500 dark:text-slate-200 dark:hover:text-slate-100 py-1' : 'text-slate-500 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-200 py-2'} space-x-1 px-3`}>
-        {applied ?
-          <MdSettingsSuggest
-            size={20}
-            className="mb-0.5"
-          /> :
-          <RiSettings3Line
-            size={20}
-          />
-        }
+      buttonTitle={<div className={`bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg flex items-center ${applied ? 'text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400' : 'text-slate-500 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-200'} space-x-1 py-2 px-3`}>
+        <RiSettings3Line
+          size={20}
+        />
         <span className="font-medium">
           Settings
         </span>
       </div>}
-      buttonClassName={`min-w-max ${disabled ? 'cursor-not-allowed' : ''} ${applied ? 'ring-2 ring-green-500 dark:ring-white' : ''} rounded-lg shadow flex items-center justify-center`}
+      buttonClassName={`min-w-max ${disabled ? 'cursor-not-allowed' : ''} ${applied ? 'border border-blue-400 dark:border-blue-500' : ''} rounded-lg shadow flex items-center justify-center`}
       title="Advanced Options"
       body={<div className="form mt-2">
         {fields

@@ -2626,7 +2626,7 @@ export default () => {
                                                             setOptions(_data)
                                                             setSlippageEditing(false)
                                                           }}
-                                                          className={`${slippage === s ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-semibold'} rounded cursor-pointer text-xs py-0.5 px-1.5`}
+                                                          className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-900 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-900 hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
                                                         >
                                                           {s} %
                                                         </div>
@@ -2643,7 +2643,7 @@ export default () => {
                                                   </span>
                                                   <button
                                                     onClick={() => setSlippageEditing(true)}
-                                                    className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                                                    className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
                                                   >
                                                     <BiEditAlt
                                                       size={16}

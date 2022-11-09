@@ -112,9 +112,11 @@ export default () => {
   } = { ...router }
 
   const [swap, setSwap] = useState({})
-  const [swapAmount, setSwapAmount] = useState(null)
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [buttonDirection, setButtonDirection] = useState(1)
+
+  const [swapAmount, setSwapAmount] = useState(null)
+  const [calculateSwapResponse, setCalculateSwapResponse] = useState(null)
 
   const [approving, setApproving] = useState(null)
   const [approveProcessing, setApproveProcessing] = useState(null)
@@ -835,6 +837,8 @@ export default () => {
 
     setOptions(DEFAULT_OPTIONS)
 
+    setCalculateSwapResponse(null)
+
     setApproving(null)
     setApproveProcessing(null)
     setApproveResponse(null)
@@ -860,6 +864,7 @@ export default () => {
   }
 
   const call = async () => {
+    setCalculateSwapResponse(null)
     setApproving(null)
     setCalling(true)
 
@@ -1033,10 +1038,12 @@ export default () => {
                 {
                   status: 'failed',
                   message:
-                    `Failed to approve ${(origin === 'x' ?
-                      x_asset_data :
-                      y_asset_data
-                    )?.symbol}`,
+                    `Failed to approve ${
+                      (origin === 'x' ?
+                        x_asset_data :
+                        y_asset_data
+                      )?.symbol
+                    }`,
                   tx_hash: hash,
                 }
             )
@@ -1262,6 +1269,8 @@ export default () => {
       amount,
     } = { ...swap }
 
+    setCalculateSwapResponse(null)
+
     if (
       _pair &&
       typeof amount === 'number'
@@ -1463,6 +1472,24 @@ export default () => {
             )
           )
         } catch (error) {
+          const message =
+            error?.data?.message ||
+            error?.message
+
+          setCalculateSwapResponse(
+            {
+              status: 'failed',
+              message,
+            }
+          )
+
+          console.log(
+            '[calculateSwap]',
+            {
+              error: message,
+            },
+          )
+
           setSwapAmount(null)
         }
       }
@@ -1859,7 +1886,8 @@ export default () => {
                         placeholder="0.00"
                         disabled={
                           disabled ||
-                          !asset
+                          !asset ||
+                          !pair
                         }
                         value={
                           typeof amount === 'number' &&
@@ -2112,8 +2140,10 @@ export default () => {
                             type="number"
                             placeholder="0.00"
                             disabled={
+                              true ||
                               disabled ||
-                              !asset
+                              !asset ||
+                              !pair
                             }
                             value={
                               typeof swapAmount === 'number' &&
@@ -2123,7 +2153,7 @@ export default () => {
                                   '0.00000000',
                                   true,
                                 ) :
-                                ''
+                                '0.00'
                             }
                             onChange={e => {
                               const regex = /^[0-9.\b]+$/
@@ -2167,7 +2197,7 @@ export default () => {
                               ].includes(e.key) &&
                               e.preventDefault()
                             }
-                            className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5`}
+                            className={`w-36 sm:w-48 bg-transparent ${'cursor-default' || (disabled ? 'cursor-not-allowed' : '')} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5`}
                           />
                       }
                     </div>
@@ -2192,7 +2222,10 @@ export default () => {
                                     y_balance_amount :
                                     x_balance_amount
 
-                                if (amount > 0) {
+                                if (
+                                  false &&
+                                  amount > 0
+                                ) {
                                   setSwap(
                                     {
                                       ...swap,
@@ -2204,6 +2237,7 @@ export default () => {
                                   )
                                 }
                               }}
+                              className="cursor-default"
                             >
                               <Balance
                                 chainId={chain_id}
@@ -2231,7 +2265,7 @@ export default () => {
                               />
                             </button>
                           </div>
-                          <button
+                          {/*<button
                             disabled={disabled}
                             onClick={() => {
                               const amount =
@@ -2254,7 +2288,7 @@ export default () => {
                             className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} font-medium`}
                           >
                             Select Max
-                          </button>
+                          </button>*/}
                         </div>
                       )
                     }
@@ -2305,15 +2339,18 @@ export default () => {
                           'Switch'
                         } to
                       </span>
-                      {image && (
-                        <Image
-                          src={image}
-                          alt=""
-                          width={32}
-                          height={32}
-                          className="rounded-full"
-                        />
-                      )}
+                      {
+                        image &&
+                        (
+                          <Image
+                            src={image}
+                            alt=""
+                            width={32}
+                            height={32}
+                            className="rounded-full"
+                          />
+                        )
+                      }
                       <span className="font-semibold">
                         {name}
                       </span>
@@ -2350,7 +2387,10 @@ export default () => {
                           }
                         </span>
                       </Alert> :
-                      !callResponse ?
+                      !(
+                        callResponse ||
+                        calculateSwapResponse
+                      ) ?
                         <button
                           disabled={
                             disabled ||
@@ -2389,12 +2429,14 @@ export default () => {
                         </button> :
                         (
                           callResponse ||
-                          approveResponse
+                          approveResponse ||
+                          calculateSwapResponse
                         ) &&
                         (
                           [
                             callResponse ||
-                            approveResponse,
+                            approveResponse ||
+                            calculateSwapResponse,
                           ].map((r, i) => {
                             const {
                               status,
@@ -2458,9 +2500,10 @@ export default () => {
                                     {
                                       status === 'failed' &&
                                       message &&
+                                      !calculateSwapResponse &&
                                       (
                                         <Copy
-                                          size={24}
+                                          size={20}
                                           value={message}
                                           className="cursor-pointer text-slate-200 hover:text-white"
                                         />

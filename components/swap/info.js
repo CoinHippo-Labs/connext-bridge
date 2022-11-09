@@ -84,21 +84,6 @@ export default ({
               </span>
             </div>
             <div className="flex items-center justify-between space-x-1">
-              <div className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
-                Price Impact
-              </div>
-              <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
-                <span>
-                  {number_format(
-                    price_impact,
-                    '0,0.000000',
-                    true,
-                  )}
-                  %
-                </span>
-              </span>
-            </div>
-            <div className="flex items-center justify-between space-x-1">
               <Tooltip
                 placement="top"
                 content="The maximum percentage you are willing to lose due to market changes."
@@ -112,6 +97,21 @@ export default ({
                 <span>
                   {number_format(
                     slippage,
+                    '0,0.000000',
+                    true,
+                  )}
+                  %
+                </span>
+              </span>
+            </div>
+            <div className="flex items-center justify-between space-x-1">
+              <div className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
+                Price Impact
+              </div>
+              <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
+                <span>
+                  {number_format(
+                    price_impact,
                     '0,0.000000',
                     true,
                   )}

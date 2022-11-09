@@ -776,8 +776,8 @@ export default ({
                 rounded={true}
                 className="mx-0"
               >
-                <div className="flex items-center justify-between space-x-1">
-                  <span className="break-all leading-5 text-xs">
+                <div className="flex flex-wrap items-center justify-between">
+                  <span className="break-all leading-5 mr-1">
                     {message}
                   </span>
                   {
