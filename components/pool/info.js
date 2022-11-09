@@ -316,7 +316,7 @@ export default ({
                             <span className={titleClassName}>
                               {_.head(symbols)}
                             </span>
-                            <Link
+                            {/*<Link
                               href={`/swap/${asset.toUpperCase()}-on-${chain}?from=${_.last(symbols)}`}
                             >
                             <a
@@ -334,7 +334,7 @@ export default ({
                                 </div>
                               </Tooltip>
                             </a>
-                            </Link>
+                            </Link>*/}
                           </div>
                           <span className={valueClassName}>
                             {
@@ -377,7 +377,7 @@ export default ({
                             <span className={titleClassName}>
                               {_.last(symbols)}
                             </span>
-                            <Link
+                            {/*<Link
                               href={`/swap/${asset.toUpperCase()}-on-${chain}`}
                             >
                             <a
@@ -395,7 +395,7 @@ export default ({
                                 </div>
                               </Tooltip>
                             </a>
-                            </Link>
+                            </Link>*/}
                           </div>
                           <span className={valueClassName}>
                             {

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
@@ -10,6 +11,7 @@ import { Tooltip } from '@material-tailwind/react'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
 import { BiPlus, BiCaretUp, BiCaretDown, BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
+import { HiSwitchHorizontal } from 'react-icons/hi'
 
 import GasPrice from '../gas-price'
 import Balance from '../balance'
@@ -146,14 +148,16 @@ export default ({
             asset,
           } = { ...pool }
 
-          const chain_data = chains_data?.find(c =>
-            c?.id === chain
-          )
+          const chain_data = (chains_data || [])
+            .find(c =>
+              c?.id === chain
+            )
 
-          const pool_data = pools_data?.find(p =>
-            p?.chain_data?.id === chain &&
-            p.asset_data?.id === asset
-          )
+          const pool_data = (pools_data || [])
+            .find(p =>
+              p?.chain_data?.id === chain &&
+              p.asset_data?.id === asset
+            )
           const {
             contract_data,
             domainId,
@@ -182,10 +186,12 @@ export default ({
               },
             )
 
-            const canonicals = await sdk.nxtpSdkPool.getCanonicalToken(
-              domainId,
-              contract_address,
-            )
+            const canonicals =
+              await sdk.nxtpSdkPool
+                .getCanonicalToken(
+                  domainId,
+                  contract_address,
+                )
 
             const canonicalDomain = _.head(canonicals),
               canonicalId = _.last(canonicals)
@@ -199,11 +205,13 @@ export default ({
               },
             )
 
-            const amounts = await sdk.nxtpSdkPool.calculateRemoveSwapLiquidity(
-              domainId,
-              canonicalId,
-              _amount,
-            )
+            const amounts =
+              await sdk.nxtpSdkPool
+                .calculateRemoveSwapLiquidity(
+                  domainId,
+                  canonicalId,
+                  _amount,
+                )
 
             setRemoveAmounts(
               (amounts || [])
@@ -287,7 +295,10 @@ export default ({
               )
           ),
           ...(
-            equals_ignore_case(_.head(tokens), contract_address) ?
+            equals_ignore_case(
+              _.head(tokens),
+              contract_address,
+            ) ?
               contract_data :
               {
                 chain_id,
@@ -308,7 +319,10 @@ export default ({
               )
           ),
           ...(
-            equals_ignore_case(_.last(tokens), contract_address) ?
+            equals_ignore_case(
+              _.last(tokens),
+              contract_address,
+            ) ?
               contract_data :
               {
                 chain_id,
@@ -370,19 +384,23 @@ export default ({
 
           if (!failed) {
             try {
-              const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
-                domainId,
-                x_asset_data?.contract_address,
-                _.head(amounts),
-                infiniteApprove,
-              )
+              const approve_request =
+                await sdk.nxtpSdkBase
+                  .approveIfNeeded(
+                    domainId,
+                    x_asset_data?.contract_address,
+                    _.head(amounts),
+                    infiniteApprove,
+                  )
 
               if (approve_request) {
                 setApproving(true)
 
-                const approve_response = await signer.sendTransaction(
-                  approve_request,
-                )
+                const approve_response =
+                  await signer
+                    .sendTransaction(
+                      approve_request,
+                    )
 
                 const {
                   hash,
@@ -398,21 +416,24 @@ export default ({
 
                 setApproveProcessing(true)
 
-                const approve_receipt = await signer.provider.waitForTransaction(
-                  hash,
-                )
+                const approve_receipt =
+                  await signer.provider
+                    .waitForTransaction(
+                      hash,
+                    )
 
                 const {
                   status,
                 } = { ...approve_receipt }
 
-                setApproveResponse(status ?
-                  null :
-                  {
-                    status: 'failed',
-                    message: `Failed to approve ${x_asset_data?.symbol}`,
-                    tx_hash: hash,
-                  }
+                setApproveResponse(
+                  status ?
+                    null :
+                    {
+                      status: 'failed',
+                      message: `Failed to approve ${x_asset_data?.symbol}`,
+                      tx_hash: hash,
+                    }
                 )
 
                 failed = !status
@@ -441,19 +462,23 @@ export default ({
 
             if (!failed) {
               try {
-                const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
-                  domainId,
-                  y_asset_data?.contract_address,
-                  _.last(amounts),
-                  infiniteApprove,
-                )
+                const approve_request =
+                  await sdk.nxtpSdkBase
+                    .approveIfNeeded(
+                      domainId,
+                      y_asset_data?.contract_address,
+                      _.last(amounts),
+                      infiniteApprove,
+                    )
 
                 if (approve_request) {
                   setApproving(true)
 
-                  const approve_response = await signer.sendTransaction(
-                    approve_request,
-                  )
+                  const approve_response =
+                    await signer
+                      .sendTransaction(
+                        approve_request,
+                      )
 
                   const {
                     hash,
@@ -469,21 +494,24 @@ export default ({
 
                   setApproveProcessing(true)
 
-                  const approve_receipt = await signer.provider.waitForTransaction(
-                    hash,
-                  )
+                  const approve_receipt =
+                    await signer.provider
+                      .waitForTransaction(
+                        hash,
+                      )
 
                   const {
                     status,
                   } = { ...approve_receipt }
 
-                  setApproveResponse(status ?
-                    null :
-                    {
-                      status: 'failed',
-                      message: `Failed to approve ${y_asset_data?.symbol}`,
-                      tx_hash: hash,
-                    }
+                  setApproveResponse(
+                    status ?
+                      null :
+                      {
+                        status: 'failed',
+                        message: `Failed to approve ${y_asset_data?.symbol}`,
+                        tx_hash: hash,
+                      }
                   )
 
                   failed = !status
@@ -525,18 +553,22 @@ export default ({
                 },
               )
 
-              const add_request = await sdk.nxtpSdkPool.addLiquidity(
-                domainId,
-                contract_address,
-                amounts,
-                minToMint,
-                deadline,
-              )
+              const add_request =
+                await sdk.nxtpSdkPool
+                  .addLiquidity(
+                    domainId,
+                    contract_address,
+                    amounts,
+                    minToMint,
+                    deadline,
+                  )
 
               if (add_request) {
-                let gasLimit = await signer.estimateGas(
-                  add_request,
-                )
+                let gasLimit =
+                  await signer
+                    .estimateGas(
+                      add_request,
+                    )
 
                 if (gasLimit) {
                   gasLimit =
@@ -560,9 +592,11 @@ export default ({
                   add_request.gasLimit = gasLimit
                 }
 
-                const add_response = await signer.sendTransaction(
-                  add_request,
-                )
+                const add_response =
+                  await signer
+                    .sendTransaction(
+                      add_request,
+                    )
 
                 const {
                   hash,
@@ -570,9 +604,11 @@ export default ({
 
                 setCallProcessing(true)
 
-                const add_receipt = await signer.provider.waitForTransaction(
-                  hash,
-                )
+                const add_receipt =
+                  await signer.provider
+                    .waitForTransaction(
+                      hash,
+                    )
 
                 const {
                   status,
@@ -625,26 +661,31 @@ export default ({
             )
             .toString()
 
-          const minAmounts = [
-            '0',
-            '0',
-          ]
+          const minAmounts =
+            [
+              '0',
+              '0',
+            ]
 
           if (!failed) {
             try {
-              const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
-                domainId,
-                lpTokenAddress,
-                _amount,
-                infiniteApprove,
-              )
+              const approve_request =
+                await sdk.nxtpSdkBase
+                  .approveIfNeeded(
+                    domainId,
+                    lpTokenAddress,
+                    _amount,
+                    infiniteApprove,
+                  )
 
               if (approve_request) {
                 setApproving(true)
 
-                const approve_response = await signer.sendTransaction(
-                  approve_request,
-                )
+                const approve_response =
+                  await signer
+                    .sendTransaction(
+                      approve_request,
+                    )
 
                 const {
                   hash,
@@ -660,21 +701,24 @@ export default ({
 
                 setApproveProcessing(true)
 
-                const approve_receipt = await signer.provider.waitForTransaction(
-                  hash,
-                )
+                const approve_receipt =
+                  await signer.provider
+                    .waitForTransaction(
+                      hash,
+                    )
 
                 const {
                   status,
                 } = { ...approve_receipt }
 
-                setApproveResponse(status ?
-                  null :
-                  {
-                    status: 'failed',
-                    message: `Failed to approve ${symbol}`,
-                    tx_hash: hash,
-                  }
+                setApproveResponse(
+                  status ?
+                    null :
+                    {
+                      status: 'failed',
+                      message: `Failed to approve ${symbol}`,
+                      tx_hash: hash,
+                    }
                 )
 
                 failed = !status
@@ -712,10 +756,12 @@ export default ({
                 },
               )
 
-              const canonicals = await sdk.nxtpSdkPool.getCanonicalToken(
-                domainId,
-                contract_address,
-              )
+              const canonicals =
+                await sdk.nxtpSdkPool
+                  .getCanonicalToken(
+                    domainId,
+                    contract_address,
+                  )
 
               const canonicalDomain = _.head(canonicals),
                 canonicalId = _.last(canonicals)
@@ -731,13 +777,15 @@ export default ({
                 },
               )
 
-              const remove_request = await sdk.nxtpSdkPool.removeLiquidity(
-                domainId,
-                canonicalId,
-                _amount,
-                minAmounts,
-                deadline,
-              )
+              const remove_request =
+                await sdk.nxtpSdkPool
+                  .removeLiquidity(
+                    domainId,
+                    canonicalId,
+                    _amount,
+                    minAmounts,
+                    deadline,
+                  )
 
               if (remove_request) {
                 let gasLimit = await signer.estimateGas(remove_request)
@@ -761,9 +809,11 @@ export default ({
                   remove_request.gasLimit = gasLimit
                 }
 
-                const remove_response = await signer.sendTransaction(
-                  remove_request,
-                )
+                const remove_response =
+                  await signer
+                    .sendTransaction(
+                      remove_request,
+                    )
 
                 const {
                   hash,
@@ -771,9 +821,11 @@ export default ({
 
                 setCallProcessing(true)
 
-                const remove_receipt = await signer.provider.waitForTransaction(
-                  hash,
-                )
+                const remove_receipt =
+                  await signer.provider
+                    .waitForTransaction(
+                      hash,
+                    )
 
                 const {
                   status,
@@ -903,7 +955,10 @@ export default ({
     asset,
   } = { ...pool }
 
-  const chain_data = chains_data?.find(c => c?.id === chain)
+  const chain_data = (chains_data || [])
+    .find(c =>
+      c?.id === chain
+    )
   const {
     chain_id,
     name,
@@ -929,17 +984,19 @@ export default ({
 
   const no_pool =
     selected &&
-    pool_assets_data?.findIndex(a =>
-      a?.id === asset &&
-      a.contracts?.findIndex(a =>
-        a?.chain_id === chain_id
-      ) > -1
-    ) < 0
+    (pool_assets_data || [])
+      .findIndex(a =>
+        a?.id === asset &&
+        a.contracts?.findIndex(a =>
+          a?.chain_id === chain_id
+        ) > -1
+      ) < 0
 
-  const pool_data = pools_data?.find(p =>
-    p?.chain_data?.id === chain &&
-    p.asset_data?.id === asset
-  )
+  const pool_data = (pools_data || [])
+    .find(p =>
+      p?.chain_data?.id === chain &&
+      p.asset_data?.id === asset
+    )
   const {
     asset_data,
     contract_data,
@@ -970,7 +1027,10 @@ export default ({
           )
       ),
       ...(
-        equals_ignore_case(_.head(tokens), contract_address) ?
+        equals_ignore_case(
+          _.head(tokens),
+          contract_address,
+        ) ?
           contract_data :
           {
             chain_id,
@@ -983,9 +1043,13 @@ export default ({
 
   const x_balance =
     x_asset_data &&
-    balances_data?.[chain_id]?.find(b =>
-      equals_ignore_case(b?.contract_address, x_asset_data.contract_address)
-    )
+    (balances_data?.[chain_id] || [])
+      .find(b =>
+        equals_ignore_case(
+          b?.contract_address,
+          x_asset_data.contract_address,
+        )
+      )
   const x_balance_amount =
     x_balance &&
     Number(x_balance.amount)
@@ -1000,7 +1064,10 @@ export default ({
           )
       ),
       ...(
-        equals_ignore_case(_.last(tokens), contract_address) ?
+        equals_ignore_case(
+          _.last(tokens),
+          contract_address,
+        ) ?
           contract_data :
           {
             chain_id,
@@ -1016,13 +1083,19 @@ export default ({
               [
                 'TEST',
               ].findIndex(s =>
-                equals_ignore_case(s, _.last(symbols))
+                equals_ignore_case(
+                  s,
+                  _.last(symbols),
+                )
               ) > -1,
             wrapable:
               [
                 'WETH',
               ].findIndex(s =>
-                equals_ignore_case(s, _.last(symbols))
+                equals_ignore_case(
+                  s,
+                  _.last(symbols),
+                )
               ) > -1,
           }
       ),
@@ -1030,9 +1103,13 @@ export default ({
 
   const y_balance =
     y_asset_data &&
-    balances_data?.[chain_id]?.find(b =>
-      equals_ignore_case(b?.contract_address, y_asset_data.contract_address)
-    )
+    (balances_data?.[chain_id] || [])
+      .find(b =>
+        equals_ignore_case(
+          b?.contract_address,
+          y_asset_data.contract_address,
+        )
+      )
   const y_balance_amount =
     y_balance &&
     Number(y_balance.amount)
@@ -1045,10 +1122,11 @@ export default ({
 
   const user_pool_data =
     pool_data &&
-    user_pools_data?.find(p =>
-      p?.chain_data?.id === chain &&
-      p.asset_data?.id === asset
-    )
+    (user_pools_data || [])
+      .find(p =>
+        p?.chain_data?.id === chain &&
+        p.asset_data?.id === asset
+      )
   const {
     lpTokenBalance,
   } = { ...user_pool_data }
@@ -1110,7 +1188,7 @@ export default ({
             <div className="form-element">
               <Tooltip
                 placement="right"
-                content="This allows you to only need to pay for approval on your first transfer."
+                content="This allows you to only need to pay for approval on your first time providing liquidity."
                 className="z-50 bg-black text-white text-xs"
               >
                 <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 font-normal">
@@ -1148,7 +1226,7 @@ export default ({
                 className="z-50 bg-black text-white text-xs"
               >
                 <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 font-normal">
-                  Slippage Tolerance
+                  Slippage
                 </div>
               </Tooltip>
               <div className="flex items-center space-x-3">
@@ -1156,7 +1234,7 @@ export default ({
                   debounceTimeout={500}
                   size="small"
                   type="number"
-                  placeholder="Slippage Tolerance"
+                  placeholder="Slippage"
                   value={
                     typeof slippage === 'number' &&
                     slippage >= 0 ?
@@ -1327,20 +1405,47 @@ export default ({
                 x_asset_data?.contract_address &&
                 (
                   <div className="flex items-center justify-between -mt-3">
-                    {url ?
-                      <a
-                        href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <span className="text-base font-semibold">
+                    <div className="flex items-center space-x-2">
+                      {url ?
+                        <a
+                          href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <span className="text-base font-semibold">
+                            {x_asset_data.symbol}
+                          </span>
+                        </a> :
+                        <div className="text-base font-semibold">
                           {x_asset_data.symbol}
-                        </span>
-                      </a> :
-                      <div className="text-base font-semibold">
-                        {x_asset_data.symbol}
-                      </div>
-                    }
+                        </div>
+                      }
+                      {
+                        chain &&
+                        asset &&
+                        (
+                          <Link
+                            href={`/swap/${asset.toUpperCase()}-on-${chain}?from=${y_asset_data.symbol}`}
+                          >
+                          <a
+                            className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
+                          >
+                            <Tooltip
+                              placement="top"
+                              content={`Click here to swap ${y_asset_data.symbol} into ${x_asset_data.symbol}`}
+                              className="z-50 bg-black text-white text-xs"
+                            >
+                              <div>
+                                <HiSwitchHorizontal
+                                  size={18}
+                                />
+                              </div>
+                            </Tooltip>
+                          </a>
+                          </Link>
+                        )
+                      }
+                    </div>
                     <div className="flex items-center space-x-1">
                       <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
                         Balance:
@@ -1453,20 +1558,47 @@ export default ({
                 y_asset_data?.contract_address &&
                 (
                   <div className="flex items-center justify-between">
-                    {url ?
-                      <a
-                        href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <span className="text-base font-semibold">
+                    <div className="flex items-center space-x-2">
+                      {url ?
+                        <a
+                          href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <span className="text-base font-semibold">
+                            {y_asset_data.symbol}
+                          </span>
+                        </a> :
+                        <div className="text-base font-semibold">
                           {y_asset_data.symbol}
-                        </span>
-                      </a> :
-                      <div className="text-base font-semibold">
-                        {y_asset_data.symbol}
-                      </div>
-                    }
+                        </div>
+                      }
+                      {
+                        chain &&
+                        asset &&
+                        (
+                          <Link
+                            href={`/swap/${asset.toUpperCase()}-on-${chain}`}
+                          >
+                          <a
+                            className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
+                          >
+                            <Tooltip
+                              placement="top"
+                              content={`Click here to swap ${x_asset_data.symbol} into ${y_asset_data.symbol}`}
+                              className="z-50 bg-black text-white text-xs"
+                            >
+                              <div>
+                                <HiSwitchHorizontal
+                                  size={18}
+                                />
+                              </div>
+                            </Tooltip>
+                          </a>
+                          </Link>
+                        )
+                      }
+                    </div>
                     <div className="flex items-center space-x-1">
                       <div className="text-slate-400 dark:text-slate-500 text-sm font-medium text-right">
                         Balance:

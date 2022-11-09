@@ -863,6 +863,14 @@ export default () => {
           <div className="flex items-center justify-end">
             {
               web3_provider &&
+              (
+                <Chains
+                  chain_id={chain_id}
+                />
+              )
+            }
+            {
+              web3_provider &&
               address &&
               (
                 <div className="hidden sm:flex lg:hidden xl:flex flex-col space-y-0.5 mx-2">
@@ -899,14 +907,6 @@ export default () => {
                 connectChainId={default_chain_id}
               />
             </div>
-            {
-              web3_provider &&
-              (
-                <Chains
-                  chain_id={chain_id}
-                />
-              )
-            }
             <Theme />
           </div>
         </div>

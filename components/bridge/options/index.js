@@ -59,8 +59,8 @@ export default ({
       type: 'switch',
     },
     /*{
-      label: 'Slippage Tolerance',
-      tooltip: 'Your transfer will not complete if the asset price changes by more than this percentage.',
+      label: 'Slippage',
+      tooltip: 'The maximum percentage you are willing to lose due to market changes.',
       name: 'slippage',
       type: 'number',
       placeholder: '0.00',
@@ -71,11 +71,11 @@ export default ({
       ],
       postfix: '%',
     },*/
-    {
+    /*{
       label: 'Bridge Path',
       name: 'forceSlow',
       type: 'switch',
-    },
+    },*/
     {
       label: 'Receive NextAsset',
       name: 'receiveLocal',

@@ -2523,7 +2523,7 @@ export default () => {
                                           <div className="flex items-start justify-between space-x-1">
                                             <Tooltip
                                               placement="top"
-                                              content="This covers costs to execute your transfer on the destination chain."
+                                              content="The maximum percentage you are willing to lose due to market changes."
                                               className="z-50 bg-black text-white text-xs"
                                             >
                                               <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
@@ -2728,7 +2728,7 @@ export default () => {
                                                 <div className="flex items-center justify-between space-x-1">
                                                   <Tooltip
                                                     placement="top"
-                                                    content="Price Impact"
+                                                    content="Price impact"
                                                     className="z-50 bg-black text-white text-xs"
                                                   >
                                                     <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">

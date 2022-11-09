@@ -90,7 +90,7 @@ export default ({
                 className="z-50 bg-black text-white text-xs"
               >
                 <div className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
-                  Slippage Tolerance
+                  Slippage
                 </div>
               </Tooltip>
               <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">

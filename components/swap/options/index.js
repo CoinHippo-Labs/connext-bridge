@@ -51,7 +51,7 @@ export default ({
       type: 'switch',
     },
     {
-      label: 'Slippage Tolerance',
+      label: 'Slippage',
       tooltip: 'The maximum percentage you are willing to lose due to market changes.',
       name: 'slippage',
       type: 'number',
@@ -65,10 +65,11 @@ export default ({
     },
   ]
 
-  const changed = !_.isEqual(
-    data,
-    initialData,
-  )
+  const changed =
+    !_.isEqual(
+      data,
+      initialData,
+    )
 
   return (
     <Modal

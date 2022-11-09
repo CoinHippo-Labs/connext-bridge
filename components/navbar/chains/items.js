@@ -71,7 +71,7 @@ export default ({
               <div
                 key={id}
                 title="Disabled"
-                className="dropdown-item w-1/2 cursor-not-allowed flex items-center justify-start font-medium space-x-1.5 p-2"
+                className="dropdown-item w-full cursor-not-allowed flex items-center justify-start font-medium space-x-1.5 p-2"
               >
                 {item}
               </div> :
@@ -79,7 +79,7 @@ export default ({
                 key={id}
                 connectChainId={c.chain_id}
                 onSwitch={onClick}
-                className="dropdown-item w-1/2"
+                className="dropdown-item w-full"
               >
                 <div className="flex items-center justify-start space-x-1.5 p-2">
                   {item}

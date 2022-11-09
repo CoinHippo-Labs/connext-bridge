@@ -8,7 +8,7 @@ import { BiChevronDown, BiChevronUp } from 'react-icons/bi'
 import TransferStatus from '../transfer-status'
 import { equals_ignore_case } from '../../lib/utils'
 
-const NUM_TRANSFER_DISPLAY = 5
+const NUM_TRANSFER_DISPLAY = 3
 
 export default ({
   trigger,
