@@ -2153,7 +2153,9 @@ export default () => {
                                   '0.00000000',
                                   true,
                                 ) :
-                                '0.00'
+                                typeof amount === 'number' ?
+                                  '0.00' :
+                                  ''
                             }
                             onChange={e => {
                               const regex = /^[0-9.\b]+$/
@@ -2422,7 +2424,9 @@ export default () => {
                                     typeof approving === 'boolean' ?
                                       'Please Confirm' :
                                       'Checking Approval' :
-                                'Swap'
+                                swapAmount === true ?
+                                  'Calculating' :
+                                  'Swap'
                               }
                             </span>
                           </span>
