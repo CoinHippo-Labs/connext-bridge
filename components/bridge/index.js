@@ -2494,7 +2494,7 @@ export default () => {
                               >
                                 <div className="col-span-2 sm:col-span-2">
                                   <div className="flex items-center">
-                                    <span className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 sm:text-base font-medium">
+                                    <span className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
                                       You will receive
                                     </span>
                                   </div>
@@ -2535,7 +2535,7 @@ export default () => {
                             web3_provider &&
                             amount > 0 &&
                             (
-                              <div className={`space-y-2.5 ${!collapse ? 'mt-2' : ''}`}>
+                              <div className="space-y-2.5 mt-2">
                                 {
                                   (
                                     feeEstimating ||
@@ -2826,6 +2826,44 @@ export default () => {
                                         )
                                       }
                                     </>
+                                  )
+                                }
+                                {
+                                  amount > 0 &&
+                                  typeof estimate_received === 'number' &&
+                                  (
+                                    amount < liquidity_amount ||
+                                    asset_balances_data
+                                  ) &&
+                                  (
+                                    <div className="flex items-center justify-between space-x-1">
+                                      <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
+                                        Estimated time
+                                      </div>
+                                      <Tooltip
+                                        placement="top"
+                                        content={
+                                          amount > liquidity_amount ||
+                                          forceSlow ?
+                                            `Unable to use Connext router network. Using ${source_chain_data?.name} messaging bridge.` :
+                                            'Fast transfer enabled by Connext router network.'
+                                        }
+                                        className="z-50 bg-black text-white text-xs"
+                                      >
+                                        <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
+                                          {
+                                            amount > liquidity_amount ||
+                                            forceSlow ?
+                                              <span className="text-yellow-500 dark:text-yellow-400">
+                                                90 minutes
+                                              </span> :
+                                              <span className="text-green-500 dark:text-green-500">
+                                                2 minutes
+                                              </span>
+                                          }
+                                        </span>
+                                      </Tooltip>
+                                    </div>
                                   )
                                 }
                               </div>
