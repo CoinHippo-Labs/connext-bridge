@@ -224,10 +224,10 @@ export default ({
     chainId &&
     asset &&
     (
-      <div className={`flex items-center justify-center text-slate-600 dark:text-slate-200 text-xs space-x-1 ${className}`}>
+      <div className={`flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm space-x-1 ${className}`}>
         {typeof amount === 'number' ?
           <>
-            <span className="font-bold">
+            <span className="font-semibold">
               {number_format(
                 amount,
                 amount > 1000000 ?

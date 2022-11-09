@@ -1341,8 +1341,8 @@ export default ({
                         {x_asset_data.symbol}
                       </div>
                     }
-                    <div className="space-y-0.5">
-                      <div className="text-slate-400 dark:text-slate-600 text-xs font-medium text-right">
+                    <div className="flex items-center space-x-1">
+                      <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
                         Balance:
                       </div>
                       <Balance
@@ -1350,6 +1350,7 @@ export default ({
                         asset={asset}
                         contractAddress={x_asset_data.contract_address}
                         symbol={x_asset_data.symbol}
+                        hideSymbol={true}
                       />
                     </div>
                   </div>
@@ -1466,8 +1467,8 @@ export default ({
                         {y_asset_data.symbol}
                       </div>
                     }
-                    <div className="space-y-0.5">
-                      <div className="text-slate-400 dark:text-slate-600 text-xs font-medium text-right">
+                    <div className="flex items-center space-x-1">
+                      <div className="text-slate-400 dark:text-slate-500 text-sm font-medium text-right">
                         Balance:
                       </div>
                       <Balance
@@ -1475,6 +1476,7 @@ export default ({
                         asset={asset}
                         contractAddress={y_asset_data.contract_address}
                         symbol={y_asset_data.symbol}
+                        hideSymbol={true}
                       />
                     </div>
                   </div>

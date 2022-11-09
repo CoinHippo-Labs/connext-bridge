@@ -114,7 +114,7 @@ export default ({
               source_contract_data &&
               (
                 <>
-                  <div className="text-slate-400 dark:text-slate-600 text-xs font-medium">
+                  <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
                     Balance:
                   </div>
                   <Balance
@@ -164,7 +164,7 @@ export default ({
               destination_contract_data &&
               (
                 <>
-                  <div className="text-slate-400 dark:text-slate-600 text-xs font-medium">
+                  <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
                     Balance:
                   </div>
                   <Balance

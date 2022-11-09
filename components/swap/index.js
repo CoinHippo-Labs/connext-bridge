@@ -1793,7 +1793,7 @@ export default () => {
               <div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between space-x-2">
-                    <span className="sm:text-base font-medium">
+                    <span className="text-slate-600 dark:text-slate-200 sm:text-base font-medium">
                       Pay with
                     </span>
                     <GasPrice
@@ -1802,7 +1802,7 @@ export default () => {
                       className="text-xs pr-1"
                     />
                   </div>
-                  <div className="bg-slate-100 dark:bg-gray-800 dark:bg-opacity-50 rounded-xl py-3 px-4">
+                  <div className="bg-slate-100 dark:bg-gray-800 dark:bg-opacity-50 rounded-lg space-y-0.5 py-3.5 px-3">
                     <div className="flex items-center justify-between space-x-2">
                       <SelectAsset
                         disabled={disabled}
@@ -1850,6 +1850,7 @@ export default () => {
                             x_asset_data :
                             y_asset_data
                         }
+                        className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
                       />
                       <DebounceInput
                         debounceTimeout={500}
@@ -1910,7 +1911,7 @@ export default () => {
                           ].includes(e.key) &&
                           e.preventDefault()
                         }
-                        className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2`}
+                        className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5`}
                       />
                     </div>
                     {
@@ -1921,9 +1922,56 @@ export default () => {
                         y_asset_data
                       ) &&
                       (
-                        <div className="flex items-center space-x-1.5 sm:ml-1.5">
-                          <div className="tracking-normal text-slate-400 dark:text-slate-600 text-xs">
-                            Balance:
+                        <div className="flex items-center justify-between space-x-2">
+                          <div className="flex items-center space-x-1">
+                            <div className="tracking-normal text-slate-400 dark:text-slate-500 text-sm font-medium">
+                              Balance:
+                            </div>
+                            <button
+                              disabled={disabled}
+                              onClick={() => {
+                                const amount =
+                                  origin === 'x' ?
+                                    x_balance_amount :
+                                    y_balance_amount
+
+                                if (typeof amount === 'number') {
+                                  setSwap(
+                                    {
+                                      ...swap,
+                                      amount,
+                                    }
+                                  )
+
+                                  setSwapAmount(true)
+                                }
+                              }}
+                            >
+                              <Balance
+                                chainId={chain_id}
+                                asset={asset}
+                                contractAddress={
+                                  (origin === 'x' ?
+                                    x_asset_data :
+                                    y_asset_data
+                                  ).contract_address
+                                }
+                                decimals={
+                                  (origin === 'x' ?
+                                    x_asset_data :
+                                    y_asset_data
+                                  ).decimals
+                                }
+                                symbol={
+                                  (origin === 'x' ?
+                                    x_asset_data :
+                                    y_asset_data
+                                  ).symbol
+                                }
+                                hideSymbol={true}
+                                trigger={balanceTrigger}
+                              />
+                            </button>
                           </div>
                           <button
                             disabled={disabled}
@@ -1944,31 +1992,9 @@ export default () => {
                                 setSwapAmount(true)
                               }
                             }}
+                            className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} font-medium`}
                           >
-                            <Balance
-                              chainId={chain_id}
-                              asset={asset}
-                              contractAddress={
-                                (origin === 'x' ?
-                                  x_asset_data :
-                                  y_asset_data
-                                ).contract_address
-                              }
-                              decimals={
-                                (origin === 'x' ?
-                                  x_asset_data :
-                                  y_asset_data
-                                ).decimals
-                              }
-                              symbol={
-                                (origin === 'x' ?
-                                  x_asset_data :
-                                  y_asset_data
-                                ).symbol
-                              }
-                              hideSymbol={true}
-                              trigger={balanceTrigger}
-                            />
+                            Select Max
                           </button>
                         </div>
                       )
@@ -2016,10 +2042,10 @@ export default () => {
                   </button>
                 </div>
                 <div className="space-y-2 -mt-0.5 sm:mt-1.5">
-                  <span className="sm:text-base font-medium">
+                  <span className="text-slate-600 dark:text-slate-200 sm:text-base font-medium">
                     Receive
                   </span>
-                  <div className="bg-slate-100 dark:bg-gray-800 dark:bg-opacity-50 rounded-xl py-3 px-4">
+                  <div className="bg-slate-100 dark:bg-gray-800 dark:bg-opacity-50 rounded-lg space-y-0.5 py-3.5 px-3">
                     <div className="flex items-center justify-between space-x-2">
                       <SelectAsset
                         disabled={disabled}
@@ -2067,10 +2093,11 @@ export default () => {
                             y_asset_data :
                             x_asset_data
                         }
+                        className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
                       />
                       {
                         swapAmount === true ?
-                          <div className="w-36 sm:w-48 flex items-center justify-end py-1.5 sm:py-2">
+                          <div className="w-36 sm:w-48 flex items-center justify-end py-1.5">
                             <div>
                               <Oval
                                 color={loader_color(theme)}
@@ -2140,7 +2167,7 @@ export default () => {
                               ].includes(e.key) &&
                               e.preventDefault()
                             }
-                            className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2`}
+                            className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5`}
                           />
                       }
                     </div>
@@ -2152,9 +2179,57 @@ export default () => {
                         x_asset_data
                       ) &&
                       (
-                        <div className="flex items-center space-x-1.5 sm:ml-1.5">
-                          <div className="tracking-normal text-slate-400 dark:text-slate-600 text-xs">
-                            Balance:
+                        <div className="flex items-center justify-between space-x-2">
+                          <div className="flex items-center space-x-1">
+                            <div className="tracking-normal text-slate-400 dark:text-slate-500 text-sm font-medium">
+                              Balance:
+                            </div>
+                            <button
+                              disabled={disabled}
+                              onClick={() => {
+                                const amount =
+                                  origin === 'x' ?
+                                    y_balance_amount :
+                                    x_balance_amount
+
+                                if (amount > 0) {
+                                  setSwap(
+                                    {
+                                      ...swap,
+                                      amount:
+                                        origin === 'x' ?
+                                          amount / rate :
+                                          amount * rate,
+                                    }
+                                  )
+                                }
+                              }}
+                            >
+                              <Balance
+                                chainId={chain_id}
+                                asset={asset}
+                                contractAddress={
+                                  (origin === 'x' ?
+                                    y_asset_data :
+                                    x_asset_data
+                                  ).contract_address
+                                }
+                                decimals={
+                                  (origin === 'x' ?
+                                    y_asset_data :
+                                    x_asset_data
+                                  ).decimals
+                                }
+                                symbol={
+                                  (origin === 'x' ?
+                                    y_asset_data :
+                                    x_asset_data
+                                  ).symbol
+                                }
+                                hideSymbol={true}
+                                trigger={balanceTrigger}
+                              />
+                            </button>
                           </div>
                           <button
                             disabled={disabled}
@@ -2176,31 +2251,9 @@ export default () => {
                                 )
                               }
                             }}
+                            className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} font-medium`}
                           >
-                            <Balance
-                              chainId={chain_id}
-                              asset={asset}
-                              contractAddress={
-                                (origin === 'x' ?
-                                  y_asset_data :
-                                  x_asset_data
-                                ).contract_address
-                              }
-                              decimals={
-                                (origin === 'x' ?
-                                  y_asset_data :
-                                  x_asset_data
-                                ).decimals
-                              }
-                              symbol={
-                                (origin === 'x' ?
-                                  y_asset_data :
-                                  x_asset_data
-                                ).symbol
-                              }
-                              hideSymbol={true}
-                              trigger={balanceTrigger}
-                            />
+                            Select Max
                           </button>
                         </div>
                       )

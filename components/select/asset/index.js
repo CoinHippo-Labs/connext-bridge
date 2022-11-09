@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import { Puff } from 'react-loader-spinner'
 import { IoRadioButtonOn } from 'react-icons/io5'
+import { BiChevronDown } from 'react-icons/bi'
 
 import Image from '../../image'
 import Search from './search'
@@ -14,9 +15,10 @@ export default ({
   value,
   onSelect,
   chain,
-  origin = 'source',
+  origin = 'from',
   is_pool = false,
   data,
+  className = '',
 }) => {
   const {
     preferences,
@@ -120,7 +122,12 @@ export default ({
       onClick={open => setHidden(!open)}
       buttonTitle={
         _assets_data ?
-          <div className="w-32 sm:w-48 min-w-max bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl flex items-center justify-center space-x-1 sm:space-x-1.5 py-1.5 sm:py-2 px-2 sm:px-3">
+          <div
+            className={
+              className ||
+              "w-32 sm:w-48 min-w-max bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl flex items-center justify-center space-x-1.5 sm:space-x-2 py-1.5 sm:py-2 px-2 sm:px-3"
+            }
+          >
             {
               image &&
               (
@@ -129,8 +136,8 @@ export default ({
                     <Image
                       src={image}
                       alt=""
-                      width={18}
-                      height={18}
+                      width={20}
+                      height={20}
                       className="rounded-full"
                     />
                   </div>
@@ -138,17 +145,26 @@ export default ({
                     <Image
                       src={image}
                       alt=""
-                      width={24}
-                      height={24}
+                      width={28}
+                      height={28}
                       className="rounded-full"
                     />
                   </div>
                 </>
               )
             }
-            <span className="whitespace-nowrap text-sm sm:text-base font-semibold">
+            <span className={`whitespace-nowrap text-xs sm:text-lg font-semibold ${!image ? 'sm:ml-3' : ''}`}>
               {symbol}
             </span>
+            {
+              className &&
+              (
+                <BiChevronDown
+                  size={18}
+                  className="text-slate-400 dark:text-slate-200"
+                />
+              )
+            }
           </div> :
           <Puff
             color={loader_color(theme)}
@@ -156,7 +172,10 @@ export default ({
             height="24"
           />
       }
-      buttonClassName={`w-32 sm:w-48 min-w-max h-10 sm:h-16 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
+      buttonClassName={
+        className ||
+        `w-32 sm:w-48 min-w-max h-10 sm:h-12 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`
+      }
       title={<div className="flex items-center justify-between">
         <span className="flex items-center uppercase space-x-1">
           <span>

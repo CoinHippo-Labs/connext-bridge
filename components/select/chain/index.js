@@ -14,7 +14,7 @@ export default ({
   onSelect,
   source,
   destination,
-  origin = 'origin',
+  origin = 'from',
 }) => {
   const {
     preferences,

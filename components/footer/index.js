@@ -60,16 +60,26 @@ export default () => {
             Connext Protocol
           </span>
         </a>
-        {dependencies?.['@connext/nxtp-sdk'] && (
-          <a
-            href="https://github.com/connext/nxtp"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 dark:text-white text-xs font-medium"
-          >
-            SDK v{dependencies['@connext/nxtp-sdk'].replace('^', '')}
-          </a>
-        )}
+        {
+          dependencies?.['@connext/nxtp-sdk'] &&
+          (
+            <a
+              href="https://github.com/connext/nxtp"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-white font-medium"
+            >
+              SDK v
+              {
+                dependencies['@connext/nxtp-sdk']
+                  .replace(
+                    '^',
+                    '',
+                  )
+              }
+            </a>
+          )
+        }
       </div>
       <div className="hidden lg:flex w-full lg:w-1/3 flex-wrap items-center justify-center space-x-2">
         {process.env.NEXT_PUBLIC_TWITTER_USERNAME && (

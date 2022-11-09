@@ -74,7 +74,7 @@ export default ({
   }, [chainId, rpcs])
 
   return chainId ?
-    <div className={`flex items-center justify-center text-slate-400 dark:text-slate-600 space-x-1 ${className}`}>
+    <div className={`flex items-center justify-center text-slate-400 dark:text-slate-500 space-x-1 ${className}`}>
       <MdLocalGasStation
         size={iconSize}
       />
@@ -108,7 +108,7 @@ export default ({
             color={
               theme === 'light' ?
                 '#94a3b8' :
-                '#475569'
+                '#64748b'
             }
             width="16"
             height="16"

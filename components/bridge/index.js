@@ -18,7 +18,8 @@ import Announcement from '../announcement'
 import PoweredBy from '../powered-by'
 import Options from './options'
 import SelectChain from '../select/chain'
-import SelectBridgeAsset from '../select/asset/bridge'
+// import SelectBridgeAsset from '../select/asset/bridge'
+import SelectAsset from '../select/asset'
 import GasPrice from '../gas-price'
 import Balance from '../balance'
 import LatestTransfers from '../latest-transfers'
@@ -1918,16 +1919,16 @@ export default () => {
               <div className="space-y-2">
                 <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
                   <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start">
-                    <div className="w-32 sm:w-48 flex flex-col sm:flex-row items-center justify-center space-x-1.5">
-                      <span className="tracking-normal text-slate-600 dark:text-slate-200 text-lg font-medium text-center">
-                        Origin
+                    <div className="w-32 sm:w-48 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
+                      <span className="tracking-normal text-slate-600 dark:text-slate-200 sm:text-base font-medium text-left">
+                        From
                       </span>
-                      <GasPrice
+                      {/*<GasPrice
                         chainId={source_chain_data?.chain_id}
                         dummy={true}
                         iconSize={18}
                         className="text-xs"
-                      />
+                      />*/}
                     </div>
                     <SelectChain
                       disabled={disabled}
@@ -1951,10 +1952,10 @@ export default () => {
                       }}
                       source={source_chain}
                       destination={destination_chain}
-                      origin="origin"
+                      origin="from"
                     />
                   </div>
-                  <div className="flex items-center justify-center mt-10 sm:mt-6">
+                  <div className="flex items-center justify-center mt-5 sm:mt-6">
                     <button
                       disabled={disabled}
                       onClick={() => {
@@ -2005,16 +2006,16 @@ export default () => {
                     </button>
                   </div>
                   <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end">
-                    <div className="w-32 sm:w-48 flex flex-col sm:flex-row items-center justify-center space-x-1.5">
-                      <span className="tracking-normal text-slate-600 dark:text-slate-200 text-lg font-medium text-center">
-                        Destination
+                    <div className="w-32 sm:w-48 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
+                      <span className="tracking-normal text-slate-600 dark:text-slate-200 sm:text-base font-medium text-left">
+                        To
                       </span>
-                      <GasPrice
+                      {/*<GasPrice
                         chainId={destination_chain_data?.chain_id}
                         dummy={true}
                         iconSize={18}
                         className="text-xs"
-                      />
+                      />*/}
                     </div>
                     <SelectChain
                       disabled={disabled}
@@ -2038,12 +2039,12 @@ export default () => {
                       }}
                       source={source_chain}
                       destination={destination_chain}
-                      origin="destination"
+                      origin="to"
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="tracking-normal text-slate-600 dark:text-slate-200 text-lg font-medium">
+                {/*<div className="space-y-2">
+                  <div className="tracking-normal text-slate-600 dark:text-slate-200 sm:text-base font-medium">
                     Asset
                   </div>
                   <SelectBridgeAsset
@@ -2069,6 +2070,162 @@ export default () => {
                     source_chain={source_chain}
                     destination_chain={destination_chain}
                   />
+                </div>*/}
+                <div className="space-y-2">
+                  <div className="tracking-normal text-slate-600 dark:text-slate-200 sm:text-base font-medium">
+                    Amount
+                  </div>
+                  <div className="bg-slate-100 dark:bg-gray-800 dark:bg-opacity-50 rounded-lg space-y-0.5 py-3.5 px-3">
+                    <div className="flex items-center justify-between space-x-2">
+                      <SelectAsset
+                        disabled={disabled}
+                        value={asset}
+                        onSelect={a => {
+                          setBridge(
+                            {
+                              ...bridge,
+                              asset: a,
+                              amount:
+                                a !== asset ?
+                                  null :
+                                  amount,
+                            }
+                          )
+
+                          if (a !== asset) {
+                            getBalances(source_chain)
+                            getBalances(destination_chain)
+                          }
+                        }}
+                        chain={source_chain}
+                        origin=""
+                        className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
+                      />
+                      <DebounceInput
+                        debounceTimeout={500}
+                        size="small"
+                        type="number"
+                        placeholder="0.00"
+                        disabled={
+                          disabled ||
+                          !asset
+                        }
+                        value={
+                          typeof amount === 'number' &&
+                          amount >= 0 ?
+                            number_format(
+                              amount,
+                              '0.00000000',
+                              true,
+                            ) :
+                            ''
+                        }
+                        onChange={e => {
+                          const regex = /^[0-9.\b]+$/
+
+                          let value
+
+                          if (
+                            e.target.value === '' ||
+                            regex.test(e.target.value)
+                          ) {
+                            value = e.target.value
+                          }
+
+                          value =
+                            value < 0 ?
+                              0 :
+                              value &&
+                              !isNaN(value) ?
+                                parseFloat(
+                                  Number(value)
+                                    .toFixed(source_decimals)
+                                ) :
+                                value
+
+                          setBridge(
+                            {
+                              ...bridge,
+                              amount:
+                                typeof value === 'number' ?
+                                  value :
+                                  null,
+                            }
+                          )
+                        }}
+                        onWheel={e => e.target.blur()}
+                        onKeyDown={e =>
+                          [
+                            'e',
+                            'E',
+                            '-',
+                          ].includes(e.key) &&
+                          e.preventDefault()
+                        }
+                        className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5`}
+                      />
+                    </div>
+                    {
+                      source_chain_data &&
+                      asset &&
+                      (
+                        <div className="flex items-center justify-between space-x-2">
+                          <div className="flex items-center space-x-1">
+                            <div className="tracking-normal text-slate-400 dark:text-slate-500 text-sm font-medium">
+                              Balance:
+                            </div>
+                            <button
+                              disabled={disabled}
+                              onClick={() => {
+                                if (max_amount > 0) {
+                                  setBridge(
+                                    {
+                                      ...bridge,
+                                      amount: max_amount,
+                                    }
+                                  )
+                                }
+                              }}
+                            >
+                              <Balance
+                                chainId={source_chain_data.chain_id}
+                                asset={asset}
+                                contractAddress={source_contract_data?.contract_address}
+                                decimals={source_decimals}
+                                symbol={source_symbol}
+                                hideSymbol={true}
+                                trigger={balanceTrigger}
+                              />
+                            </button>
+                          </div>
+                          {
+                            destination_chain &&
+                            !checkSupport() ?
+                            <div className="text-slate-400 dark:text-slate-500">
+                              Route not supported
+                            </div> :
+                            address &&
+                            (
+                              <button
+                                disabled={disabled}
+                                onClick={() => {
+                                  setBridge(
+                                    {
+                                      ...bridge,
+                                      amount: max_amount,
+                                    }
+                                  )
+                                }}
+                                className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} font-medium`}
+                              >
+                                Select Max
+                              </button>
+                            )
+                          }
+                        </div>
+                      )
+                    }
+                  </div>
                 </div>
               </div>
               {
@@ -2080,7 +2237,7 @@ export default () => {
                     Route not supported
                   </div> :
                   <>
-                    <div className="grid grid-cols-5 sm:grid-cols-5 gap-6">
+                    {/*<div className="grid grid-cols-5 sm:grid-cols-5 gap-6">
                       <div className="col-span-2 sm:col-span-2 space-y-1">
                         <div className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
                           <span className="tracking-normal text-slate-600 dark:text-slate-200 text-sm sm:text-base sm:font-medium">
@@ -2104,8 +2261,8 @@ export default () => {
                                 className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
                               >
                                 Max
-                              </button>
-                              /*<Popover
+                              </button> ||
+                              <Popover
                                 placement="bottom"
                                 disabled={disabled}
                                 onClick={() => {
@@ -2181,7 +2338,7 @@ export default () => {
                                 titleClassName="normal-case py-1.5"
                               >
                                 Max
-                              </Popover>*/
+                              </Popover>
                             )
                           }
                         </div>
@@ -2189,8 +2346,8 @@ export default () => {
                           source_chain_data &&
                           asset &&
                           (
-                            <div className="flex items-center space-x-1.5">
-                              <div className="tracking-normal text-slate-400 dark:text-slate-600 text-xs">
+                            <div className="flex items-center space-x-1">
+                              <div className="tracking-normal text-slate-400 dark:text-slate-500 text-sm font-medium">
                                 Balance:
                               </div>
                               <button
@@ -2212,6 +2369,7 @@ export default () => {
                                   contractAddress={source_contract_data?.contract_address}
                                   decimals={source_decimals}
                                   symbol={source_symbol}
+                                  hideSymbol={true}
                                   trigger={balanceTrigger}
                                 />
                               </button>
@@ -2284,10 +2442,10 @@ export default () => {
                           className={`w-36 sm:w-48 bg-gray-200 focus:bg-gray-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
                         />
                       </div>
-                    </div>
+                    </div>*/}
                     {
                       (
-                        typeof estimate_received === 'number' ||
+                        typeof estimate_received === 'number' &&
                         (
                           checkSupport() &&
                           web3_provider &&
@@ -2295,54 +2453,50 @@ export default () => {
                         )
                       ) &&
                       (
-                        <div className="space-y-2">
+                        <div className="bg-slate-100 dark:bg-slate-800 rounded-lg py-3.5 px-3">
                           {
                             typeof estimate_received === 'number' &&
                             (
-                              <div className="grid grid-cols-5 sm:grid-cols-5 gap-6">
-                                <div className="col-span-2 sm:col-span-2 space-y-1">
-                                  <button
-                                    onClick={() => {
-                                      if (!forceSlow) {
-                                        setCollapse(!collapse)
-                                      }
-                                    }}
-                                    className={`${forceSlow ? 'cursor-default' : 'cursor-pointer'} flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2`}
-                                  >
-                                    <span className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 text-sm sm:text-base font-medium">
-                                      Estimate Received
+                              <button
+                                onClick={() => setCollapse(!collapse)}
+                                className="w-full grid grid-cols-5 sm:grid-cols-5 gap-6"
+                              >
+                                <div className="col-span-2 sm:col-span-2">
+                                  <div className="flex items-center">
+                                    <span className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 sm:text-base font-medium">
+                                      You will receive
                                     </span>
-                                    {
-                                      !forceSlow &&
-                                      (
-                                        collapse ?
-                                          <BiChevronDown
-                                            size={20}
-                                            className="text-slate-600 dark:text-slate-200"
-                                          /> :
-                                          <BiChevronUp
-                                            size={20}
-                                            className="text-slate-600 dark:text-slate-200"
-                                          />
-                                      )
-                                    }
-                                  </button>
+                                  </div>
                                 </div>
-                                <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end space-x-2">
-                                  <span className="text-sm sm:text-base font-semibold">
-                                    {
-                                      number_format(
-                                        estimate_received,
-                                        '0,0.00000000',
-                                        true,
-                                      )
+                                <div className="col-span-3 sm:col-span-3">
+                                  <div className="flex items-center justify-end sm:justify-end space-x-0.5 sm:space-x-1 -mr-0.5">
+                                    <div className="flex items-center space-x-2">
+                                      <span className="font-semibold">
+                                        {
+                                          number_format(
+                                            estimate_received,
+                                            '0,0.00000000',
+                                            true,
+                                          )
+                                        }
+                                      </span>
+                                      <span className="font-semibold">
+                                        {destination_symbol}
+                                      </span>
+                                    </div>
+                                    {collapse ?
+                                      <BiChevronDown
+                                        size={18}
+                                        className="text-slate-600 dark:text-slate-200"
+                                      /> :
+                                      <BiChevronUp
+                                        size={18}
+                                        className="text-slate-600 dark:text-slate-200"
+                                      />
                                     }
-                                  </span>
-                                  <span className="text-sm sm:text-base font-medium">
-                                    {destination_symbol}
-                                  </span>
+                                  </div>
                                 </div>
-                              </div>
+                              </button>
                             )
                           }
                           {
@@ -2350,134 +2504,30 @@ export default () => {
                             web3_provider &&
                             amount > 0 &&
                             (
-                              <div className="space-y-2.5">
+                              <div className={`space-y-2.5 ${!collapse ? 'mt-2' : ''}`}>
                                 {
                                   (
                                     feeEstimating ||
                                     fee
                                   ) &&
-                                  !forceSlow &&
+                                  (
+                                    true ||
+                                    !forceSlow
+                                  ) &&
                                   !collapse &&
                                   (
-                                    <div className="space-y-2">
-                                      {/*<div className="flex items-center space-x-2">
-                                        <span className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-600 font-normal">
-                                          Fees Breakdown
-                                        </span>
-                                      </div>
-                                      <div className="w-full h-0.25 bg-slate-200 dark:bg-slate-700 sm:px-1" />*/}
-                                      <div className="space-y-2.5">
-                                        {
-                                          !forceSlow &&
-                                          (
-                                            <>
-                                              <div className="flex items-center justify-between space-x-1">
-                                                <Tooltip
-                                                  placement="top"
-                                                  content="This supports our router users providing fast liquidity."
-                                                  className="z-50 bg-black text-white text-xs"
-                                                >
-                                                  <div className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
-                                                    Bridge Fee
-                                                  </div>
-                                                </Tooltip>
-                                                <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
-                                                  <span>
-                                                    {number_format(
-                                                      router_fee,
-                                                      '0,0.00000000',
-                                                      true,
-                                                    )}
-                                                  </span>
-                                                  <span>
-                                                    {source_symbol}
-                                                  </span>
-                                                </span>
-                                              </div>
-                                              <div className="flex items-center justify-between space-x-1">
-                                                <Tooltip
-                                                  placement="top"
-                                                  content="This covers costs to execute your transfer on the destination chain."
-                                                  className="z-50 bg-black text-white text-xs"
-                                                >
-                                                  <div className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
-                                                    Destination Gas Fee
-                                                  </div>
-                                                </Tooltip>
-                                                {
-                                                  false &&
-                                                  feeEstimating ?
-                                                    <div className="flex items-center space-x-1.5">
-                                                      <span className="tracking-normal text-slate-600 dark:text-slate-200 font-medium">
-                                                        estimating
-                                                      </span>
-                                                      <Oval
-                                                        color={loader_color(theme)}
-                                                        width="20"
-                                                        height="20"
-                                                      />
-                                                    </div> :
-                                                    <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
-                                                      <span>
-                                                        {number_format(
-                                                          gas_fee,
-                                                          '0,0.00000000',
-                                                          true,
-                                                        )}
-                                                      </span>
-                                                      <span>
-                                                        {source_gas_native_token?.symbol}
-                                                      </span>
-                                                    </span>
-                                                }
-                                              </div>
-                                              {
-                                                typeof price_impact === 'number' &&
-                                                (
-                                                  <div className="flex items-center justify-between space-x-1">
-                                                    <Tooltip
-                                                      placement="top"
-                                                      content="Price Impact"
-                                                      className="z-50 bg-black text-white text-xs"
-                                                    >
-                                                      <div className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
-                                                        Price Impact
-                                                      </div>
-                                                    </Tooltip>
-                                                    <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
-                                                      <span>
-                                                        {number_format(
-                                                          price_impact,
-                                                          '0,0.00',
-                                                          true,
-                                                        )}%
-                                                      </span>
-                                                    </span>
-                                                  </div>
-                                                )
-                                              }
-                                            </>
-                                          )
-                                        }
-                                      </div>
-                                    </div>
-                                  )
-                                }
-                                {
-                                  amount > 0 &&
-                                  (
-                                    <>
+                                    <div className="space-y-2.5">
                                       {
                                         !receiveLocal &&
                                         (
                                           <div className="flex items-start justify-between space-x-1">
                                             <Tooltip
                                               placement="top"
-                                              content="Your transfer will not complete if the asset price changes by more than this percentage."
+                                              content="This covers costs to execute your transfer on the destination chain."
                                               className="z-50 bg-black text-white text-xs"
                                             >
-                                              <div className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
-                                                Slippage Tolerance
+                                              <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
+                                                Slippage
                                               </div>
                                             </Tooltip>
                                             <div className="flex flex-col sm:items-end space-y-1.5">
@@ -2605,6 +2655,109 @@ export default () => {
                                           </div>
                                         )
                                       }
+                                      {
+                                        (
+                                          true ||
+                                          !forceSlow
+                                        ) &&
+                                        (
+                                          <>
+                                            <div className="flex items-center justify-between space-x-1">
+                                              <Tooltip
+                                                placement="top"
+                                                content="This supports our router users providing fast liquidity."
+                                                className="z-50 bg-black text-white text-xs"
+                                              >
+                                                <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
+                                                  Bridge fee
+                                                </div>
+                                              </Tooltip>
+                                              <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
+                                                <span>
+                                                  {number_format(
+                                                    router_fee,
+                                                    '0,0.00000000',
+                                                    true,
+                                                  )}
+                                                </span>
+                                                <span>
+                                                  {source_symbol}
+                                                </span>
+                                              </span>
+                                            </div>
+                                            <div className="flex items-center justify-between space-x-1">
+                                              <Tooltip
+                                                placement="top"
+                                                content="This covers costs to execute your transfer on the destination chain."
+                                                className="z-50 bg-black text-white text-xs"
+                                              >
+                                                <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
+                                                  Destination gas fee
+                                                </div>
+                                              </Tooltip>
+                                              {
+                                                false &&
+                                                feeEstimating ?
+                                                  <div className="flex items-center space-x-1.5">
+                                                    <span className="tracking-normal text-slate-600 dark:text-slate-200 font-medium">
+                                                      estimating
+                                                    </span>
+                                                    <Oval
+                                                      color={loader_color(theme)}
+                                                      width="20"
+                                                      height="20"
+                                                    />
+                                                  </div> :
+                                                  <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
+                                                    <span>
+                                                      {number_format(
+                                                        gas_fee,
+                                                        '0,0.00000000',
+                                                        true,
+                                                      )}
+                                                    </span>
+                                                    <span>
+                                                      {source_gas_native_token?.symbol}
+                                                    </span>
+                                                  </span>
+                                              }
+                                            </div>
+                                            {
+                                              typeof price_impact === 'number' &&
+                                              (
+                                                <div className="flex items-center justify-between space-x-1">
+                                                  <Tooltip
+                                                    placement="top"
+                                                    content="Price Impact"
+                                                    className="z-50 bg-black text-white text-xs"
+                                                  >
+                                                    <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
+                                                      Price impact
+                                                    </div>
+                                                  </Tooltip>
+                                                  <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
+                                                    <span>
+                                                      {number_format(
+                                                        price_impact,
+                                                        '0,0.00',
+                                                        true,
+                                                      )}%
+                                                    </span>
+                                                  </span>
+                                                </div>
+                                              )
+                                            }
+                                          </>
+                                        )
+                                      }
+                                    </div>
+                                  )
+                                }
+                                {
+                                  false &&
+                                  amount > 0 &&
+                                  (
+                                    <>
                                       {
                                         asset_balances_data &&
                                         amount > liquidity_amount &&
