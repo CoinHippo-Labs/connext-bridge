@@ -82,7 +82,8 @@ export default ({
     force_slow,
   } = { ...data }
 
-  force_slow = force_slow ||
+  force_slow =
+    force_slow ||
     (status || '')
       .toLowerCase()
       .includes('slow')

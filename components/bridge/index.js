@@ -150,6 +150,8 @@ export default () => {
   const [balanceTrigger, setBalanceTrigger] = useState(null)
   const [transfersTrigger, setTransfersTrigger] = useState(null)
 
+  const [latestTransfers, setLatestTransfers] = useState([])
+
   // get bridge from path
   useEffect(() => {
     let updated = false
@@ -1610,6 +1612,7 @@ export default () => {
             setXcall(xcall_receipt)
 
             const {
+              transactionHash,
               status,
             } = { ...xcall_receipt }
 
@@ -1628,6 +1631,34 @@ export default () => {
             )
 
             success = true
+
+            if (!failed) {
+              setLatestTransfers(
+                _.uniqBy(
+                  _.concat(
+                    {
+                      xcall_transaction_hash:
+                        transactionHash ||
+                        hash,
+                      xcall_timestamp:
+                        moment()
+                          .unix(),
+                      origin_chain: source_chain_data?.chain_id,
+                      origin_domain: xcallParams.origin,
+                      origin_transacting_asset: xcallParams.asset,
+                      origin_transacting_amount: Number(xcallParams.amount),
+                      destination_chain: destination_chain_data?.chain_id,
+                      destination_domain: xcallParams.destination,
+                      destination_transacting_asset: destination_contract_data?.contract_address,
+                      to: xcallParams.to,
+                      force_slow: forceSlow,
+                    },
+                    latestTransfers,
+                  ),
+                  'xcall_transaction_hash',
+                )
+              )
+            }
           }
         } catch (error) {
           let message = 
@@ -3090,6 +3121,7 @@ export default () => {
       <div className="col-span-1 lg:col-span-2">
         <LatestTransfers
           trigger={transfersTrigger}
+          data={latestTransfers}
         />
       </div>
     </div>

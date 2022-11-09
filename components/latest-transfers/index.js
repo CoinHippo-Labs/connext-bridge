@@ -12,6 +12,7 @@ const NUM_TRANSFER_DISPLAY = 3
 
 export default ({
   trigger,
+  data,
 }) => {
   const {
     dev,
@@ -57,6 +58,16 @@ export default ({
           if (!Array.isArray(response)) {
             response = []
           }
+
+          response =
+            _.uniqBy(
+              _.concat(
+                response,
+                data ||
+                [],
+              ),
+              'xcall_transaction_hash',
+            )
 
           if (
             response
