@@ -473,7 +473,7 @@ export default ({
                 </span>
               }
               <Tooltip
-                placement="bottom"
+                placement="top"
                 content={
                   moment(
                     xcall_timestamp * 1000
