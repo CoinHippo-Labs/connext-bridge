@@ -1913,24 +1913,28 @@ export default () => {
               </div>
               <Options
                 disabled={disabled}
-                applied={!_.isEqual(
-                  Object.fromEntries(
-                    Object.entries(options)
-                      .filter(([k, v]) =>
-                        ![
-                          'slippage',
-                        ].includes(k)
-                      )
-                  ),
-                  Object.fromEntries(
-                    Object.entries(DEFAULT_OPTIONS)
-                      .filter(([k, v]) =>
-                        ![
-                          'slippage',
-                        ].includes(k)
-                      )
-                  ),
-                )}
+                applied={
+                  !_.isEqual(
+                    Object.fromEntries(
+                      Object.entries(options)
+                        .filter(([k, v]) =>
+                          ![
+                            'slippage',
+                            'forceSlow',
+                          ].includes(k)
+                        )
+                    ),
+                    Object.fromEntries(
+                      Object.entries(DEFAULT_OPTIONS)
+                        .filter(([k, v]) =>
+                          ![
+                            'slippage',
+                            'forceSlow',
+                          ].includes(k)
+                        )
+                    ),
+                  )
+                }
                 initialData={options}
                 onChange={o => setOptions(o)}
               />
@@ -2924,7 +2928,7 @@ export default () => {
                       amount <= 0
                     ) ?
                       <Alert
-                        color="bg-red-400 dark:bg-red-500 text-white text-base"
+                        color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
                         icon={
                           <BiMessageError
                             className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
@@ -3030,7 +3034,7 @@ export default () => {
                                 className="rounded-xl p-4.5"
                               >
                                 <div className="flex items-center justify-between space-x-2">
-                                  <span className="break-all">
+                                  <span className="break-all text-sm font-medium">
                                     {ellipse(
                                       (message || '')
                                         .substring(

@@ -1754,7 +1754,7 @@ export default ({
                     return (
                       <Alert
                         key={i}
-                        color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                        color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
                         icon={status === 'failed' ?
                           <BiMessageError
                             className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
@@ -1780,7 +1780,7 @@ export default ({
                         className="rounded-xl p-3"
                       >
                         <div className="flex items-center justify-between space-x-2">
-                          <span className={`leading-5 ${status === 'failed' ? 'break-all text-xs' : 'break-word'}`}>
+                          <span className={`leading-5 ${status === 'failed' ? 'break-all text-xs' : 'break-word'} text-sm font-medium`}>
                             {ellipse(
                               (message || '')
                                 .substring(
@@ -2146,7 +2146,7 @@ export default ({
                     return (
                       <Alert
                         key={i}
-                        color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                        color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
                         icon={status === 'failed' ?
                           <BiMessageError
                             className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
@@ -2172,7 +2172,7 @@ export default ({
                         className="rounded-xl p-3"
                       >
                         <div className="flex items-center justify-between space-x-2">
-                          <span className={`leading-5 ${status === 'failed' ? 'break-all text-xs' : 'break-word'}`}>
+                          <span className={`leading-5 ${status === 'failed' ? 'break-all text-xs' : 'break-word'} text-sm font-medium`}>
                             {ellipse(
                               (message || '')
                                 .substring(
