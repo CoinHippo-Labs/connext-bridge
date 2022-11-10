@@ -276,7 +276,8 @@ export default () => {
               a?.id === asset &&
               (a.contracts || [])
                 .findIndex(c =>
-                  c?.chain_id === chains_data
+                  c?.chain_id ===
+                  chains_data
                     .find(_c =>
                       _c?.id === source_chain
                     )?.chain_id
@@ -303,7 +304,8 @@ export default () => {
               a?.id === asset &&
               (a.contracts || [])
                 .findIndex(c =>
-                  c?.chain_id === chains_data
+                  c?.chain_id ===
+                  chains_data
                     .find(_c =>
                       _c?.id === destination_chain
                     )?.chain_id
