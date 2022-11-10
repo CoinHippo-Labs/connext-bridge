@@ -105,7 +105,7 @@ export default ({
         <RiSettings3Line
           size={20}
         />
-        <span className="font-medium">
+        <span className="text-sm font-medium">
           Settings
         </span>
       </div>}

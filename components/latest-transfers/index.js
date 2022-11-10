@@ -137,9 +137,9 @@ export default ({
       <div className="lg:max-w-xs lg:ml-auto">
         <button
           onClick={() => setCollapse(!collapse)}
-          className={`w-full flex items-center justify-center ${collapse ? 'text-slate-300 hover:text-slate-800 dark:text-slate-700 dark:hover:text-slate-200 font-normal' : 'font-medium'} space-x-1 mb-3`}
+          className={`w-full flex items-center justify-center ${collapse ? 'text-slate-300 hover:text-slate-800 dark:text-slate-700 dark:hover:text-slate-200 font-medium' : 'font-semibold'} space-x-1 mb-3`}
         >
-          <span className="uppercase tracking-wider">
+          <span className="uppercase text-sm">
             Latest Transfers
           </span>
           {collapse ?

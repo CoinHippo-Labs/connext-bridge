@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import { Puff } from 'react-loader-spinner'
+import { BiChevronDown } from 'react-icons/bi'
 
 import Image from '../../image'
 import Search from './search'
@@ -69,7 +70,7 @@ export default ({
       disabled={disabled}
       onClick={open => setHidden(!open)}
       buttonTitle={chains_data ?
-        <div className="w-32 sm:w-48 min-w-max bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl flex items-center justify-center space-x-1 sm:space-x-1.5 py-1.5 sm:py-2 px-2 sm:px-3">
+        <div className="w-32 sm:w-48 min-w-max h-8 sm:h-12 bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg flex items-center justify-center py-1.5 sm:py-2 px-2 sm:px-3">
           {
             image &&
             (
@@ -95,7 +96,7 @@ export default ({
               </>
             )
           }
-          <span className="whitespace-nowrap text-xs sm:text-base font-semibold">
+          <span className="whitespace-nowrap sm:text-lg font-semibold ml-2">
             {
               chainName(chain_data) ||
               (origin ?
@@ -104,6 +105,10 @@ export default ({
               )
             }
           </span>
+          <BiChevronDown
+            size={18}
+            className="text-slate-400 dark:text-slate-200 ml-1.5 -mr-1"
+          />
         </div> :
         <Puff
           color={loader_color(theme)}

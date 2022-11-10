@@ -153,7 +153,7 @@ export default ({
                 </>
               )
             }
-            <span className={`whitespace-nowrap text-xs sm:text-lg font-semibold ${!image ? 'sm:ml-3' : ''}`}>
+            <span className={`whitespace-nowrap sm:text-lg font-semibold ${!image ? 'sm:ml-3' : ''}`}>
               {symbol}
             </span>
             {

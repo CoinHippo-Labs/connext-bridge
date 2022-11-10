@@ -1890,7 +1890,7 @@ export default () => {
           <div className="w-full max-w-lg space-y-3">
             <div className="flex items-center justify-between space-x-2 pb-1">
               <div className="space-y-1 ml-1 sm:ml-2">
-                <h1 className="tracking-normal text-base sm:text-xl font-semibold">
+                <h1 className="text-lg font-semibold">
                   Bridge
                 </h1>
                 {
@@ -1949,9 +1949,9 @@ export default () => {
             >
               <div className="space-y-2">
                 <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
-                  <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start">
+                  <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start space-y-0.5 sm:space-y-0">
                     <div className="w-32 sm:w-48 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
-                      <span className="tracking-normal text-slate-600 dark:text-slate-200 sm:text-base font-medium text-left">
+                      <span className="tracking-normal text-slate-600 dark:text-slate-200 font-medium text-left">
                         From
                       </span>
                       {/*<GasPrice
@@ -1986,30 +1986,32 @@ export default () => {
                       origin="from"
                     />
                   </div>
-                  <div className="flex items-center justify-center mt-5 sm:mt-6">
+                  <div className="flex items-center justify-center mt-5 sm:mt-5">
                     <button
                       disabled={disabled}
                       onClick={() => {
-                        setBridge(
-                          {
-                            ...bridge,
-                            source_chain: destination_chain,
-                            destination_chain: source_chain,
-                            amount: null,
-                          }
-                        )
+                        if (!disabled) {
+                          setBridge(
+                            {
+                              ...bridge,
+                              source_chain: destination_chain,
+                              destination_chain: source_chain,
+                              amount: null,
+                            }
+                          )
 
-                        setButtonDirection(
-                          buttonDirection * -1
-                        )
+                          setButtonDirection(
+                            buttonDirection * -1
+                          )
 
-                        getBalances(source_chain)
-                        getBalances(destination_chain)
+                          getBalances(source_chain)
+                          getBalances(destination_chain)
+                        }
                       }}
                       className={/*`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out */`bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full sm:border dark:border-slate-800 flex items-center justify-center p-1.5 sm:p-2.5`}
                     >
                       <HiSwitchHorizontal
-                        size={24}
+                        size={18}
                         style={
                           buttonDirection < 0 ?
                             {
@@ -2036,9 +2038,9 @@ export default () => {
                       </div>*/}
                     </button>
                   </div>
-                  <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end">
+                  <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end space-y-0.5 sm:space-y-0">
                     <div className="w-32 sm:w-48 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
-                      <span className="tracking-normal text-slate-600 dark:text-slate-200 sm:text-base font-medium text-left">
+                      <span className="tracking-normal text-slate-600 dark:text-slate-200 font-medium text-left">
                         To
                       </span>
                       {/*<GasPrice
@@ -2075,7 +2077,7 @@ export default () => {
                   </div>
                 </div>
                 {/*<div className="space-y-2">
-                  <div className="tracking-normal text-slate-600 dark:text-slate-200 sm:text-base font-medium">
+                  <div className="tracking-normal text-slate-600 dark:text-slate-200 font-medium">
                     Asset
                   </div>
                   <SelectBridgeAsset
@@ -2103,7 +2105,7 @@ export default () => {
                   />
                 </div>*/}
                 <div className="space-y-2">
-                  <div className="tracking-normal text-slate-600 dark:text-slate-200 sm:text-base font-medium">
+                  <div className="tracking-normal text-slate-600 dark:text-slate-200 font-medium">
                     Amount
                   </div>
                   <div className="bg-slate-100 dark:bg-gray-800 dark:bg-opacity-50 rounded-lg space-y-0.5 py-3.5 px-3">
@@ -2247,7 +2249,7 @@ export default () => {
                                     }
                                   )
                                 }}
-                                className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} font-medium`}
+                                className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-sm font-medium`}
                               >
                                 Select Max
                               </button>
@@ -2264,14 +2266,14 @@ export default () => {
                 destination_chain &&
                 asset &&
                 !checkSupport() ?
-                  <div className="tracking-normal text-slate-400 dark:text-slate-200 text-lg text-center">
+                  <div className="tracking-normal text-slate-400 dark:text-slate-200 font-medium text-center">
                     Route not supported
                   </div> :
                   <>
                     {/*<div className="grid grid-cols-5 sm:grid-cols-5 gap-6">
                       <div className="col-span-2 sm:col-span-2 space-y-1">
                         <div className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
-                          <span className="tracking-normal text-slate-600 dark:text-slate-200 text-sm sm:text-base sm:font-medium">
+                          <span className="tracking-normal text-slate-600 dark:text-slate-200 font-medium">
                             Amount
                           </span>
                           {
@@ -2289,7 +2291,7 @@ export default () => {
                                     }
                                   )
                                 }}
-                                className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
+                                className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-sm font-semibold py-0.5 px-2 sm:px-2.5"
                               >
                                 Max
                               </button> ||
@@ -2850,7 +2852,7 @@ export default () => {
                                         }
                                         className="z-50 bg-black text-white text-xs"
                                       >
-                                        <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
+                                        <span className="tracking-normal whitespace-nowrap text-sm font-semibold space-x-1.5">
                                           {
                                             amount > liquidity_amount ||
                                             forceSlow ?
@@ -2891,7 +2893,7 @@ export default () => {
                   wrong_chain ?
                     <Wallet
                       connectChainId={source_chain_data?.chain_id}
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                     >
                       <span className="mr-1.5 sm:mr-2">
                         {is_walletconnect ?
@@ -2905,8 +2907,8 @@ export default () => {
                           <Image
                             src={source_chain_data.image}
                             alt=""
-                            width={32}
-                            height={32}
+                            width={28}
+                            height={28}
                             className="rounded-full"
                           />
                         )
@@ -2951,7 +2953,7 @@ export default () => {
                             setSlippageEditing(false)
                             call()
                           }}
-                          className={`w-full ${disabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'} rounded-xl flex items-center ${calling && !approving && callProcessing ? 'justify-center' : 'justify-center sm:text-lg'} text-white text-base py-3 sm:py-4 px-2 sm:px-3`}
+                          className={`w-full ${disabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'} rounded-xl flex items-center ${calling && !approving && callProcessing ? 'justify-center' : 'justify-center'} text-white text-lg py-3 sm:py-4 px-2 sm:px-3`}
                         >
                           <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
                             {
@@ -3098,7 +3100,7 @@ export default () => {
                     <Wallet
                       connectChainId={source_chain_data?.chain_id}
                       buttonConnectTitle="Connect Wallet"
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-lg font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                     >
                       <span>
                         Connect Wallet

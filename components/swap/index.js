@@ -1723,14 +1723,14 @@ export default () => {
             <div className="flex items-center justify-between space-x-2 pb-1">
               <div className="space-y-1 ml-1 sm:ml-2">
                 <div className="flex items-center space-x-1.5">
-                  <h1 className="tracking-normal text-base sm:text-xl font-semibold">
+                  <h1 className="text-lg font-semibold">
                     Swap
                   </h1>
                   {
                     name &&
                     (
                       <div className="flex items-center space-x-1.5">
-                        <span className="text-base sm:text-xl font-semibold">
+                        <span className="text-lg font-semibold">
                           on
                         </span>
                         {
@@ -1820,7 +1820,7 @@ export default () => {
               <div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between space-x-2">
-                    <span className="text-slate-600 dark:text-slate-200 sm:text-base font-medium">
+                    <span className="text-slate-600 dark:text-slate-200 text-sm font-medium">
                       Pay with
                     </span>
                     <GasPrice
@@ -2036,24 +2036,26 @@ export default () => {
                       !pair
                     }
                     onClick={() => {
-                      setSwap(
-                        {
-                          ...swap,
-                          origin:
-                            origin === 'x' ?
-                              'y' :
-                              'x',
-                          amount: null,
-                        }
-                      )
+                      if (!disabled) {
+                        setSwap(
+                          {
+                            ...swap,
+                            origin:
+                              origin === 'x' ?
+                                'y' :
+                                'x',
+                            amount: null,
+                          }
+                        )
 
-                      setSwapAmount(null)
+                        setSwapAmount(null)
 
-                      setButtonDirection(
-                        buttonDirection * -1
-                      )
+                        setButtonDirection(
+                          buttonDirection * -1
+                        )
 
-                      getBalances(chain)
+                        getBalances(chain)
+                      }
                     }}
                     className={`bg-gray-200 hover:bg-gray-300 dark:bg-gray-900 dark:hover:bg-gray-800 ${disabled ? 'cursor-not-allowed' : ''} rounded-full sm:border dark:border-slate-800 flex items-center justify-center p-1.5 sm:p-4`}
                   >
@@ -2070,7 +2072,7 @@ export default () => {
                   </button>
                 </div>
                 <div className="space-y-2 -mt-0.5 sm:mt-1.5">
-                  <span className="text-slate-600 dark:text-slate-200 sm:text-base font-medium">
+                  <span className="text-slate-600 dark:text-slate-200 text-sm font-medium">
                     Receive
                   </span>
                   <div className="bg-slate-100 dark:bg-gray-800 dark:bg-opacity-50 rounded-lg space-y-0.5 py-3.5 px-3">
@@ -2287,7 +2289,7 @@ export default () => {
                                 )
                               }
                             }}
-                            className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} font-medium`}
+                            className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-sm font-medium`}
                           >
                             Select Max
                           </button>*/}
@@ -2333,7 +2335,7 @@ export default () => {
                   wrong_chain ?
                     <Wallet
                       connectChainId={chain_id}
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                     >
                       <span className="mr-1.5 sm:mr-2">
                         {is_walletconnect ?
@@ -2347,8 +2349,8 @@ export default () => {
                           <Image
                             src={image}
                             alt=""
-                            width={32}
-                            height={32}
+                            width={28}
+                            height={28}
                             className="rounded-full"
                           />
                         )
@@ -2400,7 +2402,7 @@ export default () => {
                             !valid_amount
                           }
                           onClick={() => call()}
-                          className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-gray-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
+                          className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-gray-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
                         >
                           <span className="flex items-center justify-center space-x-1.5">
                             {
@@ -2589,7 +2591,7 @@ export default () => {
                     <Wallet
                       connectChainId={chain_id}
                       buttonConnectTitle="Connect Wallet"
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-lg font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                     >
                       <span>
                         Connect Wallet

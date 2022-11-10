@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import { Puff } from 'react-loader-spinner'
 import { IoRadioButtonOn } from 'react-icons/io5'
-import { BiCode } from 'react-icons/bi'
+import { BiCode, BiChevronDown } from 'react-icons/bi'
 
 import Balance from '../../balance'
 import Image from '../../image'
@@ -151,12 +151,16 @@ export default ({
                 </div>
               )
             }
-            <span className="tracking-wider text-sm sm:text-lg font-medium">
+            <span className="whitespace-nowrap sm:text-lg font-semibold">
               {
                 name ||
                 'Select token'
               }
             </span>
+            <BiChevronDown
+              size={18}
+              className="text-slate-400 dark:text-slate-200"
+            />
           </div>
           {/*<div className="space-y-1 mx-auto">
             {

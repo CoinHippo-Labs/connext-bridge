@@ -13,6 +13,7 @@ import Image from '../image'
 import EnsProfile from '../ens-profile'
 import AddToken from '../add-token'
 import Copy from '../copy'
+import TimeSpent from '../time-spent'
 import { chainName } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
 
@@ -77,6 +78,7 @@ export default ({
     execute_transaction_hash,
     to,
     xcall_timestamp,
+    execute_timestamp,
   } = { ...data }
   let {
     force_slow,
@@ -219,23 +221,7 @@ export default ({
   return data &&
     (
       <div className={`bg-zinc-50 dark:bg-zinc-900 max-w-xs sm:max-w-none rounded-xl ${pending ? 'border-0 border-blue-500' : 'border-0 border-green-500'} mx-auto py-5 px-4`}>
-        <div className="flex items-center justify-end -mt-2">
-          <a
-            href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/tx/${transfer_id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center text-blue-500 dark:text-blue-500 space-x-0.5 -mr-2"
-          >
-            <span>
-              See more on explorer
-            </span>
-            <TiArrowRight
-              size={20}
-              className="transform -rotate-45 mt-0.5"
-            />
-          </a>
-        </div>
-        <div className="flex items-center justify-between mt-2.5">
+        <div className="flex items-center justify-between">
           <div className="flex items-center space-x-1.5">
             {
               source_chain_data?.image &&
@@ -296,8 +282,8 @@ export default ({
             </span>
           </div>
         </div>
-        <div className="flex items-start justify-between space-x-2 my-2.5">
-          <div className="flex flex-col space-y-1">
+        <div className="flex items-start justify-between space-x-2 my-2">
+          <div className="flex flex-col space-y-0.5">
             {
               typeof source_amount === 'number' &&
               (
@@ -341,23 +327,27 @@ export default ({
           </div>
           <div className="flex flex-col items-center">
             {
-              !pending &&
-              (
+              pending ?
+                <TimeSpent
+                  title="Time spent"
+                  from_time={xcall_timestamp}
+                  to_time={execute_timestamp}
+                  className={`${pending ? 'text-blue-500 dark:text-blue-300' : 'text-yellow-600 dark:text-yellow-400'} font-semibold`}
+                /> :
                 <a
                   href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', execute_transaction_hash)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <HiOutlineCheckCircle
-                    size={36}
+                    size={32}
                     className="text-green-500 dark:text-green-400"
                   />
                 </a>
-              )
             }
           </div>
           <div
-            className="flex flex-col items-end space-y-1"
+            className="flex flex-col items-end space-y-0.5"
             style={{ minWidth: '4rem' }}
           >
             {
@@ -441,37 +431,85 @@ export default ({
         {
           xcall_timestamp &&
           (
-            <div className="flex items-center justify-between">
-              <span>
-                {
-                  force_slow &&
-                  (
-                    <div className={`rounded-lg border ${status === XTransferStatus.CompletedSlow ? 'border-green-500 dark:border-green-500 text-green-400 dark:text-green-400' : 'border-blue-500 dark:border-blue-500 text-blue-400 dark:text-blue-400'} flex items-center space-x-1 py-0.5 px-1.5`}>
-                      <span className="uppercase text-xs font-bold">
-                        Slow
-                      </span>
-                    </div>
-                  )
-                }
-              </span>
+            <div className="flex items-center justify-between mt-0.5">
+              {pending ?
+                <div className="flex items-center space-x-1">
+                  <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
+                    Est. time:
+                  </div>
+                  <Tooltip
+                    placement="top"
+                    content={
+                      force_slow ?
+                        `Unable to use Connext router network. Using ${source_chain_data?.name} messaging bridge.` :
+                        'Fast transfer enabled by Connext router network.'
+                    }
+                    className="z-50 bg-black text-white text-xs"
+                  >
+                    <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
+                      {
+                        force_slow ?
+                          <span className="text-yellow-500 dark:text-yellow-400">
+                            90 mins
+                          </span> :
+                          <span className="text-green-500 dark:text-green-500">
+                            2 mins
+                          </span>
+                      }
+                    </span>
+                  </Tooltip>
+                </div> :
+                <span>
+                  {
+                    force_slow &&
+                    (
+                      <div className={`rounded-lg border ${status === XTransferStatus.CompletedSlow ? 'border-green-500 dark:border-green-500 text-green-400 dark:text-green-400' : 'border-blue-500 dark:border-blue-500 text-blue-400 dark:text-blue-400'} flex items-center space-x-1 py-0.5 px-1.5`}>
+                        <span className="uppercase text-xs font-bold">
+                          Slow
+                        </span>
+                      </div>
+                    )
+                  }
+                </span>
+              }
               <Tooltip
                 placement="bottom"
                 content={
-                  moment(xcall_timestamp * 1000)
-                    .format('MMM D, YYYY h:mm:ss A')
+                  moment(
+                    xcall_timestamp * 1000
+                  )
+                  .format('MMM D, YYYY h:mm:ss A')
                 }
                 className="z-50 bg-black text-white text-xs"
               >
-                <span className="text-slate-400 dark:text-slate-200 text-xs">
+                <span className="text-slate-400 dark:text-slate-500 text-xs">
                   {
-                    moment(xcall_timestamp * 1000)
-                      .fromNow()
+                    moment(
+                      xcall_timestamp * 1000
+                    )
+                    .fromNow()
                   }
                 </span>
               </Tooltip>
             </div>
           )
         }
+        <div className="flex items-center justify-end mt-1 -mb-2">
+          <a
+            href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/tx/${transfer_id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center text-blue-500 dark:text-blue-500 text-xs font-medium space-x-0 -mr-1"
+          >
+            <span>
+              See more on explorer
+            </span>
+            <TiArrowRight
+              size={16}
+              className="transform -rotate-45 mt-0.5"
+            />
+          </a>
+        </div>
       </div>
     )
 }

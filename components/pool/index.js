@@ -648,7 +648,7 @@ export default () => {
                 size={36}
               />
             </Link>*/}
-            <h1 className="uppercase tracking-wider text-2xl font-medium">
+            <h1 className="uppercase text-lg font-semibold">
               Manage Pool
             </h1>
           </div>

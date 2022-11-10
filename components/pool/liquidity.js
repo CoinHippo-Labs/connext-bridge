@@ -1412,11 +1412,11 @@ export default ({
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <span className="text-base font-semibold">
+                          <span className="text-sm font-semibold">
                             {x_asset_data.symbol}
                           </span>
                         </a> :
-                        <div className="text-base font-semibold">
+                        <div className="text-sm font-semibold">
                           {x_asset_data.symbol}
                         </div>
                       }
@@ -1437,7 +1437,7 @@ export default ({
                             >
                               <div>
                                 <HiSwitchHorizontal
-                                  size={18}
+                                  size={16}
                                 />
                               </div>
                             </Tooltip>
@@ -1548,7 +1548,7 @@ export default ({
                 }
               </div>
             </div>
-            <div className="transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out w-full flex items-center justify-center">
+            <div className="w-full flex items-center justify-center">
               <BiPlus
                 size={24}
               />
@@ -1565,11 +1565,11 @@ export default ({
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <span className="text-base font-semibold">
+                          <span className="text-sm font-semibold">
                             {y_asset_data.symbol}
                           </span>
                         </a> :
-                        <div className="text-base font-semibold">
+                        <div className="text-sm font-semibold">
                           {y_asset_data.symbol}
                         </div>
                       }
@@ -1590,7 +1590,7 @@ export default ({
                             >
                               <div>
                                 <HiSwitchHorizontal
-                                  size={18}
+                                  size={16}
                                 />
                               </div>
                             </Tooltip>
@@ -1683,7 +1683,7 @@ export default ({
                       setAmountY(y_balance_amount)
                       autoSetX(y_balance_amount)
                     }}
-                    className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-gray-200 dark:bg-slate-900 rounded-lg text-blue-400 dark:text-slate-200 text-base font-medium py-0.5 px-2.5`}
+                    className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-gray-200 dark:bg-slate-900 rounded-lg text-blue-400 dark:text-slate-200 text-sm font-medium py-0.5 px-2.5`}
                   >
                     Max
                   </div>*/}
@@ -1715,7 +1715,7 @@ export default ({
               wrong_chain ?
                 <Wallet
                   connectChainId={chain_id}
-                  className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
+                  className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
                 >
                   <span className="mr-1.5 sm:mr-2">
                     {is_walletconnect ?
@@ -1850,7 +1850,7 @@ export default ({
                         !valid_amount
                       }
                       onClick={() => call(pool_data)}
-                      className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
+                      className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 px-2 sm:px-3`}
                     >
                       <span className="flex items-center justify-center space-x-1.5">
                         {
@@ -1885,7 +1885,7 @@ export default ({
                     <Wallet
                       connectChainId={chain_id}
                       buttonConnectTitle="Connect Wallet"
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center py-3 px-2 sm:px-3"
+                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-lg font-medium text-center py-3 px-2 sm:px-3"
                     >
                       <span>
                         Connect Wallet
@@ -2110,7 +2110,7 @@ export default ({
               wrong_chain ?
                 <Wallet
                   connectChainId={chain_id}
-                  className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-base sm:text-lg space-x-1.5 sm:space-x-2 py-3  px-2 sm:px-3"
+                  className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3  px-2 sm:px-3"
                 >
                   <span className="mr-1.5 sm:mr-2">
                     {is_walletconnect ?
@@ -2241,7 +2241,7 @@ export default ({
                         !valid_amount
                       }
                       onClick={() => call(pool_data)}
-                      className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-gray-200 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-base sm:text-lg text-center py-3 px-2 sm:px-3`}
+                      className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-gray-200 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 px-2 sm:px-3`}
                     >
                       <span className="flex items-center justify-center space-x-1.5">
                         {
@@ -2276,7 +2276,7 @@ export default ({
                     <Wallet
                       connectChainId={chain_id}
                       buttonConnectTitle="Connect Wallet"
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-base sm:text-lg text-center py-3 px-2 sm:px-3"
+                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-lg font-medium text-center py-3 px-2 sm:px-3"
                     >
                       <span>
                         Connect Wallet
