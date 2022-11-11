@@ -494,22 +494,27 @@ export default ({
             </div>
           )
         }
-        <div className="flex items-center justify-end mt-1 -mb-2">
-          <a
-            href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/tx/${transfer_id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center text-blue-500 dark:text-blue-500 text-xs font-medium space-x-0 -mr-1"
-          >
-            <span>
-              See more on explorer
-            </span>
-            <TiArrowRight
-              size={16}
-              className="transform -rotate-45 mt-0.5"
-            />
-          </a>
-        </div>
+        {
+          transfer_id &&
+          (
+            <div className="flex items-center justify-end mt-1 -mb-2">
+              <a
+                href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/tx/${transfer_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center text-blue-500 dark:text-blue-500 text-xs font-medium space-x-0 -mr-1"
+              >
+                <span>
+                  See more on explorer
+                </span>
+                <TiArrowRight
+                  size={16}
+                  className="transform -rotate-45 mt-0.5"
+                />
+              </a>
+            </div>
+          )
+        }
       </div>
     )
 }
