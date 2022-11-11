@@ -1437,12 +1437,9 @@ export default () => {
           .toString(),
         slippage:
           (
-            (
-              receiveLocal ?
-                0 :
-                typeof slippage === 'number' ?
-                  slippage :
-                  DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE
+            (typeof slippage === 'number' ?
+              slippage :
+              DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE
             ) *
             100
           )
@@ -2558,7 +2555,10 @@ export default () => {
                                   (
                                     <div className="space-y-2.5">
                                       {
-                                        !receiveLocal &&
+                                        (
+                                          true ||
+                                          !receiveLocal
+                                        ) &&
                                         (
                                           <div className="flex items-start justify-between space-x-1">
                                             <Tooltip
