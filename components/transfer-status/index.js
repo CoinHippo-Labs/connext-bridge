@@ -75,9 +75,10 @@ export default ({
     destination_transacting_amount,
     destination_local_asset,
     destination_local_amount,
-    execute_transaction_hash,
     to,
     xcall_timestamp,
+    reconcile_transaction_hash,
+    execute_transaction_hash,
     execute_timestamp,
   } = { ...data }
   let {
@@ -88,7 +89,11 @@ export default ({
     force_slow ||
     (status || '')
       .toLowerCase()
-      .includes('slow')
+      .includes('slow') ||
+    !!(
+      reconcile_transaction_hash &&
+      !execute_transaction_hash
+    )
 
   const source_chain_data = (chains_data || [])
     .find(c =>
