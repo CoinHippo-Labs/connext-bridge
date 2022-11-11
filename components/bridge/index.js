@@ -2687,7 +2687,7 @@ export default () => {
                                                       if (disabled) {
                                                         setSlippageEditing(true)
                                                       }
-                                                    }
+                                                    }}
                                                     className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
                                                   >
                                                     <BiEditAlt
