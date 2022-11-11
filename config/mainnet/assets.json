@@ -14,12 +14,14 @@
       {
         "contract_address": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
         "chain_id": 137,
-        "decimals": 6
+        "decimals": 6,
+        "is_pool": true
       },
       {
         "contract_address": "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
         "chain_id": 10,
-        "decimals": 6
+        "decimals": 6,
+        "is_pool": true
       }
     ],
     "color": "#2675c8",
@@ -43,14 +45,16 @@
         "chain_id": 137,
         "decimals": 18,
         "symbol": "WETH",
-        "image": "/logos/assets/weth.png"
+        "image": "/logos/assets/weth.png",
+        "is_pool": true
       },
       {
         "contract_address": "0x4200000000000000000000000000000000000006",
         "chain_id": 10,
         "decimals": 18,
         "symbol": "WETH",
-        "image": "/logos/assets/weth.png"
+        "image": "/logos/assets/weth.png",
+        "is_pool": true
       }
     ],
     "color": "#636890",
