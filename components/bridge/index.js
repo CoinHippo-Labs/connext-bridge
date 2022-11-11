@@ -1437,11 +1437,12 @@ export default () => {
           .toString(),
         slippage:
           (
-            !receiveLocal &&
             (
-              typeof slippage === 'number' ?
-                slippage :
-                DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE
+              receiveLocal ?
+                0 :
+                typeof slippage === 'number' ?
+                  slippage :
+                  DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE
             ) *
             100
           )
