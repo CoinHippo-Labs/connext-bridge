@@ -19,6 +19,20 @@ export default [
     ),
   },
   {
+    id: 'swap',
+    title: 'Swap',
+    path: '/swap',
+    others_paths: [
+      '/swap/[swap]',
+    ],
+    icon: (
+      <HiSwitchHorizontal
+        size={20}
+        className="stroke-current"
+      />
+    ),
+  },
+  {
     id: 'pools',
     title: 'Pools',
     // path: '/pools',
@@ -29,20 +43,6 @@ export default [
     ],
     icon: (
       <RiCopperCoinLine
-        size={20}
-        className="stroke-current"
-      />
-    ),
-  },
-  {
-    id: 'swap',
-    title: 'Swap',
-    path: '/swap',
-    others_paths: [
-      '/swap/[swap]',
-    ],
-    icon: (
-      <HiSwitchHorizontal
         size={20}
         className="stroke-current"
       />

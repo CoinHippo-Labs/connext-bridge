@@ -36,10 +36,10 @@ export default ({
 
   return (
     <>
-      <div className="dropdown-title">
+      {/*<div className="dropdown-title">
         Switch Chain
-      </div>
-      <div className="flex flex-wrap pb-1">
+      </div>*/}
+      <div className="flex flex-wrap pb-0">
         {(chains_data || [])
           .filter(c =>
             c &&
