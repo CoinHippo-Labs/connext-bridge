@@ -217,6 +217,7 @@ export default () => {
       }
     }
     else if (
+     !path.includes('[swap]') &&
       (chains_data || [])
         .filter(c => !c?.no_pool)
         .length > 0
@@ -510,7 +511,14 @@ export default () => {
           setSwapAmount(null)
         }
 
+        const chain_changed =
+          !equals_ignore_case(
+            chain,
+            pair?.chain_data?.id,
+          )
+
         if (
+          chain_changed ||
           !pair?.updated_at ||
           moment()
             .diff(
@@ -521,7 +529,8 @@ export default () => {
           try {
             if (
               pair === undefined ||
-              pair?.error
+              pair?.error ||
+              chain_changed
             ) {
               setPair(null)
             }
