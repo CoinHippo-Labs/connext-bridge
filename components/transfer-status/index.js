@@ -106,8 +106,8 @@ export default ({
         .findIndex(c =>
           c?.chain_id === source_chain_data?.chain_id &&
           [
-            origin_transacting_asset,
             origin_bridged_asset,
+            origin_transacting_asset,
           ].findIndex(a =>
             equals_ignore_case(
               c?.contract_address,
@@ -132,8 +132,8 @@ export default ({
   const source_amount =
     _.head(
       [
-        origin_transacting_amount,
         origin_bridged_amount,
+        origin_transacting_amount,
       ]
       .map(a =>
         [

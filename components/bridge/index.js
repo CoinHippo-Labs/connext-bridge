@@ -418,7 +418,7 @@ export default () => {
     setApproveResponse(null)
     setXcall(null)
     setXcallResponse(null)
-  }, [address, bridge])
+  }, [address, bridge, sdk])
 
   // update balances
   useEffect(() => {
@@ -1225,7 +1225,7 @@ export default () => {
                     ROUTER_FEE_PERCENT /
                     100
                   )
-                  .toFixed(12)
+                  .toFixed(source_contract_data.decimals)
                 )
 
             const params = {
@@ -2482,17 +2482,28 @@ export default () => {
                     </div>*/}
                     {
                       (
-                        typeof estimate_received === 'number' &&
+                        (
+                          true ||
+                          typeof estimate_received === 'number'
+                        ) &&
                         (
                           checkSupport() &&
-                          web3_provider &&
-                          amount > 0
+                          (
+                            true ||
+                            (
+                              web3_provider &&
+                              amount > 0
+                            )
+                          )
                         )
                       ) &&
                       (
                         <div className="bg-slate-100 dark:bg-slate-800 rounded-lg py-3.5 px-3">
                           {
-                            typeof estimate_received === 'number' &&
+                            (
+                              true ||
+                              typeof estimate_received === 'number'
+                            ) &&
                             (
                               <button
                                 onClick={() => setCollapse(!collapse)}
@@ -2509,12 +2520,13 @@ export default () => {
                                   <div className="flex items-center justify-end sm:justify-end space-x-0.5 sm:space-x-1 -mr-0.5">
                                     <div className="flex items-center space-x-2">
                                       <span className="font-semibold">
-                                        {
+                                        {typeof estimate_received === 'number' ?
                                           number_format(
                                             estimate_received,
                                             '0,0.00000000',
                                             true,
-                                          )
+                                          ) :
+                                          '-'
                                         }
                                       </span>
                                       <span className="font-semibold">
@@ -2538,12 +2550,18 @@ export default () => {
                           }
                           {
                             checkSupport() &&
-                            web3_provider &&
-                            amount > 0 &&
                             (
-                              <div className="space-y-2.5 mt-2">
+                              true ||
+                              (
+                                web3_provider &&
+                                amount > 0
+                              )
+                            ) &&
+                            (
+                              <div className={`space-y-2.5 ${typeof estimate_received === 'number' || !collapse > 0 ? 'mt-2' : 'mt-0'}`}>
                                 {
                                   (
+                                    true ||
                                     feeEstimating ||
                                     fee
                                   ) &&
@@ -2684,7 +2702,7 @@ export default () => {
                                                   <button
                                                     disabled={disabled}
                                                     onClick={() => {
-                                                      if (disabled) {
+                                                      if (!disabled) {
                                                         setSlippageEditing(true)
                                                       }
                                                     }}
@@ -2894,6 +2912,7 @@ export default () => {
                   xcall ||
                   source_balance
                 ) &&
+                web3_provider &&
                 (
                   typeof amount === 'number' ||
                   (
@@ -2985,7 +3004,7 @@ export default () => {
                                     'Approving' :
                                     'Please Approve' :
                                   callProcessing ?
-                                    'Transfer in progress...' :
+                                    'Transfer in progress ...' :
                                     typeof approving === 'boolean' ?
                                       'Please Confirm' :
                                       'Checking Approval' :

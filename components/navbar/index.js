@@ -440,9 +440,10 @@ export default () => {
         dispatch(
           {
             type: SDK,
-            value: await create(
-              sdkConfig,
-            ),
+            value:
+              await create(
+                sdkConfig,
+              ),
           }
         )
       }

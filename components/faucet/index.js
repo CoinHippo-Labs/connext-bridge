@@ -650,7 +650,7 @@ export default ({
                     {chain_data?.chain_id !== chain_id ?
                       <Wallet
                         connectChainId={chain_data?.chain_id}
-                        className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg flex items-center text-white text-lg font-medium space-x-1.5 py-2 px-3`}
+                        className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg flex items-center text-white text-sm font-medium space-x-1.5 py-2 px-3`}
                       >
                         <span className="mr-1 sm:mr-1.5">
                           {is_walletconnect ?
@@ -664,8 +664,8 @@ export default ({
                             <Image
                               src={image}
                               alt=""
-                              width={28}
-                              height={28}
+                              width={24}
+                              height={24}
                               className="rounded-full"
                             />
                           )
