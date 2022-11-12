@@ -344,7 +344,7 @@ export default ({
           </div>
         </div>
         <div className="flex items-start justify-between space-x-2 my-4">
-          <div className="flex flex-col space-y-1">
+          <div className="flex flex-col space-y-1.5">
             {
               typeof source_amount === 'number' &&
               (
@@ -357,7 +357,7 @@ export default ({
                 </span>
               )
             }
-            <div className="flex items-center justify-center space-x-1">
+            <div className="flex items-center justify-start space-x-1">
               {
                 source_asset_image &&
                 (
@@ -409,7 +409,7 @@ export default ({
             }
           </div>
           <div
-            className="flex flex-col items-end space-y-1"
+            className="flex flex-col items-end space-y-1.5"
             style={{ minWidth: '4rem' }}
           >
             {

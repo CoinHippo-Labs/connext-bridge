@@ -14,6 +14,7 @@ export default ({
   onSelect,
   chain,
   is_pool = false,
+  is_bridge = false,
   data,
 }) => {
   const {
@@ -166,7 +167,7 @@ export default ({
           !inputSearch ||
           a
         )
-        .map(a => {
+        .flatMap(a => {
           const {
             contracts,
           } = { ...a }
@@ -176,53 +177,88 @@ export default ({
               c?.chain_id === chain_id
             )
 
-          return {
-            ...a,
-            scores:
-              _.concat(
-                [
-                  'symbol',
-                  'name',
-                  'id',
-                ]
-                .map(f =>
-                  (a[f] || '')
-                    .toLowerCase()
-                    .includes(
-                      inputSearch
-                        .toLowerCase()
-                    ) ?
-                    inputSearch.length > 1 ?
-                      (
-                        inputSearch.length /
-                        a[f].length
-                      ) :
-                      .5 :
-                    -1
-                ),
-                contract_data ?
-                  [
-                    'symbol',
-                    'name',
-                  ]
-                  .map(f =>
-                    (contract_data[f] || '')
-                      .toLowerCase()
-                      .includes(
-                        inputSearch
+          const {
+            next_asset,
+          } = { ...contract_data }
+
+          const _contracts_data =
+            _.concat(
+              {
+                ...contract_data,
+              },
+              is_bridge &&
+              next_asset &&
+              {
+                ...contract_data,
+                ...next_asset,
+              },
+            )
+            .filter(c => c)
+
+          return (
+            _contracts_data
+              .map(c => {
+                const _contracts = _.cloneDeep(contracts)
+
+                const contract_index = (_contracts || [])
+                  .findIndex(_c =>
+                    _c?.chain_id === chain_id
+                  )
+
+                if (contract_index > -1) {
+                  _contracts[contract_index] = c
+                }
+
+                return {
+                  ...a,
+                  contracts: _contracts,
+                  scores:
+                    _.concat(
+                      [
+                        'symbol',
+                        'name',
+                        'id',
+                      ]
+                      .map(f =>
+                        (a[f] || '')
                           .toLowerCase()
-                      ) ?
-                      inputSearch.length > 1 ?
-                        (
-                          inputSearch.length /
-                          contract_data[f].length
+                          .includes(
+                            inputSearch
+                              .toLowerCase()
+                          ) ?
+                          inputSearch.length > 1 ?
+                            (
+                              inputSearch.length /
+                              a[f].length
+                            ) :
+                            .5 :
+                          -1
+                      ),
+                      c ?
+                        [
+                          'symbol',
+                          'name',
+                        ]
+                        .map(f =>
+                          (c[f] || '')
+                            .toLowerCase()
+                            .includes(
+                              inputSearch
+                                .toLowerCase()
+                            ) ?
+                            inputSearch.length > 1 ?
+                              (
+                                inputSearch.length /
+                                c[f].length
+                              ) :
+                              .5 :
+                            -1
                         ) :
-                        .5 :
-                      -1
-                  ) :
-                  [],
-              ),
-          }
+                        [],
+                    ),
+                }
+              })
+          )
         })
         .map(a => {
           const {
@@ -403,7 +439,9 @@ export default ({
                   onClick={() =>
                     onSelect(
                       id,
-                      contract_address,
+                      is_bridge ?
+                        symbol :
+                        contract_address,
                     )
                   }
                   className={className}

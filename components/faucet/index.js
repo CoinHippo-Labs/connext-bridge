@@ -780,23 +780,27 @@ export default ({
           (
             <div className="w-full mx-2 sm:mx-4">
               <Alert
-                color={`${status === 'failed' ?
-                  'bg-red-400 dark:bg-red-500' :
-                  status === 'success' ?
-                    'bg-green-400 dark:bg-green-500' :
-                    'bg-blue-400 dark:bg-blue-500'
-                } text-white mb-4 sm:mb-6`}
-                icon={status === 'failed' ?
-                  <BiMessageError
-                    className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mt-0.5 mr-2.5"
-                  /> :
-                  status === 'success' ?
-                    <BiMessageCheck
+                color={
+                  `${
+                    status === 'failed' ?
+                      'bg-red-400 dark:bg-red-500' :
+                      status === 'success' ?
+                        'bg-green-400 dark:bg-green-500' :
+                        'bg-blue-400 dark:bg-blue-500'
+                  } text-white mt-1 mb-2`
+                }
+                icon={
+                  status === 'failed' ?
+                    <BiMessageError
                       className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mt-0.5 mr-2.5"
                     /> :
-                    <BiMessageDetail
-                      className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mt-0.5 mr-2.5"
-                    />
+                    status === 'success' ?
+                      <BiMessageCheck
+                        className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mt-0.5 mr-2.5"
+                      /> :
+                      <BiMessageDetail
+                        className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mt-0.5 mr-2.5"
+                      />
                 }
                 rounded={true}
                 className="mx-0"

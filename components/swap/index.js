@@ -179,6 +179,7 @@ export default () => {
             'usdc'
 
       const chain_data = (chains_data || [])
+        .filter(c => !c?.no_pool)
         .find(c =>
           c?.id === chain
         )
@@ -216,8 +217,13 @@ export default () => {
         }
       }
     }
-    else if (
-     !path.includes('[swap]') &&
+
+    if (
+      (
+        !path.includes('on-') ||
+        !swap.chain
+      ) &&
+      !path.includes('[swap]') &&
       (chains_data || [])
         .filter(c => !c?.no_pool)
         .length > 0

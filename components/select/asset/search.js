@@ -8,6 +8,7 @@ export default ({
   onSelect,
   chain,
   is_pool = false,
+  is_bridge = false,
   data,
 }) => {
   const [inputSearch, setInputSearch] = useState('')
@@ -41,6 +42,7 @@ export default ({
             }}
             chain={chain}
             is_pool={is_pool}
+            is_bridge={is_bridge}
             data={data}
           />
         </div>

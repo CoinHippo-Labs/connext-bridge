@@ -17,6 +17,7 @@ export default ({
   chain,
   origin = 'from',
   is_pool = false,
+  is_bridge = false,
   data,
   className = '',
 }) => {
@@ -217,6 +218,7 @@ export default ({
           }
           chain={chain}
           is_pool={is_pool}
+          is_bridge={is_bridge}
           data={data}
         />
       )}

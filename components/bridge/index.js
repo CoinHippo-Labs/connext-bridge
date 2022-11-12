@@ -165,6 +165,7 @@ export default () => {
       )
 
     const {
+      symbol,
       amount,
     } = { ...params }
 
@@ -233,6 +234,11 @@ export default () => {
         updated = true
       }
 
+      if (symbol) {
+        bridge.symbol = symbol
+        updated = true
+      }
+
       if (
         bridge.source_chain &&
         !isNaN(amount) &&
@@ -257,6 +263,7 @@ export default () => {
         source_chain,
         destination_chain,
         asset,
+        symbol,
         amount,
       } = { ...bridge }
 
@@ -318,15 +325,20 @@ export default () => {
 
       if (
         params.source_chain &&
-        params.asset &&
-        amount
+        params.asset
       ) {
-        params.amount =
-          number_format(
-            Number(amount),
-            '0.00000000',
-            true,
-          )
+        if (amount) {
+          params.amount =
+            number_format(
+              Number(amount),
+              '0.00000000',
+              true,
+            )
+        }
+        
+        if (symbol) {
+          params.symbol = symbol
+        }
       }
     }
 
@@ -335,11 +347,16 @@ export default () => {
         source_chain,
         destination_chain,
         asset,
+        symbol,
       } = { ...params }
 
       delete params.source_chain
       delete params.destination_chain
       delete params.asset
+
+      if (!symbol) {
+        delete params.symbol
+      }
 
       router.push(
         `/${
@@ -377,16 +394,28 @@ export default () => {
 
     const {
       contract_address,
+      next_asset,
     } = { ...destination_contract_data }
+
+    const {
+      symbol,
+    } = { ...params }
 
     const liquidity_amount =
       _.sum(
         (asset_balances_data?.[chain_id] || [])
           .filter(a =>
-            equals_ignore_case(
-              a?.contract_address,
+            [
               contract_address,
-            )
+              next_asset?.contract_address,
+            ]
+            .filter(_a => _a)
+            .findIndex(_a =>
+              equals_ignore_case(
+                a?.contract_address,
+                _a,
+              )
+            ) > -1
           )
           .map(a =>
             Number(
@@ -582,6 +611,7 @@ export default () => {
         }
       }
       else if (
+        !asPath.includes('from-') &&
         !equals_ignore_case(
           id,
           source_chain,
@@ -1320,14 +1350,29 @@ export default () => {
         amount,
       } = { ...bridge }
 
+      const {
+        to,
+        infiniteApprove,
+        callData,
+        slippage,
+        forceSlow,
+        receiveLocal,
+      } = { ...options }
+
+      const {
+        gas,
+      } = { ...fee }
+
       const source_chain_data = (chains_data || [])
         .find(c =>
           c?.id === source_chain
         )
+
       const source_asset_data = (assets_data || [])
         .find(a =>
           a?.id === asset
         )
+
       const source_contract_data = (source_asset_data?.contracts || [])
         .find(c =>
           c?.chain_id === source_chain_data?.chain_id
@@ -1345,22 +1390,21 @@ export default () => {
         .find(c =>
           c?.id === destination_chain
         )
-      const destination_contract_data = (source_asset_data?.contracts || [])
+
+      let destination_contract_data = (source_asset_data?.contracts || [])
         .find(c =>
           c?.chain_id === destination_chain_data?.chain_id
         )
 
-      const {
-        to,
-        infiniteApprove,
-        callData,
-        slippage,
-        forceSlow,
-        receiveLocal,
-      } = { ...options }
-      const {
-        gas,
-      } = { ...fee }
+      if (
+        receiveLocal &&
+        destination_contract_data?.next_asset
+      ) {
+        destination_contract_data = {
+          ...destination_contract_data,
+          ...destination_contract_data.next_asset,
+        }
+      }
 
       /*
       const minAmount =
@@ -1645,12 +1689,14 @@ export default () => {
 
             setXcallResponse(
               {
-                status: failed ?
-                  'failed' :
-                  'success',
-                message: failed ?
-                  'Failed to send transaction' :
-                  `Transferring ${symbol}. (It’s ok to close the browser)`,
+                status:
+                  failed ?
+                    'failed' :
+                    'success',
+                message:
+                  failed ?
+                    'Failed to send transaction' :
+                    `Transferring ${symbol}. (It’s ok to close the browser)`,
                 tx_hash: hash,
               }
             )
@@ -1769,72 +1815,9 @@ export default () => {
     source_chain,
     destination_chain,
     asset,
+    symbol,
     amount,
   } = { ...bridge }
-
-  const source_chain_data = (chains_data || [])
-    .find(c =>
-      c?.id === source_chain
-    )
-  const source_asset_data = (assets_data || [])
-    .find(a =>
-      a?.id === asset
-    )
-  const source_contract_data = (source_asset_data?.contracts || [])
-    .find(c =>
-      c?.chain_id === source_chain_data?.chain_id
-    )
-
-  const destination_chain_data = (chains_data || [])
-    .find(c =>
-      c?.id === destination_chain
-    )
-  const destination_asset_data = (assets_data || [])
-    .find(a =>
-      a?.id === asset
-    )
-  const destination_contract_data = (destination_asset_data?.contracts || [])
-    .find(c =>
-      c?.chain_id === destination_chain_data?.chain_id
-    )  
-
-  const {
-    color,
-  } = { ...source_asset_data }
-  const source_symbol =
-    source_contract_data?.symbol ||
-    source_asset_data?.symbol
-  const source_balance = (balances_data?.[source_chain_data?.chain_id] || [])
-    .find(b =>
-      equals_ignore_case(
-        b?.contract_address,
-        source_contract_data?.contract_address,
-      )
-    )
-  const source_amount =
-    source_balance &&
-    Number(source_balance.amount)
-  const source_decimals =
-    source_contract_data?.decimals ||
-    18
-  const source_gas_native_token = _.head(source_chain_data?.provider_params)?.nativeCurrency
-
-  const destination_symbol =
-    destination_contract_data?.symbol ||
-    destination_asset_data?.symbol
-  const destination_balance = (balances_data?.[destination_chain_data?.chain_id] || [])
-    .find(b =>
-      equals_ignore_case(
-        b?.contract_address,
-        destination_contract_data?.contract_address,
-      )
-    )
-  const destination_amount =
-    destination_balance &&
-    Number(destination_balance.amount)
-  const destination_decimals =
-    destination_contract_data?.decimals ||
-    18
 
   const {
     to,
@@ -1844,6 +1827,105 @@ export default () => {
     receiveLocal,
   } = { ...options }
 
+  const source_chain_data = (chains_data || [])
+    .find(c =>
+      c?.id === source_chain
+    )
+
+  const source_asset_data = (assets_data || [])
+    .find(a =>
+      a?.id === asset
+    )
+
+  let source_contract_data = (source_asset_data?.contracts || [])
+    .find(c =>
+      c?.chain_id === source_chain_data?.chain_id
+    )
+
+  if (
+    symbol &&
+    equals_ignore_case(
+      source_contract_data?.next_asset?.symbol,
+      symbol,
+    )
+  ) {
+    source_contract_data = {
+      ...source_contract_data,
+      ...source_contract_data.next_asset,
+    }
+  }
+
+  const destination_chain_data = (chains_data || [])
+    .find(c =>
+      c?.id === destination_chain
+    )
+
+  const destination_asset_data = (assets_data || [])
+    .find(a =>
+      a?.id === asset
+    )
+
+  let destination_contract_data = (destination_asset_data?.contracts || [])
+    .find(c =>
+      c?.chain_id === destination_chain_data?.chain_id
+    )  
+
+  if (
+    receiveLocal &&
+    destination_contract_data?.next_asset
+  ) {
+    destination_contract_data = {
+      ...destination_contract_data,
+      ...destination_contract_data.next_asset,
+    }
+  }
+
+  const {
+    color,
+  } = { ...source_asset_data }
+
+  const source_symbol =
+    source_contract_data?.symbol ||
+    source_asset_data?.symbol
+
+  const source_balance = (balances_data?.[source_chain_data?.chain_id] || [])
+    .find(b =>
+      equals_ignore_case(
+        b?.contract_address,
+        source_contract_data?.contract_address,
+      )
+    )
+
+  const source_amount =
+    source_balance &&
+    Number(source_balance.amount)
+
+  const source_decimals =
+    source_contract_data?.decimals ||
+    18
+
+  const source_gas_native_token = _.head(source_chain_data?.provider_params)?.nativeCurrency
+
+  const destination_symbol =
+    destination_contract_data?.symbol ||
+    destination_asset_data?.symbol
+
+  const destination_balance = (balances_data?.[destination_chain_data?.chain_id] || [])
+    .find(b =>
+      equals_ignore_case(
+        b?.contract_address,
+        destination_contract_data?.contract_address,
+      )
+    )
+
+  const destination_amount =
+    destination_balance &&
+    Number(destination_balance.amount)
+
+  const destination_decimals =
+    destination_contract_data?.decimals ||
+    18
+
   const gas_fee =
     fee &&
     (
@@ -1852,6 +1934,7 @@ export default () => {
         fee.gas ||
         0
     )
+
   const router_fee =
     fee &&
     (
@@ -1860,16 +1943,24 @@ export default () => {
         fee.router ||
         0
     )
+
   const price_impact = null
 
   const liquidity_amount =
     _.sum(
       (asset_balances_data?.[destination_chain_data?.chain_id] || [])
         .filter(a =>
-          equals_ignore_case(
-            a?.contract_address,
+          [
             destination_contract_data?.contract_address,
-          )
+            destination_contract_data?.next_asset?.contract_address,
+          ]
+          .filter(_a => _a)
+          .findIndex(_a =>
+            equals_ignore_case(
+              a?.contract_address,
+              _a,
+            )
+          ) > -1
         )
         .map(a =>
           Number(
@@ -2000,15 +2091,23 @@ export default () => {
                       value={source_chain}
                       onSelect={c => {
                         const _source_chain = c
-                        const _destination_chain = c === destination_chain ?
-                          source_chain :
-                          destination_chain
+                        const _destination_chain =
+                          c === destination_chain ?
+                            source_chain :
+                            destination_chain
 
                         setBridge(
                           {
                             ...bridge,
                             source_chain: _source_chain,
                             destination_chain: _destination_chain,
+                            symbol:
+                              equals_ignore_case(
+                                _source_chain,
+                                source_chain,
+                              ) ?
+                                symbol :
+                                undefined,
                           }
                         )
 
@@ -2147,13 +2246,18 @@ export default () => {
                       <SelectAsset
                         disabled={disabled}
                         value={asset}
-                        onSelect={a => {
+                        onSelect={(a, s) => {
                           setBridge(
                             {
                               ...bridge,
                               asset: a,
+                              symbol: s,
                               amount:
-                                a !== asset ?
+                                a !== asset ||
+                                !equals_ignore_case(
+                                  s,
+                                  symbol
+                                ) ?
                                   null :
                                   amount,
                             }
@@ -2166,6 +2270,8 @@ export default () => {
                         }}
                         chain={source_chain}
                         origin=""
+                        is_bridge={true}
+                        data={source_contract_data}
                         className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
                       />
                       <DebounceInput

@@ -519,6 +519,7 @@ export default () => {
                   .map(l => {
                     const {
                       domain,
+                      adopted,
                       local,
                       balance,
                     } = { ...l }
@@ -536,10 +537,15 @@ export default () => {
                         (a?.contracts || [])
                           .findIndex(c =>
                             c?.chain_id === chain_id &&
-                            equals_ignore_case(
-                              c?.contract_address,
+                            [
+                              adopted,
                               local,
-                            )
+                            ].findIndex(_a =>
+                              equals_ignore_case(
+                                c?.contract_address,
+                                _a,
+                              )
+                            ) > -1
                           ) > -1
                       )
 
