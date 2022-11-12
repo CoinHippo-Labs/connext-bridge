@@ -14,6 +14,7 @@ import { BiMessageError, BiMessageCheck, BiMessageDetail, BiEditAlt, BiCheckCirc
 
 import Options from './options'
 import GasPrice from '../gas-price'
+import SelectChain from '../select/chain'
 import SelectAsset from '../select/asset'
 import Balance from '../balance'
 import Image from '../image'
@@ -161,9 +162,7 @@ export default () => {
         ) :
         path
 
-    if (
-      path.includes('on-')
-    ) {
+    if (path.includes('on-')) {
       const paths = path
         .replace(
           '/swap/',
@@ -216,6 +215,30 @@ export default () => {
           updated = true
         }
       }
+    }
+    else if (
+      (chains_data || [])
+        .filter(c => !c?.no_pool)
+        .length > 0
+    ) {
+      const _chain =
+        _.head(
+          chains_data
+            .filter(c => !c?.no_pool)
+            .map(c => c?.id)
+        )
+
+      router.push(
+        `/swap/on-${_chain}${
+          Object.keys(params).length > 0 ?
+            `?${new URLSearchParams(params).toString()}` :
+            ''
+        }`,
+        undefined,
+        {
+          shallow: true,
+        },
+      )
     }
 
     if (updated) {
@@ -298,15 +321,17 @@ export default () => {
       delete params.asset
 
       router.push(
-        `/swap/${chain ?
-          `${asset ?
-            `${asset.toUpperCase()}-` :
+        `/swap/${
+          chain ?
+            `${asset ?
+              `${asset.toUpperCase()}-` :
+              ''
+            }on-${chain}` :
             ''
-          }on-${chain}` :
-          ''
-        }${Object.keys(params).length > 0 ?
-          `?${new URLSearchParams(params).toString()}` :
-          ''
+        }${
+          Object.keys(params).length > 0 ?
+            `?${new URLSearchParams(params).toString()}` :
+            ''
         }`,
         undefined,
         {
@@ -352,6 +377,7 @@ export default () => {
         )
 
       if (
+        !chain &&
         !params?.chain &&
         (chains_data || [])
           .findIndex(c =>
@@ -1781,9 +1807,30 @@ export default () => {
               <div className="space-y-1 ml-1 sm:ml-2">
                 <div className="flex items-center space-x-1.5">
                   <h1 className="text-lg font-semibold">
-                    Swap
+                    Swap on
                   </h1>
-                  {
+                  <SelectChain
+                    value={
+                      chain ||
+                      _.head(
+                        (chains_data || [])
+                          .filter(c => !c?.no_pool)
+                          .map(c => c?.id)
+                      )
+                    }
+                    onSelect={c => {
+                      setSwap(
+                        {
+                          ...swap,
+                          chain: c,
+                        }
+                      )
+                    }}
+                    origin=""
+                    is_pool={true}
+                    className="w-fit flex items-center justify-center space-x-1.5 sm:space-x-2"
+                  />
+                  {/*
                     name &&
                     (
                       <div className="flex items-center space-x-1.5">
@@ -1820,7 +1867,7 @@ export default () => {
                         </span>
                       </div>
                     )
-                  }
+                  */}
                 </div>
                 {
                   false &&

@@ -156,15 +156,10 @@ export default ({
             <span className={`whitespace-nowrap sm:text-lg font-semibold ${!image ? 'sm:ml-3' : ''}`}>
               {symbol}
             </span>
-            {
-              className &&
-              (
-                <BiChevronDown
-                  size={18}
-                  className="text-slate-400 dark:text-slate-200"
-                />
-              )
-            }
+            <BiChevronDown
+              size={18}
+              className="text-slate-400 dark:text-slate-200"
+            />
           </div> :
           <Puff
             color={loader_color(theme)}

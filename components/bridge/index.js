@@ -350,9 +350,10 @@ export default () => {
               ''
             }from-${source_chain}-to-${destination_chain}` :
             ''
-        }${Object.keys(params).length > 0 ?
-          `?${new URLSearchParams(params).toString()}` :
-          ''
+        }${
+          Object.keys(params).length > 0 ?
+            `?${new URLSearchParams(params).toString()}` :
+            ''
         }`,
         undefined,
         {

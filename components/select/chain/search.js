@@ -8,6 +8,7 @@ export default ({
   onSelect,
   source,
   destination,
+  is_pool = false,
 }) => {
   const [inputSearch, setInputSearch] = useState('')
 
@@ -37,6 +38,7 @@ export default ({
             }}
             source={source}
             destination={destination}
+            is_pool={is_pool}
           />
         </div>
       </div>

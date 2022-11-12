@@ -218,15 +218,17 @@ export default () => {
       delete params.asset
 
       router.push(
-        `/pool/${chain ?
-          `${asset ?
-            `${asset.toUpperCase()}-` :
+        `/pool/${
+          chain ?
+            `${asset ?
+              `${asset.toUpperCase()}-` :
+              ''
+            }on-${chain}` :
             ''
-          }on-${chain}` :
-          ''
-        }${Object.keys(params).length > 0 ?
-          `?${new URLSearchParams(params).toString()}` :
-          ''
+        }${
+          Object.keys(params).length > 0 ?
+            `?${new URLSearchParams(params).toString()}` :
+            ''
         }`,
         undefined,
         {
@@ -789,6 +791,7 @@ export default () => {
                       )
                     }}
                     origin=""
+                    is_pool={true}
                   />
                 </div>
                 {

@@ -34,7 +34,8 @@
     },
     "image": "/logos/chains/goerli.png",
     "color": "#636890",
-    "group" : "evm"
+    "group" : "evm",
+    "no_pool": true
   },
   {
     "id": "polygon",

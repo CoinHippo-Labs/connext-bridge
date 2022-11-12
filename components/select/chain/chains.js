@@ -10,6 +10,7 @@ export default ({
   onSelect,
   source,
   destination,
+  is_pool = false,
 }) => {
   const {
     preferences,
@@ -42,33 +43,40 @@ export default ({
     _.orderBy(
       (chains_data || [])
         .filter(c =>
-          !inputSearch ||
-          c
+          (
+            !is_pool ||
+            !c?.no_pool
+          ) &&
+          (
+            !inputSearch ||
+            c
+          )
         )
         .map(c => {
           return {
             ...c,
-            scores: [
-              'short_name',
-              'name',
-              'id',
-              'group',
-            ]
-            .map(f =>
-              (c[f] || '')
-                .toLowerCase()
-                .includes(
-                  inputSearch
-                    .toLowerCase()
-                ) ?
-                inputSearch.length > 1 ?
-                  (
-                    inputSearch.length /
-                    c[f].length
-                  ) :
-                  .5 :
-                -1
-            ),
+            scores:
+              [
+                'short_name',
+                'name',
+                'id',
+                'group',
+              ]
+              .map(f =>
+                (c[f] || '')
+                  .toLowerCase()
+                  .includes(
+                    inputSearch
+                      .toLowerCase()
+                  ) ?
+                  inputSearch.length > 1 ?
+                    (
+                      inputSearch.length /
+                      c[f].length
+                    ) :
+                    .5 :
+                  -1
+              ),
           }
         })
         .map(c => {
