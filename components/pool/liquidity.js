@@ -2288,14 +2288,15 @@ export default ({
       }
       {
         (
-          y_asset_data?.mintable ||
-          y_asset_data?.wrapable ||
-          y_asset_data?.wrapped
+          x_asset_data?.mintable ||
+          x_asset_data?.wrapable ||
+          x_asset_data?.wrapped
         ) &&
         (
           <Faucet
             token_id={asset}
-            contract_data={y_asset_data}
+            contract_data={x_asset_data}
+            className="w-full max-w-lg bg-transparent flex flex-col items-center justify-center space-y-2 mx-auto"
           />
         )
       }

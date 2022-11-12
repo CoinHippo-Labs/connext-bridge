@@ -485,78 +485,102 @@ export default () => {
       contract_data,
     ) => {
       const {
-        contract_address,
-        decimals,
+        next_asset,
       } = { ...contract_data }
 
       const provider = rpcs?.[chain_id]
 
-      let balance
-
       if (
         address &&
-        provider &&
-        contract_address
+        provider
       ) {
-        if (contract_address === constants.AddressZero) {
-          balance =
-            await provider
-              .getBalance(
-                address,
-              )
-        }
-        else {
-          const contract =
-            new Contract(
-              contract_address,
-              [
-                'function balanceOf(address owner) view returns (uint256)',
-              ],
-              provider,
-            )
-
-          balance =
-            await contract
-              .balanceOf(
-                address,
-              )
-        }
-      }
-
-      if (
-        balance ||
-        !(
-          (balances_data?.[`${chain_id}`] || [])
-            .findIndex(c =>
-              equals_ignore_case(
-                c?.contract_address,
-                contract_address,
-              )
-            ) > -1
-        )
-      ) {
-        dispatch(
-          {
-            type: BALANCES_DATA,
-            value: {
-              [`${chain_id}`]:
-                [
-                  {
-                    ...contract_data,
-                    amount:
-                      balance &&
-                      Number(
-                        utils.formatUnits(
-                          balance,
-                          decimals ||
-                          18,
-                        )
-                      ),
-                  },
-                ],
+        const contracts =
+          _.concat(
+            {
+              ...contract_data,
             },
+            next_asset &&
+            {
+              ...contract_data,
+              ...next_asset,
+            },
+          )
+          .filter(c => c?.contract_address)
+
+        const balances = []
+
+        for (const contract of contracts) {
+          const {
+            contract_address,
+            decimals,
+          } = { ...contract }
+
+          let balance
+
+          if (contract_address === constants.AddressZero) {
+            balance =
+              await provider
+                .getBalance(
+                  address,
+                )
           }
-        )
+          else {
+            const contract =
+              new Contract(
+                contract_address,
+                [
+                  'function balanceOf(address owner) view returns (uint256)',
+                ],
+                provider,
+              )
+
+            balance =
+              await contract
+                .balanceOf(
+                  address,
+                )
+          }
+
+          if (
+            balance ||
+            !(
+              (balances_data?.[`${chain_id}`] || [])
+                .findIndex(c =>
+                  equals_ignore_case(
+                    c?.contract_address,
+                    contract_address,
+                  )
+                ) > -1
+            )
+          ) {
+            balances
+              .push(
+                {
+                  ...contract,
+                  amount:
+                    balance &&
+                    Number(
+                      utils.formatUnits(
+                        balance,
+                        decimals ||
+                        18,
+                      )
+                    ),
+                }
+              )
+          }
+        }
+
+        if (balances.length > 0) {
+          dispatch(
+            {
+              type: BALANCES_DATA,
+              value: {
+                [`${chain_id}`]: balances,
+              },
+            }
+          )
+        }
       }
     }
 

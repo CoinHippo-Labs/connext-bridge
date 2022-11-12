@@ -21,6 +21,7 @@ const ABI = [
   // Authenticated Functions
   'function transfer(address to, uint amount) returns (boolean)',
   'function mint(address account, uint256 amount)',
+  'function deposit() payable',
   'function withdraw(uint256 amount)',
 ]
 
@@ -32,6 +33,7 @@ export default ({
     ) ||
     1000,
   contract_data,
+  className = '',
 }) => {
   const {
     chains,
@@ -88,9 +90,9 @@ export default ({
       } = {
         ...(
           (chains_data || [])
-          .find(c =>
-            c?.chain_id === chain_id
-          )
+            .find(c =>
+              c?.chain_id === chain_id
+            )
         ),
       }
 
@@ -179,12 +181,15 @@ export default ({
           '[Wrap]' :
           '[Mint]',
         is_wrapped ?
-          {
+          /*{
             to: _address,
             value: _amount,
             overrides: {
               gasLimit,
             },
+          }*/
+          {
+            value: _amount,
           } :
           {
             address: _address,
@@ -192,6 +197,7 @@ export default ({
           },
       )
 
+      /*
       const wrap_request =
         is_wrapped &&
         await signer
@@ -202,12 +208,20 @@ export default ({
               gasLimit,
             },
           )
+      */
 
       const response =
         is_wrapped ?
-          await signer
+          /*await signer
             .sendTransaction(
               wrap_request,
+            )*/
+          await contract
+            .deposit(
+              {
+                value: _amount,
+                gasLimit,
+              },
             ) :
           await contract
             .mint(
@@ -477,7 +491,12 @@ export default ({
 
   return asset_data &&
     (
-      <div className="w-full max-w-lg bg-slate-200 dark:bg-slate-900 bg-opacity-50 rounded-3xl flex flex-col items-center justify-center space-y-2 mx-auto p-3 sm:p-6">
+      <div
+        className={
+          className ||
+          'w-full max-w-lg bg-slate-200 dark:bg-slate-900 bg-opacity-50 rounded-3xl flex flex-col items-center justify-center space-y-2 mx-auto p-3 sm:p-6'
+        }
+      >
         <button
           onClick={() => setCollapse(!collapse)}
           className="w-full flex items-center justify-center text-base font-semibold space-x-1.5"
@@ -651,32 +670,35 @@ export default ({
                       Cancel
                     </button>
                     {chain_data?.chain_id !== chain_id ?
-                      <Wallet
-                        connectChainId={chain_data?.chain_id}
-                        className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg flex items-center text-white text-sm font-medium space-x-1.5 py-2 px-3`}
-                      >
-                        <span className="mr-1 sm:mr-1.5">
-                          {is_walletconnect ?
-                            'Reconnect' :
-                            'Switch'
-                          } to
-                        </span>
-                        {
-                          image &&
-                          (
-                            <Image
-                              src={image}
-                              alt=""
-                              width={24}
-                              height={24}
-                              className="rounded-full"
-                            />
-                          )
-                        }
-                        <span className="font-semibold">
-                          {chain_data?.name}
-                        </span>
-                      </Wallet> :
+                      !className &&
+                      (
+                        <Wallet
+                          connectChainId={chain_data?.chain_id}
+                          className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg flex items-center text-white text-sm font-medium space-x-1.5 py-2 px-3`}
+                        >
+                          <span className="mr-1 sm:mr-1.5">
+                            {is_walletconnect ?
+                              'Reconnect' :
+                              'Switch'
+                            } to
+                          </span>
+                          {
+                            image &&
+                            (
+                              <Image
+                                src={image}
+                                alt=""
+                                width={24}
+                                height={24}
+                                className="rounded-full"
+                              />
+                            )
+                          }
+                          <span className="font-semibold">
+                            {chain_data?.name}
+                          </span>
+                        </Wallet>
+                      ) :
                       <>
                         <button
                           disabled={disabled}

@@ -664,78 +664,102 @@ export default () => {
       contract_data,
     ) => {
       const {
-        contract_address,
-        decimals,
+        next_asset,
       } = { ...contract_data }
 
       const provider = rpcs?.[chain_id]
 
-      let balance
-
       if (
         address &&
-        provider &&
-        contract_address
+        provider
       ) {
-        if (contract_address === constants.AddressZero) {
-          balance =
-            await provider
-              .getBalance(
-                address,
-              )
-        }
-        else {
-          const contract =
-            new Contract(
-              contract_address,
-              [
-                'function balanceOf(address owner) view returns (uint256)',
-              ],
-              provider,
-            )
-
-          balance =
-            await contract
-              .balanceOf(
-                address,
-              )
-        }
-      }
-
-      if (
-        balance ||
-        !(
-          (balances_data?.[`${chain_id}`] || [])
-            .findIndex(c =>
-              equals_ignore_case(
-                c?.contract_address,
-                contract_address,
-              )
-            ) > -1
-        )
-      ) {
-        dispatch(
-          {
-            type: BALANCES_DATA,
-            value: {
-              [`${chain_id}`]:
-                [
-                  {
-                    ...contract_data,
-                    amount:
-                      balance &&
-                      Number(
-                        utils.formatUnits(
-                          balance,
-                          decimals ||
-                          18,
-                        )
-                      ),
-                  },
-                ],
+        const contracts =
+          _.concat(
+            {
+              ...contract_data,
             },
+            next_asset &&
+            {
+              ...contract_data,
+              ...next_asset,
+            },
+          )
+          .filter(c => c?.contract_address)
+
+        const balances = []
+
+        for (const contract of contracts) {
+          const {
+            contract_address,
+            decimals,
+          } = { ...contract }
+
+          let balance
+
+          if (contract_address === constants.AddressZero) {
+            balance =
+              await provider
+                .getBalance(
+                  address,
+                )
           }
-        )
+          else {
+            const contract =
+              new Contract(
+                contract_address,
+                [
+                  'function balanceOf(address owner) view returns (uint256)',
+                ],
+                provider,
+              )
+
+            balance =
+              await contract
+                .balanceOf(
+                  address,
+                )
+          }
+
+          if (
+            balance ||
+            !(
+              (balances_data?.[`${chain_id}`] || [])
+                .findIndex(c =>
+                  equals_ignore_case(
+                    c?.contract_address,
+                    contract_address,
+                  )
+                ) > -1
+            )
+          ) {
+            balances
+              .push(
+                {
+                  ...contract,
+                  amount:
+                    balance &&
+                    Number(
+                      utils.formatUnits(
+                        balance,
+                        decimals ||
+                        18,
+                      )
+                    ),
+                }
+              )
+          }
+        }
+
+        if (balances.length > 0) {
+          dispatch(
+            {
+              type: BALANCES_DATA,
+              value: {
+                [`${chain_id}`]: balances,
+              },
+            }
+          )
+        }
       }
     }
 
@@ -945,6 +969,7 @@ export default () => {
 
       const {
         infiniteApprove,
+        slippage,
       } = { ...options }
       let {
         deadline,
@@ -961,26 +986,54 @@ export default () => {
 
       let failed = false
 
+      let minDy = 0
+
       if (!amount) {
         failed = true
 
         setApproving(false)
       }
       else {
+        const decimals =
+          (origin === 'x' ?
+            x_asset_data :
+            y_asset_data
+          )?.decimals ||
+          18
+
+        minDy =
+          parseFloat(
+            (
+              amount *
+              (
+                100 -
+                (
+                  typeof slippage === 'number' ?
+                    slippage :
+                    DEFAULT_SWAP_SLIPPAGE_PERCENTAGE
+                )
+              ) /
+              100
+            )
+            .toFixed(decimals)
+          )
+
         amount =
           utils.parseUnits(
             amount
               .toString(),
-            (origin === 'x' ?
-              x_asset_data :
-              y_asset_data
-            )?.decimals ||
-            18,
+            decimals,
           )
           .toString()
       }
 
-      const minDy = 0
+      minDy =
+        utils.parseUnits(
+          minDy
+            .toString(),
+          decimals,
+        )
+        .toString()
 
       if (!failed) {
         try {
@@ -1013,10 +1066,12 @@ export default () => {
               {
                 status: 'pending',
                 message:
-                  `Wait for ${(origin === 'x' ?
-                    x_asset_data :
-                    y_asset_data
-                  )?.symbol} approval`,
+                  `Wait for ${
+                    (origin === 'x' ?
+                      x_asset_data :
+                      y_asset_data
+                    )?.symbol
+                  } approval`,
                 tx_hash: hash,
               }
             )
@@ -1920,17 +1975,26 @@ export default () => {
                           value =
                             value < 0 ?
                               0 :
-                              value
-
-                          value &&
-                          !isNaN(value) ?
-                            Number(value) :
-                            value
+                              value &&
+                              !isNaN(value) ?
+                                parseFloat(
+                                  Number(value)
+                                    .toFixed(
+                                      (origin === 'x' ?
+                                        x_asset_data :
+                                        y_asset_data
+                                      )?.decimals
+                                    )
+                                ) :
+                                value
 
                           setSwap(
                             {
                               ...swap,
-                              amount: value,
+                              amount:
+                                typeof value === 'number' ?
+                                  value :
+                                  null,
                             }
                           )
 
@@ -2185,21 +2249,30 @@ export default () => {
                               value =
                                 value < 0 ?
                                   0 :
-                                  value
-
-                              value =
-                                value &&
+                                  value &&
                                   !isNaN(value) ?
-                                    Number(value) :
+                                    parseFloat(
+                                      Number(
+                                        origin === 'x' ?
+                                          value / rate :
+                                          value * rate
+                                      )
+                                      .toFixed(
+                                        (origin === 'x' ?
+                                          y_asset_data :
+                                          x_asset_data
+                                        )?.decimals
+                                      )
+                                    ) :
                                     value
 
                               setSwap(
                                 {
                                   ...swap,
                                   amount:
-                                    origin === 'x' ?
-                                      value / rate :
-                                      value * rate,
+                                    typeof value === 'number' ?
+                                      value :
+                                      null,
                                 }
                               )
                             }}
@@ -2377,7 +2450,7 @@ export default () => {
                                   value =
                                     value <= 0 ||
                                     value > 100 ?
-                                      DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
+                                      DEFAULT_SWAP_SLIPPAGE_PERCENTAGE :
                                       value
 
                                   const _data = {
@@ -2479,7 +2552,7 @@ export default () => {
                       typeof price_impact === 'number' &&
                       (
                         <div className="flex items-center justify-between space-x-1">
-                          <div className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
+                          <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
                             Price Impact
                           </div>
                           <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
