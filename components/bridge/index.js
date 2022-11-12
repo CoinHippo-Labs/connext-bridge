@@ -336,7 +336,22 @@ export default () => {
             )
         }
         
-        if (symbol) {
+        if (
+          symbol &&
+          (assets_data || [])
+            .findIndex(a =>
+              a?.id === asset &&
+              (a.contracts || [])
+                .findIndex(c =>
+                  c?.chain_id ===
+                  chains_data
+                    .find(_c =>
+                      _c?.id === source_chain
+                    )?.chain_id &&
+                  c?.next_asset
+                ) > -1
+            ) > -1
+        ) {
           params.symbol = symbol
         }
       }
@@ -2271,7 +2286,10 @@ export default () => {
                         chain={source_chain}
                         origin=""
                         is_bridge={true}
-                        data={source_contract_data}
+                        data={{
+                          ...source_asset_data,
+                          ...source_contract_data,
+                        }}
                         className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
                       />
                       <DebounceInput
