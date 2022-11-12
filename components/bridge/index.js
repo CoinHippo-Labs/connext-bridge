@@ -1649,9 +1649,14 @@ export default () => {
                       origin_transacting_amount: Number(xcallParams.amount),
                       destination_chain: destination_chain_data?.chain_id,
                       destination_domain: xcallParams.destination,
-                      destination_transacting_asset: destination_contract_data?.contract_address,
+                      destination_transacting_asset:
+                        receiveLocal ?
+                          destination_contract_data?.next_asset?.contract_address ||
+                          destination_contract_data?.contract_address :
+                          destination_contract_data?.contract_address,
                       to: xcallParams.to,
                       force_slow: forceSlow,
+                      receive_local: receiveLocal,
                     },
                     latestTransfers,
                   ),
@@ -1881,8 +1886,8 @@ export default () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
-      <div className="hidden lg:block col-span-0 lg:col-span-2" />
-      <div className="col-span-1 lg:col-span-4">
+      <div className="hidden xl:block col-span-0 xl:col-span-2" />
+      <div className="col-span-1 lg:col-span-5 xl:col-span-4">
         <div className="mt-4 sm:mt-8">
           <Announcement />
         </div>
@@ -3189,7 +3194,7 @@ export default () => {
           {/*<PoweredBy />*/}
         </div>
       </div>
-      <div className="col-span-1 lg:col-span-2">
+      <div className="col-span-1 lg:col-span-3 xl:col-span-2">
         <LatestTransfers
           trigger={transfersTrigger}
           data={latestTransfers}

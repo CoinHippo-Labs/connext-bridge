@@ -50,7 +50,7 @@ export default ({
       name: 'infiniteApprove',
       type: 'switch',
     },
-    {
+    /*{
       label: 'Slippage',
       tooltip: 'The maximum percentage you are willing to lose due to market changes.',
       name: 'slippage',
@@ -62,7 +62,7 @@ export default ({
         0.5,
       ],
       postfix: '%',
-    },
+    },*/
   ]
 
   const changed =

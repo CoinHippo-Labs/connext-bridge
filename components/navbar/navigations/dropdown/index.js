@@ -27,10 +27,11 @@ export default () => {
       handleClickOutside,
     )
 
-    return () => document.removeEventListener(
-      'mousedown',
-      handleClickOutside,
-    )
+    return () =>
+      document.removeEventListener(
+        'mousedown',
+        handleClickOutside,
+      )
   }, [hidden, buttonRef, dropdownRef])
 
   const onClick = () => setHidden(!hidden)

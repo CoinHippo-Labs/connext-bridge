@@ -92,13 +92,13 @@ export default ({
         'max_score',
       ],
       [
-        'desc',
+        'asc',
         'desc',
       ],
     )
 
   return (
-    <div className="max-h-96 overflow-y-scroll">
+    <div className="max-h-96 overflow-y-scroll disable-scrollbars">
       {
         chains_data_sorted
           .map((c, i) => {

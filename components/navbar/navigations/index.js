@@ -43,10 +43,14 @@ export default ({
                 pathname === '/[bridge]' &&
                 bridge
               ) {
-                path = `${pathname.replace(
-                  '[bridge]',
-                  bridge,
-                )}`
+                path =
+                  `${
+                    pathname
+                      .replace(
+                        '[bridge]',
+                        bridge,
+                      )
+                  }`
               }
               else {
                 path = '/'
@@ -57,10 +61,14 @@ export default ({
                 pathname === '/pool/[pool]' &&
                 pool
               ) {
-                path = `${pathname.replace(
-                  '[pool]',
-                  pool,
-                )}`
+                path =
+                  `${
+                    pathname
+                      .replace(
+                        '[pool]',
+                        pool,
+                      )
+                  }`
               }
               else {
                 path = '/pools'
@@ -73,10 +81,14 @@ export default ({
                 pathname === '/swap/[swap]' &&
                 swap
               ) {
-                path = `${pathname.replace(
-                  '[swap]',
-                  swap,
-                )}`
+                path =
+                  `${
+                    pathname
+                      .replace(
+                        '[swap]',
+                        swap,
+                      )
+                  }`
               }
               else {
                 path = '/swap'
@@ -88,10 +100,12 @@ export default ({
 
                 const address_path = '/address/'
 
-                path = `${path}${!path.includes(address_path) ?
-                  `${address_path}${address}` :
-                  ''
-                }`
+                path =
+                  `${path}${
+                    !path.includes(address_path) ?
+                      `${address_path}${address}` :
+                      ''
+                  }`
               }
               else {
                 title = 'Explore'
@@ -102,7 +116,8 @@ export default ({
               break
           }
 
-          const selected = !external &&
+          const selected =
+            !external &&
             (
               pathname === path ||
               others_paths?.includes(pathname)
@@ -111,24 +126,25 @@ export default ({
           const item = (
             <>
               {icon}
-              <span className="whitespace-nowrap tracking-wider">
+              <span className="whitespace-nowrap">
                 {title}
               </span>
             </>
           )
 
-          const right_icon = emphasize ?
-            <HeadShake
-              duration={1500}
-              forever
-            >
-              <FaHandPointLeft
-                size={18}
-              />
-            </HeadShake> :
-            undefined
+          const right_icon =
+            emphasize ?
+              <HeadShake
+                duration={1500}
+                forever
+              >
+                <FaHandPointLeft
+                  size={18}
+                />
+              </HeadShake> :
+              undefined
 
-          const className = `bg-transparent hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg ${disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase ${selected ? 'text-blue-600 dark:text-white text-sm font-bold' : 'text-slate-600 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200 text-sm font-normal hover:font-semibold'} space-x-1.5 py-2 px-2.5`
+          const className = `bg-transparent hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg ${disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase ${selected ? 'text-blue-600 dark:text-white text-sm font-extrabold' : 'text-slate-600 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200 text-sm font-semibold hover:font-bold'} space-x-1.5 py-2 px-2.5`
 
           return external ?
             <a

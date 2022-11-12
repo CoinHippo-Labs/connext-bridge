@@ -100,35 +100,63 @@ export default ({
       c?.chain_id === Number(origin_chain) ||
       c?.domain_id === origin_domain
     )
+
   const source_asset_data = (assets_data || [])
     .find(a =>
       (a?.contracts || [])
         .findIndex(c =>
           c?.chain_id === source_chain_data?.chain_id &&
           [
-            origin_bridged_asset,
             origin_transacting_asset,
-          ].findIndex(a =>
-            equals_ignore_case(
+            origin_bridged_asset,
+          ].findIndex(_a =>
+            [
+              c?.next_asset?.contract_address,
               c?.contract_address,
-              a,
-            )
+            ]
+            .filter(__a => __a)
+            .findIndex(__a =>
+              equals_ignore_case(
+                __a,
+                _a,
+              )
+            ) > -1
           ) > -1
         ) > -1
     )
-  const source_contract_data = (source_asset_data?.contracts || [])
+
+  let source_contract_data = (source_asset_data?.contracts || [])
     .find(c =>
       c?.chain_id === source_chain_data?.chain_id
     )
+
+  if (
+    source_contract_data?.next_asset &&
+    equals_ignore_case(
+      source_contract_data.next_asset.contract_address,
+      origin_transacting_asset,
+    )
+  ) {
+    source_contract_data = {
+      ...source_contract_data,
+      ...source_contract_data.next_asset,
+    }
+
+    delete source_contract_data.next_asset
+  }
+
   const source_symbol =
     source_contract_data?.symbol ||
     source_asset_data?.symbol
+
   const source_decimals =
     source_contract_data?.decimals ||
     18
+
   const source_asset_image =
     source_contract_data?.image ||
     source_asset_data?.image
+
   const source_amount =
     _.head(
       [
@@ -158,6 +186,7 @@ export default ({
       c?.chain_id === Number(destination_chain) ||
       c?.domain_id === destination_domain
     )
+
   const destination_asset_data = (assets_data || [])
     .find(a =>
       (a?.contracts || [])
@@ -166,27 +195,54 @@ export default ({
           [
             destination_transacting_asset,
             destination_local_asset,
-          ].findIndex(a =>
-            equals_ignore_case(
+          ].findIndex(_a =>
+            [
+              c?.next_asset?.contract_address,
               c?.contract_address,
-              a,
-            )
+            ]
+            .filter(__a => __a)
+            .findIndex(__a =>
+              equals_ignore_case(
+                __a,
+                _a,
+              )
+            ) > -1
           ) > -1
         ) > -1
     )
-  const destination_contract_data = (destination_asset_data?.contracts || [])
+
+  let destination_contract_data = (destination_asset_data?.contracts || [])
     .find(c =>
       c?.chain_id === destination_chain_data?.chain_id
     )
+
+  if (
+    destination_contract_data?.next_asset &&
+    equals_ignore_case(
+      destination_contract_data.next_asset.contract_address,
+      destination_local_asset,
+    )
+  ) {
+    destination_contract_data = {
+      ...destination_contract_data,
+      ...destination_contract_data.next_asset,
+    }
+
+    delete destination_contract_data.next_asset
+  }
+
   const destination_symbol =
     destination_contract_data?.symbol ||
     destination_asset_data?.symbol
+
   const destination_decimals =
     destination_contract_data?.decimals ||
     18
+
   const destination_asset_image =
     destination_contract_data?.image ||
     destination_asset_data?.image
+
   const destination_amount =
     _.head(
       [

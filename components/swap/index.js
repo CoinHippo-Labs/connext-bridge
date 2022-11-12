@@ -6,12 +6,12 @@ import moment from 'moment'
 import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
 import { TailSpin, Watch, Oval } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
+import { Tooltip } from '@material-tailwind/react'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
 import { HiSwitchVertical } from 'react-icons/hi'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiEditAlt, BiCheckCircle } from 'react-icons/bi'
 
-import Info from './info'
 import Options from './options'
 import GasPrice from '../gas-price'
 import SelectAsset from '../select/asset'
@@ -114,6 +114,7 @@ export default () => {
   const [swap, setSwap] = useState({})
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [buttonDirection, setButtonDirection] = useState(1)
+  const [slippageEditing, setSlippageEditing] = useState(false)
 
   const [swapAmount, setSwapAmount] = useState(null)
   const [calculateSwapResponse, setCalculateSwapResponse] = useState(null)
@@ -1550,6 +1551,7 @@ export default () => {
     symbol,
     symbols,
     rate,
+    price_impact,
   } = { ...pair }
   const {
     color,
@@ -1790,6 +1792,7 @@ export default () => {
                       Object.entries(options)
                         .filter(([k, v]) =>
                           ![
+                            'slippage',
                           ].includes(k)
                         )
                     ),
@@ -1797,6 +1800,7 @@ export default () => {
                       Object.entries(DEFAULT_OPTIONS)
                         .filter(([k, v]) =>
                           ![
+                            'slippage',
                           ].includes(k)
                         )
                     ),
@@ -1944,19 +1948,19 @@ export default () => {
                         className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5`}
                       />
                     </div>
-                    {
-                      chain_data &&
-                      asset &&
-                      (origin === 'x' ?
-                        x_asset_data :
-                        y_asset_data
-                      ) &&
-                      (
-                        <div className="flex items-center justify-between space-x-2">
-                          <div className="flex items-center space-x-1">
-                            <div className="tracking-normal text-slate-400 dark:text-slate-500 text-sm font-medium">
-                              Balance:
-                            </div>
+                    <div className="flex items-center justify-between space-x-2">
+                      <div className="flex items-center space-x-1">
+                        <div className="tracking-normal text-slate-400 dark:text-slate-500 text-sm font-medium">
+                          Balance:
+                        </div>
+                        {
+                          chain_data &&
+                          asset &&
+                          (origin === 'x' ?
+                            x_asset_data :
+                            y_asset_data
+                          ) &&
+                          (
                             <button
                               disabled={disabled}
                               onClick={() => {
@@ -2002,7 +2006,12 @@ export default () => {
                                 trigger={balanceTrigger}
                               />
                             </button>
-                          </div>
+                          )
+                        }
+                      </div>
+                      {
+                        web3_provider &&
+                        (
                           <button
                             disabled={disabled}
                             onClick={() => {
@@ -2026,9 +2035,9 @@ export default () => {
                           >
                             Select Max
                           </button>
-                        </div>
-                      )
-                    }
+                        )
+                      }
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center justify-center mt-0.5 sm:-mt-2 -mb-6 sm:-mb-12">
@@ -2207,19 +2216,19 @@ export default () => {
                           />
                       }
                     </div>
-                    {
-                      chain_data &&
-                      asset &&
-                      (origin === 'x' ?
-                        y_asset_data :
-                        x_asset_data
-                      ) &&
-                      (
-                        <div className="flex items-center justify-between space-x-2">
-                          <div className="flex items-center space-x-1">
-                            <div className="tracking-normal text-slate-400 dark:text-slate-500 text-sm font-medium">
-                              Balance:
-                            </div>
+                    <div className="flex items-center justify-between space-x-2">
+                      <div className="flex items-center space-x-1">
+                        <div className="tracking-normal text-slate-400 dark:text-slate-500 text-sm font-medium">
+                          Balance:
+                        </div>
+                        {
+                          chain_data &&
+                          asset &&
+                          (origin === 'x' ?
+                            y_asset_data :
+                            x_asset_data
+                          ) &&
+                          (
                             <button
                               disabled={disabled}
                               onClick={() => {
@@ -2270,8 +2279,13 @@ export default () => {
                                 trigger={balanceTrigger}
                               />
                             </button>
-                          </div>
-                          {/*<button
+                          )
+                        }
+                      </div>
+                      {/*
+                        web3_provider &&
+                        (
+                          <button
                             disabled={disabled}
                             onClick={() => {
                               const amount =
@@ -2294,10 +2308,10 @@ export default () => {
                             className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-sm font-medium`}
                           >
                             Select Max
-                          </button>*/}
-                        </div>
-                      )
-                    }
+                          </button>
+                        )
+                      */}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2308,15 +2322,180 @@ export default () => {
                 !pair.error &&
                 amount > 0 &&
                 (
-                  <Info
-                    data={pair}
-                    amount_received={swapAmount}
-                    asset_data={
-                      origin === 'x' ?
-                        y_asset_data :
-                        x_asset_data
+                  <div className="bg-slate-100 dark:bg-slate-800 rounded-lg space-y-2.5 py-3.5 px-3">
+                    <div className="flex items-center justify-between space-x-1">
+                      <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
+                        Rate
+                      </div>
+                      <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
+                        <span>
+                          {number_format(
+                            rate,
+                            '0,0.000000',
+                            true,
+                          )}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="flex items-start justify-between space-x-1">
+                      <Tooltip
+                        placement="top"
+                        content="The maximum percentage you are willing to lose due to market changes."
+                        className="z-50 bg-black text-white text-xs"
+                      >
+                        <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
+                          Slippage
+                        </div>
+                      </Tooltip>
+                      <div className="flex flex-col sm:items-end space-y-1.5">
+                        {slippageEditing ?
+                          <>
+                            <div className="flex items-center justify-end space-x-1.5">
+                              <DebounceInput
+                                debounceTimeout={500}
+                                size="small"
+                                type="number"
+                                placeholder="0.00"
+                                value={
+                                  typeof slippage === 'number' &&
+                                  slippage >= 0 ?
+                                    slippage :
+                                    ''
+                                }
+                                onChange={e => {
+                                  const regex = /^[0-9.\b]+$/
+
+                                  let value
+
+                                  if (
+                                    e.target.value === '' ||
+                                    regex.test(e.target.value)
+                                  ) {
+                                    value = e.target.value
+                                  }
+
+                                  value =
+                                    value <= 0 ||
+                                    value > 100 ?
+                                      DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
+                                      value
+
+                                  const _data = {
+                                    ...options,
+                                    slippage:
+                                      value &&
+                                      !isNaN(value) ?
+                                      parseFloat(
+                                        Number(value)
+                                          .toFixed(2)
+                                      ) :
+                                      value,
+                                  }
+
+                                  console.log(
+                                    '[Options]',
+                                    _data,
+                                  )
+
+                                  setOptions(_data)
+                                }}
+                                onWheel={e => e.target.blur()}
+                                onKeyDown={e =>
+                                  [
+                                    'e',
+                                    'E',
+                                    '-',
+                                  ].includes(e.key) &&
+                                  e.preventDefault()
+                                }
+                                className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1 px-2`}
+                              />
+                              <button
+                                onClick={() => setSlippageEditing(false)}
+                                className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                              >
+                                <BiCheckCircle
+                                  size={16}
+                                />
+                              </button>
+                            </div>
+                            <div className="flex items-center space-x-1.5 -mr-1.5">
+                              {
+                                [
+                                  3.0,
+                                  1.0,
+                                  0.5,
+                                ]
+                                .map((s, i) => (
+                                  <div
+                                    key={i}
+                                    onClick={() => {
+                                      const _data = {
+                                        ...options,
+                                        slippage: s,
+                                      }
+
+                                      console.log(
+                                        '[Options]',
+                                        _data,
+                                      )
+
+                                      setOptions(_data)
+                                      setSlippageEditing(false)
+                                    }}
+                                    className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-900 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-900 hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
+                                  >
+                                    {s} %
+                                  </div>
+                                ))
+                              }
+                            </div>
+                          </> :
+                          <div className="flex items-center space-x-1.5">
+                            <span className="font-semibold">
+                              {number_format(
+                                slippage,
+                                '0,0.00',
+                              )}%
+                            </span>
+                            <button
+                              disabled={disabled}
+                              onClick={() => {
+                                if (!disabled) {
+                                  setSlippageEditing(true)
+                                }
+                              }}
+                              className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
+                            >
+                              <BiEditAlt
+                                size={16}
+                              />
+                            </button>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                    {
+                      typeof price_impact === 'number' &&
+                      (
+                        <div className="flex items-center justify-between space-x-1">
+                          <div className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
+                            Price Impact
+                          </div>
+                          <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
+                            <span>
+                              {number_format(
+                                price_impact,
+                                '0,0.000000',
+                                true,
+                              )}
+                              %
+                            </span>
+                          </span>
+                        </div>
+                      )
                     }
-                  />
+                  </div>
                 )
               }
               {
@@ -2326,6 +2505,7 @@ export default () => {
                   x_balance :
                   y_balance
                 ) &&
+                web3_provider &&
                 (
                   typeof amount === 'number' ||
                   (
@@ -2403,7 +2583,10 @@ export default () => {
                             !pair ||
                             !valid_amount
                           }
-                          onClick={() => call()}
+                          onClick={() => {
+                            setSlippageEditing(false)
+                            call()
+                          }}
                           className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-gray-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
                         >
                           <span className="flex items-center justify-center space-x-1.5">

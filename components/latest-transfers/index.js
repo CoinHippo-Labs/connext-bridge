@@ -134,7 +134,7 @@ export default ({
 
   return transfers?.length > 0 &&
     (
-      <div className="lg:max-w-xs lg:ml-auto">
+      <div className="lg:max-w-xs xl:ml-auto">
         <button
           onClick={() => setCollapse(!collapse)}
           className={`w-full flex items-center justify-center ${collapse ? 'text-slate-300 hover:text-slate-800 dark:text-slate-700 dark:hover:text-slate-200 font-medium' : 'font-semibold'} space-x-1 mb-3`}
@@ -151,33 +151,36 @@ export default ({
             />
           }
         </button>
-        {!collapse && (
-          <>
-            <div className="max-w-xl grid sm:grid-cols-2 lg:grid-cols-1 gap-4 mx-auto">
-              {transfersComponent}
-            </div>
-            {
-              address &&
-              transfers.length > NUM_TRANSFER_DISPLAY &&
-              (
-                <a
-                  href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${address}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center text-blue-500 dark:text-slate-200 mt-2.5"
-                >
-                  <span className="font-medium">
-                    See more
-                  </span>
-                  <TiArrowRight
-                    size={18}
-                    className="transform -rotate-45 mt-0.5"
-                  />
-                </a>
-              )
-            }
-          </>
-        )}
+        {
+          !collapse &&
+          (
+            <>
+              <div className="max-w-xl grid sm:grid-cols-1 lg:grid-cols-1 gap-4 mx-auto">
+                {transfersComponent}
+              </div>
+              {
+                address &&
+                transfers.length > NUM_TRANSFER_DISPLAY &&
+                (
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${address}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center text-blue-500 dark:text-slate-200 mt-2.5"
+                  >
+                    <span className="font-medium">
+                      See more
+                    </span>
+                    <TiArrowRight
+                      size={18}
+                      className="transform -rotate-45 mt-0.5"
+                    />
+                  </a>
+                )
+              }
+            </>
+          )
+        }
       </div>
     )
 }

@@ -231,18 +231,21 @@ export default ({
 
       setMintResponse(
         {
-          status: !status ?
-            'failed' :
-            'success',
+          status:
+            !status ?
+              'failed' :
+              'success',
           message:
             !status ?
-              `Failed to ${is_wrapped ?
-                'wrap' :
-                'faucet'
+              `Failed to ${
+                is_wrapped ?
+                  'wrap' :
+                  'faucet'
               }` :
-              `${is_wrapped ?
-                'Wrap' :
-                'Faucet'
+              `${
+                is_wrapped ?
+                  'Wrap' :
+                  'Faucet'
               } Successful`,
           ...response,
         }
