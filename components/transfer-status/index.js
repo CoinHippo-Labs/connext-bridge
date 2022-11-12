@@ -287,8 +287,8 @@ export default ({
             </span>
           </div>
         </div>
-        <div className="flex items-start justify-between space-x-2 my-2">
-          <div className="flex flex-col space-y-0.5">
+        <div className="flex items-start justify-between space-x-2 my-4">
+          <div className="flex flex-col space-y-1">
             {
               typeof source_amount === 'number' &&
               (
@@ -318,6 +318,7 @@ export default ({
                 {source_symbol}
               </span>
               {
+                false &&
                 source_asset_data &&
                 (
                   <AddToken
@@ -352,7 +353,7 @@ export default ({
             }
           </div>
           <div
-            className="flex flex-col items-end space-y-0.5"
+            className="flex flex-col items-end space-y-1"
             style={{ minWidth: '4rem' }}
           >
             {
@@ -384,6 +385,7 @@ export default ({
                 {destination_symbol}
               </span>
               {
+                false &&
                 destination_asset_data &&
                 (
                   <AddToken
@@ -446,7 +448,7 @@ export default ({
                     placement="top"
                     content={
                       force_slow ?
-                        `Unable to use Connext router network. Using ${source_chain_data?.name} messaging bridge.` :
+                        'Unable to leverage fast liquidity. Your transfer will still complete.' :
                         'Fast transfer enabled by Connext router network.'
                     }
                     className="z-50 bg-black text-white text-xs"
@@ -458,7 +460,7 @@ export default ({
                             90 mins
                           </span> :
                           <span className="text-green-500 dark:text-green-500">
-                            2 mins
+                            4 mins
                           </span>
                       }
                     </span>
@@ -480,19 +482,21 @@ export default ({
               <Tooltip
                 placement="top"
                 content={
-                  moment(
+                  /*moment(
                     xcall_timestamp * 1000
                   )
-                  .format('MMM D, YYYY h:mm:ss A')
+                  .format('MMM D, YYYY h:mm:ss A')*/
+                  'Transferred at'
                 }
                 className="z-50 bg-black text-white text-xs"
               >
-                <span className="text-slate-400 dark:text-slate-500 text-xs">
+                <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
                   {
                     moment(
                       xcall_timestamp * 1000
                     )
-                    .fromNow()
+                    .format('MMM D, YYYY h:mm:ss A')
+                    // .fromNow()
                   }
                 </span>
               </Tooltip>

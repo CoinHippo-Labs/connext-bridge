@@ -800,6 +800,13 @@ export default () => {
               }
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-6">
+              <div className="lg:col-span-2">
+                <Info
+                  pool={pool}
+                  user_pools_data={pools}
+                  onSelect={p => setPool(p)}
+                />
+              </div>
               <Liquidity
                 pool={pool}
                 user_pools_data={pools}
@@ -810,13 +817,6 @@ export default () => {
                   )
                 }
               />
-              <div className="lg:col-span-2">
-                <Info
-                  pool={pool}
-                  user_pools_data={pools}
-                  onSelect={p => setPool(p)}
-                />
-              </div>
             </div>
           </div>
         </div>

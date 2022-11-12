@@ -1625,7 +1625,7 @@ export default () => {
                   'success',
                 message: failed ?
                   'Failed to send transaction' :
-                  `Transferring ${symbol}. (it’s ok to close the browser)`,
+                  `Transferring ${symbol}. (It’s ok to close the browser)`,
                 tx_hash: hash,
               }
             )
@@ -2859,7 +2859,7 @@ export default () => {
                                         content={
                                           amount > liquidity_amount ||
                                           forceSlow ?
-                                            `Unable to use Connext router network. Using ${source_chain_data?.name} messaging bridge.` :
+                                            'Unable to leverage fast liquidity. Your transfer will still complete.' :
                                             'Fast transfer enabled by Connext router network.'
                                         }
                                         className="z-50 bg-black text-white text-xs"
@@ -2872,7 +2872,7 @@ export default () => {
                                                 90 minutes
                                               </span> :
                                               <span className="text-green-500 dark:text-green-500">
-                                                2 minutes
+                                                4 minutes
                                               </span>
                                           }
                                         </span>
@@ -2985,7 +2985,7 @@ export default () => {
                                     'Approving' :
                                     'Please Approve' :
                                   callProcessing ?
-                                    `Transferring ${source_symbol}. Please wait.` :
+                                    'Transfer in progress...' :
                                     typeof approving === 'boolean' ?
                                       'Please Confirm' :
                                       'Checking Approval' :
