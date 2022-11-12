@@ -1027,6 +1027,13 @@ export default () => {
 
       let failed = false
 
+      const _decimals =
+        (origin === 'x' ?
+          x_asset_data :
+          y_asset_data
+        )?.decimals ||
+        18
+
       let minDy = 0
 
       if (!amount) {
@@ -1035,13 +1042,6 @@ export default () => {
         setApproving(false)
       }
       else {
-        const decimals =
-          (origin === 'x' ?
-            x_asset_data :
-            y_asset_data
-          )?.decimals ||
-          18
-
         minDy =
           parseFloat(
             (
@@ -1056,14 +1056,14 @@ export default () => {
               ) /
               100
             )
-            .toFixed(decimals)
+            .toFixed(_decimals)
           )
 
         amount =
           utils.parseUnits(
             amount
               .toString(),
-            decimals,
+            _decimals,
           )
           .toString()
       }
@@ -1072,7 +1072,7 @@ export default () => {
         utils.parseUnits(
           minDy
             .toString(),
-          decimals,
+          _decimals,
         )
         .toString()
 
