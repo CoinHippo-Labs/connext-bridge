@@ -47,6 +47,7 @@
     "postcss-preset-env": "^7.8.2",
     "react": "18.2.0",
     "react-copy-to-clipboard": "^5.1.0",
+    "react-countdown-circle-timer": "^3.0.9",
     "react-debounce-input": "^3.3.0",
     "react-dom": "18.2.0",
     "react-gtm-module": "^2.0.11",

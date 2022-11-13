@@ -8,9 +8,10 @@ import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
 import { TailSpin, Oval } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { Tooltip } from '@material-tailwind/react'
+import { CountdownCircleTimer } from 'react-countdown-circle-timer'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
-import { HiSwitchHorizontal, HiOutlineDocumentSearch } from 'react-icons/hi'
+import { HiSwitchHorizontal, HiOutlineDocumentSearch, HiOutlineCheckCircle } from 'react-icons/hi'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit, BiEditAlt, BiCheckCircle, BiChevronDown, BiChevronUp, BiBook } from 'react-icons/bi'
 import { GiPartyPopper } from 'react-icons/gi'
 
@@ -22,6 +23,7 @@ import SelectChain from '../select/chain'
 import SelectAsset from '../select/asset'
 import GasPrice from '../gas-price'
 import Balance from '../balance'
+import TimeSpent from '../time-spent'
 import LatestTransfers from '../latest-transfers'
 import Faucet from '../faucet'
 import Image from '../image'
@@ -30,7 +32,7 @@ import Alert from '../alerts'
 // import Popover from '../popover'
 import Copy from '../copy'
 import meta from '../../lib/meta'
-import { params_to_obj, number_format, ellipse, equals_ignore_case, loader_color, sleep, error_patterns } from '../../lib/utils'
+import { params_to_obj, number_format, ellipse, equals_ignore_case, total_time_string, loader_color, sleep, error_patterns } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
 const ROUTER_FEE_PERCENT =
@@ -151,6 +153,8 @@ export default () => {
   const [transfersTrigger, setTransfersTrigger] = useState(null)
 
   const [latestTransfers, setLatestTransfers] = useState([])
+  const [openTransferStatus, setOpenTransferStatus] = useState(false)
+  const [timeTrigger, setTimeTrigger] = useState(false)
 
   // get bridge from path
   useEffect(() => {
@@ -895,11 +899,21 @@ export default () => {
               XTransferStatus.CompletedSlow,
             ].includes(status)
           ) {
-            setApproveResponse(null)
-            setXcall(null)
-            setXcallResponse(null)
-
             reset('finish')
+
+            setLatestTransfers(
+              _.orderBy(
+                _.uniqBy(
+                  _.concat(
+                    transfer_data,
+                    latestTransfers,
+                  ),
+                  'xcall_transaction_hash',
+                ),
+                ['xcall_timestamp'],
+                ['desc'],
+              )
+            )
           }
           else if (transfer_data?.transfer_id) {
             setXcall(
@@ -937,11 +951,21 @@ export default () => {
                 XTransferStatus.CompletedSlow,
               ].includes(status)
             ) {
-              setApproveResponse(null)
-              setXcall(null)
-              setXcallResponse(null)
-
               reset('finish')
+
+              setLatestTransfers(
+                _.orderBy(
+                  _.uniqBy(
+                    _.concat(
+                      transfer_data,
+                      latestTransfers,
+                    ),
+                    'xcall_transaction_hash',
+                  ),
+                  ['xcall_timestamp'],
+                  ['desc'],
+                )
+              )
             }
           }
         }
@@ -958,6 +982,31 @@ export default () => {
 
     return () => clearInterval(interval)
   }, [sdk, address, xcall])
+
+  // trigger render latest transfer
+  useEffect(() => {
+    setTimeTrigger(!timeTrigger)
+  }, [openTransferStatus])
+
+  // render latest transfer status
+  useEffect(() => {
+    const update = () => {
+      if (
+        openTransferStatus &&
+        latest_transfer
+      ) {
+        setTimeTrigger(!timeTrigger)
+      }
+    }
+
+    const timeout =
+      setTimeout(() => 
+        update(),
+        1 * 1000,
+      )
+
+    return () => clearTimeout(timeout)
+  }, [timeTrigger])
 
   const getBalances = chain => {
     const getBalance = async (
@@ -1720,35 +1769,41 @@ export default () => {
 
             if (!failed) {
               setLatestTransfers(
-                _.uniqBy(
-                  _.concat(
-                    {
-                      xcall_transaction_hash:
-                        transactionHash ||
-                        hash,
-                      xcall_timestamp:
-                        moment()
-                          .unix(),
-                      origin_chain: source_chain_data?.chain_id,
-                      origin_domain: xcallParams.origin,
-                      origin_transacting_asset: xcallParams.asset,
-                      origin_transacting_amount: Number(xcallParams.amount),
-                      destination_chain: destination_chain_data?.chain_id,
-                      destination_domain: xcallParams.destination,
-                      destination_transacting_asset:
-                        receiveLocal ?
-                          destination_contract_data?.next_asset?.contract_address ||
-                          destination_contract_data?.contract_address :
-                          destination_contract_data?.contract_address,
-                      to: xcallParams.to,
-                      force_slow: forceSlow,
-                      receive_local: receiveLocal,
-                    },
-                    latestTransfers,
+                _.orderBy(
+                  _.uniqBy(
+                    _.concat(
+                      {
+                        xcall_transaction_hash:
+                          transactionHash ||
+                          hash,
+                        xcall_timestamp:
+                          moment()
+                            .unix(),
+                        origin_chain: source_chain_data?.chain_id,
+                        origin_domain: xcallParams.origin,
+                        origin_transacting_asset: xcallParams.asset,
+                        origin_transacting_amount: Number(xcallParams.amount),
+                        destination_chain: destination_chain_data?.chain_id,
+                        destination_domain: xcallParams.destination,
+                        destination_transacting_asset:
+                          receiveLocal ?
+                            destination_contract_data?.next_asset?.contract_address ||
+                            destination_contract_data?.contract_address :
+                            destination_contract_data?.contract_address,
+                        to: xcallParams.to,
+                        force_slow: forceSlow,
+                        receive_local: receiveLocal,
+                      },
+                      latestTransfers,
+                    ),
+                    'xcall_transaction_hash',
                   ),
-                  'xcall_transaction_hash',
+                  ['xcall_timestamp'],
+                  ['desc'],
                 )
               )
+
+              setOpenTransferStatus(true)
             }
           }
         } catch (error) {
@@ -2009,6 +2064,22 @@ export default () => {
     to ||
     address
 
+  const latest_transfer = _.head(latestTransfers)
+  const estimated_time_seconds =
+    latest_transfer?.force_slow ?
+      5400 :
+      240
+  const time_spent_seconds =
+    moment()
+      .diff(
+        moment(
+          latest_transfer?.xcall_timestamp ?
+            latest_transfer.xcall_timestamp * 1000 :
+            undefined
+        ),
+        'seconds',
+      )
+
   const disabled =
     calling ||
     approving
@@ -2075,204 +2146,317 @@ export default () => {
                 onChange={o => setOptions(o)}
               />
             </div>
-            <div
-              className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-8 sm:pt-10 pb-6 sm:pb-8 px-4 sm:px-6"
-              style={
-                checkSupport() ?
-                  {
-                    boxShadow,
-                    WebkitBoxShadow: boxShadow,
-                    MozBoxShadow: boxShadow,
-                  } :
-                  undefined
-              }
-            >
-              <div className="space-y-2">
-                <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
-                  <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start space-y-0.5 sm:space-y-0">
-                    <div className="w-32 sm:w-48 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
-                      <span className="tracking-normal text-slate-600 dark:text-slate-200 font-medium text-left">
-                        From
-                      </span>
-                      {/*<GasPrice
-                        chainId={source_chain_data?.chain_id}
-                        dummy={true}
-                        iconSize={18}
-                        className="text-xs"
-                      />*/}
-                    </div>
-                    <SelectChain
-                      disabled={disabled}
-                      value={source_chain}
-                      onSelect={c => {
-                        const _source_chain = c
-                        const _destination_chain =
-                          c === destination_chain ?
-                            source_chain :
-                            destination_chain
-
-                        setBridge(
-                          {
-                            ...bridge,
-                            source_chain: _source_chain,
-                            destination_chain: _destination_chain,
-                            symbol:
-                              equals_ignore_case(
-                                _source_chain,
-                                source_chain,
-                              ) ?
-                                symbol :
-                                undefined,
-                          }
-                        )
-
-                        getBalances(_source_chain)
-                        getBalances(_destination_chain)
-                      }}
-                      source={source_chain}
-                      destination={destination_chain}
-                      origin="from"
-                    />
-                  </div>
-                  <div className="flex items-center justify-center mt-5 sm:mt-5">
+            {
+              openTransferStatus &&
+              latest_transfer ?
+                <div className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-5 sm:pt-6 pb-6 sm:pb-7 px-4 sm:px-6">
+                  <div className="flex items-center justify-between space-x-2">
+                    <span className="text-lg font-semibold">
+                      Transfer status
+                    </span>
                     <button
-                      disabled={disabled}
                       onClick={() => {
-                        if (!disabled) {
-                          setBridge(
-                            {
-                              ...bridge,
-                              source_chain: destination_chain,
-                              destination_chain: source_chain,
-                              amount: null,
-                            }
-                          )
-
-                          setButtonDirection(
-                            buttonDirection * -1
-                          )
-
-                          getBalances(source_chain)
-                          getBalances(destination_chain)
-                        }
+                        setXcall(null)
+                        setOpenTransferStatus(false)
                       }}
-                      className={/*`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out */`bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full sm:border dark:border-slate-800 flex items-center justify-center p-1.5 sm:p-2.5`}
                     >
-                      <HiSwitchHorizontal
-                        size={18}
-                        style={
-                          buttonDirection < 0 ?
-                            {
-                              transform: 'scaleX(-1)',
-                            } :
-                            undefined
-                        }
+                      <MdClose
+                        size={20}
                       />
-                      {/*<div className="flex sm:hidden">
-                        <Image
-                          src="/logos/logo.png"
-                          alt=""
-                          width={24}
-                          height={24}
-                        />
-                      </div>
-                      <div className="hidden sm:flex">
-                        <Image
-                          src="/logos/logo.png"
-                          alt=""
-                          width={32}
-                          height={32}
-                        />
-                      </div>*/}
                     </button>
                   </div>
-                  <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end space-y-0.5 sm:space-y-0">
-                    <div className="w-32 sm:w-48 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
-                      <span className="tracking-normal text-slate-600 dark:text-slate-200 font-medium text-left">
-                        To
-                      </span>
-                      {/*<GasPrice
-                        chainId={destination_chain_data?.chain_id}
-                        dummy={true}
-                        iconSize={18}
-                        className="text-xs"
-                      />*/}
-                    </div>
-                    <SelectChain
-                      disabled={disabled}
-                      value={destination_chain}
-                      onSelect={c => {
-                        const _source_chain = c === source_chain ?
-                          destination_chain :
-                          source_chain
-                        const _destination_chain = c
-
-                        setBridge(
-                          {
-                            ...bridge,
-                            source_chain: _source_chain,
-                            destination_chain: _destination_chain,
-                          }
-                        )
-
-                        getBalances(_source_chain)
-                        getBalances(_destination_chain)
-                      }}
-                      source={source_chain}
-                      destination={destination_chain}
-                      origin="to"
-                    />
-                  </div>
-                </div>
-                {/*<div className="space-y-2">
-                  <div className="tracking-normal text-slate-600 dark:text-slate-200 font-medium">
-                    Asset
-                  </div>
-                  <SelectBridgeAsset
-                    disabled={disabled}
-                    value={asset}
-                    onSelect={a => {
-                      setBridge(
-                        {
-                          ...bridge,
-                          asset: a,
-                          amount:
-                            a !== asset ?
-                              null :
-                              amount,
+                  <div className="flex items-center justify-center">
+                    {latest_transfer.execute_transaction_hash ?
+                      <a
+                        href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', latest_transfer.execute_transaction_hash)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex flex-col items-center space-y-1.5"
+                      >
+                        <HiOutlineCheckCircle
+                          size={72}
+                          className="text-green-500 dark:text-green-400"
+                        />
+                        <span className="text-xl font-semibold">
+                          Completed
+                        </span>
+                      </a> :
+                      <CountdownCircleTimer
+                        isPlaying
+                        duration={estimated_time_seconds}
+                        colors={
+                          latest_transfer.force_slow ?
+                            '#facc15' :
+                            '#22c55e'
                         }
-                      )
-
-                      if (a !== asset) {
-                        getBalances(source_chain)
-                        getBalances(destination_chain)
-                      }
-                    }}
-                    source_chain={source_chain}
-                    destination_chain={destination_chain}
-                  />
-                </div>*/}
-                <div className="space-y-2">
-                  <div className="tracking-normal text-slate-600 dark:text-slate-200 font-medium">
-                    Amount
+                        size={140}
+                      >
+                        {({ remainingTime }) => (
+                          time_spent_seconds > estimated_time_seconds ?
+                            <span className="text-sm font-semibold">
+                              Processing ...
+                            </span> :
+                            <div className="flex flex-col items-center space-y-1">
+                              <span className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                Time left
+                              </span>
+                              <span className="text-lg font-semibold">
+                                {total_time_string(
+                                  time_spent_seconds,
+                                  estimated_time_seconds,
+                                )}
+                              </span>
+                            </div>
+                        )}
+                      </CountdownCircleTimer>
+                    }
                   </div>
-                  <div className="bg-slate-100 dark:bg-gray-800 dark:bg-opacity-50 rounded-lg space-y-0.5 py-3.5 px-3">
-                    <div className="flex items-center justify-between space-x-2">
-                      <SelectAsset
+                  <div className="flex flex-col items-center space-y-2">
+                    <div> 
+                      {latest_transfer.execute_transaction_hash ?
+                        <span className="text-lg font-semibold">
+                          Funds received!
+                        </span> :
+                        <div className="flex flex-wrap items-center text-lg font-semibold space-x-1.5">
+                          <span>
+                            Sending
+                          </span>
+                          <span>
+                            {number_format(
+                              amount,
+                              '0,0.00000000',
+                              true,
+                            )}
+                          </span>
+                          <div className="flex flex-wrap items-center space-x-1.5">
+                            {
+                              (
+                                source_contract_data?.image ||
+                                source_asset_data?.image
+                              ) &&
+                              (
+                                <Image
+                                  src={
+                                    source_contract_data?.image ||
+                                    source_asset_data?.image
+                                  }
+                                  alt=""
+                                  width={24}
+                                  height={24}
+                                  className="rounded-full"
+                                />
+                              )
+                            }
+                            <span>
+                              {source_symbol}
+                            </span>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                    <span className="text-slate-500 dark:text-slate-500 text-xs sm:text-sm font-medium">
+                      {latest_transfer.execute_transaction_hash ?
+                        null :
+                        <div className="flex flex-col items-center space-y-1">
+                          {time_spent_seconds > estimated_time_seconds ?
+                            <span className="text-center">
+                              Your assets are on the way! We will keep you informed.
+                            </span> :
+                            <div className="flex flex-wrap items-center justify-center space-x-1">
+                              <span>
+                                Your funds will arrive at the destination in about
+                              </span>
+                              <TimeSpent
+                                from_time={time_spent_seconds}
+                                to_time={estimated_time_seconds}
+                                no_tooltip={true}
+                                className="text-black dark:text-white font-semibold"
+                              />
+                              .
+                            </div>
+                          }
+                          <span className="text-center">
+                            If you close this window, your transaction will still be processed.
+                          </span>
+                        </div>
+                      }
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setXcall(null)
+                      setOpenTransferStatus(false)
+                    }}
+                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-lg font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                  >
+                    <span>
+                      Got it
+                    </span>
+                  </button>
+                </div> :
+                <div
+                  className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-8 sm:pt-10 pb-6 sm:pb-8 px-4 sm:px-6"
+                  style={
+                    checkSupport() ?
+                      {
+                        boxShadow,
+                        WebkitBoxShadow: boxShadow,
+                        MozBoxShadow: boxShadow,
+                      } :
+                      undefined
+                  }
+                >
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
+                      <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start space-y-0.5 sm:space-y-0">
+                        <div className="w-32 sm:w-48 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
+                          <span className="tracking-normal text-slate-600 dark:text-slate-200 font-medium text-left">
+                            From
+                          </span>
+                          {/*<GasPrice
+                            chainId={source_chain_data?.chain_id}
+                            dummy={true}
+                            iconSize={18}
+                            className="text-xs"
+                          />*/}
+                        </div>
+                        <SelectChain
+                          disabled={disabled}
+                          value={source_chain}
+                          onSelect={c => {
+                            const _source_chain = c
+                            const _destination_chain =
+                              c === destination_chain ?
+                                source_chain :
+                                destination_chain
+
+                            setBridge(
+                              {
+                                ...bridge,
+                                source_chain: _source_chain,
+                                destination_chain: _destination_chain,
+                                symbol:
+                                  equals_ignore_case(
+                                    _source_chain,
+                                    source_chain,
+                                  ) ?
+                                    symbol :
+                                    undefined,
+                              }
+                            )
+
+                            getBalances(_source_chain)
+                            getBalances(_destination_chain)
+                          }}
+                          source={source_chain}
+                          destination={destination_chain}
+                          origin="from"
+                        />
+                      </div>
+                      <div className="flex items-center justify-center mt-5 sm:mt-5">
+                        <button
+                          disabled={disabled}
+                          onClick={() => {
+                            if (!disabled) {
+                              setBridge(
+                                {
+                                  ...bridge,
+                                  source_chain: destination_chain,
+                                  destination_chain: source_chain,
+                                  amount: null,
+                                }
+                              )
+
+                              setButtonDirection(
+                                buttonDirection * -1
+                              )
+
+                              getBalances(source_chain)
+                              getBalances(destination_chain)
+                            }
+                          }}
+                          className={/*`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out */`bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full sm:border dark:border-slate-800 flex items-center justify-center p-1.5 sm:p-2.5`}
+                        >
+                          <HiSwitchHorizontal
+                            size={18}
+                            style={
+                              buttonDirection < 0 ?
+                                {
+                                  transform: 'scaleX(-1)',
+                                } :
+                                undefined
+                            }
+                          />
+                          {/*<div className="flex sm:hidden">
+                            <Image
+                              src="/logos/logo.png"
+                              alt=""
+                              width={24}
+                              height={24}
+                            />
+                          </div>
+                          <div className="hidden sm:flex">
+                            <Image
+                              src="/logos/logo.png"
+                              alt=""
+                              width={32}
+                              height={32}
+                            />
+                          </div>*/}
+                        </button>
+                      </div>
+                      <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end space-y-0.5 sm:space-y-0">
+                        <div className="w-32 sm:w-48 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
+                          <span className="tracking-normal text-slate-600 dark:text-slate-200 font-medium text-left">
+                            To
+                          </span>
+                          {/*<GasPrice
+                            chainId={destination_chain_data?.chain_id}
+                            dummy={true}
+                            iconSize={18}
+                            className="text-xs"
+                          />*/}
+                        </div>
+                        <SelectChain
+                          disabled={disabled}
+                          value={destination_chain}
+                          onSelect={c => {
+                            const _source_chain = c === source_chain ?
+                              destination_chain :
+                              source_chain
+                            const _destination_chain = c
+
+                            setBridge(
+                              {
+                                ...bridge,
+                                source_chain: _source_chain,
+                                destination_chain: _destination_chain,
+                              }
+                            )
+
+                            getBalances(_source_chain)
+                            getBalances(_destination_chain)
+                          }}
+                          source={source_chain}
+                          destination={destination_chain}
+                          origin="to"
+                        />
+                      </div>
+                    </div>
+                    {/*<div className="space-y-2">
+                      <div className="tracking-normal text-slate-600 dark:text-slate-200 font-medium">
+                        Asset
+                      </div>
+                      <SelectBridgeAsset
                         disabled={disabled}
                         value={asset}
-                        onSelect={(a, s) => {
+                        onSelect={a => {
                           setBridge(
                             {
                               ...bridge,
                               asset: a,
-                              symbol: s,
                               amount:
-                                a !== asset ||
-                                !equals_ignore_case(
-                                  s,
-                                  symbol
-                                ) ?
+                                a !== asset ?
                                   null :
                                   amount,
                             }
@@ -2283,551 +2467,543 @@ export default () => {
                             getBalances(destination_chain)
                           }
                         }}
-                        chain={source_chain}
-                        origin=""
-                        is_bridge={true}
-                        data={{
-                          ...source_asset_data,
-                          ...source_contract_data,
-                        }}
-                        className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
+                        source_chain={source_chain}
+                        destination_chain={destination_chain}
                       />
-                      <DebounceInput
-                        debounceTimeout={500}
-                        size="small"
-                        type="number"
-                        placeholder="0.00"
-                        disabled={
-                          disabled ||
-                          !asset
-                        }
-                        value={
-                          typeof amount === 'number' &&
-                          amount >= 0 ?
-                            number_format(
-                              amount,
-                              '0.00000000',
-                              true,
-                            ) :
-                            ''
-                        }
-                        onChange={e => {
-                          const regex = /^[0-9.\b]+$/
-
-                          let value
-
-                          if (
-                            e.target.value === '' ||
-                            regex.test(e.target.value)
-                          ) {
-                            value = e.target.value
-                          }
-
-                          value =
-                            value < 0 ?
-                              0 :
-                              value &&
-                              !isNaN(value) ?
-                                parseFloat(
-                                  Number(value)
-                                    .toFixed(source_decimals)
-                                ) :
-                                value
-
-                          setBridge(
-                            {
-                              ...bridge,
-                              amount:
-                                typeof value === 'number' ?
-                                  value :
-                                  null,
-                            }
-                          )
-                        }}
-                        onWheel={e => e.target.blur()}
-                        onKeyDown={e =>
-                          [
-                            'e',
-                            'E',
-                            '-',
-                          ].includes(e.key) &&
-                          e.preventDefault()
-                        }
-                        className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5`}
-                      />
-                    </div>
-                    {
-                      source_chain_data &&
-                      asset &&
-                      (
+                    </div>*/}
+                    <div className="space-y-2">
+                      <div className="tracking-normal text-slate-600 dark:text-slate-200 font-medium">
+                        Amount
+                      </div>
+                      <div className="bg-slate-100 dark:bg-gray-800 dark:bg-opacity-50 rounded-lg space-y-0.5 py-3.5 px-3">
                         <div className="flex items-center justify-between space-x-2">
-                          <div className="flex items-center space-x-1">
-                            <div className="tracking-normal text-slate-400 dark:text-slate-500 text-sm font-medium">
-                              Balance:
-                            </div>
-                            <button
-                              disabled={disabled}
-                              onClick={() => {
-                                if (max_amount > 0) {
-                                  setBridge(
-                                    {
-                                      ...bridge,
-                                      amount: max_amount,
-                                    }
-                                  )
+                          <SelectAsset
+                            disabled={disabled}
+                            value={asset}
+                            onSelect={(a, s) => {
+                              setBridge(
+                                {
+                                  ...bridge,
+                                  asset: a,
+                                  symbol: s,
+                                  amount:
+                                    a !== asset ||
+                                    !equals_ignore_case(
+                                      s,
+                                      symbol
+                                    ) ?
+                                      null :
+                                      amount,
                                 }
-                              }}
-                            >
-                              <Balance
-                                chainId={source_chain_data.chain_id}
-                                asset={asset}
-                                contractAddress={source_contract_data?.contract_address}
-                                decimals={source_decimals}
-                                symbol={source_symbol}
-                                hideSymbol={true}
-                                trigger={balanceTrigger}
-                              />
-                            </button>
-                          </div>
-                          {
-                            destination_chain &&
-                            !checkSupport() ?
-                            <div className="text-slate-400 dark:text-slate-500">
-                              Route not supported
-                            </div> :
-                            address &&
-                            (
-                              <button
-                                disabled={disabled}
-                                onClick={() => {
-                                  setBridge(
-                                    {
-                                      ...bridge,
-                                      amount: max_amount,
-                                    }
-                                  )
-                                }}
-                                className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-sm font-medium`}
-                              >
-                                Select Max
-                              </button>
-                            )
-                          }
-                        </div>
-                      )
-                    }
-                  </div>
-                </div>
-              </div>
-              {
-                source_chain &&
-                destination_chain &&
-                asset &&
-                !checkSupport() ?
-                  <div className="tracking-normal text-slate-400 dark:text-slate-200 font-medium text-center">
-                    Route not supported
-                  </div> :
-                  <>
-                    {/*<div className="grid grid-cols-5 sm:grid-cols-5 gap-6">
-                      <div className="col-span-2 sm:col-span-2 space-y-1">
-                        <div className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
-                          <span className="tracking-normal text-slate-600 dark:text-slate-200 font-medium">
-                            Amount
-                          </span>
-                          {
-                            address &&
-                            checkSupport() &&
-                            source_balance &&
-                            (
-                              <button
-                                disabled={disabled}
-                                onClick={() => {
-                                  setBridge(
-                                    {
-                                      ...bridge,
-                                      amount: max_amount,
-                                    }
-                                  )
-                                }}
-                                className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-sm font-semibold py-0.5 px-2 sm:px-2.5"
-                              >
-                                Max
-                              </button> ||
-                              <Popover
-                                placement="bottom"
-                                disabled={disabled}
-                                onClick={() => {
-                                  setBridge(
-                                    {
-                                      ...bridge,
-                                      amount: max_amount,
-                                    }
-                                  )
-                                }}
-                                title={<div className="flex items-center justify-between space-x-1">
-                                  <span className="font-bold">
-                                    {source_symbol}
-                                  </span>
-                                  <span className="font-semibold">
-                                    Transfers size
-                                  </span>
-                                </div>}
-                                content={<div className="flex flex-col space-y-1">
-                                  <div className="flex items-center justify-between space-x-2.5">
-                                    <span className="font-medium">
-                                      Balance:
-                                    </span>
-                                    <span className="font-semibold">
-                                      {typeof source_amount === 'number' ?
-                                        number_format(
-                                          source_amount,
-                                          source_amount > 1000 ?
-                                            '0,0.00' :
-                                            '0,0.00000000',
-                                          true,
-                                        ) :
-                                        'n/a'
-                                      }
-                                    </span>
-                                  </div>
-                                  <div className="flex items-start justify-between space-x-2.5 pb-1">
-                                    <span className="font-medium">
-                                      Liquidity:
-                                    </span>
-                                    <span className="font-semibold">
-                                      {typeof liquidity_amount === 'number' ?
-                                        number_format(
-                                          liquidity_amount,
-                                          liquidity_amount > 1000 ?
-                                            '0,0.00' :
-                                            '0,0.00000000',
-                                          true,
-                                        ) :
-                                        'n/a'
-                                      }
-                                    </span>
-                                  </div>
-                                  <div className="border-t flex items-center justify-between space-x-2.5 pt-2">
-                                    <span className="font-semibold">
-                                      Max:
-                                    </span>
-                                    <span className="font-semibold">
-                                      {typeof max_amount === 'number' ?
-                                        number_format(
-                                          max_amount,
-                                          max_amount > 1000 ?
-                                            '0,0.00' :
-                                            '0,0.00000000',
-                                          true,
-                                        ) :
-                                        'n/a'
-                                      }
-                                    </span>
-                                  </div>
-                                </div>}
-                                className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
-                                titleClassName="normal-case py-1.5"
-                              >
-                                Max
-                              </Popover>
-                            )
-                          }
+                              )
+
+                              if (a !== asset) {
+                                getBalances(source_chain)
+                                getBalances(destination_chain)
+                              }
+                            }}
+                            chain={source_chain}
+                            origin=""
+                            is_bridge={true}
+                            data={{
+                              ...source_asset_data,
+                              ...source_contract_data,
+                            }}
+                            className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
+                          />
+                          <DebounceInput
+                            debounceTimeout={500}
+                            size="small"
+                            type="number"
+                            placeholder="0.00"
+                            disabled={
+                              disabled ||
+                              !asset
+                            }
+                            value={
+                              typeof amount === 'number' &&
+                              amount >= 0 ?
+                                number_format(
+                                  amount,
+                                  '0.00000000',
+                                  true,
+                                ) :
+                                ''
+                            }
+                            onChange={e => {
+                              const regex = /^[0-9.\b]+$/
+
+                              let value
+
+                              if (
+                                e.target.value === '' ||
+                                regex.test(e.target.value)
+                              ) {
+                                value = e.target.value
+                              }
+
+                              value =
+                                value < 0 ?
+                                  0 :
+                                  value &&
+                                  !isNaN(value) ?
+                                    parseFloat(
+                                      Number(value)
+                                        .toFixed(source_decimals)
+                                    ) :
+                                    value
+
+                              setBridge(
+                                {
+                                  ...bridge,
+                                  amount:
+                                    typeof value === 'number' ?
+                                      value :
+                                      null,
+                                }
+                              )
+                            }}
+                            onWheel={e => e.target.blur()}
+                            onKeyDown={e =>
+                              [
+                                'e',
+                                'E',
+                                '-',
+                              ].includes(e.key) &&
+                              e.preventDefault()
+                            }
+                            className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5`}
+                          />
                         </div>
                         {
                           source_chain_data &&
                           asset &&
                           (
-                            <div className="flex items-center space-x-1">
-                              <div className="tracking-normal text-slate-400 dark:text-slate-500 text-sm font-medium">
-                                Balance:
+                            <div className="flex items-center justify-between space-x-2">
+                              <div className="flex items-center space-x-1">
+                                <div className="tracking-normal text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                  Balance:
+                                </div>
+                                <button
+                                  disabled={disabled}
+                                  onClick={() => {
+                                    if (max_amount > 0) {
+                                      setBridge(
+                                        {
+                                          ...bridge,
+                                          amount: max_amount,
+                                        }
+                                      )
+                                    }
+                                  }}
+                                >
+                                  <Balance
+                                    chainId={source_chain_data.chain_id}
+                                    asset={asset}
+                                    contractAddress={source_contract_data?.contract_address}
+                                    decimals={source_decimals}
+                                    symbol={source_symbol}
+                                    hideSymbol={true}
+                                    trigger={balanceTrigger}
+                                  />
+                                </button>
                               </div>
-                              <button
-                                disabled={disabled}
-                                onClick={() => {
-                                  if (max_amount > 0) {
-                                    setBridge(
-                                      {
-                                        ...bridge,
-                                        amount: max_amount,
-                                      }
-                                    )
-                                  }
-                                }}
-                              >
-                                <Balance
-                                  chainId={source_chain_data.chain_id}
-                                  asset={asset}
-                                  contractAddress={source_contract_data?.contract_address}
-                                  decimals={source_decimals}
-                                  symbol={source_symbol}
-                                  hideSymbol={true}
-                                  trigger={balanceTrigger}
-                                />
-                              </button>
+                              {
+                                destination_chain &&
+                                !checkSupport() ?
+                                <div className="text-slate-400 dark:text-slate-500">
+                                  Route not supported
+                                </div> :
+                                address &&
+                                (
+                                  <button
+                                    disabled={disabled}
+                                    onClick={() => {
+                                      setBridge(
+                                        {
+                                          ...bridge,
+                                          amount: max_amount,
+                                        }
+                                      )
+                                    }}
+                                    className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-sm font-medium`}
+                                  >
+                                    Select Max
+                                  </button>
+                                )
+                              }
                             </div>
                           )
                         }
                       </div>
-                      <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end">
-                        <DebounceInput
-                          debounceTimeout={500}
-                          size="small"
-                          type="number"
-                          placeholder="0.00"
-                          disabled={
-                            disabled ||
-                            !asset
-                          }
-                          value={
-                            typeof amount === 'number' &&
-                            amount >= 0 ?
-                              number_format(
-                                amount,
-                                '0.00000000',
-                                true,
-                              ) :
-                              ''
-                          }
-                          onChange={e => {
-                            const regex = /^[0-9.\b]+$/
-
-                            let value
-
-                            if (
-                              e.target.value === '' ||
-                              regex.test(e.target.value)
-                            ) {
-                              value = e.target.value
-                            }
-
-                            value =
-                              value < 0 ?
-                                0 :
-                                value &&
-                                !isNaN(value) ?
-                                  parseFloat(
-                                    Number(value)
-                                      .toFixed(source_decimals)
-                                  ) :
-                                  value
-
-                            setBridge(
+                    </div>
+                  </div>
+                  {
+                    source_chain &&
+                    destination_chain &&
+                    asset &&
+                    !checkSupport() ?
+                      <div className="tracking-normal text-slate-400 dark:text-slate-200 font-medium text-center">
+                        Route not supported
+                      </div> :
+                      <>
+                        {/*<div className="grid grid-cols-5 sm:grid-cols-5 gap-6">
+                          <div className="col-span-2 sm:col-span-2 space-y-1">
+                            <div className="flex items-center justify-start sm:justify-start space-x-1 sm:space-x-2.5">
+                              <span className="tracking-normal text-slate-600 dark:text-slate-200 font-medium">
+                                Amount
+                              </span>
                               {
-                                ...bridge,
-                                amount:
-                                  typeof value === 'number' ?
-                                    value :
-                                    null,
+                                address &&
+                                checkSupport() &&
+                                source_balance &&
+                                (
+                                  <button
+                                    disabled={disabled}
+                                    onClick={() => {
+                                      setBridge(
+                                        {
+                                          ...bridge,
+                                          amount: max_amount,
+                                        }
+                                      )
+                                    }}
+                                    className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-sm font-semibold py-0.5 px-2 sm:px-2.5"
+                                  >
+                                    Max
+                                  </button> ||
+                                  <Popover
+                                    placement="bottom"
+                                    disabled={disabled}
+                                    onClick={() => {
+                                      setBridge(
+                                        {
+                                          ...bridge,
+                                          amount: max_amount,
+                                        }
+                                      )
+                                    }}
+                                    title={<div className="flex items-center justify-between space-x-1">
+                                      <span className="font-bold">
+                                        {source_symbol}
+                                      </span>
+                                      <span className="font-semibold">
+                                        Transfers size
+                                      </span>
+                                    </div>}
+                                    content={<div className="flex flex-col space-y-1">
+                                      <div className="flex items-center justify-between space-x-2.5">
+                                        <span className="font-medium">
+                                          Balance:
+                                        </span>
+                                        <span className="font-semibold">
+                                          {typeof source_amount === 'number' ?
+                                            number_format(
+                                              source_amount,
+                                              source_amount > 1000 ?
+                                                '0,0.00' :
+                                                '0,0.00000000',
+                                              true,
+                                            ) :
+                                            'n/a'
+                                          }
+                                        </span>
+                                      </div>
+                                      <div className="flex items-start justify-between space-x-2.5 pb-1">
+                                        <span className="font-medium">
+                                          Liquidity:
+                                        </span>
+                                        <span className="font-semibold">
+                                          {typeof liquidity_amount === 'number' ?
+                                            number_format(
+                                              liquidity_amount,
+                                              liquidity_amount > 1000 ?
+                                                '0,0.00' :
+                                                '0,0.00000000',
+                                              true,
+                                            ) :
+                                            'n/a'
+                                          }
+                                        </span>
+                                      </div>
+                                      <div className="border-t flex items-center justify-between space-x-2.5 pt-2">
+                                        <span className="font-semibold">
+                                          Max:
+                                        </span>
+                                        <span className="font-semibold">
+                                          {typeof max_amount === 'number' ?
+                                            number_format(
+                                              max_amount,
+                                              max_amount > 1000 ?
+                                                '0,0.00' :
+                                                '0,0.00000000',
+                                              true,
+                                            ) :
+                                            'n/a'
+                                          }
+                                        </span>
+                                      </div>
+                                    </div>}
+                                    className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
+                                    titleClassName="normal-case py-1.5"
+                                  >
+                                    Max
+                                  </Popover>
+                                )
                               }
-                            )
-                          }}
-                          onWheel={e => e.target.blur()}
-                          onKeyDown={e =>
-                            [
-                              'e',
-                              'E',
-                              '-',
-                            ].includes(e.key) &&
-                            e.preventDefault()
-                          }
-                          className={`w-36 sm:w-48 bg-gray-200 focus:bg-gray-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
-                        />
-                      </div>
-                    </div>*/}
-                    {
-                      (
-                        (
-                          true ||
-                          typeof estimate_received === 'number'
-                        ) &&
-                        (
-                          checkSupport() &&
+                            </div>
+                            {
+                              source_chain_data &&
+                              asset &&
+                              (
+                                <div className="flex items-center space-x-1">
+                                  <div className="tracking-normal text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                    Balance:
+                                  </div>
+                                  <button
+                                    disabled={disabled}
+                                    onClick={() => {
+                                      if (max_amount > 0) {
+                                        setBridge(
+                                          {
+                                            ...bridge,
+                                            amount: max_amount,
+                                          }
+                                        )
+                                      }
+                                    }}
+                                  >
+                                    <Balance
+                                      chainId={source_chain_data.chain_id}
+                                      asset={asset}
+                                      contractAddress={source_contract_data?.contract_address}
+                                      decimals={source_decimals}
+                                      symbol={source_symbol}
+                                      hideSymbol={true}
+                                      trigger={balanceTrigger}
+                                    />
+                                  </button>
+                                </div>
+                              )
+                            }
+                          </div>
+                          <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end">
+                            <DebounceInput
+                              debounceTimeout={500}
+                              size="small"
+                              type="number"
+                              placeholder="0.00"
+                              disabled={
+                                disabled ||
+                                !asset
+                              }
+                              value={
+                                typeof amount === 'number' &&
+                                amount >= 0 ?
+                                  number_format(
+                                    amount,
+                                    '0.00000000',
+                                    true,
+                                  ) :
+                                  ''
+                              }
+                              onChange={e => {
+                                const regex = /^[0-9.\b]+$/
+
+                                let value
+
+                                if (
+                                  e.target.value === '' ||
+                                  regex.test(e.target.value)
+                                ) {
+                                  value = e.target.value
+                                }
+
+                                value =
+                                  value < 0 ?
+                                    0 :
+                                    value &&
+                                    !isNaN(value) ?
+                                      parseFloat(
+                                        Number(value)
+                                          .toFixed(source_decimals)
+                                      ) :
+                                      value
+
+                                setBridge(
+                                  {
+                                    ...bridge,
+                                    amount:
+                                      typeof value === 'number' ?
+                                        value :
+                                        null,
+                                  }
+                                )
+                              }}
+                              onWheel={e => e.target.blur()}
+                              onKeyDown={e =>
+                                [
+                                  'e',
+                                  'E',
+                                  '-',
+                                ].includes(e.key) &&
+                                e.preventDefault()
+                              }
+                              className={`w-36 sm:w-48 bg-gray-200 focus:bg-gray-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
+                            />
+                          </div>
+                        </div>*/}
+                        {
                           (
-                            true ||
-                            (
-                              web3_provider &&
-                              amount > 0
-                            )
-                          )
-                        )
-                      ) &&
-                      (
-                        <div className="bg-slate-100 dark:bg-slate-800 rounded-lg py-3.5 px-3">
-                          {
                             (
                               true ||
                               typeof estimate_received === 'number'
                             ) &&
                             (
-                              <button
-                                onClick={() => setCollapse(!collapse)}
-                                className="w-full grid grid-cols-5 sm:grid-cols-5 gap-6"
-                              >
-                                <div className="col-span-2 sm:col-span-2">
-                                  <div className="flex items-center">
-                                    <span className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
-                                      You will receive
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="col-span-3 sm:col-span-3">
-                                  <div className="flex items-center justify-end sm:justify-end space-x-0.5 sm:space-x-1 -mr-0.5">
-                                    <div className="flex items-center space-x-2">
-                                      <span className="font-semibold">
-                                        {typeof estimate_received === 'number' ?
-                                          number_format(
-                                            estimate_received,
-                                            '0,0.00000000',
-                                            true,
-                                          ) :
-                                          '-'
-                                        }
-                                      </span>
-                                      <span className="font-semibold">
-                                        {destination_symbol}
-                                      </span>
-                                    </div>
-                                    {collapse ?
-                                      <BiChevronDown
-                                        size={18}
-                                        className="text-slate-600 dark:text-slate-200"
-                                      /> :
-                                      <BiChevronUp
-                                        size={18}
-                                        className="text-slate-600 dark:text-slate-200"
-                                      />
-                                    }
-                                  </div>
-                                </div>
-                              </button>
-                            )
-                          }
-                          {
-                            checkSupport() &&
-                            (
-                              true ||
+                              checkSupport() &&
                               (
-                                web3_provider &&
-                                amount > 0
+                                true ||
+                                (
+                                  web3_provider &&
+                                  amount > 0
+                                )
                               )
-                            ) &&
-                            (
-                              <div className={`space-y-2.5 ${typeof estimate_received === 'number' || !collapse > 0 ? 'mt-2' : 'mt-0'}`}>
-                                {
+                            )
+                          ) &&
+                          (
+                            <div className="bg-slate-100 dark:bg-slate-800 rounded-lg py-3.5 px-3">
+                              {
+                                (
+                                  true ||
+                                  typeof estimate_received === 'number'
+                                ) &&
+                                (
+                                  <button
+                                    onClick={() => setCollapse(!collapse)}
+                                    className="w-full grid grid-cols-5 sm:grid-cols-5 gap-6"
+                                  >
+                                    <div className="col-span-2 sm:col-span-2">
+                                      <div className="flex items-center">
+                                        <span className="tracking-normal whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
+                                          You will receive
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <div className="col-span-3 sm:col-span-3">
+                                      <div className="flex items-center justify-end sm:justify-end space-x-0.5 sm:space-x-1 -mr-0.5">
+                                        <div className="flex items-center space-x-2">
+                                          <span className="font-semibold">
+                                            {typeof estimate_received === 'number' ?
+                                              number_format(
+                                                estimate_received,
+                                                '0,0.00000000',
+                                                true,
+                                              ) :
+                                              '-'
+                                            }
+                                          </span>
+                                          <span className="font-semibold">
+                                            {destination_symbol}
+                                          </span>
+                                        </div>
+                                        {collapse ?
+                                          <BiChevronDown
+                                            size={18}
+                                            className="text-slate-600 dark:text-slate-200"
+                                          /> :
+                                          <BiChevronUp
+                                            size={18}
+                                            className="text-slate-600 dark:text-slate-200"
+                                          />
+                                        }
+                                      </div>
+                                    </div>
+                                  </button>
+                                )
+                              }
+                              {
+                                checkSupport() &&
+                                (
+                                  true ||
                                   (
-                                    true ||
-                                    feeEstimating ||
-                                    fee
-                                  ) &&
-                                  (
-                                    true ||
-                                    !forceSlow
-                                  ) &&
-                                  !collapse &&
-                                  (
-                                    <div className="space-y-2.5">
-                                      {
-                                        (
-                                          true ||
-                                          !receiveLocal
-                                        ) &&
-                                        (
-                                          <div className="flex items-start justify-between space-x-1">
-                                            <Tooltip
-                                              placement="top"
-                                              content="The maximum percentage you are willing to lose due to market changes."
-                                              className="z-50 bg-black text-white text-xs"
-                                            >
-                                              <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
-                                                Slippage
-                                              </div>
-                                            </Tooltip>
-                                            <div className="flex flex-col sm:items-end space-y-1.5">
-                                              {slippageEditing ?
-                                                <>
-                                                  <div className="flex items-center justify-end space-x-1.5">
-                                                    <DebounceInput
-                                                      debounceTimeout={500}
-                                                      size="small"
-                                                      type="number"
-                                                      placeholder="0.00"
-                                                      value={
-                                                        typeof slippage === 'number' &&
-                                                        slippage >= 0 ?
-                                                          slippage :
-                                                          ''
-                                                      }
-                                                      onChange={e => {
-                                                        const regex = /^[0-9.\b]+$/
-
-                                                        let value
-
-                                                        if (
-                                                          e.target.value === '' ||
-                                                          regex.test(e.target.value)
-                                                        ) {
-                                                          value = e.target.value
-                                                        }
-
-                                                        value =
-                                                          value <= 0 ||
-                                                          value > 100 ?
-                                                            DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
-                                                            value
-
-                                                        const _data = {
-                                                          ...options,
-                                                          slippage:
-                                                            value &&
-                                                            !isNaN(value) ?
-                                                            parseFloat(
-                                                              Number(value)
-                                                                .toFixed(2)
-                                                            ) :
-                                                            value,
-                                                        }
-
-                                                        console.log(
-                                                          '[Options]',
-                                                          _data,
-                                                        )
-
-                                                        setOptions(_data)
-                                                      }}
-                                                      onWheel={e => e.target.blur()}
-                                                      onKeyDown={e =>
-                                                        [
-                                                          'e',
-                                                          'E',
-                                                          '-',
-                                                        ].includes(e.key) &&
-                                                        e.preventDefault()
-                                                      }
-                                                      className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1 px-2`}
-                                                    />
-                                                    <button
-                                                      onClick={() => setSlippageEditing(false)}
-                                                      className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
-                                                    >
-                                                      <BiCheckCircle
-                                                        size={16}
-                                                      />
-                                                    </button>
+                                    web3_provider &&
+                                    amount > 0
+                                  )
+                                ) &&
+                                (
+                                  <div className={`space-y-2.5 ${typeof estimate_received === 'number' || !collapse > 0 ? 'mt-2' : 'mt-0'}`}>
+                                    {
+                                      (
+                                        true ||
+                                        feeEstimating ||
+                                        fee
+                                      ) &&
+                                      (
+                                        true ||
+                                        !forceSlow
+                                      ) &&
+                                      !collapse &&
+                                      (
+                                        <div className="space-y-2.5">
+                                          {
+                                            (
+                                              true ||
+                                              !receiveLocal
+                                            ) &&
+                                            (
+                                              <div className="flex items-start justify-between space-x-1">
+                                                <Tooltip
+                                                  placement="top"
+                                                  content="The maximum percentage you are willing to lose due to market changes."
+                                                  className="z-50 bg-black text-white text-xs"
+                                                >
+                                                  <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
+                                                    Slippage
                                                   </div>
-                                                  <div className="flex items-center space-x-1.5 -mr-1.5">
-                                                    {
-                                                      [
-                                                        3.0,
-                                                        1.0,
-                                                        0.5,
-                                                      ]
-                                                      .map((s, i) => (
-                                                        <div
-                                                          key={i}
-                                                          onClick={() => {
+                                                </Tooltip>
+                                                <div className="flex flex-col sm:items-end space-y-1.5">
+                                                  {slippageEditing ?
+                                                    <>
+                                                      <div className="flex items-center justify-end space-x-1.5">
+                                                        <DebounceInput
+                                                          debounceTimeout={500}
+                                                          size="small"
+                                                          type="number"
+                                                          placeholder="0.00"
+                                                          value={
+                                                            typeof slippage === 'number' &&
+                                                            slippage >= 0 ?
+                                                              slippage :
+                                                              ''
+                                                          }
+                                                          onChange={e => {
+                                                            const regex = /^[0-9.\b]+$/
+
+                                                            let value
+
+                                                            if (
+                                                              e.target.value === '' ||
+                                                              regex.test(e.target.value)
+                                                            ) {
+                                                              value = e.target.value
+                                                            }
+
+                                                            value =
+                                                              value <= 0 ||
+                                                              value > 100 ?
+                                                                DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
+                                                                value
+
                                                             const _data = {
                                                               ...options,
-                                                              slippage: s,
+                                                              slippage:
+                                                                value &&
+                                                                !isNaN(value) ?
+                                                                parseFloat(
+                                                                  Number(value)
+                                                                    .toFixed(2)
+                                                                ) :
+                                                                value,
                                                             }
 
                                                             console.log(
@@ -2836,463 +3012,507 @@ export default () => {
                                                             )
 
                                                             setOptions(_data)
-                                                            setSlippageEditing(false)
                                                           }}
-                                                          className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-900 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-900 hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
+                                                          onWheel={e => e.target.blur()}
+                                                          onKeyDown={e =>
+                                                            [
+                                                              'e',
+                                                              'E',
+                                                              '-',
+                                                            ].includes(e.key) &&
+                                                            e.preventDefault()
+                                                          }
+                                                          className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1 px-2`}
+                                                        />
+                                                        <button
+                                                          onClick={() => setSlippageEditing(false)}
+                                                          className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
                                                         >
-                                                          {s} %
-                                                        </div>
-                                                      ))
-                                                    }
-                                                  </div>
-                                                </> :
-                                                <div className="flex items-center space-x-1.5">
-                                                  <span className="font-semibold">
-                                                    {number_format(
-                                                      slippage,
-                                                      '0,0.00',
-                                                    )}%
-                                                  </span>
-                                                  <button
-                                                    disabled={disabled}
-                                                    onClick={() => {
-                                                      if (!disabled) {
-                                                        setSlippageEditing(true)
-                                                      }
-                                                    }}
-                                                    className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
-                                                  >
-                                                    <BiEditAlt
-                                                      size={16}
-                                                    />
-                                                  </button>
+                                                          <BiCheckCircle
+                                                            size={16}
+                                                          />
+                                                        </button>
+                                                      </div>
+                                                      <div className="flex items-center space-x-1.5 -mr-1.5">
+                                                        {
+                                                          [
+                                                            3.0,
+                                                            1.0,
+                                                            0.5,
+                                                          ]
+                                                          .map((s, i) => (
+                                                            <div
+                                                              key={i}
+                                                              onClick={() => {
+                                                                const _data = {
+                                                                  ...options,
+                                                                  slippage: s,
+                                                                }
+
+                                                                console.log(
+                                                                  '[Options]',
+                                                                  _data,
+                                                                )
+
+                                                                setOptions(_data)
+                                                                setSlippageEditing(false)
+                                                              }}
+                                                              className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-900 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-900 hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
+                                                            >
+                                                              {s} %
+                                                            </div>
+                                                          ))
+                                                        }
+                                                      </div>
+                                                    </> :
+                                                    <div className="flex items-center space-x-1.5">
+                                                      <span className="font-semibold">
+                                                        {number_format(
+                                                          slippage,
+                                                          '0,0.00',
+                                                        )}%
+                                                      </span>
+                                                      <button
+                                                        disabled={disabled}
+                                                        onClick={() => {
+                                                          if (!disabled) {
+                                                            setSlippageEditing(true)
+                                                          }
+                                                        }}
+                                                        className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
+                                                      >
+                                                        <BiEditAlt
+                                                          size={16}
+                                                        />
+                                                      </button>
+                                                    </div>
+                                                  }
                                                 </div>
-                                              }
-                                            </div>
-                                          </div>
-                                        )
-                                      }
-                                      {
-                                        (
-                                          true ||
-                                          !forceSlow
-                                        ) &&
-                                        (
-                                          <>
-                                            <div className="flex items-center justify-between space-x-1">
-                                              <Tooltip
-                                                placement="top"
-                                                content="This supports our router users providing fast liquidity."
-                                                className="z-50 bg-black text-white text-xs"
-                                              >
-                                                <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
-                                                  Bridge fee
-                                                </div>
-                                              </Tooltip>
-                                              <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
-                                                <span>
-                                                  {number_format(
-                                                    router_fee,
-                                                    '0,0.00000000',
-                                                    true,
-                                                  )}
-                                                </span>
-                                                <span>
-                                                  {source_symbol}
-                                                </span>
-                                              </span>
-                                            </div>
-                                            <div className="flex items-center justify-between space-x-1">
-                                              <Tooltip
-                                                placement="top"
-                                                content="This covers costs to execute your transfer on the destination chain."
-                                                className="z-50 bg-black text-white text-xs"
-                                              >
-                                                <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
-                                                  Destination gas fee
-                                                </div>
-                                              </Tooltip>
-                                              {
-                                                false &&
-                                                feeEstimating ?
-                                                  <div className="flex items-center space-x-1.5">
-                                                    <span className="tracking-normal text-slate-600 dark:text-slate-200 font-medium">
-                                                      estimating
-                                                    </span>
-                                                    <Oval
-                                                      color={loader_color(theme)}
-                                                      width="20"
-                                                      height="20"
-                                                    />
-                                                  </div> :
-                                                  <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
-                                                    <span>
-                                                      {number_format(
-                                                        gas_fee,
-                                                        '0,0.00000000',
-                                                        true,
-                                                      )}
-                                                    </span>
-                                                    <span>
-                                                      {source_gas_native_token?.symbol}
-                                                    </span>
-                                                  </span>
-                                              }
-                                            </div>
-                                            {
-                                              typeof price_impact === 'number' &&
-                                              (
+                                              </div>
+                                            )
+                                          }
+                                          {
+                                            (
+                                              true ||
+                                              !forceSlow
+                                            ) &&
+                                            (
+                                              <>
                                                 <div className="flex items-center justify-between space-x-1">
                                                   <Tooltip
                                                     placement="top"
-                                                    content="Price impact"
+                                                    content="This supports our router users providing fast liquidity."
                                                     className="z-50 bg-black text-white text-xs"
                                                   >
                                                     <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
-                                                      Price impact
+                                                      Bridge fee
                                                     </div>
                                                   </Tooltip>
                                                   <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
                                                     <span>
                                                       {number_format(
-                                                        price_impact,
-                                                        '0,0.00',
+                                                        router_fee,
+                                                        '0,0.00000000',
                                                         true,
-                                                      )}%
+                                                      )}
+                                                    </span>
+                                                    <span>
+                                                      {source_symbol}
                                                     </span>
                                                   </span>
                                                 </div>
-                                              )
-                                            }
-                                          </>
-                                        )
-                                      }
-                                    </div>
-                                  )
-                                }
-                                {
-                                  false &&
-                                  amount > 0 &&
-                                  (
-                                    <>
-                                      {
-                                        asset_balances_data &&
-                                        amount > liquidity_amount &&
-                                        (
-                                          <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2">
-                                            <BiMessageEdit
-                                              size={20}
-                                            />
-                                            <span className="text-sm">
-                                              Insufficient router liquidity. Funds must transfer through the bridge directly.
-                                            </span>
-                                          </div>
-                                        )
-                                      }
-                                      {
-                                        amount < liquidity_amount &&
-                                        (
-                                          forceSlow ?
-                                            <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2">
-                                              <BiMessageDetail
-                                                size={20}
-                                              />
-                                              <span className="text-sm sm:text-base">
-                                                Use bridge only (wait 30-60 mins, no fees)
-                                              </span>
-                                            </div> :
-                                            <div className="flex items-center text-blue-500 dark:text-green-500 space-x-2">
-                                              <GiPartyPopper
-                                                size={20}
-                                              />
-                                              <span className="text-sm sm:text-base">
-                                                Fast liquidity available!
-                                              </span>
-                                            </div>
-                                        )
-                                      }
-                                    </>
-                                  )
-                                }
-                                {
-                                  amount > 0 &&
-                                  typeof estimate_received === 'number' &&
-                                  (
-                                    amount < liquidity_amount ||
-                                    asset_balances_data
-                                  ) &&
-                                  (
-                                    <div className="flex items-center justify-between space-x-1">
-                                      <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
-                                        Estimated time
-                                      </div>
-                                      <Tooltip
-                                        placement="top"
-                                        content={
-                                          amount > liquidity_amount ||
-                                          forceSlow ?
-                                            'Unable to leverage fast liquidity. Your transfer will still complete.' :
-                                            'Fast transfer enabled by Connext router network.'
-                                        }
-                                        className="z-50 bg-black text-white text-xs"
-                                      >
-                                        <span className="tracking-normal whitespace-nowrap text-sm font-semibold space-x-1.5">
-                                          {
-                                            amount > liquidity_amount ||
-                                            forceSlow ?
-                                              <span className="text-yellow-500 dark:text-yellow-400">
-                                                90 minutes
-                                              </span> :
-                                              <span className="text-green-500 dark:text-green-500">
-                                                4 minutes
-                                              </span>
+                                                <div className="flex items-center justify-between space-x-1">
+                                                  <Tooltip
+                                                    placement="top"
+                                                    content="This covers costs to execute your transfer on the destination chain."
+                                                    className="z-50 bg-black text-white text-xs"
+                                                  >
+                                                    <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
+                                                      Destination gas fee
+                                                    </div>
+                                                  </Tooltip>
+                                                  {
+                                                    false &&
+                                                    feeEstimating ?
+                                                      <div className="flex items-center space-x-1.5">
+                                                        <span className="tracking-normal text-slate-600 dark:text-slate-200 font-medium">
+                                                          estimating
+                                                        </span>
+                                                        <Oval
+                                                          color={loader_color(theme)}
+                                                          width="20"
+                                                          height="20"
+                                                        />
+                                                      </div> :
+                                                      <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
+                                                        <span>
+                                                          {number_format(
+                                                            gas_fee,
+                                                            '0,0.00000000',
+                                                            true,
+                                                          )}
+                                                        </span>
+                                                        <span>
+                                                          {source_gas_native_token?.symbol}
+                                                        </span>
+                                                      </span>
+                                                  }
+                                                </div>
+                                                {
+                                                  typeof price_impact === 'number' &&
+                                                  (
+                                                    <div className="flex items-center justify-between space-x-1">
+                                                      <Tooltip
+                                                        placement="top"
+                                                        content="Price impact"
+                                                        className="z-50 bg-black text-white text-xs"
+                                                      >
+                                                        <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
+                                                          Price impact
+                                                        </div>
+                                                      </Tooltip>
+                                                      <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
+                                                        <span>
+                                                          {number_format(
+                                                            price_impact,
+                                                            '0,0.00',
+                                                            true,
+                                                          )}%
+                                                        </span>
+                                                      </span>
+                                                    </div>
+                                                  )
+                                                }
+                                              </>
+                                            )
                                           }
-                                        </span>
-                                      </Tooltip>
-                                    </div>
-                                  )
-                                }
-                              </div>
-                            )
-                          }
-                        </div>
-                      )
-                    }
-                  </>
-              }
-              {
-                checkSupport() &&
-                (
-                  xcall ||
-                  source_balance
-                ) &&
-                web3_provider &&
-                (
-                  typeof amount === 'number' ||
-                  (
-                    web3_provider &&
-                    wrong_chain
-                  )
-                ) ?
-                  web3_provider &&
-                  wrong_chain ?
-                    <Wallet
-                      connectChainId={source_chain_data?.chain_id}
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
-                    >
-                      <span className="mr-1.5 sm:mr-2">
-                        {is_walletconnect ?
-                          'Reconnect' :
-                          'Switch'
-                        } to
-                      </span>
-                      {
-                        source_chain_data?.image &&
-                        (
-                          <Image
-                            src={source_chain_data.image}
-                            alt=""
-                            width={28}
-                            height={28}
-                            className="rounded-full"
-                          />
-                        )
-                      }
-                      <span className="font-semibold">
-                        {source_chain_data?.name}
-                      </span>
-                    </Wallet> :
-                    !xcall &&
-                    (
-                      amount > source_amount ||
-                      amount < min_amount ||
-                      amount <= 0
-                    ) ?
-                      <Alert
-                        color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
-                        icon={
-                          <BiMessageError
-                            className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                          />
-                        }
-                        closeDisabled={true}
-                        rounded={true}
-                        className="rounded-xl p-4.5"
-                      >
-                        <span>
-                          {amount > source_amount ?
-                            'Insufficient Balance' :
-                            amount < min_amount ?
-                              'The amount cannot be less than the transfer fee.' :
-                              amount <= 0 ?
-                                'The amount cannot be equal to or less than 0.' :
-                                ''
-                          }
-                        </span>
-                      </Alert> :
-                      !xcall &&
-                      !xcallResponse ?
-                        <button
-                          disabled={disabled}
-                          onClick={() => {
-                            setSlippageEditing(false)
-                            call()
-                          }}
-                          className={`w-full ${disabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'} rounded-xl flex items-center ${calling && !approving && callProcessing ? 'justify-center' : 'justify-center'} text-white text-lg py-3 sm:py-4 px-2 sm:px-3`}
-                        >
-                          <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
-                            {
-                              disabled &&
-                              (
-                                <TailSpin
-                                  color="white"
-                                  width="20"
-                                  height="20"
-                                />
-                              )
-                            }
-                            <span>
-                              {calling ?
-                                approving ?
-                                  approveProcessing ?
-                                    'Approving' :
-                                    'Please Approve' :
-                                  callProcessing ?
-                                    'Transfer in progress ...' :
-                                    typeof approving === 'boolean' ?
-                                      'Please Confirm' :
-                                      'Checking Approval' :
-                                'Send'
-                              }
-                            </span>
-                          </span>
-                        </button> :
-                        (
-                          xcallResponse ||
-                          (
-                            !xcall &&
-                            approveResponse
-                          )
-                        ) &&
-                        (
-                          [
-                            xcallResponse ||
-                            approveResponse,
-                          ]
-                          .map((r, i) => {
-                            const {
-                              status,
-                              message,
-                              code,
-                            } = { ...r }
-
-                            return (
-                              <Alert
-                                key={i}
-                                color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? xcallResponse ? 'bg-blue-500 dark:bg-blue-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
-                                icon={status === 'failed' ?
-                                  <BiMessageError
-                                    className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                  /> :
-                                  status === 'success' ?
-                                    xcallResponse ?
-                                      <div className="mr-3">
-                                        <TailSpin
-                                          color="white"
-                                          width="20"
-                                          height="20"
-                                        />
-                                      </div> :
-                                      <BiMessageCheck
-                                        className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                      /> :
-                                    <BiMessageDetail
-                                      className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                    />
-                                }
-                                closeDisabled={true}
-                                rounded={true}
-                                className="rounded-xl p-4.5"
-                              >
-                                <div className="flex items-center justify-between space-x-2">
-                                  <span className="break-all text-sm font-medium">
-                                    {ellipse(
-                                      (message || '')
-                                        .substring(
-                                          0,
-                                          status === 'failed' &&
-                                          error_patterns
-                                            .findIndex(c =>
-                                              message?.indexOf(c) > -1
-                                            ) > -1 ?
-                                            message.indexOf(
-                                              error_patterns
-                                                .find(c =>
-                                                  message.indexOf(c) > -1
-                                                )
-                                            ) :
-                                            undefined,
-                                        )
-                                        .trim(),
-                                      128,
-                                    )}
-                                  </span>
-                                  <div className="flex items-center space-x-2">
-                                    {
-                                      status === 'failed' &&
-                                      message &&
-                                      (
-                                        <Copy
-                                          size={24}
-                                          value={message}
-                                          className="cursor-pointer text-slate-200 hover:text-white"
-                                        />
+                                        </div>
                                       )
                                     }
-                                    {status === 'failed' ?
-                                      <button
-                                        onClick={() => reset(code)}
-                                        className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                                      >
-                                        <MdClose
-                                          size={20}
-                                        />
-                                      </button> :
-                                      status === 'success' ?
-                                        <button
-                                          onClick={() => reset()}
-                                          className={`${xcallResponse ? 'bg-blue-600 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
-                                        >
-                                          <MdClose
-                                            size={20}
-                                          />
-                                        </button> :
-                                        null
+                                    {
+                                      false &&
+                                      amount > 0 &&
+                                      (
+                                        <>
+                                          {
+                                            asset_balances_data &&
+                                            amount > liquidity_amount &&
+                                            (
+                                              <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2">
+                                                <BiMessageEdit
+                                                  size={20}
+                                                />
+                                                <span className="text-sm">
+                                                  Insufficient router liquidity. Funds must transfer through the bridge directly.
+                                                </span>
+                                              </div>
+                                            )
+                                          }
+                                          {
+                                            amount < liquidity_amount &&
+                                            (
+                                              forceSlow ?
+                                                <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2">
+                                                  <BiMessageDetail
+                                                    size={20}
+                                                  />
+                                                  <span className="text-sm sm:text-base">
+                                                    Use bridge only (wait 30-60 mins, no fees)
+                                                  </span>
+                                                </div> :
+                                                <div className="flex items-center text-blue-500 dark:text-green-500 space-x-2">
+                                                  <GiPartyPopper
+                                                    size={20}
+                                                  />
+                                                  <span className="text-sm sm:text-base">
+                                                    Fast liquidity available!
+                                                  </span>
+                                                </div>
+                                            )
+                                          }
+                                        </>
+                                      )
+                                    }
+                                    {
+                                      amount > 0 &&
+                                      typeof estimate_received === 'number' &&
+                                      (
+                                        amount < liquidity_amount ||
+                                        asset_balances_data
+                                      ) &&
+                                      (
+                                        <div className="flex items-center justify-between space-x-1">
+                                          <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
+                                            Estimated time
+                                          </div>
+                                          <Tooltip
+                                            placement="top"
+                                            content={
+                                              amount > liquidity_amount ||
+                                              forceSlow ?
+                                                'Unable to leverage fast liquidity. Your transfer will still complete.' :
+                                                'Fast transfer enabled by Connext router network.'
+                                            }
+                                            className="z-50 bg-black text-white text-xs"
+                                          >
+                                            <span className="tracking-normal whitespace-nowrap text-sm font-semibold space-x-1.5">
+                                              {
+                                                amount > liquidity_amount ||
+                                                forceSlow ?
+                                                  <span className="text-yellow-500 dark:text-yellow-400">
+                                                    90 minutes
+                                                  </span> :
+                                                  <span className="text-green-500 dark:text-green-500">
+                                                    4 minutes
+                                                  </span>
+                                              }
+                                            </span>
+                                          </Tooltip>
+                                        </div>
+                                      )
                                     }
                                   </div>
-                                </div>
-                              </Alert>
+                                )
+                              }
+                            </div>
+                          )
+                        }
+                      </>
+                  }
+                  {
+                    checkSupport() &&
+                    (
+                      xcall ||
+                      source_balance
+                    ) &&
+                    web3_provider &&
+                    (
+                      typeof amount === 'number' ||
+                      (
+                        web3_provider &&
+                        wrong_chain
+                      )
+                    ) ?
+                      web3_provider &&
+                      wrong_chain ?
+                        <Wallet
+                          connectChainId={source_chain_data?.chain_id}
+                          className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                        >
+                          <span className="mr-1.5 sm:mr-2">
+                            {is_walletconnect ?
+                              'Reconnect' :
+                              'Switch'
+                            } to
+                          </span>
+                          {
+                            source_chain_data?.image &&
+                            (
+                              <Image
+                                src={source_chain_data.image}
+                                alt=""
+                                width={28}
+                                height={28}
+                                className="rounded-full"
+                              />
                             )
-                          })
-                        ) :
-                  web3_provider ?
-                    <button
-                      disabled={true}
-                      className="w-full bg-gray-200 dark:bg-slate-800 bg-opacity-75 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
-                    >
-                      Send
-                    </button> :
-                    <Wallet
-                      connectChainId={source_chain_data?.chain_id}
-                      buttonConnectTitle="Connect Wallet"
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-lg font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
-                    >
-                      <span>
-                        Connect Wallet
-                      </span>
-                    </Wallet>
-              }
-            </div>
+                          }
+                          <span className="font-semibold">
+                            {source_chain_data?.name}
+                          </span>
+                        </Wallet> :
+                        !xcall &&
+                        (
+                          amount > source_amount ||
+                          amount < min_amount ||
+                          amount <= 0
+                        ) ?
+                          <Alert
+                            color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
+                            icon={
+                              <BiMessageError
+                                className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                              />
+                            }
+                            closeDisabled={true}
+                            rounded={true}
+                            className="rounded-xl p-4.5"
+                          >
+                            <span>
+                              {amount > source_amount ?
+                                'Insufficient Balance' :
+                                amount < min_amount ?
+                                  'The amount cannot be less than the transfer fee.' :
+                                  amount <= 0 ?
+                                    'The amount cannot be equal to or less than 0.' :
+                                    ''
+                              }
+                            </span>
+                          </Alert> :
+                          !xcall &&
+                          !xcallResponse ?
+                            <button
+                              disabled={disabled}
+                              onClick={() => {
+                                setSlippageEditing(false)
+                                call()
+                              }}
+                              className={`w-full ${disabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'} rounded-xl flex items-center ${calling && !approving && callProcessing ? 'justify-center' : 'justify-center'} text-white text-lg py-3 sm:py-4 px-2 sm:px-3`}
+                            >
+                              <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
+                                {
+                                  disabled &&
+                                  (
+                                    <TailSpin
+                                      color="white"
+                                      width="20"
+                                      height="20"
+                                    />
+                                  )
+                                }
+                                <span>
+                                  {calling ?
+                                    approving ?
+                                      approveProcessing ?
+                                        'Approving' :
+                                        'Please Approve' :
+                                      callProcessing ?
+                                        'Transfer in progress ...' :
+                                        typeof approving === 'boolean' ?
+                                          'Please Confirm' :
+                                          'Checking Approval' :
+                                    'Send'
+                                  }
+                                </span>
+                              </span>
+                            </button> :
+                            (
+                              xcallResponse ||
+                              (
+                                !xcall &&
+                                approveResponse
+                              )
+                            ) &&
+                            (
+                              [
+                                xcallResponse ||
+                                approveResponse,
+                              ]
+                              .map((r, i) => {
+                                const {
+                                  status,
+                                  message,
+                                  code,
+                                } = { ...r }
+
+                                return (
+                                  <Alert
+                                    key={i}
+                                    color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? xcallResponse ? 'bg-blue-500 dark:bg-blue-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                                    icon={status === 'failed' ?
+                                      <BiMessageError
+                                        className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                                      /> :
+                                      status === 'success' ?
+                                        xcallResponse ?
+                                          <div className="mr-3">
+                                            <TailSpin
+                                              color="white"
+                                              width="20"
+                                              height="20"
+                                            />
+                                          </div> :
+                                          <BiMessageCheck
+                                            className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                                          /> :
+                                        <BiMessageDetail
+                                          className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                                        />
+                                    }
+                                    closeDisabled={true}
+                                    rounded={true}
+                                    className="rounded-xl p-4.5"
+                                  >
+                                    <div className="flex items-center justify-between space-x-2">
+                                      <span className="break-all text-sm font-medium">
+                                        {ellipse(
+                                          (message || '')
+                                            .substring(
+                                              0,
+                                              status === 'failed' &&
+                                              error_patterns
+                                                .findIndex(c =>
+                                                  message?.indexOf(c) > -1
+                                                ) > -1 ?
+                                                message.indexOf(
+                                                  error_patterns
+                                                    .find(c =>
+                                                      message.indexOf(c) > -1
+                                                    )
+                                                ) :
+                                                undefined,
+                                            )
+                                            .trim(),
+                                          128,
+                                        )}
+                                      </span>
+                                      <div className="flex items-center space-x-2">
+                                        {
+                                          status === 'failed' &&
+                                          message &&
+                                          (
+                                            <Copy
+                                              size={24}
+                                              value={message}
+                                              className="cursor-pointer text-slate-200 hover:text-white"
+                                            />
+                                          )
+                                        }
+                                        {status === 'failed' ?
+                                          <button
+                                            onClick={() => reset(code)}
+                                            className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
+                                          >
+                                            <MdClose
+                                              size={20}
+                                            />
+                                          </button> :
+                                          status === 'success' ?
+                                            <button
+                                              onClick={() => reset()}
+                                              className={`${xcallResponse ? 'bg-blue-600 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
+                                            >
+                                              <MdClose
+                                                size={20}
+                                              />
+                                            </button> :
+                                            null
+                                        }
+                                      </div>
+                                    </div>
+                                  </Alert>
+                                )
+                              })
+                            ) :
+                      web3_provider ?
+                        <button
+                          disabled={true}
+                          className="w-full bg-gray-200 dark:bg-slate-800 bg-opacity-75 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
+                        >
+                          Send
+                        </button> :
+                        <Wallet
+                          connectChainId={source_chain_data?.chain_id}
+                          buttonConnectTitle="Connect Wallet"
+                          className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-lg font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                        >
+                          <span>
+                            Connect Wallet
+                          </span>
+                        </Wallet>
+                  }
+                </div>
+            }
             {/*<div className="flex items-center justify-end space-x-4 mr-3">
               {
                 process.env.NEXT_PUBLIC_DOCS_URL &&
@@ -3328,6 +3548,7 @@ export default () => {
             </div>*/}
           </div>
           {
+            !openTransferStatus &&
             (
               source_contract_data?.mintable ||
               source_contract_data?.wrapable ||
