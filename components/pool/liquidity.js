@@ -213,6 +213,16 @@ export default ({
                   _amount,
                 )
 
+            console.log(
+              '[amountsRemoveSwapLiquidity]',
+              {
+                domainId,
+                canonicalId,
+                amount: _amount,
+                amounts,
+              },
+            )
+
             setRemoveAmounts(
               (amounts || [])
                 .map((a, i) =>
@@ -229,6 +239,25 @@ export default ({
                 )
             )
           } catch (error) {
+            console.log(
+              '[ErrorOnCalculateRemoveSwapLiquidity]',
+              {
+                domainId,
+                contract_address,
+                amount: _amount,
+                error: error?.message,
+              },
+            )
+
+            setCallResponse(
+              {
+                status: 'failed',
+                message:
+                  error?.data?.message ||
+                  error?.message,
+              }
+            )
+
             setRemoveAmounts(null)
           }
         }
@@ -618,12 +647,14 @@ export default ({
 
                 setCallResponse(
                   {
-                    status: failed ?
-                      'failed' :
-                      'success',
-                    message: failed ?
-                      `Failed to add ${symbol} liquidity` :
-                      `Add ${symbol} liquidity successful`,
+                    status:
+                      failed ?
+                        'failed' :
+                        'success',
+                    message:
+                      failed ?
+                        `Failed to add ${symbol} liquidity` :
+                        `Add ${symbol} liquidity successful`,
                     tx_hash: hash,
                   }
                 )
@@ -987,9 +1018,10 @@ export default ({
     (pool_assets_data || [])
       .findIndex(a =>
         a?.id === asset &&
-        a.contracts?.findIndex(a =>
-          a?.chain_id === chain_id
-        ) > -1
+        (a.contracts || [])
+          .findIndex(a =>
+            a?.chain_id === chain_id
+          ) > -1
       ) < 0
 
   const pool_data = (pools_data || [])
@@ -1074,12 +1106,13 @@ export default ({
             contract_address: _.last(tokens),
             decimals: _.last(decimals),
             symbol: _.last(symbols),
-            mintable: [
-              'next',
-              'mad',
-            ].findIndex(s =>
-              _.last(symbols)?.startsWith(s)
-            ) > -1 ||
+            mintable:
+              [
+                'next',
+                'mad',
+              ].findIndex(s =>
+                _.last(symbols)?.startsWith(s)
+              ) > -1 ||
               [
                 'TEST',
               ].findIndex(s =>
@@ -1285,26 +1318,29 @@ export default ({
                   className={`w-20 bg-gray-200 dark:bg-slate-900 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
                 />
                 <div className="flex items-center space-x-2.5">
-                  {[
-                    3.0,
-                    1.0,
-                    0.5,
-                  ].map((p, i) => (
-                    <div
-                      key={i}
-                      onClick={() =>
-                        setOptions(
-                          {
-                            ...options,
-                            slippage: p,
-                          }
-                        )
-                      }
-                      className={`${slippage === p ? 'bg-gray-200 dark:bg-slate-800 font-semibold' : 'bg-gray-100 hover:bg-gray-200 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-medium'} rounded-lg cursor-pointer py-1 px-2`}
-                    >
-                      {p} %
-                    </div>
-                  ))}
+                  {
+                    [
+                      3.0,
+                      1.0,
+                      0.5,
+                    ]
+                    .map((p, i) => (
+                      <div
+                        key={i}
+                        onClick={() =>
+                          setOptions(
+                            {
+                              ...options,
+                              slippage: p,
+                            }
+                          )
+                        }
+                        className={`${slippage === p ? 'bg-gray-200 dark:bg-slate-800 font-semibold' : 'bg-gray-100 hover:bg-gray-200 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-medium'} rounded-lg cursor-pointer py-1 px-2`}
+                      >
+                        {p} %
+                      </div>
+                    ))
+                  }
                 </div>
               </div>
             </div>
@@ -1989,17 +2025,22 @@ export default ({
                         let _amount
 
                         try {
-                          _amount = Number(
-                            FixedNumber.fromString(
-                              (lpTokenBalance || 0).toString()
-                            )
-                            .mulUnsafe(
+                          _amount =
+                            Number(
                               FixedNumber.fromString(
-                                p.toString()
+                                (
+                                  lpTokenBalance ||
+                                  0
+                                )
+                                .toString()
                               )
+                              .mulUnsafe(
+                                FixedNumber.fromString(
+                                  p.toString()
+                                )
+                              )
+                              .toString()
                             )
-                            .toString()
-                          )
                         } catch (error) {
                           _amount = 0
                         }
@@ -2036,7 +2077,8 @@ export default ({
                   !isNaN(_.head(removeAmounts)) ?
                     <span className="text-base">
                       {number_format(
-                        _.head(removeAmounts) || 0,
+                        _.head(removeAmounts) ||
+                        0,
                         '0,0.000000',
                         true,
                       )}
@@ -2079,7 +2121,8 @@ export default ({
                   !isNaN(_.last(removeAmounts)) ?
                     <span className="text-base">
                       {number_format(
-                        _.last(removeAmounts) || 0,
+                        _.last(removeAmounts) ||
+                        0,
                         '0,0.000000',
                         true,
                       )}
@@ -2118,15 +2161,18 @@ export default ({
                       'Switch'
                     } to
                   </span>
-                  {image && (
-                    <Image
-                      src={image}
-                      alt=""
-                      width={28}
-                      height={28}
-                      className="rounded-full"
-                    />
-                  )}
+                  {
+                    image &&
+                    (
+                      <Image
+                        src={image}
+                        alt=""
+                        width={28}
+                        height={28}
+                        className="rounded-full"
+                      />
+                    )
+                  }
                   <span className="font-semibold">
                     {name}
                   </span>
@@ -2147,25 +2193,26 @@ export default ({
                       <Alert
                         key={i}
                         color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
-                        icon={status === 'failed' ?
-                          <BiMessageError
-                            className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
-                          /> :
-                          status === 'success' ?
-                            <BiMessageCheck
+                        icon={
+                          status === 'failed' ?
+                            <BiMessageError
                               className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
                             /> :
-                            status === 'pending' ?
-                              <div className="mr-2.5">
-                                <Watch
-                                  color="white"
-                                  width="16"
-                                  height="16"
-                                />
-                              </div> :
-                              <BiMessageDetail
+                            status === 'success' ?
+                              <BiMessageCheck
                                 className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
-                              />
+                              /> :
+                              status === 'pending' ?
+                                <div className="mr-2.5">
+                                  <Watch
+                                    color="white"
+                                    width="16"
+                                    height="16"
+                                  />
+                                </div> :
+                                <BiMessageDetail
+                                  className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
+                                />
                         }
                         closeDisabled={true}
                         rounded={true}

@@ -660,7 +660,7 @@ export default () => {
                         rate ||
                         '0'
                       ),
-                      _.last(_pair.decimals) ||
+                      // _.last(_pair.decimals) ||
                       18,
                     )
                   ),
@@ -1316,9 +1316,9 @@ export default () => {
             )
             .join('_')
 
-          if (message?.includes('revert')) {
+          /*if (message?.includes('revert')) {
             message = 'More than pool balance'
-          }
+          }*/
 
           switch (code) {
             case 'user_rejected':

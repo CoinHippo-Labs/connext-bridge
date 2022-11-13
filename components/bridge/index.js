@@ -1766,9 +1766,9 @@ export default () => {
             )
             .join('_')
 
-          if (message?.includes('revert')) {
+          /*if (message?.includes('revert')) {
             message = 'More than pool balance'
-          }
+          }*/
 
           switch (code) {
             case 'user_rejected':
