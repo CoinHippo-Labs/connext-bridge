@@ -603,7 +603,7 @@ export default () => {
     }
 
     const contracts_data =
-      (assets_data || [])
+      (pool_assets_data || [])
         .map(a => {
           const {
             contracts,
