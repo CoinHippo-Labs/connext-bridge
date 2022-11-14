@@ -15,8 +15,8 @@ export default (
         [`${POOLS_DATA}`]:
           _.uniqBy(
             _.concat(
-              state[`${POOLS_DATA}`],
               action.value,
+              state[`${POOLS_DATA}`],
             )
             .filter(d => d),
             'id',
