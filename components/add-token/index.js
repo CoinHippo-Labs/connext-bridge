@@ -136,9 +136,10 @@ export default ({
                       decimals,
                       image:
                         image ?
-                          `${image.startsWith('/') ?
-                            process.env.NEXT_PUBLIC_SITE_URL :
-                            ''
+                          `${
+                            image.startsWith('/') ?
+                              process.env.NEXT_PUBLIC_SITE_URL :
+                              ''
                           }${image}` :
                           undefined,
                     },

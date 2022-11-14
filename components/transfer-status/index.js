@@ -266,10 +266,12 @@ export default ({
       )
       .filter(a => a)
     ) ||
-    source_amount *
     (
-      1 -
-      ROUTER_FEE_PERCENT / 100
+      source_amount *
+      (
+        1 -
+        ROUTER_FEE_PERCENT / 100
+      )
     )
 
   const pending =
@@ -279,7 +281,8 @@ export default ({
       XTransferStatus.CompletedSlow,
     ].includes(status)
 
-  return data &&
+  return (
+    data &&
     (
       <div className={`bg-zinc-50 dark:bg-zinc-900 max-w-xs sm:max-w-none rounded-xl ${pending ? 'border-0 border-blue-500' : 'border-0 border-green-500'} mx-auto py-5 px-4`}>
         <div className="flex items-center justify-between">
@@ -468,7 +471,7 @@ export default ({
               </span>
               <EnsProfile
                 address={to}
-                fallback={(
+                fallback={
                   <Copy
                     value={to}
                     title={<span className="cursor-pointer text-slate-600 dark:text-white text-sm">
@@ -486,7 +489,7 @@ export default ({
                       </span>
                     </span>}
                   />
-                )}
+                }
               />
             </div>
           )
@@ -582,4 +585,5 @@ export default ({
         }
       </div>
     )
+  )
 }

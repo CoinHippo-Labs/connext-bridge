@@ -13,8 +13,12 @@ export default (
       const [
         key,
         value,
-      ] = _.head(Object.entries({ ...action.value })) ||
+      ] = (
+        _.head(
+          Object.entries({ ...action.value })
+        ) ||
         []
+      )
 
       if (
         key &&
@@ -22,14 +26,15 @@ export default (
       ) {
         let values = state?.[`${BALANCES_DATA}`]?.[key]
 
-        values = _.uniqBy(
-          _.concat(
-            value,
-            values,
+        values =
+          _.uniqBy(
+            _.concat(
+              value,
+              values,
+            )
+            .filter(v => v),
+            'contract_address',
           )
-          .filter(v => v),
-          'contract_address',
-        )
 
         action.value = {
           [key]: values,
@@ -38,7 +43,8 @@ export default (
 
       return {
         ...state,
-        [`${BALANCES_DATA}`]: action.value &&
+        [`${BALANCES_DATA}`]:
+          action.value &&
           {
             ...state?.[`${BALANCES_DATA}`], 
             ...action.value,

@@ -47,20 +47,27 @@ export default ({
       setHidden(!hidden)
     }
 
-    document.addEventListener(
-      'mousedown',
-      handleClickOutside,
-    )
+    document
+      .addEventListener(
+        'mousedown',
+        handleClickOutside,
+      )
 
-    return () => document.removeEventListener(
-      'mousedown',
-      handleClickOutside,
-    )
+    return () =>
+      document
+        .removeEventListener(
+          'mousedown',
+          handleClickOutside,
+        )
   }, [hidden, buttonRef, dropdownRef])
 
   const onClick = () => setHidden(!hidden)
 
-  const chain_data = chains_data?.find(c => c?.chain_id === chain_id)
+  const chain_data = (chains_data || [])
+    .find(c =>
+      c?.chain_id === chain_id
+    )
+
   const {
     short_name,
     image,

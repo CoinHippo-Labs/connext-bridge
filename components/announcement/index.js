@@ -20,13 +20,16 @@ export default () => {
     announcement_data,
   } = { ...announcement }
 
-  return announcement_data &&
+  return (
+    announcement_data &&
     (
       <Alert
         color="xl:max-w-lg bg-blue-600 text-white text-left mx-auto"
-        icon={<HiSpeakerphone
-          className="w-4 xl:w-6 h-4 xl:h-6 stroke-current mr-3"
-        />}
+        icon={
+          <HiSpeakerphone
+            className="w-4 xl:w-6 h-4 xl:h-6 stroke-current mr-3"
+          />
+        }
         closeDisabled={true}
         rounded={true}
         className="items-start"
@@ -40,4 +43,5 @@ export default () => {
         </div>
       </Alert>
     )
+  )
 }

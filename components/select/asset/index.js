@@ -172,42 +172,44 @@ export default ({
         className ||
         `w-32 sm:w-48 min-w-max h-10 sm:h-12 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`
       }
-      title={<div className="flex items-center justify-between">
-        <span className="flex items-center uppercase space-x-1">
-          <span>
-            {
-              origin ||
-              'select'
-            }
-          </span>
-          <span>
-            Token
-          </span>
-        </span>
-        {
-          chain_data &&
-          (
-            <div className="flex items-center space-x-2">
+      title={
+        <div className="flex items-center justify-between">
+          <span className="flex items-center uppercase space-x-1">
+            <span>
               {
-                chain_data.image &&
-                (
-                  <Image
-                    src={chain_data.image}
-                    alt=""
-                    width={24}
-                    height={24}
-                    className="rounded-full"
-                  />
-                )
+                origin ||
+                'select'
               }
-              <span className="font-semibold">
-                {chainName(chain_data)}
-              </span>
-            </div>
-          )
-        }
-      </div>}
-      body={(
+            </span>
+            <span>
+              Token
+            </span>
+          </span>
+          {
+            chain_data &&
+            (
+              <div className="flex items-center space-x-2">
+                {
+                  chain_data.image &&
+                  (
+                    <Image
+                      src={chain_data.image}
+                      alt=""
+                      width={24}
+                      height={24}
+                      className="rounded-full"
+                    />
+                  )
+                }
+                <span className="font-semibold">
+                  {chainName(chain_data)}
+                </span>
+              </div>
+            )
+          }
+        </div>
+      }
+      body={
         <Search
           value={value}
           onSelect={(a, c) =>
@@ -221,7 +223,7 @@ export default ({
           is_bridge={is_bridge}
           data={data}
         />
-      )}
+      }
     />
   )
 }

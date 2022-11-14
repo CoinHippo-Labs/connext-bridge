@@ -67,24 +67,26 @@ export default ({
               </>
             )
 
-            return disabled ?
-              <div
-                key={id}
-                title="Disabled"
-                className="dropdown-item w-full cursor-not-allowed flex items-center justify-start font-medium space-x-1.5 p-2"
-              >
-                {item}
-              </div> :
-              <Wallet
-                key={id}
-                connectChainId={c.chain_id}
-                onSwitch={onClick}
-                className="dropdown-item w-full"
-              >
-                <div className="flex items-center justify-start space-x-1.5 p-2">
+            return (
+              disabled ?
+                <div
+                  key={id}
+                  title="Disabled"
+                  className="dropdown-item w-full cursor-not-allowed flex items-center justify-start font-medium space-x-1.5 p-2"
+                >
                   {item}
-                </div>
-              </Wallet>
+                </div> :
+                <Wallet
+                  key={id}
+                  connectChainId={c.chain_id}
+                  onSwitch={onClick}
+                  className="dropdown-item w-full"
+                >
+                  <div className="flex items-center justify-start space-x-1.5 p-2">
+                    {item}
+                  </div>
+                </Wallet>
+            )
           })
         }
       </div>

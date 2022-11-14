@@ -24,34 +24,8 @@ export default ({
     return () => clearTimeout(timeout)
   }, [copied])
 
-  return copied ?
-    <div className={`${title ? 'min-w-max' : ''} flex items-center space-x-1`}>
-      {
-        title &&
-        (
-          <span>
-            {title}
-          </span>
-        )
-      }
-      <HiCheckCircle
-        size={size}
-        className={
-          className ||
-          'text-green-400 dark:text-green-300'
-        }
-      />
-    </div> :
-    <CopyToClipboard
-      text={value}
-      onCopy={() => {
-        setCopied(true)
-
-        if (onCopy) {
-          onCopy()
-        }
-      }}
-    >
+  return (
+    copied ?
       <div className={`${title ? 'min-w-max' : ''} flex items-center space-x-1`}>
         {
           title &&
@@ -61,13 +35,41 @@ export default ({
             </span>
           )
         }
-        <IoMdCopy
+        <HiCheckCircle
           size={size}
           className={
             className ||
-            'cursor-pointer text-slate-300 hover:text-slate-400 dark:text-slate-700 dark:hover:text-slate-600'
+            'text-green-400 dark:text-green-300'
           }
         />
-      </div>
-    </CopyToClipboard>
+      </div> :
+      <CopyToClipboard
+        text={value}
+        onCopy={() => {
+          setCopied(true)
+
+          if (onCopy) {
+            onCopy()
+          }
+        }}
+      >
+        <div className={`${title ? 'min-w-max' : ''} flex items-center space-x-1`}>
+          {
+            title &&
+            (
+              <span>
+                {title}
+              </span>
+            )
+          }
+          <IoMdCopy
+            size={size}
+            className={
+              className ||
+              'cursor-pointer text-slate-300 hover:text-slate-400 dark:text-slate-700 dark:hover:text-slate-600'
+            }
+          />
+        </div>
+      </CopyToClipboard>
+  )
 }

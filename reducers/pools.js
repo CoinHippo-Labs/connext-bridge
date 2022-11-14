@@ -12,14 +12,15 @@ export default (
     case POOLS_DATA:
       return {
         ...state,
-        [`${POOLS_DATA}`]: _.uniqBy(
-          _.concat(
-            state[`${POOLS_DATA}`],
-            action.value,
-          )
-          .filter(d => d),
-          'id',
-        ),
+        [`${POOLS_DATA}`]:
+          _.uniqBy(
+            _.concat(
+              state[`${POOLS_DATA}`],
+              action.value,
+            )
+            .filter(d => d),
+            'id',
+          ),
       }
     default:
       return state

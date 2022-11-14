@@ -21,7 +21,7 @@ import Options from './options'
 import SelectChain from '../select/chain'
 // import SelectBridgeAsset from '../select/asset/bridge'
 import SelectAsset from '../select/asset'
-import GasPrice from '../gas-price'
+// import GasPrice from '../gas-price'
 import Balance from '../balance'
 import TimeSpent from '../time-spent'
 import LatestTransfers from '../latest-transfers'
@@ -190,12 +190,13 @@ export default () => {
       path.includes('from-') &&
       path.includes('to-')
     ) {
-      const paths = path
-        .replace(
-          '/',
-          '',
-        )
-        .split('-')
+      const paths =
+        path
+          .replace(
+            '/',
+            '',
+          )
+          .split('-')
 
       const source_chain = paths[paths.indexOf('from') + 1]
       const destination_chain = paths[paths.indexOf('to') + 1]
@@ -210,10 +211,12 @@ export default () => {
         .find(c =>
           c?.id === source_chain
         )
+
       const destination_chain_data = (chains_data || [])
         .find(c =>
           c?.id === destination_chain
         )
+
       const asset_data = (assets_data || [])
         .find(a =>
           a?.id === asset ||
@@ -381,9 +384,10 @@ export default () => {
         `/${
           source_chain &&
           destination_chain ?
-            `${asset ?
-              `${asset.toUpperCase()}-` :
-              ''
+            `${
+              asset ?
+                `${asset.toUpperCase()}-` :
+                ''
             }from-${source_chain}-to-${destination_chain}` :
             ''
         }${
@@ -407,6 +411,7 @@ export default () => {
       .find(c =>
         c?.id === destination_chain
       )
+
     const {
       chain_id,
     } = { ...destination_chain_data }
@@ -797,15 +802,15 @@ export default () => {
     } = {
       ...(
         (chains_data || [])
-        .find(c =>
-          c?.id === source_chain
-        )
+          .find(c =>
+            c?.id === source_chain
+          )
       ),
     }
 
     if (
       balances_data?.[chain_id] &&
-      amount
+      amount > 0
     ) {
       setEstimateTrigger(
         moment()
@@ -829,7 +834,7 @@ export default () => {
     }
   }, [estimateTrigger])
 
-  // check transfer status
+  // update transfer status
   useEffect(() => {
     const update = async () => {
       if (
@@ -850,10 +855,10 @@ export default () => {
 
           try {
             const response =
-            await sdk.nxtpSdkUtils
-              .getTransferByTransactionHash(
-                transactionHash,
-              )
+              await sdk.nxtpSdkUtils
+                .getTransferByTransactionHash(
+                  transactionHash,
+                )
 
             if (Array.isArray(response)) {
               transfer_data = response
@@ -866,7 +871,10 @@ export default () => {
             }
           } catch (error) {}
 
-          if (address) {
+          if (
+            !transfer_data &&
+            address
+          ) {
             try {
               const response =
                 await sdk.nxtpSdkUtils
@@ -1135,23 +1143,31 @@ export default () => {
             ...a,
             ...(
               (contracts || [])
-              .find(c =>
-                c?.chain_id === chain_id
-              )
+                .find(c =>
+                  c?.chain_id === chain_id
+                )
             ),
           }
         })
         .filter(a => a?.contract_address)
         .map(a => {
+          const {
+            next_asset,
+          } = { ...a };
           let {
             contract_address,
           } = {  ...a }
 
           contract_address = contract_address.toLowerCase()
 
+          if (next_asset?.contract_address) {
+            next_asset.contract_address = next_asset.contract_address.toLowerCase()
+          }
+
           return {
             ...a,
             contract_address,
+            next_asset,
           }
         })
 
@@ -1285,10 +1301,12 @@ export default () => {
         .find(c =>
           c?.id === source_chain
         )
+
       const source_asset_data = (assets_data || [])
         .find(a =>
           a?.id === asset
         )
+
       const source_contract_data = (source_asset_data?.contracts || [])
         .find(c =>
           c?.chain_id === source_chain_data?.chain_id
@@ -1298,10 +1316,12 @@ export default () => {
         .find(c =>
           c?.id === destination_chain
         )
+
       const destination_asset_data = (assets_data || [])
         .find(a =>
           a?.id === asset
         )
+
       const destination_contract_data = (destination_asset_data?.contracts || [])
         .find(c =>
           c?.chain_id === destination_chain_data?.chain_id
@@ -1585,12 +1605,16 @@ export default () => {
       let failed = false
 
       try {
-        /*const approve_request = await sdk.nxtpSdkBase.approveIfNeeded(
-          xcallParams.params.originDomain,
-          xcallParams.transactingAsset,
-          xcallParams.transactingAmount,
-          infiniteApprove,
-        )*/
+        /*
+        const approve_request =
+          await sdk.nxtpSdkBase
+            .approveIfNeeded(
+              xcallParams.params.originDomain,
+              xcallParams.transactingAsset,
+              xcallParams.transactingAmount,
+              infiniteApprove,
+            )
+        */
         const approve_request =
           await sdk.nxtpSdkBase
             .approveIfNeeded(
@@ -1662,7 +1686,8 @@ export default () => {
           _.slice(
             (message || '')
               .toLowerCase()
-              .split(' '),
+              .split(' ')
+              .filter(s => s),
             0,
             2,
           )
@@ -1815,7 +1840,8 @@ export default () => {
             _.slice(
               (message || '')
                 .toLowerCase()
-                .split(' '),
+                .split(' ')
+                .filter(s => s),
               0,
               2,
             )
@@ -1857,7 +1883,7 @@ export default () => {
       address &&
       success
     ) {
-      await sleep(2 * 1000)
+      await sleep(1 * 1000)
 
       setBalanceTrigger(
         moment()
@@ -1877,6 +1903,7 @@ export default () => {
       chains_data,
       assets_data,
     )
+
   const {
     title,
   } = { ...headMeta }
@@ -2375,7 +2402,7 @@ export default () => {
                               getBalances(destination_chain)
                             }
                           }}
-                          className={/*`transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out */`bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full sm:border dark:border-slate-800 flex items-center justify-center p-1.5 sm:p-2.5`}
+                          className={`bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full sm:border dark:border-slate-800 flex items-center justify-center p-1.5 sm:p-2.5`}
                         >
                           <HiSwitchHorizontal
                             size={18}
@@ -2387,22 +2414,6 @@ export default () => {
                                 undefined
                             }
                           />
-                          {/*<div className="flex sm:hidden">
-                            <Image
-                              src="/logos/logo.png"
-                              alt=""
-                              width={24}
-                              height={24}
-                            />
-                          </div>
-                          <div className="hidden sm:flex">
-                            <Image
-                              src="/logos/logo.png"
-                              alt=""
-                              width={32}
-                              height={32}
-                            />
-                          </div>*/}
                         </button>
                       </div>
                       <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end space-y-0.5 sm:space-y-0">
@@ -2490,7 +2501,7 @@ export default () => {
                                     a !== asset ||
                                     !equals_ignore_case(
                                       s,
-                                      symbol
+                                      symbol,
                                     ) ?
                                       null :
                                       amount,
@@ -2683,67 +2694,71 @@ export default () => {
                                         }
                                       )
                                     }}
-                                    title={<div className="flex items-center justify-between space-x-1">
-                                      <span className="font-bold">
-                                        {source_symbol}
-                                      </span>
-                                      <span className="font-semibold">
-                                        Transfers size
-                                      </span>
-                                    </div>}
-                                    content={<div className="flex flex-col space-y-1">
-                                      <div className="flex items-center justify-between space-x-2.5">
-                                        <span className="font-medium">
-                                          Balance:
+                                    title={
+                                      <div className="flex items-center justify-between space-x-1">
+                                        <span className="font-bold">
+                                          {source_symbol}
                                         </span>
                                         <span className="font-semibold">
-                                          {typeof source_amount === 'number' ?
-                                            number_format(
-                                              source_amount,
-                                              source_amount > 1000 ?
-                                                '0,0.00' :
-                                                '0,0.00000000',
-                                              true,
-                                            ) :
-                                            'n/a'
-                                          }
+                                          Transfers size
                                         </span>
                                       </div>
-                                      <div className="flex items-start justify-between space-x-2.5 pb-1">
-                                        <span className="font-medium">
-                                          Liquidity:
-                                        </span>
-                                        <span className="font-semibold">
-                                          {typeof liquidity_amount === 'number' ?
-                                            number_format(
-                                              liquidity_amount,
-                                              liquidity_amount > 1000 ?
-                                                '0,0.00' :
-                                                '0,0.00000000',
-                                              true,
-                                            ) :
-                                            'n/a'
-                                          }
-                                        </span>
+                                    }
+                                    content={
+                                      <div className="flex flex-col space-y-1">
+                                        <div className="flex items-center justify-between space-x-2.5">
+                                          <span className="font-medium">
+                                            Balance:
+                                          </span>
+                                          <span className="font-semibold">
+                                            {typeof source_amount === 'number' ?
+                                              number_format(
+                                                source_amount,
+                                                source_amount > 1000 ?
+                                                  '0,0.00' :
+                                                  '0,0.00000000',
+                                                true,
+                                              ) :
+                                              'n/a'
+                                            }
+                                          </span>
+                                        </div>
+                                        <div className="flex items-start justify-between space-x-2.5 pb-1">
+                                          <span className="font-medium">
+                                            Liquidity:
+                                          </span>
+                                          <span className="font-semibold">
+                                            {typeof liquidity_amount === 'number' ?
+                                              number_format(
+                                                liquidity_amount,
+                                                liquidity_amount > 1000 ?
+                                                  '0,0.00' :
+                                                  '0,0.00000000',
+                                                true,
+                                              ) :
+                                              'n/a'
+                                            }
+                                          </span>
+                                        </div>
+                                        <div className="border-t flex items-center justify-between space-x-2.5 pt-2">
+                                          <span className="font-semibold">
+                                            Max:
+                                          </span>
+                                          <span className="font-semibold">
+                                            {typeof max_amount === 'number' ?
+                                              number_format(
+                                                max_amount,
+                                                max_amount > 1000 ?
+                                                  '0,0.00' :
+                                                  '0,0.00000000',
+                                                true,
+                                              ) :
+                                              'n/a'
+                                            }
+                                          </span>
+                                        </div>
                                       </div>
-                                      <div className="border-t flex items-center justify-between space-x-2.5 pt-2">
-                                        <span className="font-semibold">
-                                          Max:
-                                        </span>
-                                        <span className="font-semibold">
-                                          {typeof max_amount === 'number' ?
-                                            number_format(
-                                              max_amount,
-                                              max_amount > 1000 ?
-                                                '0,0.00' :
-                                                '0,0.00000000',
-                                              true,
-                                            ) :
-                                            'n/a'
-                                          }
-                                        </span>
-                                      </div>
-                                    </div>}
+                                    }
                                     className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
                                     titleClassName="normal-case py-1.5"
                                   >
@@ -3190,6 +3205,44 @@ export default () => {
                                       )
                                     }
                                     {
+                                      amount > 0 &&
+                                      typeof estimate_received === 'number' &&
+                                      (
+                                        amount < liquidity_amount ||
+                                        asset_balances_data
+                                      ) &&
+                                      (
+                                        <div className="flex items-center justify-between space-x-1">
+                                          <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
+                                            Estimated time
+                                          </div>
+                                          <Tooltip
+                                            placement="top"
+                                            content={
+                                              amount > liquidity_amount ||
+                                              forceSlow ?
+                                                'Unable to leverage fast liquidity. Your transfer will still complete.' :
+                                                'Fast transfer enabled by Connext router network.'
+                                            }
+                                            className="z-50 bg-black text-white text-xs"
+                                          >
+                                            <span className="tracking-normal whitespace-nowrap text-sm font-semibold space-x-1.5">
+                                              {
+                                                amount > liquidity_amount ||
+                                                forceSlow ?
+                                                  <span className="text-yellow-500 dark:text-yellow-400">
+                                                    90 minutes
+                                                  </span> :
+                                                  <span className="text-green-500 dark:text-green-500">
+                                                    4 minutes
+                                                  </span>
+                                              }
+                                            </span>
+                                          </Tooltip>
+                                        </div>
+                                      )
+                                    }
+                                    {
                                       false &&
                                       amount > 0 &&
                                       (
@@ -3231,44 +3284,6 @@ export default () => {
                                             )
                                           }
                                         </>
-                                      )
-                                    }
-                                    {
-                                      amount > 0 &&
-                                      typeof estimate_received === 'number' &&
-                                      (
-                                        amount < liquidity_amount ||
-                                        asset_balances_data
-                                      ) &&
-                                      (
-                                        <div className="flex items-center justify-between space-x-1">
-                                          <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
-                                            Estimated time
-                                          </div>
-                                          <Tooltip
-                                            placement="top"
-                                            content={
-                                              amount > liquidity_amount ||
-                                              forceSlow ?
-                                                'Unable to leverage fast liquidity. Your transfer will still complete.' :
-                                                'Fast transfer enabled by Connext router network.'
-                                            }
-                                            className="z-50 bg-black text-white text-xs"
-                                          >
-                                            <span className="tracking-normal whitespace-nowrap text-sm font-semibold space-x-1.5">
-                                              {
-                                                amount > liquidity_amount ||
-                                                forceSlow ?
-                                                  <span className="text-yellow-500 dark:text-yellow-400">
-                                                    90 minutes
-                                                  </span> :
-                                                  <span className="text-green-500 dark:text-green-500">
-                                                    4 minutes
-                                                  </span>
-                                              }
-                                            </span>
-                                          </Tooltip>
-                                        </div>
                                       )
                                     }
                                   </div>
@@ -3409,25 +3424,26 @@ export default () => {
                                   <Alert
                                     key={i}
                                     color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? xcallResponse ? 'bg-blue-500 dark:bg-blue-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
-                                    icon={status === 'failed' ?
-                                      <BiMessageError
-                                        className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                      /> :
-                                      status === 'success' ?
-                                        xcallResponse ?
-                                          <div className="mr-3">
-                                            <TailSpin
-                                              color="white"
-                                              width="20"
-                                              height="20"
-                                            />
-                                          </div> :
-                                          <BiMessageCheck
-                                            className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                          /> :
-                                        <BiMessageDetail
+                                    icon={
+                                      status === 'failed' ?
+                                        <BiMessageError
                                           className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                        />
+                                        /> :
+                                        status === 'success' ?
+                                          xcallResponse ?
+                                            <div className="mr-3">
+                                              <TailSpin
+                                                color="white"
+                                                width="20"
+                                                height="20"
+                                              />
+                                            </div> :
+                                            <BiMessageCheck
+                                              className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                                            /> :
+                                          <BiMessageDetail
+                                            className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                                          />
                                     }
                                     closeDisabled={true}
                                     rounded={true}

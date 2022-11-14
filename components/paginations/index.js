@@ -11,9 +11,10 @@ export const PageWithText = ({
   <button
     disabled={disabled}
     onClick={onClick}
-    className={active ?
-      activeClassNames :
-      inactiveClassNames
+    className={
+      active ?
+        activeClassNames :
+        inactiveClassNames
     }
   >
     {children}
@@ -31,9 +32,10 @@ export const Page = ({
   <button
     disabled={disabled}
     onClick={onClick}
-    className={active ?
-      activeClassNames :
-      inactiveClassNames
+    className={
+      active ?
+        activeClassNames :
+        inactiveClassNames
     }
   >
     {children}
@@ -53,7 +55,9 @@ export const Pages = ({
       items.length - 1,
       active - 1,
     ].findIndex((_i, index) =>
-      Math.floor(Math.abs(i - _i)) < (
+      Math.floor(
+        Math.abs(i - _i)
+      ) < (
         index < 2 ?
           3 :
           items.length < 20 ?
@@ -64,26 +68,28 @@ export const Pages = ({
 
   return (
     <>
-      {items.map(i =>
-        hide(i) ?
-          <div
-            key={i}
-            className={`${hide(i - 1) ? 'hidden' : ''}`}
-          >
-            <BsThreeDots
-              size={20}
-              className="text-slate-300 dark:text-slate-700 mt-1.5"
-            />
-          </div> :
-          <Page
-            key={i}
-            disabled={disabled}
-            active={i + 1 === active}
-            onClick={() => onClick(i + 1)}
-          >
-            {i + 1}
-          </Page>
-      )}
+      {items
+        .map(i =>
+          hide(i) ?
+            <div
+              key={i}
+              className={`${hide(i - 1) ? 'hidden' : ''}`}
+            >
+              <BsThreeDots
+                size={20}
+                className="text-slate-300 dark:text-slate-700 mt-1.5"
+              />
+            </div> :
+            <Page
+              key={i}
+              disabled={disabled}
+              active={i + 1 === active}
+              onClick={() => onClick(i + 1)}
+            >
+              {i + 1}
+            </Page>
+        )
+      }
     </>
   )
 }
@@ -97,50 +103,58 @@ export const Pagination = ({
   next = 'Next',
   onClick,
 }) => {
-  previous = active - 1 > 0 &&
+  previous =
+    active - 1 > 0 &&
     previous
 
-  next = active + 1 <= items.length &&
+  next =
+    active + 1 <= items.length &&
     next
 
   return (
     <div className="pagination flex flex-wrap items-center justify-center space-x-2">
-      {previous && (
-        icons ?
-          <Page
-            disabled={disabled}
-            onClick={() => onClick(active - 1)}
-          >
-            {previous}
-          </Page> :
-          <PageWithText
-            disabled={disabled}
-            onClick={() => onClick(active - 1)}
-          >
-            {previous}
-          </PageWithText>
-      )}
+      {
+        previous &&
+        (
+          icons ?
+            <Page
+              disabled={disabled}
+              onClick={() => onClick(active - 1)}
+            >
+              {previous}
+            </Page> :
+            <PageWithText
+              disabled={disabled}
+              onClick={() => onClick(active - 1)}
+            >
+              {previous}
+            </PageWithText>
+        )
+      }
       <Pages
         items={items}
         disabled={disabled}
         active={active}
         onClick={onClick}
       />
-      {next && (
-        icons ?
-          <Page
-            disabled={disabled}
-            onClick={() => onClick(active + 1)}
-          >
-            {next}
-          </Page> :
-          <PageWithText
-            disabled={disabled}
-            onClick={() => onClick(active + 1)}
-          >
-            {next}
-          </PageWithText>
-      )}
+      {
+        next &&
+        (
+          icons ?
+            <Page
+              disabled={disabled}
+              onClick={() => onClick(active + 1)}
+            >
+              {next}
+            </Page> :
+            <PageWithText
+              disabled={disabled}
+              onClick={() => onClick(active + 1)}
+            >
+              {next}
+            </PageWithText>
+        )
+      }
     </div>
   )
 }

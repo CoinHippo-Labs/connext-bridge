@@ -56,9 +56,10 @@ export default ({
     asset,
   } = { ...pool }
 
-  const chain_data = chains_data?.find(c =>
-    c?.id === chain
-  )
+  const chain_data = (chains_data || [])
+    .find(c =>
+      c?.id === chain
+    )
   const {
     chain_id,
     explorer,
@@ -76,17 +77,21 @@ export default ({
 
   const no_pool =
     selected &&
-    pool_assets_data?.findIndex(a =>
-      a?.id === asset &&
-      a.contracts?.findIndex(a =>
-        a?.chain_id === chain_id
-      ) > -1
-    ) < 0
+    (pool_assets_data || [])
+      .findIndex(a =>
+        a?.id === asset &&
+        (a.contracts || [])
+          .findIndex(a =>
+            a?.chain_id === chain_id
+          ) > -1
+      ) < 0
 
-  const pool_data = pools_data?.find(p =>
-    p?.chain_data?.id === chain &&
-    p.asset_data?.id === asset
-  )
+  const pool_data = (pools_data || [])
+    .find(p =>
+      p?.chain_data?.id === chain &&
+      p.asset_data?.id === asset
+    )
+
   const {
     name,
     lpTokenAddress,
@@ -99,22 +104,27 @@ export default ({
     error,
   } = { ...pool_data }
 
-  const pool_loading = selected &&
+  const pool_loading =
+    selected &&
     !no_pool &&
     !error &&
     !pool_data
 
-  const user_pool_data = pool_data &&
-    user_pools_data?.find(p =>
-      p?.chain_data?.id === chain &&
-      p.asset_data?.id === asset
-    )
+  const user_pool_data =
+    pool_data &&
+    (user_pools_data || [])
+      .find(p =>
+        p?.chain_data?.id === chain &&
+        p.asset_data?.id === asset
+      )
+
   const {
     lpTokenBalance,
     balances,
   } = { ...user_pool_data }
 
-  const share = lpTokenBalance * 100 /
+  const share =
+    lpTokenBalance * 100 /
     (
       Number(liquidity) ||
       1
@@ -137,365 +147,333 @@ export default ({
 
   return (
     <div className="sm:min-h-full bg-transparent">
-      {pools_data || true ?
-        <div className={statsSectionClassName}>
-          <div className="space-y-3">
-            <div className="tracking-wider text-xl font-medium">
-              Statistics
-            </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className={metricClassName}>
-                <span className={titleClassName}>
-                  Liquidity
-                </span>
-                <span className={valueClassName}>
-                  {
-                    pool_data &&
-                    !error ?
-                      number_format(
-                        liquidity,
-                        '0,0.000000',
-                        true,
-                      ) :
-                      selected &&
-                      !no_pool &&
-                      !error &&
-                      (
-                        pool_loading ?
-                          <div className="mt-1">
-                            <TailSpin
-                              color={loader_color(theme)}
-                              width="24"
-                              height="24"
-                            />
-                          </div> :
-                          '-'
-                      )
-                  }
-                </span>
+      {
+        true ||
+        pools_data ?
+          <div className={statsSectionClassName}>
+            <div className="space-y-3">
+              <div className="tracking-wider text-xl font-medium">
+                Statistics
               </div>
-              <div className={metricClassName}>
-                <span className={titleClassName}>
-                  Volume (24h)
-                </span>
-                <span className={valueClassName}>
-                  {
-                    pool_data &&
-                    !error ?
-                      <>
-                        {currency_symbol}
-                        {number_format(
-                          volume,
-                          '0,0.000000',
-                          true,
-                        )}
-                      </> :
-                      selected &&
-                      !no_pool &&
-                      !error &&
-                      (
-                        pool_loading ?
-                          <div className="mt-1">
-                            <TailSpin
-                              color={loader_color(theme)}
-                              width="24"
-                              height="24"
-                            />
-                          </div> :
-                          '-'
-                      )
-                  }
-                </span>
-              </div>
-              <div className={metricClassName}>
-                <span className={titleClassName}>
-                  Fees (24h)
-                </span>
-                <span className={valueClassName}>
-                  {
-                    pool_data &&
-                    !error ?
-                      <>
-                        {currency_symbol}
-                        {number_format(
-                          fees,
-                          '0,0.000000',
-                          true,
-                        )}
-                      </> :
-                      selected &&
-                      !no_pool &&
-                      !error &&
-                      (
-                        pool_loading ?
-                          <div className="mt-1">
-                            <TailSpin
-                              color={loader_color(theme)}
-                              width="24"
-                              height="24"
-                            />
-                          </div> :
-                          '-'
-                      )
-                  }
-                </span>
-              </div>
-              <div className={metricClassName}>
-                <span className={titleClassName}>
-                  APY
-                </span>
-                <span className={valueClassName}>
-                  {
-                    pool_data &&
-                    !error ?
-                      /*<div className="grid sm:grid-cols-1 gap-1 mt-1">
-                        {Object.entries({ ...apy })
-                          .filter(([k, v]) => !isNaN(v))
-                          .map(([k, v]) => (
-                            <div
-                              key={k}
-                              className="flex items-center text-sm space-x-1"
-                            >
-                              <span className="capitalize">
-                                {k}
-                              </span>
-                              <span>
-                                {number_format(
-                                  v,
-                                  '0,0.000000',
-                                  true,
-                                )}
-                                %
-                              </span>
-                            </div>
-                          ))
-                        }
-                      </div>*/
-                      <span>
-                        {number_format(
-                          apy?.total,
-                          '0,0.000000',
-                          true,
-                        )}
-                        %
-                      </span> :
-                      selected &&
-                      !no_pool &&
-                      !error &&
-                      (
-                        pool_loading ?
-                          <div className="mt-1">
-                            <TailSpin
-                              color={loader_color(theme)}
-                              width="24"
-                              height="24"
-                            />
-                          </div> :
-                          '-'
-                      )
-                  }
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {
-              address &&
-              symbols &&
-              (
-                <div className="space-y-3">
-                  <div className="tracking-wider text-xl font-medium">
-                    Tokens
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className={metricClassName}>
+                  <span className={titleClassName}>
+                    Liquidity
+                  </span>
+                  <span className={valueClassName}>
                     {
-                      _.head(symbols) &&
-                      (
-                        <div className={metricClassName}>
-                          <div className="flex items-center space-x-2">
-                            <span className={titleClassName}>
-                              {_.head(symbols)}
-                            </span>
-                            {/*<Link
-                              href={`/swap/${asset.toUpperCase()}-on-${chain}?from=${_.last(symbols)}`}
-                            >
-                            <a
-                              className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
-                            >
-                              <Tooltip
-                                placement="top"
-                                content={`Click here to swap ${_.last(symbols)} into ${_.head(symbols)}`}
-                                className="z-50 bg-black text-white text-xs"
-                              >
-                                <div>
-                                  <HiSwitchHorizontal
-                                    size={18}
-                                  />
-                                </div>
-                              </Tooltip>
-                            </a>
-                            </Link>*/}
-                          </div>
-                          <span className={valueClassName}>
-                            {
-                              !isNaN(_.head(balances)) ||
-                              (
-                                pool_data &&
-                                !error &&
-                                user_pools_data
-                              ) ?
-                                number_format(
-                                  _.head(balances) ||
-                                  0,
-                                  '0,0.000000',
-                                  true,
-                                ) :
-                                selected &&
-                                !no_pool &&
-                                !error &&
-                                (
-                                  position_loading ?
-                                    <div className="mt-0.5">
-                                      <TailSpin
-                                        color={loader_color(theme)}
-                                        width="24"
-                                        height="24"
-                                      />
-                                    </div> :
-                                    '-'
-                                )
-                            }
-                          </span>
-                        </div>
-                      )
+                      pool_data &&
+                      !error ?
+                        number_format(
+                          liquidity,
+                          '0,0.000000',
+                          true,
+                        ) :
+                        selected &&
+                        !no_pool &&
+                        !error &&
+                        (
+                          pool_loading ?
+                            <div className="mt-1">
+                              <TailSpin
+                                color={loader_color(theme)}
+                                width="24"
+                                height="24"
+                              />
+                            </div> :
+                            '-'
+                        )
                     }
-                    {
-                      _.last(symbols) &&
-                      (
-                        <div className={metricClassName}>
-                          <div className="flex items-center space-x-2">
-                            <span className={titleClassName}>
-                              {_.last(symbols)}
-                            </span>
-                            {/*<Link
-                              href={`/swap/${asset.toUpperCase()}-on-${chain}`}
-                            >
-                            <a
-                              className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
-                            >
-                              <Tooltip
-                                placement="top"
-                                content={`Click here to swap ${_.head(symbols)} into ${_.last(symbols)}`}
-                                className="z-50 bg-black text-white text-xs"
-                              >
-                                <div>
-                                  <HiSwitchHorizontal
-                                    size={18}
-                                  />
-                                </div>
-                              </Tooltip>
-                            </a>
-                            </Link>*/}
-                          </div>
-                          <span className={valueClassName}>
-                            {
-                              !isNaN(_.last(balances)) ||
-                              (
-                                pool_data &&
-                                !error &&
-                                user_pools_data
-                              ) ?
-                                number_format(
-                                  _.last(balances) ||
-                                  0,
-                                  '0,0.000000',
-                                  true,
-                                ) :
-                                selected &&
-                                !no_pool &&
-                                !error &&
-                                (
-                                  position_loading ?
-                                    <div className="mt-0.5">
-                                      <TailSpin
-                                        color={loader_color(theme)}
-                                        width="24"
-                                        height="24"
-                                      />
-                                    </div> :
-                                    '-'
-                                )
-                            }
-                          </span>
-                        </div>
-                      )
-                    }
-                  </div>
+                  </span>
                 </div>
-              )
-            }
-            {
-              address &&
-              (
-                <div className="space-y-3">
-                  <div className="text-xl font-medium">
-                    Your Position
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className={metricClassName}>
-                      <span className={titleClassName}>
-                        Pool Share
-                      </span>
-                      <span className={valueClassName}>
-                        {
-                          !isNaN(share) ||
-                          (
-                            pool_data &&
-                            !error &&
-                            user_pools_data
-                          ) ?
-                          <>
-                            {number_format(
-                              share || 0,
-                              '0,0.000000',
-                              true,
-                            )}
-                            %
-                          </> :
-                          selected &&
-                          !no_pool &&
-                          !error &&
-                          (
-                            position_loading ?
-                              <div className="mt-0.5">
-                                <TailSpin
-                                  color={loader_color(theme)}
-                                  width="24"
-                                  height="24"
-                                />
-                              </div> :
-                              '-'
-                          )
-                        }
-                      </span>
+                <div className={metricClassName}>
+                  <span className={titleClassName}>
+                    Volume (24h)
+                  </span>
+                  <span className={valueClassName}>
+                    {
+                      pool_data &&
+                      !error ?
+                        <>
+                          {currency_symbol}
+                          {number_format(
+                            volume,
+                            '0,0.000000',
+                            true,
+                          )}
+                        </> :
+                        selected &&
+                        !no_pool &&
+                        !error &&
+                        (
+                          pool_loading ?
+                            <div className="mt-1">
+                              <TailSpin
+                                color={loader_color(theme)}
+                                width="24"
+                                height="24"
+                              />
+                            </div> :
+                            '-'
+                        )
+                    }
+                  </span>
+                </div>
+                <div className={metricClassName}>
+                  <span className={titleClassName}>
+                    Fees (24h)
+                  </span>
+                  <span className={valueClassName}>
+                    {
+                      pool_data &&
+                      !error ?
+                        <>
+                          {currency_symbol}
+                          {number_format(
+                            fees,
+                            '0,0.000000',
+                            true,
+                          )}
+                        </> :
+                        selected &&
+                        !no_pool &&
+                        !error &&
+                        (
+                          pool_loading ?
+                            <div className="mt-1">
+                              <TailSpin
+                                color={loader_color(theme)}
+                                width="24"
+                                height="24"
+                              />
+                            </div> :
+                            '-'
+                        )
+                    }
+                  </span>
+                </div>
+                <div className={metricClassName}>
+                  <span className={titleClassName}>
+                    APY
+                  </span>
+                  <span className={valueClassName}>
+                    {
+                      pool_data &&
+                      !error ?
+                        /*<div className="grid sm:grid-cols-1 gap-1 mt-1">
+                          {Object.entries({ ...apy })
+                            .filter(([k, v]) => !isNaN(v))
+                            .map(([k, v]) => (
+                              <div
+                                key={k}
+                                className="flex items-center text-sm space-x-1"
+                              >
+                                <span className="capitalize">
+                                  {k}
+                                </span>
+                                <span>
+                                  {number_format(
+                                    v,
+                                    '0,0.000000',
+                                    true,
+                                  )}
+                                  %
+                                </span>
+                              </div>
+                            ))
+                          }
+                        </div>*/
+                        <span>
+                          {number_format(
+                            apy?.total,
+                            '0,0.000000',
+                            true,
+                          )}
+                          %
+                        </span> :
+                        selected &&
+                        !no_pool &&
+                        !error &&
+                        (
+                          pool_loading ?
+                            <div className="mt-1">
+                              <TailSpin
+                                color={loader_color(theme)}
+                                width="24"
+                                height="24"
+                              />
+                            </div> :
+                            '-'
+                        )
+                    }
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {
+                address &&
+                symbols &&
+                (
+                  <div className="space-y-3">
+                    <div className="tracking-wider text-xl font-medium">
+                      Tokens
                     </div>
-                    <div className={metricClassName}>
-                      <span className={titleClassName}>
-                        Pool Tokens
-                      </span>
-                      <span className={valueClassName}>
-                        {
-                          !isNaN(lpTokenBalance) ||
-                          (
-                            pool_data &&
-                            !error &&
-                            user_pools_data
-                          ) ?
-                            number_format(
-                              lpTokenBalance || 0,
-                              '0,0.000000',
-                              true,
-                            ) :
+                    <div className="grid grid-cols-2 gap-4">
+                      {
+                        _.head(symbols) &&
+                        (
+                          <div className={metricClassName}>
+                            <div className="flex items-center space-x-2">
+                              <span className={titleClassName}>
+                                {_.head(symbols)}
+                              </span>
+                              {/*<Link
+                                href={`/swap/${asset.toUpperCase()}-on-${chain}?from=${_.last(symbols)}`}
+                              >
+                              <a
+                                className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
+                              >
+                                <Tooltip
+                                  placement="top"
+                                  content={`Click here to swap ${_.last(symbols)} into ${_.head(symbols)}`}
+                                  className="z-50 bg-black text-white text-xs"
+                                >
+                                  <div>
+                                    <HiSwitchHorizontal
+                                      size={18}
+                                    />
+                                  </div>
+                                </Tooltip>
+                              </a>
+                              </Link>*/}
+                            </div>
+                            <span className={valueClassName}>
+                              {
+                                !isNaN(_.head(balances)) ||
+                                (
+                                  pool_data &&
+                                  !error &&
+                                  user_pools_data
+                                ) ?
+                                  number_format(
+                                    _.head(balances) ||
+                                    0,
+                                    '0,0.000000',
+                                    true,
+                                  ) :
+                                  selected &&
+                                  !no_pool &&
+                                  !error &&
+                                  (
+                                    position_loading ?
+                                      <div className="mt-0.5">
+                                        <TailSpin
+                                          color={loader_color(theme)}
+                                          width="24"
+                                          height="24"
+                                        />
+                                      </div> :
+                                      '-'
+                                  )
+                              }
+                            </span>
+                          </div>
+                        )
+                      }
+                      {
+                        _.last(symbols) &&
+                        (
+                          <div className={metricClassName}>
+                            <div className="flex items-center space-x-2">
+                              <span className={titleClassName}>
+                                {_.last(symbols)}
+                              </span>
+                              {/*<Link
+                                href={`/swap/${asset.toUpperCase()}-on-${chain}`}
+                              >
+                              <a
+                                className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
+                              >
+                                <Tooltip
+                                  placement="top"
+                                  content={`Click here to swap ${_.head(symbols)} into ${_.last(symbols)}`}
+                                  className="z-50 bg-black text-white text-xs"
+                                >
+                                  <div>
+                                    <HiSwitchHorizontal
+                                      size={18}
+                                    />
+                                  </div>
+                                </Tooltip>
+                              </a>
+                              </Link>*/}
+                            </div>
+                            <span className={valueClassName}>
+                              {
+                                !isNaN(_.last(balances)) ||
+                                (
+                                  pool_data &&
+                                  !error &&
+                                  user_pools_data
+                                ) ?
+                                  number_format(
+                                    _.last(balances) ||
+                                    0,
+                                    '0,0.000000',
+                                    true,
+                                  ) :
+                                  selected &&
+                                  !no_pool &&
+                                  !error &&
+                                  (
+                                    position_loading ?
+                                      <div className="mt-0.5">
+                                        <TailSpin
+                                          color={loader_color(theme)}
+                                          width="24"
+                                          height="24"
+                                        />
+                                      </div> :
+                                      '-'
+                                  )
+                              }
+                            </span>
+                          </div>
+                        )
+                      }
+                    </div>
+                  </div>
+                )
+              }
+              {
+                address &&
+                (
+                  <div className="space-y-3">
+                    <div className="text-xl font-medium">
+                      Your Position
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className={metricClassName}>
+                        <span className={titleClassName}>
+                          Pool Share
+                        </span>
+                        <span className={valueClassName}>
+                          {
+                            !isNaN(share) ||
+                            (
+                              pool_data &&
+                              !error &&
+                              user_pools_data
+                            ) ?
+                            <>
+                              {number_format(
+                                share || 0,
+                                '0,0.000000',
+                                true,
+                              )}
+                              %
+                            </> :
                             selected &&
                             !no_pool &&
                             !error &&
@@ -510,22 +488,56 @@ export default ({
                                 </div> :
                                 '-'
                             )
-                        }
-                      </span>
+                          }
+                        </span>
+                      </div>
+                      <div className={metricClassName}>
+                        <span className={titleClassName}>
+                          Pool Tokens
+                        </span>
+                        <span className={valueClassName}>
+                          {
+                            !isNaN(lpTokenBalance) ||
+                            (
+                              pool_data &&
+                              !error &&
+                              user_pools_data
+                            ) ?
+                              number_format(
+                                lpTokenBalance || 0,
+                                '0,0.000000',
+                                true,
+                              ) :
+                              selected &&
+                              !no_pool &&
+                              !error &&
+                              (
+                                position_loading ?
+                                  <div className="mt-0.5">
+                                    <TailSpin
+                                      color={loader_color(theme)}
+                                      width="24"
+                                      height="24"
+                                    />
+                                  </div> :
+                                  '-'
+                              )
+                          }
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
-            }
+                )
+              }
+            </div>
+          </div> :
+          <div className="py-4">
+            <TailSpin
+              color={loader_color(theme)}
+              width="36"
+              height="36"
+            />
           </div>
-        </div> :
-        <div className="py-4">
-          <TailSpin
-            color={loader_color(theme)}
-            width="36"
-            height="36"
-          />
-        </div>
       }
     </div>
   )

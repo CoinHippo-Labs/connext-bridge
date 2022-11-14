@@ -11,12 +11,13 @@ export default () => {
     asPath,
   } = { ...router }
 
-  const _asPath = asPath.includes('?') ?
-    asPath.substring(
-      0,
-      asPath.indexOf('?'),
-    ) :
-    asPath
+  const _asPath =
+    asPath.includes('?') ?
+      asPath.substring(
+        0,
+        asPath.indexOf('?'),
+      ) :
+      asPath
 
   const [ssr, setSsr] = useState(true)
 

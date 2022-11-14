@@ -163,12 +163,13 @@ export default () => {
         path
 
     if (path.includes('on-')) {
-      const paths = path
-        .replace(
-          '/swap/',
-          '',
-        )
-        .split('-')
+      const paths =
+        path
+          .replace(
+            '/swap/',
+            '',
+          )
+          .split('-')
 
       const chain = paths[paths.indexOf('on') + 1]
       const asset =
@@ -183,6 +184,7 @@ export default () => {
         .find(c =>
           c?.id === chain
         )
+
       const asset_data = (pool_assets_data || [])
         .find(a =>
           a?.id === asset ||
@@ -330,9 +332,10 @@ export default () => {
       router.push(
         `/swap/${
           chain ?
-            `${asset ?
-              `${asset.toUpperCase()}-` :
-              ''
+            `${
+              asset ?
+                `${asset.toUpperCase()}-` :
+                ''
             }on-${chain}` :
             ''
         }${
@@ -806,8 +809,7 @@ export default () => {
 
     const {
       chain_id,
-      domain_id,
-    } = { 
+    } = {
       ...(
         (chains_data || [])
           .find(c =>
@@ -817,64 +819,43 @@ export default () => {
     }
 
     const contracts_data =
-      _.uniqBy(
-        _.concat(
-          (pool_assets_data || [])
-            .map(a => {
-              const {
-                contracts,
-              } = { ...a }
+      (assets_data || [])
+        .map(a => {
+          const {
+            contracts,
+          } = { ...a }
 
-              return {
-                ...a,
-                ...(
-                  (contracts || [])
-                  .find(c =>
-                    c?.chain_id === chain_id
-                  )
-                ),
-              }
-            }),
-          (pools_data || [])
-            .filter(p =>
-              equals_ignore_case(
-                p?.domainId,
-                domain_id,
-              )
-            )
-            .flatMap(p => {
-              const {
-                tokens,
-                symbols,
-                decimals,
-              } = { ...p }
-
-              return (tokens || [])
-                .map((t, i) => {
-                  return {
-                    chain_id,
-                    contract_address: t,
-                    decimals: decimals?.[i],
-                    symbol: symbols?.[i],
-                  }
-                })
-            }),
-        )
+          return {
+            ...a,
+            ...(
+              (contracts || [])
+                .find(c =>
+                  c?.chain_id === chain_id
+                )
+            ),
+          }
+        })
         .filter(a => a?.contract_address)
         .map(a => {
+          const {
+            next_asset,
+          } = { ...a };
           let {
             contract_address,
           } = {  ...a }
 
           contract_address = contract_address.toLowerCase()
 
+          if (next_asset?.contract_address) {
+            next_asset.contract_address = next_asset.contract_address.toLowerCase()
+          }
+
           return {
             ...a,
             contract_address,
+            next_asset,
           }
-        }),
-        'contract_address',
-      )
+        })
 
     contracts_data
       .forEach(c =>
@@ -1164,7 +1145,8 @@ export default () => {
             _.slice(
               (message || '')
                 .toLowerCase()
-                .split(' '),
+                .split(' ')
+                .filter(s => s),
               0,
               2,
             )
@@ -1289,12 +1271,14 @@ export default () => {
 
             setCallResponse(
               {
-                status: failed ?
-                  'failed' :
-                  'success',
-                message: failed ?
-                  `Failed to swap ${_symbol}` :
-                  `Swap ${_symbol} successful`,
+                status:
+                  failed ?
+                    'failed' :
+                    'success',
+                message:
+                  failed ?
+                    `Failed to swap ${_symbol}` :
+                    `Swap ${_symbol} successful`,
                 tx_hash: hash,
               }
             )
@@ -1310,7 +1294,8 @@ export default () => {
             _.slice(
               (message || '')
                 .toLowerCase()
-                .split(' '),
+                .split(' ')
+                .filter(s => s),
               0,
               2,
             )
@@ -1722,6 +1707,7 @@ export default () => {
           x_asset_data.contract_address,
         )
       )
+
   const x_balance_amount =
     x_balance &&
     Number(x_balance.amount)
@@ -1786,6 +1772,7 @@ export default () => {
           y_asset_data.contract_address,
         )
       )
+
   const y_balance_amount =
     y_balance &&
     Number(y_balance.amount)
@@ -2687,9 +2674,11 @@ export default () => {
                     ) ?
                       <Alert
                         color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
-                        icon={<BiMessageError
-                          className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                        />}
+                        icon={
+                          <BiMessageError
+                            className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                          />
+                        }
                         closeDisabled={true}
                         rounded={true}
                         className="rounded-xl p-4.5"
@@ -2775,25 +2764,26 @@ export default () => {
                               <Alert
                                 key={i}
                                 color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
-                                icon={status === 'failed' ?
-                                  <BiMessageError
-                                    className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                  /> :
-                                  status === 'success' ?
-                                    <BiMessageCheck
+                                icon={
+                                  status === 'failed' ?
+                                    <BiMessageError
                                       className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
                                     /> :
-                                    status === 'pending' ?
-                                      <div className="mr-3">
-                                        <Watch
-                                          color="white"
-                                          width="20"
-                                          height="20"
-                                        />
-                                      </div> :
-                                      <BiMessageDetail
+                                    status === 'success' ?
+                                      <BiMessageCheck
                                         className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                      />
+                                      /> :
+                                      status === 'pending' ?
+                                        <div className="mr-3">
+                                          <Watch
+                                            color="white"
+                                            width="20"
+                                            height="20"
+                                          />
+                                        </div> :
+                                        <BiMessageDetail
+                                          className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                                        />
                                 }
                                 closeDisabled={true}
                                 rounded={true}

@@ -42,11 +42,12 @@ export default () => {
 
     await setAnnouncement(
       {
-        data: (data || '')
-          .trim()
-          .split('\n')
-          .filter(s => s)
-          .join('<br>'),
+        data:
+          (data || '')
+            .trim()
+            .split('\n')
+            .filter(s => s)
+            .join('<br>'),
       },
       address &&
       {

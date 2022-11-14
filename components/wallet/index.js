@@ -171,11 +171,12 @@ export default ({
               provider = window.clover
 
               try {
-                await provider.request(
-                  {
-                    method: 'eth_requestAccounts',
-                  },
-                )
+                await provider
+                  .request(
+                    {
+                      method: 'eth_requestAccounts',
+                    },
+                  )
               } catch (error) {
                 throw new Error('User Rejected')
               }
@@ -184,11 +185,12 @@ export default ({
               provider = window.ethereum
 
               try {
-                await provider.request(
-                  {
-                    method: 'eth_requestAccounts',
-                  },
-                )
+                await provider
+                  .request(
+                    {
+                      method: 'eth_requestAccounts',
+                    },
+                  )
               } catch (error) {
                 throw new Error('User Rejected')
               }
@@ -257,8 +259,8 @@ export default ({
     update()
   }, [theme])
 
-  const connect = useCallback(async () =>
-    {
+  const connect = useCallback(
+    async () => {
       const provider = await web3Modal.connect()
       const web3Provider = new providers.Web3Provider(provider)
       const network = await web3Provider.getNetwork()
@@ -302,30 +304,33 @@ export default ({
     [web3Modal],
   )
 
-  const disconnect = useCallback(async (
-    e,
-    is_reestablish,
-  ) => {
-    if (
-      web3Modal &&
-      !is_reestablish
-    ) {
-      await web3Modal.clearCachedProvider()
-    }
-
-    if (
-      provider?.disconnect &&
-      typeof provider.disconnect === 'function'
-    ) {
-      await provider.disconnect()
-    }
-
-    dispatch(
-      {
-        type: WALLET_RESET,
+  const disconnect = useCallback(
+    async (
+      e,
+      is_reestablish,
+    ) => {
+      if (
+        web3Modal &&
+        !is_reestablish
+      ) {
+        await web3Modal.clearCachedProvider()
       }
-    )
-  }, [web3Modal, provider])
+
+      if (
+        provider?.disconnect &&
+        typeof provider.disconnect === 'function'
+      ) {
+        await provider.disconnect()
+      }
+
+      dispatch(
+        {
+          type: WALLET_RESET,
+        }
+      )
+    },
+    [web3Modal, provider],
+  )
 
   const switchChain = async () => {
     if (
@@ -334,16 +339,17 @@ export default ({
       provider
     ) {
       try {
-        await provider.request(
-          {
-            method: 'wallet_switchEthereumChain',
-            params: [
-              {
-                chainId: utils.hexValue(connectChainId),
-              },
-            ],
-          },
-        )
+        await provider
+          .request(
+            {
+              method: 'wallet_switchEthereumChain',
+              params: [
+                {
+                  chainId: utils.hexValue(connectChainId),
+                },
+              ],
+            },
+          )
       } catch (error) {
         const {
           code,
@@ -354,17 +360,21 @@ export default ({
             const {
               provider_params,
             } = {
-              ...chains_data?.find(c =>
-                c.chain_id === connectChainId
+              ...(
+                (chains_data || [])
+                  .find(c =>
+                    c.chain_id === connectChainId
+                  )
               ),
             }
 
-            await provider.request(
-              {
-                method: 'wallet_addEthereumChain',
-                params: provider_params,
-              },
-            )
+            await provider
+              .request(
+                {
+                  method: 'wallet_addEthereumChain',
+                  params: provider_params,
+                },
+              )
           } catch (error) {}
         }
       }
@@ -413,33 +423,39 @@ export default ({
         }
       }
 
-      provider.on(
-        'chainChanged',
-        handleChainChanged,
-      )
-      provider.on(
-        'accountsChanged',
-        handleAccountsChanged,
-      )
-      provider.on(
-        'disconnect',
-        handleDisconnect,
-      )
+      provider
+        .on(
+          'chainChanged',
+          handleChainChanged,
+        )
+      provider
+        .on(
+          'accountsChanged',
+          handleAccountsChanged,
+        )
+      provider
+        .on(
+          'disconnect',
+          handleDisconnect,
+        )
 
       return () => {
         if (provider.removeListener) {
-          provider.removeListener(
-            'chainChanged',
-            handleChainChanged,
-          )
-          provider.removeListener(
-            'accountsChanged',
-            handleAccountsChanged,
-          )
-          provider.removeListener(
-            'disconnect',
-            handleDisconnect,
-          )
+          provider
+            .removeListener(
+              'chainChanged',
+              handleChainChanged,
+            )
+          provider
+            .removeListener(
+              'accountsChanged',
+              handleAccountsChanged,
+            )
+          provider
+            .removeListener(
+              'disconnect',
+              handleDisconnect,
+            )
         }
       }
     }

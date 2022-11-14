@@ -60,13 +60,20 @@ export default ({
             share,
           } = { ...p }
 
-          const pool_data = pools_data?.find(_p => _p?.id === id)
+          const pool_data = (pools_data || [])
+            .find(_p =>
+              _p?.id === id
+            )
           const {
             liquidity,
           } = { ...pool_data }
 
-          share = lpTokenBalance * 100 /
-            (Number(liquidity) || 1)
+          share =
+            lpTokenBalance * 100 /
+            (
+              Number(liquidity) ||
+              1
+            )
 
           return {
             ...p,
@@ -85,11 +92,12 @@ export default ({
         return {
           id: k,
           asset_data: _.head(v)?.asset_data,
-          pools: _.orderBy(
-            v,
-            ['liquidity'],
-            ['desc'],
-          ),
+          pools:
+            _.orderBy(
+              v,
+              ['liquidity'],
+              ['desc'],
+            ),
         }
       }) :
       null
@@ -119,10 +127,14 @@ export default ({
                   symbol,
                 } = { ...props.value }
 
-                const _symbol = view === 'my_pools' ?
-                  contract_data?.symbol || symbol :
-                  symbol
-                name = name ||
+                const _symbol =
+                  view === 'my_pools' ?
+                    contract_data?.symbol ||
+                    symbol :
+                    symbol
+
+                name =
+                  name ||
                   _symbol
 
                 const chain = chain_data?.id
@@ -142,15 +154,18 @@ export default ({
                       </Link> :
                       <>
                         <div className="flex items-center space-x-2">
-                          {image && (
-                            <Image
-                              src={image}
-                              alt=""
-                              width={24}
-                              height={24}
-                              className="rounded-full"
-                            />
-                          )}
+                          {
+                            image &&
+                            (
+                              <Image
+                                src={image}
+                                alt=""
+                                width={24}
+                                height={24}
+                                className="rounded-full"
+                              />
+                            )
+                          }
                           <span className="text-slate-600 dark:text-slate-400 text-base font-medium">
                             {_symbol}
                           </span>
@@ -171,9 +186,12 @@ export default ({
                                 symbol,
                               } = {  ...contract_data }
 
-                              symbol = symbol ||
+                              symbol =
+                                symbol ||
                                 asset_data?.symbol
-                              name = name ||
+
+                              name =
+                                name ||
                                 symbol
 
                               const chain = chain_data?.id
@@ -222,9 +240,13 @@ export default ({
                   if (pools?.length > 0) {
                     setUncollapseAssetIds(
                       uncollapseAssetIds?.includes(id) ?
-                        uncollapseAssetIds.filter(_id => _id !== id) :
+                        uncollapseAssetIds
+                          .filter(_id =>
+                            _id !== id
+                          ) :
                         _.concat(
-                          uncollapseAssetIds || [],
+                          uncollapseAssetIds ||
+                          [],
                           id,
                         )
                     )
@@ -240,15 +262,18 @@ export default ({
                       <a
                         className="h-6 flex items-center space-x-2"
                       >
-                        {image && (
-                          <Image
-                            src={image}
-                            alt=""
-                            width={24}
-                            height={24}
-                            className="rounded-full"
-                          />
-                        )}
+                        {
+                          image &&
+                          (
+                            <Image
+                              src={image}
+                              alt=""
+                              width={24}
+                              height={24}
+                              className="rounded-full"
+                            />
+                          )
+                        }
                         <span className="text-base font-semibold">
                           {name}
                         </span>
@@ -277,15 +302,18 @@ export default ({
                                       title={name}
                                       className="h-6 mr-1.5"
                                     >
-                                      {image && (
-                                        <Image
-                                          src={image}
-                                          alt=""
-                                          width={24}
-                                          height={24}
-                                          className="rounded-full"
-                                        />
-                                      )}
+                                      {
+                                        image &&
+                                        (
+                                          <Image
+                                            src={image}
+                                            alt=""
+                                            width={24}
+                                            height={24}
+                                            className="rounded-full"
+                                          />
+                                        )
+                                      }
                                     </div>
                                   )
                                 })
@@ -335,15 +363,18 @@ export default ({
                                 <a
                                   className="h-6 flex items-center space-x-2"
                                 >
-                                  {image && (
-                                    <Image
-                                      src={image}
-                                      alt=""
-                                      width={24}
-                                      height={24}
-                                      className="rounded-full"
-                                    />
-                                  )}
+                                  {
+                                    image &&
+                                    (
+                                      <Image
+                                        src={image}
+                                        alt=""
+                                        width={24}
+                                        height={24}
+                                        className="rounded-full"
+                                      />
+                                    )
+                                  }
                                   <span className="text-base font-semibold">
                                     {name}
                                   </span>
@@ -378,10 +409,11 @@ export default ({
                   pools,
                 } = { ...props.row.original }
 
-                const value = _.sumBy(
-                  pools,
-                  'liquidity',
-                )
+                const value =
+                  _.sumBy(
+                    pools,
+                    'liquidity',
+                  )
 
                 return (
                   <div className="flex flex-col space-y-3">
@@ -453,10 +485,11 @@ export default ({
                   pools,
                 } = { ...props.row.original }
 
-                const value = _.sumBy(
-                  pools,
-                  'volume',
-                )
+                const value =
+                  _.sumBy(
+                    pools,
+                    'volume',
+                  )
 
                 return (
                   <div className="flex flex-col space-y-3">
@@ -528,10 +561,11 @@ export default ({
                   pools,
                 } = { ...props.row.original }
 
-                const value = _.sumBy(
-                  pools,
-                  'fees',
-                )
+                const value =
+                  _.sumBy(
+                    pools,
+                    'fees',
+                  )
 
                 return (
                   <div className="flex flex-col space-y-3">
@@ -603,10 +637,11 @@ export default ({
                   pools,
                 } = { ...props.row.original }
 
-                const value = _.sumBy(
-                  pools,
-                  'apy.day',
-                )
+                const value =
+                  _.sumBy(
+                    pools,
+                    'apy.day',
+                  )
 
                 return (
                   <div className="flex flex-col space-y-3">
@@ -781,9 +816,10 @@ export default ({
             {
               Header: 'Pool Share',
               accessor: 'share',
-              sortType: (a, b) => a.original.share > b.original.share ?
-                1 :
-                -1,
+              sortType: (a, b) =>
+                a.original.share > b.original.share ?
+                  1 :
+                  -1,
               Cell: props => {
                 const {
                   value,

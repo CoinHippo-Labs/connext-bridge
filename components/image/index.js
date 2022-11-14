@@ -13,7 +13,10 @@ const loader = ({
     src?.startsWith('/') ?
       process.env.NEXT_PUBLIC_SITE_URL :
       ''
-  }${src}&w=${width}&q=${quality || 75}`
+  }${src}&w=${width}&q=${
+    quality ||
+    75
+  }`
 
 export default ({
   ...rest

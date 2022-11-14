@@ -121,6 +121,7 @@ export default ({
   const mint = async () => {
     setMinting(true)
     setMintResponse(null)
+
     if (is_wrapped) {
       setWithdrawing(false)
       setWithdrawResponse(null)
@@ -276,6 +277,7 @@ export default ({
     }
 
     setMinting(false)
+
     if (is_wrapped) {
       setTrigger(
         moment()
@@ -489,7 +491,8 @@ export default ({
     minting ||
     withdrawing
 
-  return asset_data &&
+  return (
+    asset_data &&
     (
       <div
         className={
@@ -833,4 +836,5 @@ export default ({
         }
       </div>
     )
+  )
 }

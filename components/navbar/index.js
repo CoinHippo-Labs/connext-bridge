@@ -231,18 +231,19 @@ export default () => {
                 if (Array.isArray(response)) {
                   response
                     .forEach(t => {
-                      const asset_index = assets_data
-                        .findIndex(a =>
-                          a?.id &&
-                          (a.contracts || [])
-                            .findIndex(c =>
-                              c?.chain_id === t?.chain_id &&
-                              equals_ignore_case(
-                                c.contract_address,
-                                t?.contract_address,
-                              )
-                            ) > -1
-                        )
+                      const asset_index =
+                        assets_data
+                          .findIndex(a =>
+                            a?.id &&
+                            (a.contracts || [])
+                              .findIndex(c =>
+                                c?.chain_id === t?.chain_id &&
+                                equals_ignore_case(
+                                  c.contract_address,
+                                  t?.contract_address,
+                                )
+                              ) > -1
+                          )
 
                       if (asset_index > -1) {
                         const asset = assets_data[asset_index]
@@ -317,7 +318,9 @@ export default () => {
 
             const provider =
               rpc_urls.length === 1 ?
-                new providers.JsonRpcProvider(rpc_urls[0]) :
+                new providers.JsonRpcProvider(
+                  _.head(rpc_urls)
+                ) :
                 new providers.FallbackProvider(
                   rpc_urls
                     .map((url, i) => {
@@ -512,7 +515,7 @@ export default () => {
             await sdk.nxtpSdkUtils
               .getRoutersData()
 
-          if (response) {
+          if (Array.isArray(response)) {
             const data =
               _.groupBy(
                 response
@@ -589,6 +592,46 @@ export default () => {
 
     return () => clearInterval(interval)
   }, [sdk, chains_data, assets_data])
+
+  // ens
+  useEffect(() => {
+    const getData = async () => {
+      if (
+        chains_data &&
+        asset_balances_data &&
+        chains_data
+          .filter(c =>
+            !c?.disabled
+          )
+          .length <=
+        Object.keys(asset_balances_data).length
+      ) {
+        const addresses =
+          _.uniq(
+            Object.values(asset_balances_data)
+              .flatMap(a => a)
+              .map(a => a?.router_address)
+              .filter(a =>
+                a &&
+                !ens_data?.[a]
+              )
+          )
+
+        const ens_data = await getEns(addresses)
+
+        if (ens_data) {
+          dispatch(
+            {
+              type: ENS_DATA,
+              value: ens_data,
+            }
+          )
+        }
+      }
+    }
+
+    getData()
+  }, [chains_data, asset_balances_data])
 
   // pools
   useEffect(() => {
@@ -717,39 +760,41 @@ export default () => {
                 )
               }
 
-              data.push({
-                ...pool,
-                ...stats,
-                id: `${chain_data.id}_${asset_data.id}`,
-                chain_id,
-                chain_data,
-                asset_data,
-                contract_data,
-                symbols,
-                liquidity:
-                  Number(
-                    liquidity,
-                  ),
-                volume:
-                  Number(
-                    volume,
-                  ),
-                fees:
-                  Number(
-                    fees,
-                  ),
-                rate:
-                  Number(
-                    utils.formatUnits(
-                      BigNumber.from(
-                        rate ||
-                        '0'
-                      ),
-                      _.last(decimals) ||
-                      18,
-                    )
-                  ),
-              })
+              data.push(
+                {
+                  ...pool,
+                  ...stats,
+                  id: `${chain_data.id}_${asset_data.id}`,
+                  chain_id,
+                  chain_data,
+                  asset_data,
+                  contract_data,
+                  symbols,
+                  liquidity:
+                    Number(
+                      liquidity,
+                    ),
+                  volume:
+                    Number(
+                      volume,
+                    ),
+                  fees:
+                    Number(
+                      fees,
+                    ),
+                  rate:
+                    Number(
+                      utils.formatUnits(
+                        BigNumber.from(
+                          rate ||
+                          '0'
+                        ),
+                        _.last(decimals) ||
+                        18,
+                      )
+                    ),
+                }
+              )
             } catch (error) {
               console.log(
                 '[ERROR getPool]',
@@ -760,14 +805,16 @@ export default () => {
                 error,
               )
 
-              data.push({
-                id: `${chain_data.id}_${asset_data.id}`,
-                chain_id,
-                chain_data,
-                asset_data,
-                contract_data,
-                error,
-              })
+              data.push(
+                {
+                  id: `${chain_data.id}_${asset_data.id}`,
+                  chain_id,
+                  chain_data,
+                  asset_data,
+                  contract_data,
+                  error,
+                }
+              )
             }
           }
         }
@@ -807,45 +854,6 @@ export default () => {
     return () => clearInterval(interval)
   }, [pathname, sdk, chains_data, pool_assets_data])
 
-  // ens
-  useEffect(() => {
-    const getData = async () => {
-      if (
-        chains_data &&
-        asset_balances_data &&
-        chains_data
-          .filter(c =>
-            !c?.disabled
-          ).length <=
-          Object.keys(asset_balances_data).length
-      ) {
-        const addresses =
-          _.uniq(
-            Object.values(asset_balances_data)
-              .flatMap(a => a)
-              .map(a => a?.router_address)
-              .filter(a =>
-                a &&
-                !ens_data?.[a]
-              )
-          )
-
-        const ens_data = await getEns(addresses)
-
-        if (ens_data) {
-          dispatch(
-            {
-              type: ENS_DATA,
-              value: ens_data,
-            }
-          )
-        }
-      }
-    }
-
-    getData()
-  }, [chains_data, asset_balances_data])
-
   return (
     <>
       <div className="navbar">
@@ -883,7 +891,8 @@ export default () => {
                 <div className="hidden sm:flex lg:hidden xl:flex flex-col space-y-0.5 mx-2">
                   <EnsProfile
                     address={address}
-                    fallback={address &&
+                    fallback={
+                      address &&
                       (
                         <Copy
                           value={address}
@@ -925,7 +934,9 @@ export default () => {
           <div className="w-full bg-slate-100 dark:bg-slate-900 overflow-x-auto flex items-center py-2 sm:py-3 px-2 sm:px-4">
             <span className="flex flex-wrap items-center font-mono text-blue-500 dark:text-white text-2xs xl:text-sm space-x-1.5 xl:space-x-2 mx-auto">
               <Linkify>
-                {parse(process.env.NEXT_PUBLIC_STATUS_MESSAGE)}
+                {parse(
+                  process.env.NEXT_PUBLIC_STATUS_MESSAGE
+                )}
               </Linkify>
               <button
                 onClick={() => setHiddenStatus(true)}

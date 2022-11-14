@@ -22,12 +22,15 @@ export default () => {
   return (
     <button
       onClick={() => {
-        dispatch({
-          type: THEME,
-          value: theme === 'light' ?
-            'dark' :
-            'light',
-        })
+        dispatch(
+          {
+            type: THEME,
+            value:
+              theme === 'light' ?
+                'dark' :
+                'light',
+          }
+        )
       }}
       className="w-8 h-16 flex items-center justify-center sm:mr-1"
     >

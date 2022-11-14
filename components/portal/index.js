@@ -15,9 +15,11 @@ export default ({
     setMounted(true)
   }, [selector])
 
-  return mounted &&
+  return (
+    mounted &&
     createPortal(
       children,
       ref.current,
     )
+  )
 }

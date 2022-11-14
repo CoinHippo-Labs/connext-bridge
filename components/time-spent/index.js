@@ -57,30 +57,32 @@ export default ({
       !no_tooltip ?
         <Tooltip
           placement={placement}
-          content={<div className="flex flex-col space-y-1 my-1">
-            <div className={titleClassName}>
-              {title}
-            </div>
-            <div className={className}>
-              <div className="w-38 whitespace-nowrap text-2xs font-normal space-x-1">
-                <span>
-                  {
-                    _from_time
-                      .format('MMM D, YYYY h:mm:ss A')
-                  }
-                </span>
-                <span>
-                  -
-                </span>
-                <span>
-                  {
-                    _to_time
-                      .format('MMM D, YYYY h:mm:ss A')
-                  }
-                </span>
+          content={
+            <div className="flex flex-col space-y-1 my-1">
+              <div className={titleClassName}>
+                {title}
+              </div>
+              <div className={className}>
+                <div className="w-38 whitespace-nowrap text-2xs font-normal space-x-1">
+                  <span>
+                    {
+                      _from_time
+                        .format('MMM D, YYYY h:mm:ss A')
+                    }
+                  </span>
+                  <span>
+                    -
+                  </span>
+                  <span>
+                    {
+                      _to_time
+                        .format('MMM D, YYYY h:mm:ss A')
+                    }
+                  </span>
+                </div>
               </div>
             </div>
-          </div>}
+          }
           className="z-50 bg-black text-white text-xs"
         >
           <div className={className}>

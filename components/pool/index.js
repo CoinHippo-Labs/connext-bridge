@@ -99,12 +99,13 @@ export default () => {
         path
 
     if (path.includes('on-')) {
-      const paths = path
-        .replace(
-          '/pool/',
-          '',
-        )
-        .split('-')
+      const paths =
+        path
+          .replace(
+            '/pool/',
+            '',
+          )
+          .split('-')
 
       const chain = paths[paths.indexOf('on') + 1]
       const asset =
@@ -116,6 +117,7 @@ export default () => {
         .find(c =>
           c?.id === chain
         )
+  
       const asset_data = (pool_assets_data || [])
         .find(a =>
           a?.id === asset ||
@@ -220,9 +222,10 @@ export default () => {
       router.push(
         `/pool/${
           chain ?
-            `${asset ?
-              `${asset.toUpperCase()}-` :
-              ''
+            `${
+              asset ?
+                `${asset.toUpperCase()}-` :
+                ''
             }on-${chain}` :
             ''
         }${
@@ -248,6 +251,7 @@ export default () => {
       .find(c =>
         c?.chain_id === chain_id
       )
+
     const {
       id,
     } = { ...chain_data }
@@ -393,9 +397,10 @@ export default () => {
                     liquidity,
                   } = { ...info }
 
-                  const symbols = (symbol || '')
-                    .split('-')
-                    .filter(s => s)
+                  const symbols =
+                    (symbol || '')
+                      .split('-')
+                      .filter(s => s)
 
                   const asset_data = (pool_assets_data || [])
                     .find(a =>
@@ -588,7 +593,6 @@ export default () => {
 
     const {
       chain_id,
-      domain_id,
     } = {
       ...(
         (chains_data || [])
@@ -599,64 +603,43 @@ export default () => {
     }
 
     const contracts_data =
-      _.uniqBy(
-        _.concat(
-          (pool_assets_data || [])
-            .map(a => {
-              const {
-                contracts,
-              } = { ...a }
+      (assets_data || [])
+        .map(a => {
+          const {
+            contracts,
+          } = { ...a }
 
-              return {
-                ...a,
-                ...(
-                  (contracts || [])
-                  .find(c =>
-                    c?.chain_id === chain_id
-                  )
-                ),
-              }
-            }),
-          (pools_data || [])
-            .filter(p =>
-              equals_ignore_case(
-                p?.domainId,
-                domain_id,
-              )
-            )
-            .flatMap(p => {
-              const {
-                tokens,
-                symbols,
-                decimals,
-              } = { ...p }
-
-              return (tokens || [])
-                .map((t, i) => {
-                  return {
-                    chain_id,
-                    contract_address: t,
-                    decimals: decimals?.[i],
-                    symbol: symbols?.[i],
-                  }
-                })
-            }),
-        )
+          return {
+            ...a,
+            ...(
+              (contracts || [])
+                .find(c =>
+                  c?.chain_id === chain_id
+                )
+            ),
+          }
+        })
         .filter(a => a?.contract_address)
         .map(a => {
+          const {
+            next_asset,
+          } = { ...a };
           let {
             contract_address,
           } = {  ...a }
 
           contract_address = contract_address.toLowerCase()
 
+          if (next_asset?.contract_address) {
+            next_asset.contract_address = next_asset.contract_address.toLowerCase()
+          }
+
           return {
             ...a,
             contract_address,
+            next_asset,
           }
-        }),
-        'contract_address',
-      )
+        })
 
     contracts_data
       .forEach(c =>

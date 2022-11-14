@@ -425,30 +425,32 @@ export default ({
 
               const className = `dropdown-item ${disabled ? 'cursor-not-allowed' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer'} rounded-lg flex items-center justify-between space-x-2 p-2`
 
-              return disabled ?
-                <div
-                  key={i}
-                  title="Disabled"
-                  className={className}
-                >
-                  {item}
-                  {balanceComponent}
-                </div> :
-                <div
-                  key={i}
-                  onClick={() =>
-                    onSelect(
-                      id,
-                      is_bridge ?
-                        symbol :
-                        contract_address,
-                    )
-                  }
-                  className={className}
-                >
-                  {item}
-                  {balanceComponent}
-                </div>
+              return (
+                disabled ?
+                  <div
+                    key={i}
+                    title="Disabled"
+                    className={className}
+                  >
+                    {item}
+                    {balanceComponent}
+                  </div> :
+                  <div
+                    key={i}
+                    onClick={() =>
+                      onSelect(
+                        id,
+                        is_bridge ?
+                          symbol :
+                          contract_address,
+                      )
+                    }
+                    className={className}
+                  >
+                    {item}
+                    {balanceComponent}
+                  </div>
+              )
             })
         }
       </div>

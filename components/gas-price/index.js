@@ -6,12 +6,11 @@ import { MdLocalGasStation } from 'react-icons/md'
 
 import { number_format, loader_color } from '../../lib/utils'
 
-const MIN_GAS_PRICE = 0.000001
-
 export default ({
   chainId,
   dummy,
   iconSize = 20,
+  minGasPrice = 0.00000001,
   className = '',
 }) => {
   const {
@@ -73,50 +72,52 @@ export default ({
     return () => clearInterval(interval)
   }, [chainId, rpcs])
 
-  return chainId ?
-    <div className={`flex items-center justify-center text-slate-400 dark:text-slate-500 space-x-1 ${className}`}>
-      <MdLocalGasStation
-        size={iconSize}
-      />
-      {typeof gasPrice === 'number' ?
-        <>
-          <span className="whitespace-nowrap font-semibold">
-            {gasPrice < MIN_GAS_PRICE ?
-              `< ${
+  return (
+    chainId ?
+      <div className={`flex items-center justify-center text-slate-400 dark:text-slate-500 space-x-1 ${className}`}>
+        <MdLocalGasStation
+          size={iconSize}
+        />
+        {typeof gasPrice === 'number' ?
+          <>
+            <span className="whitespace-nowrap font-semibold">
+              {gasPrice < minGasPrice ?
+                `< ${
+                  number_format(
+                    minGasPrice,
+                    '0,0.00000000',
+                    true,
+                  )
+                }` :
                 number_format(
-                  MIN_GAS_PRICE,
-                  '0,0.00000000',
+                  gasPrice,
+                  '0,0',
                   true,
                 )
-              }` :
-              number_format(
-                gasPrice,
-                '0,0',
-                true,
-              )
-            }
-          </span>
-          <span className="font-medium">
-            Gwei
-          </span>
-        </> :
-        typeof gasPrice === 'string' ?
-          <span>
-            -
-          </span> :
-          <RotatingSquare
-            color={
-              theme === 'light' ?
-                '#94a3b8' :
-                '#64748b'
-            }
-            width="16"
-            height="16"
-          />
-      }
-    </div> :
-    dummy &&
-    (
-      <div className="h-5" />
-    )
+              }
+            </span>
+            <span className="font-medium">
+              Gwei
+            </span>
+          </> :
+          typeof gasPrice === 'string' ?
+            <span>
+              -
+            </span> :
+            <RotatingSquare
+              color={
+                theme === 'light' ?
+                  '#94a3b8' :
+                  '#64748b'
+              }
+              width="16"
+              height="16"
+            />
+        }
+      </div> :
+      dummy &&
+      (
+        <div className="h-5" />
+      )
+  )
 }

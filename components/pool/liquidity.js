@@ -158,6 +158,7 @@ export default ({
               p?.chain_data?.id === chain &&
               p.asset_data?.id === asset
             )
+
           const {
             contract_data,
             domainId,
@@ -382,32 +383,35 @@ export default ({
 
       switch (action) {
         case 'add':
-          if (!(
-            amountX &&
-            amountY
-          )) {
+          if (
+            !(
+              amountX &&
+              amountY
+            )
+          ) {
             failed = true
 
             setApproving(false)
             break
           }
 
-          const amounts = [
-            utils.parseUnits(
-              amountX
-                .toString(),
-              x_asset_data?.decimals ||
-              18,
-            )
-            .toString(),
-            utils.parseUnits(
-              amountY
-                .toString(),
-              y_asset_data?.decimals ||
-              18,
-            )
-            .toString(),
-          ]
+          const amounts =
+            [
+              utils.parseUnits(
+                amountX
+                  .toString(),
+                x_asset_data?.decimals ||
+                18,
+              )
+              .toString(),
+              utils.parseUnits(
+                amountY
+                  .toString(),
+                y_asset_data?.decimals ||
+                18,
+              )
+              .toString(),
+            ]
 
           const minToMint = '0'
 
@@ -819,7 +823,11 @@ export default ({
                   )
 
               if (remove_request) {
-                let gasLimit = await signer.estimateGas(remove_request)
+                let gasLimit =
+                  await signer
+                    .estimateGas(
+                      remove_request,
+                    )
 
                 if (gasLimit) {
                   gasLimit =
@@ -835,7 +843,10 @@ export default ({
                     )
                     .round(0)
                     .toString()
-                    .replace('.0', '')
+                    .replace(
+                      '.0',
+                      '',
+                    )
 
                   remove_request.gasLimit = gasLimit
                 }
@@ -866,12 +877,14 @@ export default ({
 
                 setCallResponse(
                   {
-                    status: failed ?
-                      'failed' :
-                      'success',
-                    message: failed ?
-                      `Failed to remove ${symbol} liquidity` :
-                      `Remove ${symbol} liquidity successful`,
+                    status:
+                      failed ?
+                        'failed' :
+                        'success',
+                    message:
+                      failed ?
+                        `Failed to remove ${symbol} liquidity` :
+                        `Remove ${symbol} liquidity successful`,
                     tx_hash: hash,
                   }
                 )
@@ -1029,6 +1042,7 @@ export default ({
       p?.chain_data?.id === chain &&
       p.asset_data?.id === asset
     )
+
   const {
     asset_data,
     contract_data,
@@ -1082,6 +1096,7 @@ export default ({
           x_asset_data.contract_address,
         )
       )
+  
   const x_balance_amount =
     x_balance &&
     Number(x_balance.amount)
@@ -1143,6 +1158,7 @@ export default ({
           y_asset_data.contract_address,
         )
       )
+  
   const y_balance_amount =
     y_balance &&
     Number(y_balance.amount)
@@ -1160,6 +1176,7 @@ export default ({
         p?.chain_data?.id === chain &&
         p.asset_data?.id === asset
       )
+
   const {
     lpTokenBalance,
   } = { ...user_pool_data }
@@ -1791,25 +1808,26 @@ export default ({
                       <Alert
                         key={i}
                         color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
-                        icon={status === 'failed' ?
-                          <BiMessageError
-                            className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
-                          /> :
-                          status === 'success' ?
-                            <BiMessageCheck
+                        icon={
+                          status === 'failed' ?
+                            <BiMessageError
                               className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
                             /> :
-                            status === 'pending' ?
-                              <div className="mr-2.5">
-                                <Watch
-                                  color="white"
-                                  width="16"
-                                  height="16"
-                                />
-                              </div> :
-                              <BiMessageDetail
+                            status === 'success' ?
+                              <BiMessageCheck
                                 className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
-                              />
+                              /> :
+                              status === 'pending' ?
+                                <div className="mr-2.5">
+                                  <Watch
+                                    color="white"
+                                    width="16"
+                                    height="16"
+                                  />
+                                </div> :
+                                <BiMessageDetail
+                                  className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
+                                />
                         }
                         closeDisabled={true}
                         rounded={true}

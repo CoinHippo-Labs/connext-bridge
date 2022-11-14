@@ -12,7 +12,7 @@ const NUM_TRANSFER_DISPLAY = 3
 
 export default ({
   trigger,
-  data,
+  data = [],
 }) => {
   const {
     dev,
@@ -60,13 +60,17 @@ export default ({
           }
 
           response =
-            _.uniqBy(
-              _.concat(
-                response,
-                data ||
-                [],
+            _.orderBy(
+              _.uniqBy(
+                _.concat(
+                  response,
+                  data,
+                )
+                .filter(d => d),
+                'xcall_transaction_hash',
               ),
-              'xcall_transaction_hash',
+              ['xcall_timestamp'],
+              ['desc'],
             )
 
           if (
@@ -80,19 +84,13 @@ export default ({
                   XTransferStatus.Executed,
                   XTransferStatus.CompletedFast,
                   XTransferStatus.CompletedSlow,
-                ].includes(t?.status)
+                ].includes(t.status)
               ) > -1
           ) {
             setCollapse(false)
           }
 
-          setTransfers(
-            _.orderBy(
-              response,
-              ['xcall_timestamp'],
-              ['desc'],
-            )
-          )
+          setTransfers(response)
         } catch (error) {
           setTransfers(null)
         }
@@ -132,7 +130,8 @@ export default ({
       NUM_TRANSFER_DISPLAY,
     )
 
-  return transfers?.length > 0 &&
+  return (
+    transfers?.length > 0 &&
     (
       <div className="lg:max-w-xs xl:ml-auto">
         <button
@@ -183,4 +182,5 @@ export default ({
         }
       </div>
     )
+  )
 }
