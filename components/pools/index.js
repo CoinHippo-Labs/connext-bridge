@@ -8,10 +8,11 @@ import Pools from './pools'
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, name, equals_ignore_case } from '../../lib/utils'
 
-const VIEWS = [
-  'all_pools',
-  'my_pools',
-]
+const VIEWS =
+  [
+    'My positions',
+    'Pools',
+  ]
 
 export default () => {
   const {
@@ -191,8 +192,8 @@ export default () => {
         <div className="w-full flex flex-col space-y-8 my-6 my-4 sm:my-6 mx-1 sm:mx-4">
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="flex flex-col space-y-4">
-              <h1 className="uppercase text-lg font-semibold">
-                Add Liquidity
+              <h1 className="text-lg font-semibold">
+                Add liquidity to earn trading fees and rewards.
               </h1>
               <div className="flex items-center space-x-0.5">
                 {VIEWS
@@ -200,16 +201,16 @@ export default () => {
                     <div
                       key={i}
                       onClick={() => setView(v)}
-                      className={`${view === v ? 'bg-blue-500 dark:bg-blue-600 text-white font-bold' : 'hover:bg-slate-50 dark:hover:bg-slate-900 font-medium hover:font-semibold'} rounded-lg cursor-pointer uppercase py-1 px-2.5`}
+                      className={`${view === v ? 'bg-blue-500 dark:bg-blue-600 text-white font-bold' : 'hover:bg-slate-50 dark:hover:bg-slate-900 font-medium hover:font-semibold'} rounded-lg cursor-pointer py-1 px-2.5`}
                     >
-                      {name(v)}
+                      {v}
                     </div>
                   ))
                 }
               </div>
             </div>
             {
-              view === 'all_pools' &&
+              view === 'Pools' &&
               (
                 <Total />
               )

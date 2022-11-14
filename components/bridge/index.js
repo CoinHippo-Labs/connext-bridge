@@ -2335,7 +2335,7 @@ export default () => {
                 >
                   <div className="space-y-2">
                     <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
-                      <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start space-y-0.5 sm:space-y-0">
+                      <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start space-y-0.5 sm:space-y-1.5">
                         <div className="w-32 sm:w-48 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
                           <span className="tracking-normal text-slate-600 dark:text-slate-200 font-medium text-left">
                             From
@@ -2416,7 +2416,7 @@ export default () => {
                           />
                         </button>
                       </div>
-                      <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end space-y-0.5 sm:space-y-0">
+                      <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end space-y-0.5 sm:space-y-1.5">
                         <div className="w-32 sm:w-48 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
                           <span className="tracking-normal text-slate-600 dark:text-slate-200 font-medium text-left">
                             To
