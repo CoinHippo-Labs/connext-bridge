@@ -645,123 +645,123 @@ export default () => {
           domain_id,
         } = { ...chain_data }
 
-        const data = []
+        pool_assets_data
+          .forEach(async asset_data => {
+            const {
+              contracts,
+            } = { ...asset_data }
 
-        for (const asset_data of pool_assets_data) {
-          const {
-            contracts,
-          } = { ...asset_data }
-
-          const contract_data = (contracts || [])
-            .find(c =>
-              c?.chain_id === chain_id
-            )
-          const {
-            contract_address,
-          } = { ...contract_data }
-
-          if (contract_address) {
-            try {
-              console.log(
-                '[getPool]',
-                {
-                  domain_id,
-                  contract_address,
-                },
+            const contract_data = (contracts || [])
+              .find(c =>
+                c?.chain_id === chain_id
               )
+            const {
+              contract_address,
+            } = { ...contract_data }
 
-              const pool =
-                await sdk.nxtpSdkPool
-                  .getPool(
+            if (contract_address) {
+              let data
+
+              try {
+                console.log(
+                  '[getPool]',
+                  {
                     domain_id,
                     contract_address,
+                  },
+                )
+
+                const pool =
+                  await sdk.nxtpSdkPool
+                    .getPool(
+                      domain_id,
+                      contract_address,
+                    )
+
+                console.log(
+                  '[Pool]',
+                  {
+                    domain_id,
+                    contract_address,
+                    pool,
+                  },
+                )
+
+                const {
+                  symbol,
+                  decimals,
+                } = { ...pool }
+
+                const symbols =
+                  (symbol || '')
+                    .split('-')
+                    .filter(s => s)
+
+                if (pool) {
+                  console.log(
+                    '[getPoolStats]',
+                    {
+                      domain_id,
+                      contract_address,
+                    },
                   )
+                }
 
-              console.log(
-                '[Pool]',
-                {
-                  domain_id,
-                  contract_address,
-                  pool,
-                },
-              )
+                const stats =
+                  pool &&
+                  await sdk.nxtpSdkPool
+                    .getPoolStats(
+                      domain_id,
+                      contract_address,
+                    )
 
-              const {
-                symbol,
-                decimals,
-              } = { ...pool }
-
-              const symbols =
-                (symbol || '')
-                  .split('-')
-                  .filter(s => s)
-
-              if (pool) {
-                console.log(
-                  '[getPoolStats]',
-                  {
-                    domain_id,
-                    contract_address,
-                  },
-                )
-              }
-
-              const stats =
-                pool &&
-                await sdk.nxtpSdkPool
-                  .getPoolStats(
-                    domain_id,
-                    contract_address,
+                if (pool) {
+                  console.log(
+                    '[PoolStats]',
+                    {
+                      domain_id,
+                      contract_address,
+                      stats,
+                    },
                   )
+                }
 
-              if (pool) {
-                console.log(
-                  '[PoolStats]',
-                  {
-                    domain_id,
-                    contract_address,
-                    stats,
-                  },
-                )
-              }
+                const {
+                  liquidity,
+                  volume,
+                  fees,
+                } = { ...stats }
 
-              const {
-                liquidity,
-                volume,
-                fees,
-              } = { ...stats }
-
-              if (pool) {
-                console.log(
-                  '[getVirtualPrice]',
-                  {
-                    domain_id,
-                    contract_address,
-                  },
-                )
-              }
-
-              const rate =
-                pool &&
-                await sdk.nxtpSdkPool
-                  .getVirtualPrice(
-                    domain_id,
-                    contract_address,
+                if (pool) {
+                  console.log(
+                    '[getVirtualPrice]',
+                    {
+                      domain_id,
+                      contract_address,
+                    },
                   )
+                }
 
-              if (pool) {
-                console.log(
-                  '[VirtualPrice]',
-                  {
-                    domain_id,
-                    contract_address,
-                    rate,
-                  },
-                )
-              }
+                const rate =
+                  pool &&
+                  await sdk.nxtpSdkPool
+                    .getVirtualPrice(
+                      domain_id,
+                      contract_address,
+                    )
 
-              data.push(
-                {
+                if (pool) {
+                  console.log(
+                    '[VirtualPrice]',
+                    {
+                      domain_id,
+                      contract_address,
+                      rate,
+                    },
+                  )
+                }
+
+                data = {
                   ...pool,
                   ...stats,
                   id: `${chain_data.id}_${asset_data.id}`,
@@ -794,19 +794,17 @@ export default () => {
                       )
                     ),
                 }
-              )
-            } catch (error) {
-              console.log(
-                '[ERROR getPool]',
-                {
-                  domain_id,
-                  contract_address,
-                },
-                error,
-              )
+              } catch (error) {
+                console.log(
+                  '[ERROR getPool]',
+                  {
+                    domain_id,
+                    contract_address,
+                  },
+                  error,
+                )
 
-              data.push(
-                {
+                data = {
                   id: `${chain_data.id}_${asset_data.id}`,
                   chain_id,
                   chain_data,
@@ -814,19 +812,18 @@ export default () => {
                   contract_data,
                   error,
                 }
-              )
-            }
-          }
-        }
+              }
 
-        if (data.length > 0) {
-          dispatch(
-            {
-              type: POOLS_DATA,
-              value: data,
+              if (data) {
+                dispatch(
+                  {
+                    type: POOLS_DATA,
+                    value: data,
+                  }
+                )
+              }
             }
-          )
-        }
+          })
       }
     }
 

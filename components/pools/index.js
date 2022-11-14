@@ -200,7 +200,7 @@ export default () => {
                     <div
                       key={i}
                       onClick={() => setView(v)}
-                      className={`${view === v ? 'bg-blue-500 dark:bg-blue-600 font-semibold text-white' : 'hover:bg-slate-50 dark:hover:bg-slate-900 font-normal hover:font-medium'} rounded-lg cursor-pointer uppercase py-1 px-2.5`}
+                      className={`${view === v ? 'bg-blue-500 dark:bg-blue-600 text-white font-bold' : 'hover:bg-slate-50 dark:hover:bg-slate-900 font-medium hover:font-semibold'} rounded-lg cursor-pointer uppercase py-1 px-2.5`}
                     >
                       {name(v)}
                     </div>
