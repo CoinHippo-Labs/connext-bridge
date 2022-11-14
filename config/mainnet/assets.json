@@ -9,12 +9,14 @@
       {
         "contract_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
         "chain_id": 1,
-        "decimals": 6
+        "decimals": 6,
+        "image": "/logos/assets/usdc.png"
       },
       {
         "contract_address": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
         "chain_id": 137,
         "decimals": 6,
+        "image": "/logos/assets/usdc.png",
         "next_asset": {
           "contract_address": "0x2ABe2d4F09ea3124DE56AD91ae0950A3B71eCD11",
           "decimals": 6,
@@ -26,6 +28,7 @@
         "contract_address": "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
         "chain_id": 10,
         "decimals": 6,
+        "image": "/logos/assets/usdc.png",
         "next_asset": {
           "contract_address": "0x85FB8e2903Ad92A2ab0C6a725806636666ee2Ab4",
           "decimals": 6,

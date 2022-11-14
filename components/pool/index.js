@@ -161,6 +161,7 @@ export default () => {
         (chains_data || [])
           .findIndex(c =>
             !c?.disabled &&
+            !c?.no_pool &&
             c?.id === chain
           ) > -1
       ) {
