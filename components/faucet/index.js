@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSelector, shallowEqual } from 'react-redux'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { Contract, constants, utils } from 'ethers'
@@ -12,6 +12,7 @@ import Balance from '../balance'
 import Image from '../image'
 import Alert from '../alerts'
 import { number_format } from '../../lib/utils'
+import { BALANCES_DATA } from '../../reducers/types'
 
 const ABI = [
   // Read-Only Functions
@@ -35,15 +36,18 @@ export default ({
   contract_data,
   className = '',
 }) => {
+  const dispatch = useDispatch()
   const {
     chains,
     assets,
+    rpc_providers,
     wallet,
   } = useSelector(state =>
     (
       {
         chains: state.chains,
         assets: state.assets,
+        rpc_providers: state.rpc_providers,
         wallet: state.wallet,
       }
     ),
@@ -55,6 +59,9 @@ export default ({
   const {
     assets_data,
   } = { ...assets }
+  const {
+    rpcs,
+  } = { ...rpc_providers }
   const {
     wallet_data,
   } = { ...wallet }
@@ -265,6 +272,10 @@ export default ({
           ...response,
         }
       )
+
+      if (status) {
+        getBalances(chain)
+      }
     } catch (error) {
       setMintResponse(
         {
@@ -381,6 +392,10 @@ export default ({
           ...response,
         }
       )
+
+      if (status) {
+        getBalances(chain)
+      }
     } catch (error) {
       setWithdrawResponse(
         {
@@ -397,6 +412,170 @@ export default ({
       moment()
         .valueOf()
     )
+  }
+
+  const getBalances = chain => {
+    const getBalance = async (
+      chain_id,
+      contract_data,
+    ) => {
+      const {
+        next_asset,
+      } = { ...contract_data }
+
+      const provider = rpcs?.[chain_id]
+
+      if (
+        address &&
+        provider
+      ) {
+        const contracts =
+          _.concat(
+            {
+              ...contract_data,
+            },
+            next_asset &&
+            {
+              ...contract_data,
+              ...next_asset,
+            },
+          )
+          .filter(c => c?.contract_address)
+
+        const balances = []
+
+        for (const contract of contracts) {
+          const {
+            contract_address,
+            decimals,
+          } = { ...contract }
+
+          let balance
+
+          if (contract_address === constants.AddressZero) {
+            balance =
+              await provider
+                .getBalance(
+                  address,
+                )
+          }
+          else {
+            const contract =
+              new Contract(
+                contract_address,
+                [
+                  'function balanceOf(address owner) view returns (uint256)',
+                ],
+                provider,
+              )
+
+            balance =
+              await contract
+                .balanceOf(
+                  address,
+                )
+          }
+
+          if (
+            balance ||
+            !(
+              (balances_data?.[`${chain_id}`] || [])
+                .findIndex(c =>
+                  equals_ignore_case(
+                    c?.contract_address,
+                    contract_address,
+                  )
+                ) > -1
+            )
+          ) {
+            balances
+              .push(
+                {
+                  ...contract,
+                  amount:
+                    balance &&
+                    Number(
+                      utils.formatUnits(
+                        balance,
+                        decimals ||
+                        18,
+                      )
+                    ),
+                }
+              )
+          }
+        }
+
+        if (balances.length > 0) {
+          dispatch(
+            {
+              type: BALANCES_DATA,
+              value: {
+                [`${chain_id}`]: balances,
+              },
+            }
+          )
+        }
+      }
+    }
+
+    const {
+      chain_id,
+    } = {
+      ...(
+        (chains_data || [])
+          .find(c =>
+            c?.id === chain
+          )
+      ),
+    }
+
+    const contracts_data =
+      (assets_data || [])
+        .map(a => {
+          const {
+            contracts,
+          } = { ...a }
+
+          return {
+            ...a,
+            ...(
+              (contracts || [])
+                .find(c =>
+                  c?.chain_id === chain_id
+                )
+            ),
+          }
+        })
+        .filter(a => a?.contract_address)
+        .map(a => {
+          const {
+            next_asset,
+          } = { ...a };
+          let {
+            contract_address,
+          } = {  ...a }
+
+          contract_address = contract_address.toLowerCase()
+
+          if (next_asset?.contract_address) {
+            next_asset.contract_address = next_asset.contract_address.toLowerCase()
+          }
+
+          return {
+            ...a,
+            contract_address,
+            next_asset,
+          }
+        })
+
+    contracts_data
+      .forEach(c =>
+        getBalance(
+          chain_id,
+          c,
+        )
+      )
   }
 
   const asset_data = (assets_data || [])

@@ -94,8 +94,11 @@ export default ({
                 path = '/swap'
               }
               break
-            case 'explore':
-              if (address) {
+            case 'explorer':
+              if (
+                false &&
+                address
+              ) {
                 title = 'My Transfers'
 
                 const address_path = '/address/'
@@ -108,7 +111,7 @@ export default ({
                   }`
               }
               else {
-                title = 'Explore'
+                title = 'Explorer'
                 path = process.env.NEXT_PUBLIC_EXPLORER_URL
               }
               break

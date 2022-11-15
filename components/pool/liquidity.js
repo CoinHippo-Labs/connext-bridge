@@ -1852,7 +1852,8 @@ export default ({
                                     ) :
                                     undefined,
                                 )
-                                .trim(),
+                                .trim() ||
+                                message,
                               128,
                             )}
                           </span>
@@ -2253,7 +2254,8 @@ export default ({
                                     ) :
                                     undefined,
                                 )
-                                .trim(),
+                                .trim() ||
+                                message,
                               128,
                             )}
                           </span>

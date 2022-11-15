@@ -60,22 +60,24 @@ export default ({
                 'short_name',
                 'name',
                 'id',
-                'group',
+                // 'group',
               ]
               .map(f =>
                 (c[f] || '')
                   .toLowerCase()
-                  .includes(
+                  .startsWith(
                     inputSearch
                       .toLowerCase()
                   ) ?
-                  inputSearch.length > 1 ?
-                    (
-                      inputSearch.length /
-                      c[f].length
-                    ) :
-                    .5 :
-                  -1
+                    inputSearch.length > 1 ?
+                      (
+                        inputSearch.length /
+                        c[f].length
+                      ) :
+                      inputSearch.length > 0 ?
+                        .1 :
+                        .5 :
+                    -1
               ),
           }
         })

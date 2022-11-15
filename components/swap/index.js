@@ -23,7 +23,7 @@ import Alert from '../alerts'
 import Copy from '../copy'
 import meta from '../../lib/meta'
 import { params_to_obj, number_format, ellipse, equals_ignore_case, loader_color, sleep, error_patterns } from '../../lib/utils'
-import { BALANCES_DATA } from '../../reducers/types'
+import { POOLS_DATA, BALANCES_DATA } from '../../reducers/types'
 
 const WRAPPED_PREFIX =
   process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
@@ -307,7 +307,7 @@ export default () => {
           params.amount =
             number_format(
               Number(amount),
-              '0.00000000',
+              '0.000000000000',
               true,
             )
         }
@@ -537,19 +537,28 @@ export default () => {
             ) > 30
         ) {
           try {
-            if (
-              pair === undefined ||
-              pair?.error ||
-              chain_changed
-            ) {
-              setPair(null)
-            }
-
             const {
               chain,
               asset,
               amount,
             } = { ...swap }
+
+            if (
+              pair === undefined ||
+              pair?.error ||
+              chain_changed
+            ) {
+              setPair(
+                (pools_data || [])
+                  .find(p =>
+                    equals_ignore_case(
+                      p?.id,
+                      `${chain}_${asset}`,
+                    )
+                  ) ||
+                  null
+              )
+            }
 
             const chain_data = chains_data
               .find(c =>
@@ -656,6 +665,7 @@ export default () => {
               _pair &&
               {
                 ..._pair,
+                id: `${chain}_${asset}`,
                 contract_data,
                 rate:
                   Number(
@@ -678,6 +688,18 @@ export default () => {
                 _pair :
                 undefined
             )
+
+            if (
+              is_pool &&
+              _pair
+            ) {
+              dispatch(
+                {
+                  type: POOLS_DATA,
+                  value: _pair,
+                }
+              )
+            }
           } catch (error) {
             setPair(
               {
@@ -1916,7 +1938,7 @@ export default () => {
               />
             </div>
             <div
-              className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-4 sm:pt-6 pb-6 sm:pb-8 px-4 sm:px-6"
+              className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-4 sm:pt-5 pb-6 sm:pb-7 px-4 sm:px-6"
               style={
                 chain &&
                 color ?
@@ -2005,7 +2027,7 @@ export default () => {
                           amount >= 0 ?
                             number_format(
                               amount,
-                              '0.00000000',
+                              '0.000000000000',
                               true,
                             ) :
                             ''
@@ -2277,7 +2299,7 @@ export default () => {
                               swapAmount >= 0 ?
                                 number_format(
                                   swapAmount,
-                                  '0.00000000',
+                                  '0.000000000000',
                                   true,
                                 ) :
                                 typeof amount === 'number' ?
@@ -2454,7 +2476,7 @@ export default () => {
                         <span>
                           {number_format(
                             rate,
-                            '0,0.000000',
+                            '0,0.000000000000',
                             true,
                           )}
                         </span>
@@ -2622,292 +2644,289 @@ export default () => {
                 )
               }
               {
-                chain &&
-                asset &&
-                (origin === 'x' ?
-                  x_balance :
-                  y_balance
-                ) &&
                 web3_provider &&
-                (
-                  typeof amount === 'number' ||
-                  (
-                    web3_provider &&
-                    wrong_chain
-                  )
-                ) ?
-                  web3_provider &&
-                  wrong_chain ?
-                    <Wallet
-                      connectChainId={chain_id}
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
-                    >
-                      <span className="mr-1.5 sm:mr-2">
-                        {is_walletconnect ?
-                          'Reconnect' :
-                          'Switch'
-                        } to
-                      </span>
-                      {
-                        image &&
-                        (
-                          <Image
-                            src={image}
-                            alt=""
-                            width={28}
-                            height={28}
-                            className="rounded-full"
-                          />
-                        )
-                      }
-                      <span className="font-semibold">
-                        {name}
-                      </span>
-                    </Wallet> :
-                    !callResponse &&
+                wrong_chain ?
+                  <Wallet
+                    connectChainId={chain_id}
+                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                  >
+                    <span className="mr-1.5 sm:mr-2">
+                      {is_walletconnect ?
+                        'Reconnect' :
+                        'Switch'
+                      } to
+                    </span>
+                    {
+                      image &&
+                      (
+                        <Image
+                          src={image}
+                          alt=""
+                          width={28}
+                          height={28}
+                          className="rounded-full"
+                        />
+                      )
+                    }
+                    <span className="font-semibold">
+                      {name}
+                    </span>
+                  </Wallet> :
+                    chain &&
+                    asset &&
+                    (origin === 'x' ?
+                      x_balance :
+                      y_balance
+                    ) &&
                     (
-                      amount > (
-                        origin === 'x' ?
-                          x_balance_amount :
-                          y_balance_amount
-                      ) ||
-                      amount <= 0
+                      typeof amount === 'number' ||
+                      web3_provider
                     ) ?
-                      <Alert
-                        color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
-                        icon={
-                          <BiMessageError
-                            className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                          />
-                        }
-                        closeDisabled={true}
-                        rounded={true}
-                        className="rounded-xl p-4.5"
-                      >
-                        <span>
-                          {amount >
-                            (
-                              origin === 'x' ?
-                                x_balance_amount :
-                                y_balance_amount
-                            ) ?
-                            'Insufficient Balance' :
-                            amount <= 0 ?
-                              'The amount cannot be equal to or less than 0.' :
-                              ''
-                          }
-                        </span>
-                      </Alert> :
-                      !(
-                        callResponse ||
-                        calculateSwapResponse
+                      !callResponse &&
+                      (
+                        amount > (
+                          origin === 'x' ?
+                            x_balance_amount :
+                            y_balance_amount
+                        ) ||
+                        amount <= 0
                       ) ?
-                        <button
-                          disabled={
-                            disabled ||
-                            !pair ||
-                            !valid_amount
+                        <Alert
+                          color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
+                          icon={
+                            <BiMessageError
+                              className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                            />
                           }
-                          onClick={() => {
-                            setSlippageEditing(false)
-                            call()
-                          }}
-                          className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-gray-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
+                          closeDisabled={true}
+                          rounded={true}
+                          className="rounded-xl p-4.5"
                         >
-                          <span className="flex items-center justify-center space-x-1.5">
-                            {
-                              disabled &&
+                          <span>
+                            {amount >
                               (
-                                <TailSpin
-                                  color="white"
-                                  width="20"
-                                  height="20"
-                                />
-                              )
+                                origin === 'x' ?
+                                  x_balance_amount :
+                                  y_balance_amount
+                              ) ?
+                              'Insufficient Balance' :
+                              amount <= 0 ?
+                                'The amount cannot be equal to or less than 0.' :
+                                ''
                             }
-                            <span>
-                              {calling ?
-                                approving ?
-                                  approveProcessing ?
-                                    'Approving' :
-                                    'Please Approve' :
-                                  callProcessing ?
-                                    'Swapping' :
-                                    typeof approving === 'boolean' ?
-                                      'Please Confirm' :
-                                      'Checking Approval' :
-                                swapAmount === true ?
-                                  'Calculating' :
-                                  'Swap'
-                              }
-                            </span>
                           </span>
-                        </button> :
-                        (
+                        </Alert> :
+                        !(
                           callResponse ||
-                          approveResponse ||
                           calculateSwapResponse
-                        ) &&
-                        (
-                          [
+                        ) ?
+                          <button
+                            disabled={
+                              disabled ||
+                              !pair ||
+                              !valid_amount
+                            }
+                            onClick={() => {
+                              setSlippageEditing(false)
+                              call()
+                            }}
+                            className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-gray-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
+                          >
+                            <span className="flex items-center justify-center space-x-1.5">
+                              {
+                                disabled &&
+                                (
+                                  <TailSpin
+                                    color="white"
+                                    width="20"
+                                    height="20"
+                                  />
+                                )
+                              }
+                              <span>
+                                {calling ?
+                                  approving ?
+                                    approveProcessing ?
+                                      'Approving' :
+                                      'Please Approve' :
+                                    callProcessing ?
+                                      'Swapping' :
+                                      typeof approving === 'boolean' ?
+                                        'Please Confirm' :
+                                        'Checking Approval' :
+                                  swapAmount === true ?
+                                    'Calculating' :
+                                    'Swap'
+                                }
+                              </span>
+                            </span>
+                          </button> :
+                          (
                             callResponse ||
                             approveResponse ||
-                            calculateSwapResponse,
-                          ].map((r, i) => {
-                            const {
-                              status,
-                              message,
-                              code,
-                              tx_hash,
-                            } = { ...r }
+                            calculateSwapResponse
+                          ) &&
+                          (
+                            [
+                              callResponse ||
+                              approveResponse ||
+                              calculateSwapResponse,
+                            ].map((r, i) => {
+                              const {
+                                status,
+                                message,
+                                code,
+                                tx_hash,
+                              } = { ...r }
 
-                            return (
-                              <Alert
-                                key={i}
-                                color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
-                                icon={
-                                  status === 'failed' ?
-                                    <BiMessageError
-                                      className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                    /> :
-                                    status === 'success' ?
-                                      <BiMessageCheck
+                              return (
+                                <Alert
+                                  key={i}
+                                  color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
+                                  icon={
+                                    status === 'failed' ?
+                                      <BiMessageError
                                         className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
                                       /> :
-                                      status === 'pending' ?
-                                        <div className="mr-3">
-                                          <Watch
-                                            color="white"
-                                            width="20"
-                                            height="20"
-                                          />
-                                        </div> :
-                                        <BiMessageDetail
-                                          className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                        />
-                                }
-                                closeDisabled={true}
-                                rounded={true}
-                                className="rounded-xl p-4.5"
-                              >
-                                <div className="flex items-center justify-between space-x-2">
-                                  <span className="break-all text-sm font-medium">
-                                    {ellipse(
-                                      (message || '')
-                                        .substring(
-                                          0,
-                                          status === 'failed' &&
-                                          error_patterns
-                                            .findIndex(c =>
-                                              message?.indexOf(c) > -1
-                                            ) > -1 ?
-                                            message.indexOf(
-                                              error_patterns
-                                                .find(c =>
-                                                  message.indexOf(c) > -1
-                                                )
-                                            ) :
-                                            undefined,
-                                        )
-                                        .trim(),
-                                      128,
-                                    )}
-                                  </span>
-                                  <div className="flex items-center space-x-2">
-                                    {
-                                      status === 'failed' &&
-                                      message &&
-                                      !calculateSwapResponse &&
-                                      (
-                                        <Copy
-                                          size={20}
-                                          value={message}
-                                          className="cursor-pointer text-slate-200 hover:text-white"
-                                        />
-                                      )
-                                    }
-                                    {
-                                      url &&
-                                      tx_hash &&
-                                      (
-                                        <a
-                                          href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                        >
-                                          <TiArrowRight
-                                            size={20}
-                                            className="transform -rotate-45"
-                                          />
-                                        </a>
-                                      )
-                                    }
-                                    {status === 'failed' ?
-                                      <button
-                                        onClick={() => reset(code)}
-                                        className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                                      >
-                                        <MdClose
-                                          size={20}
-                                        />
-                                      </button> :
                                       status === 'success' ?
+                                        <BiMessageCheck
+                                          className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                                        /> :
+                                        status === 'pending' ?
+                                          <div className="mr-3">
+                                            <Watch
+                                              color="white"
+                                              width="20"
+                                              height="20"
+                                            />
+                                          </div> :
+                                          <BiMessageDetail
+                                            className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                                          />
+                                  }
+                                  closeDisabled={true}
+                                  rounded={true}
+                                  className="rounded-xl p-4.5"
+                                >
+                                  <div className="flex items-center justify-between space-x-2">
+                                    <span className="break-all text-sm font-medium">
+                                      {ellipse(
+                                        (message || '')
+                                          .substring(
+                                            0,
+                                            status === 'failed' &&
+                                            error_patterns
+                                              .findIndex(c =>
+                                                message?.indexOf(c) > -1
+                                              ) > -1 ?
+                                              message.indexOf(
+                                                error_patterns
+                                                  .find(c =>
+                                                    message.indexOf(c) > -1
+                                                  )
+                                              ) :
+                                              undefined,
+                                          )
+                                          .trim() ||
+                                          message,
+                                        128,
+                                      )}
+                                    </span>
+                                    <div className="flex items-center space-x-2">
+                                      {
+                                        status === 'failed' &&
+                                        message &&
+                                        !calculateSwapResponse &&
+                                        (
+                                          <Copy
+                                            size={20}
+                                            value={message}
+                                            className="cursor-pointer text-slate-200 hover:text-white"
+                                          />
+                                        )
+                                      }
+                                      {
+                                        url &&
+                                        tx_hash &&
+                                        (
+                                          <a
+                                            href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                          >
+                                            <TiArrowRight
+                                              size={20}
+                                              className="transform -rotate-45"
+                                            />
+                                          </a>
+                                        )
+                                      }
+                                      {status === 'failed' ?
                                         <button
-                                          onClick={() => reset()}
-                                          className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                                          onClick={() => reset(code)}
+                                          className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                                         >
                                           <MdClose
                                             size={20}
                                           />
                                         </button> :
-                                        null
-                                    }
+                                        status === 'success' ?
+                                          <button
+                                            onClick={() => reset()}
+                                            className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                                          >
+                                            <MdClose
+                                              size={20}
+                                            />
+                                          </button> :
+                                          null
+                                      }
+                                    </div>
                                   </div>
+                                </Alert>
+                              )
+                            })
+                          ) :
+                    web3_provider ?
+                      <button
+                        disabled={true}
+                        onClick={() => call()}
+                        className="w-full bg-gray-200 dark:bg-slate-800 bg-opacity-75 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
+                      >
+                        {
+                          !asset ?
+                            'Swap' :
+                            pair === undefined ?
+                              `Route doesn't exist` :
+                              pair ?
+                                pair.error ?
+                                  <div className="w-fit tracking-normal text-red-600 dark:text-red-400 text-sm mx-auto">
+                                    {pair.error.message}
+                                  </div> :
+                                  'Enter amount' :
+                                <div className="flex items-center justify-center space-x-2">
+                                  <div>
+                                    <TailSpin
+                                      color={loader_color(theme)}
+                                      width="20"
+                                      height="20"
+                                    />
+                                  </div>
+                                  <span className="text-slate-400 dark:text-slate-500 text-lg">
+                                    Fetching pair information ...
+                                  </span>
                                 </div>
-                              </Alert>
-                            )
-                          })
-                        ) :
-                  web3_provider ?
-                    <button
-                      disabled={true}
-                      onClick={() => call()}
-                      className="w-full bg-gray-200 dark:bg-slate-800 bg-opacity-75 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
-                    >
-                      {
-                        !asset ?
-                          'Swap' :
-                          pair === undefined ?
-                            `Route doesn't exist` :
-                            pair ?
-                              pair.error ?
-                                <div className="w-fit tracking-normal text-red-600 dark:text-red-400 text-sm mx-auto">
-                                  {pair.error.message}
-                                </div> :
-                                'Enter amount' :
-                              <div className="flex items-center justify-center space-x-2">
-                                <div>
-                                  <TailSpin
-                                    color={loader_color(theme)}
-                                    width="20"
-                                    height="20"
-                                  />
-                                </div>
-                                <span className="text-slate-400 dark:text-slate-500 text-lg">
-                                  Fetching pair information ...
-                                </span>
-                              </div>
-                      }
-                    </button> :
-                    <Wallet
-                      connectChainId={chain_id}
-                      buttonConnectTitle="Connect Wallet"
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-lg font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
-                    >
-                      <span>
-                        Connect Wallet
-                      </span>
-                    </Wallet>
+                        }
+                      </button> :
+                      <Wallet
+                        connectChainId={chain_id}
+                        buttonConnectTitle="Connect Wallet"
+                        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-lg font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                      >
+                        <span>
+                          Connect Wallet
+                        </span>
+                      </Wallet>
               }
             </div>
           </div>

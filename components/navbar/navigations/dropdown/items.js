@@ -34,7 +34,10 @@ export default ({
 
           switch (id) {
             case 'explorer':
-              if (address) {
+              if (
+                false &&
+                address
+              ) {
                 title = 'My Transfers'
 
                 const address_path = '/address/'

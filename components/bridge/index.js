@@ -338,7 +338,7 @@ export default () => {
           params.amount =
             number_format(
               Number(amount),
-              '0.00000000',
+              '0.000000000000',
               true,
             )
         }
@@ -907,8 +907,6 @@ export default () => {
               XTransferStatus.CompletedSlow,
             ].includes(status)
           ) {
-            reset('finish')
-
             setLatestTransfers(
               _.orderBy(
                 _.uniqBy(
@@ -922,6 +920,8 @@ export default () => {
                 ['desc'],
               )
             )
+
+            reset('finish')
           }
           else if (transfer_data?.transfer_id) {
             setXcall(
@@ -959,8 +959,6 @@ export default () => {
                 XTransferStatus.CompletedSlow,
               ].includes(status)
             ) {
-              reset('finish')
-
               setLatestTransfers(
                 _.orderBy(
                   _.uniqBy(
@@ -974,6 +972,8 @@ export default () => {
                   ['desc'],
                 )
               )
+
+              reset('finish')
             }
           }
         }
@@ -985,7 +985,7 @@ export default () => {
     const interval =
       setInterval(() =>
         update(),
-        10 * 1000,
+        7.5 * 1000,
       )
 
     return () => clearInterval(interval)
@@ -2176,7 +2176,7 @@ export default () => {
             {
               openTransferStatus &&
               latest_transfer ?
-                <div className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-5 sm:pt-6 pb-6 sm:pb-7 px-4 sm:px-6">
+                <div className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-5 sm:pt-5 pb-6 sm:pb-6 px-4 sm:px-6">
                   <div className="flex items-center justify-between space-x-2">
                     <span className="text-lg font-semibold">
                       Transfer status
@@ -2189,6 +2189,7 @@ export default () => {
                     >
                       <MdClose
                         size={20}
+                        className="-mr-1"
                       />
                     </button>
                   </div>
@@ -2251,7 +2252,7 @@ export default () => {
                           <span>
                             {number_format(
                               amount,
-                              '0,0.00000000',
+                              '0,0.000000000000',
                               true,
                             )}
                           </span>
@@ -2309,7 +2310,7 @@ export default () => {
                       }
                     </span>
                   </div>
-                  <button
+                  {/*<button
                     onClick={() => {
                       setXcall(null)
                       setOpenTransferStatus(false)
@@ -2319,10 +2320,10 @@ export default () => {
                     <span>
                       Got it
                     </span>
-                  </button>
+                  </button>*/}
                 </div> :
                 <div
-                  className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-8 sm:pt-10 pb-6 sm:pb-8 px-4 sm:px-6"
+                  className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-5 sm:pt-6 pb-6 sm:pb-7 px-4 sm:px-6"
                   style={
                     checkSupport() ?
                       {
@@ -2536,7 +2537,7 @@ export default () => {
                               amount >= 0 ?
                                 number_format(
                                   amount,
-                                  '0.00000000',
+                                  '0.000000000000',
                                   true,
                                 ) :
                                 ''
@@ -2716,7 +2717,7 @@ export default () => {
                                                 source_amount,
                                                 source_amount > 1000 ?
                                                   '0,0.00' :
-                                                  '0,0.00000000',
+                                                  '0,0.000000000000',
                                                 true,
                                               ) :
                                               'n/a'
@@ -2733,7 +2734,7 @@ export default () => {
                                                 liquidity_amount,
                                                 liquidity_amount > 1000 ?
                                                   '0,0.00' :
-                                                  '0,0.00000000',
+                                                  '0,0.000000000000',
                                                 true,
                                               ) :
                                               'n/a'
@@ -2750,7 +2751,7 @@ export default () => {
                                                 max_amount,
                                                 max_amount > 1000 ?
                                                   '0,0.00' :
-                                                  '0,0.00000000',
+                                                  '0,0.000000000000',
                                                 true,
                                               ) :
                                               'n/a'
@@ -2817,7 +2818,7 @@ export default () => {
                                 amount >= 0 ?
                                   number_format(
                                     amount,
-                                    '0.00000000',
+                                    '0.000000000000',
                                     true,
                                   ) :
                                   ''
@@ -2911,7 +2912,7 @@ export default () => {
                                             {typeof estimate_received === 'number' ?
                                               number_format(
                                                 estimate_received,
-                                                '0,0.00000000',
+                                                '0,0.000000000000',
                                                 true,
                                               ) :
                                               '-'
@@ -3127,7 +3128,7 @@ export default () => {
                                                     <span>
                                                       {number_format(
                                                         router_fee,
-                                                        '0,0.00000000',
+                                                        '0,0.000000000000',
                                                         true,
                                                       )}
                                                     </span>
@@ -3163,7 +3164,7 @@ export default () => {
                                                         <span>
                                                           {number_format(
                                                             gas_fee,
-                                                            '0,0.00000000',
+                                                            '0,0.000000000000',
                                                             true,
                                                           )}
                                                         </span>
@@ -3468,7 +3469,8 @@ export default () => {
                                                 ) :
                                                 undefined,
                                             )
-                                            .trim(),
+                                            .trim() ||
+                                            message,
                                           128,
                                         )}
                                       </span>
