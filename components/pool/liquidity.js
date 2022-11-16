@@ -6,7 +6,7 @@ import moment from 'moment'
 import { BigNumber, FixedNumber, utils } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
 import Switch from 'react-switch'
-import { TailSpin, Watch } from 'react-loader-spinner'
+import { TailSpin, Watch, RotatingSquare } from 'react-loader-spinner'
 import { Tooltip } from '@material-tailwind/react'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
@@ -1046,6 +1046,7 @@ export default ({
   const {
     asset_data,
     contract_data,
+    lpTokenAddress,
     tokens,
     decimals,
     symbol,
@@ -1465,7 +1466,7 @@ export default ({
                       <div className="flex items-center space-x-2">
                         {url ?
                           <a
-                            href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}`}
+                            href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}${address ? `?a=${address}` : ''}`}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
@@ -1618,7 +1619,7 @@ export default ({
                       <div className="flex items-center space-x-2">
                         {url ?
                           <a
-                            href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}`}
+                            href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}${address ? `?a=${address}` : ''}`}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
@@ -1956,99 +1957,57 @@ export default ({
           <>
             <div className="space-y-3 py-3 px-0">
               <div className="space-y-2">
-                <div className="text-slate-400 dark:text-slate-500 font-medium">
-                  Your Balances
-                </div>
                 <div className="flex items-center justify-between space-x-2">
                   {
-                    url &&
-                    x_asset_data?.contract_address ?
+                    lpTokenAddress &&
+                    url ?
                       <a
-                        href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}`}
+                        href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
                         target="_blank"
                         rel="noopener noreferrer"
+                        className="font-semibold"
                       >
-                        <span className="text-sm font-semibold">
-                          {x_asset_data.symbol}
-                        </span>
+                        Pool Tokens
                       </a> :
-                      <div className="text-sm font-semibold">
-                        {x_asset_data?.symbol}
-                      </div>
+                      <span className="text-slate-400 dark:text-slate-500 font-medium">
+                        Pool Tokens
+                      </span>
                   }
-                  {web3_provider ?
-                    !isNaN(_.head(removeAmounts)) ?
-                      <span className="text-sm">
-                        {number_format(
-                          _.head(removeAmounts) ||
-                          0,
-                          '0,0.000000',
-                          true,
-                        )}
-                      </span> :
-                      selected &&
-                      !no_pool &&
-                      !error &&
+                  <div className="flex items-center space-x-1">
+                    <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                      Balance:
+                    </div>
+                    {
+                      web3_provider &&
                       (
-                        position_loading ?
-                          <TailSpin
-                            color={loader_color(theme)}
-                            width="24"
-                            height="24"
-                          /> :
-                          '-'
-                      ) :
-                    <span className="text-sm">
-                      -
-                    </span>
-                  }
+                        <div className="flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm space-x-1">
+                          {typeof lpTokenBalance === 'number' ?
+                            <span className="font-semibold">
+                              {number_format(
+                                lpTokenBalance,
+                                lpTokenBalance > 1000000 ?
+                                  '0,0' :
+                                  lpTokenBalance > 10000 ?
+                                    '0,0.00' :
+                                    '0,0.000000000000000000',
+                                true,
+                              )}
+                            </span> :
+                            typeof lpTokenBalance === 'string' ?
+                              <span>
+                                n/a
+                              </span> :
+                              <RotatingSquare
+                                color={loader_color(theme)}
+                                width="16"
+                                height="16"
+                              />
+                          }
+                        </div>
+                      )
+                    }
+                  </div>
                 </div>
-                <div className="flex items-center justify-between space-x-2">
-                  {
-                    url &&
-                    y_asset_data?.contract_address ?
-                      <a
-                        href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <span className="text-sm font-semibold">
-                          {y_asset_data.symbol}
-                        </span>
-                      </a> :
-                      <div className="text-sm font-semibold">
-                        {y_asset_data?.symbol}
-                      </div>
-                  }
-                  {web3_provider ?
-                    !isNaN(_.last(removeAmounts)) ?
-                      <span className="text-sm">
-                        {number_format(
-                          _.last(removeAmounts) ||
-                          0,
-                          '0,0.000000',
-                          true,
-                        )}
-                      </span> :
-                      selected &&
-                      !no_pool &&
-                      !error &&
-                      (
-                        position_loading ?
-                          <TailSpin
-                            color={loader_color(theme)}
-                            width="24"
-                            height="24"
-                          /> :
-                          '-'
-                      ) :
-                    <span className="text-sm">
-                      -
-                    </span>
-                  }
-                </div>
-              </div>
-              <div className="space-y-2">
                 <div className="space-y-1">
                   <DebounceInput
                     debounceTimeout={500}
@@ -2165,6 +2124,96 @@ export default ({
                         {p * 100} %
                       </div>
                     ))
+                  }
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between space-x-2">
+                  {
+                    url &&
+                    x_asset_data?.contract_address ?
+                      <a
+                        href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span className="text-sm font-semibold">
+                          {x_asset_data.symbol}
+                        </span>
+                      </a> :
+                      <div className="text-sm font-semibold">
+                        {x_asset_data?.symbol}
+                      </div>
+                  }
+                  {web3_provider ?
+                    !isNaN(_.head(removeAmounts)) ?
+                      <span className="text-sm">
+                        {number_format(
+                          _.head(removeAmounts) ||
+                          0,
+                          '0,0.000000',
+                          true,
+                        )}
+                      </span> :
+                      selected &&
+                      !no_pool &&
+                      !error &&
+                      (
+                        position_loading ?
+                          <TailSpin
+                            color={loader_color(theme)}
+                            width="24"
+                            height="24"
+                          /> :
+                          '-'
+                      ) :
+                    <span className="text-sm">
+                      -
+                    </span>
+                  }
+                </div>
+                <div className="flex items-center justify-between space-x-2">
+                  {
+                    url &&
+                    y_asset_data?.contract_address ?
+                      <a
+                        href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span className="text-sm font-semibold">
+                          {y_asset_data.symbol}
+                        </span>
+                      </a> :
+                      <div className="text-sm font-semibold">
+                        {y_asset_data?.symbol}
+                      </div>
+                  }
+                  {web3_provider ?
+                    !isNaN(_.last(removeAmounts)) ?
+                      <span className="text-sm">
+                        {number_format(
+                          _.last(removeAmounts) ||
+                          0,
+                          '0,0.000000',
+                          true,
+                        )}
+                      </span> :
+                      selected &&
+                      !no_pool &&
+                      !error &&
+                      (
+                        position_loading ?
+                          <TailSpin
+                            color={loader_color(theme)}
+                            width="24"
+                            height="24"
+                          /> :
+                          '-'
+                      ) :
+                    <span className="text-sm">
+                      -
+                    </span>
                   }
                 </div>
               </div>

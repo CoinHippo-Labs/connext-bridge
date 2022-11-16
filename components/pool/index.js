@@ -804,6 +804,7 @@ export default () => {
                 }
                 {
                   name &&
+                  lpTokenAddress &&
                   url &&
                   (
                     <a
