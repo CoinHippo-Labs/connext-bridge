@@ -13,12 +13,12 @@
 [data-navbar="dark"] {
   .navbar,.footer {
     @apply text-white;
-    background: color(theme('colors.black') tint(5%));
-    border-color: color(theme('colors.black') tint(5%));
+    background: color(theme('colors.black') tint(0%));
+    border-color: color(theme('colors.black') tint(0%));
     .navbar-search {
       input {
-        background: color(theme('colors.gray.900'));
-        border-color: color(theme('colors.gray.900'));
+        background: color(theme('colors.slate.900'));
+        border-color: color(theme('colors.slate.900'));
       }
     }
   }

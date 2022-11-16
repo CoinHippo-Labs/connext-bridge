@@ -167,13 +167,13 @@ export default ({
         style={styles.popper}
       >
         <div
-          className={`${hidden ? 'hidden' : 'block'} w-auto bg-white dark:bg-black rounded shadow z-10 no-underline break-words text-sm font-normal`}
+          className={`${hidden ? 'hidden' : 'block'} w-auto bg-light dark:bg-dark rounded shadow z-10 no-underline break-words text-sm font-medium`}
           style={styles.offset}
         >
           {
             title &&
             (
-              <div className={`bg-zinc-50 dark:bg-zinc-900 rounded-t border-b border-solid border-zinc-100 dark:border-zinc-800 uppercase font-semibold mb-0 p-2 ${titleClassName}`}>
+              <div className={`bg-slate-50 dark:bg-slate-900 rounded-t border-b border-solid border-slate-100 dark:border-slate-800 uppercase font-semibold mb-0 p-2 ${titleClassName}`}>
                 {title}
               </div>
             )

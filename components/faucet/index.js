@@ -676,7 +676,7 @@ export default ({
       <div
         className={
           className ||
-          'w-full max-w-lg bg-slate-200 dark:bg-slate-900 bg-opacity-50 rounded-3xl flex flex-col items-center justify-center space-y-2 mx-auto p-3 sm:p-6'
+          'w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl flex flex-col items-center justify-center space-y-2 mx-auto p-3 sm:p-6'
         }
       >
         <button
@@ -717,7 +717,7 @@ export default ({
                 signer &&
                 (
                   <div className="form-element mt-2">
-                    <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
+                    <div className="form-label text-slate-600 dark:text-slate-200 font-medium">
                       Balance
                     </div>
                     <div className="flex items-center justify-between space-x-2">
@@ -737,7 +737,7 @@ export default ({
                           asset_data?.symbol
                         }
                         trigger={trigger}
-                        className="bg-slate-200 dark:bg-slate-800 dark:bg-opacity-75 rounded-lg py-1.5 px-2.5"
+                        className="bg-slate-200 dark:bg-slate-800 rounded-lg py-1.5 px-2.5"
                       />
                       <Balance
                         chainId={
@@ -759,7 +759,7 @@ export default ({
                           contract_data?.symbol
                         }
                         trigger={trigger}
-                        className="bg-slate-200 dark:bg-slate-800 dark:bg-opacity-75 rounded-lg py-1.5 px-2.5"
+                        className="bg-slate-200 dark:bg-slate-800 rounded-lg py-1.5 px-2.5"
                       />
                     </div>
                   </div>
@@ -782,7 +782,7 @@ export default ({
                       {
                         label &&
                         (
-                          <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
+                          <div className="form-label text-slate-600 dark:text-slate-200 font-medium">
                             {label}
                           </div>
                         )

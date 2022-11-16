@@ -255,7 +255,7 @@ export default ({
                       href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                     >
                     <a
-                      className="hover:bg-white dark:hover:bg-gray-900 rounded border dark:border-slate-800 space-y-12 p-5"
+                      className="bg-slate-50 hover:bg-slate-100 dark:bg-black dark:hover:bg-slate-900 rounded border dark:border-slate-800 space-y-12 p-5"
                     >
                       <div className="flex items-center space-x-3">
                         {
@@ -299,7 +299,7 @@ export default ({
                                     <Tooltip
                                       placement="top"
                                       content={symbols?.[i]}
-                                      className="z-50 bg-black text-white text-xs"
+                                      className="z-50 bg-dark text-white text-xs"
                                     >
                                       <div className="flex items-center">
                                         <Image
@@ -325,7 +325,7 @@ export default ({
                               <Tooltip
                                 placement="top"
                                 content={pair_balances}
-                                className="z-50 bg-black whitespace-pre-wrap text-white text-xs"
+                                className="z-50 bg-dark whitespace-pre-wrap text-white text-xs"
                               >
                                 <span className="uppercase">
                                   {currency_symbol}
@@ -377,7 +377,7 @@ export default ({
                                       </div>
                                     ))
                                 }
-                                className="z-50 bg-black whitespace-pre-wrap text-white text-xs"
+                                className="z-50 bg-dark whitespace-pre-wrap text-white text-xs"
                               >
                                 <span>
                                   {number_format(

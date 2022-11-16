@@ -107,8 +107,8 @@ export default ({
             <RotatingSquare
               color={
                 theme === 'light' ?
-                  '#94a3b8' :
-                  '#64748b'
+                  '#b0b0b0' :
+                  '#808080'
               }
               width="16"
               height="16"

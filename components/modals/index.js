@@ -135,7 +135,7 @@ export default ({
                 ref={modalRef}
                 className={`w-full ${modalClassName.includes('max-w-') ? '' : 'max-w-sm lg:max-w-lg'} relative lg:my-4 mx-auto ${modalClassName}`}
               >
-                <div className="w-full bg-white dark:bg-slate-900 dark:bg-opacity-90 relative outline-none rounded-lg shadow-lg border-0 flex flex-col">
+                <div className="w-full bg-white dark:bg-slate-900 relative outline-none rounded-lg shadow-lg border-0 flex flex-col">
                   <div className="relative flex-auto p-4">
                     <div className="flex items-start justify-start space-x-4 p-2">
                       {
@@ -157,7 +157,7 @@ export default ({
                   {
                     !noButtons &&
                     (
-                      <div className={`border-t border-zinc-100 dark:border-zinc-800 border-solid rounded-b flex items-center justify-end ${cancelButtonClassName?.includes('hidden') ? 'space-x-0' : 'space-x-2'} py-4 px-6`}>
+                      <div className={`border-t border-slate-100 dark:border-slate-800 border-solid rounded-b flex items-center justify-end ${cancelButtonClassName?.includes('hidden') ? 'space-x-0' : 'space-x-2'} py-4 px-6`}>
                         <button
                           type="button"
                           disabled={cancelDisabled}

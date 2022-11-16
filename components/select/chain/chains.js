@@ -148,7 +148,7 @@ export default ({
                       />
                     )
                   }
-                  <span className={`whitespace-nowrap text-base ${selected ? 'font-bold' : 'font-normal'}`}>
+                  <span className={`whitespace-nowrap text-base ${selected ? 'font-bold' : 'font-medium'}`}>
                     {c.name}
                   </span>
                 </div>
@@ -185,7 +185,7 @@ export default ({
               </>
             )
 
-            const className = `dropdown-item ${disabled ? 'cursor-not-allowed' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer'} rounded-lg flex items-center justify-between space-x-2 p-2`
+            const className = `dropdown-item ${disabled ? 'cursor-not-allowed' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'} rounded-lg flex items-center justify-between space-x-2 p-2`
 
             return (
               <div key={i}>

@@ -113,13 +113,13 @@ export default ({
                       <Tooltip
                         placement="right"
                         content={tooltip}
-                        className="z-50 bg-black text-white text-xs"
+                        className="z-50 bg-dark text-white text-xs"
                       >
-                        <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 font-normal">
+                        <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 font-medium">
                           {label}
                         </div>
                       </Tooltip> :
-                      <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
+                      <div className="form-label text-slate-600 dark:text-slate-200 font-medium">
                         {label}
                       </div>
                     )
@@ -278,7 +278,7 @@ export default ({
                                 ].includes(e.key) &&
                                 e.preventDefault()
                               }
-                              className={`w-20 bg-slate-50 dark:bg-slate-800 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
+                              className={`w-20 bg-slate-100 dark:bg-slate-800 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
                             />
                             {
                               presets?.length > 0 &&
@@ -301,7 +301,7 @@ export default ({
 
                                           setData(_data)
                                         }}
-                                        className={`${data?.[name] === p ? 'bg-slate-100 dark:bg-slate-800 font-semibold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-medium'} rounded-lg cursor-pointer py-1 px-2`}
+                                        className={`${data?.[name] === p ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded-lg cursor-pointer py-1 px-2`}
                                       >
                                         {p} {postfix}
                                       </div>

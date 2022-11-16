@@ -126,7 +126,7 @@ export default ({
           <div
             className={
               className ||
-              "w-32 sm:w-48 min-w-max bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl flex items-center justify-center space-x-1.5 sm:space-x-2 py-1.5 sm:py-2 px-2 sm:px-3"
+              "w-32 sm:w-48 min-w-max bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl flex items-center justify-center space-x-1.5 sm:space-x-2 py-1.5 sm:py-2 px-2 sm:px-3"
             }
           >
             {

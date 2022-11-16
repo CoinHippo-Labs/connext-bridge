@@ -267,7 +267,7 @@ a {
 .dark .dark\:bg-slate-900,
 .dark .dark\:bg-slate-800,
 .dark .dark\:bg-slate-700 {
-  --tw-bg-opacity: .66 !important;
+/* --tw-bg-opacity: .66 !important; */
 }
 
 .modal {

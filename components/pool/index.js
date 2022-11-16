@@ -797,7 +797,7 @@ export default () => {
                 {
                   no_pool &&
                   (
-                    <div className="order-2 tracking-normal text-slate-400 dark:text-slate-400 text-base font-normal py-1.5 px-4">
+                    <div className="order-2 tracking-normal text-slate-400 dark:text-slate-400 text-base font-medium py-1.5 px-4">
                       Pool doesn't exist
                     </div>
                   )
@@ -896,7 +896,7 @@ export default () => {
                               </div>
                             ))
                         }
-                        className="z-50 bg-black whitespace-pre-wrap text-white text-xs"
+                        className="z-50 bg-dark whitespace-pre-wrap text-white text-xs"
                       >
                         <span>
                           {number_format(
@@ -920,7 +920,7 @@ export default () => {
               {
                 error &&
                 (
-                  <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-100 dark:bg-opacity-50 rounded-lg tracking-wider text-red-600 dark:text-red-400 text-base font-normal py-1.5 px-4">
+                  <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-100 dark:bg-opacity-50 rounded-lg tracking-wider text-red-600 dark:text-red-400 text-base font-medium py-1.5 px-4">
                     {error.message}
                   </div>
                 )

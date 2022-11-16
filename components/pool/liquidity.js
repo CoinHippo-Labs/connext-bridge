@@ -1240,9 +1240,9 @@ export default ({
               <Tooltip
                 placement="right"
                 content="This allows you to only need to pay for approval on your first time providing liquidity."
-                className="z-50 bg-black text-white text-xs"
+                className="z-50 bg-dark text-white text-xs"
               >
-                <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 font-normal">
+                <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 font-medium">
                   Infinite Approval
                 </div>
               </Tooltip>
@@ -1274,9 +1274,9 @@ export default ({
               <Tooltip
                 placement="right"
                 content="The maximum percentage you are willing to lose due to market changes."
-                className="z-50 bg-black text-white text-xs"
+                className="z-50 bg-dark text-white text-xs"
               >
-                <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 font-normal">
+                <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 font-medium">
                   Slippage
                 </div>
               </Tooltip>
@@ -1333,7 +1333,7 @@ export default ({
                     ].includes(e.key) &&
                     e.preventDefault()
                   }
-                  className={`w-20 bg-gray-200 dark:bg-slate-900 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
+                  className={`w-20 bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1 px-2`}
                 />
                 <div className="flex items-center space-x-2.5">
                   {
@@ -1353,7 +1353,7 @@ export default ({
                             }
                           )
                         }
-                        className={`${slippage === p ? 'bg-gray-200 dark:bg-slate-800 font-semibold' : 'bg-gray-100 hover:bg-gray-200 dark:bg-slate-900 dark:hover:bg-slate-800 hover:font-medium'} rounded-lg cursor-pointer py-1 px-2`}
+                        className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-medium hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
                       >
                         {p} %
                       </div>
@@ -1363,7 +1363,7 @@ export default ({
               </div>
             </div>
             <div className="form-element">
-              <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
+              <div className="form-label text-slate-600 dark:text-slate-200 font-medium">
                 Transaction Deadline
               </div>
               <div className="flex items-center space-x-3">
@@ -1418,7 +1418,7 @@ export default ({
                     ].includes(e.key) &&
                     e.preventDefault()
                   }
-                  className={`w-20 bg-gray-200 dark:bg-slate-900 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
+                  className={`w-20 bg-slate-200 dark:bg-slate-800 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
                 />
                 <span className="font-medium">
                   minutes
@@ -1441,7 +1441,7 @@ export default ({
           chainId={chain_id}
         />
       </div>
-      <div className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-2xl space-y-4 p-6 pt-1">
+      <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl space-y-4 p-6 pt-1">
         <div className="border-b dark:border-slate-800 flex items-center justify-between space-x-2">
           {ACTIONS
             .map((a, i) => (
@@ -1491,7 +1491,7 @@ export default ({
                               <Tooltip
                                 placement="top"
                                 content={`Click here to swap ${y_asset_data.symbol} into ${x_asset_data.symbol}`}
-                                className="z-50 bg-black text-white text-xs"
+                                className="z-50 bg-dark text-white text-xs"
                               >
                                 <div>
                                   <HiSwitchHorizontal
@@ -1576,14 +1576,14 @@ export default ({
                         ].includes(e.key) &&
                         e.preventDefault()
                       }
-                      className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-gray-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
+                      className={`w-full bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
                     />
                     {/*<div
                       onClick={() => {
                         setAmountX(x_balance_amount)
                         autoSetY(x_balance_amount)
                       }}
-                      className={`${disabled || typeof x_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-gray-200 dark:bg-slate-900 rounded-lg text-blue-400 dark:text-slate-200 text-base font-medium py-0.5 px-2.5`}
+                      className={`${disabled || typeof x_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-200 dark:bg-slate-800 rounded-lg text-blue-400 dark:text-slate-200 text-base font-medium py-0.5 px-2.5`}
                     >
                       Max
                     </div>*/}
@@ -1644,7 +1644,7 @@ export default ({
                               <Tooltip
                                 placement="top"
                                 content={`Click here to swap ${x_asset_data.symbol} into ${y_asset_data.symbol}`}
-                                className="z-50 bg-black text-white text-xs"
+                                className="z-50 bg-dark text-white text-xs"
                               >
                                 <div>
                                   <HiSwitchHorizontal
@@ -1734,14 +1734,14 @@ export default ({
                         ].includes(e.key) &&
                         e.preventDefault()
                       }
-                      className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-gray-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
+                      className={`w-full bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
                     />
                     {/*<div
                       onClick={() => {
                         setAmountY(y_balance_amount)
                         autoSetX(y_balance_amount)
                       }}
-                      className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-gray-200 dark:bg-slate-900 rounded-lg text-blue-400 dark:text-slate-200 text-sm font-medium py-0.5 px-2.5`}
+                      className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-200 dark:bg-slate-800 rounded-lg text-blue-400 dark:text-slate-200 text-sm font-medium py-0.5 px-2.5`}
                     >
                       Max
                     </div>*/}
@@ -1910,7 +1910,7 @@ export default ({
                           !valid_amount
                         }
                         onClick={() => call(pool_data)}
-                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 px-2 sm:px-3`}
+                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 px-2 sm:px-3`}
                       >
                         <span className="flex items-center justify-center space-x-1.5">
                           {
@@ -2063,7 +2063,7 @@ export default ({
                       ].includes(e.key) &&
                       e.preventDefault()
                     }
-                    className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-gray-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
+                    className={`w-full bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
                   />
                   {
                     typeof amount === 'number' &&
@@ -2119,7 +2119,7 @@ export default ({
 
                           setAmount(_amount)
                         }}
-                        className={`${disabled || !lpTokenBalance ? 'bg-gray-200 dark:bg-gray-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-gray-200 dark:bg-gray-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'} rounded-lg py-0.5 px-2`}
+                        className={`${disabled || !lpTokenBalance ? 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'} rounded-lg py-0.5 px-2`}
                       >
                         {p * 100} %
                       </div>
@@ -2361,7 +2361,7 @@ export default ({
                           !valid_amount
                         }
                         onClick={() => call(pool_data)}
-                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-gray-200 dark:bg-gray-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 px-2 sm:px-3`}
+                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 px-2 sm:px-3`}
                       >
                         <span className="flex items-center justify-center space-x-1.5">
                           {

@@ -284,7 +284,7 @@ export default ({
   return (
     data &&
     (
-      <div className={`bg-zinc-50 dark:bg-zinc-900 max-w-xs sm:max-w-none rounded-xl ${pending ? 'border-0 border-blue-500' : 'border-0 border-green-500'} mx-auto py-5 px-4`}>
+      <div className={`bg-slate-100 dark:bg-slate-900 max-w-xs sm:max-w-none rounded-xl ${pending ? 'border-0 border-blue-500' : 'border-0 border-green-500'} mx-auto py-5 px-4`}>
         <div className="flex items-center justify-between space-x-2">
           <div className="flex items-center space-x-1.5">
             {
@@ -466,7 +466,7 @@ export default ({
           ) &&
           (
             <div className="flex items-center justify-between space-x-2">
-              <span className="text-sm font-normal">
+              <span className="text-sm font-medium">
                 To:
               </span>
               <EnsProfile
@@ -510,7 +510,7 @@ export default ({
                         'Unable to leverage fast liquidity. Your transfer will still complete.' :
                         'Fast transfer enabled by Connext router network.'
                     }
-                    className="z-50 bg-black text-white text-xs"
+                    className="z-50 bg-dark text-white text-xs"
                   >
                     <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
                       {
@@ -547,7 +547,7 @@ export default ({
                   .format('MMM D, YYYY h:mm:ss A')*/
                   'Transferred at'
                 }
-                className="z-50 bg-black text-white text-xs"
+                className="z-50 bg-dark text-white text-xs"
               >
                 <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
                   {

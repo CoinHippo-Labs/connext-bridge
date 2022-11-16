@@ -385,7 +385,7 @@ export default ({
                       />
                     )
                   }
-                  <span className={`whitespace-nowrap text-base ${selected ? 'font-bold' : 'font-normal'}`}>
+                  <span className={`whitespace-nowrap text-base ${selected ? 'font-bold' : 'font-medium'}`}>
                     {symbol}
                   </span>
                 </div>
@@ -411,7 +411,7 @@ export default ({
               const balanceComponent =
                 balances_data?.[chain_id] &&
                 (
-                  <div className={`${chain_id && !amount ? 'text-slate-400 dark:text-slate-500' : ''} ${selected ? 'font-semibold' : 'font-normal'} ml-auto`}>
+                  <div className={`${chain_id && !amount ? 'text-slate-400 dark:text-slate-500' : ''} ${selected ? 'font-semibold' : 'font-medium'} ml-auto`}>
                     {typeof amount === 'number' ?
                       number_format(
                         amount,
@@ -427,7 +427,7 @@ export default ({
                   </div>
                 )
 
-              const className = `dropdown-item ${disabled ? 'cursor-not-allowed' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer'} rounded-lg flex items-center justify-between space-x-2 p-2`
+              const className = `dropdown-item ${disabled ? 'cursor-not-allowed' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'} rounded-lg flex items-center justify-between space-x-2 p-2`
 
               return (
                 disabled ?

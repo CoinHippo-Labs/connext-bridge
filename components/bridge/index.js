@@ -2175,7 +2175,7 @@ export default () => {
             {
               openTransferStatus &&
               latest_transfer ?
-                <div className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-5 sm:pt-5 pb-6 sm:pb-6 px-4 sm:px-6">
+                <div className="bg-white dark:bg-slate-900 rounded-3xl space-y-6 pt-5 sm:pt-5 pb-6 sm:pb-6 px-4 sm:px-6">
                   <div className="flex items-center justify-between space-x-2">
                     <span className="text-lg font-semibold">
                       Transfer status
@@ -2322,7 +2322,7 @@ export default () => {
                   </button>*/}
                 </div> :
                 <div
-                  className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-5 sm:pt-6 pb-6 sm:pb-7 px-4 sm:px-6"
+                  className="bg-white dark:bg-slate-900 rounded-3xl space-y-6 pt-5 sm:pt-6 pb-6 sm:pb-7 px-4 sm:px-6"
                   style={
                     checkSupport() ?
                       {
@@ -2380,7 +2380,7 @@ export default () => {
                           origin="from"
                         />
                       </div>
-                      <div className="flex items-center justify-center mt-5 sm:mt-5">
+                      <div className="flex items-center justify-center mt-6 sm:mt-7">
                         <button
                           disabled={disabled}
                           onClick={() => {
@@ -2402,7 +2402,7 @@ export default () => {
                               getBalances(destination_chain)
                             }
                           }}
-                          className={`bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full sm:border dark:border-slate-800 flex items-center justify-center p-1.5 sm:p-2.5`}
+                          className={`bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-full sm:border dark:border-slate-800 flex items-center justify-center p-1.5 sm:p-2.5`}
                         >
                           <HiSwitchHorizontal
                             size={18}
@@ -2486,7 +2486,7 @@ export default () => {
                       <div className="tracking-normal text-slate-600 dark:text-slate-200 font-medium">
                         Amount
                       </div>
-                      <div className="bg-slate-100 dark:bg-gray-800 dark:bg-opacity-50 rounded-lg space-y-0.5 py-3.5 px-3">
+                      <div className="bg-slate-100 dark:bg-slate-800 rounded-lg space-y-0.5 py-3.5 px-3">
                         <div className="flex items-center justify-between space-x-2">
                           <SelectAsset
                             disabled={disabled}
@@ -2679,7 +2679,7 @@ export default () => {
                                         }
                                       )
                                     }}
-                                    className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-sm font-semibold py-0.5 px-2 sm:px-2.5"
+                                    className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-sm font-semibold py-0.5 px-2 sm:px-2.5"
                                   >
                                     Max
                                   </button> ||
@@ -2759,7 +2759,7 @@ export default () => {
                                         </div>
                                       </div>
                                     }
-                                    className="bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
+                                    className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white text-xs sm:text-sm font-semibold py-0.5 px-2 sm:px-2.5"
                                     titleClassName="normal-case py-1.5"
                                   >
                                     Max
@@ -2864,7 +2864,7 @@ export default () => {
                                 ].includes(e.key) &&
                                 e.preventDefault()
                               }
-                              className={`w-36 sm:w-48 bg-gray-200 focus:bg-gray-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
+                              className={`w-36 sm:w-48 bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5 sm:py-2 px-2 sm:px-3`}
                             />
                           </div>
                         </div>*/}
@@ -2970,7 +2970,7 @@ export default () => {
                                                 <Tooltip
                                                   placement="top"
                                                   content="The maximum percentage you are willing to lose due to market changes."
-                                                  className="z-50 bg-black text-white text-xs"
+                                                  className="z-50 bg-dark text-white text-xs"
                                                 >
                                                   <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
                                                     Slippage
@@ -3037,7 +3037,7 @@ export default () => {
                                                             ].includes(e.key) &&
                                                             e.preventDefault()
                                                           }
-                                                          className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1 px-2`}
+                                                          className={`w-20 bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1 px-2`}
                                                         />
                                                         <button
                                                           onClick={() => setSlippageEditing(false)}
@@ -3072,7 +3072,7 @@ export default () => {
                                                                 setOptions(_data)
                                                                 setSlippageEditing(false)
                                                               }}
-                                                              className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-900 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-900 hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
+                                                              className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-medium hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
                                                             >
                                                               {s} %
                                                             </div>
@@ -3117,7 +3117,7 @@ export default () => {
                                                   <Tooltip
                                                     placement="top"
                                                     content="This supports our router users providing fast liquidity."
-                                                    className="z-50 bg-black text-white text-xs"
+                                                    className="z-50 bg-dark text-white text-xs"
                                                   >
                                                     <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
                                                       Bridge fee
@@ -3140,7 +3140,7 @@ export default () => {
                                                   <Tooltip
                                                     placement="top"
                                                     content="This covers costs to execute your transfer on the destination chain."
-                                                    className="z-50 bg-black text-white text-xs"
+                                                    className="z-50 bg-dark text-white text-xs"
                                                   >
                                                     <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
                                                       Destination gas fee
@@ -3180,7 +3180,7 @@ export default () => {
                                                       <Tooltip
                                                         placement="top"
                                                         content="Price impact"
-                                                        className="z-50 bg-black text-white text-xs"
+                                                        className="z-50 bg-dark text-white text-xs"
                                                       >
                                                         <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
                                                           Price impact
@@ -3224,7 +3224,7 @@ export default () => {
                                                 'Unable to leverage fast liquidity. Your transfer will still complete.' :
                                                 'Fast transfer enabled by Connext router network.'
                                             }
-                                            className="z-50 bg-black text-white text-xs"
+                                            className="z-50 bg-dark text-white text-xs"
                                           >
                                             <span className="tracking-normal whitespace-nowrap text-sm font-semibold space-x-1.5">
                                               {
@@ -3514,7 +3514,7 @@ export default () => {
                       web3_provider ?
                         <button
                           disabled={true}
-                          className="w-full bg-gray-200 dark:bg-slate-800 bg-opacity-75 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
+                          className="w-full bg-slate-200 dark:bg-slate-800 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
                         >
                           Send
                         </button> :

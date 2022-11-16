@@ -1938,7 +1938,7 @@ export default () => {
               />
             </div>
             <div
-              className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-3xl space-y-6 pt-4 sm:pt-5 pb-6 sm:pb-7 px-4 sm:px-6"
+              className="bg-white dark:bg-slate-900 rounded-3xl space-y-6 pt-4 sm:pt-5 pb-6 sm:pb-7 px-4 sm:px-6"
               style={
                 chain &&
                 color ?
@@ -1962,7 +1962,7 @@ export default () => {
                       className="text-xs pr-1"
                     />
                   </div>
-                  <div className="bg-slate-100 dark:bg-gray-800 dark:bg-opacity-50 rounded-lg space-y-0.5 py-3.5 px-3">
+                  <div className="bg-slate-100 dark:bg-slate-800 rounded-lg space-y-0.5 py-3.5 px-3">
                     <div className="flex items-center justify-between space-x-2">
                       <SelectAsset
                         disabled={disabled}
@@ -2176,7 +2176,7 @@ export default () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center justify-center mt-0.5 sm:-mt-2 -mb-6 sm:-mb-12">
+                <div className="flex items-center justify-center mt-0.5 sm:-mt-2 -mb-6 sm:-mb-11">
                   <button
                     disabled={
                       disabled ||
@@ -2204,7 +2204,7 @@ export default () => {
                         getBalances(chain)
                       }
                     }}
-                    className={`bg-gray-200 hover:bg-gray-300 dark:bg-gray-900 dark:hover:bg-gray-800 ${disabled ? 'cursor-not-allowed' : ''} rounded-full sm:border dark:border-slate-800 flex items-center justify-center p-1.5 sm:p-4`}
+                    className={`bg-slate-200 hover:bg-slate-300 dark:bg-slate-900 dark:hover:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} rounded-full sm:border dark:border-slate-800 flex items-center justify-center p-1.5 sm:p-4`}
                   >
                     <HiSwitchVertical
                       size={28}
@@ -2222,7 +2222,7 @@ export default () => {
                   <span className="text-slate-600 dark:text-slate-200 text-sm font-medium">
                     Receive
                   </span>
-                  <div className="bg-slate-100 dark:bg-gray-800 dark:bg-opacity-50 rounded-lg space-y-0.5 py-3.5 px-3">
+                  <div className="bg-slate-100 dark:bg-slate-800 rounded-lg space-y-0.5 py-3.5 px-3">
                     <div className="flex items-center justify-between space-x-2">
                       <SelectAsset
                         disabled={disabled}
@@ -2486,7 +2486,7 @@ export default () => {
                       <Tooltip
                         placement="top"
                         content="The maximum percentage you are willing to lose due to market changes."
-                        className="z-50 bg-black text-white text-xs"
+                        className="z-50 bg-dark text-white text-xs"
                       >
                         <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
                           Slippage
@@ -2553,7 +2553,7 @@ export default () => {
                                   ].includes(e.key) &&
                                   e.preventDefault()
                                 }
-                                className={`w-20 bg-slate-50 focus:bg-slate-100 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1 px-2`}
+                                className={`w-20 bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1 px-2`}
                               />
                               <button
                                 onClick={() => setSlippageEditing(false)}
@@ -2588,7 +2588,7 @@ export default () => {
                                       setOptions(_data)
                                       setSlippageEditing(false)
                                     }}
-                                    className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-900 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-900 hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
+                                    className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-medium hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
                                   >
                                     {s} %
                                   </div>
@@ -2730,7 +2730,7 @@ export default () => {
                               setSlippageEditing(false)
                               call()
                             }}
-                            className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-gray-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
+                            className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
                           >
                             <span className="flex items-center justify-center space-x-1.5">
                               {
@@ -2891,7 +2891,7 @@ export default () => {
                       <button
                         disabled={true}
                         onClick={() => call()}
-                        className="w-full bg-gray-200 dark:bg-slate-800 bg-opacity-75 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
+                        className="w-full bg-slate-200 dark:bg-slate-800 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
                       >
                         {
                           !asset ?

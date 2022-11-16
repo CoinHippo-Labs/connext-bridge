@@ -188,10 +188,10 @@ export default ({
         }
       })
 
-  // const metricClassName = 'bg-slate-100 dark:bg-slate-900 bg-opacity-100 dark:bg-opacity-50 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col space-y-0.5 py-3 px-4'
+  // const metricClassName = 'bg-slate-100 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col space-y-0.5 py-3 px-4'
   const metricClassName = 'flex flex-col space-y-0.5'
-  const statsSectionClassName = 'bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-2xl flex flex-col space-y-8 my-auto py-4 px-5'
-  const titleClassName = 'text-slate-400 dark:text-slate-400 text-base font-normal'
+  const statsSectionClassName = 'bg-white dark:bg-slate-900 rounded-2xl flex flex-col space-y-8 my-auto py-4 px-5'
+  const titleClassName = 'text-slate-400 dark:text-slate-400 text-base font-medium'
   const valueClassName = 'text-lg sm:text-2xl font-bold'
 
   const is_staging =
@@ -792,7 +792,7 @@ export default ({
                                   <Tooltip
                                     placement="top"
                                     content={`Click here to swap ${_.last(symbols)} into ${_.head(symbols)}`}
-                                    className="z-50 bg-black text-white text-xs"
+                                    className="z-50 bg-dark text-white text-xs"
                                   >
                                     <div>
                                       <HiSwitchHorizontal
@@ -853,7 +853,7 @@ export default ({
                                   <Tooltip
                                     placement="top"
                                     content={`Click here to swap ${_.head(symbols)} into ${_.last(symbols)}`}
-                                    className="z-50 bg-black text-white text-xs"
+                                    className="z-50 bg-dark text-white text-xs"
                                   >
                                     <div>
                                       <HiSwitchHorizontal
