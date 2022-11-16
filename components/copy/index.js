@@ -66,7 +66,7 @@ export default ({
             size={size}
             className={
               className ||
-              'cursor-pointer text-slate-300 hover:text-slate-400 dark:text-slate-700 dark:hover:text-slate-600'
+              'cursor-pointer text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500'
             }
           />
         </div>

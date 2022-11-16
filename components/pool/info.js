@@ -252,62 +252,65 @@ export default ({
                     }
                   </span>
                 </div>
-                <div className={metricClassName}>
-                  <span className={titleClassName}>
-                    APY
-                  </span>
-                  <span className={valueClassName}>
-                    {
-                      pool_data &&
-                      !error ?
-                        /*<div className="grid sm:grid-cols-1 gap-1 mt-1">
-                          {Object.entries({ ...apy })
-                            .filter(([k, v]) => !isNaN(v))
-                            .map(([k, v]) => (
-                              <div
-                                key={k}
-                                className="flex items-center text-sm space-x-1"
-                              >
-                                <span className="capitalize">
-                                  {k}
-                                </span>
-                                <span>
-                                  {number_format(
-                                    v,
-                                    '0,0.000000',
-                                    true,
-                                  )}
-                                  %
-                                </span>
-                              </div>
-                            ))
-                          }
-                        </div>*/
-                        <span>
-                          {number_format(
-                            apy?.total,
-                            '0,0.000000',
-                            true,
-                          )}
-                          %
-                        </span> :
-                        selected &&
-                        !no_pool &&
-                        !error &&
-                        (
-                          pool_loading ?
-                            <div className="mt-1">
-                              <TailSpin
-                                color={loader_color(theme)}
-                                width="24"
-                                height="24"
-                              />
-                            </div> :
-                            '-'
-                        )
-                    }
-                  </span>
-                </div>
+                {
+                  false &&
+                  <div className={metricClassName}>
+                    <span className={titleClassName}>
+                      APY
+                    </span>
+                    <span className={valueClassName}>
+                      {
+                        pool_data &&
+                        !error ?
+                          /*<div className="grid sm:grid-cols-1 gap-1 mt-1">
+                            {Object.entries({ ...apy })
+                              .filter(([k, v]) => !isNaN(v))
+                              .map(([k, v]) => (
+                                <div
+                                  key={k}
+                                  className="flex items-center text-sm space-x-1"
+                                >
+                                  <span className="capitalize">
+                                    {k}
+                                  </span>
+                                  <span>
+                                    {number_format(
+                                      v,
+                                      '0,0.000000',
+                                      true,
+                                    )}
+                                    %
+                                  </span>
+                                </div>
+                              ))
+                            }
+                          </div>*/
+                          <span>
+                            {number_format(
+                              apy?.total,
+                              '0,0.000000',
+                              true,
+                            )}
+                            %
+                          </span> :
+                          selected &&
+                          !no_pool &&
+                          !error &&
+                          (
+                            pool_loading ?
+                              <div className="mt-1">
+                                <TailSpin
+                                  color={loader_color(theme)}
+                                  width="24"
+                                  height="24"
+                                />
+                              </div> :
+                              '-'
+                          )
+                      }
+                    </span>
+                  </div>
+                }
               </div>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

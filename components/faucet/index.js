@@ -686,7 +686,7 @@ export default ({
           {
             !signer &&
             (
-              <span className="whitespace-nowrap text-lg font-medium">
+              <span className="whitespace-nowrap text-xs sm:text-base font-medium">
                 Connect wallet to
               </span>
             )

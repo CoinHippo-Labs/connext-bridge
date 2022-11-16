@@ -39,8 +39,8 @@ const DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES =
   60
 const ACTIONS =
   [
-    'add',
-    'remove',
+    'deposit',
+    'withdraw',
   ]
 
 const DEFAULT_OPTIONS = {
@@ -1191,7 +1191,7 @@ export default ({
     )
 
   const valid_amount =
-    action === 'remove' ?
+    action === 'withdraw' ?
       amount &&
       amount <= lpTokenBalance :
       amountX &&
@@ -1431,942 +1431,947 @@ export default ({
   )
 
   return (
-    <div className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-2xl space-y-4 p-6">
-      <div className="flex flex-wrap items-center justify-between mr-1.5">
-        <div className="flex items-center space-x-0.5">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between space-x-2">
+        <span className="text-lg font-semibold">
+          Manage Balance
+        </span>
+        <GasPrice
+          chainId={chain_id}
+        />
+      </div>
+      <div className="bg-white dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-50 rounded-2xl space-y-4 p-6 pt-1">
+        <div className="border-b dark:border-slate-800 flex items-center justify-between space-x-2">
           {ACTIONS
             .map((a, i) => (
               <div
                 key={i}
                 onClick={() => setAction(a)}
-                className={`${action === a ? 'bg-blue-500 dark:bg-blue-600 font-bold text-white' : 'hover:bg-gray-200 dark:hover:bg-slate-900 font-medium hover:font-semibold'} rounded-lg cursor-pointer uppercase py-1 px-2.5`}
+                className={`w-full border-b-2 ${action === a ? 'border-slate-300 dark:border-slate-200 font-bold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer capitalize text-sm text-center py-5 px-3`}
               >
                 {a}
               </div>
             ))
           }
         </div>
-        <GasPrice
-          chainId={chain_id}
-        />
-      </div>
-      {action === 'add' ?
-        <>
-          <div className={`space-y-4 ${address ? 'pt-4' : 'pt-6'} pb-4 px-0`}>
-            <div className="space-y-2">
-              {
-                x_asset_data?.contract_address &&
-                (
-                  <div className="flex items-center justify-between -mt-3">
-                    <div className="flex items-center space-x-2">
-                      {url ?
-                        <a
-                          href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <span className="text-sm font-semibold">
+        {action === 'deposit' ?
+          <>
+            <div className="space-y-3 py-3 px-0">
+              <div className="space-y-2">
+                {
+                  x_asset_data?.contract_address &&
+                  (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        {url ?
+                          <a
+                            href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <span className="text-sm font-semibold">
+                              {x_asset_data.symbol}
+                            </span>
+                          </a> :
+                          <div className="text-sm font-semibold">
                             {x_asset_data.symbol}
-                          </span>
-                        </a> :
-                        <div className="text-sm font-semibold">
-                          {x_asset_data.symbol}
-                        </div>
-                      }
-                      {
-                        chain &&
-                        asset &&
-                        (
-                          <Link
-                            href={`/swap/${asset.toUpperCase()}-on-${chain}?from=${y_asset_data.symbol}`}
-                          >
-                          <a
-                            className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
-                          >
-                            <Tooltip
-                              placement="top"
-                              content={`Click here to swap ${y_asset_data.symbol} into ${x_asset_data.symbol}`}
-                              className="z-50 bg-black text-white text-xs"
+                          </div>
+                        }
+                        {
+                          chain &&
+                          asset &&
+                          (
+                            <Link
+                              href={`/swap/${asset.toUpperCase()}-on-${chain}?from=${y_asset_data.symbol}`}
                             >
-                              <div>
-                                <HiSwitchHorizontal
-                                  size={16}
-                                />
-                              </div>
-                            </Tooltip>
-                          </a>
-                          </Link>
-                        )
-                      }
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
-                        Balance:
+                            <a
+                              className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
+                            >
+                              <Tooltip
+                                placement="top"
+                                content={`Click here to swap ${y_asset_data.symbol} into ${x_asset_data.symbol}`}
+                                className="z-50 bg-black text-white text-xs"
+                              >
+                                <div>
+                                  <HiSwitchHorizontal
+                                    size={16}
+                                  />
+                                </div>
+                              </Tooltip>
+                            </a>
+                            </Link>
+                          )
+                        }
                       </div>
-                      <Balance
-                        chainId={chain_id}
-                        asset={asset}
-                        contractAddress={x_asset_data.contract_address}
-                        symbol={x_asset_data.symbol}
-                        hideSymbol={true}
-                      />
-                    </div>
-                  </div>
-                )
-              }
-              <div className="space-y-1">
-                <div className="flex items-center justify-between space-x-3">
-                  <DebounceInput
-                    debounceTimeout={500}
-                    size="small"
-                    type="number"
-                    placeholder="0.00"
-                    disabled={disabled}
-                    value={
-                      typeof amountX === 'number' &&
-                      amountX >= 0 ?
-                        amountX :
-                        ''
-                    }
-                    onChange={e => {
-                      const regex = /^[0-9.\b]+$/
-
-                      let value
-
-                      if (
-                        e.target.value === '' ||
-                        regex.test(e.target.value)
-                      ) {
-                        value = e.target.value
-                      }
-
-                      value =
-                        value < 0 ?
-                          0 :
-                          !isNaN(value) ?
-                            parseFloat(
-                              Number(value)
-                                .toFixed(
-                                  _.last(decimals) ||
-                                  18
-                                )
-                            ) :
-                            value
-
-                      value =
-                        value &&
-                        !isNaN(value) ?
-                          Number(value) :
-                          value
-
-                      setAmountX(value)
-                      autoSetY(value)
-                    }}
-                    onWheel={e => e.target.blur()}
-                    onKeyDown={e =>
-                      [
-                        'e',
-                        'E',
-                        '-',
-                      ].includes(e.key) &&
-                      e.preventDefault()
-                    }
-                    className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-gray-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
-                  />
-                  {/*<div
-                    onClick={() => {
-                      setAmountX(x_balance_amount)
-                      autoSetY(x_balance_amount)
-                    }}
-                    className={`${disabled || typeof x_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-gray-200 dark:bg-slate-900 rounded-lg text-blue-400 dark:text-slate-200 text-base font-medium py-0.5 px-2.5`}
-                  >
-                    Max
-                  </div>*/}
-                </div>
-                {
-                  typeof amountX === 'number' &&
-                  typeof x_balance_amount === 'number' &&
-                  amountX > x_balance_amount &&
-                  (
-                    <div className="flex items-center text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
-                      <BiMessageError
-                        size={16}
-                        className="min-w-max"
-                      />
-                      <span className="text-xs font-medium">
-                        Not enough {x_asset_data?.symbol}
-                      </span>
+                      <div className="flex items-center space-x-1">
+                        <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                          Balance:
+                        </div>
+                        <Balance
+                          chainId={chain_id}
+                          asset={asset}
+                          contractAddress={x_asset_data.contract_address}
+                          symbol={x_asset_data.symbol}
+                          hideSymbol={true}
+                        />
+                      </div>
                     </div>
                   )
                 }
-              </div>
-            </div>
-            <div className="w-full flex items-center justify-center">
-              <BiPlus
-                size={24}
-              />
-            </div>
-            <div className="space-y-2">
-              {
-                y_asset_data?.contract_address &&
-                (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      {url ?
-                        <a
-                          href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <span className="text-sm font-semibold">
-                            {y_asset_data.symbol}
-                          </span>
-                        </a> :
-                        <div className="text-sm font-semibold">
-                          {y_asset_data.symbol}
-                        </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between space-x-3">
+                    <DebounceInput
+                      debounceTimeout={500}
+                      size="small"
+                      type="number"
+                      placeholder="0.00"
+                      disabled={disabled}
+                      value={
+                        typeof amountX === 'number' &&
+                        amountX >= 0 ?
+                          amountX :
+                          ''
                       }
-                      {
-                        chain &&
-                        asset &&
-                        (
-                          <Link
-                            href={`/swap/${asset.toUpperCase()}-on-${chain}`}
-                          >
-                          <a
-                            className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
-                          >
-                            <Tooltip
-                              placement="top"
-                              content={`Click here to swap ${x_asset_data.symbol} into ${y_asset_data.symbol}`}
-                              className="z-50 bg-black text-white text-xs"
-                            >
-                              <div>
-                                <HiSwitchHorizontal
-                                  size={16}
-                                />
-                              </div>
-                            </Tooltip>
-                          </a>
-                          </Link>
-                        )
-                      }
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <div className="text-slate-400 dark:text-slate-500 text-sm font-medium text-right">
-                        Balance:
-                      </div>
-                      <Balance
-                        chainId={chain_id}
-                        asset={asset}
-                        contractAddress={y_asset_data.contract_address}
-                        symbol={y_asset_data.symbol}
-                        hideSymbol={true}
-                      />
-                    </div>
-                  </div>
-                )
-              }
-              <div className="space-y-1">
-                <div className="flex items-center justify-between space-x-3">
-                  <DebounceInput
-                    debounceTimeout={500}
-                    size="small"
-                    type="number"
-                    placeholder="0.00"
-                    disabled={disabled}
-                    value={
-                      typeof amountY === 'number' &&
-                      amountY >= 0 ?
-                        amountY :
-                        ''
-                    }
-                    onChange={e => {
-                      const regex = /^[0-9.\b]+$/
+                      onChange={e => {
+                        const regex = /^[0-9.\b]+$/
 
-                      let value
+                        let value
 
-                      if (
-                        e.target.value === '' ||
-                        regex.test(e.target.value)
-                      ) {
-                        value = e.target.value
-                      }
+                        if (
+                          e.target.value === '' ||
+                          regex.test(e.target.value)
+                        ) {
+                          value = e.target.value
+                        }
 
-                      value =
-                        value < 0 ?
-                          0 :
+                        value =
+                          value < 0 ?
+                            0 :
+                            !isNaN(value) ?
+                              parseFloat(
+                                Number(value)
+                                  .toFixed(
+                                    _.last(decimals) ||
+                                    18
+                                  )
+                              ) :
+                              value
+
+                        value =
+                          value &&
                           !isNaN(value) ?
-                            parseFloat(
-                              Number(value)
-                                .toFixed(
-                                  y_asset_data?.decimals ||
-                                  18
-                                )
-                            ) :
+                            Number(value) :
                             value
 
-                      value =
-                        value &&
-                        !isNaN(value) ?
-                          Number(value) :
-                          value
-
-                      value =
-                        value < 0 ?
-                          0 :
-                          value
-
-                      setAmountY(value)
-                      autoSetX(value)
-                    }}
-                    onWheel={e => e.target.blur()}
-                    onKeyDown={e =>
-                      [
-                        'e',
-                        'E',
-                        '-',
-                      ].includes(e.key) &&
-                      e.preventDefault()
-                    }
-                    className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-gray-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
-                  />
-                  {/*<div
-                    onClick={() => {
-                      setAmountY(y_balance_amount)
-                      autoSetX(y_balance_amount)
-                    }}
-                    className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-gray-200 dark:bg-slate-900 rounded-lg text-blue-400 dark:text-slate-200 text-sm font-medium py-0.5 px-2.5`}
-                  >
-                    Max
-                  </div>*/}
-                </div>
-                {
-                  typeof amountY === 'number' &&
-                  typeof y_balance_amount === 'number' &&
-                  amountY > y_balance_amount &&
-                  (
-                    <div className="flex items-center text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
-                      <BiMessageError
-                        size={16}
-                        className="min-w-max"
-                      />
-                      <span className="text-xs font-medium">
-                        Not enough {y_asset_data?.symbol}
-                      </span>
-                    </div>
-                  )
-                }
-              </div>
-            </div>
-          </div>
-          {/*advancedOptions*/}
-          <div className="flex items-end">
-            {
-              chain &&
-              web3_provider &&
-              wrong_chain ?
-                <Wallet
-                  connectChainId={chain_id}
-                  className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
-                >
-                  <span className="mr-1.5 sm:mr-2">
-                    {is_walletconnect ?
-                      'Reconnect' :
-                      'Switch'
-                    } to
-                  </span>
+                        setAmountX(value)
+                        autoSetY(value)
+                      }}
+                      onWheel={e => e.target.blur()}
+                      onKeyDown={e =>
+                        [
+                          'e',
+                          'E',
+                          '-',
+                        ].includes(e.key) &&
+                        e.preventDefault()
+                      }
+                      className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-gray-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
+                    />
+                    {/*<div
+                      onClick={() => {
+                        setAmountX(x_balance_amount)
+                        autoSetY(x_balance_amount)
+                      }}
+                      className={`${disabled || typeof x_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-gray-200 dark:bg-slate-900 rounded-lg text-blue-400 dark:text-slate-200 text-base font-medium py-0.5 px-2.5`}
+                    >
+                      Max
+                    </div>*/}
+                  </div>
                   {
-                    image &&
+                    typeof amountX === 'number' &&
+                    typeof x_balance_amount === 'number' &&
+                    amountX > x_balance_amount &&
                     (
-                      <Image
-                        src={image}
-                        alt=""
-                        width={28}
-                        height={28}
-                        className="rounded-full"
-                      />
+                      <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
+                        <BiMessageError
+                          size={16}
+                          className="min-w-max"
+                        />
+                        <span className="text-xs font-medium">
+                          Not enough {x_asset_data?.symbol}
+                        </span>
+                      </div>
                     )
                   }
-                  <span className="font-semibold">
-                    {name}
-                  </span>
-                </Wallet> :
-                callResponse ||
-                approveResponse ?
-                  [
-                    callResponse ||
-                    approveResponse,
-                  ].map((r, i) => {
-                    const {
-                      status,
-                      message,
-                      tx_hash,
-                    } = { ...r }
+                </div>
+              </div>
+              <div className="w-full flex items-center justify-center">
+                <BiPlus
+                  size={24}
+                />
+              </div>
+              <div className="space-y-2">
+                {
+                  y_asset_data?.contract_address &&
+                  (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        {url ?
+                          <a
+                            href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <span className="text-sm font-semibold">
+                              {y_asset_data.symbol}
+                            </span>
+                          </a> :
+                          <div className="text-sm font-semibold">
+                            {y_asset_data.symbol}
+                          </div>
+                        }
+                        {
+                          chain &&
+                          asset &&
+                          (
+                            <Link
+                              href={`/swap/${asset.toUpperCase()}-on-${chain}`}
+                            >
+                            <a
+                              className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
+                            >
+                              <Tooltip
+                                placement="top"
+                                content={`Click here to swap ${x_asset_data.symbol} into ${y_asset_data.symbol}`}
+                                className="z-50 bg-black text-white text-xs"
+                              >
+                                <div>
+                                  <HiSwitchHorizontal
+                                    size={16}
+                                  />
+                                </div>
+                              </Tooltip>
+                            </a>
+                            </Link>
+                          )
+                        }
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <div className="text-slate-400 dark:text-slate-500 text-sm font-medium text-right">
+                          Balance:
+                        </div>
+                        <Balance
+                          chainId={chain_id}
+                          asset={asset}
+                          contractAddress={y_asset_data.contract_address}
+                          symbol={y_asset_data.symbol}
+                          hideSymbol={true}
+                        />
+                      </div>
+                    </div>
+                  )
+                }
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between space-x-3">
+                    <DebounceInput
+                      debounceTimeout={500}
+                      size="small"
+                      type="number"
+                      placeholder="0.00"
+                      disabled={disabled}
+                      value={
+                        typeof amountY === 'number' &&
+                        amountY >= 0 ?
+                          amountY :
+                          ''
+                      }
+                      onChange={e => {
+                        const regex = /^[0-9.\b]+$/
 
-                    return (
-                      <Alert
-                        key={i}
-                        color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
-                        icon={
-                          status === 'failed' ?
-                            <BiMessageError
-                              className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
-                            /> :
-                            status === 'success' ?
-                              <BiMessageCheck
+                        let value
+
+                        if (
+                          e.target.value === '' ||
+                          regex.test(e.target.value)
+                        ) {
+                          value = e.target.value
+                        }
+
+                        value =
+                          value < 0 ?
+                            0 :
+                            !isNaN(value) ?
+                              parseFloat(
+                                Number(value)
+                                  .toFixed(
+                                    y_asset_data?.decimals ||
+                                    18
+                                  )
+                              ) :
+                              value
+
+                        value =
+                          value &&
+                          !isNaN(value) ?
+                            Number(value) :
+                            value
+
+                        value =
+                          value < 0 ?
+                            0 :
+                            value
+
+                        setAmountY(value)
+                        autoSetX(value)
+                      }}
+                      onWheel={e => e.target.blur()}
+                      onKeyDown={e =>
+                        [
+                          'e',
+                          'E',
+                          '-',
+                        ].includes(e.key) &&
+                        e.preventDefault()
+                      }
+                      className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-gray-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
+                    />
+                    {/*<div
+                      onClick={() => {
+                        setAmountY(y_balance_amount)
+                        autoSetX(y_balance_amount)
+                      }}
+                      className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-gray-200 dark:bg-slate-900 rounded-lg text-blue-400 dark:text-slate-200 text-sm font-medium py-0.5 px-2.5`}
+                    >
+                      Max
+                    </div>*/}
+                  </div>
+                  {
+                    typeof amountY === 'number' &&
+                    typeof y_balance_amount === 'number' &&
+                    amountY > y_balance_amount &&
+                    (
+                      <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
+                        <BiMessageError
+                          size={16}
+                          className="min-w-max"
+                        />
+                        <span className="text-xs font-medium">
+                          Not enough {y_asset_data?.symbol}
+                        </span>
+                      </div>
+                    )
+                  }
+                </div>
+              </div>
+            </div>
+            {/*advancedOptions*/}
+            <div className="flex items-end">
+              {
+                chain &&
+                web3_provider &&
+                wrong_chain ?
+                  <Wallet
+                    connectChainId={chain_id}
+                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
+                  >
+                    <span className="mr-1.5 sm:mr-2">
+                      {is_walletconnect ?
+                        'Reconnect' :
+                        'Switch'
+                      } to
+                    </span>
+                    {
+                      image &&
+                      (
+                        <Image
+                          src={image}
+                          alt=""
+                          width={28}
+                          height={28}
+                          className="rounded-full"
+                        />
+                      )
+                    }
+                    <span className="font-semibold">
+                      {name}
+                    </span>
+                  </Wallet> :
+                  callResponse ||
+                  approveResponse ?
+                    [
+                      callResponse ||
+                      approveResponse,
+                    ].map((r, i) => {
+                      const {
+                        status,
+                        message,
+                        tx_hash,
+                      } = { ...r }
+
+                      return (
+                        <Alert
+                          key={i}
+                          color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
+                          icon={
+                            status === 'failed' ?
+                              <BiMessageError
                                 className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
                               /> :
-                              status === 'pending' ?
-                                <div className="mr-2.5">
-                                  <Watch
-                                    color="white"
-                                    width="16"
-                                    height="16"
-                                  />
-                                </div> :
-                                <BiMessageDetail
-                                  className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
-                                />
-                        }
-                        closeDisabled={true}
-                        rounded={true}
-                        className="rounded-xl p-3"
-                      >
-                        <div className="flex items-center justify-between space-x-2">
-                          <span className={`leading-5 ${status === 'failed' ? 'break-all text-xs' : 'break-word'} text-sm font-medium`}>
-                            {ellipse(
-                              (message || '')
-                                .substring(
-                                  0,
-                                  status === 'failed' &&
-                                  error_patterns
-                                    .findIndex(c =>
-                                      message?.indexOf(c) > -1
-                                    ) > -1 ?
-                                    message.indexOf(
-                                      error_patterns
-                                        .find(c =>
-                                          message.indexOf(c) > -1
-                                        )
-                                    ) :
-                                    undefined,
-                                )
-                                .trim() ||
-                                message,
-                              128,
-                            )}
-                          </span>
-                          <div className="flex items-center space-x-2">
-                            {
-                              url &&
-                              tx_hash &&
-                              (
-                                <a
-                                  href={`${url}${transaction_path?.replace('{tx}', r.tx_hash)}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <TiArrowRight
-                                    size={20}
-                                    className="transform -rotate-45"
-                                  />
-                                </a>
-                              )}
-                            {status === 'failed' ?
-                              <button
-                                onClick={() => reset()}
-                                className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                              >
-                                <MdClose
-                                  size={16}
-                                />
-                              </button> :
                               status === 'success' ?
+                                <BiMessageCheck
+                                  className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
+                                /> :
+                                status === 'pending' ?
+                                  <div className="mr-2.5">
+                                    <Watch
+                                      color="white"
+                                      width="16"
+                                      height="16"
+                                    />
+                                  </div> :
+                                  <BiMessageDetail
+                                    className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
+                                  />
+                          }
+                          closeDisabled={true}
+                          rounded={true}
+                          className="rounded-xl p-3"
+                        >
+                          <div className="flex items-center justify-between space-x-2">
+                            <span className={`leading-5 ${status === 'failed' ? 'break-all text-xs' : 'break-word'} text-sm font-medium`}>
+                              {ellipse(
+                                (message || '')
+                                  .substring(
+                                    0,
+                                    status === 'failed' &&
+                                    error_patterns
+                                      .findIndex(c =>
+                                        message?.indexOf(c) > -1
+                                      ) > -1 ?
+                                      message.indexOf(
+                                        error_patterns
+                                          .find(c =>
+                                            message.indexOf(c) > -1
+                                          )
+                                      ) :
+                                      undefined,
+                                  )
+                                  .trim() ||
+                                  message,
+                                128,
+                              )}
+                            </span>
+                            <div className="flex items-center space-x-2">
+                              {
+                                url &&
+                                tx_hash &&
+                                (
+                                  <a
+                                    href={`${url}${transaction_path?.replace('{tx}', r.tx_hash)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <TiArrowRight
+                                      size={20}
+                                      className="transform -rotate-45"
+                                    />
+                                  </a>
+                                )}
+                              {status === 'failed' ?
                                 <button
                                   onClick={() => reset()}
-                                  className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                                  className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                                 >
                                   <MdClose
                                     size={16}
                                   />
                                 </button> :
-                                null
-                            }
+                                status === 'success' ?
+                                  <button
+                                    onClick={() => reset()}
+                                    className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                                  >
+                                    <MdClose
+                                      size={16}
+                                    />
+                                  </button> :
+                                  null
+                              }
+                            </div>
                           </div>
-                        </div>
-                      </Alert>
-                    )
-                  }) :
-                  web3_provider ?
-                    <button
-                      disabled={
-                        disabled ||
-                        !valid_amount
-                      }
-                      onClick={() => call(pool_data)}
-                      className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 px-2 sm:px-3`}
-                    >
-                      <span className="flex items-center justify-center space-x-1.5">
-                        {
-                          (
-                            calling ||
-                            approving
-                          ) &&
-                          (
-                            <TailSpin
-                              color="white"
-                              width="20"
-                              height="20"
-                            />
-                          )
+                        </Alert>
+                      )
+                    }) :
+                    web3_provider ?
+                      <button
+                        disabled={
+                          disabled ||
+                          !valid_amount
                         }
-                        <span>
-                          {calling ?
-                            approving ?
-                              approveProcessing ?
-                                'Approving' :
-                                'Please Approve' :
-                              callProcessing ?
-                                'Adding' :
-                                typeof approving === 'boolean' ?
-                                  'Please Confirm' :
-                                  'Checking Approval' :
-                            'Supply'
+                        onClick={() => call(pool_data)}
+                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 px-2 sm:px-3`}
+                      >
+                        <span className="flex items-center justify-center space-x-1.5">
+                          {
+                            (
+                              calling ||
+                              approving
+                            ) &&
+                            (
+                              <TailSpin
+                                color="white"
+                                width="20"
+                                height="20"
+                              />
+                            )
                           }
+                          <span>
+                            {calling ?
+                              approving ?
+                                approveProcessing ?
+                                  'Approving' :
+                                  'Please Approve' :
+                                callProcessing ?
+                                  'Depositing' :
+                                  typeof approving === 'boolean' ?
+                                    'Please Confirm' :
+                                    'Checking Approval' :
+                              'Supply'
+                            }
+                          </span>
                         </span>
-                      </span>
-                    </button> :
-                    <Wallet
-                      connectChainId={chain_id}
-                      buttonConnectTitle="Connect Wallet"
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-lg font-medium text-center py-3 px-2 sm:px-3"
-                    >
-                      <span>
-                        Connect Wallet
-                      </span>
-                    </Wallet>
-            }
-          </div>
-        </> :
-        <>
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <div className="text-slate-400 dark:text-slate-500 font-medium">
-                Your Pool Tokens
-              </div>
-              <div className="space-y-1">
-                <DebounceInput
-                  debounceTimeout={500}
-                  size="small"
-                  type="number"
-                  placeholder="0.00"
-                  disabled={disabled}
-                  value={
-                    typeof amount === 'number' &&
-                    amount >= 0 ?
-                      amount :
-                      ''
+                      </button> :
+                      <Wallet
+                        connectChainId={chain_id}
+                        buttonConnectTitle="Connect Wallet"
+                        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-lg font-medium text-center py-3 px-2 sm:px-3"
+                      >
+                        <span>
+                          Connect Wallet
+                        </span>
+                      </Wallet>
+              }
+            </div>
+          </> :
+          <>
+            <div className="space-y-3 py-3 px-0">
+              <div className="space-y-2">
+                <div className="text-slate-400 dark:text-slate-500 font-medium">
+                  Your Balances
+                </div>
+                <div className="flex items-center justify-between space-x-2">
+                  {
+                    url &&
+                    x_asset_data?.contract_address ?
+                      <a
+                        href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span className="text-sm font-semibold">
+                          {x_asset_data.symbol}
+                        </span>
+                      </a> :
+                      <div className="text-sm font-semibold">
+                        {x_asset_data?.symbol}
+                      </div>
                   }
-                  onChange={e => {
-                    const regex = /^[0-9.\b]+$/
-
-                    let value
-
-                    if (
-                      e.target.value === '' ||
-                      regex.test(e.target.value)
-                    ) {
-                      value = e.target.value
+                  {web3_provider ?
+                    !isNaN(_.head(removeAmounts)) ?
+                      <span className="text-sm">
+                        {number_format(
+                          _.head(removeAmounts) ||
+                          0,
+                          '0,0.000000',
+                          true,
+                        )}
+                      </span> :
+                      selected &&
+                      !no_pool &&
+                      !error &&
+                      (
+                        position_loading ?
+                          <TailSpin
+                            color={loader_color(theme)}
+                            width="24"
+                            height="24"
+                          /> :
+                          '-'
+                      ) :
+                    <span className="text-sm">
+                      -
+                    </span>
+                  }
+                </div>
+                <div className="flex items-center justify-between space-x-2">
+                  {
+                    url &&
+                    y_asset_data?.contract_address ?
+                      <a
+                        href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span className="text-sm font-semibold">
+                          {y_asset_data.symbol}
+                        </span>
+                      </a> :
+                      <div className="text-sm font-semibold">
+                        {y_asset_data?.symbol}
+                      </div>
+                  }
+                  {web3_provider ?
+                    !isNaN(_.last(removeAmounts)) ?
+                      <span className="text-sm">
+                        {number_format(
+                          _.last(removeAmounts) ||
+                          0,
+                          '0,0.000000',
+                          true,
+                        )}
+                      </span> :
+                      selected &&
+                      !no_pool &&
+                      !error &&
+                      (
+                        position_loading ?
+                          <TailSpin
+                            color={loader_color(theme)}
+                            width="24"
+                            height="24"
+                          /> :
+                          '-'
+                      ) :
+                    <span className="text-sm">
+                      -
+                    </span>
+                  }
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="space-y-1">
+                  <DebounceInput
+                    debounceTimeout={500}
+                    size="small"
+                    type="number"
+                    placeholder="0.00"
+                    disabled={disabled}
+                    value={
+                      typeof amount === 'number' &&
+                      amount >= 0 ?
+                        amount :
+                        ''
                     }
+                    onChange={e => {
+                      const regex = /^[0-9.\b]+$/
 
-                    value =
-                      value < 0 ?
-                        0 :
+                      let value
+
+                      if (
+                        e.target.value === '' ||
+                        regex.test(e.target.value)
+                      ) {
+                        value = e.target.value
+                      }
+
+                      value =
+                        value < 0 ?
+                          0 :
+                          !isNaN(value) ?
+                            parseFloat(
+                              Number(value)
+                                .toFixed(
+                                  x_asset_data?.decimals ||
+                                  18
+                                )
+                            ) :
+                            value
+
+                      value =
+                        value &&
                         !isNaN(value) ?
-                          parseFloat(
-                            Number(value)
-                              .toFixed(
-                                x_asset_data?.decimals ||
-                                18
-                              )
-                          ) :
+                          Number(value) :
                           value
 
-                    value =
-                      value &&
-                      !isNaN(value) ?
-                        Number(value) :
-                        value
-
-                    setAmount(value)
-                  }}
-                  onWheel={e => e.target.blur()}
-                  onKeyDown={e =>
-                    [
-                      'e',
-                      'E',
-                      '-',
-                    ].includes(e.key) &&
-                    e.preventDefault()
+                      setAmount(value)
+                    }}
+                    onWheel={e => e.target.blur()}
+                    onKeyDown={e =>
+                      [
+                        'e',
+                        'E',
+                        '-',
+                      ].includes(e.key) &&
+                      e.preventDefault()
+                    }
+                    className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-gray-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
+                  />
+                  {
+                    typeof amount === 'number' &&
+                    typeof lpTokenBalance === 'number' &&
+                    amount > lpTokenBalance &&
+                    (
+                      <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
+                        <BiMessageError
+                          size={16}
+                          className="min-w-max"
+                        />
+                        <span className="text-xs font-medium">
+                          Not enough {symbol}
+                        </span>
+                      </div>
+                    )
                   }
-                  className={`w-full bg-gray-200 focus:bg-gray-300 dark:bg-gray-900 dark:focus:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
-                />
-                {
-                  typeof amount === 'number' &&
-                  typeof lpTokenBalance === 'number' &&
-                  amount > lpTokenBalance &&
-                  (
-                    <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
-                      <BiMessageError
-                        size={16}
-                        className="min-w-max"
-                      />
-                      <span className="text-xs font-medium">
-                        Not enough {symbol}
-                      </span>
-                    </div>
-                  )
-                }
-              </div>
-              <div className="flex items-center justify-end space-x-2.5">
-                {
-                  [
-                    0.25,
-                    0.5,
-                    0.75,
-                    1.0,
-                  ]
-                  .map((p, i) => (
-                    <div
-                      key={i}
-                      onClick={() => {
-                        let _amount
+                </div>
+                <div className="flex items-center justify-end space-x-2.5">
+                  {
+                    [
+                      0.25,
+                      0.5,
+                      0.75,
+                      1.0,
+                    ]
+                    .map((p, i) => (
+                      <div
+                        key={i}
+                        onClick={() => {
+                          let _amount
 
-                        try {
-                          _amount =
-                            Number(
-                              FixedNumber.fromString(
-                                (
-                                  lpTokenBalance ||
-                                  0
+                          try {
+                            _amount =
+                              Number(
+                                FixedNumber.fromString(
+                                  (
+                                    lpTokenBalance ||
+                                    0
+                                  )
+                                  .toString()
+                                )
+                                .mulUnsafe(
+                                  FixedNumber.fromString(
+                                    p.toString()
+                                  )
                                 )
                                 .toString()
                               )
-                              .mulUnsafe(
-                                FixedNumber.fromString(
-                                  p.toString()
-                                )
-                              )
-                              .toString()
-                            )
-                        } catch (error) {
-                          _amount = 0
-                        }
+                          } catch (error) {
+                            _amount = 0
+                          }
 
-                        setAmount(_amount)
-                      }}
-                      className={`${disabled || !lpTokenBalance ? 'bg-gray-200 dark:bg-gray-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-gray-200 dark:bg-gray-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'} rounded-lg py-0.5 px-2`}
-                    >
-                      {p * 100} %
-                    </div>
-                  ))
-                }
-              </div>
-            </div>
-            <div className="bg-gray-200 dark:bg-slate-900 rounded-xl space-y-5 py-6 px-4">
-              <div className="flex items-center justify-between space-x-3">
-                {
-                  url &&
-                  x_asset_data?.contract_address ?
-                    <a
-                      href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <span className="text-base font-semibold">
-                        {x_asset_data.symbol}
-                      </span>
-                    </a> :
-                    <div className="text-base font-semibold">
-                      {x_asset_data?.symbol}
-                    </div>
-                }
-                {web3_provider ?
-                  !isNaN(_.head(removeAmounts)) ?
-                    <span className="text-base">
-                      {number_format(
-                        _.head(removeAmounts) ||
-                        0,
-                        '0,0.000000',
-                        true,
-                      )}
-                    </span> :
-                    selected &&
-                    !no_pool &&
-                    !error &&
-                    (
-                      position_loading ?
-                        <TailSpin
-                          color={loader_color(theme)}
-                          width="24"
-                          height="24"
-                        /> :
-                        '-'
-                    ) :
-                  <span className="text-base">
-                    -
-                  </span>
-                }
-              </div>
-              <div className="flex items-center justify-between space-x-3">
-                {
-                  url &&
-                  y_asset_data?.contract_address ?
-                    <a
-                      href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <span className="text-base font-semibold">
-                        {y_asset_data.symbol}
-                      </span>
-                    </a> :
-                    <div className="text-base font-semibold">
-                      {y_asset_data?.symbol}
-                    </div>
-                }
-                {web3_provider ?
-                  !isNaN(_.last(removeAmounts)) ?
-                    <span className="text-base">
-                      {number_format(
-                        _.last(removeAmounts) ||
-                        0,
-                        '0,0.000000',
-                        true,
-                      )}
-                    </span> :
-                    selected &&
-                    !no_pool &&
-                    !error &&
-                    (
-                      position_loading ?
-                        <TailSpin
-                          color={loader_color(theme)}
-                          width="24"
-                          height="24"
-                        /> :
-                        '-'
-                    ) :
-                  <span className="text-base">
-                    -
-                  </span>
-                }
-              </div>
-            </div>
-          </div>
-          {/*advancedOptions*/}
-          <div className="flex items-end">
-            {
-              web3_provider &&
-              wrong_chain ?
-                <Wallet
-                  connectChainId={chain_id}
-                  className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3  px-2 sm:px-3"
-                >
-                  <span className="mr-1.5 sm:mr-2">
-                    {is_walletconnect ?
-                      'Reconnect' :
-                      'Switch'
-                    } to
-                  </span>
-                  {
-                    image &&
-                    (
-                      <Image
-                        src={image}
-                        alt=""
-                        width={28}
-                        height={28}
-                        className="rounded-full"
-                      />
-                    )
+                          setAmount(_amount)
+                        }}
+                        className={`${disabled || !lpTokenBalance ? 'bg-gray-200 dark:bg-gray-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-gray-200 dark:bg-gray-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'} rounded-lg py-0.5 px-2`}
+                      >
+                        {p * 100} %
+                      </div>
+                    ))
                   }
-                  <span className="font-semibold">
-                    {name}
-                  </span>
-                </Wallet> :
-                callResponse ||
-                approveResponse ?
-                  [
-                    callResponse ||
-                    approveResponse,
-                  ].map((r, i) => {
-                    const {
-                      status,
-                      message,
-                      tx_hash,
-                    } = { ...r }
+                </div>
+              </div>
+            </div>
+            {/*advancedOptions*/}
+            <div className="flex items-end">
+              {
+                web3_provider &&
+                wrong_chain ?
+                  <Wallet
+                    connectChainId={chain_id}
+                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3  px-2 sm:px-3"
+                  >
+                    <span className="mr-1.5 sm:mr-2">
+                      {is_walletconnect ?
+                        'Reconnect' :
+                        'Switch'
+                      } to
+                    </span>
+                    {
+                      image &&
+                      (
+                        <Image
+                          src={image}
+                          alt=""
+                          width={28}
+                          height={28}
+                          className="rounded-full"
+                        />
+                      )
+                    }
+                    <span className="font-semibold">
+                      {name}
+                    </span>
+                  </Wallet> :
+                  callResponse ||
+                  approveResponse ?
+                    [
+                      callResponse ||
+                      approveResponse,
+                    ].map((r, i) => {
+                      const {
+                        status,
+                        message,
+                        tx_hash,
+                      } = { ...r }
 
-                    return (
-                      <Alert
-                        key={i}
-                        color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
-                        icon={
-                          status === 'failed' ?
-                            <BiMessageError
-                              className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
-                            /> :
-                            status === 'success' ?
-                              <BiMessageCheck
+                      return (
+                        <Alert
+                          key={i}
+                          color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
+                          icon={
+                            status === 'failed' ?
+                              <BiMessageError
                                 className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
                               /> :
-                              status === 'pending' ?
-                                <div className="mr-2.5">
-                                  <Watch
-                                    color="white"
-                                    width="16"
-                                    height="16"
-                                  />
-                                </div> :
-                                <BiMessageDetail
-                                  className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
-                                />
-                        }
-                        closeDisabled={true}
-                        rounded={true}
-                        className="rounded-xl p-3"
-                      >
-                        <div className="flex items-center justify-between space-x-2">
-                          <span className={`leading-5 ${status === 'failed' ? 'break-all text-xs' : 'break-word'} text-sm font-medium`}>
-                            {ellipse(
-                              (message || '')
-                                .substring(
-                                  0,
-                                  status === 'failed' &&
-                                  error_patterns.findIndex(c =>
-                                    message?.indexOf(c) > -1
-                                  ) > -1 ?
-                                    message.indexOf(
-                                      error_patterns.find(c =>
-                                        message.indexOf(c) > -1
-                                      )
-                                    ) :
-                                    undefined,
-                                )
-                                .trim() ||
-                                message,
-                              128,
-                            )}
-                          </span>
-                          <div className="flex items-center space-x-2">
-                            {
-                              url &&
-                              r.tx_hash &&
-                              (
-                                <a
-                                  href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <TiArrowRight
-                                    size={20}
-                                    className="transform -rotate-45"
-                                  />
-                                </a>
-                              )
-                            }
-                            {status === 'failed' ?
-                              <button
-                                onClick={() => reset()}
-                                className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                              >
-                                <MdClose
-                                  size={16}
-                                />
-                              </button> :
                               status === 'success' ?
+                                <BiMessageCheck
+                                  className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
+                                /> :
+                                status === 'pending' ?
+                                  <div className="mr-2.5">
+                                    <Watch
+                                      color="white"
+                                      width="16"
+                                      height="16"
+                                    />
+                                  </div> :
+                                  <BiMessageDetail
+                                    className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
+                                  />
+                          }
+                          closeDisabled={true}
+                          rounded={true}
+                          className="rounded-xl p-3"
+                        >
+                          <div className="flex items-center justify-between space-x-2">
+                            <span className={`leading-5 ${status === 'failed' ? 'break-all text-xs' : 'break-word'} text-sm font-medium`}>
+                              {ellipse(
+                                (message || '')
+                                  .substring(
+                                    0,
+                                    status === 'failed' &&
+                                    error_patterns.findIndex(c =>
+                                      message?.indexOf(c) > -1
+                                    ) > -1 ?
+                                      message.indexOf(
+                                        error_patterns.find(c =>
+                                          message.indexOf(c) > -1
+                                        )
+                                      ) :
+                                      undefined,
+                                  )
+                                  .trim() ||
+                                  message,
+                                128,
+                              )}
+                            </span>
+                            <div className="flex items-center space-x-2">
+                              {
+                                url &&
+                                r.tx_hash &&
+                                (
+                                  <a
+                                    href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <TiArrowRight
+                                      size={20}
+                                      className="transform -rotate-45"
+                                    />
+                                  </a>
+                                )
+                              }
+                              {status === 'failed' ?
                                 <button
                                   onClick={() => reset()}
-                                  className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                                  className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                                 >
                                   <MdClose
                                     size={16}
                                   />
                                 </button> :
-                                null
-                            }
+                                status === 'success' ?
+                                  <button
+                                    onClick={() => reset()}
+                                    className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                                  >
+                                    <MdClose
+                                      size={16}
+                                    />
+                                  </button> :
+                                  null
+                              }
+                            </div>
                           </div>
-                        </div>
-                      </Alert>
-                    )
-                  }) :
-                  web3_provider ?
-                    <button
-                      disabled={
-                        disabled ||
-                        !valid_amount
-                      }
-                      onClick={() => call(pool_data)}
-                      className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-gray-200 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 px-2 sm:px-3`}
-                    >
-                      <span className="flex items-center justify-center space-x-1.5">
-                        {
-                          (
-                            calling ||
-                            approving
-                          ) &&
-                          (
-                            <TailSpin
-                              color="white"
-                              width="20"
-                              height="20"
-                            />
-                          )
+                        </Alert>
+                      )
+                    }) :
+                    web3_provider ?
+                      <button
+                        disabled={
+                          disabled ||
+                          !valid_amount
                         }
-                        <span>
-                          {calling ?
-                            approving ?
-                              approveProcessing ?
-                                'Approving' :
-                                'Please Approve' :
-                              callProcessing ?
-                                'Removing' :
-                                typeof approving === 'boolean' ?
-                                  'Please Confirm' :
-                                  'Checking Approval' :
-                            'Remove'
+                        onClick={() => call(pool_data)}
+                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-gray-200 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 px-2 sm:px-3`}
+                      >
+                        <span className="flex items-center justify-center space-x-1.5">
+                          {
+                            (
+                              calling ||
+                              approving
+                            ) &&
+                            (
+                              <TailSpin
+                                color="white"
+                                width="20"
+                                height="20"
+                              />
+                            )
                           }
+                          <span>
+                            {calling ?
+                              approving ?
+                                approveProcessing ?
+                                  'Approving' :
+                                  'Please Approve' :
+                                callProcessing ?
+                                  'Withdrawing' :
+                                  typeof approving === 'boolean' ?
+                                    'Please Confirm' :
+                                    'Checking Approval' :
+                              'Withdraw'
+                            }
+                          </span>
                         </span>
-                      </span>
-                    </button> :
-                    <Wallet
-                      connectChainId={chain_id}
-                      buttonConnectTitle="Connect Wallet"
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-lg font-medium text-center py-3 px-2 sm:px-3"
-                    >
-                      <span>
-                        Connect Wallet
-                      </span>
-                    </Wallet>
-            }
-          </div>
-        </>
-      }
-      {
-        (
-          x_asset_data?.mintable ||
-          x_asset_data?.wrapable ||
-          x_asset_data?.wrapped
-        ) &&
-        (
-          <Faucet
-            token_id={asset}
-            contract_data={x_asset_data}
-            className="w-full max-w-lg bg-transparent flex flex-col items-center justify-center space-y-2 mx-auto"
-          />
-        )
-      }
+                      </button> :
+                      <Wallet
+                        connectChainId={chain_id}
+                        buttonConnectTitle="Connect Wallet"
+                        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-lg font-medium text-center py-3 px-2 sm:px-3"
+                      >
+                        <span>
+                          Connect Wallet
+                        </span>
+                      </Wallet>
+              }
+            </div>
+          </>
+        }
+        {
+          (
+            x_asset_data?.mintable ||
+            x_asset_data?.wrapable ||
+            x_asset_data?.wrapped
+          ) &&
+          (
+            <Faucet
+              token_id={asset}
+              contract_data={x_asset_data}
+              className="w-full max-w-lg bg-transparent flex flex-col items-center justify-center space-y-2 mx-auto"
+            />
+          )
+        }
+      </div>
     </div>
   )
 }

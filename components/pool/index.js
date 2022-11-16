@@ -5,18 +5,23 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, Contract, constants, utils } from 'ethers'
-import { RiArrowLeftCircleFill } from 'react-icons/ri'
+import { TailSpin } from 'react-loader-spinner'
+import { Tooltip } from '@material-tailwind/react'
+import { TiArrowLeft, TiArrowRight } from 'react-icons/ti'
 
 import Info from './info'
 import Liquidity from './liquidity'
 import SelectChain from '../select/chain'
 import SelectAsset from '../select/asset'
-import { params_to_obj, equals_ignore_case } from '../../lib/utils'
+import Image from '../image'
+import { chainName } from '../../lib/object/chain'
+import { number_format, params_to_obj, equals_ignore_case, loader_color } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
 export default () => {
   const dispatch = useDispatch()
   const {
+    preferences,
     chains,
     pool_assets,
     _pools,
@@ -27,6 +32,7 @@ export default () => {
   } = useSelector(state =>
     (
       {
+        preferences: state.preferences,
         chains: state.chains,
         pool_assets: state.pool_assets,
         _pools: state.pools,
@@ -38,6 +44,9 @@ export default () => {
     ),
     shallowEqual,
   )
+  const {
+    theme,
+  } = { ...preferences }
   const {
     chains_data,
   } = { ...chains }
@@ -726,26 +735,33 @@ export default () => {
     error,
   } = { ...pool_data }
 
+  const pool_loading =
+    selected &&
+    !no_pool &&
+    !error &&
+    !pool_data
+
   return (
     <div className="mb-4">
       <div className="flex justify-center">
-        <div className="w-full flex flex-col space-y-1 my-6 my-4 sm:my-6 mx-1 sm:mx-4">
-          <div className="flex items-center space-x-3">
-            {/*<Link
-              href="/pools"
-              className="text-blue-400 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
-            >
-              <RiArrowLeftCircleFill
-                size={36}
-              />
-            </Link>*/}
-            <h1 className="uppercase text-lg font-semibold">
-              Manage Pool
-            </h1>
-          </div>
-          <div className="space-y-3">
+        <div className="w-full flex flex-col space-y-4 my-4 sm:my-12 mx-1 sm:mx-4">
+          <Link
+            href="/pools"
+          >
+          <a
+            className="w-fit flex items-center text-slate-600 hover:text-slate-800 dark:text-slate-500 dark:hover:text-slate-200 font-medium hover:font-semibold space-x-1"
+          >
+            <TiArrowLeft
+              size={24}
+            />
+            <span className="text-lg">
+              Back to pools
+            </span>
+          </a>
+          </Link>
+          <div className="space-y-6 sm:space-y-10">
             <div className="space-y-2">
-              <div className="grid sm:flex sm:items-center sm:justify-between sm:space-x-2 gap-2">
+              {/*<div className="grid sm:flex sm:items-center sm:justify-between sm:space-x-2 gap-2">
                 <div className="order-2 sm:order-1 flex items-center space-x-4 sm:space-x-6">
                   <SelectAsset
                     value={asset}
@@ -800,6 +816,107 @@ export default () => {
                     </a>
                   )
                 }
+              </div>*/}
+              <div className="flex flex-wrap items-center justify-between space-y-2 sm:space-y-0 sm:space-x-2">
+                <div className="flex items-center space-x-1">
+                  <div className="flex items-center space-x-3">
+                    {
+                      chain_data?.image &&
+                      (
+                        <Image
+                          src={chain_data.image}
+                          alt=""
+                          width={32}
+                          height={32}
+                          className="rounded-full"
+                        />
+                      )
+                    }
+                    <span className="text-lg sm:text-4xl font-semibold">
+                      <span className="mr-1">
+                        {chainName(chain_data)}
+                      </span>
+                      <span className="whitespace-nowrap">
+                        {
+                          (name || '')
+                            .split('-')
+                            .join(' ')
+                        }
+                      </span>
+                    </span>
+                  </div>
+                  {
+                    lpTokenAddress &&
+                    url &&
+                    (
+                      <a
+                        href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <TiArrowRight
+                          size={32}
+                          className="transform -rotate-45 mt-1"
+                        />
+                      </a>
+                    )
+                  }
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <span className="text-slate-400 dark:text-slate-500 font-medium">
+                    APY
+                  </span>
+                  <span className="text-lg font-semibold">
+                    {!isNaN(apy?.total) ?
+                      <Tooltip
+                        placement="top"
+                        content={
+                          Object.entries({ ...apy })
+                            .map(([k, v]) => (
+                              <div
+                                key={k}
+                                className="flex items-center justify-between space-x-1"
+                              >
+                                <span className="capitalize">
+                                  {k}:
+                                </span>
+                                <span>
+                                  {!isNaN(v) ?
+                                    <>
+                                      {number_format(
+                                        v,
+                                        '0,0.00',
+                                        true,
+                                      )}
+                                      %
+                                    </> :
+                                    '-'
+                                  }
+                                </span>
+                              </div>
+                            ))
+                        }
+                        className="z-50 bg-black whitespace-pre-wrap text-white text-xs"
+                      >
+                        <span>
+                          {number_format(
+                            apy.total,
+                            '0,0.00',
+                            true,
+                          )}
+                          %
+                        </span>
+                      </Tooltip> :
+                      pool_loading ?
+                        <TailSpin
+                          color={loader_color(theme)}
+                          width="24"
+                          height="24"
+                        /> :
+                        '-'
+                    }
+                  </span>
+                </div>
               </div>
               {
                 error &&
