@@ -10,8 +10,14 @@ import { number_format, name, equals_ignore_case } from '../../lib/utils'
 
 const VIEWS =
   [
-    'My positions',
-    'Pools',
+    {
+      id: 'my_positions',
+      title: 'My positions',
+    },
+    {
+      id: 'pools',
+      title: 'Pools',
+    },
   ]
 
 export default () => {
@@ -51,7 +57,10 @@ export default () => {
     address,
   } = { ...wallet_data }
 
-  const [view, setView] = useState(_.head(VIEWS))
+  const [view, setView] =
+    useState(
+      _.last(VIEWS)?.id
+    )
   const [pools, setPools] = useState(null)
   const [poolsTrigger, setPoolsTrigger] = useState(null)
 
@@ -189,28 +198,31 @@ export default () => {
   return (
     <div className="mb-4">
       <div className="flex justify-center">
-        <div className="w-full flex flex-col space-y-8 my-6 my-4 sm:my-6 mx-1 sm:mx-4">
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="flex flex-col space-y-4">
-              <h1 className="text-lg font-semibold">
-                Add liquidity to earn trading fees and rewards.
+        <div className="w-full flex flex-col space-y-4 sm:space-y-6 my-4 sm:my-12 mx-1 sm:mx-4">
+          <div className="grid sm:grid-cols-1 gap-4">
+            <div className="flex flex-col space-y-6 sm:space-y-16">
+              <h1 className="text-2xl sm:text-3xl font-bold">
+                Add liquidity to earn
+                <br />
+                trading fees and rewards.
               </h1>
-              <div className="flex items-center space-x-0.5">
+              <div className="border-b dark:border-slate-800 flex items-center space-x-2">
                 {VIEWS
                   .map((v, i) => (
                     <div
                       key={i}
-                      onClick={() => setView(v)}
-                      className={`${view === v ? 'bg-blue-500 dark:bg-blue-600 text-white font-bold' : 'hover:bg-slate-50 dark:hover:bg-slate-900 font-medium hover:font-semibold'} rounded-lg cursor-pointer py-1 px-2.5`}
+                      onClick={() => setView(v.id)}
+                      className={`border-b-4 ${view === v.id ? 'border-blue-500 dark:border-blue-600 font-bold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer text-lg p-3`}
                     >
-                      {v}
+                      {v.title}
                     </div>
                   ))
                 }
               </div>
             </div>
             {
-              view === 'Pools' &&
+              false &&
+              view === 'pools' &&
               (
                 <Total />
               )
