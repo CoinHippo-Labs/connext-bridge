@@ -20,12 +20,14 @@ export default ({
   const {
     preferences,
     assets,
+    pool_assets,
     pools,
   } = useSelector(state =>
     (
       {
         preferences: state.preferences,
         assets: state.assets,
+        pool_assets: state.pool_assets,
         pools: state.pools,
       }
     ),
@@ -38,6 +40,9 @@ export default ({
     assets_data,
   } = { ...assets }
   const {
+    pool_assets_data,
+  } = { ...pool_assets }
+  const {
     pools_data,
   } = { ...pools }
 
@@ -48,9 +53,10 @@ export default ({
       pools_data &&
       !uncollapseAssetIds
     ) {
-      const ids = pools_data
-        .map(p => p?.asset_data?.id)
-        .filter(id => id)
+      const ids =
+        pools_data
+          .map(p => p?.asset_data?.id)
+          .filter(id => id)
 
       setUncollapseAssetIds(ids)
     }
@@ -90,10 +96,12 @@ export default ({
             }
           }) :
           null :
-      pools_data ?
+      pools_data ||
+      pool_assets_data?.length === 0 ?
         Object.entries(
           _.groupBy(
-            pools_data,
+            pools_data ||
+            [],
             'asset_data.id',
           )
         )

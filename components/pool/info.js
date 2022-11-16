@@ -142,6 +142,7 @@ export default ({
     )
 
   const position_loading =
+    address &&
     selected &&
     !no_pool &&
     !error &&
