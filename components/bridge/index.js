@@ -2178,7 +2178,7 @@ export default () => {
             {
               openTransferStatus &&
               latest_transfer ?
-                <div className="bg-white dark:bg-slate-900 rounded-3xl space-y-6 pt-5 sm:pt-5 pb-6 sm:pb-6 px-4 sm:px-6">
+                <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl space-y-6 pt-5 sm:pt-5 pb-6 sm:pb-6 px-4 sm:px-6">
                   <div className="flex items-center justify-between space-x-2">
                     <span className="text-lg font-semibold">
                       Transfer status
