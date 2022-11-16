@@ -1596,6 +1596,9 @@ export default () => {
             100
           )
           .toString(),
+        receiveLocal:
+          receiveLocal ||
+          false,
         callData:
           callData ||
           '0x',
