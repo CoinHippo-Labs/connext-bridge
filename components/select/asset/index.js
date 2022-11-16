@@ -173,7 +173,7 @@ export default ({
         `w-32 sm:w-48 min-w-max h-10 sm:h-12 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`
       }
       title={
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between space-x-2">
           <span className="flex items-center uppercase space-x-1">
             <span>
               {

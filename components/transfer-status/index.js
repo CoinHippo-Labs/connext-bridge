@@ -285,7 +285,7 @@ export default ({
     data &&
     (
       <div className={`bg-zinc-50 dark:bg-zinc-900 max-w-xs sm:max-w-none rounded-xl ${pending ? 'border-0 border-blue-500' : 'border-0 border-green-500'} mx-auto py-5 px-4`}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between space-x-2">
           <div className="flex items-center space-x-1.5">
             {
               source_chain_data?.image &&

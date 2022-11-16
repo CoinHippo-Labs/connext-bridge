@@ -111,10 +111,10 @@ export default ({
         }) :
         null
 
-const is_staging =
-  process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' ||
-  process.env.NEXT_PUBLIC_SITE_URL?.includes('staging') ||
-  process.env.NEXT_PUBLIC_SITE_URL?.includes('cloudfront')
+  const is_staging =
+    process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' ||
+    process.env.NEXT_PUBLIC_SITE_URL?.includes('staging') ||
+    process.env.NEXT_PUBLIC_SITE_URL?.includes('cloudfront')
 
   return (
     data ?
@@ -185,7 +185,7 @@ const is_staging =
                               a,
                               next_asset?.contract_address,
                             ) ?
-                              next_asset?.contract_data?.image ||
+                              next_asset?.image ||
                               contract_data?.image :
                               null
                         ) ||
@@ -214,7 +214,8 @@ const is_staging =
                               b > 1 ?
                                 '0,0.00' :
                                 '0,0.000000000000',
-                          ),
+                          )
+                          .toUpperCase(),
                         ]
                         .filter(s =>
                           typeof s === 'string'
@@ -318,7 +319,7 @@ const is_staging =
                                 content={pair_balances}
                                 className="z-50 bg-black whitespace-pre-wrap text-white text-xs"
                               >
-                                <span>
+                                <span className="uppercase">
                                   {currency_symbol}
                                   {number_format(
                                     tvl,
@@ -360,8 +361,7 @@ const is_staging =
                                                 v,
                                                 '0,0.00',
                                                 true,
-                                              )}
-                                              %
+                                              )} %
                                             </> :
                                             '-'
                                           }
@@ -376,8 +376,7 @@ const is_staging =
                                     apy.total,
                                     '0,0.00',
                                     true,
-                                  )}
-                                  %
+                                  )} %
                                 </span>
                               </Tooltip> :
                               '-'
@@ -936,8 +935,7 @@ const is_staging =
                           value,
                           '0,0.00',
                           true,
-                        )}
-                        %
+                        )} %
                       </div>
                       {
                         uncollapseAssetIds?.includes(id) &&
@@ -966,8 +964,7 @@ const is_staging =
                                     value,
                                     '0,0.00',
                                     true,
-                                  )}
-                                  %
+                                  )} %
                                 </span>
                               </a>
                               </Link>

@@ -1462,7 +1462,7 @@ export default ({
                 {
                   x_asset_data?.contract_address &&
                   (
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between space-x-2">
                       <div className="flex items-center space-x-2">
                         {url ?
                           <a
@@ -1615,7 +1615,7 @@ export default ({
                 {
                   y_asset_data?.contract_address &&
                   (
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between space-x-2">
                       <div className="flex items-center space-x-2">
                         {url ?
                           <a
@@ -2361,7 +2361,7 @@ export default ({
                           !valid_amount
                         }
                         onClick={() => call(pool_data)}
-                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-gray-200 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 px-2 sm:px-3`}
+                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-gray-200 dark:bg-gray-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 px-2 sm:px-3`}
                       >
                         <span className="flex items-center justify-center space-x-1.5">
                           {

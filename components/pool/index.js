@@ -888,8 +888,7 @@ export default () => {
                                         v,
                                         '0,0.00',
                                         true,
-                                      )}
-                                      %
+                                      )} %
                                     </> :
                                     '-'
                                   }
@@ -904,8 +903,7 @@ export default () => {
                             apy.total,
                             '0,0.00',
                             true,
-                          )}
-                          %
+                          )} %
                         </span>
                       </Tooltip> :
                       pool_loading ?
@@ -928,7 +926,7 @@ export default () => {
                 )
               }
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-16">
               <div className="lg:col-span-2">
                 <Info
                   pool={pool}
