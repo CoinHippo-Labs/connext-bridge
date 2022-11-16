@@ -206,6 +206,166 @@ export default ({
           is_staging ?
             <div className="space-y-6">
               <div className="space-y-4">
+                <div className="tracking-wider text-lg font-semibold">
+                  Statistics
+                </div>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className={metricClassName}>
+                    <span className={titleClassName}>
+                      Liquidity
+                    </span>
+                    <span className={valueClassName}>
+                      {
+                        pool_data &&
+                        !error ?
+                          number_format(
+                            liquidity,
+                            '0,0.000000',
+                            true,
+                          ) :
+                          selected &&
+                          !no_pool &&
+                          !error &&
+                          (
+                            pool_loading ?
+                              <div className="mt-1">
+                                <TailSpin
+                                  color={loader_color(theme)}
+                                  width="24"
+                                  height="24"
+                                />
+                              </div> :
+                              '-'
+                          )
+                      }
+                    </span>
+                  </div>
+                  <div className={metricClassName}>
+                    <span className={titleClassName}>
+                      Volume (24h)
+                    </span>
+                    <span className={valueClassName}>
+                      {
+                        pool_data &&
+                        !error ?
+                          <>
+                            {currency_symbol}
+                            {number_format(
+                              volume,
+                              '0,0.000000',
+                              true,
+                            )}
+                          </> :
+                          selected &&
+                          !no_pool &&
+                          !error &&
+                          (
+                            pool_loading ?
+                              <div className="mt-1">
+                                <TailSpin
+                                  color={loader_color(theme)}
+                                  width="24"
+                                  height="24"
+                                />
+                              </div> :
+                              '-'
+                          )
+                      }
+                    </span>
+                  </div>
+                  <div className={metricClassName}>
+                    <span className={titleClassName}>
+                      Fees (24h)
+                    </span>
+                    <span className={valueClassName}>
+                      {
+                        pool_data &&
+                        !error ?
+                          <>
+                            {currency_symbol}
+                            {number_format(
+                              fees,
+                              '0,0.000000',
+                              true,
+                            )}
+                          </> :
+                          selected &&
+                          !no_pool &&
+                          !error &&
+                          (
+                            pool_loading ?
+                              <div className="mt-1">
+                                <TailSpin
+                                  color={loader_color(theme)}
+                                  width="24"
+                                  height="24"
+                                />
+                              </div> :
+                              '-'
+                          )
+                      }
+                    </span>
+                  </div>
+                  {
+                    false &&
+                    <div className={metricClassName}>
+                      <span className={titleClassName}>
+                        APY
+                      </span>
+                      <span className={valueClassName}>
+                        {
+                          pool_data &&
+                          !error ?
+                            /*<div className="grid sm:grid-cols-1 gap-1 mt-1">
+                              {Object.entries({ ...apy })
+                                .filter(([k, v]) => !isNaN(v))
+                                .map(([k, v]) => (
+                                  <div
+                                    key={k}
+                                    className="flex items-center text-sm space-x-1"
+                                  >
+                                    <span className="capitalize">
+                                      {k}
+                                    </span>
+                                    <span>
+                                      {number_format(
+                                        v,
+                                        '0,0.00',
+                                        true,
+                                      )} %
+                                    </span>
+                                  </div>
+                                ))
+                              }
+                            </div>*/
+                            <span>
+                              {number_format(
+                                apy?.total,
+                                '0,0.00',
+                                true,
+                              )} %
+                            </span> :
+                            selected &&
+                            !no_pool &&
+                            !error &&
+                            (
+                              pool_loading ?
+                                <div className="mt-1">
+                                  <TailSpin
+                                    color={loader_color(theme)}
+                                    width="24"
+                                    height="24"
+                                  />
+                                </div> :
+                                '-'
+                            )
+                        }
+                      </span>
+                    </div>
+                  }
+                </div>
+              </div>
+              <div className="space-y-4">
                 <div className="flex items-center justify-between space-x-2">
                   <span className="text-lg font-semibold">
                     Reserve Info
@@ -271,10 +431,16 @@ export default ({
                           } = { ...props }
                           const {
                             i,
+                            contract_address,
                           } = { ...props.row.original }
 
                           return (
-                            <div className={`h-10 flex items-center text-sm font-semibold space-x-2 ${i % 2 === 0 ? 'pt-2' : 'pb-2'} mx-2`}>
+                            <a
+                              href={`${url}${contract_path?.replace('{address}', contract_address)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`h-10 flex items-center text-sm font-semibold space-x-2 ${i % 2 === 0 ? 'pt-2' : 'pb-2'} mx-2`}
+                            >
                               {value > -1 ?
                                 number_format(
                                   value,
@@ -285,7 +451,7 @@ export default ({
                                 ) :
                                 '-'
                               }
-                            </div>
+                            </a>
                           )
                         },
                         headerClassName: 'normal-case text-base font-semibold mx-2',
