@@ -180,28 +180,10 @@ export default ({
 
           try {
             console.log(
-              '[getCanonicalToken]',
-              {
-                domainId,
-                tokenAddress: contract_address,
-              },
-            )
-
-            const canonicals =
-              await sdk.nxtpSdkPool
-                .getCanonicalToken(
-                  domainId,
-                  contract_address,
-                )
-
-            const canonicalDomain = _.head(canonicals),
-              canonicalId = _.last(canonicals)
-
-            console.log(
               '[calculateRemoveSwapLiquidity]',
               {
                 domainId,
-                canonicalId,
+                contract_address,
                 amount: _amount,
               },
             )
@@ -210,7 +192,7 @@ export default ({
               await sdk.nxtpSdkPool
                 .calculateRemoveSwapLiquidity(
                   domainId,
-                  canonicalId,
+                  contract_address,
                   _amount,
                 )
 
@@ -218,7 +200,7 @@ export default ({
               '[amountsRemoveSwapLiquidity]',
               {
                 domainId,
-                canonicalId,
+                contract_address,
                 amount: _amount,
                 amounts,
               },
@@ -784,28 +766,10 @@ export default ({
           if (!failed) {
             try {
               console.log(
-                '[getCanonicalToken]',
-                {
-                  domainId,
-                  tokenAddress: contract_address,
-                },
-              )
-
-              const canonicals =
-                await sdk.nxtpSdkPool
-                  .getCanonicalToken(
-                    domainId,
-                    contract_address,
-                  )
-
-              const canonicalDomain = _.head(canonicals),
-                canonicalId = _.last(canonicals)
-
-              console.log(
                 '[Remove Liquidity]',
                 {
                   domainId,
-                  canonicalId,
+                  contract_address,
                   amount: _amount,
                   minAmounts,
                   deadline,
@@ -816,7 +780,7 @@ export default ({
                 await sdk.nxtpSdkPool
                   .removeLiquidity(
                     domainId,
-                    canonicalId,
+                    contract_address,
                     _amount,
                     minAmounts,
                     deadline,
