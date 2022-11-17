@@ -661,7 +661,7 @@ export default ({
             }
           }
           break
-        case 'remove':
+        case 'withdraw':
           if (!amount) {
             failed = true
 

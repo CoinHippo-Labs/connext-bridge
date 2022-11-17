@@ -937,12 +937,14 @@ export default () => {
               <Liquidity
                 pool={pool}
                 user_pools_data={pools}
-                onFinish={() =>
+                onFinish={() => {
                   setPoolsTrigger(
                     moment()
                       .valueOf()
                   )
-                }
+
+                  getBalances(chain)
+                }}
               />
             </div>
           </div>
