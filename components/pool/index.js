@@ -744,17 +744,18 @@ export default () => {
   return (
     <div className="mb-4">
       <div className="flex justify-center">
-        <div className="w-full flex flex-col space-y-4 my-4 sm:my-12 mx-1 sm:mx-4">
+        <div className="w-full flex flex-col space-y-3.5 my-4 sm:my-12 mx-1 sm:mx-4">
           <Link
             href="/pools"
           >
           <a
-            className="w-fit flex items-center text-slate-600 hover:text-slate-800 dark:text-slate-500 dark:hover:text-slate-200 font-medium hover:font-semibold space-x-1"
+            className="w-fit rounded border dark:border-slate-800 flex items-center text-slate-600 dark:text-slate-500 font-semibold space-x-1 py-0.5 px-2.5"
           >
             <TiArrowLeft
-              size={24}
+              size={18}
+              className="-ml-0.5"
             />
-            <span className="text-lg">
+            <span className="text-base">
               Back to pools
             </span>
           </a>
@@ -820,20 +821,20 @@ export default () => {
               </div>*/}
               <div className="flex flex-wrap items-center justify-between space-y-2 sm:space-y-0 sm:space-x-2">
                 <div className="flex items-center space-x-1">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     {
                       chain_data?.image &&
                       (
                         <Image
                           src={chain_data.image}
                           alt=""
-                          width={32}
-                          height={32}
+                          width={48}
+                          height={48}
                           className="rounded-full"
                         />
                       )
                     }
-                    <span className="text-lg sm:text-4xl font-semibold">
+                    <span className="tracking-tighter text-xl sm:text-6xl font-semibold">
                       <span className="mr-1">
                         {chainName(chain_data)}
                       </span>
@@ -846,7 +847,7 @@ export default () => {
                       </span>
                     </span>
                   </div>
-                  {
+                  {/*
                     lpTokenAddress &&
                     url &&
                     (
@@ -861,7 +862,7 @@ export default () => {
                         />
                       </a>
                     )
-                  }
+                  */}
                 </div>
                 <div className="flex flex-col space-y-1">
                   <span className="text-slate-400 dark:text-slate-500 font-medium">
