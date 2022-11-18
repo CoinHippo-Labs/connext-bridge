@@ -22,6 +22,9 @@ import Alert from '../alerts'
 import Copy from '../copy'
 import { number_format, ellipse, equals_ignore_case, loader_color, switch_color, sleep, error_patterns } from '../../lib/utils'
 
+const WRAPPED_PREFIX =
+  process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
+  'next'
 const GAS_LIMIT_ADJUSTMENT =
   Number(
     process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT
@@ -1028,6 +1031,12 @@ export default ({
     rate ||
     1
 
+  const _image = contract_data?.image
+  const image_paths =
+    (_image || '')
+      .split('/')
+  const image_name = _.last(image_paths)
+
   const x_asset_data =
     _.head(tokens) &&
     {
@@ -1048,6 +1057,33 @@ export default ({
             contract_address: _.head(tokens),
             decimals: _.head(decimals),
             symbol: _.head(symbols),
+            image:
+              _image ?
+                !_.head(symbols) ?
+                  _image :
+                  _.head(symbols).startsWith(WRAPPED_PREFIX) ?
+                    !image_name.startsWith(WRAPPED_PREFIX) ?
+                      image_paths
+                        .map((s, i) =>
+                          i === image_paths.length - 1 ?
+                            `${WRAPPED_PREFIX}${s}` :
+                            s
+                        )
+                        .join('/') :
+                      _image :
+                    !image_name.startsWith(WRAPPED_PREFIX) ?
+                      _image :
+                      image_paths
+                        .map((s, i) =>
+                          i === image_paths.length - 1 ?
+                            s
+                              .substring(
+                                WRAPPED_PREFIX.length,
+                              ) :
+                            s
+                        )
+                        .join('/') :
+                undefined,
           }
       ),
     }
@@ -1086,6 +1122,33 @@ export default ({
             contract_address: _.last(tokens),
             decimals: _.last(decimals),
             symbol: _.last(symbols),
+            image:
+              _image ?
+                !_.last(symbols) ?
+                  _image :
+                  _.last(symbols).startsWith(WRAPPED_PREFIX) ?
+                    !image_name.startsWith(WRAPPED_PREFIX) ?
+                      image_paths
+                        .map((s, i) =>
+                          i === image_paths.length - 1 ?
+                            `${WRAPPED_PREFIX}${s}` :
+                            s
+                        )
+                        .join('/') :
+                      _image :
+                    !image_name.startsWith(WRAPPED_PREFIX) ?
+                      _image :
+                      image_paths
+                        .map((s, i) =>
+                          i === image_paths.length - 1 ?
+                            s
+                              .substring(
+                                WRAPPED_PREFIX.length,
+                              ) :
+                            s
+                        )
+                        .join('/') :
+                undefined,
             mintable:
               [
                 'next',
@@ -1403,16 +1466,18 @@ export default ({
         </span>
         <GasPrice
           chainId={chain_id}
+          iconSize={16}
+          className="text-xs"
         />
       </div>
-      <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl space-y-4 p-6 pt-1">
+      <div className="bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-4 pb-5 px-4">
         <div className="border-b dark:border-slate-800 flex items-center justify-between space-x-2">
           {ACTIONS
             .map((a, i) => (
               <div
                 key={i}
                 onClick={() => setAction(a)}
-                className={`w-full border-b-2 ${action === a ? 'border-slate-300 dark:border-slate-200 font-bold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer capitalize text-sm text-center py-5 px-3`}
+                className={`w-full border-b-2 ${action === a ? 'border-slate-300 dark:border-slate-200 font-semibold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer capitalize text-base text-center py-5 px-3`}
               >
                 {a}
               </div>
@@ -1421,70 +1486,90 @@ export default ({
         </div>
         {action === 'deposit' ?
           <>
-            <div className="space-y-3 py-3 px-0">
-              <div className="space-y-2">
-                {
-                  x_asset_data?.contract_address &&
-                  (
-                    <div className="flex items-center justify-between space-x-2">
-                      <div className="flex items-center space-x-2">
-                        {url ?
-                          <a
-                            href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}${address ? `?a=${address}` : ''}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <span className="text-sm font-semibold">
-                              {x_asset_data.symbol}
-                            </span>
-                          </a> :
-                          <div className="text-sm font-semibold">
-                            {x_asset_data.symbol}
-                          </div>
-                        }
-                        {
-                          chain &&
-                          asset &&
-                          (
-                            <Link
-                              href={`/swap/${asset.toUpperCase()}-on-${chain}?from=${y_asset_data.symbol}`}
-                            >
-                            <a
-                              className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
-                            >
-                              <Tooltip
-                                placement="top"
-                                content={`Click here to swap ${y_asset_data.symbol} into ${x_asset_data.symbol}`}
-                                className="z-50 bg-dark text-white text-xs"
-                              >
-                                <div>
-                                  <HiSwitchHorizontal
-                                    size={16}
-                                  />
-                                </div>
-                              </Tooltip>
-                            </a>
-                            </Link>
-                          )
-                        }
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
-                          Balance:
-                        </div>
+            <div className="pt-1 pb-2 px-0">
+              <div className="space-y-1">
+                <div className="flex items-center justify-between space-x-2">
+                  <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                    Token 1
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                      Balance:
+                    </div>
+                    {
+                      x_asset_data?.contract_address &&
+                      (
                         <Balance
                           chainId={chain_id}
                           asset={asset}
                           contractAddress={x_asset_data.contract_address}
                           symbol={x_asset_data.symbol}
                           hideSymbol={true}
+                          className="text-xs"
                         />
-                      </div>
-                    </div>
-                  )
-                }
+                      )
+                    }
+                  </div>
+                </div>
                 <div className="space-y-1">
-                  <div className="flex items-center justify-between space-x-3">
+                  <div className="rounded border dark:border-slate-800 flex items-center justify-between space-x-2 py-2.5 px-3">
+                    {
+                      x_asset_data?.contract_address &&
+                      (
+                        <div className="flex items-center justify-between space-x-2">
+                          <div className="flex items-center space-x-1.5">
+                            <a
+                              href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}${address ? `?a=${address}` : ''}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="min-w-max flex items-center space-x-1.5"
+                            >
+                              {
+                                x_asset_data.image &&
+                                (
+                                  <Image
+                                    src={x_asset_data.image}
+                                    alt=""
+                                    width={20}
+                                    height={20}
+                                    className="rounded-full"
+                                  />
+                                )
+                              }
+                              <span className="text-base font-semibold">
+                                {x_asset_data.symbol}
+                              </span>
+                            </a>
+                            {
+                              false &&
+                              chain &&
+                              asset &&
+                              (
+                                <Link
+                                  href={`/swap/${asset.toUpperCase()}-on-${chain}?from=${y_asset_data.symbol}`}
+                                >
+                                <a
+                                  className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
+                                >
+                                  <Tooltip
+                                    placement="top"
+                                    content={`Click here to swap ${y_asset_data.symbol} into ${x_asset_data.symbol}`}
+                                    className="z-50 bg-dark text-white text-xs"
+                                  >
+                                    <div>
+                                      <HiSwitchHorizontal
+                                        size={14}
+                                      />
+                                    </div>
+                                  </Tooltip>
+                                </a>
+                                </Link>
+                              )
+                            }
+                          </div>
+                        </div>
+                      )
+                    }
                     <DebounceInput
                       debounceTimeout={500}
                       size="small"
@@ -1540,7 +1625,7 @@ export default ({
                         ].includes(e.key) &&
                         e.preventDefault()
                       }
-                      className={`w-full bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
+                      className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
                     />
                     {/*<div
                       onClick={() => {
@@ -1570,74 +1655,95 @@ export default ({
                   }
                 </div>
               </div>
-              <div className="w-full flex items-center justify-center">
+              <div className="w-full flex items-center justify-center mt-2.5 -mb-2">
                 <BiPlus
-                  size={24}
+                  size={20}
+                  className="text-slate-400 dark:text-slate-500"
                 />
               </div>
-              <div className="space-y-2">
-                {
-                  y_asset_data?.contract_address &&
-                  (
-                    <div className="flex items-center justify-between space-x-2">
-                      <div className="flex items-center space-x-2">
-                        {url ?
-                          <a
-                            href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}${address ? `?a=${address}` : ''}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <span className="text-sm font-semibold">
-                              {y_asset_data.symbol}
-                            </span>
-                          </a> :
-                          <div className="text-sm font-semibold">
-                            {y_asset_data.symbol}
-                          </div>
-                        }
-                        {
-                          chain &&
-                          asset &&
-                          (
-                            <Link
-                              href={`/swap/${asset.toUpperCase()}-on-${chain}`}
-                            >
-                            <a
-                              className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
-                            >
-                              <Tooltip
-                                placement="top"
-                                content={`Click here to swap ${x_asset_data.symbol} into ${y_asset_data.symbol}`}
-                                className="z-50 bg-dark text-white text-xs"
-                              >
-                                <div>
-                                  <HiSwitchHorizontal
-                                    size={16}
-                                  />
-                                </div>
-                              </Tooltip>
-                            </a>
-                            </Link>
-                          )
-                        }
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <div className="text-slate-400 dark:text-slate-500 text-sm font-medium text-right">
-                          Balance:
-                        </div>
+              <div className="space-y-1 mt-2.5">
+                <div className="flex items-center justify-between space-x-2">
+                  <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                    Token 2
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                      Balance:
+                    </div>
+                    {
+                      y_asset_data?.contract_address &&
+                      (
                         <Balance
                           chainId={chain_id}
                           asset={asset}
                           contractAddress={y_asset_data.contract_address}
                           symbol={y_asset_data.symbol}
                           hideSymbol={true}
+                          className="text-xs"
                         />
-                      </div>
-                    </div>
-                  )
-                }
+                      )
+                    }
+                  </div>
+                </div>
                 <div className="space-y-1">
-                  <div className="flex items-center justify-between space-x-3">
+                  <div className="rounded border dark:border-slate-800 flex items-center justify-between space-x-2 py-2.5 px-3">
+                    {
+                      y_asset_data?.contract_address &&
+                      (
+                        <div className="flex items-center justify-between space-x-2">
+                          <div className="flex items-center space-x-1.5">
+                            <a
+                              href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}${address ? `?a=${address}` : ''}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="min-w-max flex items-center space-x-1.5"
+                            >
+                              {
+                                y_asset_data.image &&
+                                (
+                                  <Image
+                                    src={y_asset_data.image}
+                                    alt=""
+                                    width={20}
+                                    height={20}
+                                    className="rounded-full"
+                                  />
+                                )
+                              }
+                              <span className="text-base font-semibold">
+                                {y_asset_data.symbol}
+                              </span>
+                            </a>
+                            {
+                              false &&
+                              chain &&
+                              asset &&
+                              (
+                                <Link
+                                  href={`/swap/${asset.toUpperCase()}-on-${chain}`}
+                                >
+                                <a
+                                  className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
+                                >
+                                  <Tooltip
+                                    placement="top"
+                                    content={`Click here to swap ${x_asset_data.symbol} into ${y_asset_data.symbol}`}
+                                    className="z-50 bg-dark text-white text-xs"
+                                  >
+                                    <div>
+                                      <HiSwitchHorizontal
+                                        size={14}
+                                      />
+                                    </div>
+                                  </Tooltip>
+                                </a>
+                                </Link>
+                              )
+                            }
+                          </div>
+                        </div>
+                      )
+                    }
                     <DebounceInput
                       debounceTimeout={500}
                       size="small"
@@ -1698,7 +1804,7 @@ export default ({
                         ].includes(e.key) &&
                         e.preventDefault()
                       }
-                      className={`w-full bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-medium text-right py-2 px-3`}
+                      className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
                     />
                     {/*<div
                       onClick={() => {
@@ -1929,22 +2035,22 @@ export default ({
                         href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-semibold"
+                        className="text-xs font-semibold"
                       >
                         Pool Tokens
                       </a> :
-                      <span className="text-slate-400 dark:text-slate-500 font-medium">
+                      <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
                         Pool Tokens
                       </span>
                   }
                   <div className="flex items-center space-x-1">
-                    <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                    <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
                       Balance:
                     </div>
                     {
                       web3_provider &&
                       (
-                        <div className="flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm space-x-1">
+                        <div className="flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs space-x-1">
                           {typeof lpTokenBalance === 'number' ?
                             <span className="font-semibold">
                               {number_format(
@@ -1973,68 +2079,70 @@ export default ({
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <DebounceInput
-                    debounceTimeout={500}
-                    size="small"
-                    type="number"
-                    placeholder="0.00"
-                    disabled={disabled}
-                    value={
-                      typeof amount === 'number' &&
-                      amount >= 0 ?
-                        amount :
-                        ''
-                    }
-                    onChange={e => {
-                      const regex = /^[0-9.\b]+$/
-
-                      let value
-
-                      if (
-                        e.target.value === '' ||
-                        regex.test(e.target.value)
-                      ) {
-                        value = e.target.value
+                  <div className="rounded border dark:border-slate-800 flex items-center justify-between space-x-2 py-2.5 px-3">
+                    <DebounceInput
+                      debounceTimeout={500}
+                      size="small"
+                      type="number"
+                      placeholder="0.00"
+                      disabled={disabled}
+                      value={
+                        typeof amount === 'number' &&
+                        amount >= 0 ?
+                          amount :
+                          ''
                       }
+                      onChange={e => {
+                        const regex = /^[0-9.\b]+$/
 
-                      value =
-                        value < 0 ?
-                          0 :
+                        let value
+
+                        if (
+                          e.target.value === '' ||
+                          regex.test(e.target.value)
+                        ) {
+                          value = e.target.value
+                        }
+
+                        value =
+                          value < 0 ?
+                            0 :
+                            !isNaN(value) ?
+                              parseFloat(
+                                Number(value)
+                                  .toFixed(
+                                    x_asset_data?.decimals ||
+                                    18
+                                  )
+                              ) :
+                              value
+
+                        value =
+                          value &&
                           !isNaN(value) ?
-                            parseFloat(
-                              Number(value)
-                                .toFixed(
-                                  x_asset_data?.decimals ||
-                                  18
-                                )
-                            ) :
+                            Number(value) :
                             value
 
-                      value =
-                        value &&
-                        !isNaN(value) ?
-                          Number(value) :
-                          value
-
-                      setAmount(value)
-                    }}
-                    onWheel={e => e.target.blur()}
-                    onKeyDown={e =>
-                      [
-                        'e',
-                        'E',
-                        '-',
-                      ].includes(e.key) &&
-                      e.preventDefault()
-                    }
-                    className={`w-full bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl text-lg font-semibold text-right py-2 px-3`}
-                  />
+                        setAmount(value)
+                      }}
+                      onWheel={e => e.target.blur()}
+                      onKeyDown={e =>
+                        [
+                          'e',
+                          'E',
+                          '-',
+                        ].includes(e.key) &&
+                        e.preventDefault()
+                      }
+                      className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
+                    />
+                  </div>
                   {
                     typeof amount === 'number' &&
                     typeof lpTokenBalance === 'number' &&
                     amount > lpTokenBalance &&
                     (
-                      <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-2">
+                      <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
                         <BiMessageError
                           size={16}
                           className="min-w-max"
@@ -2083,7 +2191,7 @@ export default ({
 
                           setAmount(_amount)
                         }}
-                        className={`${disabled || !lpTokenBalance ? 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'} rounded-lg py-0.5 px-2`}
+                        className={`${disabled || !lpTokenBalance ? 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'} rounded-lg text-xs py-0.5 px-1.5`}
                       >
                         {p * 100} %
                       </div>
@@ -2101,17 +2209,17 @@ export default ({
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <span className="text-sm font-semibold">
+                        <span className="text-xs font-semibold">
                           {x_asset_data.symbol}
                         </span>
                       </a> :
-                      <div className="text-sm font-semibold">
+                      <div className="text-xs font-semibold">
                         {x_asset_data?.symbol}
                       </div>
                   }
                   {web3_provider ?
                     !isNaN(_.head(removeAmounts)) ?
-                      <span className="text-sm">
+                      <span className="text-xs">
                         {number_format(
                           _.head(removeAmounts) ||
                           0,
@@ -2131,7 +2239,7 @@ export default ({
                           /> :
                           '-'
                       ) :
-                    <span className="text-sm">
+                    <span className="text-xs">
                       -
                     </span>
                   }
@@ -2145,17 +2253,17 @@ export default ({
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <span className="text-sm font-semibold">
+                        <span className="text-xs font-semibold">
                           {y_asset_data.symbol}
                         </span>
                       </a> :
-                      <div className="text-sm font-semibold">
+                      <div className="text-xs font-semibold">
                         {y_asset_data?.symbol}
                       </div>
                   }
                   {web3_provider ?
                     !isNaN(_.last(removeAmounts)) ?
-                      <span className="text-sm">
+                      <span className="text-xs">
                         {number_format(
                           _.last(removeAmounts) ||
                           0,
@@ -2175,7 +2283,7 @@ export default ({
                           /> :
                           '-'
                       ) :
-                    <span className="text-sm">
+                    <span className="text-xs">
                       -
                     </span>
                   }

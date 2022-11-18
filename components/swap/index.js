@@ -1757,9 +1757,9 @@ export default () => {
             symbol: _.last(symbols),
             image:
               _image ?
-                !_.head(symbols) ?
+                !_.last(symbols) ?
                   _image :
-                  _.head(symbols).startsWith(WRAPPED_PREFIX) ?
+                  _.last(symbols).startsWith(WRAPPED_PREFIX) ?
                     !image_name.startsWith(WRAPPED_PREFIX) ?
                       image_paths
                         .map((s, i) =>
