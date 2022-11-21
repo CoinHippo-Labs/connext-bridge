@@ -1820,7 +1820,7 @@ export default () => {
     calling ||
     approving
 
-  const boxShadow = `${color}${theme === 'light' ? '99' : 'ff'} 0px 16px 128px 8px`
+  const boxShadow = `${color}${theme === 'light' ? '44' : '33'} 0px 16px 128px 64px`
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">

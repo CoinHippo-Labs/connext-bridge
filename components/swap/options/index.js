@@ -79,9 +79,9 @@ export default ({
           <RiSettings3Line
             size={20}
           />
-          <span className="text-sm font-medium">
+          {/*<span className="text-sm font-medium">
             Settings
-          </span>
+          </span>*/}
         </div>
       }
       buttonClassName={`min-w-max ${disabled ? 'cursor-not-allowed' : ''} ${applied ? 'border border-blue-400 dark:border-blue-500' : ''} rounded-lg shadow flex items-center justify-center`}
