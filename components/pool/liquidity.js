@@ -1614,7 +1614,7 @@ export default ({
                             value
 
                         setAmountX(value)
-                        autoSetY(value)
+                        // autoSetY(value)
                       }}
                       onWheel={e => e.target.blur()}
                       onKeyDown={e =>
@@ -1630,7 +1630,7 @@ export default ({
                     {/*<div
                       onClick={() => {
                         setAmountX(x_balance_amount)
-                        autoSetY(x_balance_amount)
+                        // autoSetY(x_balance_amount)
                       }}
                       className={`${disabled || typeof x_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-200 dark:bg-slate-800 rounded-lg text-blue-400 dark:text-slate-200 text-base font-medium py-0.5 px-2.5`}
                     >
@@ -1793,7 +1793,7 @@ export default ({
                             value
 
                         setAmountY(value)
-                        autoSetX(value)
+                        // autoSetX(value)
                       }}
                       onWheel={e => e.target.blur()}
                       onKeyDown={e =>
@@ -1809,7 +1809,7 @@ export default ({
                     {/*<div
                       onClick={() => {
                         setAmountY(y_balance_amount)
-                        autoSetX(y_balance_amount)
+                        // autoSetX(y_balance_amount)
                       }}
                       className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-200 dark:bg-slate-800 rounded-lg text-blue-400 dark:text-slate-200 text-sm font-medium py-0.5 px-2.5`}
                     >

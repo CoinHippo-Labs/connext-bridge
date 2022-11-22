@@ -119,15 +119,10 @@ export default ({
         }) :
         null
 
-  const is_staging =
-    process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' ||
-    process.env.NEXT_PUBLIC_SITE_URL?.includes('staging') ||
-    process.env.NEXT_PUBLIC_SITE_URL?.includes('cloudfront')
-
   return (
     data ?
       <div className="grid my-4 sm:my-6">
-        {view === 'pools' && is_staging ?
+        {view === 'pools' ?
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {
               data
