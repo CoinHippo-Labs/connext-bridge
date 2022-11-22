@@ -119,6 +119,7 @@ export default () => {
 
   const [swapAmount, setSwapAmount] = useState(null)
   const [calculateSwapResponse, setCalculateSwapResponse] = useState(null)
+  const [priceImpact, setPriceImpact] = useState(null)
 
   const [approving, setApproving] = useState(null)
   const [approveProcessing, setApproveProcessing] = useState(null)
@@ -1380,80 +1381,80 @@ export default () => {
       _pair &&
       typeof amount === 'number'
     ) {
+      let {
+        amount,
+        origin,
+      } = { ...swap }
+
+      origin =
+        origin ||
+        'x'
+
+      const {
+        asset_data,
+        contract_data,
+        domainId,
+        lpTokenAddress,
+        tokens,
+        decimals,
+        symbols,
+      } = { ..._pair }
+      const {
+        contract_address,
+      } = { ...contract_data }
+
+      const x_asset_data =
+        _.head(tokens) &&
+        {
+          ...Object.fromEntries(
+            Object.entries({ ...asset_data })
+              .filter(([k, v]) =>
+                !['contracts'].includes(k)
+              )
+          ),
+          ...(
+            equals_ignore_case(
+              _.head(tokens),
+              contract_address,
+            ) ?
+              contract_data :
+              {
+                chain_id,
+                contract_address: _.head(tokens),
+                decimals: _.head(decimals),
+                symbol: _.head(symbols),
+              }
+          ),
+        }
+
+      const y_asset_data =
+        _.last(tokens) &&
+        {
+          ...Object.fromEntries(
+            Object.entries({ ...asset_data })
+              .filter(([k, v]) =>
+                !['contracts'].includes(k)
+              )
+          ),
+          ...(
+            equals_ignore_case(
+              _.last(tokens),
+              contract_address,
+            ) ?
+              contract_data :
+              {
+                chain_id,
+                contract_address: _.last(tokens),
+                decimals: _.last(decimals),
+                symbol: _.last(symbols),
+              }
+          ),
+        }
+
       if (amount <= 0) {
         setSwapAmount(0)
       }
       else {
-        let {
-          amount,
-          origin,
-        } = { ...swap }
-
-        origin =
-          origin ||
-          'x'
-
-        const {
-          asset_data,
-          contract_data,
-          domainId,
-          lpTokenAddress,
-          tokens,
-          decimals,
-          symbols,
-        } = { ..._pair }
-        const {
-          contract_address,
-        } = { ...contract_data }
-
-        const x_asset_data =
-          _.head(tokens) &&
-          {
-            ...Object.fromEntries(
-              Object.entries({ ...asset_data })
-                .filter(([k, v]) =>
-                  !['contracts'].includes(k)
-                )
-            ),
-            ...(
-              equals_ignore_case(
-                _.head(tokens),
-                contract_address,
-              ) ?
-                contract_data :
-                {
-                  chain_id,
-                  contract_address: _.head(tokens),
-                  decimals: _.head(decimals),
-                  symbol: _.head(symbols),
-                }
-            ),
-          }
-
-        const y_asset_data =
-          _.last(tokens) &&
-          {
-            ...Object.fromEntries(
-              Object.entries({ ...asset_data })
-                .filter(([k, v]) =>
-                  !['contracts'].includes(k)
-                )
-            ),
-            ...(
-              equals_ignore_case(
-                _.last(tokens),
-                contract_address,
-              ) ?
-                contract_data :
-                {
-                  chain_id,
-                  contract_address: _.last(tokens),
-                  decimals: _.last(decimals),
-                  symbol: _.last(symbols),
-                }
-            ),
-          }
-
         if (
           !(
             equals_ignore_case(
@@ -1467,9 +1468,35 @@ export default () => {
           )
         ) {
           setSwapAmount(true)
+          setPriceImpact(true)
         }
 
         try {
+          amount =
+            utils.parseUnits(
+              amount
+                .toString(),
+              (origin === 'x' ?
+                x_asset_data :
+                y_asset_data
+              )?.decimals ||
+              18,
+            )
+            .toString()
+
+          calculateSwapPriceImpact(
+            domainId,
+            amount,
+            (origin === 'x' ?
+              x_asset_data :
+              y_asset_data
+            )?.contract_address,
+            (origin === 'x' ?
+              y_asset_data :
+              x_asset_data
+            )?.contract_address,
+          )
+
           console.log(
             '[getPoolTokenIndex]',
             {
@@ -1516,19 +1543,7 @@ export default () => {
                   x_asset_data
                 )?.contract_address,
               )
- 
-          amount =
-            utils.parseUnits(
-              amount
-                .toString(),
-              (origin === 'x' ?
-                x_asset_data :
-                y_asset_data
-              )?.decimals ||
-              18,
-            )
-            .toString()
- 
+
           console.log(
             '[calculateSwap]',
             {
@@ -1539,7 +1554,7 @@ export default () => {
               amount,
             },
           )
- 
+
           const _amount =
             await sdk.nxtpSdkPool
               .calculateSwap(
@@ -1549,7 +1564,7 @@ export default () => {
                 tokenIndexTo,
                 amount,
               )
- 
+
           console.log(
             '[amountToReceive]',
             {
@@ -1601,7 +1616,58 @@ export default () => {
     }
     else {
       setSwapAmount(null)
+      setPriceImpact(null)
     }
+  }
+
+  const calculateSwapPriceImpact = async (
+    domainId,
+    amount,
+    x_contract_address,
+    y_contract_address,
+  ) => {
+    console.log(
+      '[calculateSwapPriceImpact]',
+      {
+        domainId,
+        amount,
+        x_contract_address,
+        y_contract_address,
+      },
+    )
+
+    const price_impact =
+      await sdk.nxtpSdkPool
+        .calculateSwapPriceImpact(
+          domainId,
+          amount,
+          x_contract_address,
+          y_contract_address,
+        )
+
+    console.log(
+      '[swapPriceImpact]',
+      {
+        domainId,
+        amount,
+        x_contract_address,
+        y_contract_address,
+        price_impact,
+      },
+    )
+
+    setPriceImpact(
+      Number(
+        utils.formatUnits(
+          BigNumber.from(
+            price_impact ||
+            '0'
+          ),
+          18,
+        )
+      ) *
+      100
+    )
   }
 
   const headMeta =
@@ -1655,7 +1721,6 @@ export default () => {
     symbol,
     symbols,
     rate,
-    price_impact,
   } = { ...pair }
   const {
     color,
@@ -2621,7 +2686,7 @@ export default () => {
                       </div>
                     </div>
                     {
-                      typeof price_impact === 'number' &&
+                      typeof priceImpact === 'number' &&
                       (
                         <div className="flex items-center justify-between space-x-1">
                           <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
@@ -2630,7 +2695,7 @@ export default () => {
                           <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
                             <span>
                               {number_format(
-                                price_impact,
+                                priceImpact,
                                 '0,0.000000',
                                 true,
                               )}
@@ -2683,6 +2748,7 @@ export default () => {
                       web3_provider
                     ) ?
                       !callResponse &&
+                      typeof amount === 'number' &&
                       (
                         amount > (
                           origin === 'x' ?
@@ -2756,7 +2822,9 @@ export default () => {
                                         'Checking Approval' :
                                   swapAmount === true ?
                                     'Calculating' :
-                                    'Swap'
+                                    typeof amount === 'number' ?
+                                      'Swap' :
+                                      'Enter amount'
                                 }
                               </span>
                             </span>

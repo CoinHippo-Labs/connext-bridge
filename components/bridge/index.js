@@ -3340,6 +3340,7 @@ export default () => {
                           </span>
                         </Wallet> :
                         !xcall &&
+                        typeof amount === 'number' &&
                         (
                           amount > source_amount ||
                           amount < min_amount ||
