@@ -2595,11 +2595,11 @@ export default () => {
                                     slippage:
                                       value &&
                                       !isNaN(value) ?
-                                      parseFloat(
-                                        Number(value)
-                                          .toFixed(2)
-                                      ) :
-                                      value,
+                                        parseFloat(
+                                          Number(value)
+                                            .toFixed(2)
+                                        ) :
+                                        value,
                                   }
 
                                   console.log(
@@ -2689,10 +2689,10 @@ export default () => {
                       typeof priceImpact === 'number' &&
                       (
                         <div className="flex items-center justify-between space-x-1">
-                          <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
+                          <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
                             Price Impact
                           </div>
-                          <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
+                          <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
                             <span>
                               {number_format(
                                 priceImpact,

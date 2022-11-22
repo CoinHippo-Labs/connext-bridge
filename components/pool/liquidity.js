@@ -6,7 +6,7 @@ import moment from 'moment'
 import { BigNumber, FixedNumber, utils } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
 import Switch from 'react-switch'
-import { TailSpin, Watch, RotatingSquare } from 'react-loader-spinner'
+import { TailSpin, Watch, RotatingSquare, Oval } from 'react-loader-spinner'
 import { Tooltip } from '@material-tailwind/react'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
@@ -109,13 +109,19 @@ export default ({
 
   const wallet_chain_id = wallet_data?.chain_id
 
-  const [action, setAction] = useState(_.head(ACTIONS))
+  const [action, setAction] =
+    useState(
+      _.head(ACTIONS)
+    )
   const [amountX, setAmountX] = useState(null)
   const [amountY, setAmountY] = useState(null)
   const [amount, setAmount] = useState(null)
   const [removeAmounts, setRemoveAmounts] = useState(null)
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [openOptions, setOpenOptions] = useState(false)
+
+  const [priceImpactAdd, setPriceImpactAdd] = useState(null)
+  const [priceImpactRemove, setPriceImpactRemove] = useState(null)
 
   const [approving, setApproving] = useState(null)
   const [approveProcessing, setApproveProcessing] = useState(null)
@@ -130,12 +136,68 @@ export default ({
   }, [action, pool])
 
   useEffect(() => {
+    setPriceImpactAdd(null)
+
     setApproveResponse(null)
     setCallResponse(null)
+
+    const {
+      chain,
+      asset,
+    } = { ...pool }
+
+    const chain_data = (chains_data || [])
+      .find(c =>
+        c?.id === chain
+      )
+
+    const pool_data = (pools_data || [])
+      .find(p =>
+        p?.chain_data?.id === chain &&
+        p.asset_data?.id === asset
+      )
+
+    const {
+      contract_data,
+      domainId,
+      tokens,
+      decimals,
+    } = { ...pool_data }
+    const {
+      contract_address,
+    } = { ...contract_data }
+
+    if (
+      domainId &&
+      contract_address &&
+      typeof amountX === 'number' &&
+      typeof amountY === 'number'
+    ) {
+      calculateAddLiquidityPriceImpact(
+        domainId,
+        contract_address,
+        utils.parseUnits(
+          amountX
+            .toString(),
+          _.head(decimals) ||
+          18,
+        )
+        .toString(),
+        utils.parseUnits(
+          amountY
+            .toString(),
+          _.last(decimals) ||
+          18,
+        )
+        .toString(),
+      )
+    }
   }, [amountX, amountY])
 
   useEffect(() => {
     const getData = async () => {
+      setPriceImpactRemove(null)
+
       if (typeof amount === 'number') {
         if (amount <= 0) {
           setRemoveAmounts(
@@ -208,6 +270,15 @@ export default ({
                 amounts,
               },
             )
+
+            if (amounts?.length > 1) {
+              calculateRemoveLiquidityPriceImpact(
+                domainId,
+                contract_address,
+                _.head(amounts),
+                _.last(amounts),
+              )
+            }
 
             setRemoveAmounts(
               (amounts || [])
@@ -893,6 +964,110 @@ export default ({
     }
   }
 
+  const calculateAddLiquidityPriceImpact = async (
+    domainId,
+    contract_address,
+    amountX,
+    amountY,
+  ) => {
+    setPriceImpactAdd(true)
+
+    console.log(
+      '[calculateAddLiquidityPriceImpact]',
+      {
+        domainId,
+        contract_address,
+        amountX,
+        amountY,
+      },
+    )
+
+    const price_impact =
+      await sdk.nxtpSdkPool
+        .calculateAddLiquidityPriceImpact(
+          domainId,
+          contract_address,
+          amountX,
+          amountY,
+        )
+
+    console.log(
+      '[addLiquidityPriceImpact]',
+      {
+        domainId,
+        contract_address,
+        amountX,
+        amountY,
+        price_impact,
+      },
+    )
+
+    setPriceImpactAdd(
+      Number(
+        utils.formatUnits(
+          BigNumber.from(
+            price_impact ||
+            '0'
+          ),
+          18,
+        )
+      ) *
+      100
+    )
+  }
+
+  const calculateRemoveLiquidityPriceImpact = async (
+    domainId,
+    contract_address,
+    amountX,
+    amountY,
+  ) => {
+    setPriceImpactRemove(true)
+
+    console.log(
+      '[calculateRemoveLiquidityPriceImpact]',
+      {
+        domainId,
+        contract_address,
+        amountX,
+        amountY,
+      },
+    )
+
+    const price_impact =
+      await sdk.nxtpSdkPool
+        .calculateRemoveLiquidityPriceImpact(
+          domainId,
+          contract_address,
+          amountX,
+          amountY,
+        )
+
+    console.log(
+      '[removeLiquidityPriceImpact]',
+      {
+        domainId,
+        contract_address,
+        amountX,
+        amountY,
+        price_impact,
+      },
+    )
+
+    setPriceImpactRemove(
+      Number(
+        utils.formatUnits(
+          BigNumber.from(
+            price_impact ||
+            '0'
+          ),
+          18,
+        )
+      ) *
+      100
+    )
+  }
+
   const autoSetY = value => {
     if (typeof value === 'number') {
       if (value > 0) {
@@ -1342,11 +1517,11 @@ export default ({
                       slippage:
                         value &&
                         !isNaN(value) ?
-                        parseFloat(
-                          Number(value)
-                            .toFixed(2)
-                        ) :
-                        value,
+                          parseFloat(
+                            Number(value)
+                              .toFixed(2)
+                          ) :
+                          value,
                     }
 
                     setOptions(_data)
@@ -1427,11 +1602,11 @@ export default ({
                       deadline:
                         value &&
                         !isNaN(value) ?
-                        parseFloat(
-                          Number(value)
-                            .toFixed(2)
-                        ) :
-                        value,
+                          parseFloat(
+                            Number(value)
+                              .toFixed(2)
+                          ) :
+                          value,
                     }
 
                     setOptions(_data)
@@ -1597,7 +1772,8 @@ export default ({
                         value =
                           value < 0 ?
                             0 :
-                            !isNaN(value) ?
+                            !isNaN(value) &&
+                            value !== '' ?
                               parseFloat(
                                 Number(value)
                                   .toFixed(
@@ -1771,7 +1947,8 @@ export default ({
                         value =
                           value < 0 ?
                             0 :
-                            !isNaN(value) ?
+                            !isNaN(value) &&
+                            value !== '' ?
                               parseFloat(
                                 Number(value)
                                   .toFixed(
@@ -1833,6 +2010,36 @@ export default ({
                     )
                   }
                 </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between space-x-1">
+              <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
+                Price Impact
+              </div>
+              <div className="flex items-center text-xs font-semibold space-x-1">
+                {
+                  priceImpactAdd === true ?
+                    <Oval
+                      color={loader_color(theme)}
+                      width="16"
+                      height="16"
+                    /> :
+                    <>
+                      <span className="whitespace-nowrap">
+                        {typeof priceImpactAdd === 'number' ?
+                          number_format(
+                            priceImpactAdd,
+                            '0,0.000000',
+                            true,
+                          ) :
+                          '-'
+                        }
+                      </span>
+                      <span>
+                        %
+                      </span>
+                    </>
+                }
               </div>
             </div>
             {/*advancedOptions*/}
@@ -2035,7 +2242,7 @@ export default ({
                         href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs font-semibold"
+                        className="text-slate-400 dark:text-slate-500 text-xs font-medium"
                       >
                         Pool Tokens
                       </a> :
@@ -2107,7 +2314,8 @@ export default ({
                         value =
                           value < 0 ?
                             0 :
-                            !isNaN(value) ?
+                            !isNaN(value) &&
+                            value !== '' ?
                               parseFloat(
                                 Number(value)
                                   .toFixed(
@@ -2288,6 +2496,36 @@ export default ({
                     </span>
                   }
                 </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between space-x-1">
+              <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
+                Price Impact
+              </div>
+              <div className="flex items-center text-xs font-semibold space-x-1">
+                {
+                  priceImpactRemove === true ?
+                    <Oval
+                      color={loader_color(theme)}
+                      width="16"
+                      height="16"
+                    /> :
+                    <>
+                      <span className="whitespace-nowrap">
+                        {typeof priceImpactRemove === 'number' ?
+                          number_format(
+                            priceImpactRemove,
+                            '0,0.000000',
+                            true,
+                          ) :
+                          '-'
+                        }
+                      </span>
+                      <span>
+                        %
+                      </span>
+                    </>
+                }
               </div>
             </div>
             {/*advancedOptions*/}

@@ -255,11 +255,11 @@ export default ({
                                   [`${name}`]:
                                     value &&
                                     !isNaN(value) ?
-                                    parseFloat(
-                                      Number(value)
-                                        .toFixed(2)
-                                    ) :
-                                    value,
+                                      parseFloat(
+                                        Number(value)
+                                          .toFixed(2)
+                                      ) :
+                                      value,
                                 }
 
                                 console.log(

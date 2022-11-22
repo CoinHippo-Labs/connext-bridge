@@ -2560,7 +2560,8 @@ export default () => {
                                 value < 0 ?
                                   0 :
                                   value &&
-                                  !isNaN(value) ?
+                                  !isNaN(value) &&
+                                  value !== '' ?
                                     parseFloat(
                                       Number(value)
                                         .toFixed(source_decimals)
@@ -2841,7 +2842,8 @@ export default () => {
                                   value < 0 ?
                                     0 :
                                     value &&
-                                    !isNaN(value) ?
+                                    !isNaN(value) &&
+                                    value !== '' ?
                                       parseFloat(
                                         Number(value)
                                           .toFixed(source_decimals)
@@ -3017,11 +3019,11 @@ export default () => {
                                                               slippage:
                                                                 value &&
                                                                 !isNaN(value) ?
-                                                                parseFloat(
-                                                                  Number(value)
-                                                                    .toFixed(2)
-                                                                ) :
-                                                                value,
+                                                                  parseFloat(
+                                                                    Number(value)
+                                                                      .toFixed(2)
+                                                                  ) :
+                                                                  value,
                                                             }
 
                                                             console.log(
