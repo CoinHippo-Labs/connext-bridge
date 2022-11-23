@@ -2897,7 +2897,7 @@ export default () => {
                                               undefined,
                                           )
                                           .trim() ||
-                                          message,
+                                        message,
                                         128,
                                       )}
                                     </span>

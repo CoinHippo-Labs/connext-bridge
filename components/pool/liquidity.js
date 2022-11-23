@@ -300,7 +300,7 @@ export default ({
               },
             )
 
-            const amounts =
+            let amounts =
               await sdk.nxtpSdkPool
                 .calculateRemoveSwapLiquidity(
                   domainId,
@@ -319,6 +319,40 @@ export default ({
             )
 
             if (amounts?.length > 1) {
+              console.log(
+                '[getPoolTokenIndex]',
+                {
+                  domainId,
+                  contract_address,
+                  tokenAddress: contract_address,
+                },
+              )
+
+              const tokenIndex =
+                await sdk.nxtpSdkPool
+                  .getPoolTokenIndex(
+                    domainId,
+                    contract_address,
+                    contract_address,
+                  )
+
+              console.log(
+                '[poolTokenIndex]',
+                {
+                  domainId,
+                  contract_address,
+                  tokenAddress: contract_address,
+                  tokenIndex,
+                },
+              )
+
+              if (tokenIndex === 1) {
+                amounts =
+                  _.reverse(
+                    _.cloneDeep(amounts)
+                  )
+              }
+
               calculateRemoveLiquidityPriceImpact(
                 domainId,
                 contract_address,
@@ -401,6 +435,7 @@ export default ({
     setCalling(true)
 
     let success = false
+    let failed = false
 
     if (sdk) {
       const {
@@ -482,10 +517,8 @@ export default ({
           )
           .valueOf()
 
-      let failed = false
-
       switch (action) {
-        case 'add':
+        case 'deposit':
           if (
             !(
               typeof amountX === 'number' &&
@@ -710,7 +743,10 @@ export default ({
               )
 
               if (tokenIndex === 1) {
-                amounts = _.reverse(amount)
+                amounts =
+                  _.reverse(
+                    _.cloneDeep(amounts)
+                  )
               }
 
               console.log(
@@ -1043,6 +1079,20 @@ export default ({
       if (onFinish) {
         onFinish()
       }
+
+      if (!failed) {
+        switch (action) {
+          case 'deposit':
+            setAmountX(null)
+            setAmountY(null)
+            break
+          case 'withdraw':
+            setAmount(null)
+            break
+          default:
+            break
+        }
+      }
     }
   }
 
@@ -1289,9 +1339,11 @@ export default ({
     1
 
   const _image = contract_data?.image
+
   const image_paths =
     (_image || '')
       .split('/')
+
   const image_name = _.last(image_paths)
 
   const x_asset_data =
@@ -1466,6 +1518,22 @@ export default ({
     lpTokenBalance,
   } = { ...user_pool_data }
 
+  const x_remove_amount =
+    equals_ignore_case(
+      _.head(tokens),
+      contract_address,
+    ) ?
+      _.head(removeAmounts) :
+      _.last(removeAmounts)
+
+  const y_remove_amount =
+    equals_ignore_case(
+      _.head(tokens),
+      contract_address,
+    ) ?
+      _.last(removeAmounts) :
+      _.head(removeAmounts)
+
   const position_loading =
     selected &&
     !no_pool &&
@@ -1479,8 +1547,12 @@ export default ({
     action === 'withdraw' ?
       amount &&
       amount <= lpTokenBalance :
-      amountX &&
-      amountY &&
+      typeof amountX === 'number' &&
+      typeof amountY === 'number' &&
+      (
+        amountX ||
+        amountY
+      ) &&
       amountX <= x_balance_amount &&
       amountY <= y_balance_amount
 
@@ -2195,11 +2267,11 @@ export default ({
                           icon={
                             status === 'failed' ?
                               <BiMessageError
-                                className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
+                                className="w-4 h-4 stroke-current mr-2.5"
                               /> :
                               status === 'success' ?
                                 <BiMessageCheck
-                                  className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
+                                  className="w-4 h-4 stroke-current mr-2.5"
                                 /> :
                                 status === 'pending' ?
                                   <div className="mr-2.5">
@@ -2210,7 +2282,7 @@ export default ({
                                     />
                                   </div> :
                                   <BiMessageDetail
-                                    className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
+                                    className="w-4 h-4 stroke-current mr-2.5"
                                   />
                           }
                           closeDisabled={true}
@@ -2237,7 +2309,7 @@ export default ({
                                       undefined,
                                   )
                                   .trim() ||
-                                  message,
+                                message,
                                 128,
                               )}
                             </span>
@@ -2258,14 +2330,20 @@ export default ({
                                   </a>
                                 )}
                               {status === 'failed' ?
-                                <button
-                                  onClick={() => reset()}
-                                  className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                                >
-                                  <MdClose
-                                    size={16}
+                                <>
+                                  <Copy
+                                    value={message}
+                                    className="cursor-pointer text-slate-200 hover:text-white"
                                   />
-                                </button> :
+                                  <button
+                                    onClick={() => reset()}
+                                    className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
+                                  >
+                                    <MdClose
+                                      size={16}
+                                    />
+                                  </button>
+                                </> :
                                 status === 'success' ?
                                   <button
                                     onClick={() => reset()}
@@ -2316,7 +2394,9 @@ export default ({
                                   typeof approving === 'boolean' ?
                                     'Please Confirm' :
                                     'Checking Approval' :
-                              'Supply'
+                              !valid_amount ?
+                                'Enter amount' :
+                                'Supply'
                             }
                           </span>
                         </span>
@@ -2480,20 +2560,24 @@ export default ({
 
                           try {
                             _amount =
-                              Number(
-                                FixedNumber.fromString(
-                                  (
-                                    lpTokenBalance ||
-                                    0
+                              parseFloat(
+                                Number(
+                                  FixedNumber.fromString(
+                                    (
+                                      lpTokenBalance ||
+                                      0
+                                    )
+                                    .toString()
+                                  )
+                                  .mulUnsafe(
+                                    FixedNumber.fromString(
+                                      p
+                                        .toString()
+                                    )
                                   )
                                   .toString()
                                 )
-                                .mulUnsafe(
-                                  FixedNumber.fromString(
-                                    p.toString()
-                                  )
-                                )
-                                .toString()
+                                .toFixed(18)
                               )
                           } catch (error) {
                             _amount = 0
@@ -2528,10 +2612,10 @@ export default ({
                       </div>
                   }
                   {web3_provider ?
-                    !isNaN(_.head(removeAmounts)) ?
+                    !isNaN(x_remove_amount) ?
                       <span className="text-xs">
                         {number_format(
-                          _.head(removeAmounts) ||
+                          x_remove_amount ||
                           0,
                           '0,0.000000',
                           true,
@@ -2572,10 +2656,10 @@ export default ({
                       </div>
                   }
                   {web3_provider ?
-                    !isNaN(_.last(removeAmounts)) ?
+                    !isNaN(y_remove_amount) ?
                       <span className="text-xs">
                         {number_format(
-                          _.last(removeAmounts) ||
+                          y_remove_amount ||
                           0,
                           '0,0.000000',
                           true,
@@ -2680,11 +2764,11 @@ export default ({
                           icon={
                             status === 'failed' ?
                               <BiMessageError
-                                className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
+                                className="w-4 h-4 stroke-current mr-2.5"
                               /> :
                               status === 'success' ?
                                 <BiMessageCheck
-                                  className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
+                                  className="w-4 h-4 stroke-current mr-2.5"
                                 /> :
                                 status === 'pending' ?
                                   <div className="mr-2.5">
@@ -2695,7 +2779,7 @@ export default ({
                                     />
                                   </div> :
                                   <BiMessageDetail
-                                    className="w-4 sm:w-5 h-4 sm:h-5 stroke-current mr-2.5"
+                                    className="w-4 h-4 stroke-current mr-2.5"
                                   />
                           }
                           closeDisabled={true}
@@ -2720,7 +2804,7 @@ export default ({
                                       undefined,
                                   )
                                   .trim() ||
-                                  message,
+                                message,
                                 128,
                               )}
                             </span>
@@ -2742,14 +2826,20 @@ export default ({
                                 )
                               }
                               {status === 'failed' ?
-                                <button
-                                  onClick={() => reset()}
-                                  className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                                >
-                                  <MdClose
-                                    size={16}
+                                <>
+                                  <Copy
+                                    value={message}
+                                    className="cursor-pointer text-slate-200 hover:text-white"
                                   />
-                                </button> :
+                                  <button
+                                    onClick={() => reset()}
+                                    className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
+                                  >
+                                    <MdClose
+                                      size={16}
+                                    />
+                                  </button>
+                                </> :
                                 status === 'success' ?
                                   <button
                                     onClick={() => reset()}
@@ -2800,7 +2890,9 @@ export default ({
                                   typeof approving === 'boolean' ?
                                     'Please Confirm' :
                                     'Checking Approval' :
-                              'Withdraw'
+                              !valid_amount ?
+                                'Enter amount' :
+                                'Withdraw'
                             }
                           </span>
                         </span>
