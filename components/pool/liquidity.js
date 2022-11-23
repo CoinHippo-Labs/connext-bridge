@@ -488,7 +488,11 @@ export default ({
         case 'add':
           if (
             !(
-              amountX &&
+              typeof amountX === 'number' &&
+              typeof amountY === 'number'
+            ) ||
+            !(
+              amountX ||
               amountY
             )
           ) {
@@ -498,7 +502,7 @@ export default ({
             break
           }
 
-          const amounts =
+          let amounts =
             [
               utils.parseUnits(
                 amountX
@@ -678,6 +682,37 @@ export default ({
 
           if (!failed) {
             try {
+              console.log(
+                '[getPoolTokenIndex]',
+                {
+                  domainId,
+                  contract_address,
+                  tokenAddress: contract_address,
+                },
+              )
+
+              const tokenIndex =
+                await sdk.nxtpSdkPool
+                  .getPoolTokenIndex(
+                    domainId,
+                    contract_address,
+                    contract_address,
+                  )
+
+              console.log(
+                '[poolTokenIndex]',
+                {
+                  domainId,
+                  contract_address,
+                  tokenAddress: contract_address,
+                  tokenIndex,
+                },
+              )
+
+              if (tokenIndex === 1) {
+                amounts = _.reverse(amount)
+              }
+
               console.log(
                 '[Add Liquidity]',
                 {
