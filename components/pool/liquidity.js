@@ -136,62 +136,109 @@ export default ({
   }, [action, pool])
 
   useEffect(() => {
-    setPriceImpactAdd(null)
+    const getData = async () => {
+      setPriceImpactAdd(null)
 
-    setApproveResponse(null)
-    setCallResponse(null)
+      setApproveResponse(null)
+      setCallResponse(null)
 
-    const {
-      chain,
-      asset,
-    } = { ...pool }
+      const {
+        chain,
+        asset,
+      } = { ...pool }
 
-    const chain_data = (chains_data || [])
-      .find(c =>
-        c?.id === chain
-      )
+      const chain_data = (chains_data || [])
+        .find(c =>
+          c?.id === chain
+        )
 
-    const pool_data = (pools_data || [])
-      .find(p =>
-        p?.chain_data?.id === chain &&
-        p.asset_data?.id === asset
-      )
+      const pool_data = (pools_data || [])
+        .find(p =>
+          p?.chain_data?.id === chain &&
+          p.asset_data?.id === asset
+        )
 
-    const {
-      contract_data,
-      domainId,
-      tokens,
-      decimals,
-    } = { ...pool_data }
-    const {
-      contract_address,
-    } = { ...contract_data }
-
-    if (
-      domainId &&
-      contract_address &&
-      typeof amountX === 'number' &&
-      typeof amountY === 'number'
-    ) {
-      calculateAddLiquidityPriceImpact(
+      const {
+        contract_data,
         domainId,
+        tokens,
+        decimals,
+      } = { ...pool_data }
+      const {
         contract_address,
-        utils.parseUnits(
-          amountX
-            .toString(),
-          _.head(decimals) ||
-          18,
+      } = { ...contract_data }
+
+      if (
+        domainId &&
+        contract_address &&
+        typeof amountX === 'number' &&
+        typeof amountY === 'number'
+      ) {
+        console.log(
+          '[getPoolTokenIndex]',
+          {
+            domainId,
+            contract_address,
+            tokenAddress: contract_address,
+          },
         )
-        .toString(),
-        utils.parseUnits(
-          amountY
-            .toString(),
-          _.last(decimals) ||
-          18,
+
+        const tokenIndex =
+          await sdk.nxtpSdkPool
+            .getPoolTokenIndex(
+              domainId,
+              contract_address,
+              contract_address,
+            )
+
+        console.log(
+          '[poolTokenIndex]',
+          {
+            domainId,
+            contract_address,
+            tokenAddress: contract_address,
+            tokenIndex,
+          },
         )
-        .toString(),
-      )
+
+        calculateAddLiquidityPriceImpact(
+          domainId,
+          contract_address,
+          utils.parseUnits(
+            (
+              tokenIndex === 0 ?
+                amountX :
+                amountY
+            )
+            .toString(),
+            (
+              tokenIndex === 0 ?
+                _.head(decimals) :
+                _.last(decimals)
+            ) ||
+            18,
+          )
+          .toString(),
+          utils.parseUnits(
+            (
+              tokenIndex === 0 ?
+                amountY :
+                amountX
+            )
+            .toString(),
+            (
+              tokenIndex === 0 ?
+                _.last(decimals) :
+                _.head(decimals)
+            ) ||
+            18,
+          )
+          .toString(),
+        )
+      }
     }
+
+    getData()
   }, [amountX, amountY])
 
   useEffect(() => {
@@ -1790,6 +1837,11 @@ export default ({
                             value
 
                         setAmountX(value)
+
+                        if (typeof amountY !== 'number') {
+                          setAmountY(0)
+                        }
+
                         // autoSetY(value)
                       }}
                       onWheel={e => e.target.blur()}
@@ -1806,6 +1858,11 @@ export default ({
                     {/*<div
                       onClick={() => {
                         setAmountX(x_balance_amount)
+
+                        if (typeof amountY !== 'number') {
+                          setAmountY(0)
+                        }
+
                         // autoSetY(x_balance_amount)
                       }}
                       className={`${disabled || typeof x_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-200 dark:bg-slate-800 rounded-lg text-blue-400 dark:text-slate-200 text-base font-medium py-0.5 px-2.5`}
@@ -1970,6 +2027,11 @@ export default ({
                             value
 
                         setAmountY(value)
+
+                        if (typeof amountX !== 'number') {
+                          setAmountX(0)
+                        }
+
                         // autoSetX(value)
                       }}
                       onWheel={e => e.target.blur()}
@@ -1986,6 +2048,11 @@ export default ({
                     {/*<div
                       onClick={() => {
                         setAmountY(y_balance_amount)
+
+                        if (typeof amountX !== 'number') {
+                          setAmountX(0)
+                        }
+
                         // autoSetX(y_balance_amount)
                       }}
                       className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-200 dark:bg-slate-800 rounded-lg text-blue-400 dark:text-slate-200 text-sm font-medium py-0.5 px-2.5`}

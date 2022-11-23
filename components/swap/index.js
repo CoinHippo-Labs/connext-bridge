@@ -1531,7 +1531,8 @@ export default () => {
                   y_asset_data :
                   x_asset_data
                 )?.contract_address,
-            })
+            },
+          )
 
           const tokenIndexTo =
             await sdk.nxtpSdkPool
