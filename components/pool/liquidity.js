@@ -12,6 +12,7 @@ import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
 import { BiPlus, BiCaretUp, BiCaretDown, BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
 import { HiSwitchHorizontal } from 'react-icons/hi'
+import { IoWarning } from 'react-icons/io5'
 
 import GasPrice from '../gas-price'
 import Balance from '../balance'
@@ -2186,35 +2187,56 @@ export default ({
                 </div>
               </div>
             </div>
-            <div className="flex items-center justify-between space-x-1">
-              <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
-                Price Impact
+            <div className="space-y-2">
+              <div className="flex items-center justify-between space-x-1">
+                <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
+                  Price Impact
+                </div>
+                <div className="flex items-center text-xs font-semibold space-x-1">
+                  {
+                    priceImpactAdd === true ?
+                      <Oval
+                        color={loader_color(theme)}
+                        width="16"
+                        height="16"
+                      /> :
+                      <>
+                        <span className="whitespace-nowrap">
+                          {typeof priceImpactAdd === 'number' ?
+                            number_format(
+                              priceImpactAdd,
+                              '0,0.000000',
+                              true,
+                            ) :
+                            '-'
+                          }
+                        </span>
+                        <span>
+                          %
+                        </span>
+                      </>
+                  }
+                </div>
               </div>
-              <div className="flex items-center text-xs font-semibold space-x-1">
-                {
-                  priceImpactAdd === true ?
-                    <Oval
-                      color={loader_color(theme)}
-                      width="16"
-                      height="16"
-                    /> :
-                    <>
-                      <span className="whitespace-nowrap">
-                        {typeof priceImpactAdd === 'number' ?
-                          number_format(
-                            priceImpactAdd,
-                            '0,0.000000',
-                            true,
-                          ) :
-                          '-'
-                        }
+              {
+                priceImpactAdd < 0 &&
+                (
+                  <div className="bg-yellow-50 dark:bg-yellow-200 bg-opacity-50 dark:bg-opacity-10 rounded flex items-start space-x-2 p-2">
+                    <IoWarning
+                      size={16}
+                      className="min-w-max text-yellow-500 dark:text-yellow-400"
+                    />
+                    <div className="flex flex-col space-y-0.5">
+                      <span className="text-xs font-bold">
+                        Price impact is negative
                       </span>
-                      <span>
-                        %
+                      <span className="text-xs">
+                        The pools is currently overweighted in {y_asset_data?.symbol}. Providing {x_asset_data?.symbol} instead will give you positive price impact and bonus LP tokens.
                       </span>
-                    </>
-                }
-              </div>
+                    </div>
+                  </div>
+                )
+              }
             </div>
             {/*advancedOptions*/}
             <div className="flex items-end">
