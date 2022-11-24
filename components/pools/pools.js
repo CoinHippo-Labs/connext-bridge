@@ -125,8 +125,9 @@ export default ({
         {view === 'pools' ?
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {
-              data
-                .flatMap(d => {
+              _.orderBy(
+                data
+                  .flatMap(d => {
                   const {
                     pools,
                   } = { ...d }
@@ -140,257 +141,320 @@ export default ({
                       })
                   )
                 })
-                .map((d, i) => {
-                  const {
-                    chain_data,
-                    contract_data,
-                    name,
-                    tokens,
-                    symbols,
-                    balances,
-                    decimals,
-                    apy,
-                    rate,
-                  } = { ...d }
-                  let {
-                    asset_data,
-                  } = { ...d }
+                  .map((d, i) => {
+                    const {
+                      balances,
+                      decimals,
+                      rate,
+                    } = { ...d }
+                    let {
+                      asset_data,
+                    } = { ...d }
 
-                  const {
-                    contract_address,
-                    next_asset,
-                  } = { ...contract_data }
+                    asset_data =
+                      (assets_data || [])
+                        .find(a =>
+                          a?.id === asset_data?.id
+                        ) ||
+                      asset_data
 
-                  asset_data =
-                    (assets_data || [])
-                      .find(a =>
-                        a?.id === asset_data?.id
-                      ) ||
-                    asset_data
+                    const {
+                      price,
+                    } = { ...asset_data }
 
-                  const {
-                    price,
-                  } = { ...asset_data }
+                    const _balances =
+                      (balances || [])
+                        .map((b, i) =>
+                          utils.formatUnits(
+                            b,
+                            decimals?.[i] ||
+                            18,
+                          )
+                        )
 
-                  const chain = chain_data?.id
-                  const asset = asset_data?.id
+                    const tvl =
+                      typeof price === 'number' ?
+                        _.sum(
+                          _balances
+                            .map((b, i) =>
+                              b /
+                              (
+                                i > 0 &&
+                                rate > 0 ?
+                                  rate :
+                                  1
+                              )
+                            )
+                        ) *
+                        price :
+                        0
 
-                  const images =
-                    (tokens || [])
-                      .map(a =>
-                        (
+                    return {
+                      ...d,
+                      tvl,
+                      i,
+                    }
+                  }),
+                [
+                  'tvl',
+                  'i',
+                ],
+                [
+                  'desc',
+                  'asc',
+                ],
+              )
+              .map((d, i) => {
+                const {
+                  chain_data,
+                  contract_data,
+                  name,
+                  tokens,
+                  symbols,
+                  balances,
+                  decimals,
+                  apy,
+                  rate,
+                } = { ...d }
+                let {
+                  asset_data,
+                } = { ...d }
+
+                const {
+                  contract_address,
+                  next_asset,
+                } = { ...contract_data }
+
+                asset_data =
+                  (assets_data || [])
+                    .find(a =>
+                      a?.id === asset_data?.id
+                    ) ||
+                  asset_data
+
+                const {
+                  price,
+                } = { ...asset_data }
+
+                const chain = chain_data?.id
+                const asset = asset_data?.id
+
+                const images =
+                  (tokens || [])
+                    .map(a =>
+                      (
+                        equals_ignore_case(
+                          a,
+                          contract_address,
+                        ) ?
+                          contract_data?.image :
                           equals_ignore_case(
                             a,
-                            contract_address,
+                            next_asset?.contract_address,
                           ) ?
+                            next_asset?.image ||
                             contract_data?.image :
-                            equals_ignore_case(
-                              a,
-                              next_asset?.contract_address,
-                            ) ?
-                              next_asset?.image ||
-                              contract_data?.image :
-                              null
-                        ) ||
-                        asset_data?.image
-                      )
+                            null
+                      ) ||
+                      asset_data?.image
+                    )
 
-                  const _balances =
-                    (balances || [])
-                      .map((b, i) =>
-                        utils.formatUnits(
+                const _balances =
+                  (balances || [])
+                    .map((b, i) =>
+                      utils.formatUnits(
+                        b,
+                        decimals?.[i] ||
+                        18,
+                      )
+                    )
+
+                const pair_balances =
+                  _balances
+                    .map((b, i) =>
+                      [
+                        symbols?.[i],
+                        number_format(
                           b,
-                          decimals?.[i] ||
-                          18,
+                          b > 1000 ?
+                            '0,0.00a' :
+                            b > 1 ?
+                              '0,0.00' :
+                              '0,0.000000000000',
                         )
+                        .toUpperCase(),
+                      ]
+                      .filter(s =>
+                        typeof s === 'string'
                       )
+                      .join(':\t')
+                    )
+                    .join('\n')
 
-                  const pair_balances =
-                    _balances
-                      .map((b, i) =>
-                        [
-                          symbols?.[i],
-                          number_format(
-                            b,
-                            b > 1000 ?
-                              '0,0.00a' :
-                              b > 1 ?
-                                '0,0.00' :
-                                '0,0.000000000000',
-                          )
-                          .toUpperCase(),
-                        ]
-                        .filter(s =>
-                          typeof s === 'string'
-                        )
-                        .join(':\t')
-                      )
-                      .join('\n')
-
-                  const tvl =
-                    typeof price === 'number' ?
-                      _.sum(
-                        _balances
-                          .map((b, i) =>
-                            b /
-                            (
-                              i > 0 &&
-                              rate > 0 ?
-                                rate :
-                                1
-                            )
-                          )
-                      ) *
-                      price :
-                      pair_balances
-
-                  return (
-                    <Link
-                      key={i}
-                      href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                    >
-                    <a
-                      className="bg-slate-50 hover:bg-slate-100 dark:bg-black dark:hover:bg-slate-900 rounded border dark:border-slate-800 space-y-12 p-5"
-                    >
-                      <div className="flex items-center space-x-3">
-                        {
-                          chain_data?.image &&
+                const tvl =
+                  typeof price === 'number' ?
+                    _.sum(
+                      _balances
+                        .map((b, i) =>
+                          b /
                           (
-                            <Image
-                              src={chain_data.image}
-                              alt=""
-                              width={24}
-                              height={24}
-                              className="rounded-full"
-                            />
+                            i > 0 &&
+                            rate > 0 ?
+                              rate :
+                              1
                           )
-                        }
-                        <span className="text-lg font-bold">
-                          <span className="mr-1">
-                            {chainName(chain_data)}
-                          </span>
-                          <span>
-                            {
-                              (name || '')
-                                .split('-')
-                                .join(' ')
-                            }
-                          </span>
+                        )
+                    ) *
+                    price :
+                    pair_balances
+
+                return (
+                  <Link
+                    key={i}
+                    href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                  >
+                  <a
+                    className="bg-slate-50 hover:bg-slate-100 dark:bg-black dark:hover:bg-slate-900 rounded border dark:border-slate-800 space-y-12 p-5"
+                  >
+                    <div className="flex items-center space-x-3">
+                      {
+                        chain_data?.image &&
+                        (
+                          <Image
+                            src={chain_data.image}
+                            alt=""
+                            width={24}
+                            height={24}
+                            className="rounded-full"
+                          />
+                        )
+                      }
+                      <span className="text-lg font-bold">
+                        <span className="mr-1">
+                          {chainName(chain_data)}
+                        </span>
+                        <span>
+                          {
+                            (name || '')
+                              .split('-')
+                              .join(' ')
+                          }
+                        </span>
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
+                      <div className="flex flex-col space-y-1">
+                        <span className="text-slate-400 dark:text-slate-500 font-medium">
+                          Assets
+                        </span>
+                        <div className="h-7 flex items-center">
+                          {
+                            images
+                              .map((image, i) => (
+                                <div
+                                  key={i}
+                                  className={`flex items-center ${i > 0 ? '-ml-1' : ''}`}
+                                >
+                                  <Tooltip
+                                    placement="top"
+                                    content={symbols?.[i]}
+                                    className="z-50 bg-dark text-white text-xs"
+                                  >
+                                    <div className="flex items-center">
+                                      <Image
+                                        src={image}
+                                        alt=""
+                                        width={20}
+                                        height={20}
+                                        className="rounded-full"
+                                      />
+                                    </div>
+                                  </Tooltip>
+                                </div>
+                              ))
+                          }
+                        </div>
+                      </div>
+                      <div className="flex flex-col space-y-1">
+                        <span className="text-slate-400 dark:text-slate-500 font-medium">
+                          TVL
+                        </span>
+                        <span className="text-lg font-semibold">
+                          {typeof tvl === 'number' ?
+                            <Tooltip
+                              placement="top"
+                              content={pair_balances}
+                              className="z-50 bg-dark whitespace-pre-wrap text-white text-xs"
+                            >
+                              <span className="uppercase">
+                                {currency_symbol}
+                                {number_format(
+                                  tvl,
+                                  tvl > 1000 ?
+                                    '0,0.00a' :
+                                    tvl > 1 ?
+                                      '0,0.00' :
+                                      '0,0.000000000000',
+                                )}
+                              </span>
+                            </Tooltip> :
+                            tvl ||
+                            '-'
+                          }
                         </span>
                       </div>
-                      <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
-                        <div className="flex flex-col space-y-1">
-                          <span className="text-slate-400 dark:text-slate-500 font-medium">
-                            Assets
-                          </span>
-                          <div className="h-7 flex items-center">
-                            {
-                              images
-                                .map((image, i) => (
-                                  <div
-                                    key={i}
-                                    className={`flex items-center ${i > 0 ? '-ml-1' : ''}`}
-                                  >
-                                    <Tooltip
-                                      placement="top"
-                                      content={symbols?.[i]}
-                                      className="z-50 bg-dark text-white text-xs"
+                      <div className="flex flex-col space-y-1">
+                        <span className="text-slate-400 dark:text-slate-500 font-medium">
+                          APY
+                        </span>
+                        <span className="text-lg font-semibold">
+                          {!isNaN(apy?.total) ?
+                            <Tooltip
+                              placement="top"
+                              content={
+                                Object.entries({ ...apy })
+                                  .map(([k, v]) => (
+                                    <div
+                                      key={k}
+                                      className="flex items-center justify-between space-x-1"
                                     >
-                                      <div className="flex items-center">
-                                        <Image
-                                          src={image}
-                                          alt=""
-                                          width={20}
-                                          height={20}
-                                          className="rounded-full"
-                                        />
-                                      </div>
-                                    </Tooltip>
-                                  </div>
-                                ))
-                            }
-                          </div>
-                        </div>
-                        <div className="flex flex-col space-y-1">
-                          <span className="text-slate-400 dark:text-slate-500 font-medium">
-                            TVL
-                          </span>
-                          <span className="text-lg font-semibold">
-                            {typeof tvl === 'number' ?
-                              <Tooltip
-                                placement="top"
-                                content={pair_balances}
-                                className="z-50 bg-dark whitespace-pre-wrap text-white text-xs"
-                              >
-                                <span className="uppercase">
-                                  {currency_symbol}
-                                  {number_format(
-                                    tvl,
-                                    tvl > 1000 ?
-                                      '0,0.00a' :
-                                      tvl > 1 ?
-                                        '0,0.00' :
-                                        '0,0.000000000000',
-                                  )}
-                                </span>
-                              </Tooltip> :
-                              tvl ||
-                              '-'
-                            }
-                          </span>
-                        </div>
-                        <div className="flex flex-col space-y-1">
-                          <span className="text-slate-400 dark:text-slate-500 font-medium">
-                            APY
-                          </span>
-                          <span className="text-lg font-semibold">
-                            {!isNaN(apy?.total) ?
-                              <Tooltip
-                                placement="top"
-                                content={
-                                  Object.entries({ ...apy })
-                                    .map(([k, v]) => (
-                                      <div
-                                        key={k}
-                                        className="flex items-center justify-between space-x-1"
-                                      >
-                                        <span className="capitalize">
-                                          {k}:
-                                        </span>
-                                        <span>
-                                          {!isNaN(v) ?
-                                            <>
-                                              {number_format(
-                                                v,
-                                                '0,0.00',
-                                                true,
-                                              )} %
-                                            </> :
-                                            '-'
-                                          }
-                                        </span>
-                                      </div>
-                                    ))
-                                }
-                                className="z-50 bg-dark whitespace-pre-wrap text-white text-xs"
-                              >
-                                <span>
-                                  {number_format(
-                                    apy.total,
-                                    '0,0.00',
-                                    true,
-                                  )} %
-                                </span>
-                              </Tooltip> :
-                              '-'
-                            }
-                          </span>
-                        </div>
+                                      <span className="capitalize">
+                                        {k}:
+                                      </span>
+                                      <span>
+                                        {!isNaN(v) ?
+                                          <>
+                                            {number_format(
+                                              v,
+                                              '0,0.00',
+                                              true,
+                                            )} %
+                                          </> :
+                                          '-'
+                                        }
+                                      </span>
+                                    </div>
+                                  ))
+                              }
+                              className="z-50 bg-dark whitespace-pre-wrap text-white text-xs"
+                            >
+                              <span>
+                                {number_format(
+                                  apy.total,
+                                  '0,0.00',
+                                  true,
+                                )} %
+                              </span>
+                            </Tooltip> :
+                            '-'
+                          }
+                        </span>
                       </div>
-                    </a>
-                    </Link>
-                  )
-                })
+                    </div>
+                  </a>
+                  </Link>
+                )
+              })
             }
           </div> :
           <Datatable
