@@ -314,7 +314,7 @@ export default ({
                                 />
                               )
                             }
-                            <span className="text-xs font-medium">
+                            <span className="uppercase text-xs font-medium">
                               {
                                 [
                                   'optimism',
@@ -370,7 +370,7 @@ export default ({
                     Liquidity provided
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {pool_loading ?
+                    {position_loading ?
                       <div>
                         <div className="mt-1">
                           <TailSpin
@@ -464,7 +464,7 @@ export default ({
                     My positions
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {pool_loading ?
+                    {position_loading ?
                       <div>
                         <div className="mt-1">
                           <TailSpin
