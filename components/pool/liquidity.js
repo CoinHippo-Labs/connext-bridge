@@ -1789,7 +1789,7 @@ export default ({
   )
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-0 pt-4 pb-5 px-4">
+    <div className="bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-3 pt-4 pb-5 px-4">
       <div className="flex items-center justify-between space-x-2">
         <span className="text-lg font-semibold">
           Manage Balance

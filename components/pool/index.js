@@ -861,7 +861,7 @@ export default () => {
                   )
                 }
               </div>*/}
-              <div className="flex flex-wrap items-center justify-between space-y-2 sm:space-y-0 sm:space-x-2">
+              <div className="flex flex-wrap items-center justify-between space-y-4 lg:space-y-0 sm:space-x-2">
                 <div className="flex items-center space-x-1">
                   <div className="flex items-center space-x-3 sm:space-x-4">
                     {
@@ -966,7 +966,7 @@ export default () => {
                     )
                     .length > 0 &&
                   (
-                    <div className="flex flex-col sm:items-end space-y-0">
+                    <div className="flex flex-col lg:items-end space-y-0">
                       <span className="text-slate-400 dark:text-slate-500 font-medium">
                         Convert to {
                           pool_tokens_data

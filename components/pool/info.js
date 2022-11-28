@@ -225,6 +225,7 @@ export default ({
   const metricClassName = 'bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 flex flex-col space-y-8 py-5 px-4'
   const titleClassName = 'text-slate-400 dark:text-slate-200 text-base font-medium'
   const valueClassName = 'text-lg sm:text-3xl font-bold'
+  const gridValueClassName = 'text-lg font-bold'
 
   return (
     <div className="sm:min-h-full bg-transparent">
@@ -255,7 +256,7 @@ export default ({
                           />
                         )
                       }
-                      <span className="uppercase text-xs font-medium">
+                      <span className="text-xs font-medium">
                         {asset_data?.symbol}
                       </span>
                     </div>
@@ -313,7 +314,7 @@ export default ({
                                 />
                               )
                             }
-                            <span className="uppercase text-xs font-medium">
+                            <span className="text-xs font-medium">
                               {
                                 [
                                   'optimism',
@@ -362,6 +363,174 @@ export default ({
                           )
                       }
                     </span>
+                  </div>
+                </div>
+                <div className={metricClassName}>
+                  <span className={titleClassName}>
+                    Liquidity provided
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {pool_loading ?
+                      <div>
+                        <div className="mt-1">
+                          <TailSpin
+                            color={loader_color(theme)}
+                            width="24"
+                            height="24"
+                          />
+                        </div>
+                      </div> :
+                      pool_tokens_data
+                        .map((p, i) => {
+                          const {
+                            contract_address,
+                            symbol,
+                            image,
+                            balance,
+                          } = { ...p }
+
+                          return (
+                            <div
+                              key={i}
+                              className="flex flex-col space-y-1"
+                            >
+                              <a
+                                href={`${url}${contract_path?.replace('{address}', contract_address)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center space-x-2"
+                              >
+                                {
+                                  image &&
+                                  (
+                                    <Image
+                                      src={image}
+                                      alt=""
+                                      width={16}
+                                      height={16}
+                                      className="rounded-full"
+                                    />
+                                  )
+                                }
+                                <span className="text-xs font-medium">
+                                  {symbol}
+                                </span>
+                              </a>
+                              <a
+                                href={`${url}${contract_path?.replace('{address}', contract_address)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={gridValueClassName}
+                              >
+                                {
+                                  pool_data &&
+                                  !error ?
+                                    <span className="uppercase">
+                                      {balance > -1 ?
+                                        number_format(
+                                          balance,
+                                          balance > 1000 ?
+                                            '0,0.00' :
+                                            '0,0.00000000',
+                                          true,
+                                        ) :
+                                        '-'
+                                      }
+                                    </span> :
+                                    selected &&
+                                    !no_pool &&
+                                    !error &&
+                                    (
+                                      pool_loading ?
+                                        <div className="mt-1">
+                                          <TailSpin
+                                            color={loader_color(theme)}
+                                            width="24"
+                                            height="24"
+                                          />
+                                        </div> :
+                                        '-'
+                                    )
+                                }
+                              </a>
+                            </div>
+                          )
+                        })
+                    }
+                  </div>
+                </div>
+                <div className={metricClassName}>
+                  <span className={titleClassName}>
+                    My positions
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {pool_loading ?
+                      <div>
+                        <div className="mt-1">
+                          <TailSpin
+                            color={loader_color(theme)}
+                            width="24"
+                            height="24"
+                          />
+                        </div>
+                      </div> :
+                      <>
+                        <div className="flex flex-col space-y-1">
+                          {
+                            lpTokenAddress &&
+                            url ?
+                              <a
+                                href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs font-medium"
+                              >
+                                Pool Tokens
+                              </a> :
+                              <span className="text-xs font-medium">
+                                Pool Tokens
+                              </span>
+                          }
+                          {
+                            lpTokenAddress &&
+                            url ?
+                              <a
+                                href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={gridValueClassName}
+                              >
+                                {number_format(
+                                  lpTokenBalance ||
+                                  0,
+                                  '0,0.000000000000',
+                                  true,
+                                )}
+                              </a> :
+                              number_format(
+                                lpTokenBalance ||
+                                0,
+                                '0,0.000000000000',
+                                true,
+                              )
+                          }
+                        </div>
+                        <div className="flex flex-col space-y-1">
+                          <span className="text-xs font-medium">
+                            Share
+                          </span>
+                          <span className={gridValueClassName}>
+                            {number_format(
+                              share ||
+                              0,
+                              '0,0.000000',
+                              true,
+                            )}
+                            %
+                          </span>
+                        </div>
+                      </>
+                    }
                   </div>
                 </div>
                 {/*<div className={metricClassName}>
@@ -432,7 +601,7 @@ export default ({
                 </div>*/}
               </div>
             </div>
-            <div className="space-y-4">
+            {/*<div className="space-y-4">
               <div className="flex items-center justify-between space-x-2">
                 <span className="text-lg font-semibold">
                   Reserve Info
@@ -647,7 +816,8 @@ export default ({
                               0,
                               '0,0.000000',
                               true,
-                            )} %
+                            )}
+                            %
                           </> :
                           selected &&
                           !no_pool &&
@@ -668,7 +838,7 @@ export default ({
                   </div>
                 </div>
               </div>
-            </div>
+            </div>*/}
           </div> :
           <div className="py-4">
             <TailSpin
