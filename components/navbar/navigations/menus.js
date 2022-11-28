@@ -20,10 +20,10 @@ export default [
   },
   {
     id: 'pools',
-    // title: 'Pools',
-    // path: '/pools',
-    title: 'Pool',
-    path: '/pool',
+    title: 'Pools',
+    path: '/pools',
+    // title: 'Pool',
+    // path: '/pool',
     others_paths: [
       '/pool',
       '/pool/[pool]',

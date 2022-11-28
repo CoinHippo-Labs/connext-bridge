@@ -1789,7 +1789,7 @@ export default ({
   )
 
   return (
-    <div className="space-y-4">
+    <div className="bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-0 pt-4 pb-5 px-4">
       <div className="flex items-center justify-between space-x-2">
         <span className="text-lg font-semibold">
           Manage Balance
@@ -1800,14 +1800,14 @@ export default ({
           className="text-xs"
         />
       </div>
-      <div className="bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-4 pb-5 px-4">
-        <div className="border-b dark:border-slate-800 flex items-center justify-between space-x-2">
+      <div className="space-y-4">
+        <div className="w-fit border-b dark:border-slate-800 flex items-center justify-between space-x-4">
           {ACTIONS
             .map((a, i) => (
               <div
                 key={i}
                 onClick={() => setAction(a)}
-                className={`w-full border-b-2 ${action === a ? 'border-slate-300 dark:border-slate-200 font-semibold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer capitalize text-base text-center py-5 px-3`}
+                className={`w-fit border-b-2 ${action === a ? 'border-slate-300 dark:border-slate-200 font-semibold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer capitalize text-sm text-left py-3 px-0`}
               >
                 {a}
               </div>

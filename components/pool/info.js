@@ -188,9 +188,9 @@ export default ({
         }
       })
 
-  const metricClassName = 'flex flex-col space-y-0.5'
-  const titleClassName = 'text-slate-400 dark:text-slate-400 text-base font-medium'
-  const valueClassName = 'text-lg sm:text-2xl font-bold'
+  const metricClassName = 'bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 flex flex-col space-y-8 py-5 px-4'
+  const titleClassName = 'text-slate-400 dark:text-slate-200 text-base font-medium'
+  const valueClassName = 'text-lg sm:text-3xl font-bold'
 
   return (
     <div className="sm:min-h-full bg-transparent">
@@ -199,41 +199,135 @@ export default ({
         pools_data ?
           <div className="space-y-6">
             <div className="space-y-4">
-              <div className="tracking-wider text-lg font-semibold">
+              {/*<div className="tracking-wider text-lg font-semibold">
                 Statistics
-              </div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              </div>*/}
+              <div className="grid grid-cols-2 lg:grid-cols-2 gap-2">
                 <div className={metricClassName}>
                   <span className={titleClassName}>
-                    Liquidity
+                    TVL
                   </span>
-                  <span className={valueClassName}>
-                    {
-                      pool_data &&
-                      !error ?
-                        number_format(
-                          liquidity,
-                          '0,0.000000',
-                          true,
-                        ) :
-                        selected &&
-                        !no_pool &&
-                        !error &&
+                  <div className="flex flex-col space-y-1">
+                    <div className="flex items-center space-x-2">
+                      {
+                        asset_data?.image &&
                         (
-                          pool_loading ?
-                            <div className="mt-1">
-                              <TailSpin
-                                color={loader_color(theme)}
-                                width="24"
-                                height="24"
-                              />
-                            </div> :
-                            '-'
+                          <Image
+                            src={asset_data.image}
+                            alt=""
+                            width={16}
+                            height={16}
+                            className="rounded-full"
+                          />
                         )
-                    }
-                  </span>
+                      }
+                      <span className="uppercase text-xs font-medium">
+                        {asset_data?.symbol}
+                      </span>
+                    </div>
+                    <span className={valueClassName}>
+                      {
+                        pool_data &&
+                        !error ?
+                          number_format(
+                            liquidity,
+                            '0,0.000000',
+                            true,
+                          ) :
+                          selected &&
+                          !no_pool &&
+                          !error &&
+                          (
+                            pool_loading ?
+                              <div className="mt-1">
+                                <TailSpin
+                                  color={loader_color(theme)}
+                                  width="24"
+                                  height="24"
+                                />
+                              </div> :
+                              '-'
+                          )
+                      }
+                    </span>
+                  </div>
                 </div>
                 <div className={metricClassName}>
+                  <span className={titleClassName}>
+                    Reward APY
+                  </span>
+                  <div className="flex flex-col space-y-1">
+                    {
+                      pool_data &&
+                      (
+                        [
+                          'optimism',
+                        ].includes(chain) ?
+                          <div className="flex items-center space-x-2">
+                            {
+                              chain_data?.image &&
+                              (
+                                <Image
+                                  src={chain_data.image}
+                                  alt=""
+                                  width={16}
+                                  height={16}
+                                  className="rounded-full"
+                                />
+                              )
+                            }
+                            <span className="uppercase text-xs font-medium">
+                              {
+                                [
+                                  'optimism',
+                                ].includes(chain) ?
+                                  chain
+                                    .slice(
+                                      0,
+                                      2,
+                                    ) :
+                                  chain_data?.short_name
+                              }
+                            </span>
+                          </div> :
+                          <div className="h-4" />
+                      )
+                    }
+                    <span className={valueClassName}>
+                      {
+                        pool_data &&
+                        !error ?
+                          [
+                            'optimism',
+                          ].includes(chain) ?
+                          'TBD' :
+                            <>
+                              {number_format(
+                                apy?.total,
+                                '0,0.00',
+                                true,
+                              )}
+                              %
+                            </> :
+                          selected &&
+                          !no_pool &&
+                          !error &&
+                          (
+                            pool_loading ?
+                              <div className="mt-1">
+                                <TailSpin
+                                  color={loader_color(theme)}
+                                  width="24"
+                                  height="24"
+                                />
+                              </div> :
+                              'TBD'
+                          )
+                      }
+                    </span>
+                  </div>
+                </div>
+                {/*<div className={metricClassName}>
                   <span className={titleClassName}>
                     Volume (24h)
                   </span>
@@ -298,64 +392,7 @@ export default ({
                         )
                     }
                   </span>
-                </div>
-                {
-                  false &&
-                  <div className={metricClassName}>
-                    <span className={titleClassName}>
-                      APY
-                    </span>
-                    <span className={valueClassName}>
-                      {
-                        pool_data &&
-                        !error ?
-                          /*<div className="grid sm:grid-cols-1 gap-1 mt-1">
-                            {Object.entries({ ...apy })
-                              .filter(([k, v]) => !isNaN(v))
-                              .map(([k, v]) => (
-                                <div
-                                  key={k}
-                                  className="flex items-center text-sm space-x-1"
-                                >
-                                  <span className="capitalize">
-                                    {k}
-                                  </span>
-                                  <span>
-                                    {number_format(
-                                      v,
-                                      '0,0.00',
-                                      true,
-                                    )} %
-                                  </span>
-                                </div>
-                              ))
-                            }
-                          </div>*/
-                          <span>
-                            {number_format(
-                              apy?.total,
-                              '0,0.00',
-                              true,
-                            )} %
-                          </span> :
-                          selected &&
-                          !no_pool &&
-                          !error &&
-                          (
-                            pool_loading ?
-                              <div className="mt-1">
-                                <TailSpin
-                                  color={loader_color(theme)}
-                                  width="24"
-                                  height="24"
-                                />
-                              </div> :
-                              '-'
-                          )
-                      }
-                    </span>
-                  </div>
-                }
+                </div>*/}
               </div>
             </div>
             <div className="space-y-4">

@@ -73,8 +73,8 @@ export default ({
               else {
                 path = '/pools'
               }*/
-              // path = '/pools'
-              path = '/pool'
+              path = '/pools'
+              // path = '/pool'
               break
             case 'swap':
               if (

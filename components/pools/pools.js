@@ -408,45 +408,80 @@ export default ({
                           APY
                         </span>
                         <span className="text-lg font-semibold">
-                          {!isNaN(apy?.total) ?
-                            <Tooltip
-                              placement="top"
-                              content={
-                                Object.entries({ ...apy })
-                                  .map(([k, v]) => (
-                                    <div
-                                      key={k}
-                                      className="flex items-center justify-between space-x-1"
-                                    >
-                                      <span className="capitalize">
-                                        {k}:
-                                      </span>
-                                      <span>
-                                        {!isNaN(v) ?
-                                          <>
-                                            {number_format(
-                                              v,
-                                              '0,0.00',
-                                              true,
-                                            )} %
-                                          </> :
-                                          '-'
-                                        }
-                                      </span>
-                                    </div>
-                                  ))
-                              }
-                              className="z-50 bg-dark whitespace-pre-wrap text-white text-xs"
-                            >
-                              <span>
-                                {number_format(
-                                  apy.total,
-                                  '0,0.00',
-                                  true,
-                                )} %
-                              </span>
-                            </Tooltip> :
-                            '-'
+                          {
+                            [
+                              'mainnet',
+                              'testnet',
+                            ].includes(process.env.NEXT_PUBLIC_NETWORK) &&
+                            [
+                              'optimism',
+                            ].includes(chain) ?
+                              <Tooltip
+                                placement="top"
+                                content={
+                                  <>
+                                    Rewards: $OP tokens
+                                  </>
+                                }
+                                className="z-50 bg-dark whitespace-pre-wrap text-white text-xs"
+                              >
+                                <div className="flex items-center">
+                                  <span className="mr-1.5">
+                                    TBD
+                                  </span>
+                                  {
+                                    chain_data?.image &&
+                                    (
+                                      <Image
+                                        src={chain_data.image}
+                                        alt=""
+                                        width={20}
+                                        height={20}
+                                        className="rounded-full"
+                                      />
+                                    )
+                                  }
+                                </div>
+                              </Tooltip> :
+                              !isNaN(apy?.total) ?
+                                <Tooltip
+                                  placement="top"
+                                  content={
+                                    Object.entries({ ...apy })
+                                      .map(([k, v]) => (
+                                        <div
+                                          key={k}
+                                          className="flex items-center justify-between space-x-1"
+                                        >
+                                          <span className="capitalize">
+                                            {k}:
+                                          </span>
+                                          <span>
+                                            {!isNaN(v) ?
+                                              <>
+                                                {number_format(
+                                                  v,
+                                                  '0,0.00',
+                                                  true,
+                                                )} %
+                                              </> :
+                                              '-'
+                                            }
+                                          </span>
+                                        </div>
+                                      ))
+                                  }
+                                  className="z-50 bg-dark whitespace-pre-wrap text-white text-xs"
+                                >
+                                  <span>
+                                    {number_format(
+                                      apy.total,
+                                      '0,0.00',
+                                      true,
+                                    )} %
+                                  </span>
+                                </Tooltip> :
+                                'TBD'
                           }
                         </span>
                       </div>
