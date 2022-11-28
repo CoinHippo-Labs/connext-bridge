@@ -2589,11 +2589,11 @@ export default () => {
                                   ].includes(e.key) &&
                                   e.preventDefault()
                                 }
-                                className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-900 dark:focus:bg-slate-800 rounded border-0 focus:ring-0 font-semibold text-right py-1 px-2`}
+                                className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 font-semibold text-right py-1 px-2`}
                               />
                               <button
                                 onClick={() => setSlippageEditing(false)}
-                                className="bg-slate-100 dark:bg-slate-900 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                                className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
                               >
                                 <BiCheckCircle
                                   size={16}
@@ -2767,7 +2767,7 @@ export default () => {
                               setSlippageEditing(false)
                               call()
                             }}
-                            className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-200 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
+                            className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
                           >
                             <span className="flex items-center justify-center space-x-1.5">
                               {
@@ -2930,7 +2930,7 @@ export default () => {
                       <button
                         disabled={true}
                         onClick={() => call()}
-                        className="w-full bg-slate-100 dark:bg-slate-900 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
+                        className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
                       >
                         {
                           !asset ?

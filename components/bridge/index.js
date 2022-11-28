@@ -3041,11 +3041,11 @@ export default () => {
                                                             ].includes(e.key) &&
                                                             e.preventDefault()
                                                           }
-                                                          className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-900 dark:focus:bg-slate-800 rounded border-0 focus:ring-0 font-semibold text-right py-1 px-2`}
+                                                          className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 font-semibold text-right py-1 px-2`}
                                                         />
                                                         <button
                                                           onClick={() => setSlippageEditing(false)}
-                                                          className="bg-slate-100 dark:bg-slate-900 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                                                          className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
                                                         >
                                                           <BiCheckCircle
                                                             size={16}
