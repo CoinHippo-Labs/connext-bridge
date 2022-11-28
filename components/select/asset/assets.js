@@ -305,7 +305,7 @@ export default ({
                   <div
                     key={i}
                     onClick={() => onSelect(a.id)}
-                    className="hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer flex items-center hover:font-semibold space-x-1 mr-1.5 py-1 px-1.5"
+                    className="hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded cursor-pointer flex items-center hover:font-semibold space-x-1 mr-1.5 py-1 px-1.5"
                   >
                     {
                       a.image &&
@@ -427,7 +427,7 @@ export default ({
                   </div>
                 )
 
-              const className = `dropdown-item ${disabled ? 'cursor-not-allowed' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'} rounded-lg flex items-center justify-between space-x-2 p-2`
+              const className = `dropdown-item ${disabled ? 'cursor-not-allowed' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'} rounded flex items-center justify-between space-x-2 p-2`
 
               return (
                 disabled ?

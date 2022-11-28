@@ -173,7 +173,7 @@ export default ({
                         .map((o, i) => (
                           <div
                             key={i}
-                            className="bg-blue-600 rounded-lg uppercase text-white text-lg font-semibold px-2"
+                            className="bg-blue-600 rounded uppercase text-white text-lg font-semibold px-2"
                           >
                             {o}
                           </div>
@@ -185,7 +185,7 @@ export default ({
               </>
             )
 
-            const className = `dropdown-item ${disabled ? 'cursor-not-allowed' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'} rounded-lg flex items-center justify-between space-x-2 p-2`
+            const className = `dropdown-item ${disabled ? 'cursor-not-allowed' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'} rounded flex items-center justify-between space-x-2 p-2`
 
             return (
               <div key={i}>

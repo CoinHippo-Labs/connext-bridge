@@ -76,43 +76,45 @@ export default ({
           <div
             className={
               className ||
-              "w-32 sm:w-48 min-w-max bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl flex items-center justify-center space-x-1.5 sm:space-x-2 py-1.5 sm:py-2 px-2 sm:px-3"
+              "w-32 sm:w-40 min-w-max bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded border dark:border-slate-700 flex items-center justify-between space-x-1.5 sm:space-x-2 py-1.5 sm:py-2 px-2"
             }
           >
-            {
-              image &&
-              (
-                <>
-                  <div className="flex sm:hidden">
-                    <Image
-                      src={image}
-                      alt=""
-                      width={18}
-                      height={18}
-                      className="rounded-full"
-                    />
-                  </div>
-                  <div className="hidden sm:flex">
-                    <Image
-                      src={image}
-                      alt=""
-                      width={24}
-                      height={24}
-                      className="rounded-full"
-                    />
-                  </div>
-                </>
-              )
-            }
-            <span className="whitespace-nowrap sm:text-lg font-semibold ml-2">
+            <div className="flex items-center space-x-2">
               {
-                chainName(chain_data) ||
-                (origin ?
-                  'Chain' :
-                  'Select chain'
+                image &&
+                (
+                  <>
+                    <div className="flex sm:hidden">
+                      <Image
+                        src={image}
+                        alt=""
+                        width={18}
+                        height={18}
+                        className="rounded-full"
+                      />
+                    </div>
+                    <div className="hidden sm:flex">
+                      <Image
+                        src={image}
+                        alt=""
+                        width={20}
+                        height={20}
+                        className="rounded-full"
+                      />
+                    </div>
+                  </>
                 )
               }
-            </span>
+              <span className="whitespace-nowrap sm:text-base font-semibold">
+                {
+                  chainName(chain_data) ||
+                  (origin ?
+                    'Chain' :
+                    'Select chain'
+                  )
+                }
+              </span>
+            </div>
             <BiChevronDown
               size={18}
               className="text-slate-400 dark:text-slate-200 ml-1.5 -mr-1"
@@ -126,7 +128,7 @@ export default ({
       }
       buttonClassName={
         className ||
-        `w-32 sm:w-48 min-w-max h-10 sm:h-12 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`
+        `w-32 sm:w-40 min-w-max h-10 sm:h-12 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`
       }
       title={
         <span className="flex items-center uppercase space-x-1">

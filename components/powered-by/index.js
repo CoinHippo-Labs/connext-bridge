@@ -4,7 +4,7 @@ import Image from '../image'
 
 export default () => {
   return (
-    <div className="w-full max-w-lg bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow dark:shadow-slate-600 rounded-xl space-y-3 p-4">
+    <div className="w-full max-w-lg bg-slate-50 dark:bg-slate-900 rounded border border-slate-100 dark:border-slate-800 shadow dark:shadow-slate-600 space-y-3 p-4">
       <div className="text-base font-bold">
         <span className="mr-1">
           The {process.env.NEXT_PUBLIC_APP_NAME} Bridge is powered by

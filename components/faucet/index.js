@@ -676,7 +676,7 @@ export default ({
       <div
         className={
           className ||
-          'w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl flex flex-col items-center justify-center space-y-2 mx-auto p-3 sm:p-6'
+          'w-full max-w-md bg-white dark:bg-slate-900 rounded border dark:border-slate-800 flex flex-col items-center justify-center space-y-2 mx-auto p-3 sm:p-6'
         }
       >
         <button
@@ -737,7 +737,7 @@ export default ({
                           asset_data?.symbol
                         }
                         trigger={trigger}
-                        className="bg-slate-200 dark:bg-slate-800 rounded-lg py-1.5 px-2.5"
+                        className="bg-slate-200 dark:bg-slate-800 rounded py-1.5 px-2.5"
                       />
                       <Balance
                         chainId={
@@ -759,7 +759,7 @@ export default ({
                           contract_data?.symbol
                         }
                         trigger={trigger}
-                        className="bg-slate-200 dark:bg-slate-800 rounded-lg py-1.5 px-2.5"
+                        className="bg-slate-200 dark:bg-slate-800 rounded py-1.5 px-2.5"
                       />
                     </div>
                   </div>
@@ -815,7 +815,7 @@ export default ({
                               }
                             )
                           }
-                          className="form-input border-0 focus:ring-0 rounded-lg"
+                          className="form-input rounded border-0 focus:ring-0"
                         />
                       }
                     </div>
@@ -847,7 +847,7 @@ export default ({
                           }
                         )
                       }}
-                      className={`bg-transparent hover:bg-slate-100 dark:hover:bg-slate-900 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg font-medium py-2 px-3`}
+                      className={`bg-transparent hover:bg-slate-100 dark:hover:bg-slate-900 ${disabled ? 'cursor-not-allowed' : ''} rounded font-medium py-2 px-3`}
                     >
                       Cancel
                     </button>
@@ -856,7 +856,7 @@ export default ({
                       (
                         <Wallet
                           connectChainId={chain_data?.chain_id}
-                          className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg flex items-center text-white text-sm font-medium space-x-1.5 py-2 px-3`}
+                          className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded flex items-center text-white text-sm font-medium space-x-1.5 py-2 px-3`}
                         >
                           <span className="mr-1 sm:mr-1.5">
                             {is_walletconnect ?
@@ -885,7 +885,7 @@ export default ({
                         <button
                           disabled={disabled}
                           onClick={() => mint()}
-                          className={`bg-blue-600 hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
+                          className={`bg-blue-600 hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
                         >
                           {
                             minting &&
@@ -931,7 +931,7 @@ export default ({
                             <button
                               disabled={disabled}
                               onClick={() => withdraw()}
-                              className={`bg-red-600 hover:bg-red-700 ${disabled ? 'cursor-not-allowed' : ''} rounded-lg flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
+                              className={`bg-red-600 hover:bg-red-700 ${disabled ? 'cursor-not-allowed' : ''} rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
                             >
                               {
                                 withdrawing &&

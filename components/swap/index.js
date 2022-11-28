@@ -21,7 +21,6 @@ import Image from '../image'
 import Wallet from '../wallet'
 import Alert from '../alerts'
 import Copy from '../copy'
-import meta from '../../lib/meta'
 import { params_to_obj, number_format, ellipse, equals_ignore_case, loader_color, sleep, error_patterns } from '../../lib/utils'
 import { POOLS_DATA, BALANCES_DATA } from '../../reducers/types'
 
@@ -1671,17 +1670,6 @@ export default () => {
     )
   }
 
-  const headMeta =
-    meta(
-      asPath,
-      null,
-      chains_data,
-      assets_data,
-    )
-  const {
-    title,
-  } = { ...headMeta }
-
   const {
     chain,
     asset,
@@ -1893,11 +1881,23 @@ export default () => {
       <div className="hidden lg:block col-span-0 lg:col-span-2" />
       <div className="col-span-1 lg:col-span-4">
         <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6 my-4 sm:my-6 mx-1 sm:mx-4">
-          <div className="w-full max-w-lg space-y-3">
-            <div className="flex items-center justify-between space-x-2 pb-1">
-              <div className="space-y-1 ml-1 sm:ml-2">
+          <div className="w-full max-w-md space-y-3">
+            <div
+              className="bg-white dark:bg-slate-900 rounded border dark:border-slate-800 space-y-6 pt-4 sm:pt-5 pb-6 sm:pb-7 px-4 sm:px-6"
+              style={
+                chain &&
+                color ?
+                  {
+                    boxShadow,
+                    WebkitBoxShadow: boxShadow,
+                    MozBoxShadow: boxShadow,
+                  } :
+                  undefined
+              }
+            >
+              <div className="flex items-center justify-between space-x-2">
                 <div className="flex items-center space-x-1.5">
-                  <h1 className="text-lg font-semibold">
+                  <h1 className="text-xl font-semibold">
                     Swap on
                   </h1>
                   <SelectChain
@@ -1953,73 +1953,43 @@ export default () => {
                             </>
                           )
                         }
-                        <span className="tracking-normal whitespace-nowrap text-base sm:text-xl font-semibold">
+                        <span className="whitespace-nowrap text-base sm:text-xl font-semibold">
                           {name}
                         </span>
                       </div>
                     )
                   */}
                 </div>
-                {
-                  false &&
-                  asPath?.includes('on-') &&
-                  title &&
-                  (
-                    <h2 className="tracking-normal text-slate-700 dark:text-slate-300 text-xs font-medium">
-                      {
-                        title
-                          .replace(
-                            ' with Connext',
-                            '',
+                <Options
+                  disabled={disabled}
+                  applied={
+                    !_.isEqual(
+                      Object.fromEntries(
+                        Object.entries(options)
+                          .filter(([k, v]) =>
+                            ![
+                              'slippage',
+                            ].includes(k)
                           )
-                      }
-                    </h2>
-                  )
-                }
+                      ),
+                      Object.fromEntries(
+                        Object.entries(DEFAULT_OPTIONS)
+                          .filter(([k, v]) =>
+                            ![
+                              'slippage',
+                            ].includes(k)
+                          )
+                      ),
+                    )
+                  }
+                  initialData={options}
+                  onChange={o => setOptions(o)}
+                />
               </div>
-              <Options
-                disabled={disabled}
-                applied={
-                  !_.isEqual(
-                    Object.fromEntries(
-                      Object.entries(options)
-                        .filter(([k, v]) =>
-                          ![
-                            'slippage',
-                          ].includes(k)
-                        )
-                    ),
-                    Object.fromEntries(
-                      Object.entries(DEFAULT_OPTIONS)
-                        .filter(([k, v]) =>
-                          ![
-                            'slippage',
-                          ].includes(k)
-                        )
-                    ),
-                  )
-                }
-                initialData={options}
-                onChange={o => setOptions(o)}
-              />
-            </div>
-            <div
-              className="bg-white dark:bg-slate-900 rounded-3xl space-y-6 pt-4 sm:pt-5 pb-6 sm:pb-7 px-4 sm:px-6"
-              style={
-                chain &&
-                color ?
-                  {
-                    boxShadow,
-                    WebkitBoxShadow: boxShadow,
-                    MozBoxShadow: boxShadow,
-                  } :
-                  undefined
-              }
-            >
               <div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between space-x-2">
-                    <span className="text-slate-600 dark:text-slate-200 text-sm font-medium">
+                    <span className="text-slate-600 dark:text-slate-500 text-sm font-medium">
                       Pay with
                     </span>
                     <GasPrice
@@ -2028,7 +1998,7 @@ export default () => {
                       className="text-xs pr-1"
                     />
                   </div>
-                  <div className="bg-slate-100 dark:bg-slate-800 rounded-lg space-y-0.5 py-3.5 px-3">
+                  <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-0.5 py-3.5 px-3">
                     <div className="flex items-center justify-between space-x-2">
                       <SelectAsset
                         disabled={disabled}
@@ -2147,12 +2117,12 @@ export default () => {
                           ].includes(e.key) &&
                           e.preventDefault()
                         }
-                        className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5`}
+                        className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg font-semibold text-right py-1.5`}
                       />
                     </div>
                     <div className="flex items-center justify-between space-x-2">
                       <div className="flex items-center space-x-1">
-                        <div className="tracking-normal text-slate-400 dark:text-slate-500 text-sm font-medium">
+                        <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
                           Balance:
                         </div>
                         {
@@ -2270,7 +2240,7 @@ export default () => {
                         getBalances(chain)
                       }
                     }}
-                    className={`bg-slate-200 hover:bg-slate-300 dark:bg-slate-900 dark:hover:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} rounded-full sm:border dark:border-slate-800 flex items-center justify-center p-1.5 sm:p-4`}
+                    className={`bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} rounded-full sm:border dark:border-slate-800 flex items-center justify-center p-1.5 sm:p-4`}
                   >
                     <HiSwitchVertical
                       size={28}
@@ -2285,10 +2255,10 @@ export default () => {
                   </button>
                 </div>
                 <div className="space-y-2 -mt-0.5 sm:mt-1.5">
-                  <span className="text-slate-600 dark:text-slate-200 text-sm font-medium">
+                  <span className="text-slate-600 dark:text-slate-500 text-sm font-medium">
                     Receive
                   </span>
-                  <div className="bg-slate-100 dark:bg-slate-800 rounded-lg space-y-0.5 py-3.5 px-3">
+                  <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-0.5 py-3.5 px-3">
                     <div className="flex items-center justify-between space-x-2">
                       <SelectAsset
                         disabled={disabled}
@@ -2423,13 +2393,13 @@ export default () => {
                               ].includes(e.key) &&
                               e.preventDefault()
                             }
-                            className={`w-36 sm:w-48 bg-transparent ${'cursor-default' || (disabled ? 'cursor-not-allowed' : '')} border-0 focus:ring-0 rounded-xl sm:text-lg font-semibold text-right py-1.5`}
+                            className={`w-36 sm:w-48 bg-transparent ${'cursor-default' || (disabled ? 'cursor-not-allowed' : '')} rounded border-0 focus:ring-0 sm:text-lg font-semibold text-right py-1.5`}
                           />
                       }
                     </div>
                     <div className="flex items-center justify-between space-x-2">
                       <div className="flex items-center space-x-1">
-                        <div className="tracking-normal text-slate-400 dark:text-slate-500 text-sm font-medium">
+                        <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
                           Balance:
                         </div>
                         {
@@ -2533,12 +2503,12 @@ export default () => {
                 !pair.error &&
                 amount > 0 &&
                 (
-                  <div className="bg-slate-100 dark:bg-slate-800 rounded-lg space-y-2.5 py-3.5 px-3">
+                  <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-2.5 py-3.5 px-3">
                     <div className="flex items-center justify-between space-x-1">
-                      <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
+                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
                         Rate
                       </div>
-                      <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
+                      <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
                         <span>
                           {number_format(
                             rate,
@@ -2554,7 +2524,7 @@ export default () => {
                         content="The maximum percentage you are willing to lose due to market changes."
                         className="z-50 bg-dark text-white text-xs"
                       >
-                        <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
+                        <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
                           Slippage
                         </div>
                       </Tooltip>
@@ -2619,11 +2589,11 @@ export default () => {
                                   ].includes(e.key) &&
                                   e.preventDefault()
                                 }
-                                className={`w-20 bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1 px-2`}
+                                className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-900 dark:focus:bg-slate-800 rounded border-0 focus:ring-0 font-semibold text-right py-1 px-2`}
                               />
                               <button
                                 onClick={() => setSlippageEditing(false)}
-                                className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                                className="bg-slate-100 dark:bg-slate-900 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
                               >
                                 <BiCheckCircle
                                   size={16}
@@ -2654,7 +2624,7 @@ export default () => {
                                       setOptions(_data)
                                       setSlippageEditing(false)
                                     }}
-                                    className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-medium hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
+                                    className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
                                   >
                                     {s} %
                                   </div>
@@ -2690,7 +2660,7 @@ export default () => {
                       typeof priceImpact === 'number' &&
                       (
                         <div className="flex items-center justify-between space-x-1">
-                          <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 font-medium">
+                          <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
                             Price Impact
                           </div>
                           <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
@@ -2714,7 +2684,7 @@ export default () => {
                 wrong_chain ?
                   <Wallet
                     connectChainId={chain_id}
-                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                   >
                     <span className="mr-1.5 sm:mr-2">
                       {is_walletconnect ?
@@ -2767,7 +2737,7 @@ export default () => {
                           }
                           closeDisabled={true}
                           rounded={true}
-                          className="rounded-xl p-4.5"
+                          className="rounded p-4.5"
                         >
                           <span>
                             {amount >
@@ -2797,7 +2767,7 @@ export default () => {
                               setSlippageEditing(false)
                               call()
                             }}
-                            className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
+                            className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-200 dark:bg-slate-900 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
                           >
                             <span className="flex items-center justify-center space-x-1.5">
                               {
@@ -2875,7 +2845,7 @@ export default () => {
                                   }
                                   closeDisabled={true}
                                   rounded={true}
-                                  className="rounded-xl p-4.5"
+                                  className="rounded p-4.5"
                                 >
                                   <div className="flex items-center justify-between space-x-2">
                                     <span className="break-all text-sm font-medium">
@@ -2960,7 +2930,7 @@ export default () => {
                       <button
                         disabled={true}
                         onClick={() => call()}
-                        className="w-full bg-slate-200 dark:bg-slate-800 cursor-not-allowed rounded-xl text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
+                        className="w-full bg-slate-100 dark:bg-slate-900 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
                       >
                         {
                           !asset ?
@@ -2969,7 +2939,7 @@ export default () => {
                               `Route doesn't exist` :
                               pair ?
                                 pair.error ?
-                                  <div className="w-fit tracking-normal text-red-600 dark:text-red-400 text-sm mx-auto">
+                                  <div className="w-fit text-red-600 dark:text-red-400 text-sm mx-auto">
                                     {pair.error.message}
                                   </div> :
                                   'Enter amount' :
@@ -2990,7 +2960,7 @@ export default () => {
                       <Wallet
                         connectChainId={chain_id}
                         buttonConnectTitle="Connect Wallet"
-                        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-lg font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-lg font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                       >
                         <span>
                           Connect Wallet

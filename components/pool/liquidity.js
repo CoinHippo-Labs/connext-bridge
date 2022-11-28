@@ -1690,7 +1690,7 @@ export default ({
                     ].includes(e.key) &&
                     e.preventDefault()
                   }
-                  className={`w-20 bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 border-0 focus:ring-0 rounded-lg font-semibold text-right py-1 px-2`}
+                  className={`w-20 bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 font-semibold text-right py-1 px-2`}
                 />
                 <div className="flex items-center space-x-2.5">
                   {
@@ -1775,7 +1775,7 @@ export default ({
                     ].includes(e.key) &&
                     e.preventDefault()
                   }
-                  className={`w-20 bg-slate-200 dark:bg-slate-800 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
+                  className={`w-20 bg-slate-200 dark:bg-slate-800 rounded border-0 focus:ring-0 font-semibold py-1.5 px-2.5`}
                 />
                 <span className="font-medium">
                   minutes
@@ -1973,7 +1973,7 @@ export default ({
 
                         // autoSetY(x_balance_amount)
                       }}
-                      className={`${disabled || typeof x_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-200 dark:bg-slate-800 rounded-lg text-blue-400 dark:text-slate-200 text-base font-medium py-0.5 px-2.5`}
+                      className={`${disabled || typeof x_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-200 dark:bg-slate-800 rounded border dark:border-slate-700 text-blue-400 dark:text-slate-200 text-base font-medium py-0.5 px-2.5`}
                     >
                       Max
                     </div>*/}
@@ -2163,7 +2163,7 @@ export default ({
 
                         // autoSetX(y_balance_amount)
                       }}
-                      className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-200 dark:bg-slate-800 rounded-lg text-blue-400 dark:text-slate-200 text-sm font-medium py-0.5 px-2.5`}
+                      className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-200 dark:bg-slate-800 rounded border dark:border-slate-700 text-blue-400 dark:text-slate-200 text-sm font-medium py-0.5 px-2.5`}
                     >
                       Max
                     </div>*/}
@@ -2246,7 +2246,7 @@ export default ({
                 wrong_chain ?
                   <Wallet
                     connectChainId={chain_id}
-                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
+                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
                   >
                     <span className="mr-1.5 sm:mr-2">
                       {is_walletconnect ?
@@ -2309,7 +2309,7 @@ export default ({
                           }
                           closeDisabled={true}
                           rounded={true}
-                          className="rounded-xl p-3"
+                          className="rounded p-3"
                         >
                           <div className="flex items-center justify-between space-x-2">
                             <span className={`leading-5 ${status === 'failed' ? 'break-all text-xs' : 'break-word'} text-sm font-medium`}>
@@ -2389,7 +2389,7 @@ export default ({
                           !valid_amount
                         }
                         onClick={() => call(pool_data)}
-                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 px-2 sm:px-3`}
+                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-lg text-center py-3 px-2 sm:px-3`}
                       >
                         <span className="flex items-center justify-center space-x-1.5">
                           {
@@ -2426,7 +2426,7 @@ export default ({
                       <Wallet
                         connectChainId={chain_id}
                         buttonConnectTitle="Connect Wallet"
-                        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-lg font-medium text-center py-3 px-2 sm:px-3"
+                        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-lg font-medium text-center py-3 px-2 sm:px-3"
                       >
                         <span>
                           Connect Wallet
@@ -2607,7 +2607,7 @@ export default ({
 
                           setAmount(_amount)
                         }}
-                        className={`${disabled || !lpTokenBalance ? 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'} rounded-lg text-xs py-0.5 px-1.5`}
+                        className={`${disabled || !lpTokenBalance ? 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'} rounded text-xs py-0.5 px-1.5`}
                       >
                         {p * 100} %
                       </div>
@@ -2743,7 +2743,7 @@ export default ({
                 wrong_chain ?
                   <Wallet
                     connectChainId={chain_id}
-                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3  px-2 sm:px-3"
+                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3  px-2 sm:px-3"
                   >
                     <span className="mr-1.5 sm:mr-2">
                       {is_walletconnect ?
@@ -2806,7 +2806,7 @@ export default ({
                           }
                           closeDisabled={true}
                           rounded={true}
-                          className="rounded-xl p-3"
+                          className="rounded p-3"
                         >
                           <div className="flex items-center justify-between space-x-2">
                             <span className={`leading-5 ${status === 'failed' ? 'break-all text-xs' : 'break-word'} text-sm font-medium`}>
@@ -2885,7 +2885,7 @@ export default ({
                           !valid_amount
                         }
                         onClick={() => call(pool_data)}
-                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded-xl text-lg text-center py-3 px-2 sm:px-3`}
+                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded text-lg text-center py-3 px-2 sm:px-3`}
                       >
                         <span className="flex items-center justify-center space-x-1.5">
                           {
@@ -2922,7 +2922,7 @@ export default ({
                       <Wallet
                         connectChainId={chain_id}
                         buttonConnectTitle="Connect Wallet"
-                        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-xl text-white text-lg font-medium text-center py-3 px-2 sm:px-3"
+                        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-lg font-medium text-center py-3 px-2 sm:px-3"
                       >
                         <span>
                           Connect Wallet

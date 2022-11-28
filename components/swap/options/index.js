@@ -75,7 +75,7 @@ export default ({
     <Modal
       disabled={disabled}
       buttonTitle={
-        <div className={`bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg flex items-center ${applied ? 'text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400' : 'text-slate-500 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-200'} space-x-1 py-2 px-2`}>
+        <div className={`bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded flex items-center ${applied ? 'text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400' : 'text-slate-600 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200'} space-x-1 py-2 px-2`}>
           <RiSettings3Line
             size={20}
           />
@@ -84,7 +84,7 @@ export default ({
           </span>*/}
         </div>
       }
-      buttonClassName={`min-w-max ${disabled ? 'cursor-not-allowed' : ''} ${applied ? 'border border-blue-400 dark:border-blue-500' : ''} rounded-lg shadow flex items-center justify-center`}
+      buttonClassName={`min-w-max ${disabled ? 'cursor-not-allowed' : ''} rounded ${applied ? 'border border-blue-400 dark:border-blue-500' : ''} flex items-center justify-center`}
       title="Advanced Options"
       body={
         <div className="form mt-2">
@@ -141,7 +141,7 @@ export default ({
 
                         setData(_data)
                       }}
-                      className="form-select bg-slate-50 border-0 focus:ring-0 rounded-lg"
+                      className="form-select bg-slate-50 rounded border-0 focus:ring-0"
                     >
                       {(options || [])
                         .map((o, j) => {
@@ -209,7 +209,7 @@ export default ({
 
                             setData(_data)
                           }}
-                          className="form-textarea border-0 focus:ring-0 rounded-lg"
+                          className="form-textarea rounded border-0 focus:ring-0"
                         /> :
                         type === 'number' ?
                           <div className="flex items-center space-x-3">
@@ -278,7 +278,7 @@ export default ({
                                 ].includes(e.key) &&
                                 e.preventDefault()
                               }
-                              className={`w-20 bg-slate-100 dark:bg-slate-800 border-0 focus:ring-0 rounded-lg font-semibold py-1.5 px-2.5`}
+                              className={`w-20 bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0 font-semibold py-1.5 px-2.5`}
                             />
                             {
                               presets?.length > 0 &&
@@ -301,7 +301,7 @@ export default ({
 
                                           setData(_data)
                                         }}
-                                        className={`${data?.[name] === p ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded-lg cursor-pointer py-1 px-2`}
+                                        className={`${data?.[name] === p ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer py-1 px-2`}
                                       >
                                         {p} {postfix}
                                       </div>
@@ -328,7 +328,7 @@ export default ({
 
                               setData(_data)
                             }}
-                            className="form-input border-0 focus:ring-0 rounded-lg"
+                            className="form-input rounded border-0 focus:ring-0"
                           />
                   }
                 </div>

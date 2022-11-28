@@ -60,7 +60,7 @@ export default () => {
           {
             is_testnet &&
             (
-              // <div className="max-w-min bg-blue-500 dark:bg-blue-500 rounded-xl whitespace-nowrap uppercase tracking-wider text-white text-2xs py-0.5 px-2.5 mt-0.5">
+              // <div className="max-w-min bg-blue-500 dark:bg-blue-500 rounded whitespace-nowrap uppercase tracking-wider text-white text-2xs py-0.5 px-2.5 mt-0.5">
               <div className="max-w-min whitespace-nowrap lowercase tracking-wider text-slate-400 dark:text-slate-500 text-sm ml-10">
                 {process.env.NEXT_PUBLIC_NETWORK}
               </div>

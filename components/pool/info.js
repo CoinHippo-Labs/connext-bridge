@@ -20,6 +20,7 @@ export default ({
   const {
     preferences,
     chains,
+    assets,
     pool_assets,
     pools,
     wallet,
@@ -28,6 +29,7 @@ export default ({
       {
         preferences: state.preferences,
         chains: state.chains,
+        assets: state.assets,
         pool_assets: state.pool_assets,
         pools: state.pools,
         wallet: state.wallet,
@@ -41,6 +43,9 @@ export default ({
   const {
     chains_data,
   } = { ...chains }
+  const {
+    assets_data,
+  } = { ...assets }
   const {
     pool_assets_data,
   } = { ...pool_assets }
@@ -108,6 +113,7 @@ export default ({
     tokens,
     symbols,
     decimals,
+    rate,
     error,
   } = { ...pool_data }
   const {
@@ -188,6 +194,34 @@ export default ({
         }
       })
 
+  const {
+    price,
+  } = {
+    ...(
+      (assets_data || [])
+        .find(a =>
+          a?.id === asset
+        )
+    ),
+  }
+
+  const tvl =
+    typeof price === 'number' ?
+      _.sum(
+        (balances || [])
+          .map((b, i) =>
+            b /
+            (
+              i > 0 &&
+              rate > 0 ?
+                rate :
+                1
+            )
+          )
+      ) *
+      price :
+      0
+
   const metricClassName = 'bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 flex flex-col space-y-8 py-5 px-4'
   const titleClassName = 'text-slate-400 dark:text-slate-200 text-base font-medium'
   const valueClassName = 'text-lg sm:text-3xl font-bold'
@@ -229,11 +263,14 @@ export default ({
                       {
                         pool_data &&
                         !error ?
-                          number_format(
-                            liquidity,
-                            '0,0.000000',
-                            true,
-                          ) :
+                          <span className="uppercase">
+                            {currency_symbol}
+                            {number_format(
+                              tvl,
+                              '0,0.00',
+                              true,
+                            )}
+                          </span> :
                           selected &&
                           !no_pool &&
                           !error &&

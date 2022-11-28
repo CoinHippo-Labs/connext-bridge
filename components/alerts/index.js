@@ -22,7 +22,7 @@ export default ({
   if (raised)
     css.push('shadow')
   if (rounded)
-    css.push('rounded-lg')
+    css.push('rounded')
   if (hidden)
     css.push('hidden')
   if (borderLeft)

@@ -26,7 +26,7 @@ export default () => {
   } = { ...pools }
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-900 rounded-lg grid grid-cols-2 md:grid-cols-3 gap-4 p-4">
+    <div className="bg-slate-50 dark:bg-slate-900 rounded grid grid-cols-2 md:grid-cols-3 gap-4 p-4">
       <div className="flex flex-col space-y-0.5">
         <span className="text-slate-600 dark:text-slate-300 text-base font-medium">
           Total Liquidity

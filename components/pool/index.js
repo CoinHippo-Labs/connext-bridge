@@ -802,7 +802,7 @@ export default () => {
             </span>
           </a>
           </Link>
-          <div className="space-y-6 sm:space-y-10">
+          <div className="space-y-6 sm:space-y-16">
             <div className="space-y-2">
               {/*<div className="grid sm:flex sm:items-center sm:justify-between sm:space-x-2 gap-2">
                 <div className="order-2 sm:order-1 flex items-center space-x-4 sm:space-x-6">
@@ -1005,7 +1005,7 @@ export default () => {
               {
                 error &&
                 (
-                  <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-100 dark:bg-opacity-50 rounded-lg tracking-wider text-red-600 dark:text-red-400 text-base font-medium py-1.5 px-4">
+                  <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-100 dark:bg-opacity-50 rounded tracking-wider text-red-600 dark:text-red-400 text-base font-medium py-1.5 px-4">
                     {error.message}
                   </div>
                 )
