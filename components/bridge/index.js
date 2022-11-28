@@ -262,6 +262,9 @@ export default () => {
         'true',
       ].includes(receive_next)
     ) {
+      bridge.receive_next = true
+      updated = true
+
       setOptions(
         {
           ...options,
@@ -382,7 +385,10 @@ export default () => {
       receiveLocal,
     } = { ...options }
 
-    if (receiveLocal) {
+    if (
+      receiveLocal ||
+      bridge?.receive_next
+    ) {
       params.receive_next = true
     }
 

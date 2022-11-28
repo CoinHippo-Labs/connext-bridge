@@ -982,7 +982,7 @@ export default () => {
                           rel="noopener noreferrer"
                         >
                           <span className="text-slate-600 dark:text-slate-300 hover:text-black dark:hover:text-white font-medium">
-                            Using bridge
+                            Using Bridge
                           </span>
                         </a>
                         <span className="text-xl text-slate-400 dark:text-slate-500 mt-0.5">
