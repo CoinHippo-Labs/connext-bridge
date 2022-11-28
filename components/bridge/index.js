@@ -170,6 +170,7 @@ export default () => {
     const {
       symbol,
       amount,
+      receive_next,
     } = { ...params }
 
     let path =
@@ -253,6 +254,20 @@ export default () => {
         bridge.amount = Number(amount)
         updated = true
       }
+    }
+
+    if (
+      [
+        true,
+        'true',
+      ].includes(receive_next)
+    ) {
+      setOptions(
+        {
+          ...options,
+          receiveLocal: true,
+        }
+      )
     }
 
     if (updated) {
@@ -363,6 +378,14 @@ export default () => {
       }
     }
 
+    const {
+      receiveLocal,
+    } = { ...options }
+
+    if (receiveLocal) {
+      params.receive_next = true
+    }
+
     if (Object.keys(params).length > 0) {
       const {
         source_chain,
@@ -461,6 +484,7 @@ export default () => {
           asset_balances_data ?
             amount > liquidity_amount :
             false,
+        receiveLocal,
       }
     )
 
