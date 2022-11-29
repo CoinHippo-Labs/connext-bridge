@@ -91,7 +91,6 @@
       }
     ],
     "color": "#636890",
-    "preset": true,
-    "is_staging": true
+    "preset": true
   }
 ]
