@@ -63,7 +63,6 @@
           "symbol": "nextWETH",
           "image": "/logos/assets/nextweth.png"
         },
-        "wrapable": true,
         "is_pool": true
       },
       {

@@ -51,7 +51,8 @@
         "chain_id": 1,
         "decimals": 18,
         "symbol": "WETH",
-        "image": "/logos/assets/weth.png"
+        "image": "/logos/assets/weth.png",
+        "wrapable": true
       },
       {
         "contract_address": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
@@ -79,6 +80,7 @@
           "symbol": "nextWETH",
           "image": "/logos/assets/nextweth.png"
         },
+        "wrapable": true,
         "is_pool": true
       }
     ],

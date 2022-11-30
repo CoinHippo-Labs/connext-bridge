@@ -2231,7 +2231,7 @@ export default ({
                         Price impact is negative
                       </span>
                       <span className="text-xs">
-                        The pools is currently overweighted in {y_asset_data?.symbol}. Providing {x_asset_data?.symbol} instead will give you positive price impact and bonus LP tokens.
+                        The pool is currently overweighted in {y_asset_data?.symbol}. Providing more {x_asset_data?.symbol} will give you positive price impact and bonus LP tokens.
                       </span>
                     </div>
                   </div>
