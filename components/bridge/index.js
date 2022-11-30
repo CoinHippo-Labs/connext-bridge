@@ -5,6 +5,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import { XTransferStatus } from '@connext/nxtp-utils'
 import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
+import PageVisibility from 'react-page-visibility'
 import { TailSpin, Oval } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { Tooltip } from '@material-tailwind/react'
@@ -126,6 +127,8 @@ export default () => {
   const {
     asPath,
   } = { ...router }
+
+  const [pageVisible, setPageVisible] = useState(true)
 
   const [bridge, setBridge] = useState({})
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
@@ -1017,7 +1020,7 @@ export default () => {
       )
 
     return () => clearInterval(interval)
-  }, [sdk, address, xcall])
+  }, [sdk, address, xcall, pageVisible])
 
   // trigger render latest transfer
   useEffect(() => {
@@ -2144,152 +2147,156 @@ export default () => {
             {
               openTransferStatus &&
               latest_transfer ?
-                <div className="bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-6 pt-5 sm:pt-5 pb-6 sm:pb-6 px-4 sm:px-6">
-                  <div className="flex items-center justify-between space-x-2">
-                    <span className="text-lg font-semibold">
-                      Transfer status
-                    </span>
-                    <button
+                <PageVisibility
+                  onChange={v => setPageVisible(v)}
+                >
+                  <div className="bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-6 pt-5 sm:pt-5 pb-6 sm:pb-6 px-4 sm:px-6">
+                    <div className="flex items-center justify-between space-x-2">
+                      <span className="text-lg font-semibold">
+                        Transfer status
+                      </span>
+                      <button
+                        onClick={() => {
+                          setXcall(null)
+                          setOpenTransferStatus(false)
+                        }}
+                      >
+                        <MdClose
+                          size={20}
+                          className="-mr-1"
+                        />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-center">
+                      {latest_transfer.execute_transaction_hash ?
+                        <a
+                          href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', latest_transfer.execute_transaction_hash)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex flex-col items-center space-y-1.5"
+                        >
+                          <HiOutlineCheckCircle
+                            size={72}
+                            className="text-green-500 dark:text-green-400"
+                          />
+                          <span className="text-xl font-semibold">
+                            Completed
+                          </span>
+                        </a> :
+                        <CountdownCircleTimer
+                          isPlaying
+                          duration={estimated_time_seconds}
+                          colors={
+                            latest_transfer.force_slow ?
+                              '#facc15' :
+                              '#22c55e'
+                          }
+                          size={140}
+                        >
+                          {({ remainingTime }) => (
+                            time_spent_seconds > estimated_time_seconds ?
+                              <span className="text-sm font-semibold">
+                                Processing ...
+                              </span> :
+                              <div className="flex flex-col items-center space-y-1">
+                                <span className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                  Time left
+                                </span>
+                                <span className="text-lg font-semibold">
+                                  {total_time_string(
+                                    time_spent_seconds,
+                                    estimated_time_seconds,
+                                  )}
+                                </span>
+                              </div>
+                          )}
+                        </CountdownCircleTimer>
+                      }
+                    </div>
+                    <div className="flex flex-col items-center space-y-2">
+                      <div> 
+                        {latest_transfer.execute_transaction_hash ?
+                          <span className="text-lg font-semibold">
+                            Funds received!
+                          </span> :
+                          <div className="flex flex-wrap items-center text-lg font-semibold space-x-1.5">
+                            <span>
+                              Sending
+                            </span>
+                            <span>
+                              {number_format(
+                                amount,
+                                '0,0.000000000000',
+                                true,
+                              )}
+                            </span>
+                            <div className="flex flex-wrap items-center space-x-1.5">
+                              {
+                                (
+                                  source_contract_data?.image ||
+                                  source_asset_data?.image
+                                ) &&
+                                (
+                                  <Image
+                                    src={
+                                      source_contract_data?.image ||
+                                      source_asset_data?.image
+                                    }
+                                    alt=""
+                                    width={24}
+                                    height={24}
+                                    className="rounded-full"
+                                  />
+                                )
+                              }
+                              <span>
+                                {source_symbol}
+                              </span>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                      <span className="text-slate-500 dark:text-slate-500 text-xs sm:text-sm font-medium">
+                        {latest_transfer.execute_transaction_hash ?
+                          null :
+                          <div className="flex flex-col items-center space-y-1">
+                            {time_spent_seconds > estimated_time_seconds ?
+                              <span className="text-center">
+                                Your assets are on the way! We will keep you informed.
+                              </span> :
+                              <div className="flex flex-wrap items-center justify-center space-x-1">
+                                <span>
+                                  Your funds will arrive at the destination in about
+                                </span>
+                                <TimeSpent
+                                  from_time={time_spent_seconds}
+                                  to_time={estimated_time_seconds}
+                                  no_tooltip={true}
+                                  className="text-black dark:text-white font-semibold"
+                                />
+                                .
+                              </div>
+                            }
+                            <span className="text-center">
+                              If you close this window, your transaction will still be processed.
+                            </span>
+                          </div>
+                        }
+                      </span>
+                    </div>
+                    {/*<button
                       onClick={() => {
                         setXcall(null)
                         setOpenTransferStatus(false)
                       }}
+                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-lg font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                     >
-                      <MdClose
-                        size={20}
-                        className="-mr-1"
-                      />
-                    </button>
+                      <span>
+                        Got it
+                      </span>
+                    </button>*/}
                   </div>
-                  <div className="flex items-center justify-center">
-                    {latest_transfer.execute_transaction_hash ?
-                      <a
-                        href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', latest_transfer.execute_transaction_hash)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex flex-col items-center space-y-1.5"
-                      >
-                        <HiOutlineCheckCircle
-                          size={72}
-                          className="text-green-500 dark:text-green-400"
-                        />
-                        <span className="text-xl font-semibold">
-                          Completed
-                        </span>
-                      </a> :
-                      <CountdownCircleTimer
-                        isPlaying
-                        duration={estimated_time_seconds}
-                        colors={
-                          latest_transfer.force_slow ?
-                            '#facc15' :
-                            '#22c55e'
-                        }
-                        size={140}
-                      >
-                        {({ remainingTime }) => (
-                          time_spent_seconds > estimated_time_seconds ?
-                            <span className="text-sm font-semibold">
-                              Processing ...
-                            </span> :
-                            <div className="flex flex-col items-center space-y-1">
-                              <span className="text-slate-400 dark:text-slate-500 text-sm font-medium">
-                                Time left
-                              </span>
-                              <span className="text-lg font-semibold">
-                                {total_time_string(
-                                  time_spent_seconds,
-                                  estimated_time_seconds,
-                                )}
-                              </span>
-                            </div>
-                        )}
-                      </CountdownCircleTimer>
-                    }
-                  </div>
-                  <div className="flex flex-col items-center space-y-2">
-                    <div> 
-                      {latest_transfer.execute_transaction_hash ?
-                        <span className="text-lg font-semibold">
-                          Funds received!
-                        </span> :
-                        <div className="flex flex-wrap items-center text-lg font-semibold space-x-1.5">
-                          <span>
-                            Sending
-                          </span>
-                          <span>
-                            {number_format(
-                              amount,
-                              '0,0.000000000000',
-                              true,
-                            )}
-                          </span>
-                          <div className="flex flex-wrap items-center space-x-1.5">
-                            {
-                              (
-                                source_contract_data?.image ||
-                                source_asset_data?.image
-                              ) &&
-                              (
-                                <Image
-                                  src={
-                                    source_contract_data?.image ||
-                                    source_asset_data?.image
-                                  }
-                                  alt=""
-                                  width={24}
-                                  height={24}
-                                  className="rounded-full"
-                                />
-                              )
-                            }
-                            <span>
-                              {source_symbol}
-                            </span>
-                          </div>
-                        </div>
-                      }
-                    </div>
-                    <span className="text-slate-500 dark:text-slate-500 text-xs sm:text-sm font-medium">
-                      {latest_transfer.execute_transaction_hash ?
-                        null :
-                        <div className="flex flex-col items-center space-y-1">
-                          {time_spent_seconds > estimated_time_seconds ?
-                            <span className="text-center">
-                              Your assets are on the way! We will keep you informed.
-                            </span> :
-                            <div className="flex flex-wrap items-center justify-center space-x-1">
-                              <span>
-                                Your funds will arrive at the destination in about
-                              </span>
-                              <TimeSpent
-                                from_time={time_spent_seconds}
-                                to_time={estimated_time_seconds}
-                                no_tooltip={true}
-                                className="text-black dark:text-white font-semibold"
-                              />
-                              .
-                            </div>
-                          }
-                          <span className="text-center">
-                            If you close this window, your transaction will still be processed.
-                          </span>
-                        </div>
-                      }
-                    </span>
-                  </div>
-                  {/*<button
-                    onClick={() => {
-                      setXcall(null)
-                      setOpenTransferStatus(false)
-                    }}
-                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-lg font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
-                  >
-                    <span>
-                      Got it
-                    </span>
-                  </button>*/}
-                </div> :
+                </PageVisibility> :
                 <div
                   className="bg-white dark:bg-slate-900 rounded border dark:border-slate-700 space-y-10 pt-5 sm:pt-6 pb-6 sm:pb-7 px-4 sm:px-6"
                   style={
