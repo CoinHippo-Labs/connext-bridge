@@ -141,7 +141,6 @@ export default ({
       setPriceImpactAdd(null)
 
       setApproveResponse(null)
-      setCallResponse(null)
 
       const {
         chain,
@@ -175,6 +174,8 @@ export default ({
         typeof amountX === 'number' &&
         typeof amountY === 'number'
       ) {
+        setCallResponse(null)
+
         console.log(
           '[getPoolTokenIndex]',
           {
@@ -1333,6 +1334,7 @@ export default ({
   } = { ...pool_data }
   const {
     contract_address,
+    next_asset,
   } = { ...contract_data }
 
   rate =
@@ -1543,6 +1545,36 @@ export default ({
       !user_pools_data ||
       pool_loading
     )
+
+  const pool_tokens_data =
+    (symbols || [])
+      .map((s, i) => {
+        const _contract_address = tokens?.[i]
+
+        return {
+          i,
+          contract_address: _contract_address,
+          chain_id: chain_data?.chain_id,
+          symbol: s,
+          decimals: decimals?.[i],
+          image:
+            (
+              equals_ignore_case(
+                _contract_address,
+                contract_address,
+              ) ?
+                contract_data?.image :
+                equals_ignore_case(
+                  _contract_address,
+                  next_asset?.contract_address,
+                ) ?
+                  next_asset?.image ||
+                  contract_data?.image :
+                  null
+            ) ||
+            asset_data?.image,
+        }
+      })
 
   const valid_amount =
     action === 'withdraw' ?
@@ -1787,6 +1819,36 @@ export default ({
       }
     </div>
   )
+
+  const overweighted_asset =
+    Array.isArray(user_pool_data?.balances) &&
+    Array.isArray(user_pool_data.tokens) &&
+    (
+      amountX +
+      user_pool_data.balances[
+        user_pool_data.tokens
+          .indexOf(t =>
+            equals_ignore_case(
+              t,
+              x_asset_data?.contract_address,
+            )
+          )
+      ]
+    ) >
+    (
+      amountY +
+      user_pool_data.balances[
+        user_pool_data.tokens
+          .indexOf(t =>
+            equals_ignore_case(
+              t,
+              y_asset_data?.contract_address,
+            )
+          )
+      ]
+    ) ?
+     'x' :
+     'y'
 
   return (
     <div className="bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-3 pt-4 pb-5 px-4">
@@ -2223,16 +2285,74 @@ export default ({
                 (
                   <div className="bg-yellow-50 dark:bg-yellow-200 bg-opacity-50 dark:bg-opacity-10 rounded flex items-start space-x-2 p-2">
                     <IoWarning
-                      size={16}
-                      className="min-w-max text-yellow-500 dark:text-yellow-400"
+                      size={18}
+                      className="min-w-max text-yellow-500 dark:text-yellow-400 mt-0.5"
                     />
-                    <div className="flex flex-col space-y-0.5">
-                      <span className="text-xs font-bold">
-                        Price impact is negative
-                      </span>
-                      <span className="text-xs">
-                        The pool is currently overweighted in {y_asset_data?.symbol}. Providing more {x_asset_data?.symbol} will give you positive price impact and bonus LP tokens.
-                      </span>
+                    <div className="flex flex-col space-y-1.5">
+                      <div className="flex flex-col space-y-1">
+                        <span className="text-sm font-bold">
+                          Price impact is negative
+                        </span>
+                        <span className="leading-4 text-xs">
+                          The pool is currently overweighted in {
+                            (overweighted_asset === 'x' ?
+                              x_asset_data :
+                              y_asset_data
+                            )?.symbol
+                          }. Providing more {
+                            (overweighted_asset === 'x' ?
+                              y_asset_data :
+                              x_asset_data
+                            )?.symbol
+                          } will grant bonus LP tokens.
+                        </span>
+                      </div>
+                      {
+                        pool_tokens_data
+                          .filter(d =>
+                            d.symbol?.includes(WRAPPED_PREFIX)
+                          )
+                          .length > 0 &&
+                        (
+                          <div className="flex flex-col space-y-0">
+                            <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                              Convert to {
+                                /*pool_tokens_data
+                                  .find(d =>
+                                    d.symbol?.includes(WRAPPED_PREFIX)
+                                  )?.symbol*/
+                                (overweighted_asset === 'x' ?
+                                  y_asset_data :
+                                  x_asset_data
+                                )?.symbol
+                              }
+                            </span>
+                            <div className="flex items-center space-x-1">
+                              <a
+                                href={`/${asset.toUpperCase()}-from-${_.head(chains_data)?.id}-to-${chain}?receive_next=true`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <span className="leading-3 text-xs font-medium">
+                                  Using Bridge
+                                </span>
+                              </a>
+                              <span className="leading-3 text-base text-slate-400 dark:text-slate-500 mt-0.5">
+                                |
+                              </span>
+                              <a
+                                href={`/swap/${asset.toUpperCase()}-on-${chain}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <span className="leading-3 text-xs font-medium">
+                                  Using AMM
+                                </span>
+                              </a>
+                            </div>
+                          </div>
+                        )
+                      }
                     </div>
                   </div>
                 )

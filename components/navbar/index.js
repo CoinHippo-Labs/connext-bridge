@@ -31,6 +31,7 @@ export default () => {
     pool_assets,
     ens,
     asset_balances,
+    pools,
     rpc_providers,
     dev,
     wallet,
@@ -43,6 +44,7 @@ export default () => {
         pool_assets: state.pool_assets,
         ens: state.ens,
         asset_balances: state.asset_balances,
+        pools: state.pools,
         rpc_providers: state.rpc_providers,
         dev: state.dev,
         wallet: state.wallet,
@@ -68,6 +70,9 @@ export default () => {
   const {
     asset_balances_data,
   } = { ...asset_balances }
+  const {
+    pools_data,
+  } = { ...pools }
   const {
     rpcs,
   } = { ...rpc_providers }
@@ -635,195 +640,298 @@ export default () => {
 
   // pools
   useEffect(() => {
+    const getPoolData = async (
+      chain_data,
+      asset_data,
+    ) => {
+      const {
+        chain_id,
+        domain_id,
+      } = { ...chain_data }
+
+      const {
+        contracts,
+      } = { ...asset_data }
+
+      const contract_data = (contracts || [])
+        .find(c =>
+          c?.chain_id === chain_id
+        )
+      const {
+        contract_address,
+      } = { ...contract_data }
+
+      if (contract_address) {
+        let data
+
+        const id = `${chain_data.id}_${asset_data.id}`
+
+        try {
+          console.log(
+            '[getPool]',
+            {
+              domain_id,
+              contract_address,
+            },
+          )
+
+          const pool =
+            await sdk.nxtpSdkPool
+              .getPool(
+                domain_id,
+                contract_address,
+              )
+
+          console.log(
+            '[Pool]',
+            {
+              domain_id,
+              contract_address,
+              pool,
+            },
+          )
+
+          const {
+            lpTokenAddress,
+            symbol,
+            balances,
+            decimals,
+          } = { ...pool }
+
+          if (Array.isArray(balances)) {
+            pool.balances =
+              balances
+                .map((b, i) =>
+                  typeof b === 'number' ?
+                    b :
+                    Number(
+                      utils.formatUnits(
+                        b,
+                        decimals?.[i] ||
+                        18,
+                      )
+                    )
+                )
+          }
+
+          let supply
+
+          console.log(
+            '[getLPTokenSupply]',
+            {
+              domain_id,
+              lpTokenAddress,
+            },
+          )
+
+          try {
+            supply =
+              await sdk.nxtpSdkPool
+                .getLPTokenSupply(
+                  domain_id,
+                  lpTokenAddress,
+                )
+
+            supply =
+              utils.formatUnits(
+                BigNumber.from(
+                  supply
+                ),
+                18,
+              )
+          } catch (error) {
+            console.log(
+              '[ERROR getLPTokenSupply]',
+              {
+                domain_id,
+                lpTokenAddress,
+              },
+              error,
+            )
+          }
+
+          console.log(
+            '[LPTokenSupply]',
+            {
+              domain_id,
+              lpTokenAddress,
+              supply,
+            },
+          )
+
+          const symbols =
+            (symbol || '')
+              .split('-')
+              .filter(s => s)
+
+          if (pool) {
+            console.log(
+              '[getPoolStats]',
+              {
+                domain_id,
+                contract_address,
+              },
+            )
+          }
+
+          const stats =
+            pool &&
+            await sdk.nxtpSdkPool
+              .getPoolStats(
+                domain_id,
+                contract_address,
+              )
+
+          if (pool) {
+            console.log(
+              '[PoolStats]',
+              {
+                domain_id,
+                contract_address,
+                stats,
+              },
+            )
+          }
+
+          const {
+            liquidity,
+            volume,
+            fees,
+          } = { ...stats }
+
+          if (pool) {
+            console.log(
+              '[getVirtualPrice]',
+              {
+                domain_id,
+                contract_address,
+              },
+            )
+          }
+
+          const rate =
+            pool &&
+            await sdk.nxtpSdkPool
+              .getVirtualPrice(
+                domain_id,
+                contract_address,
+              )
+
+          if (pool) {
+            console.log(
+              '[VirtualPrice]',
+              {
+                domain_id,
+                contract_address,
+                rate,
+              },
+            )
+          }
+
+          if (
+            equals_ignore_case(
+              pool?.domainId,
+              domain_id,
+            )
+          ) {
+            data = {
+              ...pool,
+              ...stats,
+              id,
+              chain_id,
+              chain_data,
+              asset_data,
+              contract_data,
+              symbols,
+              supply:
+                supply ||
+                pool?.supply,
+              liquidity:
+                Number(
+                  liquidity,
+                ),
+              volume:
+                Number(
+                  volume,
+                ),
+              fees:
+                Number(
+                  fees,
+                ),
+              rate:
+                Number(
+                  utils.formatUnits(
+                    BigNumber.from(
+                      rate ||
+                      '0'
+                    ),
+                    _.last(decimals) ||
+                    18,
+                  )
+                ),
+            }
+          }
+          else {
+            data =
+              (pools_data || [])
+                .find(p =>
+                  equals_ignore_case(
+                    p?.id,
+                    id,
+                  )
+                )
+          }
+        } catch (error) {
+          console.log(
+            '[ERROR getPool]',
+            {
+              domain_id,
+              contract_address,
+            },
+            error,
+          )
+
+          data =
+            (pools_data || [])
+              .find(p =>
+                equals_ignore_case(
+                  p?.id,
+                  id,
+                )
+              ) ||
+            {
+              id: `${chain_data.id}_${asset_data.id}`,
+              chain_id,
+              chain_data,
+              asset_data,
+              contract_data,
+              error,
+            }
+        }
+
+        if (data) {
+          dispatch(
+            {
+              type: POOLS_DATA,
+              value: data,
+            }
+          )
+        }
+      }
+    }
+
     const getChainData = async chain_data => {
       if (
         sdk &&
         chain_data
       ) {
-        const {
-          chain_id,
-          domain_id,
-        } = { ...chain_data }
-
         pool_assets_data
-          .forEach(async asset_data => {
-            const {
-              contracts,
-            } = { ...asset_data }
-
-            const contract_data = (contracts || [])
-              .find(c =>
-                c?.chain_id === chain_id
-              )
-            const {
-              contract_address,
-            } = { ...contract_data }
-
-            if (contract_address) {
-              let data
-
-              try {
-                console.log(
-                  '[getPool]',
-                  {
-                    domain_id,
-                    contract_address,
-                  },
-                )
-
-                const pool =
-                  await sdk.nxtpSdkPool
-                    .getPool(
-                      domain_id,
-                      contract_address,
-                    )
-
-                console.log(
-                  '[Pool]',
-                  {
-                    domain_id,
-                    contract_address,
-                    pool,
-                  },
-                )
-
-                const {
-                  symbol,
-                  decimals,
-                } = { ...pool }
-
-                const symbols =
-                  (symbol || '')
-                    .split('-')
-                    .filter(s => s)
-
-                if (pool) {
-                  console.log(
-                    '[getPoolStats]',
-                    {
-                      domain_id,
-                      contract_address,
-                    },
-                  )
-                }
-
-                const stats =
-                  pool &&
-                  await sdk.nxtpSdkPool
-                    .getPoolStats(
-                      domain_id,
-                      contract_address,
-                    )
-
-                if (pool) {
-                  console.log(
-                    '[PoolStats]',
-                    {
-                      domain_id,
-                      contract_address,
-                      stats,
-                    },
-                  )
-                }
-
-                const {
-                  liquidity,
-                  volume,
-                  fees,
-                } = { ...stats }
-
-                if (pool) {
-                  console.log(
-                    '[getVirtualPrice]',
-                    {
-                      domain_id,
-                      contract_address,
-                    },
-                  )
-                }
-
-                const rate =
-                  pool &&
-                  await sdk.nxtpSdkPool
-                    .getVirtualPrice(
-                      domain_id,
-                      contract_address,
-                    )
-
-                if (pool) {
-                  console.log(
-                    '[VirtualPrice]',
-                    {
-                      domain_id,
-                      contract_address,
-                      rate,
-                    },
-                  )
-                }
-
-                data = {
-                  ...pool,
-                  ...stats,
-                  id: `${chain_data.id}_${asset_data.id}`,
-                  chain_id,
-                  chain_data,
-                  asset_data,
-                  contract_data,
-                  symbols,
-                  liquidity:
-                    Number(
-                      liquidity,
-                    ),
-                  volume:
-                    Number(
-                      volume,
-                    ),
-                  fees:
-                    Number(
-                      fees,
-                    ),
-                  rate:
-                    Number(
-                      utils.formatUnits(
-                        BigNumber.from(
-                          rate ||
-                          '0'
-                        ),
-                        _.last(decimals) ||
-                        18,
-                      )
-                    ),
-                }
-              } catch (error) {
-                console.log(
-                  '[ERROR getPool]',
-                  {
-                    domain_id,
-                    contract_address,
-                  },
-                  error,
-                )
-
-                data = {
-                  id: `${chain_data.id}_${asset_data.id}`,
-                  chain_id,
-                  chain_data,
-                  asset_data,
-                  contract_data,
-                  error,
-                }
-              }
-
-              if (data) {
-                dispatch(
-                  {
-                    type: POOLS_DATA,
-                    value: data,
-                  }
-                )
-              }
-            }
-          })
+          .forEach(a =>
+            getPoolData(
+              chain_data,
+              a,
+            )
+          )
       }
     }
 

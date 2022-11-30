@@ -1961,6 +1961,8 @@ export default () => {
       c?.chain_id === source_chain_data?.chain_id
     )
 
+  const _source_contract_data = _.cloneDeep(source_contract_data)
+
   if (
     symbol &&
     equals_ignore_case(
@@ -3579,14 +3581,14 @@ export default () => {
           {
             !openTransferStatus &&
             (
-              source_contract_data?.mintable ||
-              source_contract_data?.wrapable ||
-              source_contract_data?.wrapped
+              _source_contract_data?.mintable ||
+              _source_contract_data?.wrapable ||
+              _source_contract_data?.wrapped
             ) &&
             (
               <Faucet
                 token_id={asset}
-                contract_data={source_contract_data}
+                contract_data={_source_contract_data}
               />
             )
           }

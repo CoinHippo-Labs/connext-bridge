@@ -597,6 +597,75 @@ export default () => {
                   contract_address,
                 )
 
+            const {
+              lpTokenAddress,
+              balances,
+              decimals,
+            } = { ...pool }
+
+            if (Array.isArray(balances)) {
+              pool.balances =
+                balances
+                  .map((b, i) =>
+                    typeof b === 'number' ?
+                      b :
+                      Number(
+                        utils.formatUnits(
+                          b,
+                          decimals?.[i] ||
+                          18,
+                        )
+                      )
+                  )
+            }
+
+            let supply
+
+            if (lpTokenAddress) {
+              console.log(
+                '[getLPTokenSupply]',
+                {
+                  domain_id,
+                  lpTokenAddress,
+                },
+              )
+
+              try {
+                supply =
+                  await sdk.nxtpSdkPool
+                    .getLPTokenSupply(
+                      domain_id,
+                      lpTokenAddress,
+                    )
+
+                supply =
+                  utils.formatUnits(
+                    BigNumber.from(
+                      supply,
+                    ),
+                    18,
+                  )
+              } catch (error) {
+                console.log(
+                  '[ERROR getLPTokenSupply]',
+                  {
+                    domain_id,
+                    lpTokenAddress,
+                  },
+                  error,
+                )
+              }
+
+              console.log(
+                '[LPTokenSupply]',
+                {
+                  domain_id,
+                  lpTokenAddress,
+                  supply,
+                },
+              )
+            }
+
             const rate =
               pool &&
               await sdk.nxtpSdkPool
@@ -667,6 +736,9 @@ export default () => {
                 ..._pair,
                 id: `${chain}_${asset}`,
                 contract_data,
+                supply:
+                  supply ||
+                  _pair.supply,
                 rate:
                   Number(
                     utils.formatUnits(

@@ -105,6 +105,7 @@ export default ({
     contract_data,
     name,
     lpTokenAddress,
+    supply,
     liquidity,
     volume,
     fees,
@@ -137,13 +138,19 @@ export default ({
 
   const {
     lpTokenBalance,
+  } = { ...user_pool_data }
+  let {
     balances,
   } = { ...user_pool_data }
+
+  balances =
+    balances ||
+    pool_data?.balances
 
   const share =
     lpTokenBalance * 100 /
     (
-      Number(liquidity) ||
+      Number(supply) ||
       1
     )
 
@@ -207,17 +214,20 @@ export default ({
 
   const tvl =
     typeof price === 'number' ?
-      _.sum(
-        (balances || [])
-          .map((b, i) =>
-            b /
-            (
-              i > 0 &&
-              rate > 0 ?
-                rate :
-                1
+      (
+        supply ||
+        _.sum(
+          (balances || [])
+            .map((b, i) =>
+              b /
+              (
+                i > 0 &&
+                rate > 0 ?
+                  rate :
+                  1
+              )
             )
-          )
+        )
       ) *
       price :
       0
@@ -370,92 +380,94 @@ export default ({
                     Liquidity provided
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {position_loading ?
-                      <div>
-                        <div className="mt-1">
-                          <TailSpin
-                            color={loader_color(theme)}
-                            width="24"
-                            height="24"
-                          />
-                        </div>
-                      </div> :
-                      pool_tokens_data
-                        .map((p, i) => {
-                          const {
-                            contract_address,
-                            symbol,
-                            image,
-                            balance,
-                          } = { ...p }
+                    {
+                      position_loading ||
+                      pool_loading ?
+                        <div>
+                          <div className="mt-1">
+                            <TailSpin
+                              color={loader_color(theme)}
+                              width="24"
+                              height="24"
+                            />
+                          </div>
+                        </div> :
+                        pool_tokens_data
+                          .map((p, i) => {
+                            const {
+                              contract_address,
+                              symbol,
+                              image,
+                              balance,
+                            } = { ...p }
 
-                          return (
-                            <div
-                              key={i}
-                              className="flex flex-col space-y-1"
-                            >
-                              <a
-                                href={`${url}${contract_path?.replace('{address}', contract_address)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center space-x-2"
+                            return (
+                              <div
+                                key={i}
+                                className="flex flex-col space-y-1"
                               >
-                                {
-                                  image &&
-                                  (
-                                    <Image
-                                      src={image}
-                                      alt=""
-                                      width={16}
-                                      height={16}
-                                      className="rounded-full"
-                                    />
-                                  )
-                                }
-                                <span className="text-xs font-medium">
-                                  {symbol}
-                                </span>
-                              </a>
-                              <a
-                                href={`${url}${contract_path?.replace('{address}', contract_address)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={gridValueClassName}
-                              >
-                                {
-                                  pool_data &&
-                                  !error ?
-                                    <span className="uppercase">
-                                      {balance > -1 ?
-                                        number_format(
-                                          balance,
-                                          balance > 1000 ?
-                                            '0,0.00' :
-                                            '0,0.00000000',
-                                          true,
-                                        ) :
-                                        '-'
-                                      }
-                                    </span> :
-                                    selected &&
-                                    !no_pool &&
-                                    !error &&
+                                <a
+                                  href={`${url}${contract_path?.replace('{address}', contract_address)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center space-x-2"
+                                >
+                                  {
+                                    image &&
                                     (
-                                      pool_loading ?
-                                        <div className="mt-1">
-                                          <TailSpin
-                                            color={loader_color(theme)}
-                                            width="24"
-                                            height="24"
-                                          />
-                                        </div> :
-                                        '-'
+                                      <Image
+                                        src={image}
+                                        alt=""
+                                        width={16}
+                                        height={16}
+                                        className="rounded-full"
+                                      />
                                     )
-                                }
-                              </a>
-                            </div>
-                          )
-                        })
+                                  }
+                                  <span className="text-xs font-medium">
+                                    {symbol}
+                                  </span>
+                                </a>
+                                <a
+                                  href={`${url}${contract_path?.replace('{address}', contract_address)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={gridValueClassName}
+                                >
+                                  {
+                                    pool_data &&
+                                    !error ?
+                                      <span className="uppercase">
+                                        {balance > -1 ?
+                                          number_format(
+                                            balance,
+                                            balance > 1000 ?
+                                              '0,0.00' :
+                                              '0,0.00000000',
+                                            true,
+                                          ) :
+                                          '-'
+                                        }
+                                      </span> :
+                                      selected &&
+                                      !no_pool &&
+                                      !error &&
+                                      (
+                                        pool_loading ?
+                                          <div className="mt-1">
+                                            <TailSpin
+                                              color={loader_color(theme)}
+                                              width="24"
+                                              height="24"
+                                            />
+                                          </div> :
+                                          '-'
+                                      )
+                                  }
+                                </a>
+                              </div>
+                            )
+                          })
                     }
                   </div>
                 </div>
@@ -464,72 +476,76 @@ export default ({
                     My positions
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {position_loading ?
-                      <div>
-                        <div className="mt-1">
-                          <TailSpin
-                            color={loader_color(theme)}
-                            width="24"
-                            height="24"
-                          />
-                        </div>
-                      </div> :
-                      <>
-                        <div className="flex flex-col space-y-1">
-                          {
-                            lpTokenAddress &&
-                            url ?
-                              <a
-                                href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs font-medium"
-                              >
-                                Pool Tokens
-                              </a> :
-                              <span className="text-xs font-medium">
-                                Pool Tokens
-                              </span>
-                          }
-                          {
-                            lpTokenAddress &&
-                            url ?
-                              <a
-                                href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={gridValueClassName}
-                              >
-                                {number_format(
-                                  lpTokenBalance ||
-                                  0,
-                                  '0,0.000000000000',
-                                  true,
-                                )}
-                              </a> :
-                              number_format(
-                                lpTokenBalance ||
+                    {
+                      position_loading ||
+                      pool_loading ?
+                        <div>
+                          <div className="mt-1">
+                            <TailSpin
+                              color={loader_color(theme)}
+                              width="24"
+                              height="24"
+                            />
+                          </div>
+                        </div> :
+                        <>
+                          <div className="flex flex-col space-y-1">
+                            {
+                              lpTokenAddress &&
+                              url ?
+                                <a
+                                  href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs font-medium"
+                                >
+                                  Pool Tokens
+                                </a> :
+                                <span className="text-xs font-medium">
+                                  Pool Tokens
+                                </span>
+                            }
+                            {
+                              lpTokenAddress &&
+                              url ?
+                                <a
+                                  href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={gridValueClassName}
+                                >
+                                  {number_format(
+                                    lpTokenBalance ||
+                                    0,
+                                    '0,0.000000000000',
+                                    true,
+                                  )}
+                                </a> :
+                                <span className={gridValueClassName}>
+                                  {number_format(
+                                    lpTokenBalance ||
+                                    0,
+                                    '0,0.000000000000',
+                                    true,
+                                  )}
+                                </span>
+                            }
+                          </div>
+                          <div className="flex flex-col space-y-1">
+                            <span className="text-xs font-medium">
+                              Share
+                            </span>
+                            <span className={gridValueClassName}>
+                              {number_format(
+                                share ||
                                 0,
-                                '0,0.000000000000',
+                                '0,0.000000',
                                 true,
-                              )
-                          }
-                        </div>
-                        <div className="flex flex-col space-y-1">
-                          <span className="text-xs font-medium">
-                            Share
-                          </span>
-                          <span className={gridValueClassName}>
-                            {number_format(
-                              share ||
-                              0,
-                              '0,0.000000',
-                              true,
-                            )}
-                            %
-                          </span>
-                        </div>
-                      </>
+                              )}
+                              %
+                            </span>
+                          </div>
+                        </>
                     }
                   </div>
                 </div>

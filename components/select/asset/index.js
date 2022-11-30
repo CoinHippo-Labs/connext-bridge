@@ -103,6 +103,7 @@ export default ({
       data?.symbol ||
       asset_data?.symbol ||
       'Select token' :
+      data?.symbol ||
       symbol ||
       asset_data?.symbol ||
       'Token'

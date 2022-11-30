@@ -18,10 +18,6 @@ import { chainName } from '../../lib/object/chain'
 import { number_format, params_to_obj, equals_ignore_case, loader_color } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
-const WRAPPED_PREFIX =
-  process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
-  'next'
-
 export default () => {
   const dispatch = useDispatch()
   const {
@@ -742,46 +738,12 @@ export default () => {
     decimals,
     error,
   } = { ...pool_data }
-  const {
-    contract_address,
-    next_asset,
-  } = { ...contract_data }
 
   const pool_loading =
     selected &&
     !no_pool &&
     !error &&
     !pool_data
-
-  const pool_tokens_data =
-    (symbols || [])
-      .map((s, i) => {
-        const _contract_address = tokens?.[i]
-
-        return {
-          i,
-          contract_address: _contract_address,
-          chain_id: chain_data?.chain_id,
-          symbol: s,
-          decimals: decimals?.[i],
-          image:
-            (
-              equals_ignore_case(
-                _contract_address,
-                contract_address,
-              ) ?
-                contract_data?.image :
-                equals_ignore_case(
-                  _contract_address,
-                  next_asset?.contract_address,
-                ) ?
-                  next_asset?.image ||
-                  contract_data?.image :
-                  null
-            ) ||
-            asset_data?.image,
-        }
-      })
 
   return (
     <div className="mb-4">
@@ -959,48 +921,6 @@ export default () => {
                     }
                   </span>
                 </div>*/}
-                {
-                  pool_tokens_data
-                    .filter(d =>
-                      d.symbol?.includes(WRAPPED_PREFIX)
-                    )
-                    .length > 0 &&
-                  (
-                    <div className="flex flex-col lg:items-end space-y-0">
-                      <span className="text-slate-400 dark:text-slate-500 font-medium">
-                        Convert to {
-                          pool_tokens_data
-                            .find(d =>
-                              d.symbol?.includes(WRAPPED_PREFIX)
-                            )?.symbol
-                        }
-                      </span>
-                      <div className="flex items-center space-x-2">
-                        <a
-                          href={`/${asset.toUpperCase()}-from-${_.head(chains_data)?.id}-to-${chain}?receive_next=true`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <span className="text-slate-600 dark:text-slate-300 hover:text-black dark:hover:text-white font-medium">
-                            Using Bridge
-                          </span>
-                        </a>
-                        <span className="text-xl text-slate-400 dark:text-slate-500 mt-0.5">
-                          |
-                        </span>
-                        <a
-                          href={`/swap/${asset.toUpperCase()}-on-${chain}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <span className="text-slate-600 dark:text-slate-300 hover:text-black dark:hover:text-white font-medium">
-                            Using AMM
-                          </span>
-                        </a>
-                      </div>
-                    </div>
-                  )
-                }
               </div>
               {
                 error &&

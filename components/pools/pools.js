@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { utils } from 'ethers'
 import { TailSpin } from 'react-loader-spinner'
 import { Tooltip } from '@material-tailwind/react'
 import { MdKeyboardArrowUp, MdKeyboardArrowDown } from 'react-icons/md'
@@ -128,21 +127,22 @@ export default ({
               _.orderBy(
                 data
                   .flatMap(d => {
-                  const {
-                    pools,
-                  } = { ...d }
+                    const {
+                      pools,
+                    } = { ...d }
 
-                  return (
-                    (pools || [])
-                      .map(p => {
-                        return {
-                          ...p,
-                        }
-                      })
-                  )
-                })
+                    return (
+                      (pools || [])
+                        .map(p => {
+                          return {
+                            ...p,
+                          }
+                        })
+                    )
+                  })
                   .map((d, i) => {
                     const {
+                      supply,
                       balances,
                       decimals,
                       rate,
@@ -162,29 +162,22 @@ export default ({
                       price,
                     } = { ...asset_data }
 
-                    const _balances =
-                      (balances || [])
-                        .map((b, i) =>
-                          utils.formatUnits(
-                            b,
-                            decimals?.[i] ||
-                            18,
-                          )
-                        )
-
                     const tvl =
                       typeof price === 'number' ?
-                        _.sum(
-                          _balances
-                            .map((b, i) =>
-                              b /
-                              (
-                                i > 0 &&
-                                rate > 0 ?
-                                  rate :
-                                  1
+                        (
+                          supply ||
+                          _.sum(
+                            (balances || [])
+                              .map((b, i) =>
+                                b /
+                                (
+                                  i > 0 &&
+                                  rate > 0 ?
+                                    rate :
+                                    1
+                                )
                               )
-                            )
+                          )
                         ) *
                         price :
                         0
@@ -209,6 +202,7 @@ export default ({
                   chain_data,
                   contract_data,
                   name,
+                  supply,
                   tokens,
                   symbols,
                   balances,
@@ -259,18 +253,8 @@ export default ({
                       asset_data?.image
                     )
 
-                const _balances =
-                  (balances || [])
-                    .map((b, i) =>
-                      utils.formatUnits(
-                        b,
-                        decimals?.[i] ||
-                        18,
-                      )
-                    )
-
                 const pair_balances =
-                  _balances
+                  (balances || [])
                     .map((b, i) =>
                       [
                         symbols?.[i],
@@ -293,17 +277,20 @@ export default ({
 
                 const tvl =
                   typeof price === 'number' ?
-                    _.sum(
-                      _balances
-                        .map((b, i) =>
-                          b /
-                          (
-                            i > 0 &&
-                            rate > 0 ?
-                              rate :
-                              1
+                    (
+                      supply ||
+                      _.sum(
+                        (balances || [])
+                          .map((b, i) =>
+                            b /
+                            (
+                              i > 0 &&
+                              rate > 0 ?
+                                rate :
+                                1
+                            )
                           )
-                        )
+                      )
                     ) *
                     price :
                     pair_balances
