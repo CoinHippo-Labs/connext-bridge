@@ -174,6 +174,7 @@ export default ({
         typeof amountX === 'number' &&
         typeof amountY === 'number'
       ) {
+        setPriceImpactAdd(true)
         setCallResponse(null)
 
         console.log(
@@ -293,6 +294,8 @@ export default ({
             .toString()
 
           try {
+            setPriceImpactRemove(true)
+
             console.log(
               '[calculateRemoveSwapLiquidity]',
               {
@@ -399,6 +402,7 @@ export default ({
             )
 
             setRemoveAmounts(null)
+            setPriceImpactRemove(null)
           }
         }
       }

@@ -79,19 +79,50 @@ export default ({
                 _p?.id === id
               )
             const {
-              liquidity,
+              balances,
+              supply,
+              rate,
             } = { ...pool_data }
 
             share =
               lpTokenBalance * 100 /
               (
-                Number(liquidity) ||
+                Number(supply) ||
                 1
               )
+
+            const asset_data = (assets_data || [])
+              .find(a =>
+                a?.id === pool_data?.asset_data?.id
+              )
+            const {
+              price,
+            } = { ...asset_data }
+
+            const tvl =
+              typeof price === 'number' ?
+                (
+                  supply ||
+                  _.sum(
+                    (balances || [])
+                      .map((b, i) =>
+                        b /
+                        (
+                          i > 0 &&
+                          rate > 0 ?
+                            rate :
+                            1
+                        )
+                      )
+                  )
+                ) *
+                price :
+                0
 
             return {
               ...p,
               share,
+              tvl,
             }
           }) :
           null :
@@ -111,7 +142,7 @@ export default ({
             pools:
               _.orderBy(
                 v,
-                ['liquidity'],
+                ['tvl'],
                 ['desc'],
               ),
           }
@@ -207,7 +238,7 @@ export default ({
                   symbols,
                   balances,
                   decimals,
-                  apy,
+                  apr,
                   rate,
                 } = { ...d }
                 let {
@@ -392,7 +423,7 @@ export default ({
                       </div>
                       <div className="flex flex-col space-y-1">
                         <span className="text-slate-400 dark:text-slate-500 font-medium">
-                          APY
+                          APR
                         </span>
                         <span className="text-lg font-semibold">
                           {
@@ -412,9 +443,18 @@ export default ({
                                 }
                                 className="z-50 bg-dark whitespace-pre-wrap text-white text-xs"
                               >
-                                <div className="flex items-center">
+                                <div className="min-w-max flex items-center">
                                   <span className="mr-1.5">
-                                    TBD
+                                    {!isNaN(apr) ?
+                                      <span className="uppercase">
+                                        {number_format(
+                                          apr / 100,
+                                          '0,0.00a',
+                                          true,
+                                        )} %
+                                      </span> :
+                                      'TBD'
+                                    }
                                   </span>
                                   {
                                     chain_data?.image &&
@@ -430,45 +470,15 @@ export default ({
                                   }
                                 </div>
                               </Tooltip> :
-                              !isNaN(apy?.total) ?
-                                <Tooltip
-                                  placement="top"
-                                  content={
-                                    Object.entries({ ...apy })
-                                      .map(([k, v]) => (
-                                        <div
-                                          key={k}
-                                          className="flex items-center justify-between space-x-1"
-                                        >
-                                          <span className="capitalize">
-                                            {k}:
-                                          </span>
-                                          <span>
-                                            {!isNaN(v) ?
-                                              <>
-                                                {number_format(
-                                                  v,
-                                                  '0,0.00',
-                                                  true,
-                                                )} %
-                                              </> :
-                                              '-'
-                                            }
-                                          </span>
-                                        </div>
-                                      ))
-                                  }
-                                  className="z-50 bg-dark whitespace-pre-wrap text-white text-xs"
-                                >
-                                  <span>
-                                    {number_format(
-                                      apy.total,
-                                      '0,0.00',
-                                      true,
-                                    )} %
-                                  </span>
-                                </Tooltip> :
-                                'TBD'
+                              !isNaN(apr) ?
+                                <span className="uppercase">
+                                  {number_format(
+                                    apr / 100,
+                                    '0,0.00a',
+                                    true,
+                                  )} %
+                                </span> :
+                                '-'
                           }
                         </span>
                       </div>
@@ -765,15 +775,15 @@ export default ({
               },
               {
                 Header: 'Liquidity',
-                accessor: 'liquidity',
+                accessor: 'tvl',
                 sortType: (a, b) =>
                   _.sumBy(
                     a.original.pools,
-                    'liquidity',
+                    'tvl',
                   ) >
                   _.sumBy(
                     b.original.pools,
-                    'liquidity',
+                    'tvl',
                   ) ?
                     1 :
                     -1,
@@ -786,7 +796,7 @@ export default ({
                   const value =
                     _.sumBy(
                       pools,
-                      'liquidity',
+                      'tvl',
                     )
 
                   return (
@@ -806,12 +816,12 @@ export default ({
                             const {
                               chain_data,
                               asset_data,
-                              liquidity,
+                              tvl,
                             } = { ...p }
 
                             const chain = chain_data?.id
                             const asset = asset_data?.id
-                            const value = liquidity
+                            const value = tvl
 
                             return (
                               <Link
@@ -992,16 +1002,16 @@ export default ({
                 headerClassName: 'whitespace-nowrap justify-end text-right',
               },
               {
-                Header: 'APY',
-                accessor: 'apy.day',
+                Header: 'APR',
+                accessor: 'apr',
                 sortType: (a, b) =>
                   _.meanBy(
                     a.original.pools,
-                    'apy.day',
+                    'apr',
                   ) >
                   _.sumBy(
                     b.original.pools,
-                    'apy.day',
+                    'apr',
                   ) ?
                     1 :
                     -1,
@@ -1014,7 +1024,7 @@ export default ({
                   const value =
                     _.sumBy(
                       pools,
-                      'apy.day',
+                      'apr',
                     )
 
                   return (
@@ -1033,12 +1043,12 @@ export default ({
                             const {
                               chain_data,
                               asset_data,
-                              apy,
+                              apr,
                             } = { ...p }
 
                             const chain = chain_data?.id
                             const asset = asset_data?.id
-                            const value = apy?.day
+                            const value = apr
 
                             return (
                               <Link
@@ -1215,10 +1225,10 @@ export default ({
               !(
                 view === 'my_positions' ?
                   [
-                    'liquidity',
+                    'tvl',
                     'volume',
                     'fees',
-                    'apy.day',
+                    'apr',
                   ] :
                   [
                     'lpTokenBalance',

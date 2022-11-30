@@ -666,13 +666,57 @@ export default () => {
               )
             }
 
-            const rate =
+            let rate =
               pool &&
               await sdk.nxtpSdkPool
                 .getVirtualPrice(
                   domain_id,
                   contract_address,
                 )
+
+            rate =
+              Number(
+                utils.formatUnits(
+                  BigNumber.from(
+                    rate ||
+                    '0'
+                  ),
+                  // _.last(decimals) ||
+                  18,
+                )
+              )
+
+            let tvl
+
+            if (Array.isArray(pool.balances)) {
+              const asset_data = (assets_data || [])
+                .find(a =>
+                  a?.id === asset
+                )
+              const {
+                price,
+              } = { ...asset_data }
+
+              tvl =
+                typeof price === 'number' ?
+                  (
+                    supply ||
+                    _.sum(
+                      pool.balances
+                        .map((b, i) =>
+                          b /
+                          (
+                            i > 0 &&
+                            rate > 0 ?
+                              rate :
+                              1
+                          )
+                        )
+                    )
+                  ) *
+                  price :
+                  0
+            }
 
             _pair =
               (
@@ -739,17 +783,8 @@ export default () => {
                 supply:
                   supply ||
                   _pair.supply,
-                rate:
-                  Number(
-                    utils.formatUnits(
-                      BigNumber.from(
-                        rate ||
-                        '0'
-                      ),
-                      // _.last(_pair.decimals) ||
-                      18,
-                    )
-                  ),
+                rate,
+                tvl,
                 updated_at:
                   moment()
                     .valueOf(),

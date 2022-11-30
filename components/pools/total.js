@@ -37,7 +37,7 @@ export default () => {
               {number_format(
                 _.sumBy(
                   pools_data,
-                  'liquidity',
+                  'tvl',
                 ),
                 '0,0.000000',
                 true,
@@ -82,7 +82,7 @@ export default () => {
       </div>
       <div className="flex flex-col space-y-0.5">
         <span className="text-slate-600 dark:text-slate-300 text-base font-medium">
-          APY
+          APR
         </span>
         <span className="text-lg font-semibold">
           {pools_data ?
@@ -90,7 +90,7 @@ export default () => {
               {number_format(
                 _.meanBy(
                   pools_data,
-                  'apy.day',
+                  'apr',
                 ),
                 '0,0.000000',
                 true,

@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import { TailSpin } from 'react-loader-spinner'
-import { Tooltip } from '@material-tailwind/react'
 import { HiSwitchHorizontal } from 'react-icons/hi'
 import { TiArrowRight } from 'react-icons/ti'
 
@@ -106,10 +105,9 @@ export default ({
     name,
     lpTokenAddress,
     supply,
-    liquidity,
     volume,
     fees,
-    apy,
+    apr,
     symbol,
     tokens,
     symbols,
@@ -302,7 +300,7 @@ export default ({
                 </div>
                 <div className={metricClassName}>
                   <span className={titleClassName}>
-                    Reward APY
+                    Reward APR
                   </span>
                   <div className="flex flex-col space-y-1">
                     {
@@ -348,15 +346,22 @@ export default ({
                           [
                             'optimism',
                           ].includes(chain) ?
-                          'TBD' :
-                            <>
+                            !isNaN(apr) ?
+                              <span className="uppercase">
+                                {number_format(
+                                  apr / 100,
+                                  '0,0.00a',
+                                  true,
+                                )} %
+                              </span> :
+                              'TBD' :
+                            <span className="uppercase">
                               {number_format(
-                                apy?.total,
-                                '0,0.00',
+                                apr / 100,
+                                '0,0.00a',
                                 true,
-                              )}
-                              %
-                            </> :
+                              )} %
+                            </span> :
                           selected &&
                           !no_pool &&
                           !error &&
@@ -369,7 +374,42 @@ export default ({
                                   height="24"
                                 />
                               </div> :
-                              'TBD'
+                              '-'
+                          )
+                      }
+                    </span>
+                  </div>
+                </div>
+                <div className={metricClassName}>
+                  <span className={titleClassName}>
+                    Volume 24h
+                  </span>
+                  <div className="flex flex-col space-y-1">
+                   <span className={valueClassName}>
+                      {
+                        pool_data &&
+                        !error ?
+                          <span className="uppercase">
+                            {currency_symbol}
+                            {number_format(
+                              volume,
+                              '0,0.00',
+                              true,
+                            )}
+                          </span> :
+                          selected &&
+                          !no_pool &&
+                          !error &&
+                          (
+                            pool_loading ?
+                              <div className="mt-1">
+                                <TailSpin
+                                  color={loader_color(theme)}
+                                  width="24"
+                                  height="24"
+                                />
+                              </div> :
+                              '-'
                           )
                       }
                     </span>

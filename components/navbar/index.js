@@ -766,7 +766,7 @@ export default () => {
 
           if (pool) {
             console.log(
-              '[getPoolStats]',
+              '[getYieldData]',
               {
                 domain_id,
                 contract_address,
@@ -774,17 +774,30 @@ export default () => {
             )
           }
 
-          const stats =
-            pool &&
-            await sdk.nxtpSdkPool
-              .getPoolStats(
+          let stats
+
+          try {
+            stats =
+              pool &&
+              await sdk.nxtpSdkPool
+                .getYieldData(
+                  domain_id,
+                  contract_address,
+                )
+          } catch (error) {
+            console.log(
+              '[ERROR getYieldData]',
+              {
                 domain_id,
                 contract_address,
-              )
+              },
+              error,
+            )
+          }
 
           if (pool) {
             console.log(
-              '[PoolStats]',
+              '[yieldData]',
               {
                 domain_id,
                 contract_address,
@@ -794,9 +807,7 @@ export default () => {
           }
 
           const {
-            liquidity,
-            volume,
-            fees,
+            volumeFormatted,
           } = { ...stats }
 
           if (pool) {
@@ -809,13 +820,60 @@ export default () => {
             )
           }
 
-          const rate =
+          let rate =
             pool &&
             await sdk.nxtpSdkPool
               .getVirtualPrice(
                 domain_id,
                 contract_address,
               )
+
+          rate =
+            Number(
+              utils.formatUnits(
+                BigNumber.from(
+                  rate ||
+                  '0'
+                ),
+                // _.last(decimals) ||
+                18,
+              )
+            )
+
+          let tvl
+
+          if (Array.isArray(pool.balances)) {
+            const {
+              price,
+            } = {
+              ...(
+                (assets_data || [])
+                  .find(a =>
+                    a?.id === asset_data.id
+                  )
+              ),
+            }
+
+            tvl =
+              typeof price === 'number' ?
+                (
+                  supply ||
+                  _.sum(
+                    pool.balances
+                      .map((b, i) =>
+                        b /
+                        (
+                          i > 0 &&
+                          rate > 0 ?
+                            rate :
+                            1
+                        )
+                      )
+                  )
+                ) *
+                price :
+                0
+          }
 
           if (pool) {
             console.log(
@@ -846,29 +904,60 @@ export default () => {
               supply:
                 supply ||
                 pool?.supply,
-              liquidity:
-                Number(
-                  liquidity,
-                ),
-              volume:
-                Number(
-                  volume,
-                ),
-              fees:
-                Number(
-                  fees,
-                ),
-              rate:
-                Number(
-                  utils.formatUnits(
-                    BigNumber.from(
-                      rate ||
-                      '0'
-                    ),
-                    _.last(decimals) ||
-                    18,
+              volume: volumeFormatted,
+              rate,
+              tvl,
+            }
+
+            if (
+              [
+                'optimism',
+              ].includes(chain_data.id)
+            ) {
+              const totalTokens = 250000
+              const totalBlocks = 657436
+              const numPools = 2
+              const symbol =
+                contract_data.symbol ||
+                assets_data.symbol
+
+              console.log(
+                '[getLiquidityMiningAprPerPool]',
+                {
+                  totalTokens,
+                  totalBlocks,
+                  numPools,
+                  symbol,
+                  tvl,
+                },
+              )
+
+              const apr =
+                await sdk.nxtpSdkPool
+                  .getLiquidityMiningAprPerPool(
+                    totalTokens,
+                    totalBlocks,
+                    numPools,
+                    symbol,
+                    tvl,
                   )
-                ),
+
+              console.log(
+                '[liquidityMiningAprPerPool]',
+                {
+                  totalTokens,
+                  totalBlocks,
+                  numPools,
+                  symbol,
+                  tvl,
+                  apr,
+                },
+              )
+
+              data = {
+                ...data,
+                apr,
+              }
             }
           }
           else {

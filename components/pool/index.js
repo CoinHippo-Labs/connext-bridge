@@ -6,7 +6,6 @@ import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, Contract, constants, utils } from 'ethers'
 import { TailSpin } from 'react-loader-spinner'
-import { Tooltip } from '@material-tailwind/react'
 import { TiArrowLeft, TiArrowRight } from 'react-icons/ti'
 
 import Info from './info'
@@ -404,7 +403,6 @@ export default () => {
                     symbol,
                     decimals,
                     balances,
-                    liquidity,
                   } = { ...info }
 
                   const symbols =
@@ -728,10 +726,7 @@ export default () => {
     contract_data,
     name,
     lpTokenAddress,
-    liquidity,
     volume,
-    fees,
-    apy,
     symbol,
     tokens,
     symbols,
@@ -868,59 +863,6 @@ export default () => {
                     )
                   */}
                 </div>
-                {/*<div className="flex flex-col space-y-1">
-                  <span className="text-slate-400 dark:text-slate-500 font-medium">
-                    APY
-                  </span>
-                  <span className="text-lg font-semibold">
-                    {!isNaN(apy?.total) ?
-                      <Tooltip
-                        placement="top"
-                        content={
-                          Object.entries({ ...apy })
-                            .map(([k, v]) => (
-                              <div
-                                key={k}
-                                className="flex items-center justify-between space-x-1"
-                              >
-                                <span className="capitalize">
-                                  {k}:
-                                </span>
-                                <span>
-                                  {!isNaN(v) ?
-                                    <>
-                                      {number_format(
-                                        v,
-                                        '0,0.00',
-                                        true,
-                                      )} %
-                                    </> :
-                                    '-'
-                                  }
-                                </span>
-                              </div>
-                            ))
-                        }
-                        className="z-50 bg-dark whitespace-pre-wrap text-white text-xs"
-                      >
-                        <span>
-                          {number_format(
-                            apy.total,
-                            '0,0.00',
-                            true,
-                          )} %
-                        </span>
-                      </Tooltip> :
-                      pool_loading ?
-                        <TailSpin
-                          color={loader_color(theme)}
-                          width="24"
-                          height="24"
-                        /> :
-                        'TBD'
-                    }
-                  </span>
-                </div>*/}
               </div>
               {
                 error &&

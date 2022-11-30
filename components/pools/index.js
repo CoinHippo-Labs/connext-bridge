@@ -100,7 +100,6 @@ export default () => {
                         symbol,
                         decimals,
                         balances,
-                        liquidity,
                       } = { ...info }
 
                       const symbols =
