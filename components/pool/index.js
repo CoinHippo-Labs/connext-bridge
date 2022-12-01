@@ -464,18 +464,20 @@ export default () => {
                           )
                         ),
                     balances:
-                      (balances || [])
+                      (balances || p?.balances || [])
                         .map((b, i) =>
-                          Number(
-                            utils.formatUnits(
-                              BigNumber.from(
-                                b ||
-                                '0',
-                              ),
-                              decimals?.[i] ||
-                              18,
+                          typeof b === 'number' ?
+                            b :
+                            Number(
+                              utils.formatUnits(
+                                BigNumber.from(
+                                  b ||
+                                  '0',
+                                ),
+                                decimals?.[i] ||
+                                18,
+                              )
                             )
-                          )
                         ),
                   }
                 })
