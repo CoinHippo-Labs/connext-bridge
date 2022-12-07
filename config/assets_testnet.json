@@ -77,5 +77,22 @@
         "contract_decimals": 18
       }
     ]
+  },
+  {
+    "id": "tkn",
+    "symbol": "TKN",
+    "image": "/logos/assets/coin.png",
+    "contracts": [
+      {
+        "contract_address": "0x16F63C5036d3F48A239358656a8f123eCE85789C",
+        "chain_id": 5,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0x3Db593146464816F10d4eBA4743C76A5A4D08425",
+        "chain_id": 420,
+        "contract_decimals": 18
+      }
+    ]
   }
 ]
