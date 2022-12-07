@@ -744,5 +744,69 @@
         "contract_decimals": 18
       }
     ]
+  },
+  {
+    "id": "kp3r",
+    "symbol": "KP3R",
+    "image": "/logos/assets/kp3r.png",
+    "contracts": [
+      {
+        "contract_address": "0x1cEB5cB57C4D4E2b2433641b95Dd330A33185A44",
+        "chain_id": 1,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0x74bcb73fA7010EB523a81feE2bB23EaB3d12c2f8",
+        "chain_id": 10,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0x8b46589ACB27C66d09dBeACBcdBAFF7dcc681b13",
+        "chain_id": 137,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0xeC9A9073f7D386e1Ef5f931eE2A33150C9E52cd5",
+        "chain_id": 56,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0x7Cd74859273818F928d2D20472343cb61378af49",
+        "chain_id": 100,
+        "contract_decimals": 18
+      }
+    ]
+  },
+  {
+    "id": "kp3r-lp",
+    "symbol": "KLP",
+    "image": "/logos/assets/kp3r.png",
+    "contracts": [
+      {
+        "contract_address": "0x3f6740b5898c5D3650ec6eAce9a649Ac791e44D7",
+        "chain_id": 1,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0x3007DB59A437f3F0a64b4fE26c8caf20E9Cb6f43",
+        "chain_id": 10,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0x37227A963Da5bdbe192E12add9f207fF915F470C",
+        "chain_id": 137,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0x6D9F091C2D92215b6Ab68061f0997ADe31985C3C",
+        "chain_id": 56,
+        "contract_decimals": 18
+      },
+      {
+        "contract_address": "0x2F8e2b29cBf58875035eCfe41E61112c9B3be19e",
+        "chain_id": 100,
+        "contract_decimals": 18
+      }
+    ]
   }
 ]
