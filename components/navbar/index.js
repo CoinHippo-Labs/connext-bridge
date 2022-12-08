@@ -323,14 +323,19 @@ export default () => {
 
             const provider =
               rpc_urls.length === 1 ?
-                new providers.JsonRpcProvider(
-                  _.head(rpc_urls)
+                new providers.StaticJsonRpcProvider(
+                  _.head(rpc_urls),
+                  chain_id,
                 ) :
                 new providers.FallbackProvider(
                   rpc_urls
                     .map((url, i) => {
                       return {
-                        provider: new providers.JsonRpcProvider(url),
+                        provider:
+                          new providers.StaticJsonRpcProvider(
+                            url,
+                            chain_id,
+                          ),
                         priority: i + 1,
                         stallTimeout: 1000,
                       }
