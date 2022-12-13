@@ -1468,6 +1468,12 @@ export default () => {
       try {
         setEstimatedValues(null)
 
+        const amount =
+          utils.parseUnits(
+            _amount.toString(),
+            source_decimals,
+          )
+
         const isNextAsset =
           !receiveLocal ||
           equals_ignore_case(
@@ -1482,7 +1488,7 @@ export default () => {
             destinationDomain: destination_chain_data?.domain_id,
             originTokenAddress: source_contract_data?.contract_address,
             destinationTokenAddress: destination_contract_data?.contract_address,
-            amount: _amount,
+            amount,
             isNextAsset,
           },
         )
@@ -1494,7 +1500,7 @@ export default () => {
               destination_chain_data?.domain_id,
               source_contract_data?.contract_address,
               destination_contract_data?.contract_address,
-              _amount,
+              amount,
               isNextAsset,
             )
 
@@ -1511,7 +1517,12 @@ export default () => {
               .map(([k, v]) => {
                 return [
                   k,
-                  v.toNumber(),
+                  Number(
+                    utils.formatUnits(
+                      v,
+                      destination_decimals,
+                    )
+                  ),
                 ]
               })
           )
