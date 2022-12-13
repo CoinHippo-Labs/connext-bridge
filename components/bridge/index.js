@@ -135,6 +135,7 @@ export default () => {
   const [buttonDirection, setButtonDirection] = useState(1)
   const [collapse, setCollapse] = useState(false)
   const [slippageEditing, setSlippageEditing] = useState(false)
+  const [estimatedValues, setEstimatedValues] = useState(undefined)
 
   const [fee, setFee] = useState(null)
   const [feeEstimating, setFeeEstimating] = useState(null)
@@ -255,6 +256,16 @@ export default () => {
       ) {
         bridge.amount = Number(amount)
         updated = true
+
+        if (
+          sdk &&
+          estimatedValues === undefined
+        ) {
+          calculateAmountReceived(bridge.amount)
+        }
+      }
+      else if (estimatedValues) {
+        setEstimatedValues(undefined)
       }
     }
 
@@ -278,7 +289,7 @@ export default () => {
     if (updated) {
       setBridge(bridge)
     }
-  }, [asPath, chains_data, assets_data])
+  }, [asPath, chains_data, assets_data, sdk])
 
   // set bridge to path
   useEffect(() => {
@@ -1272,6 +1283,7 @@ export default () => {
       )
 
       setXcall(null)
+      setEstimatedValues(null)
     }
 
     if (
@@ -1448,6 +1460,70 @@ export default () => {
       }
 
       setFeeEstimating(false)
+    }
+  }
+
+  const calculateAmountReceived = async _amount => {
+    if (sdk) {
+      try {
+        setEstimatedValues(null)
+
+        const isNextAsset =
+          !receiveLocal ||
+          equals_ignore_case(
+            destination_contract_data?.contract_address,
+            destination_contract_data?.next_asset?.contract_address,
+          )
+
+        console.log(
+          '[calculateAmountReceived]',
+          {
+            originDomain: source_chain_data?.domain_id,
+            destinationDomain: destination_chain_data?.domain_id,
+            originTokenAddress: source_contract_data?.contract_address,
+            destinationTokenAddress: destination_contract_data?.contract_address,
+            amount: _amount,
+            isNextAsset,
+          },
+        )
+
+        const response =
+          await sdk.nxtpSdkPool
+            .calculateAmountReceived(
+              source_chain_data?.domain_id,
+              destination_chain_data?.domain_id,
+              source_contract_data?.contract_address,
+              destination_contract_data?.contract_address,
+              _amount,
+              isNextAsset,
+            )
+
+        console.log(
+          '[calculateAmountReceived response]',
+          {
+            ...response,
+          },
+        )
+
+        setEstimatedValues(
+          Object.fromEntries(
+            Object.entries({ ...response })
+              .map(([k, v]) => {
+                return [
+                  k,
+                  v.toNumber(),
+                ]
+              })
+          )
+        )
+      } catch (error) {
+        console.log(
+          '[calculateAmountReceived error]',
+          {
+            ...error,
+          },
+        )
+      }
     }
   }
 
@@ -2057,13 +2133,15 @@ export default () => {
     )
 
   const router_fee =
-    fee &&
-    (
-      forceSlow ?
-        0 :
-        fee.router ||
-        0
-    )
+    typeof estimatedValues?.routerFee === 'number' ?
+      estimatedValues.routerFee :
+      fee &&
+      (
+        forceSlow ?
+          0 :
+          fee.router ||
+          0
+      )
 
   const price_impact = null
 
@@ -2099,10 +2177,12 @@ export default () => {
   const min_amount = 0
   const max_amount = source_amount
   const estimate_received =
-    amount > 0 &&
-    typeof router_fee === 'number' ?
-      amount - router_fee :
-      null
+    estimatedValues?.amountReceived ?
+      estimatedValues.amountReceived :
+      amount > 0 &&
+      typeof router_fee === 'number' ?
+        amount - router_fee :
+        null
 
   const wrong_chain =
     source_chain_data &&
@@ -2585,6 +2665,20 @@ export default () => {
                                       null,
                                 }
                               )
+
+                              if (typeof value === 'number') {
+                                if (value) {
+                                  calculateAmountReceived(value)
+                                }
+                                else {
+                                  setEstimatedValues(
+                                    {
+                                      amountReceived: 0,
+                                      routerFee: 0,
+                                    }
+                                  )
+                                }
+                              }
                             }}
                             onWheel={e => e.target.blur()}
                             onKeyDown={e =>
@@ -2919,21 +3013,32 @@ export default () => {
                                     </div>
                                     <div className="col-span-3 sm:col-span-3">
                                       <div className="flex items-center justify-end sm:justify-end space-x-0.5 sm:space-x-1 -mr-0.5">
-                                        <div className="flex items-center space-x-2">
-                                          <span className="font-semibold">
-                                            {typeof estimate_received === 'number' ?
-                                              number_format(
-                                                estimate_received,
-                                                '0,0.000000000000',
-                                                true,
-                                              ) :
-                                              '-'
-                                            }
-                                          </span>
-                                          <span className="font-semibold">
-                                            {destination_symbol}
-                                          </span>
-                                        </div>
+                                        {
+                                          typeof amount !== 'number' ||
+                                          typeof estimatedValues?.amountReceived === 'number' ?
+                                            <div className="flex items-center space-x-2">
+                                              <span className="font-semibold">
+                                                {
+                                                  typeof amount === 'number' &&
+                                                  typeof estimate_received === 'number' ?
+                                                    number_format(
+                                                      estimate_received,
+                                                      '0,0.000000000000',
+                                                      true,
+                                                    ) :
+                                                    '-'
+                                                }
+                                              </span>
+                                              <span className="font-semibold">
+                                                {destination_symbol}
+                                              </span>
+                                            </div> :
+                                            <Oval
+                                              color={loader_color(theme)}
+                                              width="16"
+                                              height="16"
+                                            />
+                                        }
                                         {collapse ?
                                           <BiChevronDown
                                             size={18}
@@ -3136,18 +3241,27 @@ export default () => {
                                                       Bridge fee
                                                     </div>
                                                   </Tooltip>
-                                                  <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
-                                                    <span>
-                                                      {number_format(
-                                                        router_fee,
-                                                        '0,0.000000000000',
-                                                        true,
-                                                      )}
-                                                    </span>
-                                                    <span>
-                                                      {source_symbol}
-                                                    </span>
-                                                  </span>
+                                                  {
+                                                    typeof router_fee !== 'number' ||
+                                                    typeof estimatedValues?.routerFee === 'number' ?
+                                                      <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
+                                                        <span>
+                                                          {number_format(
+                                                            router_fee,
+                                                            '0,0.000000000000',
+                                                            true,
+                                                          )}
+                                                        </span>
+                                                        <span>
+                                                          {source_symbol}
+                                                        </span>
+                                                      </span> :
+                                                      <Oval
+                                                        color={loader_color(theme)}
+                                                        width="16"
+                                                        height="16"
+                                                      />
+                                                  }
                                                 </div>
                                                 <div className="flex items-center justify-between space-x-1">
                                                   <Tooltip

@@ -35,6 +35,18 @@
           "symbol": "nextUSDC"
         },
         "is_pool": true
+      },
+      {
+        "contract_address": "0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83",
+        "chain_id": 100,
+        "decimals": 6,
+        "image": "/logos/assets/usdc.png",
+        "next_asset": {
+          "contract_address": "0x7e0F3216A74888E8eE3C839C27db1b4a3D8C1CC3",
+          "decimals": 6,
+          "symbol": "nextUSDC"
+        },
+        "is_pool": true
       }
     ],
     "color": "#2675c8",
@@ -76,6 +88,21 @@
         "image": "/logos/assets/weth.png",
         "next_asset": {
           "contract_address": "0x30E049eda6Da0cc0b4F5e39B51FD25666E38b24E",
+          "decimals": 18,
+          "symbol": "nextWETH",
+          "image": "/logos/assets/nextweth.png"
+        },
+        "wrapable": true,
+        "is_pool": true
+      },
+      {
+        "contract_address": "0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1",
+        "chain_id": 100,
+        "decimals": 18,
+        "symbol": "WETH",
+        "image": "/logos/assets/weth.png",
+        "next_asset": {
+          "contract_address": "0x475e647B3E31585466506bd36c6a59822DC32A08",
           "decimals": 18,
           "symbol": "nextWETH",
           "image": "/logos/assets/nextweth.png"

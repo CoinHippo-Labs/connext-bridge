@@ -113,5 +113,42 @@
     "image": "/logos/chains/optimism.png",
     "color": "#dc2626",
     "group" : "optimistic_rollups"
+  },
+  {
+    "id": "gnosis",
+    "chain_id": 100,
+    "domain_id": "6648936",
+    "name": "Gnosis",
+    "short_name": "GNO",
+    "provider_params": [
+      {
+        "chainId": "0x64",
+        "chainName": "Gnosis",
+        "rpcUrls": [
+          "https://rpc.ankr.com/gnosis"
+        ],
+        "nativeCurrency": {
+          "name": "xDAI",
+          "symbol": "xDAI",
+          "decimals": 18
+        },
+        "blockExplorerUrls": [
+          "https://gnosisscan.io"
+        ]
+      }
+    ],
+    "explorer": {
+      "name": "Gnosisscan",
+      "url": "https://gnosisscan.io",
+      "icon": "/logos/explorers/gnosisscan.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/gnosis.png",
+    "color": "#48a9a6",
+    "group" : "evm"
   }
 ]
