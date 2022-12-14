@@ -178,5 +178,45 @@
     ],
     "color": "#000000",
     "group": "other_tokens"
+  },
+  {
+    "id": "kp3r-lp",
+    "symbol": "KLP",
+    "name": "Keep3rV1 LP",
+    "image": "/logos/assets/kp3r.png",
+    "contracts": [
+      {
+        "contract_address": "0x3f6740b5898c5D3650ec6eAce9a649Ac791e44D7",
+        "chain_id": 1,
+        "decimals": 18,
+        "symbol": "KLP"
+      },
+      {
+        "contract_address": "0xf813835326f1c606892a36F96b6Cdd18D6d87De9",
+        "chain_id": 56,
+        "decimals": 18,
+        "symbol": "KLP"
+      },
+      {
+        "contract_address": "0x381BC51bb203c5940A398622be918C876cB0f035",
+        "chain_id": 137,
+        "decimals": 18,
+        "symbol": "KLP"
+      },
+      {
+        "contract_address": "0x87A93A942D10B6cC061A952C3A1213d52044bE97",
+        "chain_id": 10,
+        "decimals": 18,
+        "symbol": "KLP"
+      },
+      {
+        "contract_address": "0x87A93A942D10B6cC061A952C3A1213d52044bE97",
+        "chain_id": 100,
+        "decimals": 18,
+        "symbol": "KLP"
+      }
+    ],
+    "color": "#000000",
+    "group": "other_tokens"
   }
 ]
