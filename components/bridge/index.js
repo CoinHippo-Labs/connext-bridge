@@ -3253,7 +3253,7 @@ export default () => {
                                                     </div>
                                                   </Tooltip>
                                                   {
-                                                    typeof router_fee !== 'number' ||
+                                                    typeof amount !== 'number' ||
                                                     typeof estimatedValues?.routerFee === 'number' ?
                                                       <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
                                                         <span>
