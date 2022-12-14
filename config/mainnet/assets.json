@@ -177,6 +177,6 @@
       }
     ],
     "color": "#000000",
-    "others": true
+    "group": "other_tokens"
   }
 ]

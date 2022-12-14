@@ -2,7 +2,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 
 import Image from '../../image'
-import { number_format, equals_ignore_case } from '../../../lib/utils'
+import { number_format, name, equals_ignore_case } from '../../../lib/utils'
 
 const WRAPPED_PREFIX =
   process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
@@ -266,11 +266,15 @@ export default ({
         })
         .map(a => {
           const {
+            group,
             scores,
           } = { ...a }
 
           return {
             ...a,
+            group:
+              group ||
+              '',
             max_score:
               _.max(
                 scores,
@@ -280,8 +284,14 @@ export default ({
         .filter(a =>
           a.max_score > 1 / 10
         ),
-      ['max_score'],
-      ['desc'],
+      [
+        'group',
+        'max_score',
+      ],
+      [
+        'asc',
+        'desc',
+      ],
     )
 
   const preset_assets_data =
@@ -338,8 +348,8 @@ export default ({
               const {
                 id,
                 disabled,
-                name,
                 contracts,
+                group,
               } = { ...a }
 
               const contract_data = (contracts || [])
@@ -367,9 +377,22 @@ export default ({
                 symbol ||
                 a?.symbol ||
                 a?.name
+
               image =
                 image ||
                 a?.image
+
+              const header =
+                group &&
+                !equals_ignore_case(
+                  group,
+                  assets_data_sorted[i - 1]?.group,
+                ) &&
+                (
+                  <div className="text-slate-400 dark:text-slate-500 text-xs my-1 ml-2">
+                    {name(group)}
+                  </div>
+                )
 
               const item = (
                 <div className="flex items-center space-x-2">
@@ -430,30 +453,32 @@ export default ({
               const className = `dropdown-item ${disabled ? 'cursor-not-allowed' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'} rounded flex items-center justify-between space-x-2 p-2`
 
               return (
-                disabled ?
-                  <div
-                    key={i}
-                    title="Disabled"
-                    className={className}
-                  >
-                    {item}
-                    {balanceComponent}
-                  </div> :
-                  <div
-                    key={i}
-                    onClick={() =>
-                      onSelect(
-                        id,
-                        is_bridge ?
-                          symbol :
-                          contract_address,
-                      )
-                    }
-                    className={className}
-                  >
-                    {item}
-                    {balanceComponent}
-                  </div>
+                <div key={i}>
+                  {header}
+                  {disabled ?
+                    <div
+                      title="Disabled"
+                      className={className}
+                    >
+                      {item}
+                      {balanceComponent}
+                    </div> :
+                    <div
+                      onClick={() =>
+                        onSelect(
+                          id,
+                          is_bridge ?
+                            symbol :
+                            contract_address,
+                        )
+                      }
+                      className={className}
+                    >
+                      {item}
+                      {balanceComponent}
+                    </div>
+                  }
+                </div>
               )
             })
         }
