@@ -138,5 +138,45 @@
     ],
     "color": "#636890",
     "preset": true
+  },
+  {
+    "id": "kp3r",
+    "symbol": "KP3R",
+    "name": "Keep3rV1",
+    "image": "/logos/assets/kp3r.png",
+    "contracts": [
+      {
+        "contract_address": "0x1cEB5cB57C4D4E2b2433641b95Dd330A33185A44",
+        "chain_id": 1,
+        "decimals": 18,
+        "symbol": "KP3R"
+      },
+      {
+        "contract_address": "0xB3de3929C3bE8a1Fa446f27d1b549Dd9d5C313E0",
+        "chain_id": 56,
+        "decimals": 18,
+        "symbol": "KP3R"
+      },
+      {
+        "contract_address": "0x725dB429F0ff5A3DF5f41fcA8676CF9Dd1C6b3F0",
+        "chain_id": 137,
+        "decimals": 18,
+        "symbol": "KP3R"
+      },
+      {
+        "contract_address": "0xa83ad51c99bb40995f9292c9a436046ab7578caf",
+        "chain_id": 10,
+        "decimals": 18,
+        "symbol": "KP3R"
+      },
+      {
+        "contract_address": "0xA83ad51C99BB40995F9292C9a436046ab7578cAF",
+        "chain_id": 100,
+        "decimals": 18,
+        "symbol": "KP3R"
+      }
+    ],
+    "color": "#000000",
+    "others": true
   }
 ]
