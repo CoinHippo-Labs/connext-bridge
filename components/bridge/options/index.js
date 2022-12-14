@@ -21,6 +21,7 @@ export default ({
   applied = false,
   initialData,
   onChange,
+  hasNextAsset = false,
 }) => {
   const {
     preferences,
@@ -44,50 +45,53 @@ export default ({
 
   const reset = () => setData(initialData)
 
-  const fields = [
-    {
-      label: 'Recipient Address',
-      tooltip: 'Allows you to transfer to a different address than your connected wallet address.',
-      name: 'to',
-      type: 'text',
-      placeholder: 'target contract or recipient address',
-    },
-    {
-      label: 'Infinite Approval',
-      tooltip: 'This allows you to only need to pay for approval on your first transfer.',
-      name: 'infiniteApprove',
-      type: 'switch',
-    },
-    /*{
-      label: 'Slippage',
-      tooltip: 'The maximum percentage you are willing to lose due to market changes.',
-      name: 'slippage',
-      type: 'number',
-      placeholder: '0.00',
-      presets: [
-        3.0,
-        1.0,
-        0.5,
-      ],
-      postfix: '%',
-    },*/
-    /*{
-      label: 'Bridge Path',
-      name: 'forceSlow',
-      type: 'switch',
-    },*/
-    {
-      label: 'Receive NextAsset',
-      name: 'receiveLocal',
-      type: 'switch',
-    },
-    /*{
-      label: 'Call Data',
-      name: 'callData',
-      type: 'textarea',
-      placeholder: 'encoded calldata to execute on receiving chain',
-    },*/
-  ]
+  const fields =
+    [
+      {
+        label: 'Recipient Address',
+        tooltip: 'Allows you to transfer to a different address than your connected wallet address.',
+        name: 'to',
+        type: 'text',
+        placeholder: 'target contract or recipient address',
+      },
+      {
+        label: 'Infinite Approval',
+        tooltip: 'This allows you to only need to pay for approval on your first transfer.',
+        name: 'infiniteApprove',
+        type: 'switch',
+      },
+      /*{
+        label: 'Slippage',
+        tooltip: 'The maximum percentage you are willing to lose due to market changes.',
+        name: 'slippage',
+        type: 'number',
+        placeholder: '0.00',
+        presets: [
+          3.0,
+          1.0,
+          0.5,
+        ],
+        postfix: '%',
+      },*/
+      /*{
+        label: 'Bridge Path',
+        name: 'forceSlow',
+        type: 'switch',
+      },*/
+      hasNextAsset &&
+      {
+        label: 'Receive NextAsset',
+        name: 'receiveLocal',
+        type: 'switch',
+      },
+      /*{
+        label: 'Call Data',
+        name: 'callData',
+        type: 'textarea',
+        placeholder: 'encoded calldata to execute on receiving chain',
+      },*/
+    ]
+    .filter(f => f)
 
   const changed =
     !_.isEqual(

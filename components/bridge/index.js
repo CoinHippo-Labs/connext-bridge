@@ -2433,6 +2433,7 @@ export default () => {
                         }
                         initialData={options}
                         onChange={o => setOptions(o)}
+                        hasNextAsset={destination_contract_data?.next_asset}
                       />
                     </div>
                     <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
