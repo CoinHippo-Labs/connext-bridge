@@ -39,6 +39,44 @@
     "no_pool": true
   },
   {
+    "id": "binance",
+    "chain_id": 56,
+    "domain_id": "6450786",
+    "name": "BNB Chain",
+    "short_name": "BNB",
+    "provider_params": [
+      {
+        "chainId": "0x38",
+        "chainName": "BNB Chain",
+        "rpcUrls": [
+          "https://rpc.ankr.com/bsc",
+          "https://bscrpc.com"
+        ],
+        "nativeCurrency": {
+          "name": "BNB",
+          "symbol": "BNB",
+          "decimals": 18
+        },
+        "blockExplorerUrls": [
+          "https://bscscan.com"
+        ]
+      }
+    ],
+    "explorer": {
+      "name": "BscScan",
+      "url": "https://bscscan.com",
+      "icon": "/logos/explorers/bscscan.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/binance.png",
+    "color": "#e8b30b",
+    "group" : "evm"
+  },
+  {
     "id": "polygon",
     "chain_id": 137,
     "domain_id": "1886350457",
@@ -117,7 +155,7 @@
   {
     "id": "gnosis",
     "chain_id": 100,
-    "domain_id": "6648936",
+    "domain_id": "6778479",
     "name": "Gnosis",
     "short_name": "GNO",
     "provider_params": [
