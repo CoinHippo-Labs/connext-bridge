@@ -1670,7 +1670,7 @@ export default ({
                 className="z-50 bg-dark text-white text-xs"
               >
                 <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 font-medium">
-                  Slippage
+                  Slippage Tolerance
                 </div>
               </Tooltip>
               <div className="flex items-center space-x-3">
@@ -1678,7 +1678,7 @@ export default ({
                   debounceTimeout={500}
                   size="small"
                   type="number"
-                  placeholder="Slippage"
+                  placeholder="Slippage Tolerance"
                   value={
                     typeof slippage === 'number' &&
                     slippage >= 0 ?

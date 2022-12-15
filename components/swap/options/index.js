@@ -51,7 +51,7 @@ export default ({
       type: 'switch',
     },
     /*{
-      label: 'Slippage',
+      label: 'Slippage Tolerance',
       tooltip: 'The maximum percentage you are willing to lose due to market changes.',
       name: 'slippage',
       type: 'number',

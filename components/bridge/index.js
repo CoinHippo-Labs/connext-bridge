@@ -1417,6 +1417,7 @@ export default () => {
             }
 
             const response =
+              false &&
               forceSlow ?
                 0 :
                 await sdk.nxtpSdkBase
@@ -1425,6 +1426,7 @@ export default () => {
                   )
 
             const gasFee =
+              false &&
               forceSlow ?
                 0 :
                 response &&
@@ -1441,7 +1443,7 @@ export default () => {
               {
                 options,
                 params,
-                routerFee,
+                // routerFee,
                 gasFee,
               },
             )
@@ -2137,6 +2139,7 @@ export default () => {
   const gas_fee =
     fee &&
     (
+      false &&
       forceSlow ?
         0 :
         fee.gas ||
@@ -3103,7 +3106,7 @@ export default () => {
                                                   className="z-50 bg-dark text-white text-xs"
                                                 >
                                                   <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
-                                                    Slippage
+                                                    Slippage Tolerance
                                                   </div>
                                                 </Tooltip>
                                                 <div className="flex flex-col sm:items-end space-y-1.5">
