@@ -178,7 +178,7 @@ export default () => {
                                   lpTokenBalance ||
                                   '0',
                                 ),
-                                _.last(decimals) ||
+                                // _.last(decimals) ||
                                 18,
                               )
                             ),
