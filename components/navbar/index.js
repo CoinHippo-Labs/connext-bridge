@@ -808,13 +808,13 @@ export default () => {
           let stats
 
           try {
-            // stats =
-            //   pool &&
-            //   await sdk.nxtpSdkPool
-            //     .getYieldData(
-            //       domain_id,
-            //       contract_address,
-            //     )
+            stats =
+              pool &&
+              await sdk.nxtpSdkPool
+                .getYieldData(
+                  domain_id,
+                  contract_address,
+                )
           } catch (error) {
             console.log(
               '[ERROR getYieldData]',
