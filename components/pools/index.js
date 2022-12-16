@@ -87,82 +87,66 @@ export default () => {
 
               if (Array.isArray(response)) {
                 data =
-                _.concat(
-                  data,
-                  response
-                    .map(p => {
-                      const {
-                        info,
-                        lpTokenBalance,
-                        poolTokenBalances,
-                      } = { ...p }
-                      const {
-                        symbol,
-                        decimals,
-                        balances,
-                      } = { ...info }
+                  _.concat(
+                    data,
+                    response
+                      .map(p => {
+                        const {
+                          info,
+                          lpTokenBalance,
+                          poolTokenBalances,
+                        } = { ...p }
+                        const {
+                          symbol,
+                          decimals,
+                          balances,
+                        } = { ...info }
 
-                      const symbols =
-                        (symbol || '')
-                          .split('-')
-                          .filter(s => s)
+                        const symbols =
+                          (symbol || '')
+                            .split('-')
+                            .filter(s => s)
 
-                      const asset_data = pool_assets_data
-                        .find(a =>
-                          symbols.findIndex(s =>
-                            equals_ignore_case(
-                              s,
-                              a?.symbol,
-                            )
-                          ) > -1 ||
-                          (a?.contracts || [])
-                            .findIndex(c =>
-                              c?.chain_id === chain_id &&
-                              symbols.findIndex(s =>
-                                equals_ignore_case(
-                                  s,
-                                  c?.symbol,
-                                )
+                        const asset_data = pool_assets_data
+                          .find(a =>
+                            symbols.findIndex(s =>
+                              equals_ignore_case(
+                                s,
+                                a?.symbol,
+                              )
+                            ) > -1 ||
+                            (a?.contracts || [])
+                              .findIndex(c =>
+                                c?.chain_id === chain_id &&
+                                symbols.findIndex(s =>
+                                  equals_ignore_case(
+                                    s,
+                                    c?.symbol,
+                                  )
+                                ) > -1
                               ) > -1
-                            ) > -1
-                        )
+                          )
 
-                      return {
-                        ...p,
-                        chain_data,
-                        asset_data,
-                        ...info,
-                        symbols,
-                        lpTokenBalance:
-                          Number(
-                            utils.formatUnits(
-                              igNumber.from(
-                                lpTokenBalance ||
-                                '0',
-                              ),
-                              _.last(decimals) ||
-                              18,
-                            )
-                          ),
-                        poolTokenBalances:
-                          (poolTokenBalances || [])
-                            .map((b, i) =>
-                              Number(
-                                utils.formatUnits(
-                                  BigNumber.from(
-                                    b ||
-                                    '0',
-                                  ),
-                                  decimals?.[i] ||
-                                  18,
-                                )
+                        return {
+                          ...p,
+                          chain_data,
+                          asset_data,
+                          ...info,
+                          symbols,
+                          lpTokenBalance:
+                            Number(
+                              utils.formatUnits(
+                                BigNumber.from(
+                                  lpTokenBalance ||
+                                  '0',
+                                ),
+                                _.last(decimals) ||
+                                18,
                               )
                             ),
-                        balances:
-                          (balances || p?.balances || [])
-                            .map((b, i) =>
-                              typeof b === 'number' ?
-                                b :
+                          poolTokenBalances:
+                            (poolTokenBalances || [])
+                              .map((b, i) =>
                                 Number(
                                   utils.formatUnits(
                                     BigNumber.from(
@@ -173,11 +157,27 @@ export default () => {
                                     18,
                                   )
                                 )
-                            ),
-                      }
-                    }),
-                )
-                .filter(d => d)
+                              ),
+                          balances:
+                            (balances || p?.balances || [])
+                              .map((b, i) =>
+                                typeof b === 'number' ?
+                                  b :
+                                  Number(
+                                    utils.formatUnits(
+                                      BigNumber.from(
+                                        b ||
+                                        '0',
+                                      ),
+                                      decimals?.[i] ||
+                                      18,
+                                    )
+                                  )
+                              ),
+                        }
+                      }),
+                  )
+                  .filter(d => d)
               }
             } catch (error) {}
           }
