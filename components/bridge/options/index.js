@@ -84,6 +84,11 @@ export default ({
         name: 'receiveLocal',
         type: 'switch',
       },
+      {
+        label: 'Show NextAsset',
+        name: 'showNextAssets',
+        type: 'switch',
+      },
       /*{
         label: 'Call Data',
         name: 'callData',

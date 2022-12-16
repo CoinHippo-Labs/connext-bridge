@@ -61,6 +61,7 @@ const DEFAULT_OPTIONS = {
   slippage: DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE,
   forceSlow: false,
   receiveLocal: false,
+  showNextAssets: false,
 }
 
 export default () => {
@@ -2033,6 +2034,7 @@ export default () => {
     slippage,
     forceSlow,
     receiveLocal,
+    showNextAssets,
   } = { ...options }
 
   const source_chain_data = (chains_data || [])
@@ -2420,6 +2422,7 @@ export default () => {
                                   ![
                                     'slippage',
                                     'forceSlow',
+                                    'showNextAssets',
                                   ].includes(k)
                                 )
                             ),
@@ -2429,6 +2432,7 @@ export default () => {
                                   ![
                                     'slippage',
                                     'forceSlow',
+                                    'showNextAssets',
                                   ].includes(k)
                                 )
                             ),
@@ -2622,6 +2626,7 @@ export default () => {
                             chain={source_chain}
                             origin=""
                             is_bridge={true}
+                            show_next_assets={showNextAssets}
                             data={{
                               ...source_asset_data,
                               ...source_contract_data,

@@ -15,6 +15,7 @@ export default ({
   chain,
   is_pool = false,
   is_bridge = false,
+  show_next_assets = false,
   data,
 }) => {
   const {
@@ -187,6 +188,7 @@ export default ({
                 ...contract_data,
               },
               is_bridge &&
+              show_next_assets &&
               next_asset &&
               {
                 ...contract_data,
