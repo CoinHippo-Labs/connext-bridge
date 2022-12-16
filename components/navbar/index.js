@@ -726,48 +726,50 @@ export default () => {
 
           let supply
 
-          console.log(
-            '[getLPTokenSupply]',
-            {
-              domain_id,
-              lpTokenAddress,
-            },
-          )
-
-          try {
-            supply =
-              await sdk.nxtpSdkPool
-                .getLPTokenSupply(
-                  domain_id,
-                  lpTokenAddress,
-                )
-
-            supply =
-              utils.formatUnits(
-                BigNumber.from(
-                  supply
-                ),
-                18,
-              )
-          } catch (error) {
+          if (lpTokenAddress) {
             console.log(
-              '[ERROR getLPTokenSupply]',
+              '[getLPTokenSupply]',
               {
                 domain_id,
                 lpTokenAddress,
               },
-              error,
+            )
+
+            try {
+              supply =
+                await sdk.nxtpSdkPool
+                  .getLPTokenSupply(
+                    domain_id,
+                    lpTokenAddress,
+                  )
+
+              supply =
+                utils.formatUnits(
+                  BigNumber.from(
+                    supply
+                  ),
+                  18,
+                )
+            } catch (error) {
+              console.log(
+                '[ERROR getLPTokenSupply]',
+                {
+                  domain_id,
+                  lpTokenAddress,
+                },
+                error,
+              )
+            }
+
+            console.log(
+              '[LPTokenSupply]',
+              {
+                domain_id,
+                lpTokenAddress,
+                supply,
+              },
             )
           }
-
-          console.log(
-            '[LPTokenSupply]',
-            {
-              domain_id,
-              lpTokenAddress,
-              supply,
-            },
-          )
 
           let symbols =
             (symbol || '')
