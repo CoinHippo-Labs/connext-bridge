@@ -22,6 +22,10 @@ import { ens as getEns } from '../../lib/api/ens'
 import { ellipse, equals_ignore_case } from '../../lib/utils'
 import { ANNOUNCEMENT_DATA, CHAINS_DATA, ASSETS_DATA, POOL_ASSETS_DATA, ENS_DATA, ASSET_BALANCES_DATA, POOLS_DATA, SDK, RPCS } from '../../reducers/types'
 
+const WRAPPED_PREFIX =
+  process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
+  'next'
+
 export default () => {
   const dispatch = useDispatch()
   const {
@@ -664,6 +668,7 @@ export default () => {
         )
       const {
         contract_address,
+        next_asset,
       } = { ...contract_data }
 
       if (contract_address) {
@@ -764,12 +769,31 @@ export default () => {
             },
           )
 
-          const symbols =
+          let symbols =
             (symbol || '')
               .split('-')
               .filter(s => s)
 
           if (pool) {
+            if (
+              symbols
+                .findIndex(s =>
+                  s?.startsWith(WRAPPED_PREFIX)
+                ) !==
+              (pool.tokens || [])
+                .findIndex(t =>
+                  equals_ignore_case(
+                    t,
+                    next_asset?.contract_address,
+                  ),
+                )
+            ) {
+              symbols =
+                _.reverse(
+                  _.cloneDeep(symbols)
+                )
+            }
+
             console.log(
               '[getYieldData]',
               {

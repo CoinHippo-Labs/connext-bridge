@@ -17,6 +17,10 @@ import { chainName } from '../../lib/object/chain'
 import { number_format, params_to_obj, equals_ignore_case, loader_color } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
+const WRAPPED_PREFIX =
+  process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
+  'next'
+
 export default () => {
   const dispatch = useDispatch()
   const {
@@ -405,7 +409,7 @@ export default () => {
                     balances,
                   } = { ...info }
 
-                  const symbols =
+                  let symbols =
                     (symbol || '')
                       .split('-')
                       .filter(s => s)
@@ -431,6 +435,39 @@ export default () => {
                             ) > -1
                         ) > -1
                     )
+
+                  const {
+                    contracts,
+                  } = { ...asset_data }
+
+                  const contract_data =
+                    (contracts || [])
+                      .find(c =>
+                        c?.chain_id === chain_id
+                      )
+
+                  const {
+                    next_asset,
+                  } = { ...contract_data }
+
+                  if (
+                    symbols
+                      .findIndex(s =>
+                        s?.startsWith(WRAPPED_PREFIX)
+                      ) !==
+                    (p?.tokens || [])
+                      .findIndex(t =>
+                        equals_ignore_case(
+                          t,
+                          next_asset?.contract_address,
+                        ),
+                      )
+                  ) {
+                    symbols =
+                      _.reverse(
+                        _.cloneDeep(symbols)
+                      )
+                  }
 
                   return {
                     ...p,

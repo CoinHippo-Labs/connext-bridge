@@ -8,6 +8,10 @@ import Pools from './pools'
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, name, equals_ignore_case } from '../../lib/utils'
 
+const WRAPPED_PREFIX =
+  process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
+  'next'
+
 const VIEWS =
   [
     {
@@ -102,7 +106,7 @@ export default () => {
                           balances,
                         } = { ...info }
 
-                        const symbols =
+                        let symbols =
                           (symbol || '')
                             .split('-')
                             .filter(s => s)
@@ -118,14 +122,48 @@ export default () => {
                             (a?.contracts || [])
                               .findIndex(c =>
                                 c?.chain_id === chain_id &&
-                                symbols.findIndex(s =>
-                                  equals_ignore_case(
-                                    s,
-                                    c?.symbol,
-                                  )
-                                ) > -1
+                                symbols
+                                  .findIndex(s =>
+                                    equals_ignore_case(
+                                      s,
+                                      c?.symbol,
+                                    )
+                                  ) > -1
                               ) > -1
                           )
+
+                        const {
+                          contracts,
+                        } = { ...asset_data }
+
+                        const contract_data =
+                          (contracts || [])
+                            .find(c =>
+                              c?.chain_id === chain_id
+                            )
+
+                        const {
+                          next_asset,
+                        } = { ...contract_data }
+
+                        if (
+                          symbols
+                            .findIndex(s =>
+                              s?.startsWith(WRAPPED_PREFIX)
+                            ) !==
+                          (p?.tokens || [])
+                            .findIndex(t =>
+                              equals_ignore_case(
+                                t,
+                                next_asset?.contract_address,
+                              ),
+                            )
+                        ) {
+                          symbols =
+                            _.reverse(
+                              _.cloneDeep(symbols)
+                            )
+                        }
 
                         return {
                           ...p,
