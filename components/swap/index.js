@@ -1525,6 +1525,10 @@ export default () => {
             message = 'More than pool balance'
           }*/
 
+          if (message?.includes('cannot estimate gas')) {
+            message = 'Slippage exceeded. Please try increasing slippage tolerance and resubmitting your transfer.'
+          }
+
           switch (code) {
             case 'user_rejected':
               reset(code)
