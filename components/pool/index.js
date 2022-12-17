@@ -86,246 +86,242 @@ export default () => {
   const [poolsTrigger, setPoolsTrigger] = useState(null)
 
   // get pool from path
-  useEffect(() => {
-    let updated = false
+  useEffect(
+    () => {
+      let updated = false
 
-    const params =
-      params_to_obj(
-        asPath?.indexOf('?') > -1 &&
-        asPath.substring(
-          asPath.indexOf('?') + 1,
-        )
-      )
-
-    let path =
-      !asPath ?
-        '/' :
-        asPath.toLowerCase()
-
-    path =
-      path.includes('?') ?
-        path.substring(
-          0,
-          path.indexOf('?'),
-        ) :
-        path
-
-    if (path.includes('on-')) {
-      const paths =
-        path
-          .replace(
-            '/pool/',
-            '',
-          )
-          .split('-')
-
-      const chain = paths[paths.indexOf('on') + 1]
-      const asset =
-        _.head(paths) !== 'on' ?
-          _.head(paths) :
-          null
-
-      const chain_data = (chains_data || [])
-        .find(c =>
-          c?.id === chain
-        )
-  
-      const asset_data = (pool_assets_data || [])
-        .find(a =>
-          a?.id === asset ||
-          equals_ignore_case(
-            a?.symbol,
-            asset,
-          )
-        )
-
-      if (chain_data) {
-        pool.chain = chain
-        updated = true
-      }
-
-      if (asset_data) {
-        pool.asset = asset
-        updated = true
-      }
-    }
-
-    if (updated) {
-      setPool(pool)
-      setPoolsTrigger(
-        moment()
-          .valueOf()
-      )
-    }
-  }, [asPath, chains_data, pool_assets_data])
-
-  // set pool to path
-  useEffect(() => {
-    const params = {}
-
-    if (pool) {
-      const {
-        chain,
-        asset,
-      } = { ...pool }
-
-      if (
-        (chains_data || [])
-          .findIndex(c =>
-            !c?.disabled &&
-            !c?.no_pool &&
-            c?.id === chain
-          ) > -1
-      ) {
-        params.chain = chain
-
-        if (
-          asset &&
-          (pool_assets_data || [])
-            .findIndex(a =>
-              a?.id === asset &&
-              (a.contracts || [])
-                .findIndex(c =>
-                  c?.chain_id ===
-                  chains_data
-                    .find(_c =>
-                      _c?.id === chain
-                    )?.chain_id
-                ) > -1
-            ) > -1
-        ) {
-          params.asset = asset
-        }
-      }
-    }
-
-    if (
-      !(
-        params.chain &&
-        params.asset
-      ) &&
-      pool_assets_data?.length > 0
-    ) {
-      const {
-        id,
-        contracts,
-      } = { ..._.head(pool_assets_data) }
-
-      params.chain =
-        params.chain ||
-        (chains_data || [])
-          .find(c =>
-            c?.chain_id === _.head(contracts)?.chain_id
-          )?.id
-
-      params.asset =
-        params.asset ||
-        id
-    }
-
-    if (Object.keys(params).length > 0) {
-      const {
-        chain,
-        asset,
-      } = { ...params }
-
-      delete params.chain
-      delete params.asset
-
-      router.push(
-        `/pool/${
-          chain ?
-            `${
-              asset ?
-                `${asset.toUpperCase()}-` :
-                ''
-            }on-${chain}` :
-            ''
-        }${
-          Object.keys(params).length > 0 ?
-            `?${new URLSearchParams(params).toString()}` :
-            ''
-        }`,
-        undefined,
-        {
-          shallow: true,
-        },
-      )
-    }
-  }, [address, pool])
-
-  // update balances
-  useEffect(() => {
-    const {
-      chain,
-    } = { ...pool }
-
-    const chain_data = (chains_data || [])
-      .find(c =>
-        c?.chain_id === chain_id
-      )
-
-    const {
-      id,
-    } = { ...chain_data }
-
-    if (
-      asPath &&
-      id
-    ) {
       const params =
         params_to_obj(
-          asPath.indexOf('?') > -1 &&
+          asPath?.indexOf('?') > -1 &&
           asPath.substring(
             asPath.indexOf('?') + 1,
           )
         )
 
-      if (
-        !params?.chain &&
-        !asPath.includes('on-') &&
-        (chains_data || [])
-          .findIndex(c =>
-            !c?.disabled &&
-            c?.id === id
-          ) > -1
-      ) {
-        setPool(
-          {
-            ...pool,
-            chain: id,
-          }
+      let path =
+        !asPath ?
+          '/' :
+          asPath.toLowerCase()
+
+      path =
+        path.includes('?') ?
+          path.substring(
+            0,
+            path.indexOf('?'),
+          ) :
+          path
+
+      if (path.includes('on-')) {
+        const paths =
+          path
+            .replace(
+              '/pool/',
+              '',
+            )
+            .split('-')
+
+        const chain = paths[paths.indexOf('on') + 1]
+        const asset =
+          _.head(paths) !== 'on' ?
+            _.head(paths) :
+            null
+
+        const chain_data = (chains_data || [])
+          .find(c =>
+            c?.id === chain
+          )
+    
+        const asset_data = (pool_assets_data || [])
+          .find(a =>
+            a?.id === asset ||
+            equals_ignore_case(
+              a?.symbol,
+              asset,
+            )
+          )
+
+        if (chain_data) {
+          pool.chain = chain
+          updated = true
+        }
+
+        if (asset_data) {
+          pool.asset = asset
+          updated = true
+        }
+      }
+
+      if (updated) {
+        setPool(pool)
+        setPoolsTrigger(
+          moment()
+            .valueOf()
         )
       }
+    },
+    [asPath, chains_data, pool_assets_data],
+  )
 
-      getBalances(id)
-    }
-  }, [asPath, chain_id, chains_data])
+  // set pool to path
+  useEffect(
+    () => {
+      const params = {}
+
+      if (pool) {
+        const {
+          chain,
+          asset,
+        } = { ...pool }
+
+        if (
+          (chains_data || [])
+            .findIndex(c =>
+              !c?.disabled &&
+              !c?.no_pool &&
+              c?.id === chain
+            ) > -1
+        ) {
+          params.chain = chain
+
+          if (
+            asset &&
+            (pool_assets_data || [])
+              .findIndex(a =>
+                a?.id === asset &&
+                (a.contracts || [])
+                  .findIndex(c =>
+                    c?.chain_id ===
+                    chains_data
+                      .find(_c =>
+                        _c?.id === chain
+                      )?.chain_id
+                  ) > -1
+              ) > -1
+          ) {
+            params.asset = asset
+          }
+        }
+      }
+
+      if (
+        !(
+          params.chain &&
+          params.asset
+        ) &&
+        pool_assets_data?.length > 0
+      ) {
+        const {
+          id,
+          contracts,
+        } = { ..._.head(pool_assets_data) }
+
+        params.chain =
+          params.chain ||
+          (chains_data || [])
+            .find(c =>
+              c?.chain_id === _.head(contracts)?.chain_id
+            )?.id
+
+        params.asset =
+          params.asset ||
+          id
+      }
+
+      if (Object.keys(params).length > 0) {
+        const {
+          chain,
+          asset,
+        } = { ...params }
+
+        delete params.chain
+        delete params.asset
+
+        router
+          .push(
+            `/pool/${
+              chain ?
+                `${
+                  asset ?
+                    `${asset.toUpperCase()}-` :
+                    ''
+                }on-${chain}` :
+                ''
+            }${
+              Object.keys(params).length > 0 ?
+                `?${new URLSearchParams(params).toString()}` :
+                ''
+            }`,
+            undefined,
+            {
+              shallow: true,
+            },
+          )
+      }
+    },
+    [address, pool],
+  )
 
   // update balances
-  useEffect(() => {
-    dispatch(
-      {
-        type: BALANCES_DATA,
-        value: null,
-      }
-    )
-
-    if (address) {
+  useEffect(
+    () => {
       const {
         chain,
       } = { ...pool }
 
-      getBalances(chain)
-    }
-    else {
-      reset('address')
-    }
-  }, [address])
+      const chain_data = (chains_data || [])
+        .find(c =>
+          c?.chain_id === chain_id
+        )
+
+      const {
+        id,
+      } = { ...chain_data }
+
+      if (
+        asPath &&
+        id
+      ) {
+        const params =
+          params_to_obj(
+            asPath.indexOf('?') > -1 &&
+            asPath.substring(
+              asPath.indexOf('?') + 1,
+            )
+          )
+
+        if (
+          !params?.chain &&
+          !asPath.includes('on-') &&
+          (chains_data || [])
+            .findIndex(c =>
+              !c?.disabled &&
+              c?.id === id
+            ) > -1
+        ) {
+          setPool(
+            {
+              ...pool,
+              chain: id,
+            }
+          )
+        }
+
+        getBalances(id)
+      }
+    },
+    [asPath, chain_id, chains_data],
+  )
 
   // update balances
-  useEffect(() => {
-    const getData = () => {
+  useEffect(
+    () => {
+      dispatch(
+        {
+          type: BALANCES_DATA,
+          value: null,
+        }
+      )
+
       if (address) {
         const {
           chain,
@@ -333,178 +329,186 @@ export default () => {
 
         getBalances(chain)
       }
-    }
-
-    getData()
-
-    const interval =
-      setInterval(() =>
-        getData(),
-        0.25 * 60 * 1000,
-      )
-
-    return () => clearInterval(interval)
-  }, [rpcs])
+      else {
+        reset('address')
+      }
+    },
+    [address],
+  )
 
   // update balances
-  useEffect(() => {
-    if (pools_data) {
-      const chains =
-        _.uniq(
-          pools_data
-            .map(p => p?.chain_data?.id)
-            .filter(c => c)
+  useEffect(
+    () => {
+      const getData = () => {
+        if (address) {
+          const {
+            chain,
+          } = { ...pool }
+
+          getBalances(chain)
+        }
+      }
+
+      getData()
+
+      const interval =
+        setInterval(() =>
+          getData(),
+          0.25 * 60 * 1000,
         )
 
-      chains
-        .forEach(c =>
-          getBalances(c)
-        )
-    }
-  }, [pools_data])
+      return () => clearInterval(interval)
+    },
+    [rpcs],
+  )
+
+  // update balances
+  useEffect(
+    () => {
+      if (pools_data) {
+        const chains =
+          _.uniq(
+            pools_data
+              .map(p => p?.chain_data?.id)
+              .filter(c => c)
+          )
+
+        chains
+          .forEach(c =>
+            getBalances(c)
+          )
+      }
+    },
+    [pools_data],
+  )
 
   // get pools
-  useEffect(() => {
-    const getData = async () => {
-      const {
-        chain,
-      } = { ...pool }
+  useEffect(
+    () => {
+      const getData = async () => {
+        const {
+          chain,
+        } = { ...pool }
 
-      if (
-        sdk &&
-        address &&
-        chain &&
-        poolsTrigger
-      ) {
-        try {
-          const chain_data = (chains_data || [])
-            .find(c =>
-              c?.id === chain
-            )
-
-          const {
-            chain_id,
-            domain_id,
-          } = { ...chain_data }
-
-          const response =
-            await sdk.nxtpSdkPool
-              .getUserPools(
-                domain_id,
-                address,
+        if (
+          sdk &&
+          address &&
+          chain &&
+          poolsTrigger
+        ) {
+          try {
+            const chain_data = (chains_data || [])
+              .find(c =>
+                c?.id === chain
               )
 
-          if (Array.isArray(response)) {
-            setPools(
-              response
-                .map(p => {
-                  const {
-                    info,
-                    lpTokenBalance,
-                    poolTokenBalances,
-                  } = { ...p }
-                  const {
-                    symbol,
-                    decimals,
-                    balances,
-                  } = { ...info }
+            const {
+              chain_id,
+              domain_id,
+            } = { ...chain_data }
 
-                  let symbols =
-                    (symbol || '')
-                      .split('-')
-                      .filter(s => s)
+            const response =
+              await sdk.nxtpSdkPool
+                .getUserPools(
+                  domain_id,
+                  address,
+                )
 
-                  const asset_data = (pool_assets_data || [])
-                    .find(a =>
+            if (Array.isArray(response)) {
+              setPools(
+                response
+                  .map(p => {
+                    const {
+                      info,
+                      lpTokenBalance,
+                      poolTokenBalances,
+                    } = { ...p }
+                    const {
+                      symbol,
+                      decimals,
+                      balances,
+                    } = { ...info }
+
+                    let symbols =
+                      (symbol || '')
+                        .split('-')
+                        .filter(s => s)
+
+                    const asset_data = (pool_assets_data || [])
+                      .find(a =>
+                        symbols
+                          .findIndex(s =>
+                            equals_ignore_case(
+                              s,
+                              a?.symbol,
+                            )
+                          ) > -1 ||
+                        (a?.contracts || [])
+                          .findIndex(c =>
+                            c?.chain_id === chain_id &&
+                            symbols
+                              .findIndex(s =>
+                                equals_ignore_case(
+                                  s,
+                                  c?.symbol,
+                                )
+                              ) > -1
+                          ) > -1
+                      )
+
+                    const {
+                      contracts,
+                    } = { ...asset_data }
+
+                    const contract_data =
+                      (contracts || [])
+                        .find(c =>
+                          c?.chain_id === chain_id
+                        )
+
+                    const {
+                      next_asset,
+                    } = { ...contract_data }
+
+                    if (
                       symbols
                         .findIndex(s =>
+                          s?.startsWith(WRAPPED_PREFIX)
+                        ) !==
+                      (p?.tokens || [])
+                        .findIndex(t =>
                           equals_ignore_case(
-                            s,
-                            a?.symbol,
-                          )
-                        ) > -1 ||
-                      (a?.contracts || [])
-                        .findIndex(c =>
-                          c?.chain_id === chain_id &&
-                          symbols
-                            .findIndex(s =>
-                              equals_ignore_case(
-                                s,
-                                c?.symbol,
-                              )
-                            ) > -1
-                        ) > -1
-                    )
-
-                  const {
-                    contracts,
-                  } = { ...asset_data }
-
-                  const contract_data =
-                    (contracts || [])
-                      .find(c =>
-                        c?.chain_id === chain_id
-                      )
-
-                  const {
-                    next_asset,
-                  } = { ...contract_data }
-
-                  if (
-                    symbols
-                      .findIndex(s =>
-                        s?.startsWith(WRAPPED_PREFIX)
-                      ) !==
-                    (p?.tokens || [])
-                      .findIndex(t =>
-                        equals_ignore_case(
-                          t,
-                          next_asset?.contract_address,
-                        ),
-                      )
-                  ) {
-                    symbols =
-                      _.reverse(
-                        _.cloneDeep(symbols)
-                      )
-                  }
-
-                  return {
-                    ...p,
-                    chain_data,
-                    asset_data,
-                    ...info,
-                    symbols,
-                    lpTokenBalance:
-                      Number(
-                        utils.formatUnits(
-                          BigNumber.from(
-                            lpTokenBalance ||
-                            '0',
+                            t,
+                            next_asset?.contract_address,
                           ),
-                          // _.last(decimals) ||
-                          18,
                         )
-                      ),
-                    poolTokenBalances:
-                      (poolTokenBalances || [])
-                        .map((b, i) =>
-                          Number(
-                            utils.formatUnits(
-                              BigNumber.from(
-                                b ||
-                                '0',
-                              ),
-                              decimals?.[i] ||
-                              18,
-                            )
+                    ) {
+                      symbols =
+                        _.reverse(
+                          _.cloneDeep(symbols)
+                        )
+                    }
+
+                    return {
+                      ...p,
+                      chain_data,
+                      asset_data,
+                      ...info,
+                      symbols,
+                      lpTokenBalance:
+                        Number(
+                          utils.formatUnits(
+                            BigNumber.from(
+                              lpTokenBalance ||
+                              '0',
+                            ),
+                            // _.last(decimals) ||
+                            18,
                           )
                         ),
-                    balances:
-                      (balances || p?.balances || [])
-                        .map((b, i) =>
-                          typeof b === 'number' ?
-                            b :
+                      poolTokenBalances:
+                        (poolTokenBalances || [])
+                          .map((b, i) =>
                             Number(
                               utils.formatUnits(
                                 BigNumber.from(
@@ -515,23 +519,41 @@ export default () => {
                                 18,
                               )
                             )
-                        ),
-                  }
-                })
-            )
-          }
-          else {
-            setPools(
-              pools ||
-              []
-            )
-          }
-        } catch (error) {}
+                          ),
+                      balances:
+                        (balances || p?.balances || [])
+                          .map((b, i) =>
+                            typeof b === 'number' ?
+                              b :
+                              Number(
+                                utils.formatUnits(
+                                  BigNumber.from(
+                                    b ||
+                                    '0',
+                                  ),
+                                  decimals?.[i] ||
+                                  18,
+                                )
+                              )
+                          ),
+                    }
+                  })
+              )
+            }
+            else {
+              setPools(
+                pools ||
+                []
+              )
+            }
+          } catch (error) {}
+        }
       }
-    }
 
-    getData()
-  }, [sdk, address, poolsTrigger])
+      getData()
+    },
+    [sdk, address, poolsTrigger],
+  )
 
   const getBalances = chain => {
     const getBalance = async (

@@ -136,737 +136,791 @@ export default () => {
   const [balanceTrigger, setBalanceTrigger] = useState(null)
 
   // get swap from path
-  useEffect(() => {
-    let updated = false
+  useEffect(
+    () => {
+      let updated = false
 
-    const params =
-      params_to_obj(
-        asPath?.indexOf('?') > -1 &&
-        asPath.substring(
-          asPath.indexOf('?') + 1,
-        )
-      )
-
-    const {
-      amount,
-      from,
-    } = { ...params }
-
-    let path =
-      !asPath ?
-        '/' :
-        asPath.toLowerCase()
-
-    path =
-      path.includes('?') ?
-        path.substring(
-          0,
-          path.indexOf('?'),
-        ) :
-        path
-
-    if (path.includes('on-')) {
-      const paths =
-        path
-          .replace(
-            '/swap/',
-            '',
-          )
-          .split('-')
-
-      const chain = paths[paths.indexOf('on') + 1]
-      const asset =
-        _.head(paths) !== 'on' ?
-          _.head(paths) :
-          process.env.NEXT_PUBLIC_NETWORK === 'testnet' ?
-            'eth' :
-            'usdc'
-
-      const chain_data = (chains_data || [])
-        .filter(c => !c?.no_pool)
-        .find(c =>
-          c?.id === chain
-        )
-
-      const asset_data = (pool_assets_data || [])
-        .find(a =>
-          a?.id === asset ||
-          equals_ignore_case(
-            a?.symbol,
-            asset,
-          )
-        )
-
-      if (chain_data) {
-        swap.chain = chain
-        updated = true
-      }
-
-      if (asset_data) {
-        swap.asset = asset
-        updated = true
-      }
-
-      if (swap.chain) {
-        if (
-          !isNaN(amount) &&
-          Number(amount)
-        ) {
-          swap.amount = Number(amount)
-          updated = true
-        }
-
-        if (from) {
-          swap.origin = 'y'
-          updated = true
-        }
-      }
-    }
-
-    if (
-      (
-        !path.includes('on-') ||
-        !swap.chain
-      ) &&
-      !path.includes('[swap]') &&
-      (chains_data || [])
-        .filter(c => !c?.no_pool)
-        .length > 0
-    ) {
-      const _chain =
-        _.head(
-          chains_data
-            .filter(c => !c?.no_pool)
-            .map(c => c?.id)
-        )
-
-      router.push(
-        `/swap/on-${_chain}${
-          Object.keys(params).length > 0 ?
-            `?${new URLSearchParams(params).toString()}` :
-            ''
-        }`,
-        undefined,
-        {
-          shallow: true,
-        },
-      )
-    }
-
-    if (updated) {
-      setSwap(swap)
-    }
-  }, [asPath, chains_data, pool_assets_data])
-
-  // set swap to path
-  useEffect(() => {
-    const params = {}
-
-    if (swap) {
-      const {
-        chain,
-        asset,
-        amount,
-        origin,
-      } = { ...swap }
-
-      if (
-        (chains_data || [])
-          .findIndex(c =>
-            !c?.disabled &&
-            !c?.no_pool &&
-            c?.id === chain
-          ) > -1
-      ) {
-        params.chain = chain
-
-        if (
-          asset &&
-          (pool_assets_data || [])
-            .findIndex(a =>
-              a?.id === asset &&
-              (a.contracts || [])
-                .findIndex(c =>
-                  c?.chain_id ===
-                  chains_data
-                    .find(_c =>
-                      _c?.id === chain
-                    )?.chain_id
-                ) > -1
-            ) > -1
-        ) {
-          params.asset = asset
-        }
-      }
-
-      if (
-        params.chain &&
-        params.asset
-      ) {
-        if (
-          !isNaN(amount) &&
-          Number(amount)
-        ) {
-          params.amount =
-            number_format(
-              Number(amount),
-              '0.000000000000',
-              true,
-            )
-        }
-
-        if (
-          origin === 'y' &&
-          _.last(symbols)
-        ) {
-          params.from = _.last(symbols)
-        }
-      }
-    }
-
-    if (Object.keys(params).length > 0) {
-      const {
-        chain,
-        asset,
-      } = { ...params }
-
-      delete params.chain
-      delete params.asset
-
-      router.push(
-        `/swap/${
-          chain ?
-            `${
-              asset ?
-                `${asset.toUpperCase()}-` :
-                ''
-            }on-${chain}` :
-            ''
-        }${
-          Object.keys(params).length > 0 ?
-            `?${new URLSearchParams(params).toString()}` :
-            ''
-        }`,
-        undefined,
-        {
-          shallow: true,
-        },
-      )
-
-      setBalanceTrigger(
-        moment()
-          .valueOf()
-      )
-    }
-
-    setApproveResponse(null)
-    setCallResponse(null)
-  }, [address, swap])
-
-  // update balances
-  useEffect(() => {
-    let {
-      chain,
-    } = { ...swap }
-
-    const chain_data = (chains_data || [])
-      .find(c =>
-        c?.chain_id === wallet_chain_id
-      )
-
-    const {
-      id,
-    } = { ...chain_data }
-
-    if (
-      asPath &&
-      id
-    ) {
       const params =
         params_to_obj(
-          asPath.indexOf('?') > -1 &&
+          asPath?.indexOf('?') > -1 &&
           asPath.substring(
             asPath.indexOf('?') + 1,
           )
         )
 
-      if (
-        !chain &&
-        !params?.chain &&
-        (chains_data || [])
-          .findIndex(c =>
-            !c?.disabled &&
-            c?.id === id
-          ) > -1
-      ) {
-        chain = id
-      }
+      const {
+        amount,
+        from,
+      } = { ...params }
 
-      getBalances(id)
-    }
+      let path =
+        !asPath ?
+          '/' :
+          asPath.toLowerCase()
 
-    if (Object.keys(swap).length > 0) {
-      chain =
-        chain ||
-        _.head(
-          (chains_data || [])
-            .filter(c =>
-              !c?.disabled &&
-              (pool_assets_data || [])
-                .findIndex(a =>
-                  (a?.contracts || [])
-                    .findIndex(_c =>
-                      _c?.chain_id === c?.chain_id
-                    ) > -1
-                ) > -1
+      path =
+        path.includes('?') ?
+          path.substring(
+            0,
+            path.indexOf('?'),
+          ) :
+          path
+
+      if (path.includes('on-')) {
+        const paths =
+          path
+            .replace(
+              '/swap/',
+              '',
             )
-        )?.id
-    }
+            .split('-')
 
-    setSwap(
-      {
-        ...swap,
-        chain,
+        const chain = paths[paths.indexOf('on') + 1]
+        const asset =
+          _.head(paths) !== 'on' ?
+            _.head(paths) :
+            process.env.NEXT_PUBLIC_NETWORK === 'testnet' ?
+              'eth' :
+              'usdc'
+
+        const chain_data = (chains_data || [])
+          .filter(c => !c?.no_pool)
+          .find(c =>
+            c?.id === chain
+          )
+
+        const asset_data = (pool_assets_data || [])
+          .find(a =>
+            a?.id === asset ||
+            equals_ignore_case(
+              a?.symbol,
+              asset,
+            )
+          )
+
+        if (chain_data) {
+          swap.chain = chain
+          updated = true
+        }
+
+        if (asset_data) {
+          swap.asset = asset
+          updated = true
+        }
+
+        if (swap.chain) {
+          if (
+            !isNaN(amount) &&
+            Number(amount)
+          ) {
+            swap.amount = Number(amount)
+            updated = true
+          }
+
+          if (from) {
+            swap.origin = 'y'
+            updated = true
+          }
+        }
       }
-    )
-  }, [asPath, wallet_chain_id, chains_data])
+
+      if (
+        (
+          !path.includes('on-') ||
+          !swap.chain
+        ) &&
+        !path.includes('[swap]') &&
+        (chains_data || [])
+          .filter(c => !c?.no_pool)
+          .length > 0
+      ) {
+        const _chain =
+          _.head(
+            chains_data
+              .filter(c => !c?.no_pool)
+              .map(c => c?.id)
+          )
+
+        router
+          .push(
+            `/swap/on-${_chain}${
+              Object.keys(params).length > 0 ?
+                `?${new URLSearchParams(params).toString()}` :
+                ''
+            }`,
+            undefined,
+            {
+              shallow: true,
+            },
+          )
+      }
+
+      if (updated) {
+        setSwap(swap)
+      }
+    },
+    [asPath, chains_data, pool_assets_data],
+  )
+
+  // set swap to path
+  useEffect(
+    () => {
+      const params = {}
+
+      if (swap) {
+        const {
+          chain,
+          asset,
+          amount,
+          origin,
+        } = { ...swap }
+
+        if (
+          (chains_data || [])
+            .findIndex(c =>
+              !c?.disabled &&
+              !c?.no_pool &&
+              c?.id === chain
+            ) > -1
+        ) {
+          params.chain = chain
+
+          if (
+            asset &&
+            (pool_assets_data || [])
+              .findIndex(a =>
+                a?.id === asset &&
+                (a.contracts || [])
+                  .findIndex(c =>
+                    c?.chain_id ===
+                    chains_data
+                      .find(_c =>
+                        _c?.id === chain
+                      )?.chain_id
+                  ) > -1
+              ) > -1
+          ) {
+            params.asset = asset
+          }
+        }
+
+        if (
+          params.chain &&
+          params.asset
+        ) {
+          if (
+            !isNaN(amount) &&
+            Number(amount)
+          ) {
+            params.amount =
+              number_format(
+                Number(amount),
+                '0.000000000000',
+                true,
+              )
+          }
+
+          if (
+            origin === 'y' &&
+            _.last(symbols) &&
+            (pool_assets_data || [])
+              .findIndex(a =>
+                a?.id === asset &&
+                (a.contracts || [])
+                  .findIndex(c =>
+                    c?.chain_id ===
+                    chains_data
+                      .find(_c =>
+                        _c?.id === chain
+                      )?.chain_id &&
+                    [
+                      a?.symbol,
+                      c?.symbol,
+                      c?.next_asset?.symbol,
+                    ].findIndex(s =>
+                      equals_ignore_case(
+                        s,
+                        _.last(symbols),
+                      )
+                    ) > -1
+                  ) > -1
+              ) > -1
+          ) {
+            params.from = _.last(symbols)
+          }
+        }
+      }
+
+      if (Object.keys(params).length > 0) {
+        const {
+          chain,
+          asset,
+        } = { ...params }
+
+        delete params.chain
+        delete params.asset
+
+        router
+          .push(
+            `/swap/${
+              chain ?
+                `${
+                  asset ?
+                    `${asset.toUpperCase()}-` :
+                    ''
+                }on-${chain}` :
+                ''
+            }${
+              Object.keys(params).length > 0 ?
+                `?${new URLSearchParams(params).toString()}` :
+                ''
+            }`,
+            undefined,
+            {
+              shallow: true,
+            },
+          )
+
+        setBalanceTrigger(
+          moment()
+            .valueOf()
+        )
+      }
+
+      setApproveResponse(null)
+      setCallResponse(null)
+    },
+    [address, swap],
+  )
 
   // update balances
-  useEffect(() => {
-    dispatch(
-      {
-        type: BALANCES_DATA,
-        value: null,
-      }
-    )
-
-    if (address) {
-      const {
+  useEffect(
+    () => {
+      let {
         chain,
       } = { ...swap }
 
-      getBalances(chain)
-    }
-    else {
-      reset('address')
-    }
-  }, [address])
+      const chain_data = (chains_data || [])
+        .find(c =>
+          c?.chain_id === wallet_chain_id
+        )
 
-  // update balances
-  useEffect(() => {
-    const getData = () => {
       const {
-        status,
-      } = { ...approveResponse }
+        id,
+      } = { ...chain_data }
 
       if (
-        address &&
-        !calling &&
-        ![
-          'pending',
-        ].includes(status)
+        asPath &&
+        id
       ) {
+        const params =
+          params_to_obj(
+            asPath.indexOf('?') > -1 &&
+            asPath.substring(
+              asPath.indexOf('?') + 1,
+            )
+          )
+
+        if (
+          !chain &&
+          !params?.chain &&
+          (chains_data || [])
+            .findIndex(c =>
+              !c?.disabled &&
+              c?.id === id
+            ) > -1
+        ) {
+          chain = id
+        }
+
+        getBalances(id)
+      }
+
+      if (Object.keys(swap).length > 0) {
+        chain =
+          chain ||
+          _.head(
+            (chains_data || [])
+              .filter(c =>
+                !c?.disabled &&
+                (pool_assets_data || [])
+                  .findIndex(a =>
+                    (a?.contracts || [])
+                      .findIndex(_c =>
+                        _c?.chain_id === c?.chain_id
+                      ) > -1
+                  ) > -1
+              )
+          )?.id
+      }
+
+      setSwap(
+        {
+          ...swap,
+          chain,
+        }
+      )
+    },
+    [asPath, wallet_chain_id, chains_data],
+  )
+
+  // update balances
+  useEffect(
+    () => {
+      dispatch(
+        {
+          type: BALANCES_DATA,
+          value: null,
+        }
+      )
+
+      if (address) {
         const {
           chain,
         } = { ...swap }
 
         getBalances(chain)
       }
-    }
-
-    getData()
-
-    const interval =
-      setInterval(() =>
-        getData(),
-        0.25 * 60 * 1000,
-      )
-
-    return () => clearInterval(interval)
-  }, [rpcs])
+      else {
+        reset('address')
+      }
+    },
+    [address],
+  )
 
   // update balances
-  useEffect(() => {
-    if (pools_data) {
-      const chains =
-        _.uniq(
-          pools_data
-            .map(p => p?.chain_data?.id)
-            .filter(c => c)
-        )
-
-      chains
-        .forEach(c =>
-          getBalances(c)
-        )
-    }
-  }, [pools_data])
-
-  // get pair
-  useEffect(() => {
-    const getData = async () => {
-      const {
-        chain,
-        amount,
-      } = { ...swap }
-
-      let failed,
-        _pair
-
-      if (
-        sdk &&
-        chain
-      ) {
-        if (typeof amount === 'number') {
-          setSwapAmount(true)
-        }
-        else if (typeof swapAmount === 'number') {
-          setSwapAmount(null)
-        }
-
-        const chain_changed =
-          !equals_ignore_case(
-            chain,
-            pair?.chain_data?.id,
-          )
+  useEffect(
+    () => {
+      const getData = () => {
+        const {
+          status,
+        } = { ...approveResponse }
 
         if (
-          chain_changed ||
-          !pair?.updated_at ||
-          moment()
-            .diff(
-              moment(pair.updated_at),
-              'seconds',
-            ) > 30
+          address &&
+          !calling &&
+          ![
+            'pending',
+          ].includes(status)
         ) {
-          try {
-            const {
+          const {
+            chain,
+          } = { ...swap }
+
+          getBalances(chain)
+        }
+      }
+
+      getData()
+
+      const interval =
+        setInterval(() =>
+          getData(),
+          0.25 * 60 * 1000,
+        )
+
+      return () => clearInterval(interval)
+    },
+    [rpcs],
+  )
+
+  // update balances
+  useEffect(
+    () => {
+      if (pools_data) {
+        const chains =
+          _.uniq(
+            pools_data
+              .map(p => p?.chain_data?.id)
+              .filter(c => c)
+          )
+
+        chains
+          .forEach(c =>
+            getBalances(c)
+          )
+      }
+    },
+    [pools_data],
+  )
+
+  // get pair
+  useEffect(
+    () => {
+      const getData = async () => {
+        const {
+          chain,
+          asset,
+          amount,
+        } = { ...swap }
+
+        let failed,
+          _pair
+
+        if (
+          sdk &&
+          chain
+        ) {
+          if (typeof amount === 'number') {
+            setSwapAmount(true)
+          }
+          else if (typeof swapAmount === 'number') {
+            setSwapAmount(null)
+          }
+
+          const chain_changed =
+            !equals_ignore_case(
               chain,
+              pair?.chain_data?.id,
+            )
+
+          const asset_changed =
+            !equals_ignore_case(
               asset,
-              amount,
-            } = { ...swap }
+              pair?.asset_data?.id,
+            )
 
-            if (
-              pair === undefined ||
-              pair?.error ||
-              chain_changed
-            ) {
-              setPair(
-                (pools_data || [])
-                  .find(p =>
-                    equals_ignore_case(
-                      p?.id,
-                      `${chain}_${asset}`,
-                    )
-                  ) ||
-                  null
-              )
-            }
+          if (
+            chain_changed ||
+            asset_changed ||
+            !pair?.updated_at ||
+            moment()
+              .diff(
+                moment(pair.updated_at),
+                'seconds',
+              ) > 30
+          ) {
+            try {
+              const {
+                chain,
+                asset,
+                amount,
+              } = { ...swap }
 
-            const chain_data = chains_data
-              .find(c =>
-                c?.id === chain
-              )
+              if (
+                pair === undefined ||
+                pair?.error ||
+                chain_changed ||
+                asset_changed
+              ) {
+                setPair(
+                  (pools_data || [])
+                    .find(p =>
+                      equals_ignore_case(
+                        p?.id,
+                        `${chain}_${asset}`,
+                      )
+                    ) ||
+                    null
+                )
+              }
 
-            const {
-              chain_id,
-              domain_id,
-            } = { ...chain_data }
-
-            const asset_data = pool_assets_data
-              .find(a =>
-                a?.id === asset
-              )
-
-            const {
-              contracts,
-            } = { ...asset_data }
-
-            const contract_data = (contracts || [])
-              .find(c =>
-                c?.chain_id === chain_id
-              )
-
-            const {
-              contract_address,
-              is_pool,
-            } = { ...contract_data }
-
-            const pool =
-              is_pool &&
-              await sdk.nxtpSdkPool
-                .getPool(
-                  domain_id,
-                  contract_address,
+              const chain_data = chains_data
+                .find(c =>
+                  c?.id === chain
                 )
 
-            const {
-              lpTokenAddress,
-              balances,
-              decimals,
-            } = { ...pool }
+              const {
+                chain_id,
+                domain_id,
+              } = { ...chain_data }
 
-            if (Array.isArray(balances)) {
-              pool.balances =
-                balances
-                  .map((b, i) =>
-                    typeof b === 'number' ?
-                      b :
-                      Number(
-                        utils.formatUnits(
-                          b,
-                          decimals?.[i] ||
-                          18,
+              const asset_data = pool_assets_data
+                .find(a =>
+                  a?.id === asset
+                )
+
+              const {
+                contracts,
+              } = { ...asset_data }
+
+              const contract_data = (contracts || [])
+                .find(c =>
+                  c?.chain_id === chain_id
+                )
+
+              const {
+                contract_address,
+                is_pool,
+              } = { ...contract_data }
+
+              const pool =
+                is_pool &&
+                await sdk.nxtpSdkPool
+                  .getPool(
+                    domain_id,
+                    contract_address,
+                  )
+
+              const {
+                lpTokenAddress,
+                balances,
+                decimals,
+              } = { ...pool }
+
+              if (Array.isArray(balances)) {
+                pool.balances =
+                  balances
+                    .map((b, i) =>
+                      typeof b === 'number' ?
+                        b :
+                        Number(
+                          utils.formatUnits(
+                            b,
+                            decimals?.[i] ||
+                            18,
+                          )
                         )
-                      )
-                  )
-            }
-
-            let supply
-
-            if (lpTokenAddress) {
-              console.log(
-                '[getLPTokenSupply]',
-                {
-                  domain_id,
-                  lpTokenAddress,
-                },
-              )
-
-              try {
-                supply =
-                  await sdk.nxtpSdkPool
-                    .getLPTokenSupply(
-                      domain_id,
-                      lpTokenAddress,
                     )
+              }
 
-                supply =
-                  utils.formatUnits(
-                    BigNumber.from(
-                      supply,
-                    ),
-                    18,
-                  )
-              } catch (error) {
+              let supply
+
+              if (lpTokenAddress) {
                 console.log(
-                  '[ERROR getLPTokenSupply]',
+                  '[getLPTokenSupply]',
                   {
                     domain_id,
                     lpTokenAddress,
                   },
-                  error,
+                )
+
+                try {
+                  supply =
+                    await sdk.nxtpSdkPool
+                      .getLPTokenSupply(
+                        domain_id,
+                        lpTokenAddress,
+                      )
+
+                  supply =
+                    utils.formatUnits(
+                      BigNumber.from(
+                        supply,
+                      ),
+                      18,
+                    )
+                } catch (error) {
+                  console.log(
+                    '[ERROR getLPTokenSupply]',
+                    {
+                      domain_id,
+                      lpTokenAddress,
+                    },
+                    error,
+                  )
+                }
+
+                console.log(
+                  '[LPTokenSupply]',
+                  {
+                    domain_id,
+                    lpTokenAddress,
+                    supply,
+                  },
                 )
               }
 
-              console.log(
-                '[LPTokenSupply]',
-                {
-                  domain_id,
-                  lpTokenAddress,
-                  supply,
-                },
-              )
-            }
+              let rate =
+                pool &&
+                await sdk.nxtpSdkPool
+                  .getVirtualPrice(
+                    domain_id,
+                    contract_address,
+                  )
 
-            let rate =
-              pool &&
-              await sdk.nxtpSdkPool
-                .getVirtualPrice(
-                  domain_id,
-                  contract_address,
+              rate =
+                Number(
+                  utils.formatUnits(
+                    BigNumber.from(
+                      rate ||
+                      '0'
+                    ),
+                    // _.last(decimals) ||
+                    18,
+                  )
                 )
 
-            rate =
-              Number(
-                utils.formatUnits(
-                  BigNumber.from(
-                    rate ||
-                    '0'
-                  ),
-                  // _.last(decimals) ||
-                  18,
-                )
-              )
+              let tvl
 
-            let tvl
+              if (Array.isArray(pool.balances)) {
+                const asset_data = (assets_data || [])
+                  .find(a =>
+                    a?.id === asset
+                  )
+                const {
+                  price,
+                } = { ...asset_data }
 
-            if (Array.isArray(pool.balances)) {
-              const asset_data = (assets_data || [])
-                .find(a =>
-                  a?.id === asset
-                )
-              const {
-                price,
-              } = { ...asset_data }
-
-              tvl =
-                typeof price === 'number' ?
-                  (
-                    supply ||
-                    _.sum(
-                      pool.balances
-                        .map((b, i) =>
-                          b /
-                          (
-                            i > 0 &&
-                            rate > 0 ?
-                              rate :
-                              1
+                tvl =
+                  typeof price === 'number' ?
+                    (
+                      supply ||
+                      _.sum(
+                        pool.balances
+                          .map((b, i) =>
+                            b /
+                            (
+                              i > 0 &&
+                              rate > 0 ?
+                                rate :
+                                1
+                            )
                           )
-                        )
-                    )
-                  ) *
-                  price :
-                  0
-            }
+                      )
+                    ) *
+                    price :
+                    0
+              }
 
-            _pair =
-              (
-                pool ?
-                  [pool]
-                    .map(p => {
-                      const {
-                        symbol,
-                      } = { ...p }
+              _pair =
+                (
+                  pool ?
+                    [pool]
+                      .map(p => {
+                        const {
+                          symbol,
+                        } = { ...p }
 
-                      let symbols =
-                        (symbol || '')
-                          .split('-')
-                          .filter(s => s)
+                        let symbols =
+                          (symbol || '')
+                            .split('-')
+                            .filter(s => s)
 
-                      const asset_data = pool_assets_data
-                        .find(a =>
+                        const asset_data = pool_assets_data
+                          .find(a =>
+                            symbols
+                              .findIndex(s =>
+                                equals_ignore_case(
+                                  s,
+                                  a?.symbol,
+                                )
+                              ) > -1 ||
+                            (a?.contracts || [])
+                              .findIndex(c =>
+                                c?.chain_id === chain_id &&
+                                symbols
+                                  .findIndex(s =>
+                                    equals_ignore_case(
+                                      s,
+                                      c?.symbol,
+                                    )
+                                  ) > -1
+                              ) > -1
+                          )
+
+                        const {
+                          contracts,
+                        } = { ...asset_data }
+
+                        const contract_data =
+                          (contracts || [])
+                            .find(c =>
+                              c?.chain_id === chain_id
+                            )
+
+                        const {
+                          next_asset,
+                        } = { ...contract_data }
+
+                        if (
                           symbols
                             .findIndex(s =>
+                              s?.startsWith(WRAPPED_PREFIX)
+                            ) !==
+                          (p?.tokens || [])
+                            .findIndex(t =>
                               equals_ignore_case(
-                                s,
-                                a?.symbol,
-                              )
-                            ) > -1 ||
-                          (a?.contracts || [])
-                            .findIndex(c =>
-                              c?.chain_id === chain_id &&
-                              symbols
-                                .findIndex(s =>
-                                  equals_ignore_case(
-                                    s,
-                                    c?.symbol,
-                                  )
-                                ) > -1
-                            ) > -1
-                        )
+                                t,
+                                next_asset?.contract_address,
+                              ),
+                            )
+                        ) {
+                          symbols =
+                            _.reverse(
+                              _.cloneDeep(symbols)
+                            )
+                        }
 
-                      const {
-                        contracts,
-                      } = { ...asset_data }
-
-                      const contract_data =
-                        (contracts || [])
-                          .find(c =>
-                            c?.chain_id === chain_id
-                          )
-
-                      const {
-                        next_asset,
-                      } = { ...contract_data }
-
-                      if (
-                        symbols
-                          .findIndex(s =>
-                            s?.startsWith(WRAPPED_PREFIX)
-                          ) !==
-                        (p?.tokens || [])
-                          .findIndex(t =>
-                            equals_ignore_case(
-                              t,
-                              next_asset?.contract_address,
-                            ),
-                          )
-                      ) {
-                        symbols =
-                          _.reverse(
-                            _.cloneDeep(symbols)
-                          )
-                      }
-
-                      return {
-                        ...p,
-                        chain_data,
-                        asset_data,
-                        symbols,
-                      }
-                    }) :
-                  [pair]
-              )
-              .find(p =>
-                equals_ignore_case(
-                  p?.domainId,
-                  domain_id,
-                ) &&
-                equals_ignore_case(
-                  p?.asset_data?.id,
-                  asset,
+                        return {
+                          ...p,
+                          chain_data,
+                          asset_data,
+                          symbols,
+                        }
+                      }) :
+                    [pair]
                 )
+                .find(p =>
+                  equals_ignore_case(
+                    p?.domainId,
+                    domain_id,
+                  ) &&
+                  equals_ignore_case(
+                    p?.asset_data?.id,
+                    asset,
+                  )
+                )
+
+              _pair =
+                _pair &&
+                {
+                  ..._pair,
+                  id: `${chain}_${asset}`,
+                  contract_data,
+                  supply:
+                    supply ||
+                    _pair.supply,
+                  rate,
+                  tvl,
+                  updated_at:
+                    moment()
+                      .valueOf(),
+                }
+
+              setPair(
+                is_pool ?
+                  _pair :
+                  undefined
               )
 
-            _pair =
-              _pair &&
-              {
-                ..._pair,
-                id: `${chain}_${asset}`,
-                contract_data,
-                supply:
-                  supply ||
-                  _pair.supply,
-                rate,
-                tvl,
-                updated_at:
-                  moment()
-                    .valueOf(),
+              if (
+                is_pool &&
+                _pair
+              ) {
+                dispatch(
+                  {
+                    type: POOLS_DATA,
+                    value: _pair,
+                  }
+                )
               }
-
-            setPair(
-              is_pool ?
-                _pair :
-                undefined
-            )
-
-            if (
-              is_pool &&
-              _pair
-            ) {
-              dispatch(
+            } catch (error) {
+              setPair(
                 {
-                  type: POOLS_DATA,
-                  value: _pair,
+                  error,
                 }
               )
+
+              calculateSwap(null)
+
+              failed = true
             }
-          } catch (error) {
-            setPair(
-              {
-                error,
-              }
-            )
+          }
+          else {
+            _pair = pair
+          }
 
-            calculateSwap(null)
-
-            failed = true
+          if (!failed) {
+            calculateSwap(_pair)
           }
         }
-        else {
-          _pair = pair
-        }
-
-        if (!failed) {
-          calculateSwap(_pair)
-        }
       }
-    }
 
-    getData()
-  }, [sdk, swap, pairTrigger])
+      getData()
+    },
+    [sdk, swap, pairTrigger],
+  )
 
   const getBalances = chain => {
     const getBalance = async (
@@ -3082,7 +3136,7 @@ export default () => {
                               `Route doesn't exist` :
                               pair ?
                                 pair.error ?
-                                  <div className="w-fit text-red-600 dark:text-red-400 text-sm mx-auto">
+                                  <div className="max-w-fit break-words text-red-600 dark:text-red-400 text-sm text-left mx-auto">
                                     {pair.error.message}
                                   </div> :
                                   'Enter amount' :

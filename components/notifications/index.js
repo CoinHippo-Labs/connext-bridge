@@ -1,20 +1,22 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { BiX } from 'react-icons/bi'
 
 import Portal from '../portal'
 
-export default ({
-  visible = true,
-  outerClassNames,
-  innerClassNames,
-  animation,
-  btnTitle,
-  btnClassNames,
-  icon,
-  content,
-  hideButton,
-  onClose,
-}) => {
+export default (
+  {
+    visible = true,
+    outerClassNames,
+    innerClassNames,
+    animation,
+    btnTitle,
+    btnClassNames,
+    icon,
+    content,
+    hideButton,
+    onClose,
+  },
+) => {
   const [open, setOpen] = useState(visible)
 
   const show = () => setOpen(true)

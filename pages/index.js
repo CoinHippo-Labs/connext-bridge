@@ -30,11 +30,12 @@ export default () => {
     typeof window !== 'undefined' &&
     pathname !== _asPath
   ) {
-    router.push(
-      is_route_exist(_asPath) ?
-        asPath :
-        '/'
-    )
+    router
+      .push(
+        is_route_exist(_asPath) ?
+          asPath :
+          '/'
+      )
   }
 
   return (

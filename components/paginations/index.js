@@ -1,13 +1,15 @@
 import { BsThreeDots } from 'react-icons/bs'
 
-export const PageWithText = ({
-  disabled = false,
-  active,
-  onClick,
-  activeClassNames = 'btn btn-default bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 shadow rounded text-white',
-  inactiveClassNames = 'btn btn-default bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 shadow rounded text-slate-400 hover:text-slate-700 dark:text-slate-600 dark:hover:text-slate-200',
-  children,
-}) => (
+export const PageWithText = (
+  {
+    disabled = false,
+    active,
+    onClick,
+    activeClassNames = 'btn btn-default bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 shadow rounded text-white',
+    inactiveClassNames = 'btn btn-default bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 shadow rounded text-slate-400 hover:text-slate-700 dark:text-slate-600 dark:hover:text-slate-200',
+    children,
+  },
+) => (
   <button
     disabled={disabled}
     onClick={onClick}
@@ -21,14 +23,16 @@ export const PageWithText = ({
   </button>
 )
 
-export const Page = ({
-  disabled = false,
-  active,
-  onClick,
-  activeClassNames = 'btn btn-circle bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white',
-  inactiveClassNames = 'btn btn-circle bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:text-slate-600 dark:hover:text-slate-200',
-  children,
-}) => (
+export const Page = (
+  {
+    disabled = false,
+    active,
+    onClick,
+    activeClassNames = 'btn btn-circle bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white',
+    inactiveClassNames = 'btn btn-circle bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:text-slate-600 dark:hover:text-slate-200',
+    children,
+  },
+) => (
   <button
     disabled={disabled}
     onClick={onClick}
@@ -42,12 +46,14 @@ export const Page = ({
   </button>
 )
 
-export const Pages = ({
-  items = [],
-  disabled = false,
-  active,
-  onClick,
-}) => {
+export const Pages = (
+  {
+    items = [],
+    disabled = false,
+    active,
+    onClick,
+  },
+) => {
   const hide = i =>
     items.length > 10 &&
     [
@@ -94,15 +100,17 @@ export const Pages = ({
   )
 }
 
-export const Pagination = ({
-  items,
-  disabled = false,
-  active,
-  icons = false,
-  previous = 'Previous',
-  next = 'Next',
-  onClick,
-}) => {
+export const Pagination = (
+  {
+    items,
+    disabled = false,
+    active,
+    icons = false,
+    previous = 'Previous',
+    next = 'Next',
+    onClick,
+  },
+) => {
   previous =
     active - 1 > 0 &&
     previous

@@ -3,26 +3,31 @@ import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { HiCheckCircle } from 'react-icons/hi'
 import { IoMdCopy } from 'react-icons/io'
 
-export default ({
-  size = 18,
-  value,
-  title,
-  onCopy,
-  className = '',
-}) => {
+export default (
+  {
+    size = 18,
+    value,
+    title,
+    onCopy,
+    className = '',
+  },
+) => {
   const [copied, setCopied] = useState(false)
 
-  useEffect(() => {
-    const timeout =
-      copied ?
-        setTimeout(() =>
-          setCopied(false),
-          1 * 1000,
-        ) :
-        undefined
+  useEffect(
+    () => {
+      const timeout =
+        copied ?
+          setTimeout(() =>
+            setCopied(false),
+            1 * 1000,
+          ) :
+          undefined
 
-    return () => clearTimeout(timeout)
-  }, [copied])
+      return () => clearTimeout(timeout)
+    },
+    [copied],
+  )
 
   return (
     copied ?

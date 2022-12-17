@@ -16,13 +16,15 @@ const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE =
   ) ||
   3
 
-export default ({
-  disabled = false,
-  applied = false,
-  initialData,
-  onChange,
-  hasNextAsset = false,
-}) => {
+export default (
+  {
+    disabled = false,
+    applied = false,
+    initialData,
+    onChange,
+    hasNextAsset = false,
+  },
+) => {
   const {
     preferences,
   } = useSelector(state =>
@@ -39,9 +41,12 @@ export default ({
 
   const [data, setData] = useState(initialData)
 
-  useEffect(() => {
-    setData(initialData)
-  }, [initialData])
+  useEffect(
+    () => {
+      setData(initialData)
+    },
+    [initialData],
+  )
 
   const reset = () => setData(initialData)
 

@@ -7,16 +7,18 @@ import { RotatingSquare } from 'react-loader-spinner'
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
-export default ({
-  chainId,
-  asset,
-  contractAddress,
-  decimals = 18,
-  symbol,
-  hideSymbol = false,
-  trigger,
-  className = '',
-}) => {
+export default (
+  {
+    chainId,
+    asset,
+    contractAddress,
+    decimals = 18,
+    symbol,
+    hideSymbol = false,
+    trigger,
+    className = '',
+  },
+) => {
   const dispatch = useDispatch()
   const {
     preferences,
@@ -59,68 +61,74 @@ export default ({
   const [balance, setBalance] = useState(null)
   const [_trigger, setTrigger] = useState(null)
 
-  useEffect(() => {
-    const getData = async () => {
-      if (
-        chainId &&
-        contractAddress &&
-        (
-          trigger ||
-          _trigger
-        )
-      ) {
-        const contract_data = {
-          contract_address: contractAddress,
-          chain_id: chainId,
-          decimals,
-          symbol,
-        }
-
-        const balance =
-          await getBalance(
-            chainId,
-            contract_data,
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (
+          chainId &&
+          contractAddress &&
+          (
+            trigger ||
+            _trigger
           )
-
-        setBalance(balance)
-
-        dispatch(
-          {
-            type: BALANCES_DATA,
-            value: {
-              [`${chainId}`]:
-                [
-                  {
-                    ...contract_data,
-                    amount: balance,
-                  }
-                ],
-            },
+        ) {
+          const contract_data = {
+            contract_address: contractAddress,
+            chain_id: chainId,
+            decimals,
+            symbol,
           }
+
+          const balance =
+            await getBalance(
+              chainId,
+              contract_data,
+            )
+
+          setBalance(balance)
+
+          dispatch(
+            {
+              type: BALANCES_DATA,
+              value: {
+                [`${chainId}`]:
+                  [
+                    {
+                      ...contract_data,
+                      amount: balance,
+                    }
+                  ],
+              },
+            }
+          )
+        }
+      }
+
+      getData()
+
+      const interval =
+        setInterval(() =>
+          getData(),
+          30 * 1000,
+        )
+
+      return () => clearInterval(interval)
+    },
+    [trigger, _trigger],
+  )
+
+  useEffect(
+    () => {
+      if (typeof balance === 'number') {
+        setBalance(null)
+        setTrigger(
+          moment()
+            .valueOf()
         )
       }
-    }
-
-    getData()
-
-    const interval =
-      setInterval(() =>
-        getData(),
-        30 * 1000,
-      )
-
-    return () => clearInterval(interval)
-  }, [trigger, _trigger])
-
-  useEffect(() => {
-    if (typeof balance === 'number') {
-      setBalance(null)
-      setTrigger(
-        moment()
-          .valueOf()
-      )
-    }
-  }, [chainId, contractAddress])
+    },
+    [chainId, contractAddress],
+  )
 
   const getBalance = async (
     chain_id,

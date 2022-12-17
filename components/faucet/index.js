@@ -26,16 +26,18 @@ const ABI = [
   'function withdraw(uint256 amount)',
 ]
 
-export default ({
-  token_id = 'test',
-  faucet_amount =
-    Number(
-      process.env.NEXT_PUBLIC_FAUCET_AMOUNT
-    ) ||
-    1000,
-  contract_data,
-  className = '',
-}) => {
+export default (
+  {
+    token_id = 'test',
+    faucet_amount =
+      Number(
+        process.env.NEXT_PUBLIC_FAUCET_AMOUNT
+      ) ||
+      1000,
+    contract_data,
+    className = '',
+  },
+) => {
   const dispatch = useDispatch()
   const {
     chains,
@@ -84,46 +86,52 @@ export default ({
         .valueOf()
     )
 
-  useEffect(() => {
-    if (
-      chain_id &&
-      address
-    ) {
-      let {
-        chain,
-      } = { ...data }
-      const {
-        id,
-      } = {
-        ...(
-          (chains_data || [])
-            .find(c =>
-              c?.chain_id === chain_id
-            )
-        ),
-      }
-
-      chain =
-        id ||
-        chain
-
-      setData(
-        {
-          ...data,
-          address:
-            data ?
-              data.address :
-              address,
+  useEffect(
+    () => {
+      if (
+        chain_id &&
+        address
+      ) {
+        let {
           chain,
+        } = { ...data }
+        const {
+          id,
+        } = {
+          ...(
+            (chains_data || [])
+              .find(c =>
+                c?.chain_id === chain_id
+              )
+          ),
         }
-      )
-    }
-  }, [chain_id, address])
 
-  useEffect(() => {
-    setMintResponse(null)
-    setWithdrawResponse(null)
-  }, [data])
+        chain =
+          id ||
+          chain
+
+        setData(
+          {
+            ...data,
+            address:
+              data ?
+                data.address :
+                address,
+            chain,
+          }
+        )
+      }
+    },
+    [chain_id, address],
+  )
+
+  useEffect(
+    () => {
+      setMintResponse(null)
+      setWithdrawResponse(null)
+    },
+    [data],
+  )
 
   const mint = async () => {
     setMinting(true)

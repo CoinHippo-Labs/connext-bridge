@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import { Puff } from 'react-loader-spinner'
 import { IoRadioButtonOn } from 'react-icons/io5'
@@ -11,13 +11,15 @@ import Modal from '../../modals'
 import { chainName } from '../../../lib/object/chain'
 import { loader_color } from '../../../lib/utils'
 
-export default ({
-  disabled = false,
-  value,
-  onSelect,
-  source_chain,
-  destination_chain,
-}) => {
+export default (
+  {
+    disabled = false,
+    value,
+    onSelect,
+    source_chain,
+    destination_chain,
+  },
+) => {
   const {
     preferences,
     chains,

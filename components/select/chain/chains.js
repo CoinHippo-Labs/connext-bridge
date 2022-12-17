@@ -4,14 +4,16 @@ import _ from 'lodash'
 import Image from '../../image'
 import { name, equals_ignore_case } from '../../../lib/utils'
 
-export default ({
-  value,
-  inputSearch,
-  onSelect,
-  source,
-  destination,
-  is_pool = false,
-}) => {
+export default (
+  {
+    value,
+    inputSearch,
+    onSelect,
+    source,
+    destination,
+    is_pool = false,
+  },
+) => {
   const {
     preferences,
     chains,

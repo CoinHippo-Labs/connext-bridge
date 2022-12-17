@@ -6,9 +6,11 @@ import { providers } from 'ethers'
 import Image from '../image'
 import { WALLET_DATA, CHAIN_ID } from '../../reducers/types'
 
-export default ({
-  token_data,
-}) => {
+export default (
+  {
+    token_data,
+  },
+) => {
   const dispatch = useDispatch()
   const {
     chains,
@@ -41,70 +43,79 @@ export default ({
   const [chainId, setChainId] = useState(null)
   const [data, setData] = useState(null)
 
-  useEffect(() => {
-    if (!web3) {
-      setWeb3(
-        new Web3(
-          Web3.givenProvider
+  useEffect(
+    () => {
+      if (!web3) {
+        setWeb3(
+          new Web3(
+            Web3.givenProvider
+          )
         )
-      )
-    }
-    else {
-      try {
-        web3.currentProvider._handleChainChanged = e => {
-          try {
-            const chainId = Web3.utils.hexToNumber(e?.chainId)
+      }
+      else {
+        try {
+          web3.currentProvider._handleChainChanged = e => {
+            try {
+              const chainId = Web3.utils.hexToNumber(e?.chainId)
 
-            setChainId(chainId)
+              setChainId(chainId)
 
-            dispatch(
-              {
-                type: CHAIN_ID,
-                value: chainId,
-              }
-            )
+              dispatch(
+                {
+                  type: CHAIN_ID,
+                  value: chainId,
+                }
+              )
 
-            const web3Provider = new providers.Web3Provider(provider)
-            const signer = web3Provider.getSigner()
+              const web3Provider = new providers.Web3Provider(provider)
+              const signer = web3Provider.getSigner()
 
-            dispatch(
-              {
-                type: WALLET_DATA,
-                value: {
-                  chain_id: chainId,
-                  web3_provider: web3Provider,
-                  signer,
-                },
-              }
-            )
-          } catch (error) {}
-        }
-      } catch (error) {}
-    }
-  }, [web3])
+              dispatch(
+                {
+                  type: WALLET_DATA,
+                  value: {
+                    chain_id: chainId,
+                    web3_provider: web3Provider,
+                    signer,
+                  },
+                }
+              )
+            } catch (error) {}
+          }
+        } catch (error) {}
+      }
+    },
+    [web3],
+  )
 
-  useEffect(() => {
-    if (chain_id) {
-      setChainId(chain_id)
-    }
-  }, [chain_id])
+  useEffect(
+    () => {
+      if (chain_id) {
+        setChainId(chain_id)
+      }
+    },
+    [chain_id],
+  )
 
-  useEffect(() => {
-    const {
-      chain_id,
-      contract_data,
-    } = { ...data }
-
-    if (
-      chain_id === chainId &&
-      contract_data
-    ) {
-      addToken(
+  useEffect(
+    () => {
+      const {
         chain_id,
         contract_data,
-      )
-    }
-  }, [chainId, data])
+      } = { ...data }
+
+      if (
+        chain_id === chainId &&
+        contract_data
+      ) {
+        addToken(
+          chain_id,
+          contract_data,
+        )
+      }
+    },
+    [chainId, data],
+  )
 
   const addToken = async (
     chain_id,

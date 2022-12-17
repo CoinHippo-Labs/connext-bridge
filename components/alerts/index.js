@@ -1,18 +1,20 @@
 import { useState } from 'react'
 import { BiX } from 'react-icons/bi'
 
-export default ({
-  size = 'default',
-  color,
-  outlined = false,
-  raised = false,
-  rounded = false,
-  borderLeft = false,
-  icon = null,
-  closeDisabled = false,
-  children,
-  className = '',
-}) => {
+export default (
+  {
+    size = 'default',
+    color,
+    outlined = false,
+    raised = false,
+    rounded = false,
+    borderLeft = false,
+    icon = null,
+    closeDisabled = false,
+    children,
+    className = '',
+  },
+) => {
   const [hidden, setHidden] = useState(false)
 
   let css = [color]

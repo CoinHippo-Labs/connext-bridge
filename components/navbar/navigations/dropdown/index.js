@@ -9,32 +9,35 @@ export default () => {
   const buttonRef = useRef(null)
   const dropdownRef = useRef(null)
 
-  useEffect(() => {
-    const handleClickOutside = e => {
-      if (
-        hidden ||
-        buttonRef.current.contains(e.target) ||
-        dropdownRef.current.contains(e.target)
-      ) {
-        return false
+  useEffect(
+    () => {
+      const handleClickOutside = e => {
+        if (
+          hidden ||
+          buttonRef.current.contains(e.target) ||
+          dropdownRef.current.contains(e.target)
+        ) {
+          return false
+        }
+
+        setHidden(!hidden)
       }
 
-      setHidden(!hidden)
-    }
-
-    document
-      .addEventListener(
-        'mousedown',
-        handleClickOutside,
-      )
-
-    return () =>
       document
-        .removeEventListener(
+        .addEventListener(
           'mousedown',
           handleClickOutside,
         )
-  }, [hidden, buttonRef, dropdownRef])
+
+      return () =>
+        document
+          .removeEventListener(
+            'mousedown',
+            handleClickOutside,
+          )
+    },
+    [hidden, buttonRef, dropdownRef],
+  )
 
   const onClick = () => setHidden(!hidden)
 

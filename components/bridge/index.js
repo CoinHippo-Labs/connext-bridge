@@ -39,21 +39,25 @@ const ROUTER_FEE_PERCENT =
     process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT
   ) ||
   0.05
+
 const FEE_ESTIMATE_COOLDOWN =
   Number(
     process.env.NEXT_PUBLIC_FEE_ESTIMATE_COOLDOWN
   ) ||
   30
+
 const GAS_LIMIT_ADJUSTMENT =
   Number(
     process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT
   ) ||
   1
+
 const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE =
   Number(
     process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE
   ) ||
   3
+
 const DEFAULT_OPTIONS = {
   to: '',
   infiniteApprove: true,
@@ -160,621 +164,607 @@ export default () => {
   const [timeTrigger, setTimeTrigger] = useState(false)
 
   // get bridge from path
-  useEffect(() => {
-    let updated = false
+  useEffect(
+    () => {
+      let updated = false
 
-    const params =
-      params_to_obj(
-        asPath?.indexOf('?') > -1 &&
-        asPath.substring(
-          asPath.indexOf('?') + 1,
-        )
-      )
-
-    const {
-      symbol,
-      amount,
-      receive_next,
-    } = { ...params }
-
-    let path =
-      !asPath ?
-        '/' :
-        asPath.toLowerCase()
-
-    path =
-      path.includes('?') ?
-        path.substring(
-          0,
-          path.indexOf('?'),
-        ) :
-        path
-
-    if (
-      path.includes('from-') &&
-      path.includes('to-')
-    ) {
-      const paths =
-        path
-          .replace(
-            '/',
-            '',
+      const params =
+        params_to_obj(
+          asPath?.indexOf('?') > -1 &&
+          asPath.substring(
+            asPath.indexOf('?') + 1,
           )
-          .split('-')
-
-      const source_chain = paths[paths.indexOf('from') + 1]
-      const destination_chain = paths[paths.indexOf('to') + 1]
-      const asset =
-        _.head(paths) !== 'from' ?
-          _.head(paths) :
-          process.env.NEXT_PUBLIC_NETWORK === 'testnet' ?
-            'test' :
-            'usdc'
-
-      const source_chain_data = (chains_data || [])
-        .find(c =>
-          c?.id === source_chain
         )
+
+      const {
+        symbol,
+        amount,
+        receive_next,
+      } = { ...params }
+
+      let path =
+        !asPath ?
+          '/' :
+          asPath.toLowerCase()
+
+      path =
+        path.includes('?') ?
+          path.substring(
+            0,
+            path.indexOf('?'),
+          ) :
+          path
+
+      if (
+        path.includes('from-') &&
+        path.includes('to-')
+      ) {
+        const paths =
+          path
+            .replace(
+              '/',
+              '',
+            )
+            .split('-')
+
+        const source_chain = paths[paths.indexOf('from') + 1]
+        const destination_chain = paths[paths.indexOf('to') + 1]
+        const asset =
+          _.head(paths) !== 'from' ?
+            _.head(paths) :
+            process.env.NEXT_PUBLIC_NETWORK === 'testnet' ?
+              'test' :
+              'usdc'
+
+        const source_chain_data = (chains_data || [])
+          .find(c =>
+            c?.id === source_chain
+          )
+
+        const destination_chain_data = (chains_data || [])
+          .find(c =>
+            c?.id === destination_chain
+          )
+
+        const asset_data = (assets_data || [])
+          .find(a =>
+            a?.id === asset ||
+            equals_ignore_case(
+              a?.symbol,
+              asset,
+            )
+          )
+
+        if (source_chain_data) {
+          bridge.source_chain = source_chain
+          updated = true
+        }
+
+        if (destination_chain_data) {
+          bridge.destination_chain = destination_chain
+          updated = true
+        }
+
+        if (asset_data) {
+          bridge.asset = asset
+          updated = true
+        }
+
+        if (symbol) {
+          bridge.symbol = symbol
+          updated = true
+        }
+
+        if (
+          bridge.source_chain &&
+          !isNaN(amount) &&
+          Number(amount) > 0
+        ) {
+          bridge.amount = Number(amount)
+          updated = true
+
+          if (
+            sdk &&
+            estimatedValues === undefined
+          ) {
+            calculateAmountReceived(bridge.amount)
+          }
+        }
+        else if (estimatedValues) {
+          setEstimatedValues(undefined)
+        }
+      }
+
+      if (
+        [
+          true,
+          'true',
+        ].includes(receive_next)
+      ) {
+        bridge.receive_next = true
+        updated = true
+
+        setOptions(
+          {
+            ...options,
+            receiveLocal: true,
+          }
+        )
+      }
+
+      if (updated) {
+        setBridge(bridge)
+      }
+    },
+    [asPath, chains_data, assets_data, sdk],
+  )
+
+  // set bridge to path
+  useEffect(
+    () => {
+      const params = {}
+
+      if (bridge) {
+        const {
+          source_chain,
+          destination_chain,
+          asset,
+          symbol,
+          amount,
+        } = { ...bridge }
+
+        if (
+          (chains_data || [])
+            .findIndex(c =>
+              !c?.disabled &&
+              c?.id === source_chain
+            ) > -1
+        ) {
+          params.source_chain = source_chain
+
+          if (
+            asset &&
+            (assets_data || [])
+              .findIndex(a =>
+                a?.id === asset &&
+                (a.contracts || [])
+                  .findIndex(c =>
+                    c?.chain_id ===
+                    chains_data
+                      .find(_c =>
+                        _c?.id === source_chain
+                      )?.chain_id
+                  ) > -1
+              ) > -1
+          ) {
+            params.asset = asset
+          }
+        }
+
+        if (
+          (chains_data || [])
+            .findIndex(c =>
+              !c?.disabled &&
+              c?.id === destination_chain
+            ) > -1
+        ) {
+          params.destination_chain = destination_chain
+
+          if (
+            asset &&
+            (assets_data || [])
+              .findIndex(a =>
+                a?.id === asset &&
+                (a.contracts || [])
+                  .findIndex(c =>
+                    c?.chain_id ===
+                    chains_data
+                      .find(_c =>
+                        _c?.id === destination_chain
+                      )?.chain_id
+                  ) > -1
+              ) > -1
+          ) {
+            params.asset = asset
+          }
+        }
+
+        if (
+          params.source_chain &&
+          params.asset
+        ) {
+          if (amount) {
+            params.amount =
+              number_format(
+                Number(amount),
+                '0.000000000000',
+                true,
+              )
+          }
+          
+          if (
+            symbol &&
+            (assets_data || [])
+              .findIndex(a =>
+                a?.id === asset &&
+                (a.contracts || [])
+                  .findIndex(c =>
+                    c?.chain_id ===
+                    chains_data
+                      .find(_c =>
+                        _c?.id === source_chain
+                      )?.chain_id &&
+                    c?.next_asset
+                  ) > -1
+              ) > -1
+          ) {
+            params.symbol = symbol
+          }
+        }
+      }
+
+      const {
+        receiveLocal,
+      } = { ...options }
+
+      if (
+        receiveLocal ||
+        bridge?.receive_next
+      ) {
+        params.receive_next = true
+      }
+
+      if (Object.keys(params).length > 0) {
+        const {
+          source_chain,
+          destination_chain,
+          asset,
+          symbol,
+        } = { ...params }
+
+        delete params.source_chain
+        delete params.destination_chain
+        delete params.asset
+
+        if (!symbol) {
+          delete params.symbol
+        }
+
+        router
+          .push(
+            `/${
+              source_chain &&
+              destination_chain ?
+                `${
+                  asset ?
+                    `${asset.toUpperCase()}-` :
+                    ''
+                }from-${source_chain}-to-${destination_chain}` :
+                ''
+            }${
+              Object.keys(params).length > 0 ?
+                `?${new URLSearchParams(params).toString()}` :
+                ''
+            }`,
+            undefined,
+            {
+              shallow: true,
+            },
+          )
+
+        setBalanceTrigger(
+          moment()
+            .valueOf()
+        )
+      }
 
       const destination_chain_data = (chains_data || [])
         .find(c =>
           c?.id === destination_chain
         )
 
-      const asset_data = (assets_data || [])
-        .find(a =>
-          a?.id === asset ||
-          equals_ignore_case(
-            a?.symbol,
-            asset,
-          )
-        )
-
-      if (source_chain_data) {
-        bridge.source_chain = source_chain
-        updated = true
-      }
-
-      if (destination_chain_data) {
-        bridge.destination_chain = destination_chain
-        updated = true
-      }
-
-      if (asset_data) {
-        bridge.asset = asset
-        updated = true
-      }
-
-      if (symbol) {
-        bridge.symbol = symbol
-        updated = true
-      }
-
-      if (
-        bridge.source_chain &&
-        !isNaN(amount) &&
-        Number(amount) > 0
-      ) {
-        bridge.amount = Number(amount)
-        updated = true
-
-        if (
-          sdk &&
-          estimatedValues === undefined
-        ) {
-          calculateAmountReceived(bridge.amount)
-        }
-      }
-      else if (estimatedValues) {
-        setEstimatedValues(undefined)
-      }
-    }
-
-    if (
-      [
-        true,
-        'true',
-      ].includes(receive_next)
-    ) {
-      bridge.receive_next = true
-      updated = true
-
-      setOptions(
-        {
-          ...options,
-          receiveLocal: true,
-        }
-      )
-    }
-
-    if (updated) {
-      setBridge(bridge)
-    }
-  }, [asPath, chains_data, assets_data, sdk])
-
-  // set bridge to path
-  useEffect(() => {
-    const params = {}
-
-    if (bridge) {
       const {
-        source_chain,
-        destination_chain,
-        asset,
-        symbol,
-        amount,
-      } = { ...bridge }
+        chain_id,
+      } = { ...destination_chain_data }
 
-      if (
-        (chains_data || [])
-          .findIndex(c =>
-            !c?.disabled &&
-            c?.id === source_chain
-          ) > -1
-      ) {
-        params.source_chain = source_chain
-
-        if (
-          asset &&
-          (assets_data || [])
-            .findIndex(a =>
-              a?.id === asset &&
-              (a.contracts || [])
-                .findIndex(c =>
-                  c?.chain_id ===
-                  chains_data
-                    .find(_c =>
-                      _c?.id === source_chain
-                    )?.chain_id
-                ) > -1
-            ) > -1
-        ) {
-          params.asset = asset
-        }
-      }
-
-      if (
-        (chains_data || [])
-          .findIndex(c =>
-            !c?.disabled &&
-            c?.id === destination_chain
-          ) > -1
-      ) {
-        params.destination_chain = destination_chain
-
-        if (
-          asset &&
-          (assets_data || [])
-            .findIndex(a =>
-              a?.id === asset &&
-              (a.contracts || [])
-                .findIndex(c =>
-                  c?.chain_id ===
-                  chains_data
-                    .find(_c =>
-                      _c?.id === destination_chain
-                    )?.chain_id
-                ) > -1
-            ) > -1
-        ) {
-          params.asset = asset
-        }
-      }
-
-      if (
-        params.source_chain &&
-        params.asset
-      ) {
-        if (amount) {
-          params.amount =
-            number_format(
-              Number(amount),
-              '0.000000000000',
-              true,
-            )
-        }
-        
-        if (
-          symbol &&
-          (assets_data || [])
-            .findIndex(a =>
-              a?.id === asset &&
-              (a.contracts || [])
-                .findIndex(c =>
-                  c?.chain_id ===
-                  chains_data
-                    .find(_c =>
-                      _c?.id === source_chain
-                    )?.chain_id &&
-                  c?.next_asset
-                ) > -1
-            ) > -1
-        ) {
-          params.symbol = symbol
-        }
-      }
-    }
-
-    const {
-      receiveLocal,
-    } = { ...options }
-
-    if (
-      receiveLocal ||
-      bridge?.receive_next
-    ) {
-      params.receive_next = true
-    }
-
-    if (Object.keys(params).length > 0) {
       const {
-        source_chain,
-        destination_chain,
-        asset,
+        contract_address,
+        next_asset,
+      } = { ...destination_contract_data }
+
+      const {
         symbol,
       } = { ...params }
 
-      delete params.source_chain
-      delete params.destination_chain
-      delete params.asset
+      const liquidity_amount =
+        _.sum(
+          (asset_balances_data?.[chain_id] || [])
+            .filter(a =>
+              [
+                contract_address,
+                next_asset?.contract_address,
+              ]
+              .filter(_a => _a)
+              .findIndex(_a =>
+                equals_ignore_case(
+                  a?.contract_address,
+                  _a,
+                )
+              ) > -1
+            )
+            .map(a =>
+              Number(
+                utils.formatUnits(
+                  BigNumber.from(
+                    a?.amount ||
+                    '0'
+                  ),
+                  destination_decimals,
+                )
+              )
+            )
+        )
 
-      if (!symbol) {
-        delete params.symbol
-      }
-
-      router.push(
-        `/${
-          source_chain &&
-          destination_chain ?
-            `${
-              asset ?
-                `${asset.toUpperCase()}-` :
-                ''
-            }from-${source_chain}-to-${destination_chain}` :
-            ''
-        }${
-          Object.keys(params).length > 0 ?
-            `?${new URLSearchParams(params).toString()}` :
-            ''
-        }`,
-        undefined,
+      setOptions(
         {
-          shallow: true,
-        },
+          ...DEFAULT_OPTIONS,
+          forceSlow:
+            destination_chain_data &&
+            asset_balances_data ?
+              amount > liquidity_amount :
+              false,
+          receiveLocal,
+        }
       )
 
-      setBalanceTrigger(
+      setEstimateTrigger(
         moment()
           .valueOf()
       )
-    }
-
-    const destination_chain_data = (chains_data || [])
-      .find(c =>
-        c?.id === destination_chain
-      )
-
-    const {
-      chain_id,
-    } = { ...destination_chain_data }
-
-    const {
-      contract_address,
-      next_asset,
-    } = { ...destination_contract_data }
-
-    const {
-      symbol,
-    } = { ...params }
-
-    const liquidity_amount =
-      _.sum(
-        (asset_balances_data?.[chain_id] || [])
-          .filter(a =>
-            [
-              contract_address,
-              next_asset?.contract_address,
-            ]
-            .filter(_a => _a)
-            .findIndex(_a =>
-              equals_ignore_case(
-                a?.contract_address,
-                _a,
-              )
-            ) > -1
-          )
-          .map(a =>
-            Number(
-              utils.formatUnits(
-                BigNumber.from(
-                  a?.amount ||
-                  '0'
-                ),
-                destination_decimals,
-              )
-            )
-          )
-      )
-
-    setOptions(
-      {
-        ...DEFAULT_OPTIONS,
-        forceSlow:
-          destination_chain_data &&
-          asset_balances_data ?
-            amount > liquidity_amount :
-            false,
-        receiveLocal,
-      }
-    )
-
-    setEstimateTrigger(
-      moment()
-        .valueOf()
-    )
-    setApproveResponse(null)
-    setXcall(null)
-    setXcallResponse(null)
-  }, [address, bridge, sdk])
+      setApproveResponse(null)
+      setXcall(null)
+      setXcallResponse(null)
+    },
+    [address, bridge, sdk],
+  )
 
   // update balances
-  useEffect(() => {
-    let {
-      source_chain,
-      destination_chain,
-    } = { ...bridge }
-
-    const chain_data = (chains_data || [])
-      .find(c =>
-        c?.chain_id === wallet_chain_id
-      )
-
-    const {
-      id,
-    } = { ...chain_data }
-
-    if (
-      asPath &&
-      id
-    ) {
-      if (
-        !(
-          source_chain &&
-          destination_chain
-        ) &&
-        !equals_ignore_case(
-          id,
-          destination_chain,
-        )
-      ) {
-        const params =
-          params_to_obj(
-            asPath.indexOf('?') > -1 &&
-            asPath.substring(
-              asPath.indexOf('?') + 1,
-            )
-          )
-
-        if (
-          !params?.source_chain &&
-          !asPath.includes('from-') &&
-          (chains_data || [])
-            .findIndex(c =>
-              !c?.disabled &&
-              c?.id === id
-            ) > -1
-        ) {
-          source_chain = id
-        }
-      }
-      else if (
-        !asPath.includes('from-') &&
-        !equals_ignore_case(
-          id,
-          source_chain,
-        )
-      ) {
-        source_chain = id
-      }
-
-      getBalances(id)
-    }
-
-    if (
-      Object.keys(bridge).length > 0 ||
-      [
-        '/',
-      ].includes(asPath)
-    ) {
-      source_chain =
-        source_chain ||
-        _.head(
-          (chains_data || [])
-            .filter(c =>
-              !c?.disabled &&
-              c?.id !== destination_chain
-            )
-        )?.id
-
-      destination_chain =
-        destination_chain &&
-        !equals_ignore_case(
-          destination_chain,
-          source_chain,
-        ) ?
-          destination_chain :
-          bridge.source_chain &&
-          !equals_ignore_case(
-            bridge.source_chain,
-            source_chain,
-          ) ?
-            bridge.source_chain :
-            _.head(
-              (chains_data || [])
-                .filter(c =>
-                  !c?.disabled &&
-                  c?.id !== source_chain
-                )
-            )?.id
-    }
-
-    setBridge(
-      {
-        ...bridge,
-        source_chain,
-        destination_chain,
-      }
-    )
-  }, [asPath, chains_data])
-
-  // update balances
-  useEffect(() => {
-    let {
-      source_chain,
-      destination_chain,
-    } = { ...bridge }
-
-    const chain_data = (chains_data || [])
-      .find(c =>
-        c?.chain_id === wallet_chain_id
-      )
-
-    const {
-      id,
-    } = { ...chain_data }
-
-    if (
-      asPath &&
-      id
-    ) {
-      if (
-        !(
-          source_chain &&
-          destination_chain
-        ) &&
-        !equals_ignore_case(
-          id,
-          destination_chain,
-        )
-      ) {
-        const params =
-          params_to_obj(
-            asPath.indexOf('?') > -1 &&
-            asPath.substring(
-              asPath.indexOf('?') + 1,
-            )
-          )
-
-        if (
-          !params?.source_chain &&
-          !asPath.includes('from-') &&
-          (chains_data || [])
-            .findIndex(c =>
-              !c?.disabled &&
-              c?.id === id
-            ) > -1
-        ) {
-          source_chain = id
-        }
-      }
-      else if (
-        !asPath.includes('from-') &&
-        !equals_ignore_case(
-          id,
-          source_chain,
-        )
-      ) {
-        source_chain = id
-      }
-
-      getBalances(id)
-    }
-
-    if (
-      Object.keys(bridge).length > 0 ||
-      [
-        '/',
-      ].includes(asPath)
-    ) {
-      source_chain =
-        source_chain ||
-        _.head(
-          (chains_data || [])
-            .filter(c =>
-              !c?.disabled &&
-              c?.id !== destination_chain
-            )
-        )?.id
-
-      destination_chain =
-        destination_chain &&
-        !equals_ignore_case(
-          destination_chain,
-          source_chain,
-        ) ?
-          destination_chain :
-          bridge.source_chain &&
-          !equals_ignore_case(
-            bridge.source_chain,
-            source_chain,
-          ) ?
-            bridge.source_chain :
-            _.head(
-              (chains_data || [])
-                .filter(c =>
-                  !c?.disabled &&
-                  c?.id !== source_chain
-                )
-            )?.id
-    }
-
-    setBridge(
-      {
-        ...bridge,
-        source_chain,
-        destination_chain,
-      }
-    )
-  }, [wallet_chain_id, chains_data])
-
-  // update balances
-  useEffect(() => {
-    dispatch(
-      {
-        type: BALANCES_DATA,
-        value: null,
-      }
-    )
-
-    if (address) {
-      const {
+  useEffect(
+    () => {
+      let {
         source_chain,
         destination_chain,
       } = { ...bridge }
 
-      getBalances(source_chain)
-      getBalances(destination_chain)
-    }
-    else {
-      reset('address')
-    }
-  }, [address])
+      const chain_data = (chains_data || [])
+        .find(c =>
+          c?.chain_id === wallet_chain_id
+        )
 
-  // update balances
-  useEffect(() => {
-    const getData = () => {
       const {
-        status,
-      } = { ...approveResponse }
+        id,
+      } = { ...chain_data }
 
       if (
-        address &&
-        !xcall &&
-        !calling &&
-        ![
-          'pending',
-        ].includes(status)
+        asPath &&
+        id
       ) {
+        if (
+          !(
+            source_chain &&
+            destination_chain
+          ) &&
+          !equals_ignore_case(
+            id,
+            destination_chain,
+          )
+        ) {
+          const params =
+            params_to_obj(
+              asPath.indexOf('?') > -1 &&
+              asPath.substring(
+                asPath.indexOf('?') + 1,
+              )
+            )
+
+          if (
+            !params?.source_chain &&
+            !asPath.includes('from-') &&
+            (chains_data || [])
+              .findIndex(c =>
+                !c?.disabled &&
+                c?.id === id
+              ) > -1
+          ) {
+            source_chain = id
+          }
+        }
+        else if (
+          !asPath.includes('from-') &&
+          !equals_ignore_case(
+            id,
+            source_chain,
+          )
+        ) {
+          source_chain = id
+        }
+
+        getBalances(id)
+      }
+
+      if (
+        Object.keys(bridge).length > 0 ||
+        [
+          '/',
+        ].includes(asPath)
+      ) {
+        source_chain =
+          source_chain ||
+          _.head(
+            (chains_data || [])
+              .filter(c =>
+                !c?.disabled &&
+                c?.id !== destination_chain
+              )
+          )?.id
+
+        destination_chain =
+          destination_chain &&
+          !equals_ignore_case(
+            destination_chain,
+            source_chain,
+          ) ?
+            destination_chain :
+            bridge.source_chain &&
+            !equals_ignore_case(
+              bridge.source_chain,
+              source_chain,
+            ) ?
+              bridge.source_chain :
+              _.head(
+                (chains_data || [])
+                  .filter(c =>
+                    !c?.disabled &&
+                    c?.id !== source_chain
+                  )
+              )?.id
+      }
+
+      setBridge(
+        {
+          ...bridge,
+          source_chain,
+          destination_chain,
+        }
+      )
+    },
+    [asPath, chains_data],
+  )
+
+  // update balances
+  useEffect(
+    () => {
+      let {
+        source_chain,
+        destination_chain,
+      } = { ...bridge }
+
+      const chain_data = (chains_data || [])
+        .find(c =>
+          c?.chain_id === wallet_chain_id
+        )
+
+      const {
+        id,
+      } = { ...chain_data }
+
+      if (
+        asPath &&
+        id
+      ) {
+        if (
+          !(
+            source_chain &&
+            destination_chain
+          ) &&
+          !equals_ignore_case(
+            id,
+            destination_chain,
+          )
+        ) {
+          const params =
+            params_to_obj(
+              asPath.indexOf('?') > -1 &&
+              asPath.substring(
+                asPath.indexOf('?') + 1,
+              )
+            )
+
+          if (
+            !params?.source_chain &&
+            !asPath.includes('from-') &&
+            (chains_data || [])
+              .findIndex(c =>
+                !c?.disabled &&
+                c?.id === id
+              ) > -1
+          ) {
+            source_chain = id
+          }
+        }
+        else if (
+          !asPath.includes('from-') &&
+          !equals_ignore_case(
+            id,
+            source_chain,
+          )
+        ) {
+          source_chain = id
+        }
+
+        getBalances(id)
+      }
+
+      if (
+        Object.keys(bridge).length > 0 ||
+        [
+          '/',
+        ].includes(asPath)
+      ) {
+        source_chain =
+          source_chain ||
+          _.head(
+            (chains_data || [])
+              .filter(c =>
+                !c?.disabled &&
+                c?.id !== destination_chain
+              )
+          )?.id
+
+        destination_chain =
+          destination_chain &&
+          !equals_ignore_case(
+            destination_chain,
+            source_chain,
+          ) ?
+            destination_chain :
+            bridge.source_chain &&
+            !equals_ignore_case(
+              bridge.source_chain,
+              source_chain,
+            ) ?
+              bridge.source_chain :
+              _.head(
+                (chains_data || [])
+                  .filter(c =>
+                    !c?.disabled &&
+                    c?.id !== source_chain
+                  )
+              )?.id
+      }
+
+      setBridge(
+        {
+          ...bridge,
+          source_chain,
+          destination_chain,
+        }
+      )
+    },
+    [wallet_chain_id, chains_data],
+  )
+
+  // update balances
+  useEffect(
+    () => {
+      dispatch(
+        {
+          type: BALANCES_DATA,
+          value: null,
+        }
+      )
+
+      if (address) {
         const {
           source_chain,
           destination_chain,
@@ -783,148 +773,170 @@ export default () => {
         getBalances(source_chain)
         getBalances(destination_chain)
       }
-    }
+      else {
+        reset('address')
+      }
+    },
+    [address],
+  )
 
-    getData()
+  // update balances
+  useEffect(
+    () => {
+      const getData = () => {
+        const {
+          status,
+        } = { ...approveResponse }
 
-    const interval =
-      setInterval(() =>
-        getData(),
-        10 * 1000,
-      )
+        if (
+          address &&
+          !xcall &&
+          !calling &&
+          ![
+            'pending',
+          ].includes(status)
+        ) {
+          const {
+            source_chain,
+            destination_chain,
+          } = { ...bridge }
 
-    return () => clearInterval(interval)
-  }, [rpcs])
+          getBalances(source_chain)
+          getBalances(destination_chain)
+        }
+      }
+
+      getData()
+
+      const interval =
+        setInterval(() =>
+          getData(),
+          10 * 1000,
+        )
+
+      return () => clearInterval(interval)
+    },
+    [rpcs],
+  )
 
   // fee estimate cooldown
-  useEffect(() => {
-    if (typeof feeEstimateCooldown === 'number') {
-      if (feeEstimateCooldown === 0) {
+  useEffect(
+    () => {
+      if (typeof feeEstimateCooldown === 'number') {
+        if (feeEstimateCooldown === 0) {
+          setEstimateTrigger(
+            moment()
+              .valueOf()
+          )
+        }
+        else if (fee) {
+          const interval =
+            setInterval(() =>
+              {
+                const cooldown = feeEstimateCooldown - 1
+
+                if (cooldown > -1) {
+                  setFeeEstimateCooldown(cooldown)
+                }
+              },
+              1000,
+            )
+
+          return () => clearInterval(interval)
+        }
+      }
+    },
+    [fee, feeEstimateCooldown],
+  )
+
+  // reset fee estimate cooldown
+  useEffect(
+    () => {
+      if (
+        typeof feeEstimating === 'boolean' &&
+        !feeEstimating
+      ) {
+        setFeeEstimateCooldown(FEE_ESTIMATE_COOLDOWN)
+      }
+    },
+    [fee, feeEstimating],
+  )
+
+  // trigger estimate
+  useEffect(
+    () => {
+      const {
+        source_chain,
+        amount,
+      } = { ...bridge }
+
+      const {
+        chain_id,
+      } = {
+        ...(
+          (chains_data || [])
+            .find(c =>
+              c?.id === source_chain
+            )
+        ),
+      }
+
+      if (
+        balances_data?.[chain_id] &&
+        amount > 0
+      ) {
         setEstimateTrigger(
           moment()
             .valueOf()
         )
       }
-      else if (fee) {
-        const interval =
-          setInterval(() =>
-            {
-              const cooldown = feeEstimateCooldown - 1
-
-              if (cooldown > -1) {
-                setFeeEstimateCooldown(cooldown)
-              }
-            },
-            1000,
-          )
-
-        return () => clearInterval(interval)
-      }
-    }
-  }, [fee, feeEstimateCooldown])
-
-  // reset fee estimate cooldown
-  useEffect(() => {
-    if (
-      typeof feeEstimating === 'boolean' &&
-      !feeEstimating
-    ) {
-      setFeeEstimateCooldown(FEE_ESTIMATE_COOLDOWN)
-    }
-  }, [fee, feeEstimating])
-
-  // trigger estimate
-  useEffect(() => {
-    const {
-      source_chain,
-      amount,
-    } = { ...bridge }
-
-    const {
-      chain_id,
-    } = {
-      ...(
-        (chains_data || [])
-          .find(c =>
-            c?.id === source_chain
-          )
-      ),
-    }
-
-    if (
-      balances_data?.[chain_id] &&
-      amount > 0
-    ) {
-      setEstimateTrigger(
-        moment()
-          .valueOf()
-      )
-    }
-  }, [balances_data])
+    },
+    [balances_data],
+  )
 
   // estimate trigger
-  useEffect(() => {
-    if (
-      estimateTrigger &&
-      !(
-        approving ||
-        approveResponse ||
-        calling ||
-        xcallResponse
-      )
-    ) {
-      estimate()
-    }
-  }, [estimateTrigger])
+  useEffect(
+    () => {
+      if (
+        estimateTrigger &&
+        !(
+          approving ||
+          approveResponse ||
+          calling ||
+          xcallResponse
+        )
+      ) {
+        estimate()
+      }
+    },
+    [estimateTrigger],
+  )
 
   // update transfer status
-  useEffect(() => {
-    const update = async () => {
-      if (
-        sdk &&
-        address &&
-        xcall
-      ) {
-        const {
-          transfer_id,
-          transactionHash,
-        } = { ...xcall }
-
+  useEffect(
+    () => {
+      const update = async () => {
         if (
-          !transfer_id &&
-          transactionHash
+          sdk &&
+          address &&
+          xcall
         ) {
-          let transfer_data
-
-          try {
-            const response =
-              await sdk.nxtpSdkUtils
-                .getTransferByTransactionHash(
-                  transactionHash,
-                )
-
-            if (Array.isArray(response)) {
-              transfer_data = response
-                .find(t =>
-                  equals_ignore_case(
-                    t?.xcall_transaction_hash,
-                    transactionHash,
-                  )
-                )
-            }
-          } catch (error) {}
+          const {
+            transfer_id,
+            transactionHash,
+          } = { ...xcall }
 
           if (
-            !transfer_data &&
-            address
+            !transfer_id &&
+            transactionHash
           ) {
+            let transfer_data
+
             try {
               const response =
                 await sdk.nxtpSdkUtils
-                  .getTransfersByUser(
-                    {
-                      userAddress: address,
-                    },
+                  .getTransferByTransactionHash(
+                    transactionHash,
                   )
 
               if (Array.isArray(response)) {
@@ -937,59 +949,31 @@ export default () => {
                   )
               }
             } catch (error) {}
-          }
 
-          const {
-            status,
-          } = { ...transfer_data }
+            if (
+              !transfer_data &&
+              address
+            ) {
+              try {
+                const response =
+                  await sdk.nxtpSdkUtils
+                    .getTransfersByUser(
+                      {
+                        userAddress: address,
+                      },
+                    )
 
-          if (
-            [
-              XTransferStatus.Executed,
-              XTransferStatus.CompletedFast,
-              XTransferStatus.CompletedSlow,
-            ].includes(status)
-          ) {
-            setLatestTransfers(
-              _.orderBy(
-                _.uniqBy(
-                  _.concat(
-                    transfer_data,
-                    latestTransfers,
-                  ),
-                  'xcall_transaction_hash',
-                ),
-                ['xcall_timestamp'],
-                ['desc'],
-              )
-            )
-
-            reset('finish')
-          }
-          else if (transfer_data?.transfer_id) {
-            setXcall(
-              {
-                ...xcall,
-                transfer_id: transfer_data.transfer_id,
-              }
-            )
-          }
-        }
-        else if (transfer_id) {
-          const response =
-            await sdk.nxtpSdkUtils
-              .getTransferById(
-                transfer_id,
-              )
-
-          if (Array.isArray(response)) {
-            const transfer_data = response
-              .find(t =>
-                equals_ignore_case(
-                  t?.transfer_id,
-                  transfer_id,
-                )
-              )
+                if (Array.isArray(response)) {
+                  transfer_data = response
+                    .find(t =>
+                      equals_ignore_case(
+                        t?.xcall_transaction_hash,
+                        transactionHash,
+                      )
+                    )
+                }
+              } catch (error) {}
+            }
 
             const {
               status,
@@ -1018,46 +1002,106 @@ export default () => {
 
               reset('finish')
             }
+            else if (transfer_data?.transfer_id) {
+              setXcall(
+                {
+                  ...xcall,
+                  transfer_id: transfer_data.transfer_id,
+                }
+              )
+            }
+          }
+          else if (transfer_id) {
+            const response =
+              await sdk.nxtpSdkUtils
+                .getTransferById(
+                  transfer_id,
+                )
+
+            if (Array.isArray(response)) {
+              const transfer_data = response
+                .find(t =>
+                  equals_ignore_case(
+                    t?.transfer_id,
+                    transfer_id,
+                  )
+                )
+
+              const {
+                status,
+              } = { ...transfer_data }
+
+              if (
+                [
+                  XTransferStatus.Executed,
+                  XTransferStatus.CompletedFast,
+                  XTransferStatus.CompletedSlow,
+                ].includes(status)
+              ) {
+                setLatestTransfers(
+                  _.orderBy(
+                    _.uniqBy(
+                      _.concat(
+                        transfer_data,
+                        latestTransfers,
+                      ),
+                      'xcall_transaction_hash',
+                    ),
+                    ['xcall_timestamp'],
+                    ['desc'],
+                  )
+                )
+
+                reset('finish')
+              }
+            }
           }
         }
       }
-    }
 
-    update()
+      update()
 
-    const interval =
-      setInterval(() =>
-        update(),
-        7.5 * 1000,
-      )
+      const interval =
+        setInterval(() =>
+          update(),
+          7.5 * 1000,
+        )
 
-    return () => clearInterval(interval)
-  }, [sdk, address, xcall, pageVisible])
+      return () => clearInterval(interval)
+    },
+    [sdk, address, xcall, pageVisible],
+  )
 
   // trigger render latest transfer
-  useEffect(() => {
-    setTimeTrigger(!timeTrigger)
-  }, [openTransferStatus])
+  useEffect(
+    () => {
+      setTimeTrigger(!timeTrigger)
+    },
+    [openTransferStatus],
+  )
 
   // render latest transfer status
-  useEffect(() => {
-    const update = () => {
-      if (
-        openTransferStatus &&
-        latest_transfer
-      ) {
-        setTimeTrigger(!timeTrigger)
+  useEffect(
+    () => {
+      const update = () => {
+        if (
+          openTransferStatus &&
+          latest_transfer
+        ) {
+          setTimeTrigger(!timeTrigger)
+        }
       }
-    }
 
-    const timeout =
-      setTimeout(() => 
-        update(),
-        1 * 1000,
-      )
+      const timeout =
+        setTimeout(() => 
+          update(),
+          1 * 1000,
+        )
 
-    return () => clearTimeout(timeout)
-  }, [timeTrigger])
+      return () => clearTimeout(timeout)
+    },
+    [timeTrigger],
+  )
 
   const getBalances = chain => {
     const getBalance = async (

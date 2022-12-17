@@ -15,12 +15,14 @@ const DEFAULT_SWAP_SLIPPAGE_PERCENTAGE =
   ) ||
   3
 
-export default ({
-  disabled = false,
-  applied = false,
-  initialData,
-  onChange,
-}) => {
+export default (
+  {
+    disabled = false,
+    applied = false,
+    initialData,
+    onChange,
+  },
+) => {
   const {
     preferences,
   } = useSelector(state =>
@@ -37,9 +39,12 @@ export default ({
 
   const [data, setData] = useState(initialData)
 
-  useEffect(() => {
-    setData(initialData)
-  }, [initialData])
+  useEffect(
+    () => {
+      setData(initialData)
+    },
+    [initialData],
+  )
 
   const reset = () => setData(initialData)
 

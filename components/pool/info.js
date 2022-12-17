@@ -10,12 +10,14 @@ import Image from '../image'
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
 
-export default ({
-  pool,
-  user_pools_data,
-  disabled = false,
-  onSelect,
-}) => {
+export default (
+  {
+    pool,
+    user_pools_data,
+    disabled = false,
+    onSelect,
+  },
+) => {
   const {
     preferences,
     chains,

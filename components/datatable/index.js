@@ -34,22 +34,24 @@ const IndeterminateCheckbox = forwardRef(
   }
 )
 
-export default ({
-  columns,
-  data,
-  rowSelectEnable = false,
-  defaultPageSize = 10,
-  pageSizes = [
-    10,
-    25,
-    50,
-    100,
-  ],
-  noPagination = false,
-  noRecordPerPage = false,
-  className = '',
-  style,
-}) => {
+export default (
+  {
+    columns,
+    data,
+    rowSelectEnable = false,
+    defaultPageSize = 10,
+    pageSizes = [
+      10,
+      25,
+      50,
+      100,
+    ],
+    noPagination = false,
+    noRecordPerPage = false,
+    className = '',
+    style,
+  },
+) => {
   const tableRef = useRef()
   const {
     getTableProps,
@@ -124,11 +126,14 @@ export default ({
     }
   )
 
-  useEffect(() => {
-    if (pageIndex + 1 > pageCount) {
-      gotoPage(pageCount - 1)
-    }
-  }, [pageIndex, pageCount])
+  useEffect(
+    () => {
+      if (pageIndex + 1 > pageCount) {
+        gotoPage(pageCount - 1)
+      }
+    },
+    [pageIndex, pageCount],
+  )
 
   const loading =
     (data || [])

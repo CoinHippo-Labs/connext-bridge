@@ -6,13 +6,15 @@ import { MdLocalGasStation } from 'react-icons/md'
 
 import { number_format, loader_color } from '../../lib/utils'
 
-export default ({
-  chainId,
-  dummy,
-  iconSize = 20,
-  minGasPrice = 0.00000001,
-  className = '',
-}) => {
+export default (
+  {
+    chainId,
+    dummy,
+    iconSize = 20,
+    minGasPrice = 0.00000001,
+    className = '',
+  },
+) => {
   const {
     preferences,
     rpc_providers,
@@ -34,43 +36,46 @@ export default ({
 
   const [gasPrice, setGasPrice] = useState(null)
 
-  useEffect(() => {
-    const getData = async is_interval => {
-      if (rpcs?.[chainId]) {
-        if (!is_interval) {
-          setGasPrice(null)
-        }
+  useEffect(
+    () => {
+      const getData = async is_interval => {
+        if (rpcs?.[chainId]) {
+          if (!is_interval) {
+            setGasPrice(null)
+          }
 
-        const provider = rpcs[chainId]
+          const provider = rpcs[chainId]
 
-        try {
-          setGasPrice(
-            Number(
-              utils.formatUnits(
-                await provider
-                  .getGasPrice(),
-                'gwei',
+          try {
+            setGasPrice(
+              Number(
+                utils.formatUnits(
+                  await provider
+                    .getGasPrice(),
+                  'gwei',
+                )
               )
             )
-          )
-        } catch (error) {
-          if (!gasPrice) {
-            setGasPrice('')
+          } catch (error) {
+            if (!gasPrice) {
+              setGasPrice('')
+            }
           }
         }
       }
-    }
 
-    getData()
+      getData()
 
-    const interval =
-      setInterval(() =>
-        getData(true),
-        0.5 * 60 * 1000,
-      )
+      const interval =
+        setInterval(() =>
+          getData(true),
+          0.5 * 60 * 1000,
+        )
 
-    return () => clearInterval(interval)
-  }, [chainId, rpcs])
+      return () => clearInterval(interval)
+    },
+    [chainId, rpcs],
+  )
 
   return (
     chainId ?

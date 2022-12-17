@@ -99,15 +99,17 @@ const getNetwork = chain_id => {
 
 let web3Modal
 
-export default ({
-  mainController = false,
-  hidden = false,
-  disabled = false, 
-  connectChainId,
-  onSwitch,
-  children,
-  className = '',
-}) => {
+export default (
+  {
+    mainController = false,
+    hidden = false,
+    disabled = false, 
+    connectChainId,
+    onSwitch,
+    children,
+    className = '',
+  },
+) => {
   const dispatch = useDispatch()
   const {
     preferences,
@@ -140,197 +142,212 @@ export default ({
 
   const [defaultChainId, setDefaultChainId] = useState(null)
 
-  useEffect(() => {
-    if (
-      connectChainId &&
-      connectChainId !== defaultChainId
-    ) {
-      setDefaultChainId(connectChainId)
-    }
-  }, [connectChainId])
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (web3_provider) {
-        dispatch(
-          {
-            type: WALLET_DATA,
-            value: {
-              default_chain_id: defaultChainId,
-            },
-          }
-        )
-      }
-
-      /*if (window.clover) {
-        providerOptions['custom-clover'] = {
-          package: async () => {
-            let provider = null
-
-            if (typeof window.clover !== 'undefined') {
-              provider = window.clover
-
-              try {
-                await provider
-                  .request(
-                    {
-                      method: 'eth_requestAccounts',
-                    },
-                  )
-              } catch (error) {
-                throw new Error('User Rejected')
-              }
-            }
-            else if (typeof window.ethereum !== 'undefined') {
-              provider = window.ethereum
-
-              try {
-                await provider
-                  .request(
-                    {
-                      method: 'eth_requestAccounts',
-                    },
-                  )
-              } catch (error) {
-                throw new Error('User Rejected')
-              }
-            }
-            else if (window.web3) {
-              provider = window.web3.currentProvider
-            }
-            else if (window.celo) {
-              provider = window.celo
-            }
-            else {
-              throw new Error('No Web3 Provider found')
-            }
-
-            return provider
-          },
-          connector: async (
-            ProviderPackage,
-            options,
-          ) => {
-            const provider = new ProviderPackage(
-              options,
-            )
-
-            try {
-              await provider.enable()
-            } catch (error) {}
-
-            return provider
-          },
-          display: {
-            name: 'Clover',
-            logo: '/logos/wallets/clover.png',
-          },
-        }
-      }*/
-
-      web3Modal = new Web3Modal(
-        {
-          network:
-            getNetwork(defaultChainId) ||
-            (process.env.NETWORK === 'testnet' ?
-              'goerli' :
-              'mainnet'
-            ),
-          cacheProvider: true,
-          providerOptions,
-        }
-      )
-    }
-  }, [defaultChainId])
-
-  useEffect(() => {
-    if (web3Modal?.cachedProvider) {
-      connect()
-    }
-  }, [web3Modal])
-
-  useEffect(() => {
-    const update = async () => {
-      if (web3Modal) {
-        await web3Modal.updateTheme(theme)
-      }
-    }
-
-    update()
-  }, [theme])
-
-  const connect = useCallback(
-    async () => {
-      const provider = await web3Modal.connect()
-      const web3Provider = new providers.Web3Provider(provider)
-      const network = await web3Provider.getNetwork()
-      const signer = web3Provider.getSigner()
-      const address = await signer.getAddress()
-
+  useEffect(
+    () => {
       if (
-        blocked_addresses
-          .findIndex(a =>
-            equals_ignore_case(
-              a,
-              address,
-            )
-          ) > -1
+        connectChainId &&
+        connectChainId !== defaultChainId
       ) {
-        dispatch(
-          {
-            type: WALLET_RESET,
-          }
-        )
+        setDefaultChainId(connectChainId)
       }
-      else {
-        const {
-          chainId,
-        } = { ...network }
+    },
+    [connectChainId],
+  )
 
-        dispatch(
-          {
-            type: WALLET_DATA,
-            value: {
-              chain_id: chainId,
-              provider,
-              web3_provider: web3Provider,
-              address,
-              signer,
+  useEffect(
+    () => {
+      if (typeof window !== 'undefined') {
+        if (web3_provider) {
+          dispatch(
+            {
+              type: WALLET_DATA,
+              value: {
+                default_chain_id: defaultChainId,
+              },
+            }
+          )
+        }
+
+        /*if (window.clover) {
+          providerOptions['custom-clover'] = {
+            package: async () => {
+              let provider = null
+
+              if (typeof window.clover !== 'undefined') {
+                provider = window.clover
+
+                try {
+                  await provider
+                    .request(
+                      {
+                        method: 'eth_requestAccounts',
+                      },
+                    )
+                } catch (error) {
+                  throw new Error('User Rejected')
+                }
+              }
+              else if (typeof window.ethereum !== 'undefined') {
+                provider = window.ethereum
+
+                try {
+                  await provider
+                    .request(
+                      {
+                        method: 'eth_requestAccounts',
+                      },
+                    )
+                } catch (error) {
+                  throw new Error('User Rejected')
+                }
+              }
+              else if (window.web3) {
+                provider = window.web3.currentProvider
+              }
+              else if (window.celo) {
+                provider = window.celo
+              }
+              else {
+                throw new Error('No Web3 Provider found')
+              }
+
+              return provider
+            },
+            connector: async (
+              ProviderPackage,
+              options,
+            ) => {
+              const provider = new ProviderPackage(
+                options,
+              )
+
+              try {
+                await provider.enable()
+              } catch (error) {}
+
+              return provider
+            },
+            display: {
+              name: 'Clover',
+              logo: '/logos/wallets/clover.png',
             },
           }
-        )
+        }*/
+
+        web3Modal =
+          new Web3Modal(
+            {
+              network:
+                getNetwork(defaultChainId) ||
+                (process.env.NETWORK === 'testnet' ?
+                  'goerli' :
+                  'mainnet'
+                ),
+              cacheProvider: true,
+              providerOptions,
+            }
+          )
+      }
+    },
+    [defaultChainId],
+  )
+
+  useEffect(
+    () => {
+      if (web3Modal?.cachedProvider) {
+        connect()
       }
     },
     [web3Modal],
   )
 
-  const disconnect = useCallback(
-    async (
-      e,
-      is_reestablish,
-    ) => {
-      if (
-        web3Modal &&
-        !is_reestablish
-      ) {
-        await web3Modal.clearCachedProvider()
-      }
-
-      if (
-        provider?.disconnect &&
-        typeof provider.disconnect === 'function'
-      ) {
-        await provider.disconnect()
-      }
-
-      dispatch(
-        {
-          type: WALLET_RESET,
+  useEffect(
+    () => {
+      const update = async () => {
+        if (web3Modal) {
+          await web3Modal.updateTheme(theme)
         }
-      )
+      }
+
+      update()
     },
-    [web3Modal, provider],
+    [theme],
   )
+
+  const connect =
+    useCallback(
+      async () => {
+        const provider = await web3Modal.connect()
+        const web3Provider = new providers.Web3Provider(provider)
+        const network = await web3Provider.getNetwork()
+        const signer = web3Provider.getSigner()
+        const address = await signer.getAddress()
+
+        if (
+          blocked_addresses
+            .findIndex(a =>
+              equals_ignore_case(
+                a,
+                address,
+              )
+            ) > -1
+        ) {
+          dispatch(
+            {
+              type: WALLET_RESET,
+            }
+          )
+        }
+        else {
+          const {
+            chainId,
+          } = { ...network }
+
+          dispatch(
+            {
+              type: WALLET_DATA,
+              value: {
+                chain_id: chainId,
+                provider,
+                web3_provider: web3Provider,
+                address,
+                signer,
+              },
+            }
+          )
+        }
+      },
+      [web3Modal],
+    )
+
+  const disconnect =
+    useCallback(
+      async (
+        e,
+        is_reestablish,
+      ) => {
+        if (
+          web3Modal &&
+          !is_reestablish
+        ) {
+          await web3Modal.clearCachedProvider()
+        }
+
+        if (
+          provider?.disconnect &&
+          typeof provider.disconnect === 'function'
+        ) {
+          await provider.disconnect()
+        }
+
+        dispatch(
+          {
+            type: WALLET_RESET,
+          }
+        )
+      },
+      [web3Modal, provider],
+    )
 
   const switchChain = async () => {
     if (
@@ -381,141 +398,147 @@ export default ({
     }
   }
 
-  useEffect(() => {
-    if (provider?.on) {
-      const handleChainChanged = chainId => {
-        if (!chainId) {
-          disconnect()
+  useEffect(
+    () => {
+      if (provider?.on) {
+        const handleChainChanged = chainId => {
+          if (!chainId) {
+            disconnect()
+          }
+          else {
+            connect()
+          }
         }
-        else {
-          connect()
-        }
-      }
 
-      const handleAccountsChanged = accounts => {
-        if (!_.head(accounts)) {
-          disconnect()
-        }
-        else {
-          dispatch(
-            {
-              type: WALLET_DATA,
-              value: {
-                address: _.head(accounts),
-              },
-            }
-          )
-        }
-      }
-
-      const handleDisconnect = e => {
-        const {
-          code,
-        } = { ...e }
-
-        disconnect(
-          e,
-          code === 1013,
-        )
-
-        if (code === 1013) {
-          connect()
-        }
-      }
-
-      provider
-        .on(
-          'chainChanged',
-          handleChainChanged,
-        )
-      provider
-        .on(
-          'accountsChanged',
-          handleAccountsChanged,
-        )
-      provider
-        .on(
-          'disconnect',
-          handleDisconnect,
-        )
-
-      return () => {
-        if (provider.removeListener) {
-          provider
-            .removeListener(
-              'chainChanged',
-              handleChainChanged,
-            )
-          provider
-            .removeListener(
-              'accountsChanged',
-              handleAccountsChanged,
-            )
-          provider
-            .removeListener(
-              'disconnect',
-              handleDisconnect,
-            )
-        }
-      }
-    }
-  }, [provider, disconnect])
-
-  return !hidden && (
-    <>
-      {web3_provider ?
-        !mainController &&
-        connectChainId &&
-        connectChainId !== chain_id ?
-          <button
-            disabled={disabled}
-            onClick={() => {
-              switchChain()
-
-              if (onSwitch) {
-                onSwitch()
+        const handleAccountsChanged = accounts => {
+          if (!_.head(accounts)) {
+            disconnect()
+          }
+          else {
+            dispatch(
+              {
+                type: WALLET_DATA,
+                value: {
+                  address: _.head(accounts),
+                },
               }
-            }}
-            className={className}
-          >
-            {
-              children ||
-              (
-                <div className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded whitespace-nowrap py-1 px-2">
-                  Switch Network
-                </div>
-              )
-            }
-          </button> :
-          <button
-            disabled={disabled}
-            onClick={disconnect}
-            className={className}
-          >
-            {
-              children ||
-              (
-                <div className="bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-500 rounded whitespace-nowrap text-white py-1 px-2">
-                  Disconnect
-                </div>
-              )
-            }
-          </button> :
-        <button
-          disabled={disabled}
-          onClick={connect}
-          className={className}
-        >
-          {
-            children ||
-            (
-              <div className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 rounded whitespace-nowrap text-white py-1 px-2">
-                Connect
-              </div>
             )
           }
-        </button>
+        }
+
+        const handleDisconnect = e => {
+          const {
+            code,
+          } = { ...e }
+
+          disconnect(
+            e,
+            code === 1013,
+          )
+
+          if (code === 1013) {
+            connect()
+          }
+        }
+
+        provider
+          .on(
+            'chainChanged',
+            handleChainChanged,
+          )
+        provider
+          .on(
+            'accountsChanged',
+            handleAccountsChanged,
+          )
+        provider
+          .on(
+            'disconnect',
+            handleDisconnect,
+          )
+
+        return () => {
+          if (provider.removeListener) {
+            provider
+              .removeListener(
+                'chainChanged',
+                handleChainChanged,
+              )
+            provider
+              .removeListener(
+                'accountsChanged',
+                handleAccountsChanged,
+              )
+            provider
+              .removeListener(
+                'disconnect',
+                handleDisconnect,
+              )
+          }
+        }
       }
-    </>
+    },
+    [provider, disconnect],
+  )
+
+  return (
+    !hidden &&
+    (
+      <>
+        {web3_provider ?
+          !mainController &&
+          connectChainId &&
+          connectChainId !== chain_id ?
+            <button
+              disabled={disabled}
+              onClick={() => {
+                switchChain()
+
+                if (onSwitch) {
+                  onSwitch()
+                }
+              }}
+              className={className}
+            >
+              {
+                children ||
+                (
+                  <div className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded whitespace-nowrap py-1 px-2">
+                    Switch Network
+                  </div>
+                )
+              }
+            </button> :
+            <button
+              disabled={disabled}
+              onClick={disconnect}
+              className={className}
+            >
+              {
+                children ||
+                (
+                  <div className="bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-500 rounded whitespace-nowrap text-white py-1 px-2">
+                    Disconnect
+                  </div>
+                )
+              }
+            </button> :
+          <button
+            disabled={disabled}
+            onClick={connect}
+            className={className}
+          >
+            {
+              children ||
+              (
+                <div className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 rounded whitespace-nowrap text-white py-1 px-2">
+                  Connect
+                </div>
+              )
+            }
+          </button>
+        }
+      </>
+    )
   )
 }

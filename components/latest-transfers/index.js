@@ -10,10 +10,12 @@ import { equals_ignore_case } from '../../lib/utils'
 
 const NUM_TRANSFER_DISPLAY = 3
 
-export default ({
-  trigger,
-  data = [],
-}) => {
+export default (
+  {
+    trigger,
+    data = [],
+  },
+) => {
   const {
     dev,
     wallet,
@@ -40,76 +42,79 @@ export default ({
   const [collapse, setCollapse] = useState(null)
   const [timer, setTimer] = useState(null)
 
-  useEffect(() => {
-    const getData = async () => {
-      if (
-        sdk &&
-        address
-      ) {
-        try {
-          let response =
-            await sdk.nxtpSdkUtils
-              .getTransfersByUser(
-                {
-                  userAddress: address,
-                },
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (
+          sdk &&
+          address
+        ) {
+          try {
+            let response =
+              await sdk.nxtpSdkUtils
+                .getTransfersByUser(
+                  {
+                    userAddress: address,
+                  },
+                )
+
+            if (!Array.isArray(response)) {
+              response = []
+            }
+
+            response =
+              _.orderBy(
+                _.uniqBy(
+                  _.concat(
+                    response,
+                    data,
+                  )
+                  .filter(d => d),
+                  'xcall_transaction_hash',
+                ),
+                ['xcall_timestamp'],
+                ['desc'],
               )
 
-          if (!Array.isArray(response)) {
-            response = []
+            if (
+              response
+                .findIndex(t =>
+                  (transfers || [])
+                    .findIndex(_t =>
+                      _t?.transfer_id
+                    ) < 0 &&
+                  ![
+                    XTransferStatus.Executed,
+                    XTransferStatus.CompletedFast,
+                    XTransferStatus.CompletedSlow,
+                  ].includes(t.status)
+                ) > -1
+            ) {
+              setCollapse(false)
+            }
+
+            setTransfers(response)
+          } catch (error) {
+            setTransfers(null)
           }
-
-          response =
-            _.orderBy(
-              _.uniqBy(
-                _.concat(
-                  response,
-                  data,
-                )
-                .filter(d => d),
-                'xcall_transaction_hash',
-              ),
-              ['xcall_timestamp'],
-              ['desc'],
-            )
-
-          if (
-            response
-              .findIndex(t =>
-                (transfers || [])
-                  .findIndex(_t =>
-                    _t?.transfer_id
-                  ) < 0 &&
-                ![
-                  XTransferStatus.Executed,
-                  XTransferStatus.CompletedFast,
-                  XTransferStatus.CompletedSlow,
-                ].includes(t.status)
-              ) > -1
-          ) {
-            setCollapse(false)
-          }
-
-          setTransfers(response)
-        } catch (error) {
+        }
+        else {
           setTransfers(null)
         }
       }
-      else {
-        setTransfers(null)
-      }
-    }
 
-    getData()
+      getData()
 
-    const interval =
-      setInterval(() =>
-        getData(),
-        10 * 1000,
-      )
+      const interval =
+        setInterval(() =>
+          getData(),
+          10 * 1000,
+        )
 
-    return () => clearInterval(interval)
-  }, [sdk, address, trigger])
+      return () => clearInterval(interval)
+    },
+    [sdk, address, trigger],
+  )
 
   const transfersComponent =
     _.slice(

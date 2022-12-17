@@ -12,10 +12,12 @@ import { chainName } from '../../lib/object/chain'
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
 
-export default ({
-  view,
-  user_pools_data,
-}) => {
+export default (
+  {
+    view,
+    user_pools_data,
+  },
+) => {
   const {
     preferences,
     assets,
@@ -47,19 +49,22 @@ export default ({
 
   const [uncollapseAssetIds, setUncollapseAssetIds] = useState(null)
 
-  useEffect(() => {
-    if (
-      pools_data &&
-      !uncollapseAssetIds
-    ) {
-      const ids =
-        pools_data
-          .map(p => p?.asset_data?.id)
-          .filter(id => id)
+  useEffect(
+    () => {
+      if (
+        pools_data &&
+        !uncollapseAssetIds
+      ) {
+        const ids =
+          pools_data
+            .map(p => p?.asset_data?.id)
+            .filter(id => id)
 
-      setUncollapseAssetIds(ids)
-    }
-  }, [pools_data])
+        setUncollapseAssetIds(ids)
+      }
+    },
+    [pools_data],
+  )
 
   const data =
     view === 'my_positions' ?

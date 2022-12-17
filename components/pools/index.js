@@ -69,138 +69,123 @@ export default () => {
   const [poolsTrigger, setPoolsTrigger] = useState(null)
 
   // get pools
-  useEffect(() => {
-    const getData = async () => {
-      if (sdk) {
-        if (address) {
-          let data
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (sdk) {
+          if (address) {
+            let data
 
-          for (const chain_data of chains_data) {
-            try {
-              const {
-                chain_id,
-                domain_id,
-              } = { ...chain_data }
+            for (const chain_data of chains_data) {
+              try {
+                const {
+                  chain_id,
+                  domain_id,
+                } = { ...chain_data }
 
-              const response =
-                await sdk.nxtpSdkPool
-                  .getUserPools(
-                    domain_id,
-                    address,
-                  )
+                const response =
+                  await sdk.nxtpSdkPool
+                    .getUserPools(
+                      domain_id,
+                      address,
+                    )
 
-              if (Array.isArray(response)) {
-                data =
-                  _.concat(
-                    data,
-                    response
-                      .map(p => {
-                        const {
-                          info,
-                          lpTokenBalance,
-                          poolTokenBalances,
-                        } = { ...p }
-                        const {
-                          symbol,
-                          decimals,
-                          balances,
-                        } = { ...info }
+                if (Array.isArray(response)) {
+                  data =
+                    _.concat(
+                      data,
+                      response
+                        .map(p => {
+                          const {
+                            info,
+                            lpTokenBalance,
+                            poolTokenBalances,
+                          } = { ...p }
+                          const {
+                            symbol,
+                            decimals,
+                            balances,
+                          } = { ...info }
 
-                        let symbols =
-                          (symbol || '')
-                            .split('-')
-                            .filter(s => s)
+                          let symbols =
+                            (symbol || '')
+                              .split('-')
+                              .filter(s => s)
 
-                        const asset_data = pool_assets_data
-                          .find(a =>
-                            symbols.findIndex(s =>
-                              equals_ignore_case(
-                                s,
-                                a?.symbol,
+                          const asset_data = pool_assets_data
+                            .find(a =>
+                              symbols.findIndex(s =>
+                                equals_ignore_case(
+                                  s,
+                                  a?.symbol,
+                                )
+                              ) > -1 ||
+                              (a?.contracts || [])
+                                .findIndex(c =>
+                                  c?.chain_id === chain_id &&
+                                  symbols
+                                    .findIndex(s =>
+                                      equals_ignore_case(
+                                        s,
+                                        c?.symbol,
+                                      )
+                                    ) > -1
+                                ) > -1
+                            )
+
+                          const {
+                            contracts,
+                          } = { ...asset_data }
+
+                          const contract_data =
+                            (contracts || [])
+                              .find(c =>
+                                c?.chain_id === chain_id
                               )
-                            ) > -1 ||
-                            (a?.contracts || [])
-                              .findIndex(c =>
-                                c?.chain_id === chain_id &&
-                                symbols
-                                  .findIndex(s =>
-                                    equals_ignore_case(
-                                      s,
-                                      c?.symbol,
-                                    )
-                                  ) > -1
-                              ) > -1
-                          )
 
-                        const {
-                          contracts,
-                        } = { ...asset_data }
+                          const {
+                            next_asset,
+                          } = { ...contract_data }
 
-                        const contract_data =
-                          (contracts || [])
-                            .find(c =>
-                              c?.chain_id === chain_id
-                            )
-
-                        const {
-                          next_asset,
-                        } = { ...contract_data }
-
-                        if (
-                          symbols
-                            .findIndex(s =>
-                              s?.startsWith(WRAPPED_PREFIX)
-                            ) !==
-                          (p?.tokens || [])
-                            .findIndex(t =>
-                              equals_ignore_case(
-                                t,
-                                next_asset?.contract_address,
-                              ),
-                            )
-                        ) {
-                          symbols =
-                            _.reverse(
-                              _.cloneDeep(symbols)
-                            )
-                        }
-
-                        return {
-                          ...p,
-                          chain_data,
-                          asset_data,
-                          ...info,
-                          symbols,
-                          lpTokenBalance:
-                            Number(
-                              utils.formatUnits(
-                                BigNumber.from(
-                                  lpTokenBalance ||
-                                  '0',
+                          if (
+                            symbols
+                              .findIndex(s =>
+                                s?.startsWith(WRAPPED_PREFIX)
+                              ) !==
+                            (p?.tokens || [])
+                              .findIndex(t =>
+                                equals_ignore_case(
+                                  t,
+                                  next_asset?.contract_address,
                                 ),
-                                // _.last(decimals) ||
-                                18,
                               )
-                            ),
-                          poolTokenBalances:
-                            (poolTokenBalances || [])
-                              .map((b, i) =>
-                                Number(
-                                  utils.formatUnits(
-                                    BigNumber.from(
-                                      b ||
-                                      '0',
-                                    ),
-                                    decimals?.[i] ||
-                                    18,
-                                  )
+                          ) {
+                            symbols =
+                              _.reverse(
+                                _.cloneDeep(symbols)
+                              )
+                          }
+
+                          return {
+                            ...p,
+                            chain_data,
+                            asset_data,
+                            ...info,
+                            symbols,
+                            lpTokenBalance:
+                              Number(
+                                utils.formatUnits(
+                                  BigNumber.from(
+                                    lpTokenBalance ||
+                                    '0',
+                                  ),
+                                  // _.last(decimals) ||
+                                  18,
                                 )
                               ),
-                          balances:
-                            (balances || p?.balances || [])
-                              .map((b, i) =>
-                                typeof b === 'number' ?
-                                  b :
+                            poolTokenBalances:
+                              (poolTokenBalances || [])
+                                .map((b, i) =>
                                   Number(
                                     utils.formatUnits(
                                       BigNumber.from(
@@ -211,29 +196,47 @@ export default () => {
                                       18,
                                     )
                                   )
-                              ),
-                        }
-                      }),
-                  )
-                  .filter(d => d)
-              }
-            } catch (error) {}
-          }
+                                ),
+                            balances:
+                              (balances || p?.balances || [])
+                                .map((b, i) =>
+                                  typeof b === 'number' ?
+                                    b :
+                                    Number(
+                                      utils.formatUnits(
+                                        BigNumber.from(
+                                          b ||
+                                          '0',
+                                        ),
+                                        decimals?.[i] ||
+                                        18,
+                                      )
+                                    )
+                                ),
+                          }
+                        }),
+                    )
+                    .filter(d => d)
+                }
+              } catch (error) {}
+            }
 
-          setPools(
-            data ||
-            pools ||
-            []
-          )
-        }
-        else {
-          setPools([])
+            setPools(
+              data ||
+              pools ||
+              []
+            )
+          }
+          else {
+            setPools([])
+          }
         }
       }
-    }
 
-    getData()
-  }, [sdk, address, poolsTrigger])
+      getData()
+    },
+    [sdk, address, poolsTrigger],
+  )
 
   return (
     <div className="mb-4">

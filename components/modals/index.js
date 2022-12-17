@@ -4,31 +4,33 @@ import { FiX } from 'react-icons/fi'
 
 import Portal from '../portal'
 
-export default ({
-  id = 'portal',
-  hidden,
-  disabled,
-  onClick,
-  buttonTitle,
-  buttonClassName,
-  buttonStyle = {},
-  title,
-  icon,
-  body,
-  noCancelOnClickOutside = false,
-  cancelDisabled = false,
-  onCancel,
-  cancelButtonTitle,
-  cancelButtonClassName,
-  confirmDisabled = false,
-  onConfirm,
-  onConfirmHide = true,
-  confirmButtonTitle,
-  confirmButtonClassName,
-  onClose,
-  noButtons,
-  modalClassName = '',
-}) => {
+export default (
+  {
+    id = 'portal',
+    hidden,
+    disabled,
+    onClick,
+    buttonTitle,
+    buttonClassName,
+    buttonStyle = {},
+    title,
+    icon,
+    body,
+    noCancelOnClickOutside = false,
+    cancelDisabled = false,
+    onCancel,
+    cancelButtonTitle,
+    cancelButtonClassName,
+    confirmDisabled = false,
+    onConfirm,
+    onConfirmHide = true,
+    confirmButtonTitle,
+    confirmButtonClassName,
+    onClose,
+    noButtons,
+    modalClassName = '',
+  },
+) => {
   const {
     preferences,
   } = useSelector(state =>
@@ -61,52 +63,58 @@ export default ({
     }
   }
 
-  useEffect(() => {
-    const handleClickOutside = e => {
-      if (
-        !modalRef ||
-        !modalRef.current
-      ) {
-        return false
-      }
+  useEffect(
+    () => {
+      const handleClickOutside = e => {
+        if (
+          !modalRef ||
+          !modalRef.current
+        ) {
+          return false
+        }
 
-      if (
-        !open ||
-        modalRef.current.contains(e.target)
-      ) {
-        return false
-      }
+        if (
+          !open ||
+          modalRef.current.contains(e.target)
+        ) {
+          return false
+        }
 
-      if (!cancelDisabled) {
-        setOpen(!open)
+        if (!cancelDisabled) {
+          setOpen(!open)
 
-        if (onClose) {
-          onClose()
+          if (onClose) {
+            onClose()
+          }
         }
       }
-    }
 
-    if (!noCancelOnClickOutside) {
-      document
-        .addEventListener(
-          'mousedown',
-          handleClickOutside,
-        )
-
-      return () =>
+      if (!noCancelOnClickOutside) {
         document
-          .removeEventListener(
+          .addEventListener(
             'mousedown',
             handleClickOutside,
           )
-    }
-  }, [modalRef, open, cancelDisabled])
 
-  useEffect(() => {
-    if (typeof hidden === 'boolean') {
-      setOpen(!hidden)
-    }
-  }, [hidden])
+        return () =>
+          document
+            .removeEventListener(
+              'mousedown',
+              handleClickOutside,
+            )
+      }
+    },
+    [modalRef, open, cancelDisabled],
+  )
+
+  useEffect(
+    () => {
+      if (typeof hidden === 'boolean') {
+        setOpen(!hidden)
+      }
+    },
+    [hidden],
+  )
 
   return (
     <>

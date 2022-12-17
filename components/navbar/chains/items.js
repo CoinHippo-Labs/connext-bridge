@@ -4,9 +4,11 @@ import Image from '../../image'
 import Wallet from '../../wallet'
 import { chainName } from '../../../lib/object/chain'
 
-export default ({
-  onClick,
-}) => {
+export default (
+  {
+    onClick,
+  },
+) => {
   const {
     preferences,
     chains,

@@ -8,16 +8,18 @@ const WRAPPED_PREFIX =
   process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
   'next'
 
-export default ({
-  value,
-  inputSearch,
-  onSelect,
-  chain,
-  is_pool = false,
-  is_bridge = false,
-  show_next_assets = false,
-  data,
-}) => {
+export default (
+  {
+    value,
+    inputSearch,
+    onSelect,
+    chain,
+    is_pool = false,
+    is_bridge = false,
+    show_next_assets = false,
+    data,
+  },
+) => {
   const {
     chains,
     assets,

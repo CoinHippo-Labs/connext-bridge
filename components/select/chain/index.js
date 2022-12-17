@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import { Puff } from 'react-loader-spinner'
 import { BiChevronDown } from 'react-icons/bi'
@@ -9,16 +9,18 @@ import Modal from '../../modals'
 import { chainName } from '../../../lib/object/chain'
 import { loader_color } from '../../../lib/utils'
 
-export default ({
-  disabled = false,
-  value,
-  onSelect,
-  source,
-  destination,
-  origin = 'from',
-  is_pool = false,
-  className = '',
-}) => {
+export default (
+  {
+    disabled = false,
+    value,
+    onSelect,
+    source,
+    destination,
+    origin = 'from',
+    is_pool = false,
+    className = '',
+  },
+) => {
   const {
     preferences,
     chains,

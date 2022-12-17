@@ -1,10 +1,12 @@
 import Image from 'next/image'
 
-const loader = ({
-  src,
-  width,
-  quality,
-}) =>
+const loader = (
+  {
+    src,
+    width,
+    quality,
+  },
+) =>
   `${process.env.NEXT_PUBLIC_IMAGE_OPTIMIZER_URL}/_next${
     src?.startsWith('/') ?
       '' :
@@ -18,9 +20,11 @@ const loader = ({
     75
   }`
 
-export default ({
-  ...rest
-}) => {
+export default (
+  {
+    ...rest
+  },
+) => {
   return (
     <Image
       { ...rest }

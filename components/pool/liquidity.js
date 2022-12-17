@@ -26,21 +26,25 @@ import { number_format, ellipse, equals_ignore_case, loader_color, switch_color,
 const WRAPPED_PREFIX =
   process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
   'next'
+
 const GAS_LIMIT_ADJUSTMENT =
   Number(
     process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT
   ) ||
   1
+
 const DEFAULT_POOL_SLIPPAGE_PERCENTAGE =
   Number(
     process.env.NEXT_PUBLIC_DEFAULT_POOL_SLIPPAGE_PERCENTAGE
   ) ||
   3
+
 const DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES =
   Number(
     process.env.NEXT_PUBLIC_DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES
   ) ||
   60
+
 const ACTIONS =
   [
     'deposit',
@@ -53,11 +57,13 @@ const DEFAULT_OPTIONS = {
   deadline: DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES,
 }
 
-export default ({
-  pool,
-  user_pools_data,
-  onFinish,
-}) => {
+export default (
+  {
+    pool,
+    user_pools_data,
+    onFinish,
+  },
+) => {
   const {
     preferences,
     chains,
@@ -132,287 +138,296 @@ export default ({
   const [callProcessing, setCallProcessing] = useState(null)
   const [callResponse, setCallResponse] = useState(null)
 
-  useEffect(() => {
-    reset()
-  }, [action, pool])
+  useEffect(
+    () => {
+      reset()
+    },
+    [action, pool],
+  )
 
-  useEffect(() => {
-    const getData = async () => {
-      setPriceImpactAdd(null)
+  useEffect(
+    () => {
+      const getData = async () => {
+        setPriceImpactAdd(null)
 
-      setApproveResponse(null)
+        setApproveResponse(null)
 
-      const {
-        chain,
-        asset,
-      } = { ...pool }
+        const {
+          chain,
+          asset,
+        } = { ...pool }
 
-      const chain_data = (chains_data || [])
-        .find(c =>
-          c?.id === chain
-        )
+        const chain_data = (chains_data || [])
+          .find(c =>
+            c?.id === chain
+          )
 
-      const pool_data = (pools_data || [])
-        .find(p =>
-          p?.chain_data?.id === chain &&
-          p.asset_data?.id === asset
-        )
+        const pool_data = (pools_data || [])
+          .find(p =>
+            p?.chain_data?.id === chain &&
+            p.asset_data?.id === asset
+          )
 
-      const {
-        contract_data,
-        domainId,
-        tokens,
-        decimals,
-      } = { ...pool_data }
-      const {
-        contract_address,
-      } = { ...contract_data }
+        const {
+          contract_data,
+          domainId,
+          tokens,
+          decimals,
+        } = { ...pool_data }
+        const {
+          contract_address,
+        } = { ...contract_data }
 
-      if (
-        domainId &&
-        contract_address &&
-        typeof amountX === 'number' &&
-        typeof amountY === 'number'
-      ) {
-        setPriceImpactAdd(true)
-        setCallResponse(null)
+        if (
+          domainId &&
+          contract_address &&
+          typeof amountX === 'number' &&
+          typeof amountY === 'number'
+        ) {
+          setPriceImpactAdd(true)
+          setCallResponse(null)
 
-        console.log(
-          '[getPoolTokenIndex]',
-          {
-            domainId,
-            contract_address,
-            tokenAddress: contract_address,
-          },
-        )
-
-        const tokenIndex =
-          await sdk.nxtpSdkPool
-            .getPoolTokenIndex(
+          console.log(
+            '[getPoolTokenIndex]',
+            {
               domainId,
               contract_address,
+              tokenAddress: contract_address,
+            },
+          )
+
+          const tokenIndex =
+            await sdk.nxtpSdkPool
+              .getPoolTokenIndex(
+                domainId,
+                contract_address,
+                contract_address,
+              )
+
+          console.log(
+            '[poolTokenIndex]',
+            {
+              domainId,
               contract_address,
-            )
+              tokenAddress: contract_address,
+              tokenIndex,
+            },
+          )
 
-        console.log(
-          '[poolTokenIndex]',
-          {
+          calculateAddLiquidityPriceImpact(
             domainId,
             contract_address,
-            tokenAddress: contract_address,
-            tokenIndex,
-          },
-        )
-
-        calculateAddLiquidityPriceImpact(
-          domainId,
-          contract_address,
-          utils.parseUnits(
-            (
-              tokenIndex === 0 ?
-                amountX :
-                amountY
-            )
-            .toString(),
-            (
-              tokenIndex === 0 ?
-                _.head(decimals) :
-                _.last(decimals)
-            ) ||
-            18,
-          )
-          .toString(),
-          utils.parseUnits(
-            (
-              tokenIndex === 0 ?
-                amountY :
-                amountX
-            )
-            .toString(),
-            (
-              tokenIndex === 0 ?
-                _.last(decimals) :
-                _.head(decimals)
-            ) ||
-            18,
-          )
-          .toString(),
-        )
-      }
-    }
-
-    getData()
-  }, [amountX, amountY])
-
-  useEffect(() => {
-    const getData = async () => {
-      setPriceImpactRemove(null)
-
-      if (typeof amount === 'number') {
-        if (amount <= 0) {
-          setRemoveAmounts(
-            [
-              0,
-              0,
-            ]
-          )
-        }
-        else {
-          const {
-            chain,
-            asset,
-          } = { ...pool }
-
-          const chain_data = (chains_data || [])
-            .find(c =>
-              c?.id === chain
-            )
-
-          const pool_data = (pools_data || [])
-            .find(p =>
-              p?.chain_data?.id === chain &&
-              p.asset_data?.id === asset
-            )
-
-          const {
-            contract_data,
-            domainId,
-            tokens,
-            decimals,
-          } = { ...pool_data }
-          const {
-            contract_address,
-          } = { ...contract_data }
-
-          const _amount =
             utils.parseUnits(
-              amount
-                .toString(),
-              _.last(decimals) ||
+              (
+                tokenIndex === 0 ?
+                  amountX :
+                  amountY
+              )
+              .toString(),
+              (
+                tokenIndex === 0 ?
+                  _.head(decimals) :
+                  _.last(decimals)
+              ) ||
               18,
             )
-            .toString()
-
-          try {
-            setPriceImpactRemove(true)
-
-            console.log(
-              '[calculateRemoveSwapLiquidity]',
-              {
-                domainId,
-                contract_address,
-                amount: _amount,
-              },
-            )
-
-            let amounts =
-              await sdk.nxtpSdkPool
-                .calculateRemoveSwapLiquidity(
-                  domainId,
-                  contract_address,
-                  _amount,
-                )
-
-            console.log(
-              '[amountsRemoveSwapLiquidity]',
-              {
-                domainId,
-                contract_address,
-                amount: _amount,
-                amounts,
-              },
-            )
-
-            if (amounts?.length > 1) {
-              console.log(
-                '[getPoolTokenIndex]',
-                {
-                  domainId,
-                  contract_address,
-                  tokenAddress: contract_address,
-                },
+            .toString(),
+            utils.parseUnits(
+              (
+                tokenIndex === 0 ?
+                  amountY :
+                  amountX
               )
-
-              const tokenIndex =
-                await sdk.nxtpSdkPool
-                  .getPoolTokenIndex(
-                    domainId,
-                    contract_address,
-                    contract_address,
-                  )
-
-              console.log(
-                '[poolTokenIndex]',
-                {
-                  domainId,
-                  contract_address,
-                  tokenAddress: contract_address,
-                  tokenIndex,
-                },
-              )
-
-              if (tokenIndex === 1) {
-                amounts =
-                  _.reverse(
-                    _.cloneDeep(amounts)
-                  )
-              }
-
-              calculateRemoveLiquidityPriceImpact(
-                domainId,
-                contract_address,
-                _.head(amounts),
-                _.last(amounts),
-              )
-            }
-
-            setRemoveAmounts(
-              (amounts || [])
-                .map((a, i) =>
-                  Number(
-                    utils.formatUnits(
-                      BigNumber.from(
-                        a ||
-                        '0'
-                      ),
-                      decimals?.[i] ||
-                      18,
-                    )
-                  )
-                )
+              .toString(),
+              (
+                tokenIndex === 0 ?
+                  _.last(decimals) :
+                  _.head(decimals)
+              ) ||
+              18,
             )
-          } catch (error) {
-            console.log(
-              '[ErrorOnCalculateRemoveSwapLiquidity]',
-              {
-                domainId,
-                contract_address,
-                amount: _amount,
-                error: error?.message,
-              },
-            )
-
-            setCallResponse(
-              {
-                status: 'failed',
-                message:
-                  error?.data?.message ||
-                  error?.message,
-              }
-            )
-
-            setRemoveAmounts(null)
-            setPriceImpactRemove(null)
-          }
+            .toString(),
+          )
         }
       }
-      else {
-        setRemoveAmounts(null)
-      }
-    }
 
-    getData()
-  }, [amount])
+      getData()
+    },
+    [amountX, amountY],
+  )
+
+  useEffect(
+    () => {
+      const getData = async () => {
+        setPriceImpactRemove(null)
+
+        if (typeof amount === 'number') {
+          if (amount <= 0) {
+            setRemoveAmounts(
+              [
+                0,
+                0,
+              ]
+            )
+          }
+          else {
+            const {
+              chain,
+              asset,
+            } = { ...pool }
+
+            const chain_data = (chains_data || [])
+              .find(c =>
+                c?.id === chain
+              )
+
+            const pool_data = (pools_data || [])
+              .find(p =>
+                p?.chain_data?.id === chain &&
+                p.asset_data?.id === asset
+              )
+
+            const {
+              contract_data,
+              domainId,
+              tokens,
+              decimals,
+            } = { ...pool_data }
+            const {
+              contract_address,
+            } = { ...contract_data }
+
+            const _amount =
+              utils.parseUnits(
+                amount
+                  .toString(),
+                _.last(decimals) ||
+                18,
+              )
+              .toString()
+
+            try {
+              setPriceImpactRemove(true)
+
+              console.log(
+                '[calculateRemoveSwapLiquidity]',
+                {
+                  domainId,
+                  contract_address,
+                  amount: _amount,
+                },
+              )
+
+              let amounts =
+                await sdk.nxtpSdkPool
+                  .calculateRemoveSwapLiquidity(
+                    domainId,
+                    contract_address,
+                    _amount,
+                  )
+
+              console.log(
+                '[amountsRemoveSwapLiquidity]',
+                {
+                  domainId,
+                  contract_address,
+                  amount: _amount,
+                  amounts,
+                },
+              )
+
+              if (amounts?.length > 1) {
+                console.log(
+                  '[getPoolTokenIndex]',
+                  {
+                    domainId,
+                    contract_address,
+                    tokenAddress: contract_address,
+                  },
+                )
+
+                const tokenIndex =
+                  await sdk.nxtpSdkPool
+                    .getPoolTokenIndex(
+                      domainId,
+                      contract_address,
+                      contract_address,
+                    )
+
+                console.log(
+                  '[poolTokenIndex]',
+                  {
+                    domainId,
+                    contract_address,
+                    tokenAddress: contract_address,
+                    tokenIndex,
+                  },
+                )
+
+                if (tokenIndex === 1) {
+                  amounts =
+                    _.reverse(
+                      _.cloneDeep(amounts)
+                    )
+                }
+
+                calculateRemoveLiquidityPriceImpact(
+                  domainId,
+                  contract_address,
+                  _.head(amounts),
+                  _.last(amounts),
+                )
+              }
+
+              setRemoveAmounts(
+                (amounts || [])
+                  .map((a, i) =>
+                    Number(
+                      utils.formatUnits(
+                        BigNumber.from(
+                          a ||
+                          '0'
+                        ),
+                        decimals?.[i] ||
+                        18,
+                      )
+                    )
+                  )
+              )
+            } catch (error) {
+              console.log(
+                '[ErrorOnCalculateRemoveSwapLiquidity]',
+                {
+                  domainId,
+                  contract_address,
+                  amount: _amount,
+                  error: error?.message,
+                },
+              )
+
+              setCallResponse(
+                {
+                  status: 'failed',
+                  message:
+                    error?.data?.message ||
+                    error?.message,
+                }
+              )
+
+              setRemoveAmounts(null)
+              setPriceImpactRemove(null)
+            }
+          }
+        }
+        else {
+          setRemoveAmounts(null)
+        }
+      }
+
+      getData()
+    },
+    [amount],
+  )
 
   const reset = async origin => {
     const reset_pool = origin !== 'address'

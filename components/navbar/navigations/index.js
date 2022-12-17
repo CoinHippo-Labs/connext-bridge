@@ -5,9 +5,11 @@ import { FaHandPointLeft } from 'react-icons/fa'
 
 import menus from './menus'
 
-export default ({
-  address,
-}) => {
+export default (
+  {
+    address,
+  },
+) => {
   const router = useRouter()
   const {
     pathname,

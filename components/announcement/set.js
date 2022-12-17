@@ -31,11 +31,14 @@ export default () => {
   const [updating, setUpdating] = useState(null)
   const [data, setData] = useState('')
 
-  useEffect(() => {
-    if (announcement_data) {
-      setData(announcement_data)
-    }
-  }, [announcement_data])
+  useEffect(
+    () => {
+      if (announcement_data) {
+        setData(announcement_data)
+      }
+    },
+    [announcement_data],
+  )
 
   const update = async () => {
     setUpdating(true)

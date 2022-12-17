@@ -4,26 +4,31 @@ import { Tooltip } from '@material-tailwind/react'
 
 import { total_time_string } from '../../lib/utils'
 
-export default ({
-  from_time,
-  to_time,
-  no_tooltip = false,
-  placement = 'top',
-  title = 'time',
-  titleClassName = 'normal-case text-xs font-semibold',
-  className = 'normal-case text-slate-400 dark:text-slate-600 font-medium',
-}) => {
+export default (
+  {
+    from_time,
+    to_time,
+    no_tooltip = false,
+    placement = 'top',
+    title = 'time',
+    titleClassName = 'normal-case text-xs font-semibold',
+    className = 'normal-case text-slate-400 dark:text-slate-600 font-medium',
+  },
+) => {
   const [trigger, setTrigger] = useState(false)
 
-  useEffect(() => {
-    const timeout =
-      setTimeout(() =>
-        setTrigger(!trigger),
-        1 * 1000,
-      )
+  useEffect(
+    () => {
+      const timeout =
+        setTimeout(() =>
+          setTrigger(!trigger),
+          1 * 1000,
+        )
 
-    return () => clearTimeout(timeout)
-  }, [trigger])
+      return () => clearTimeout(timeout)
+    },
+    [trigger],
+  )
 
   const _from_time =
     typeof from_time === 'number' &&

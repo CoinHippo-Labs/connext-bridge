@@ -1,17 +1,19 @@
 import { useState, useEffect, useRef } from 'react'
 import { usePopper } from 'react-popper'
 
-export default ({
-  placement,
-  disabled = false,
-  onClick,
-  title,
-  content,
-  children,
-  className = '',
-  titleClassName = '',
-  contentClassName = '',
-}) => {
+export default (
+  {
+    placement,
+    disabled = false,
+    onClick,
+    title,
+    content,
+    children,
+    className = '',
+    titleClassName = '',
+    contentClassName = '',
+  },
+) => {
   const [hidden, setHidden] = useState(true)
 
   const buttonRef = useRef(null)
@@ -47,84 +49,52 @@ export default ({
     },
   )
 
-  useEffect(() => {
-    const handleClickOutside = e => {
-      if (
-        hidden ||
-        buttonRef.current.contains(e.target) ||
-        popoverRef.current.contains(e.target)
-      ) {
-        return false
+  useEffect(
+    () => {
+      const handleClickOutside = e => {
+        if (
+          hidden ||
+          buttonRef.current.contains(e.target) ||
+          popoverRef.current.contains(e.target)
+        ) {
+          return false
+        }
+
+        setHidden(!hidden)
       }
 
-      setHidden(!hidden)
-    }
-
-    const handleMouseEnter = e => {
-      if (
-        buttonRef.current.contains(e.target) ||
-        popoverRef.current.contains(e.target)
-      ) {
-        setHidden(false)
+      const handleMouseEnter = e => {
+        if (
+          buttonRef.current.contains(e.target) ||
+          popoverRef.current.contains(e.target)
+        ) {
+          setHidden(false)
+        }
       }
-    }
 
-    const handleMouseLeave = e => {
-      if (
-        buttonRef.current.contains(e.target) ||
-        popoverRef.current.contains(e.target)
-      ) {
-        setHidden(true)
+      const handleMouseLeave = e => {
+        if (
+          buttonRef.current.contains(e.target) ||
+          popoverRef.current.contains(e.target)
+        ) {
+          setHidden(true)
+        }
       }
-    }
 
-    document
-      .addEventListener(
-        'mousedown',
-        handleClickOutside,
-      )
-
-    if (buttonRef?.current) {
-      buttonRef.current
-        .addEventListener(
-          'mouseenter',
-          handleMouseEnter,
-        )
-      buttonRef.current
-        .addEventListener(
-          'mouseleave',
-          handleMouseLeave,
-        )
-    }
-
-    if (popoverRef?.current) {
-      popoverRef.current
-        .addEventListener(
-          'mouseenter',
-          handleMouseEnter,
-        )
-      popoverRef.current
-        .addEventListener(
-          'mouseleave',
-          handleMouseLeave,
-        )
-    }
-
-    return () => {
       document
-        .removeEventListener(
+        .addEventListener(
           'mousedown',
           handleClickOutside,
         )
 
       if (buttonRef?.current) {
         buttonRef.current
-          .removeEventListener(
+          .addEventListener(
             'mouseenter',
             handleMouseEnter,
           )
         buttonRef.current
-          .removeEventListener(
+          .addEventListener(
             'mouseleave',
             handleMouseLeave,
           )
@@ -132,18 +102,53 @@ export default ({
 
       if (popoverRef?.current) {
         popoverRef.current
-          .removeEventListener(
+          .addEventListener(
             'mouseenter',
             handleMouseEnter,
           )
         popoverRef.current
-          .removeEventListener(
+          .addEventListener(
             'mouseleave',
             handleMouseLeave,
           )
       }
-    }
-  }, [hidden, popoverRef, buttonRef])
+
+      return () => {
+        document
+          .removeEventListener(
+            'mousedown',
+            handleClickOutside,
+          )
+
+        if (buttonRef?.current) {
+          buttonRef.current
+            .removeEventListener(
+              'mouseenter',
+              handleMouseEnter,
+            )
+          buttonRef.current
+            .removeEventListener(
+              'mouseleave',
+              handleMouseLeave,
+            )
+        }
+
+        if (popoverRef?.current) {
+          popoverRef.current
+            .removeEventListener(
+              'mouseenter',
+              handleMouseEnter,
+            )
+          popoverRef.current
+            .removeEventListener(
+              'mouseleave',
+              handleMouseLeave,
+            )
+        }
+      }
+    },
+    [hidden, popoverRef, buttonRef],
+  )
 
   return (
     <div className="flex">
