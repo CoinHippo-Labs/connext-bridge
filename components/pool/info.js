@@ -667,90 +667,92 @@ export default (
               </div>
               <div className="grid sm:grid-cols-2 gap-8">
                 <Datatable
-                  columns={[
-                    {
-                      Header: 'Assets',
-                      accessor: 'symbol',
-                      sortType: (a, b) =>
-                        a.original.symbol > b.original.symbol ?
-                          1 :
-                          -1,
-                      Cell: props => {
-                        const {
-                          value,
-                        } = { ...props }
-                        const {
-                          i,
-                          contract_address,
-                          image,
-                        } = { ...props.row.original }
+                  columns={
+                    [
+                      {
+                        Header: 'Assets',
+                        accessor: 'symbol',
+                        sortType: (a, b) =>
+                          a.original.symbol > b.original.symbol ?
+                            1 :
+                            -1,
+                        Cell: props => {
+                          const {
+                            value,
+                          } = { ...props }
+                          const {
+                            i,
+                            contract_address,
+                            image,
+                          } = { ...props.row.original }
 
-                        return (
-                          <a
-                            href={`${url}${contract_path?.replace('{address}', contract_address)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`h-10 flex items-center space-x-2 ${i % 2 === 0 ? 'pt-2' : 'pb-2'} mx-2`}
-                          >
-                            {
-                              image &&
-                              (
-                                <Image
-                                  src={image}
-                                  alt=""
-                                  width={24}
-                                  height={24}
-                                  className="rounded-full"
-                                />
-                              )
-                            }
-                            <span className="text-sm font-semibold">
-                              {value}
-                            </span>
-                          </a>
-                        )
+                          return (
+                            <a
+                              href={`${url}${contract_path?.replace('{address}', contract_address)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`h-10 flex items-center space-x-2 ${i % 2 === 0 ? 'pt-2' : 'pb-2'} mx-2`}
+                            >
+                              {
+                                image &&
+                                (
+                                  <Image
+                                    src={image}
+                                    alt=""
+                                    width={24}
+                                    height={24}
+                                    className="rounded-full"
+                                  />
+                                )
+                              }
+                              <span className="text-sm font-semibold">
+                                {value}
+                              </span>
+                            </a>
+                          )
+                        },
+                        headerClassName: 'normal-case text-base font-semibold mx-2',
                       },
-                      headerClassName: 'normal-case text-base font-semibold mx-2',
-                    },
-                    {
-                      Header: 'Reserves',
-                      accessor: 'balance',
-                      sortType: (a, b) =>
-                        a.original.balance > b.original.balance ?
-                          1 :
-                          -1,
-                      Cell: props => {
-                        const {
-                          value,
-                        } = { ...props }
-                        const {
-                          i,
-                          contract_address,
-                        } = { ...props.row.original }
+                      {
+                        Header: 'Reserves',
+                        accessor: 'balance',
+                        sortType: (a, b) =>
+                          a.original.balance > b.original.balance ?
+                            1 :
+                            -1,
+                        Cell: props => {
+                          const {
+                            value,
+                          } = { ...props }
+                          const {
+                            i,
+                            contract_address,
+                          } = { ...props.row.original }
 
-                        return (
-                          <a
-                            href={`${url}${contract_path?.replace('{address}', contract_address)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`h-10 flex items-center text-sm font-semibold space-x-2 ${i % 2 === 0 ? 'pt-2' : 'pb-2'} mx-2`}
-                          >
-                            {value > -1 ?
-                              number_format(
-                                value,
-                                value > 1000 ?
-                                  '0,0.00' :
-                                  '0,0.00000000',
-                                true,
-                              ) :
-                              '-'
-                            }
-                          </a>
-                        )
+                          return (
+                            <a
+                              href={`${url}${contract_path?.replace('{address}', contract_address)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`h-10 flex items-center text-sm font-semibold space-x-2 ${i % 2 === 0 ? 'pt-2' : 'pb-2'} mx-2`}
+                            >
+                              {value > -1 ?
+                                number_format(
+                                  value,
+                                  value > 1000 ?
+                                    '0,0.00' :
+                                    '0,0.00000000',
+                                  true,
+                                ) :
+                                '-'
+                              }
+                            </a>
+                          )
+                        },
+                        headerClassName: 'normal-case text-base font-semibold mx-2',
                       },
-                      headerClassName: 'normal-case text-base font-semibold mx-2',
-                    },
-                  ]}
+                    ]
+                  }
                   data={pool_tokens_data}
                   noPagination={pool_tokens_data.length <= 10}
                   defaultPageSize={10}
