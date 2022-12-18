@@ -2571,7 +2571,7 @@ export default () => {
                               getBalances(destination_chain)
                             }
                           }}
-                          className={`bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} rounded border dark:border-slate-700 flex items-center justify-center p-1.5`}
+                          className={`bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} ${receive_next ? 'pointer-events-none' : ''} rounded border dark:border-slate-700 flex items-center justify-center p-1.5`}
                         >
                           <HiArrowRight
                             size={18}
