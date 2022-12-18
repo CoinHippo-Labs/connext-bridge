@@ -1093,13 +1093,15 @@ export default () => {
         }
       }
 
-      const timeout =
-        setTimeout(() => 
+      update()
+
+      const interval =
+        setInterval(() =>
           update(),
           1 * 1000,
         )
 
-      return () => clearTimeout(timeout)
+      return () => clearInterval(interval)
     },
     [timeTrigger],
   )
