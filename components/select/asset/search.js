@@ -11,6 +11,7 @@ export default (
     is_pool = false,
     is_bridge = false,
     show_next_assets = false,
+    fixed = false,
     data,
   },
 ) => {

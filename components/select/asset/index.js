@@ -13,6 +13,7 @@ import { loader_color } from '../../../lib/utils'
 export default (
   {
     disabled = false,
+    fixed = false,
     value,
     onSelect,
     chain,
@@ -123,14 +124,19 @@ export default (
       id="modal-assets"
       noButtons={true}
       hidden={hidden}
-      disabled={disabled}
+      disabled={
+        disabled ||
+        fixed
+      }
       onClick={open => setHidden(!open)}
       buttonTitle={
         _assets_data ?
           <div
             className={
-              className ||
-              "w-32 sm:w-48 min-w-max bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded border dark:border-slate-700 flex items-center justify-between space-x-1.5 sm:space-x-2 py-1.5 sm:py-2 px-2 sm:px-3"
+              fixed ?
+                'cursor-default flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1' :
+                className ||
+                'w-32 sm:w-48 min-w-max bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded border dark:border-slate-700 flex items-center justify-between space-x-1.5 sm:space-x-2 py-1.5 sm:py-2 px-2 sm:px-3'
             }
           >
             {
@@ -161,10 +167,15 @@ export default (
             <span className={`whitespace-nowrap sm:text-lg font-semibold ${!image ? 'sm:ml-3' : ''}`}>
               {symbol}
             </span>
-            <BiChevronDown
-              size={18}
-              className="text-slate-400 dark:text-slate-200"
-            />
+            {
+              !fixed &&
+              (
+                <BiChevronDown
+                  size={18}
+                  className="text-slate-400 dark:text-slate-200"
+                />
+              )
+            }
           </div> :
           <Puff
             color={loader_color(theme)}
@@ -226,6 +237,7 @@ export default (
           is_pool={is_pool}
           is_bridge={is_bridge}
           show_next_assets={show_next_assets}
+          fixed={fixed}
           data={data}
         />
       }

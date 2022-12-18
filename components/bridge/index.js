@@ -2071,6 +2071,7 @@ export default () => {
     asset,
     symbol,
     amount,
+    receive_next,
   } = { ...bridge }
 
   const {
@@ -2456,37 +2457,50 @@ export default () => {
                     <div className="flex items-center justify-between space-x-2">
                       <h1 className="text-xl font-semibold">
                         Bridge
-                      </h1>
-                      <Options
-                        disabled={disabled}
-                        applied={
-                          !_.isEqual(
-                            Object.fromEntries(
-                              Object.entries(options)
-                                .filter(([k, v]) =>
-                                  ![
-                                    'slippage',
-                                    'forceSlow',
-                                    'showNextAssets',
-                                  ].includes(k)
-                                )
-                            ),
-                            Object.fromEntries(
-                              Object.entries(DEFAULT_OPTIONS)
-                                .filter(([k, v]) =>
-                                  ![
-                                    'slippage',
-                                    'forceSlow',
-                                    'showNextAssets',
-                                  ].includes(k)
-                                )
-                            ),
+                        {
+                          receive_next &&
+                          (
+                            <span className="ml-1">
+                              into nextAsset
+                            </span>
                           )
                         }
-                        initialData={options}
-                        onChange={o => setOptions(o)}
-                        hasNextAsset={destination_contract_data?.next_asset}
-                      />
+                      </h1>
+                      {
+                        !receive_next &&
+                        (
+                          <Options
+                            disabled={disabled}
+                            applied={
+                              !_.isEqual(
+                                Object.fromEntries(
+                                  Object.entries(options)
+                                    .filter(([k, v]) =>
+                                      ![
+                                        'slippage',
+                                        'forceSlow',
+                                        'showNextAssets',
+                                      ].includes(k)
+                                    )
+                                ),
+                                Object.fromEntries(
+                                  Object.entries(DEFAULT_OPTIONS)
+                                    .filter(([k, v]) =>
+                                      ![
+                                        'slippage',
+                                        'forceSlow',
+                                        'showNextAssets',
+                                      ].includes(k)
+                                    )
+                                ),
+                              )
+                            }
+                            initialData={options}
+                            onChange={o => setOptions(o)}
+                            hasNextAsset={destination_contract_data?.next_asset}
+                          />
+                        )
+                      }
                     </div>
                     <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
                       <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start space-y-0.5 sm:space-y-2">
@@ -2503,6 +2517,7 @@ export default () => {
                         </div>
                         <SelectChain
                           disabled={disabled}
+                          fixed={receive_next}
                           value={source_chain}
                           onSelect={c => {
                             const _source_chain = c
@@ -2585,6 +2600,7 @@ export default () => {
                         </div>
                         <SelectChain
                           disabled={disabled}
+                          fixed={receive_next}
                           value={destination_chain}
                           onSelect={c => {
                             const _source_chain = c === source_chain ?
@@ -2645,6 +2661,7 @@ export default () => {
                         <div className="flex items-center justify-between space-x-2">
                           <SelectAsset
                             disabled={disabled}
+                            fixed={receive_next}
                             value={asset}
                             onSelect={(a, s) => {
                               setBridge(
@@ -3148,6 +3165,7 @@ export default () => {
                                               true ||
                                               !receiveLocal
                                             ) &&
+                                            !receive_next &&
                                             (
                                               <div className="flex flex-col space-y-0.5">
                                                 <div className="flex items-start justify-between space-x-1">
@@ -3293,7 +3311,8 @@ export default () => {
                                                   (
                                                     slippage < 0.2 ||
                                                     slippage > 5.0
-                                                  ) && (
+                                                  ) &&
+                                                  (
                                                     <div className="flex items-center space-x-1">
                                                       <IoWarning
                                                         size={16}

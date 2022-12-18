@@ -12,6 +12,7 @@ import { loader_color } from '../../../lib/utils'
 export default (
   {
     disabled = false,
+    fixed = false,
     value,
     onSelect,
     source,
@@ -71,14 +72,19 @@ export default (
       id="modal-chains"
       noButtons={true}
       hidden={hidden}
-      disabled={disabled}
+      disabled={
+        disabled ||
+        fixed
+      }
       onClick={open => setHidden(!open)}
       buttonTitle={
         chains_data ?
           <div
             className={
-              className ||
-              "w-32 sm:w-40 min-w-max bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded border dark:border-slate-700 flex items-center justify-between space-x-1.5 sm:space-x-2 py-1.5 sm:py-2 px-2"
+              fixed ?
+                'w-32 sm:w-40 min-w-max bg-slate-100 dark:bg-slate-900 cursor-default rounded border dark:border-slate-700 flex items-center justify-between space-x-1.5 sm:space-x-2 py-1.5 sm:py-2 px-2' :
+                className ||
+                'w-32 sm:w-40 min-w-max bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded border dark:border-slate-700 flex items-center justify-between space-x-1.5 sm:space-x-2 py-1.5 sm:py-2 px-2'
             }
           >
             <div className="flex items-center space-x-2">
@@ -117,10 +123,15 @@ export default (
                 }
               </span>
             </div>
-            <BiChevronDown
-              size={18}
-              className="text-slate-400 dark:text-slate-200 ml-1.5 -mr-1"
-            />
+            {
+              !fixed &&
+              (
+                <BiChevronDown
+                  size={18}
+                  className="text-slate-400 dark:text-slate-200 ml-1.5 -mr-1"
+                />
+              )
+            }
           </div> :
           <Puff
             color={loader_color(theme)}
@@ -152,6 +163,7 @@ export default (
           source={source}
           destination={destination}
           is_pool={is_pool}
+          fixed={fixed}
         />
       }
     />

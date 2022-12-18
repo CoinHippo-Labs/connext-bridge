@@ -10,6 +10,7 @@ export default (
     source,
     destination,
     is_pool = false,
+    fixed = false,
   },
 ) => {
   const [inputSearch, setInputSearch] = useState('')
