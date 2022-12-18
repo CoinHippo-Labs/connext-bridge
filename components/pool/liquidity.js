@@ -2376,6 +2376,65 @@ export default (
                   </div>
                 )
               }
+              {
+                typeof priceImpactAdd === 'number' &&
+                priceImpactAdd > 0 &&
+                (
+                  <div className="bg-yellow-50 dark:bg-yellow-200 bg-opacity-50 dark:bg-opacity-10 rounded flex items-start space-x-2 p-2">
+                    <IoWarning
+                      size={18}
+                      className="min-w-max text-yellow-500 dark:text-yellow-400 mt-0.5"
+                    />
+                    <div className="flex flex-col space-y-1.5">
+                      <div className="flex flex-col space-y-1">
+                        <span className="text-sm font-bold">
+                          Heads Up!
+                        </span>
+                        <span className="leading-4 text-xs">
+                          The pool is currently overweighted in {
+                            (overweighted_asset === 'x' ?
+                              x_asset_data :
+                              y_asset_data
+                            )?.symbol
+                          }. Providing {
+                            (overweighted_asset === 'x' ?
+                              y_asset_data :
+                              x_asset_data
+                            )?.symbol
+                          } instead may result in bonus LP tokens!
+                        </span>
+                      </div>
+                      {
+                        pool_tokens_data
+                          .filter(d =>
+                            d.symbol?.includes(WRAPPED_PREFIX)
+                          )
+                          .length > 0 &&
+                        (
+                          <div className="flex flex-col space-y-0">
+                            <div className="flex items-center space-x-1">
+                              <a
+                                href={`/${asset.toUpperCase()}-from-${_.head(chains_data)?.id}-to-${chain}?receive_next=true`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <span className="leading-3 text-xs font-medium">
+                                  GET {
+                                    (overweighted_asset === 'x' ?
+                                      y_asset_data :
+                                      x_asset_data
+                                    )?.symbol
+                                  }
+                                </span>
+                              </a>
+                            </div>
+                          </div>
+                        )
+                      }
+                    </div>
+                  </div>
+                )
+              }
             </div>
             {/*advancedOptions*/}
             <div className="flex items-end">
