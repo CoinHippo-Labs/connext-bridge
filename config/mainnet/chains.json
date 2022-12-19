@@ -50,7 +50,7 @@
         "chainName": "BNB Chain",
         "rpcUrls": [
           "https://rpc.ankr.com/bsc",
-          "https://bscrpc.com"
+          "https://bsc-mainnet.public.blastapi.io"
         ],
         "nativeCurrency": {
           "name": "BNB",
@@ -89,7 +89,7 @@
         "rpcUrls": [
           "https://rpc.ankr.com/polygon",
           "https://matic-mainnet.chainstacklabs.com",
-          "https://polygon-rpc.com"
+          "https://rpc-mainnet.matic.quiknode.pro"
         ],
         "nativeCurrency": {
           "name": "Polygon",
@@ -126,7 +126,7 @@
         "chainId": "0xa",
         "chainName": "Optimism",
         "rpcUrls": [
-          "https://rpc.ankr.com/optimism"
+          "https://mainnet.optimism.io"
         ],
         "nativeCurrency": {
           "name": "Ethereum",
