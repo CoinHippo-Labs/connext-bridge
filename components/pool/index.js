@@ -26,6 +26,7 @@ export default () => {
   const {
     preferences,
     chains,
+    assets,
     pool_assets,
     _pools,
     rpc_providers,
@@ -37,6 +38,7 @@ export default () => {
       {
         preferences: state.preferences,
         chains: state.chains,
+        assets: state.assets,
         pool_assets: state.pool_assets,
         _pools: state.pools,
         rpc_providers: state.rpc_providers,
@@ -53,6 +55,9 @@ export default () => {
   const {
     chains_data,
   } = { ...chains }
+  const {
+    assets_data,
+  } = { ...assets }
   const {
     pool_assets_data,
   } = { ...pool_assets }
