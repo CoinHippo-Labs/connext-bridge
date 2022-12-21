@@ -1,5 +1,6 @@
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
+import { constants } from 'ethers'
 
 import Image from '../../image'
 import { number_format, name, equals_ignore_case } from '../../../lib/utils'
@@ -17,6 +18,7 @@ export default (
     is_pool = false,
     is_bridge = false,
     show_next_assets = false,
+    show_native_assets = false,
     data,
   },
 ) => {
@@ -172,6 +174,8 @@ export default (
         )
         .flatMap(a => {
           const {
+            symbol,
+            image,
             contracts,
           } = { ...a }
 
@@ -182,10 +186,19 @@ export default (
 
           const {
             next_asset,
+            wrapable,
           } = { ...contract_data }
 
           const _contracts_data =
             _.concat(
+              is_bridge &&
+              wrapable &&
+              {
+                ...contract_data,
+                contract_address: constants.AddressZero,
+                symbol,
+                image,
+              },
               {
                 ...contract_data,
               },
@@ -196,6 +209,7 @@ export default (
                 ...contract_data,
                 ...next_asset,
               },
+
             )
             .filter(c => c)
 
@@ -318,7 +332,46 @@ export default (
                 .map((a, i) => (
                   <div
                     key={i}
-                    onClick={() => onSelect(a.id)}
+                    onClick={() => {
+                      const {
+                        id,
+                        contracts,
+                      } = { ...a }
+
+                      const contract_data = (contracts || [])
+                        .find(c =>
+                          c?.chain_id === chain_id &&
+                          (
+                            c?.wrapable ||
+                            c?.contract_address
+                          )
+                        )
+
+                      const {
+                        wrapable,
+                      } = { ...contract_data }
+                      let {
+                        contract_address,
+                        symbol,
+                      } = { ...contract_data }
+
+                      contract_address =
+                        wrapable ?
+                          constants.AddressZero :
+                          contract_address
+
+                      symbol =
+                        wrapable ?
+                          a.symbol :
+                          symbol
+
+                      onSelect(
+                        id,
+                        is_bridge ?
+                          symbol :
+                          contract_address,
+                      )
+                    }}
                     className="hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded cursor-pointer flex items-center hover:font-semibold space-x-1 mr-1.5 py-1 px-1.5"
                   >
                     {

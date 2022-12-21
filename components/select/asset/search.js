@@ -11,6 +11,7 @@ export default (
     is_pool = false,
     is_bridge = false,
     show_next_assets = false,
+    show_native_assets = false,
     fixed = false,
     data,
   },
@@ -48,6 +49,7 @@ export default (
             is_pool={is_pool}
             is_bridge={is_bridge}
             show_next_assets={show_next_assets}
+            show_native_assets={show_native_assets}
             data={data}
           />
         </div>

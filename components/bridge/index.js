@@ -142,6 +142,7 @@ export default () => {
   const [collapse, setCollapse] = useState(false)
   const [slippageEditing, setSlippageEditing] = useState(false)
   const [estimatedValues, setEstimatedValues] = useState(undefined)
+  const [estimateResponse, setEstimateResponse] = useState(null)
 
   const [fee, setFee] = useState(null)
   const [feeEstimating, setFeeEstimating] = useState(null)
@@ -378,7 +379,7 @@ export default () => {
             params.amount =
               number_format(
                 Number(amount),
-                '0.000000000000',
+                '0.000000000000000000',
                 true,
               )
           }
@@ -388,15 +389,21 @@ export default () => {
             (assets_data || [])
               .findIndex(a =>
                 a?.id === asset &&
-                (a.contracts || [])
-                  .findIndex(c =>
-                    c?.chain_id ===
-                    chains_data
-                      .find(_c =>
-                        _c?.id === source_chain
-                      )?.chain_id &&
-                    c?.next_asset
-                  ) > -1
+                (
+                  equals_ignore_case(
+                    a?.symbol,
+                    symbol,
+                  ) ||
+                  (a.contracts || [])
+                    .findIndex(c =>
+                      c?.chain_id ===
+                      chains_data
+                        .find(_c =>
+                          _c?.id === source_chain
+                        )?.chain_id &&
+                      c?.next_asset
+                    ) > -1
+                )
               ) > -1
           ) {
             params.symbol = symbol
@@ -518,6 +525,7 @@ export default () => {
         }
       )
 
+      setEstimateResponse(null)
       setEstimateTrigger(
         moment()
           .valueOf()
@@ -1112,7 +1120,9 @@ export default () => {
       contract_data,
     ) => {
       const {
+        contract_address,
         next_asset,
+        wrapable,
       } = { ...contract_data }
 
       const provider = rpcs?.[chain_id]
@@ -1121,8 +1131,34 @@ export default () => {
         address &&
         provider
       ) {
+        const {
+          symbol,
+          image,
+        } = {
+          ...(
+            assets_data
+              .find(a =>
+                (a?.contracts || [])
+                  .findIndex(c =>
+                    c?.chain_id === chain_id &&
+                    equals_ignore_case(
+                      c?.contract_address,
+                      contract_address,
+                    )
+                  ) > -1
+              )
+          ),
+        }
+
         const contracts =
           _.concat(
+            wrapable &&
+            {
+              ...contract_data,
+              contract_address: constants.AddressZero,
+              symbol,
+              image,
+            },
             {
               ...contract_data,
             },
@@ -1332,6 +1368,7 @@ export default () => {
 
       setXcall(null)
       setEstimatedValues(null)
+      setEstimateResponse(null)
     }
 
     if (
@@ -1517,6 +1554,7 @@ export default () => {
     if (sdk) {
       try {
         setEstimatedValues(null)
+        setEstimateResponse(null)
 
         const amount =
           utils.parseUnits(
@@ -1584,6 +1622,30 @@ export default () => {
             ...error,
           },
         )
+
+        const message =
+          error?.reason ||
+          error?.data?.message ||
+          error?.message
+        
+        const code =
+          _.slice(
+            (message || '')
+              .toLowerCase()
+              .split(' ')
+              .filter(s => s),
+            0,
+            2,
+          )
+          .join('_')
+
+        setEstimateResponse(
+          {
+            status: 'failed',
+            message,
+            code,
+          }
+        )
       }
     }
   }
@@ -1600,6 +1662,9 @@ export default () => {
         destination_chain,
         asset,
         amount,
+      } = { ...bridge }
+      let {
+        symbol,
       } = { ...bridge }
 
       const {
@@ -1625,17 +1690,41 @@ export default () => {
           a?.id === asset
         )
 
-      const source_contract_data = (source_asset_data?.contracts || [])
+      let source_contract_data = (source_asset_data?.contracts || [])
         .find(c =>
           c?.chain_id === source_chain_data?.chain_id
         )
 
-      let {
-        symbol,
-      } = { ...source_contract_data }
+      if (symbol) {
+        if (
+          equals_ignore_case(
+            source_contract_data?.next_asset?.symbol,
+            symbol,
+          )
+        ) {
+          source_contract_data = {
+            ...source_contract_data,
+            ...source_contract_data.next_asset,
+          }
+        }
+        else if (
+          source_contract_data?.wrapable &&
+          equals_ignore_case(
+            source_asset_data?.symbol,
+            symbol,
+          )
+        ) {
+          source_contract_data = {
+            ...source_contract_data,
+            contract_address: constants.AddressZero,
+            symbol: source_asset_data.symbol,
+            image: source_asset_data.image,
+          }
+        }
+      }
 
       symbol =
-        symbol ||
+        source_contract_data?.symbol ||
         source_asset_data?.symbol
 
       const destination_chain_data = (chains_data || [])
@@ -1879,7 +1968,7 @@ export default () => {
       if (!failed) {
         try {
           console.log(
-            '[xCall]',
+            '[wrapEthAndXCall]',
             {
               xcallParams,
             },
@@ -1887,7 +1976,7 @@ export default () => {
 
           const xcall_request =
             await sdk.nxtpSdkBase
-              .xcall(
+              .wrapEthAndXCall(
                 xcallParams,
               )
 
@@ -2102,16 +2191,31 @@ export default () => {
 
   const _source_contract_data = _.cloneDeep(source_contract_data)
 
-  if (
-    symbol &&
-    equals_ignore_case(
-      source_contract_data?.next_asset?.symbol,
-      symbol,
-    )
-  ) {
-    source_contract_data = {
-      ...source_contract_data,
-      ...source_contract_data.next_asset,
+  if (symbol) {
+    if (
+      equals_ignore_case(
+        source_contract_data?.next_asset?.symbol,
+        symbol,
+      )
+    ) {
+      source_contract_data = {
+        ...source_contract_data,
+        ...source_contract_data.next_asset,
+      }
+    }
+    else if (
+      source_contract_data?.wrapable &&
+      equals_ignore_case(
+        source_asset_data?.symbol,
+        symbol,
+      )
+    ) {
+      source_contract_data = {
+        ...source_contract_data,
+        contract_address: constants.AddressZero,
+        symbol: source_asset_data.symbol,
+        image: source_asset_data.image,
+      }
     }
   }
 
@@ -2372,7 +2476,7 @@ export default () => {
                             <span>
                               {number_format(
                                 amount,
-                                '0,0.000000000000',
+                                '0,0.000000000000000000',
                                 true,
                               )}
                             </span>
@@ -2691,6 +2795,7 @@ export default () => {
                             origin=""
                             is_bridge={true}
                             show_next_assets={showNextAssets}
+                            show_native_assets={true}
                             data={{
                               ...source_asset_data,
                               ...source_contract_data,
@@ -2711,7 +2816,7 @@ export default () => {
                               amount >= 0 ?
                                 number_format(
                                   amount,
-                                  '0.000000000000',
+                                  '0.000000000000000000',
                                   true,
                                 ) :
                                 ''
@@ -3099,12 +3204,14 @@ export default () => {
                                       <div className="flex items-center justify-end sm:justify-end space-x-0.5 sm:space-x-1 -mr-0.5">
                                         {
                                           typeof amount !== 'number' ||
-                                          typeof estimatedValues?.amountReceived === 'number' ?
+                                          typeof estimatedValues?.amountReceived === 'number' ||
+                                          estimateResponse ?
                                             <div className="flex items-center space-x-2">
                                               <span className="font-semibold">
                                                 {
                                                   typeof amount === 'number' &&
-                                                  typeof estimate_received === 'number' ?
+                                                  typeof estimate_received === 'number' &&
+                                                  !estimateResponse ?
                                                     number_format(
                                                       estimate_received,
                                                       '0,0.000000000000',
@@ -3351,7 +3458,8 @@ export default () => {
                                                   </Tooltip>
                                                   {
                                                     typeof amount !== 'number' ||
-                                                    typeof estimatedValues?.routerFee === 'number' ?
+                                                    typeof estimatedValues?.routerFee === 'number' ||
+                                                    estimateResponse ?
                                                       <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
                                                         <span>
                                                           {number_format(
@@ -3601,7 +3709,8 @@ export default () => {
                             </span>
                           </Alert> :
                           !xcall &&
-                          !xcallResponse ?
+                          !xcallResponse &&
+                          !estimateResponse ?
                             <button
                               disabled={disabled}
                               onClick={() => {
@@ -3642,12 +3751,14 @@ export default () => {
                               (
                                 !xcall &&
                                 approveResponse
-                              )
+                              ) ||
+                              estimateResponse
                             ) &&
                             (
                               [
                                 xcallResponse ||
-                                approveResponse,
+                                approveResponse ||
+                                estimateResponse,
                               ]
                               .map((r, i) => {
                                 const {
@@ -3709,13 +3820,13 @@ export default () => {
                                           128,
                                         )}
                                       </span>
-                                      <div className="flex items-center space-x-2">
+                                      <div className="flex items-center space-x-1">
                                         {
                                           status === 'failed' &&
                                           message &&
                                           (
                                             <Copy
-                                              size={24}
+                                              size={18}
                                               value={message}
                                               className="cursor-pointer text-slate-200 hover:text-white"
                                             />
@@ -3727,7 +3838,7 @@ export default () => {
                                             className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                                           >
                                             <MdClose
-                                              size={20}
+                                              size={14}
                                             />
                                           </button> :
                                           status === 'success' ?
@@ -3736,7 +3847,7 @@ export default () => {
                                               className={`${xcallResponse ? 'bg-blue-600 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
                                             >
                                               <MdClose
-                                                size={20}
+                                                size={14}
                                               />
                                             </button> :
                                             null

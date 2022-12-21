@@ -88,7 +88,6 @@
         "chainId": "0x1a4",
         "chainName": "Optimism Goerli",
         "rpcUrls": [
-          "https://goerli.optimism.io",
           "https://rpc.ankr.com/optimism_testnet"
         ],
         "nativeCurrency": {

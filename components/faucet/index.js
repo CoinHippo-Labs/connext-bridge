@@ -428,7 +428,9 @@ export default (
       contract_data,
     ) => {
       const {
+        contract_address,
         next_asset,
+        wrapable,
       } = { ...contract_data }
 
       const provider = rpcs?.[chain_id]
@@ -437,8 +439,33 @@ export default (
         address &&
         provider
       ) {
+        const {
+          symbol,
+          image,
+        } = {
+          ...(
+            assets_data
+              .find(a =>
+                (a?.contracts || [])
+                  .findIndex(c =>
+                    c?.chain_id === chain_id &&
+                    equals_ignore_case(
+                      c?.contract_address,
+                      contract_address,
+                    )
+                  ) > -1
+              )
+          ),
+        }
+
         const contracts =
           _.concat(
+            {
+              ...contract_data,
+              contract_address: constants.AddressZero,
+              symbol,
+              image,
+            },
             {
               ...contract_data,
             },
