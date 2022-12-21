@@ -3284,7 +3284,7 @@ export default () => {
                                                     className="z-50 bg-dark text-white text-xs"
                                                   >
                                                     <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
-                                                      Slippage Tolerance
+                                                      Slippage tolerance
                                                     </div>
                                                   </Tooltip>
                                                   <div className="flex flex-col sm:items-end space-y-1.5">
