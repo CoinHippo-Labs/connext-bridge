@@ -1556,9 +1556,25 @@ export default () => {
         setEstimatedValues(null)
         setEstimateResponse(null)
 
+        const originDomain = source_chain_data?.domain_id
+        const destinationDomain = destination_chain_data?.domain_id
+
+        const originTokenAddress =
+          (
+            equals_ignore_case(
+              source_contract_data?.contract_address,
+              constants.AddressZero,
+            ) ?
+              _source_contract_data :
+              source_contract_data
+          )?.contract_address
+
+        const destinationTokenAddress = destination_contract_data?.contract_address
+
         const amount =
           utils.parseUnits(
-            _amount.toString(),
+            _amount
+              .toString(),
             source_decimals,
           )
 
@@ -1572,10 +1588,10 @@ export default () => {
         console.log(
           '[calculateAmountReceived]',
           {
-            originDomain: source_chain_data?.domain_id,
-            destinationDomain: destination_chain_data?.domain_id,
-            originTokenAddress: source_contract_data?.contract_address,
-            destinationTokenAddress: destination_contract_data?.contract_address,
+            originDomain,
+            destinationDomain,
+            originTokenAddress,
+            destinationTokenAddress,
             amount,
             isNextAsset,
           },
@@ -1584,10 +1600,10 @@ export default () => {
         const response =
           await sdk.nxtpSdkPool
             .calculateAmountReceived(
-              source_chain_data?.domain_id,
-              destination_chain_data?.domain_id,
-              source_contract_data?.contract_address,
-              destination_contract_data?.contract_address,
+              originDomain,
+              destinationDomain,
+              originTokenAddress,
+              destinationTokenAddress,
               amount,
               isNextAsset,
             )
@@ -1975,10 +1991,21 @@ export default () => {
           )
 
           const xcall_request =
-            await sdk.nxtpSdkBase
-              .wrapEthAndXCall(
-                xcallParams,
-              )
+            equals_ignore_case(
+              source_contract_data?.contract_address,
+              constants.AddressZero,
+            ) &&
+            [
+              'ETH',
+            ].includes(source_asset_data?.symbol) ?
+              await sdk.nxtpSdkBase
+                .wrapEthAndXCall(
+                  xcallParams,
+                ) :
+              await sdk.nxtpSdkBase
+                .xcall(
+                  xcallParams,
+                )
 
           if (xcall_request) {
             let gasLimit =
