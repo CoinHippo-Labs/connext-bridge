@@ -1982,22 +1982,31 @@ export default () => {
       }
 
       if (!failed) {
+        const is_wrap_eth =
+          equals_ignore_case(
+            source_contract_data?.contract_address,
+            constants.AddressZero,
+          ) &&
+          [
+            'ETH',
+          ].includes(source_asset_data?.symbol)
+
         try {
+          if (is_wrap_eth) {
+            xcallParams.asset = _source_contract_data?.contract_address
+          }
+
           console.log(
-            '[wrapEthAndXCall]',
+            is_wrap_eth ?
+              '[wrapEthAndXCall]' :
+              '[xcall]',
             {
               xcallParams,
             },
           )
 
           const xcall_request =
-            equals_ignore_case(
-              source_contract_data?.contract_address,
-              constants.AddressZero,
-            ) &&
-            [
-              'ETH',
-            ].includes(source_asset_data?.symbol) ?
+            is_wrap_eth ?
               await sdk.nxtpSdkBase
                 .wrapEthAndXCall(
                   xcallParams,
@@ -2119,6 +2128,17 @@ export default () => {
             }
           }
         } catch (error) {
+          console.log(
+            `[${
+              is_wrap_eth ?
+                'wrapEthAndXCall' :
+                'xcall'
+            } error]`,
+            {
+              error: error?.message,
+            },
+          )
+
           let message = 
             error?.data?.message ||
             error?.message
