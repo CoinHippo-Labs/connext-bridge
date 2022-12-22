@@ -2300,6 +2300,8 @@ export default (
                 </div>
               </div>
               {
+                false &&
+                typeof priceImpactAdd === 'number' &&
                 priceImpactAdd < 0 &&
                 (
                   <div className="bg-yellow-50 dark:bg-yellow-200 bg-opacity-50 dark:bg-opacity-10 rounded flex items-start space-x-2 p-2">
@@ -2380,29 +2382,42 @@ export default (
                 typeof priceImpactAdd === 'number' &&
                 priceImpactAdd > 0 &&
                 (
-                  <div className="bg-yellow-50 dark:bg-yellow-200 bg-opacity-50 dark:bg-opacity-10 rounded flex items-start space-x-2 p-2">
+                  <div className="bg-yellow-50 dark:bg-yellow-200 bg-opacity-50 dark:bg-opacity-10 rounded flex items-start space-x-2 pt-2 pb-3 px-2">
                     <IoWarning
                       size={18}
-                      className="min-w-max text-yellow-500 dark:text-yellow-400 mt-0.5"
+                      className="min-w-max text-yellow-500 dark:text-yellow-400 mt-1"
                     />
-                    <div className="flex flex-col space-y-1.5">
-                      <div className="flex flex-col space-y-1">
-                        <span className="text-sm font-bold">
+                    <div className="flex flex-col space-y-3">
+                      <div className="flex flex-col space-y-2.5">
+                        <span className="text-base font-bold">
                           Heads Up!
                         </span>
-                        <span className="leading-4 text-xs">
+                        <span className="leading-4 text-xs font-bold">
                           The pool is currently overweighted in {
                             (overweighted_asset === 'x' ?
                               x_asset_data :
                               y_asset_data
                             )?.symbol
-                          }. Providing {
-                            (overweighted_asset === 'x' ?
-                              y_asset_data :
-                              x_asset_data
-                            )?.symbol
-                          } instead may result in bonus LP tokens!
+                          }.
                         </span>
+                        <div className="flex flex-col items-center space-y-1">
+                          <span className="leading-4 text-xs text-center">
+                            Providing {
+                              (overweighted_asset === 'x' ?
+                                y_asset_data :
+                                x_asset_data
+                              )?.symbol
+                            } instead
+                          </span>
+                          <span className="leading-4 text-xs text-center">
+                            <span className="mr-1">
+                              may result in
+                            </span>
+                            <span className="font-bold">
+                              bonus LP tokens!
+                            </span>
+                          </span>
+                        </div>
                       </div>
                       {
                         pool_tokens_data
@@ -2411,14 +2426,14 @@ export default (
                           )
                           .length > 0 &&
                         (
-                          <div className="flex flex-col space-y-0">
-                            <div className="flex items-center space-x-1">
+                          <div className="flex flex-col space-y-0 mx-auto">
+                            <div className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 rounded flex items-center space-x-1 pt-0.5 pb-1 px-2">
                               <a
                                 href={`/${asset.toUpperCase()}-from-${_.head(chains_data)?.id}-to-${chain}?receive_next=true`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
-                                <span className="leading-3 text-xs font-medium">
+                                <span className="leading-3 text-white text-xs font-medium">
                                   GET {
                                     (overweighted_asset === 'x' ?
                                       y_asset_data :

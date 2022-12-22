@@ -3966,9 +3966,9 @@ export default () => {
           {
             !openTransferStatus &&
             (
-              _source_contract_data?.mintable ||
+              _source_contract_data?.mintable/* ||
               _source_contract_data?.wrapable ||
-              _source_contract_data?.wrapped
+              _source_contract_data?.wrapped*/
             ) &&
             (
               <Faucet

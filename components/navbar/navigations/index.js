@@ -19,12 +19,21 @@ export default (
     bridge,
     pool,
     swap,
+    receive_next,
   } = { ...query }
 
   return (
     <div className="hidden xl:flex items-center space-x-0 xl:space-x-2 mx-auto">
       {menus
-        .filter(m => m?.path)
+        .filter(m =>
+          m?.path &&
+          (
+            receive_next !== 'true' ||
+            ![
+              '/',
+            ].includes(m.path)
+          )
+        )
         .map(m => {
           const {
             id,

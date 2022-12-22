@@ -14,12 +14,24 @@ export default (
   const router = useRouter()
   const {
     pathname,
+    query,
   } = { ...router }
+  const {
+    receive_next,
+  } = { ...query }
 
   return (
     <div className="flex flex-wrap">
       {menus
-        .filter(m => m?.path)
+        .filter(m =>
+          m?.path &&
+          (
+            receive_next !== 'true' ||
+            ![
+              '/',
+            ].includes(m.path)
+          )
+        )
         .map((m, i) => {
           const {
             id,
