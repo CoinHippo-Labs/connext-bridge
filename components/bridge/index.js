@@ -3729,7 +3729,10 @@ export default () => {
                         !xcall &&
                         typeof amount === 'number' &&
                         (
-                          amount > source_amount ||
+                          (
+                            amount > source_amount &&
+                            typeof source_amount === 'number'
+                          ) ||
                           amount < min_amount ||
                           amount <= 0
                         ) ?
@@ -3745,13 +3748,15 @@ export default () => {
                             className="rounded p-4.5"
                           >
                             <span>
-                              {amount > source_amount ?
-                                'Insufficient Balance' :
-                                amount < min_amount ?
-                                  'The amount cannot be less than the transfer fee.' :
-                                  amount <= 0 ?
-                                    'The amount cannot be equal to or less than 0.' :
-                                    ''
+                              {
+                                amount > source_amount &&
+                                typeof source_amount === 'number' ?
+                                  'Insufficient Balance' :
+                                  amount < min_amount ?
+                                    'The amount cannot be less than the transfer fee.' :
+                                    amount <= 0 ?
+                                      'The amount cannot be equal to or less than 0.' :
+                                      ''
                               }
                             </span>
                           </Alert> :
