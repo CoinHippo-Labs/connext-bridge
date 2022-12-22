@@ -2850,7 +2850,7 @@ export default () => {
                             className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
                           />
                           <DebounceInput
-                            debounceTimeout={500}
+                            debounceTimeout={750}
                             size="small"
                             type="number"
                             placeholder="0.00"
@@ -2878,6 +2878,16 @@ export default () => {
                                 regex.test(e.target.value)
                               ) {
                                 value = e.target.value
+                              }
+
+                              if (typeof value === 'string') {
+                                if (value.startsWith('.')) {
+                                  value = `0${value}`
+                                }
+
+                                if (!isNaN(value)) {
+                                  value = Number(value)
+                                }
                               }
 
                               value =
@@ -3146,7 +3156,7 @@ export default () => {
                           </div>
                           <div className="col-span-3 sm:col-span-3 flex items-center justify-end sm:justify-end">
                             <DebounceInput
-                              debounceTimeout={500}
+                              debounceTimeout={750}
                               size="small"
                               type="number"
                               placeholder="0.00"
@@ -3174,6 +3184,16 @@ export default () => {
                                   regex.test(e.target.value)
                                 ) {
                                   value = e.target.value
+                                }
+
+                                if (typeof value === 'string') {
+                                  if (value.startsWith('.')) {
+                                    value = `0${value}`
+                                  }
+
+                                  if (!isNaN(value)) {
+                                    value = Number(value)
+                                  }
                                 }
 
                                 value =
@@ -3339,7 +3359,7 @@ export default () => {
                                                       <>
                                                         <div className="flex items-center justify-end space-x-1.5">
                                                           <DebounceInput
-                                                            debounceTimeout={500}
+                                                            debounceTimeout={750}
                                                             size="small"
                                                             type="number"
                                                             placeholder="0.00"
@@ -3359,6 +3379,16 @@ export default () => {
                                                                 regex.test(e.target.value)
                                                               ) {
                                                                 value = e.target.value
+                                                              }
+
+                                                              if (typeof value === 'string') {
+                                                                if (value.startsWith('.')) {
+                                                                  value = `0${value}`
+                                                                }
+
+                                                                if (!isNaN(value)) {
+                                                                  value = Number(value)
+                                                                }
                                                               }
 
                                                               value =
@@ -3878,7 +3908,6 @@ export default () => {
                                           message &&
                                           (
                                             <Copy
-                                              size={18}
                                               value={message}
                                               className="cursor-pointer text-slate-200 hover:text-white"
                                             />

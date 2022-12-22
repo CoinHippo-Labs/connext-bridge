@@ -219,7 +219,7 @@ export default (
                         type === 'number' ?
                           <div className="flex items-center space-x-3">
                             <DebounceInput
-                              debounceTimeout={500}
+                              debounceTimeout={750}
                               size={
                                 size ||
                                 'small'
@@ -242,6 +242,16 @@ export default (
                                   regex.test(e.target.value)
                                 ) {
                                   value = e.target.value
+                                }
+
+                                if (typeof value === 'string') {
+                                  if (value.startsWith('.')) {
+                                    value = `0${value}`
+                                  }
+
+                                  if (!isNaN(value)) {
+                                    value = Number(value)
+                                  }
                                 }
 
                                 value =

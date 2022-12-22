@@ -1690,7 +1690,7 @@ export default (
               </Tooltip>
               <div className="flex items-center space-x-3">
                 <DebounceInput
-                  debounceTimeout={500}
+                  debounceTimeout={750}
                   size="small"
                   type="number"
                   placeholder="Slippage Tolerance"
@@ -1710,6 +1710,16 @@ export default (
                       regex.test(e.target.value)
                     ) {
                       value = e.target.value
+                    }
+
+                    if (typeof value === 'string') {
+                      if (value.startsWith('.')) {
+                        value = `0${value}`
+                      }
+
+                      if (!isNaN(value)) {
+                        value = Number(value)
+                      }
                     }
 
                     value =
@@ -1776,7 +1786,7 @@ export default (
               </div>
               <div className="flex items-center space-x-3">
                 <DebounceInput
-                  debounceTimeout={500}
+                  debounceTimeout={750}
                   size="small"
                   type="number"
                   placeholder="Transaction Deadline (minutes)"
@@ -1796,6 +1806,16 @@ export default (
                       regex.test(e.target.value)
                     ) {
                       value = e.target.value
+                    }
+
+                    if (typeof value === 'string') {
+                      if (value.startsWith('.')) {
+                        value = `0${value}`
+                      }
+
+                      if (!isNaN(value)) {
+                        value = Number(value)
+                      }
                     }
 
                     value =
@@ -1982,7 +2002,7 @@ export default (
                       )
                     }
                     <DebounceInput
-                      debounceTimeout={500}
+                      debounceTimeout={750}
                       size="small"
                       type="number"
                       placeholder="0.00"
@@ -2003,6 +2023,16 @@ export default (
                           regex.test(e.target.value)
                         ) {
                           value = e.target.value
+                        }
+
+                        if (typeof value === 'string') {
+                          if (value.startsWith('.')) {
+                            value = `0${value}`
+                          }
+
+                          if (!isNaN(value)) {
+                            value = Number(value)
+                          }
                         }
 
                         value =
@@ -2167,7 +2197,7 @@ export default (
                       )
                     }
                     <DebounceInput
-                      debounceTimeout={500}
+                      debounceTimeout={750}
                       size="small"
                       type="number"
                       placeholder="0.00"
@@ -2188,6 +2218,16 @@ export default (
                           regex.test(e.target.value)
                         ) {
                           value = e.target.value
+                        }
+
+                        if (typeof value === 'string') {
+                          if (value.startsWith('.')) {
+                            value = `0${value}`
+                          }
+
+                          if (!isNaN(value)) {
+                            value = Number(value)
+                          }
                         }
 
                         value =
@@ -2548,7 +2588,7 @@ export default (
                                 128,
                               )}
                             </span>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-1">
                               {
                                 url &&
                                 tx_hash &&
@@ -2575,7 +2615,7 @@ export default (
                                     className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                                   >
                                     <MdClose
-                                      size={16}
+                                      size={14}
                                     />
                                   </button>
                                 </> :
@@ -2585,7 +2625,7 @@ export default (
                                     className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
                                   >
                                     <MdClose
-                                      size={16}
+                                      size={14}
                                     />
                                   </button> :
                                   null
@@ -2705,7 +2745,7 @@ export default (
                 <div className="space-y-1">
                   <div className="rounded border dark:border-slate-800 flex items-center justify-between space-x-2 py-2.5 px-3">
                     <DebounceInput
-                      debounceTimeout={500}
+                      debounceTimeout={750}
                       size="small"
                       type="number"
                       placeholder="0.00"
@@ -2726,6 +2766,16 @@ export default (
                           regex.test(e.target.value)
                         ) {
                           value = e.target.value
+                        }
+
+                        if (typeof value === 'string') {
+                          if (value.startsWith('.')) {
+                            value = `0${value}`
+                          }
+
+                          if (!isNaN(value)) {
+                            value = Number(value)
+                          }
                         }
 
                         value =
@@ -2779,54 +2829,59 @@ export default (
                     )
                   }
                 </div>
-                <div className="flex items-center justify-end space-x-2.5">
-                  {
-                    [
-                      0.25,
-                      0.5,
-                      0.75,
-                      1.0,
-                    ]
-                    .map((p, i) => (
-                      <div
-                        key={i}
-                        onClick={() => {
-                          let _amount
+                {
+                  typeof lpTokenBalance === 'number' &&
+                  (
+                    <div className="flex items-center justify-end space-x-2.5">
+                      {
+                        [
+                          0.25,
+                          0.5,
+                          0.75,
+                          1.0,
+                        ]
+                        .map((p, i) => (
+                          <div
+                            key={i}
+                            onClick={() => {
+                              let _amount
 
-                          try {
-                            _amount =
-                              parseFloat(
-                                Number(
-                                  FixedNumber.fromString(
-                                    (
-                                      lpTokenBalance ||
-                                      0
-                                    )
-                                    .toString()
-                                  )
-                                  .mulUnsafe(
-                                    FixedNumber.fromString(
-                                      p
+                              try {
+                                _amount =
+                                  parseFloat(
+                                    Number(
+                                      FixedNumber.fromString(
+                                        (
+                                          lpTokenBalance ||
+                                          0
+                                        )
                                         .toString()
+                                      )
+                                      .mulUnsafe(
+                                        FixedNumber.fromString(
+                                          p
+                                            .toString()
+                                        )
+                                      )
+                                      .toString()
                                     )
+                                    .toFixed(18)
                                   )
-                                  .toString()
-                                )
-                                .toFixed(18)
-                              )
-                          } catch (error) {
-                            _amount = 0
-                          }
+                              } catch (error) {
+                                _amount = 0
+                              }
 
-                          setAmount(_amount)
-                        }}
-                        className={`${disabled || !lpTokenBalance ? 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'} rounded text-xs py-0.5 px-1.5`}
-                      >
-                        {p * 100} %
-                      </div>
-                    ))
-                  }
-                </div>
+                              setAmount(_amount)
+                            }}
+                            className={`${disabled || typeof lpTokenBalance !== 'number' ? 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'} rounded text-xs py-0.5 px-1.5`}
+                          >
+                            {p * 100} %
+                          </div>
+                        ))
+                      }
+                    </div>
+                  )
+                }
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between space-x-2">
@@ -3043,7 +3098,7 @@ export default (
                                 128,
                               )}
                             </span>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-1">
                               {
                                 url &&
                                 r.tx_hash &&
@@ -3071,7 +3126,7 @@ export default (
                                     className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                                   >
                                     <MdClose
-                                      size={16}
+                                      size={14}
                                     />
                                   </button>
                                 </> :
@@ -3081,7 +3136,7 @@ export default (
                                     className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
                                   >
                                     <MdClose
-                                      size={16}
+                                      size={14}
                                     />
                                   </button> :
                                   null

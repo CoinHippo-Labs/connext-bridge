@@ -316,7 +316,7 @@ export default () => {
             params.amount =
               number_format(
                 Number(amount),
-                '0.000000000000',
+                '0.000000000000000000',
                 true,
               )
           }
@@ -2279,7 +2279,7 @@ export default () => {
                         className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
                       />
                       <DebounceInput
-                        debounceTimeout={500}
+                        debounceTimeout={750}
                         size="small"
                         type="number"
                         placeholder="0.00"
@@ -2293,7 +2293,7 @@ export default () => {
                           amount >= 0 ?
                             number_format(
                               amount,
-                              '0.000000000000',
+                              '0.000000000000000000',
                               true,
                             ) :
                             ''
@@ -2308,6 +2308,16 @@ export default () => {
                             regex.test(e.target.value)
                           ) {
                             value = e.target.value
+                          }
+
+                          if (typeof value === 'string') {
+                            if (value.startsWith('.')) {
+                              value = `0${value}`
+                            }
+
+                            if (!isNaN(value)) {
+                              value = Number(value)
+                            }
                           }
 
                           value =
@@ -2550,7 +2560,7 @@ export default () => {
                             </div>
                           </div> :
                           <DebounceInput
-                            debounceTimeout={500}
+                            debounceTimeout={750}
                             size="small"
                             type="number"
                             placeholder="0.00"
@@ -2565,7 +2575,7 @@ export default () => {
                               swapAmount >= 0 ?
                                 number_format(
                                   swapAmount,
-                                  '0.000000000000',
+                                  '0.000000000000000000',
                                   true,
                                 ) :
                                 typeof amount === 'number' ?
@@ -2582,6 +2592,16 @@ export default () => {
                                 regex.test(e.target.value)
                               ) {
                                 value = e.target.value
+                              }
+
+                              if (typeof value === 'string') {
+                                if (value.startsWith('.')) {
+                                  value = `0${value}`
+                                }
+
+                                if (!isNaN(value)) {
+                                  value = Number(value)
+                                }
                               }
 
                               value =
@@ -2764,7 +2784,7 @@ export default () => {
                             <>
                               <div className="flex items-center justify-end space-x-1.5">
                                 <DebounceInput
-                                  debounceTimeout={500}
+                                  debounceTimeout={750}
                                   size="small"
                                   type="number"
                                   placeholder="0.00"
@@ -2784,6 +2804,16 @@ export default () => {
                                       regex.test(e.target.value)
                                     ) {
                                       value = e.target.value
+                                    }
+
+                                    if (typeof value === 'string') {
+                                      if (value.startsWith('.')) {
+                                        value = `0${value}`
+                                      }
+
+                                      if (!isNaN(value)) {
+                                        value = Number(value)
+                                      }
                                     }
 
                                     value =
@@ -3124,14 +3154,13 @@ export default () => {
                                         128,
                                       )}
                                     </span>
-                                    <div className="flex items-center space-x-2">
+                                    <div className="flex items-center space-x-1">
                                       {
                                         status === 'failed' &&
                                         message &&
                                         !calculateSwapResponse &&
                                         (
                                           <Copy
-                                            size={20}
                                             value={message}
                                             className="cursor-pointer text-slate-200 hover:text-white"
                                           />
@@ -3159,7 +3188,7 @@ export default () => {
                                           className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                                         >
                                           <MdClose
-                                            size={20}
+                                            size={14}
                                           />
                                         </button> :
                                         status === 'success' ?
@@ -3168,7 +3197,7 @@ export default () => {
                                             className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
                                           >
                                             <MdClose
-                                              size={20}
+                                              size={14}
                                             />
                                           </button> :
                                           null
