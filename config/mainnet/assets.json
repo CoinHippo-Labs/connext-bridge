@@ -18,7 +18,7 @@
         "decimals": 18,
         "image": "/logos/assets/usdc.png",
         "next_asset": {
-          "contract_address": "0x58B04866a734677bC66fC2Bf405860D658Ae4a05",
+          "contract_address": "0x5e7D83dA751F4C9694b13aF351B30aC108f32C38",
           "decimals": 6,
           "symbol": "nextUSDC"
         },
@@ -30,7 +30,7 @@
         "decimals": 6,
         "image": "/logos/assets/usdc.png",
         "next_asset": {
-          "contract_address": "0x6653e37db7eEEe514ACD0998f66e66c75F216699",
+          "contract_address": "0xF96C6d2537e1af1a9503852eB2A4AF264272a5B6",
           "decimals": 6,
           "symbol": "nextUSDC"
         },
@@ -42,7 +42,7 @@
         "decimals": 6,
         "image": "/logos/assets/usdc.png",
         "next_asset": {
-          "contract_address": "0xFF748Daa6C2eAa1d3Ac78D2Ce8Ab84c25a53e68A",
+          "contract_address": "0x67E51f46e8e14D4E4cab9dF48c59ad8F512486DD",
           "decimals": 6,
           "symbol": "nextUSDC"
         },
@@ -54,7 +54,7 @@
         "decimals": 6,
         "image": "/logos/assets/usdc.png",
         "next_asset": {
-          "contract_address": "0x7e0F3216A74888E8eE3C839C27db1b4a3D8C1CC3",
+          "contract_address": "0x44CF74238d840a5fEBB0eAa089D05b763B73faB8",
           "decimals": 6,
           "symbol": "nextUSDC"
         },
@@ -85,7 +85,7 @@
         "symbol": "WETH",
         "image": "/logos/assets/weth.png",
         "next_asset": {
-          "contract_address": "0xcEc11a1963BBA00e18255Ba590623cD99Ed38D42",
+          "contract_address": "0xA9CB51C666D2AF451d87442Be50747B31BB7d805",
           "decimals": 18,
           "symbol": "nextWETH",
           "image": "/logos/assets/nextweth.png"
@@ -99,7 +99,7 @@
         "symbol": "WETH",
         "image": "/logos/assets/weth.png",
         "next_asset": {
-          "contract_address": "0xd824518dF03a41d7124115799f78973A603D42f7",
+          "contract_address": "0x4b8BaC8Dd1CAA52E32C07755c17eFadeD6A0bbD0",
           "decimals": 18,
           "symbol": "nextWETH",
           "image": "/logos/assets/nextweth.png"
@@ -113,7 +113,7 @@
         "symbol": "WETH",
         "image": "/logos/assets/weth.png",
         "next_asset": {
-          "contract_address": "0x30E049eda6Da0cc0b4F5e39B51FD25666E38b24E",
+          "contract_address": "0xbAD5B3c68F855EaEcE68203312Fd88AD3D365e50",
           "decimals": 18,
           "symbol": "nextWETH",
           "image": "/logos/assets/nextweth.png"
@@ -128,7 +128,7 @@
         "symbol": "WETH",
         "image": "/logos/assets/weth.png",
         "next_asset": {
-          "contract_address": "0x475e647B3E31585466506bd36c6a59822DC32A08",
+          "contract_address": "0x538E2dDbfDf476D24cCb1477A518A82C9EA81326",
           "decimals": 18,
           "symbol": "nextWETH",
           "image": "/logos/assets/nextweth.png"
@@ -155,25 +155,53 @@
         "contract_address": "0xB3de3929C3bE8a1Fa446f27d1b549Dd9d5C313E0",
         "chain_id": 56,
         "decimals": 18,
-        "symbol": "KP3R"
+        "symbol": "KP3R",
+        "image": "/logos/assets/kp3r.png",
+        "next_asset": {
+          "contract_address": "0x2aa48B3d6EFe651542D22CEF0CB7ea853D97A850",
+          "decimals": 18,
+          "symbol": "nextKP3R",
+          "image": "/logos/assets/nextkp3r.png"
+        }
       },
       {
         "contract_address": "0x725dB429F0ff5A3DF5f41fcA8676CF9Dd1C6b3F0",
         "chain_id": 137,
         "decimals": 18,
-        "symbol": "KP3R"
+        "symbol": "KP3R",
+        "image": "/logos/assets/kp3r.png",
+        "next_asset": {
+          "contract_address": "0x4a2bE2075588BcE6A7E072574698a7DbbAc39b08",
+          "decimals": 18,
+          "symbol": "nextKP3R",
+          "image": "/logos/assets/nextkp3r.png"
+        }
       },
       {
         "contract_address": "0xa83ad51c99bb40995f9292c9a436046ab7578caf",
         "chain_id": 10,
         "decimals": 18,
-        "symbol": "KP3R"
+        "symbol": "KP3R",
+        "image": "/logos/assets/kp3r.png",
+        "next_asset": {
+          "contract_address": "0xca87472DBfB041c2e5a2672d319eA6184Ad9755e",
+          "decimals": 18,
+          "symbol": "nextKP3R",
+          "image": "/logos/assets/nextkp3r.png"
+        }
       },
       {
         "contract_address": "0xA83ad51C99BB40995F9292C9a436046ab7578cAF",
         "chain_id": 100,
         "decimals": 18,
-        "symbol": "KP3R"
+        "symbol": "KP3R",
+        "image": "/logos/assets/kp3r.png",
+        "next_asset": {
+          "contract_address": "0x398bB7642BD0A5c7CB64f6255159BFABa5512342",
+          "decimals": 18,
+          "symbol": "nextKP3R",
+          "image": "/logos/assets/nextkp3r.png"
+        }
       }
     ],
     "color": "#000000",
