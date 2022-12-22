@@ -437,7 +437,11 @@ export default (
   )
 
   const reset = async origin => {
-    const reset_pool = origin !== 'address'
+    const reset_pool =
+      ![
+        'address',
+        'user_rejected',
+      ].includes(origin)
 
     if (reset_pool) {
       setAmountX(null)
@@ -885,12 +889,31 @@ export default (
                 },
               )
 
-              setCallResponse(
-                {
-                  status: 'failed',
-                  message,
-                }
-              )
+              const code =
+                _.slice(
+                  (message || '')
+                    .toLowerCase()
+                    .split(' ')
+                    .filter(s => s),
+                  0,
+                  2,
+                )
+                .join('_')
+
+              switch (code) {
+                case 'user_rejected':
+                  reset(code)
+                  break
+                default:
+                  setCallResponse(
+                    {
+                      status: 'failed',
+                      message,
+                      code,
+                    }
+                  )
+                  break
+              }
 
               failed = true
             }
@@ -1108,16 +1131,35 @@ export default (
                 },
               )
 
+              const code =
+                _.slice(
+                  (message || '')
+                    .toLowerCase()
+                    .split(' ')
+                    .filter(s => s),
+                  0,
+                  2,
+                )
+                .join('_')
+
               if (message?.includes('exceed total supply')) {
                 message = 'Exceed Total Supply'
               }
 
-              setCallResponse(
-                {
-                  status: 'failed',
-                  message,
-                }
-              )
+              switch (code) {
+                case 'user_rejected':
+                  reset(code)
+                  break
+                default:
+                  setCallResponse(
+                    {
+                      status: 'failed',
+                      message,
+                      code,
+                    }
+                  )
+                  break
+              }
 
               failed = true
             }
@@ -2606,7 +2648,7 @@ export default (
                           className="rounded p-3"
                         >
                           <div className="flex items-center justify-between space-x-2">
-                            <span className={`leading-5 ${status === 'failed' ? 'break-all text-xs' : 'break-word'} text-sm font-medium`}>
+                            <span className={`leading-5 ${status === 'failed' ? 'break-words text-xs' : 'break-words'} text-sm font-medium`}>
                               {ellipse(
                                 (message || '')
                                   .substring(
@@ -3119,7 +3161,7 @@ export default (
                           className="rounded p-3"
                         >
                           <div className="flex items-center justify-between space-x-2">
-                            <span className={`leading-5 ${status === 'failed' ? 'break-all text-xs' : 'break-word'} text-sm font-medium`}>
+                            <span className={`leading-5 ${status === 'failed' ? 'break-words text-xs' : 'break-words'} text-sm font-medium`}>
                               {ellipse(
                                 (message || '')
                                   .substring(
