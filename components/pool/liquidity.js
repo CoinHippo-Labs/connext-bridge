@@ -395,13 +395,13 @@ export default (
                   )
               )
             } catch (error) {
-              const message =
+              let message =
                 error?.reason ||
                 error?.data?.message ||
                 error?.message
 
               console.log(
-                '[ErrorOnCalculateRemoveSwapLiquidity]',
+                '[calculateRemoveSwapLiquidity error]',
                 {
                   domainId,
                   contract_address,
@@ -409,6 +409,10 @@ export default (
                   error: message,
                 },
               )
+
+              if (message?.includes('exceed total supply')) {
+                message = 'Exceed Total Supply'
+              }
 
               setCallResponse(
                 {
