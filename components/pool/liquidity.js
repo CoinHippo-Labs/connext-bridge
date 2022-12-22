@@ -128,7 +128,9 @@ export default (
   const [openOptions, setOpenOptions] = useState(false)
 
   const [priceImpactAdd, setPriceImpactAdd] = useState(null)
+  const [priceImpactAddResponse, setPriceImpactAddResponse] = useState(null)
   const [priceImpactRemove, setPriceImpactRemove] = useState(null)
+  const [priceImpactRemoveResponse, setPriceImpactRemoveResponse] = useState(null)
 
   const [approving, setApproving] = useState(null)
   const [approveProcessing, setApproveProcessing] = useState(null)
@@ -149,7 +151,7 @@ export default (
     () => {
       const getData = async () => {
         setPriceImpactAdd(null)
-
+        setPriceImpactAddResponse(null)
         setApproveResponse(null)
 
         const {
@@ -214,40 +216,86 @@ export default (
             },
           )
 
-          calculateAddLiquidityPriceImpact(
-            domainId,
-            contract_address,
-            utils.parseUnits(
-              (
-                tokenIndex === 0 ?
-                  amountX :
-                  amountY
+          let _amountX,
+            _amountY
+
+          try {
+            _amountX =
+              utils.parseUnits(
+                (
+                  tokenIndex === 0 ?
+                    amountX :
+                    amountY
+                )
+                .toString(),
+                (
+                  tokenIndex === 0 ?
+                    _.head(decimals) :
+                    _.last(decimals)
+                ) ||
+                18,
               )
-              .toString(),
-              (
-                tokenIndex === 0 ?
-                  _.head(decimals) :
-                  _.last(decimals)
-              ) ||
-              18,
-            )
-            .toString(),
-            utils.parseUnits(
-              (
-                tokenIndex === 0 ?
-                  amountY :
-                  amountX
+              .toString()
+
+            _amountY =
+              utils.parseUnits(
+                (
+                  tokenIndex === 0 ?
+                    amountY :
+                    amountX
+                )
+                .toString(),
+                (
+                  tokenIndex === 0 ?
+                    _.last(decimals) :
+                    _.head(decimals)
+                ) ||
+                18,
               )
-              .toString(),
-              (
-                tokenIndex === 0 ?
-                  _.last(decimals) :
-                  _.head(decimals)
-              ) ||
-              18,
+              .toString()
+
+            calculateAddLiquidityPriceImpact(
+              domainId,
+              contract_address,
+              _amountX,
+              _amountY,
             )
-            .toString(),
-          )
+          } catch (error) {
+            const message =
+              error?.reason ||
+              error?.data?.message ||
+              error?.message
+
+            console.log(
+              '[calculateAddLiquidityPriceImpact error]',
+              {
+                domainId,
+                contract_address,
+                _amountX,
+                _amountY,
+                error: message,
+              },
+            )
+
+            const code =
+              _.slice(
+                (message || '')
+                  .toLowerCase()
+                  .split(' ')
+                  .filter(s => s),
+                0,
+                2,
+              )
+              .join('_')
+
+            setPriceImpactAddResponse(
+              {
+                status: 'failed',
+                message,
+                code,
+              }
+            )
+          }
         }
       }
 
@@ -449,6 +497,9 @@ export default (
       setAmount(null)
     }
 
+    setPriceImpactAddResponse(null)
+    setPriceImpactRemoveResponse(null)
+
     setApproving(null)
     setApproveProcessing(null)
     setApproveResponse(null)
@@ -463,6 +514,8 @@ export default (
   }
 
   const call = async pool_data => {
+    setPriceImpactAddResponse(null)
+    setPriceImpactRemoveResponse(null)
     setApproving(null)
     setCalling(true)
 
@@ -1206,50 +1259,87 @@ export default (
     amountX,
     amountY,
   ) => {
-    setPriceImpactAdd(true)
+    try {
+      setPriceImpactAdd(true)
 
-    console.log(
-      '[calculateAddLiquidityPriceImpact]',
-      {
-        domainId,
-        contract_address,
-        amountX,
-        amountY,
-      },
-    )
-
-    const price_impact =
-      await sdk.nxtpSdkPool
-        .calculateAddLiquidityPriceImpact(
+      console.log(
+        '[calculateAddLiquidityPriceImpact]',
+        {
           domainId,
           contract_address,
           amountX,
           amountY,
-        )
+        },
+      )
 
-    console.log(
-      '[addLiquidityPriceImpact]',
-      {
-        domainId,
-        contract_address,
-        amountX,
-        amountY,
-        price_impact,
-      },
-    )
+      const price_impact =
+        await sdk.nxtpSdkPool
+          .calculateAddLiquidityPriceImpact(
+            domainId,
+            contract_address,
+            amountX,
+            amountY,
+          )
 
-    setPriceImpactAdd(
-      Number(
-        utils.formatUnits(
-          BigNumber.from(
-            price_impact ||
-            '0'
-          ),
-          18,
+      console.log(
+        '[addLiquidityPriceImpact]',
+        {
+          domainId,
+          contract_address,
+          amountX,
+          amountY,
+          price_impact,
+        },
+      )
+
+      setPriceImpactAdd(
+        Number(
+          utils.formatUnits(
+            BigNumber.from(
+              price_impact ||
+              '0'
+            ),
+            18,
+          )
+        ) *
+        100
+      )
+    } catch (error) {
+      const message =
+        error?.reason ||
+        error?.data?.message ||
+        error?.message
+
+      console.log(
+        '[calculateAddLiquidityPriceImpact error]',
+        {
+          domainId,
+          contract_address,
+          amountX,
+          amountY,
+          error: message,
+        },
+      )
+      
+      const code =
+        _.slice(
+          (message || '')
+            .toLowerCase()
+            .split(' ')
+            .filter(s => s),
+          0,
+          2,
         )
-      ) *
-      100
-    )
+        .join('_')
+
+      setPriceImpactAddResponse(
+        {
+          status: 'failed',
+          message,
+          code,
+        }
+      )
+    }
   }
 
   const calculateRemoveLiquidityPriceImpact = async (
@@ -1258,50 +1348,87 @@ export default (
     amountX,
     amountY,
   ) => {
-    setPriceImpactRemove(true)
+    try {
+      setPriceImpactRemove(true)
 
-    console.log(
-      '[calculateRemoveLiquidityPriceImpact]',
-      {
-        domainId,
-        contract_address,
-        amountX,
-        amountY,
-      },
-    )
-
-    const price_impact =
-      await sdk.nxtpSdkPool
-        .calculateRemoveLiquidityPriceImpact(
+      console.log(
+        '[calculateRemoveLiquidityPriceImpact]',
+        {
           domainId,
           contract_address,
           amountX,
           amountY,
-        )
+        },
+      )
 
-    console.log(
-      '[removeLiquidityPriceImpact]',
-      {
-        domainId,
-        contract_address,
-        amountX,
-        amountY,
-        price_impact,
-      },
-    )
+      const price_impact =
+        await sdk.nxtpSdkPool
+          .calculateRemoveLiquidityPriceImpact(
+            domainId,
+            contract_address,
+            amountX,
+            amountY,
+          )
 
-    setPriceImpactRemove(
-      Number(
-        utils.formatUnits(
-          BigNumber.from(
-            price_impact ||
-            '0'
-          ),
-          18,
+      console.log(
+        '[removeLiquidityPriceImpact]',
+        {
+          domainId,
+          contract_address,
+          amountX,
+          amountY,
+          price_impact,
+        },
+      )
+
+      setPriceImpactRemove(
+        Number(
+          utils.formatUnits(
+            BigNumber.from(
+              price_impact ||
+              '0'
+            ),
+            18,
+          )
+        ) *
+        100
+      )
+    } catch (error) {
+      const message =
+        error?.reason ||
+        error?.data?.message ||
+        error?.message
+
+      console.log(
+        '[calculateRemoveLiquidityPriceImpact error]',
+        {
+          domainId,
+          contract_address,
+          amountX,
+          amountY,
+          error: message,
+        },
+      )
+      
+      const code =
+        _.slice(
+          (message || '')
+            .toLowerCase()
+            .split(' ')
+            .filter(s => s),
+          0,
+          2,
         )
-      ) *
-      100
-    )
+        .join('_')
+
+      setPriceImpactRemoveResponse(
+        {
+          status: 'failed',
+          message,
+          code,
+        }
+      )
+    }
   }
 
   const autoSetY = value => {
@@ -2438,7 +2565,8 @@ export default (
                 </div>
                 <div className="flex items-center text-xs font-semibold space-x-1">
                   {
-                    priceImpactAdd === true ?
+                    priceImpactAdd === true &&
+                    !priceImpactAddResponse ?
                       <Oval
                         color={loader_color(theme)}
                         width="16"
@@ -2647,10 +2775,14 @@ export default (
                     </span>
                   </Wallet> :
                   callResponse ||
-                  approveResponse ?
+                  approveResponse ||
+                  priceImpactAddResponse ||
+                  priceImpactRemoveResponse ?
                     [
                       callResponse ||
-                      approveResponse,
+                      approveResponse ||
+                      priceImpactAddResponse ||
+                      priceImpactRemoveResponse,
                     ].map((r, i) => {
                       const {
                         status,
@@ -3160,10 +3292,14 @@ export default (
                     </span>
                   </Wallet> :
                   callResponse ||
-                  approveResponse ?
+                  approveResponse ||
+                  priceImpactAdd ||
+                  priceImpactRemoveResponse ?
                     [
                       callResponse ||
-                      approveResponse,
+                      approveResponse ||
+                      priceImpactAdd ||
+                      priceImpactRemoveResponse,
                     ].map((r, i) => {
                       const {
                         status,
