@@ -395,22 +395,25 @@ export default (
                   )
               )
             } catch (error) {
+              const message =
+                error?.reason ||
+                error?.data?.message ||
+                error?.message
+
               console.log(
                 '[ErrorOnCalculateRemoveSwapLiquidity]',
                 {
                   domainId,
                   contract_address,
                   amount: _amount,
-                  error: error?.message,
+                  error: message,
                 },
               )
 
               setCallResponse(
                 {
                   status: 'failed',
-                  message:
-                    error?.data?.message ||
-                    error?.message,
+                  message,
                 }
               )
 
@@ -771,7 +774,7 @@ export default (
               }
 
               console.log(
-                '[Add Liquidity]',
+                '[addLiquidity]',
                 {
                   domainId,
                   contract_address,
@@ -861,12 +864,27 @@ export default (
                 success = true
               }
             } catch (error) {
+              const message =
+                error?.reason ||
+                error?.data?.message ||
+                error?.message
+
+              console.log(
+                '[addLiquidity error]',
+                {
+                  domainId,
+                  contract_address,
+                  amounts,
+                  minToMint,
+                  deadline,
+                  error: message,
+                },
+              )
+
               setCallResponse(
                 {
                   status: 'failed',
-                  message:
-                    error?.data?.message ||
-                    error?.message,
+                  message,
                 }
               )
 
@@ -979,7 +997,7 @@ export default (
           if (!failed) {
             try {
               console.log(
-                '[Remove Liquidity]',
+                '[removeLiquidity]',
                 {
                   domainId,
                   contract_address,
@@ -1069,12 +1087,31 @@ export default (
                 success = true
               }
             } catch (error) {
+              let message =
+                error?.reason ||
+                error?.data?.message ||
+                error?.message
+
+              console.log(
+                '[removeLiquidity error]',
+                {
+                  domainId,
+                  contract_address,
+                  amount: _amount,
+                  minAmounts,
+                  deadline,
+                  error: message,
+                },
+              )
+
+              if (message?.includes('exceed total supply')) {
+                message = 'Exceed Total Supply'
+              }
+
               setCallResponse(
                 {
                   status: 'failed',
-                  message:
-                    error?.data?.message ||
-                    error?.message,
+                  message,
                 }
               )
 

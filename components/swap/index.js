@@ -1387,6 +1387,7 @@ export default () => {
           failed = true
 
           const message =
+            error?.reason ||
             error?.data?.message ||
             error?.message
 
@@ -1536,6 +1537,7 @@ export default () => {
           }
         } catch (error) {
           let message = 
+            error?.reason ||
             error?.data?.message ||
             error?.message
 
@@ -1823,21 +1825,22 @@ export default () => {
           )
         } catch (error) {
           const message =
+            error?.reason ||
             error?.data?.message ||
             error?.message
-
-          setCalculateSwapResponse(
-            {
-              status: 'failed',
-              message,
-            }
-          )
 
           console.log(
             '[calculateSwap]',
             {
               error: message,
             },
+          )
+
+          setCalculateSwapResponse(
+            {
+              status: 'failed',
+              message,
+            }
           )
 
           setSwapAmount(null)

@@ -1611,6 +1611,12 @@ export default () => {
         console.log(
           '[calculateAmountReceived response]',
           {
+            originDomain,
+            destinationDomain,
+            originTokenAddress,
+            destinationTokenAddress,
+            amount,
+            isNextAsset,
             ...response,
           },
         )
@@ -1632,17 +1638,23 @@ export default () => {
           )
         )
       } catch (error) {
-        console.log(
-          '[calculateAmountReceived error]',
-          {
-            ...error,
-          },
-        )
-
         const message =
           error?.reason ||
           error?.data?.message ||
           error?.message
+
+        console.log(
+          '[calculateAmountReceived error]',
+          {
+            originDomain,
+            destinationDomain,
+            originTokenAddress,
+            destinationTokenAddress,
+            amount,
+            isNextAsset,
+            error: message,
+          },
+        )
         
         const code =
           _.slice(
@@ -1955,6 +1967,7 @@ export default () => {
         failed = true
 
         const message =
+          error?.reason ||
           error?.data?.message ||
           error?.message
 
@@ -2128,6 +2141,11 @@ export default () => {
             }
           }
         } catch (error) {
+          let message = 
+            error?.reason ||
+            error?.data?.message ||
+            error?.message
+
           console.log(
             `[${
               is_wrap_eth ?
@@ -2135,13 +2153,9 @@ export default () => {
                 'xcall'
             } error]`,
             {
-              error: error?.message,
+              error: message,
             },
           )
-
-          let message = 
-            error?.data?.message ||
-            error?.message
 
           const code =
             _.slice(
