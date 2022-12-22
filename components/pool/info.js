@@ -357,13 +357,15 @@ export default (
                                 )} %
                               </span> :
                               'TBD' :
-                            <span className="uppercase">
-                              {number_format(
-                                apr / 100,
-                                '0,0.00a',
-                                true,
-                              )} %
-                            </span> :
+                            !isNaN(apr) ?
+                              <span className="uppercase">
+                                {number_format(
+                                  apr / 100,
+                                  '0,0.00a',
+                                  true,
+                                )} %
+                              </span> :
+                              'TBD' :
                           selected &&
                           !no_pool &&
                           !error &&

@@ -20,6 +20,7 @@ export default (
 ) => {
   const {
     preferences,
+    chains,
     assets,
     pool_assets,
     pools,
@@ -27,6 +28,7 @@ export default (
     (
       {
         preferences: state.preferences,
+        chains: state.chains,
         assets: state.assets,
         pool_assets: state.pool_assets,
         pools: state.pools,
@@ -37,6 +39,9 @@ export default (
   const {
     theme,
   } = { ...preferences }
+  const {
+    chains_data,
+  } = { ...chains }
   const {
     assets_data,
   } = { ...assets }
@@ -53,7 +58,10 @@ export default (
     () => {
       if (
         pools_data &&
-        !uncollapseAssetIds
+        (
+          !uncollapseAssetIds ||
+          uncollapseAssetIds.length < 2
+        )
       ) {
         const ids =
           pools_data
@@ -146,9 +154,39 @@ export default (
             asset_data: _.head(v)?.asset_data,
             pools:
               _.orderBy(
-                v,
-                ['tvl'],
-                ['desc'],
+                v
+                  .map(d => {
+                    const {
+                      chain_data,
+                      apr,
+                    } = { ...d }
+                    const {
+                      id,
+                    } = { ...chain_data }
+
+                    return {
+                      ...d,
+                      i:
+                        (chains_data || [])
+                          .findIndex(c =>
+                            c?.id === id
+                          ),
+                      _apr:
+                        !isNaN(apr) ?
+                          apr :
+                          -1,
+                    }
+                  }),
+                [
+                  'tvl',
+                  '_apr',
+                  'i',
+                ],
+                [
+                  'desc',
+                  'desc',
+                  'asc',
+                ],
               ),
           }
         }) :
@@ -1037,12 +1075,17 @@ export default (
 
                       return (
                         <div className="flex flex-col space-y-3">
-                          <div className="uppercase text-slate-600 dark:text-slate-400 text-base font-medium text-right">
-                            {number_format(
-                              value,
-                              '0,0.00',
-                              true,
-                            )} %
+                          <div className="text-slate-600 dark:text-slate-400 text-base font-medium text-right">
+                            {!isNaN(value) ?
+                              <span className="uppercase">
+                                {number_format(
+                                  value / 100,
+                                  '0,0.00a',
+                                  true,
+                                )} %
+                              </span> :
+                              'TBD'
+                            }
                           </div>
                           {
                             uncollapseAssetIds?.includes(id) &&
@@ -1066,13 +1109,16 @@ export default (
                                   <a
                                     className="h-6 text-base font-semibold text-right"
                                   >
-                                    <span className="uppercase">
-                                      {number_format(
-                                        value,
-                                        '0,0.00',
-                                        true,
-                                      )} %
-                                    </span>
+                                    {!isNaN(value) ?
+                                      <span className="uppercase">
+                                        {number_format(
+                                          value / 100,
+                                          '0,0.00a',
+                                          true,
+                                        )} %
+                                      </span> :
+                                      'TBD'
+                                    }
                                   </a>
                                   </Link>
                                 )

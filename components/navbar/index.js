@@ -824,13 +824,13 @@ export default () => {
                   )
               }
 
-              console.log(
-                '[getYieldData]',
-                {
-                  domain_id,
-                  contract_address,
-                },
-              )
+              // console.log(
+              //   '[getYieldData]',
+              //   {
+              //     domain_id,
+              //     contract_address,
+              //   },
+              // )
             }
 
             let stats
@@ -978,7 +978,7 @@ export default () => {
                 const numPools = 2
                 const symbol =
                   contract_data.symbol ||
-                  assets_data.symbol
+                  asset_data.symbol
 
                 console.log(
                   '[getLiquidityMiningAprPerPool]',
