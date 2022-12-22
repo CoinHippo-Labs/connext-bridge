@@ -412,12 +412,29 @@ export default () => {
               domain_id,
             } = { ...chain_data }
 
+            console.log(
+              '[getUserPools]',
+              {
+                domain_id,
+                address,
+              },
+            )
+
             const response =
               await sdk.nxtpSdkPool
                 .getUserPools(
                   domain_id,
                   address,
                 )
+
+            console.log(
+              '[UserPools]',
+              {
+                domain_id,
+                address,
+                response,
+              },
+            )
 
             if (Array.isArray(response)) {
               setPools(
@@ -551,7 +568,16 @@ export default () => {
                 []
               )
             }
-          } catch (error) {}
+          } catch (error) {
+            console.log(
+              '[getUserPools error]',
+              {
+                domain_id,
+                address,
+                error: error?.message,
+              },
+            )
+          }
         }
       }
 
