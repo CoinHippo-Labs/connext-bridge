@@ -401,17 +401,17 @@ export default () => {
           chain &&
           poolsTrigger
         ) {
+          const chain_data = (chains_data || [])
+            .find(c =>
+              c?.id === chain
+            )
+
+          const {
+            chain_id,
+            domain_id,
+          } = { ...chain_data }
+
           try {
-            const chain_data = (chains_data || [])
-              .find(c =>
-                c?.id === chain
-              )
-
-            const {
-              chain_id,
-              domain_id,
-            } = { ...chain_data }
-
             console.log(
               '[getUserPools]',
               {

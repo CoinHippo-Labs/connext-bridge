@@ -2013,14 +2013,34 @@ export default (
                     {
                       x_asset_data?.contract_address &&
                       (
-                        <Balance
-                          chainId={chain_id}
-                          asset={asset}
-                          contractAddress={x_asset_data.contract_address}
-                          symbol={x_asset_data.symbol}
-                          hideSymbol={true}
-                          className="text-xs"
-                        />
+                        <button
+                          disabled={disabled}
+                          onClick={() => {
+                            if (
+                              typeof x_balance_amount === 'number' &&
+                              x_balance_amount >= 0
+                            ) {
+                              setAmountX(x_balance_amount)
+
+                              if (typeof amountY !== 'number') {
+                                setAmountY(0)
+                              }
+                            }
+                          }}
+                          className="flex items-center space-x-1.5"
+                        >
+                          <Balance
+                            chainId={chain_id}
+                            asset={asset}
+                            contractAddress={x_asset_data.contract_address}
+                            symbol={x_asset_data.symbol}
+                            hideSymbol={true}
+                            className="text-xs"
+                          />
+                          <span className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-xs font-medium`}>
+                            Max
+                          </span>
+                        </button>
                       )
                     }
                   </div>
@@ -2208,14 +2228,34 @@ export default (
                     {
                       y_asset_data?.contract_address &&
                       (
-                        <Balance
-                          chainId={chain_id}
-                          asset={asset}
-                          contractAddress={y_asset_data.contract_address}
-                          symbol={y_asset_data.symbol}
-                          hideSymbol={true}
-                          className="text-xs"
-                        />
+                        <button
+                          disabled={disabled}
+                          onClick={() => {
+                            if (
+                              typeof y_balance_amount === 'number' &&
+                              y_balance_amount >= 0
+                            ) {
+                              setAmountY(y_balance_amount)
+
+                              if (typeof amountX !== 'number') {
+                                setAmountX(0)
+                              }
+                            }
+                          }}
+                          className="flex items-center space-x-1.5"
+                        >
+                          <Balance
+                            chainId={chain_id}
+                            asset={asset}
+                            contractAddress={y_asset_data.contract_address}
+                            symbol={y_asset_data.symbol}
+                            hideSymbol={true}
+                            className="text-xs"
+                          />
+                          <span className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-xs font-medium`}>
+                            Max
+                          </span>
+                        </button>
                       )
                     }
                   </div>

@@ -126,7 +126,6 @@
         "chainId": "0xa",
         "chainName": "Optimism",
         "rpcUrls": [
-          
           "https://rpc.ankr.com/optimism",
           "https://mainnet.optimism.io"
         ],
@@ -152,6 +151,44 @@
     },
     "image": "/logos/chains/optimism.png",
     "color": "#dc2626",
+    "group" : "optimistic_rollups"
+  },
+  {
+    "id": "arbitrum",
+    "chain_id": 42161,
+    "domain_id": "1634886255",
+    "name": "Arbitrum One",
+    "short_name": "ARB",
+    "provider_params": [
+      {
+        "chainId": "0xa4b1",
+        "chainName": "Arbitrum One",
+        "rpcUrls": [
+          "https://rpc.ankr.com/arbitrum",
+          "https://arb1.arbitrum.io/rpc"
+        ],
+        "nativeCurrency": {
+          "name": "Ethereum",
+          "symbol": "aETH",
+          "decimals": 18
+        },
+        "blockExplorerUrls": [
+          "https://arbiscan.io"
+        ]
+      }
+    ],
+    "explorer": {
+      "name": "Arbiscan",
+      "url": "https://arbiscan.io",
+      "icon": "/logos/explorers/arbiscan.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/arbitrum.png",
+    "color": "#28a0f0",
     "group" : "optimistic_rollups"
   },
   {

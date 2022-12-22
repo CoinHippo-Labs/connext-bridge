@@ -1552,38 +1552,38 @@ export default () => {
 
   const calculateAmountReceived = async _amount => {
     if (sdk) {
+      const originDomain = source_chain_data?.domain_id
+      const destinationDomain = destination_chain_data?.domain_id
+
+      const originTokenAddress =
+        (
+          equals_ignore_case(
+            source_contract_data?.contract_address,
+            constants.AddressZero,
+          ) ?
+            _source_contract_data :
+            source_contract_data
+        )?.contract_address
+
+      const destinationTokenAddress = destination_contract_data?.contract_address
+
+      const amount =
+        utils.parseUnits(
+          _amount
+            .toString(),
+          source_decimals,
+        )
+
+      const isNextAsset =
+        !receiveLocal ||
+        equals_ignore_case(
+          destination_contract_data?.contract_address,
+          destination_contract_data?.next_asset?.contract_address,
+        )
+
       try {
         setEstimatedValues(null)
         setEstimateResponse(null)
-
-        const originDomain = source_chain_data?.domain_id
-        const destinationDomain = destination_chain_data?.domain_id
-
-        const originTokenAddress =
-          (
-            equals_ignore_case(
-              source_contract_data?.contract_address,
-              constants.AddressZero,
-            ) ?
-              _source_contract_data :
-              source_contract_data
-          )?.contract_address
-
-        const destinationTokenAddress = destination_contract_data?.contract_address
-
-        const amount =
-          utils.parseUnits(
-            _amount
-              .toString(),
-            source_decimals,
-          )
-
-        const isNextAsset =
-          !receiveLocal ||
-          equals_ignore_case(
-            destination_contract_data?.contract_address,
-            destination_contract_data?.next_asset?.contract_address,
-          )
 
         console.log(
           '[calculateAmountReceived]',
