@@ -228,11 +228,11 @@ export default (
                     amountY
                 )
                 .toString(),
-                (
-                  tokenIndex === 0 ?
-                    _.head(decimals) :
-                    _.last(decimals)
-                ) ||
+                // (
+                //   tokenIndex === 0 ?
+                //     _.head(decimals) :
+                //     _.last(decimals)
+                // ) ||
                 18,
               )
               .toString()
@@ -245,11 +245,11 @@ export default (
                     amountX
                 )
                 .toString(),
-                (
-                  tokenIndex === 0 ?
-                    _.last(decimals) :
-                    _.head(decimals)
-                ) ||
+                // (
+                //   tokenIndex === 0 ?
+                //     _.last(decimals) :
+                //     _.head(decimals)
+                // ) ||
                 18,
               )
               .toString()
@@ -349,7 +349,7 @@ export default (
               utils.parseUnits(
                 amount
                   .toString(),
-                _.last(decimals) ||
+                // _.last(decimals) ||
                 18,
               )
               .toString()
@@ -436,7 +436,7 @@ export default (
                           a ||
                           '0'
                         ),
-                        decimals?.[i] ||
+                        // decimals?.[i] ||
                         18,
                       )
                     )
@@ -625,14 +625,14 @@ export default (
               utils.parseUnits(
                 amountX
                   .toString(),
-                x_asset_data?.decimals ||
+                // x_asset_data?.decimals ||
                 18,
               )
               .toString(),
               utils.parseUnits(
                 amountY
                   .toString(),
-                y_asset_data?.decimals ||
+                // y_asset_data?.decimals ||
                 18,
               )
               .toString(),
@@ -984,7 +984,7 @@ export default (
             utils.parseUnits(
               amount
                 .toString(),
-              y_asset_data?.decimals ||
+              // y_asset_data?.decimals ||
               18,
             )
             .toString()
@@ -1259,51 +1259,63 @@ export default (
     amountX,
     amountY,
   ) => {
+    let manual
+
     try {
       setPriceImpactAdd(true)
 
-      console.log(
-        '[calculateAddLiquidityPriceImpact]',
-        {
-          domainId,
-          contract_address,
-          amountX,
-          amountY,
-        },
-      )
-
-      const price_impact =
-        await sdk.nxtpSdkPool
-          .calculateAddLiquidityPriceImpact(
+      if (
+        [
+          chain_data?.id,
+        ].includes(pool_data?.chain_data?.id) &&
+        pool_data?.tvl
+      ) {
+        console.log(
+          '[calculateAddLiquidityPriceImpact]',
+          {
             domainId,
             contract_address,
             amountX,
             amountY,
-          )
+          },
+        )
 
-      console.log(
-        '[addLiquidityPriceImpact]',
-        {
-          domainId,
-          contract_address,
-          amountX,
-          amountY,
-          price_impact,
-        },
-      )
+        const price_impact =
+          await sdk.nxtpSdkPool
+            .calculateAddLiquidityPriceImpact(
+              domainId,
+              contract_address,
+              amountX,
+              amountY,
+            )
 
-      setPriceImpactAdd(
-        Number(
-          utils.formatUnits(
-            BigNumber.from(
-              price_impact ||
-              '0'
-            ),
-            18,
-          )
-        ) *
-        100
-      )
+        console.log(
+          '[addLiquidityPriceImpact]',
+          {
+            domainId,
+            contract_address,
+            amountX,
+            amountY,
+            price_impact,
+          },
+        )
+
+        setPriceImpactAdd(
+          Number(
+            utils.formatUnits(
+              BigNumber.from(
+                price_impact ||
+                '0'
+              ),
+              18,
+            )
+          ) *
+          100
+        )
+      }
+      else {
+        manual = true
+      }
     } catch (error) {
       const message =
         error?.reason ||
@@ -1332,13 +1344,22 @@ export default (
         )
         .join('_')
 
-      setPriceImpactAddResponse(
-        {
-          status: 'failed',
-          message,
-          code,
-        }
-      )
+      if (message?.includes('reverted')) {
+        manual = true
+      }
+      else {
+        setPriceImpactAddResponse(
+          {
+            status: 'failed',
+            message,
+            code,
+          }
+        )
+      }
+    }
+
+    if (manual) {
+      setPriceImpactAdd(null)
     }
   }
 
