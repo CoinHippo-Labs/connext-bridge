@@ -1392,51 +1392,63 @@ export default (
     amountX,
     amountY,
   ) => {
+    let manual
+
     try {
       setPriceImpactRemove(true)
 
-      console.log(
-        '[calculateRemoveLiquidityPriceImpact]',
-        {
-          domainId,
-          contract_address,
-          amountX,
-          amountY,
-        },
-      )
-
-      const price_impact =
-        await sdk.nxtpSdkPool
-          .calculateRemoveLiquidityPriceImpact(
+      if (
+        [
+          chain_data?.id,
+        ].includes(pool_data?.chain_data?.id) &&
+        pool_data?.tvl
+      ) {
+        console.log(
+          '[calculateRemoveLiquidityPriceImpact]',
+          {
             domainId,
             contract_address,
             amountX,
             amountY,
-          )
+          },
+        )
 
-      console.log(
-        '[removeLiquidityPriceImpact]',
-        {
-          domainId,
-          contract_address,
-          amountX,
-          amountY,
-          price_impact,
-        },
-      )
+        const price_impact =
+          await sdk.nxtpSdkPool
+            .calculateRemoveLiquidityPriceImpact(
+              domainId,
+              contract_address,
+              amountX,
+              amountY,
+            )
 
-      setPriceImpactRemove(
-        Number(
-          utils.formatUnits(
-            BigNumber.from(
-              price_impact ||
-              '0'
-            ),
-            18,
-          )
-        ) *
-        100
-      )
+        console.log(
+          '[removeLiquidityPriceImpact]',
+          {
+            domainId,
+            contract_address,
+            amountX,
+            amountY,
+            price_impact,
+          },
+        )
+
+        setPriceImpactRemove(
+          Number(
+            utils.formatUnits(
+              BigNumber.from(
+                price_impact ||
+                '0'
+              ),
+              18,
+            )
+          ) *
+          100
+        )
+      }
+      else {
+        manual = true
+      }
     } catch (error) {
       const message =
         error?.reason ||
@@ -1465,13 +1477,22 @@ export default (
         )
         .join('_')
 
-      setPriceImpactRemoveResponse(
-        {
-          status: 'failed',
-          message,
-          code,
-        }
-      )
+      if (message?.includes('reverted')) {
+        manual = true
+      }
+      else {
+        setPriceImpactRemoveResponse(
+          {
+            status: 'failed',
+            message,
+            code,
+          }
+        )
+      }
+    }
+
+    if (manual) {
+      setPriceImpactRemove(null)
     }
   }
 

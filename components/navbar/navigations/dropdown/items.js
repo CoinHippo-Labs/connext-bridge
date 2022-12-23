@@ -28,7 +28,7 @@ export default (
           (
             receive_next !== 'true' ||
             ![
-              '/',
+              // '/',
             ].includes(m.path)
           )
         )
