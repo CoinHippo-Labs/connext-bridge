@@ -529,12 +529,10 @@ export default (
                   ...contract,
                   amount:
                     balance &&
-                    Number(
-                      utils.formatUnits(
-                        balance,
-                        decimals ||
-                        18,
-                      )
+                    utils.formatUnits(
+                      balance,
+                      decimals ||
+                      18,
                     ),
                 }
               )

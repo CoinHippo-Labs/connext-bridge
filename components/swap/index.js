@@ -22,7 +22,7 @@ import Image from '../image'
 import Wallet from '../wallet'
 import Alert from '../alerts'
 import Copy from '../copy'
-import { params_to_obj, number_format, ellipse, equals_ignore_case, loader_color, sleep, error_patterns } from '../../lib/utils'
+import { params_to_obj, number_format, number_to_fixed, ellipse, equals_ignore_case, loader_color, sleep, error_patterns } from '../../lib/utils'
 import { POOLS_DATA, BALANCES_DATA } from '../../reducers/types'
 
 const WRAPPED_PREFIX =
@@ -212,9 +212,9 @@ export default () => {
         if (swap.chain) {
           if (
             !isNaN(amount) &&
-            Number(amount)
+            Number(amount) > 0
           ) {
-            swap.amount = Number(amount)
+            swap.amount = amount
             updated = true
           }
 
@@ -311,14 +311,9 @@ export default () => {
         ) {
           if (
             !isNaN(amount) &&
-            Number(amount)
+            Number(amount) > 0
           ) {
-            params.amount =
-              number_format(
-                Number(amount),
-                '0.000000000000000000',
-                true,
-              )
+            params.amount = amount
           }
 
           if (
@@ -562,10 +557,20 @@ export default () => {
           sdk &&
           chain
         ) {
-          if (typeof amount === 'number') {
+          if (
+            [
+              'string',
+              'number',
+            ].includes(typeof amount)
+          ) {
             setSwapAmount(true)
           }
-          else if (typeof swapAmount === 'number') {
+          else if (
+            [
+              'string',
+              'number',
+            ].includes(typeof swapAmount)
+          ) {
             setSwapAmount(null)
           }
 
@@ -1031,12 +1036,10 @@ export default () => {
                   ...contract,
                   amount:
                     balance &&
-                    Number(
-                      utils.formatUnits(
-                        balance,
-                        decimals ||
-                        18,
-                      )
+                    utils.formatUnits(
+                      balance,
+                      decimals ||
+                      18,
                     ),
                 }
               )
@@ -1266,33 +1269,51 @@ export default () => {
 
       let minDy = 0
 
-      if (!amount) {
+      if (
+        !amount ||
+        [
+          '0',
+          0,
+        ].includes(amount)
+      ) {
         failed = true
 
         setApproving(false)
       }
       else {
         minDy =
-          parseFloat(
+          FixedNumber.fromString(
             (
-              amount *
-              (
-                100 -
-                (
-                  typeof slippage === 'number' ?
-                    slippage :
-                    DEFAULT_SWAP_SLIPPAGE_PERCENTAGE
-                )
-              ) /
-              100
+              amount ||
+              0
             )
-            .toFixed(_decimals)
+            .toString()
+          )
+          .mulUnsafe(
+            FixedNumber.fromString(
+              (
+                (
+                  100 -
+                  (
+                    typeof slippage === 'number' ?
+                      slippage :
+                      DEFAULT_SWAP_SLIPPAGE_PERCENTAGE
+                  )
+                ) /
+                100
+              )
+              .toFixed(_decimals)
+              .toString()
+            )
           )
 
         amount =
           utils.parseUnits(
-            amount
-              .toString(),
+            (
+              amount ||
+              0
+            )
+            .toString(),
             _decimals,
           )
           .toString()
@@ -1300,8 +1321,11 @@ export default () => {
 
       minDy =
         utils.parseUnits(
-          minDy
-            .toString(),
+          (
+            minDy ||
+            0
+          )
+          .toString(),
           _decimals,
         )
         .toString()
@@ -1610,7 +1634,10 @@ export default () => {
 
     if (
       _pair &&
-      typeof amount === 'number'
+      [
+        'string',
+        'number',
+      ].includes(typeof amount)
     ) {
       let {
         amount,
@@ -1682,8 +1709,8 @@ export default () => {
           ),
         }
 
-      if (amount <= 0) {
-        setSwapAmount(0)
+      if (Number(amount) <= 0) {
+        setSwapAmount('0')
       }
       else {
         if (
@@ -1705,8 +1732,11 @@ export default () => {
         try {
           amount =
             utils.parseUnits(
-              amount
-                .toString(),
+              (
+                amount ||
+                0
+              )
+              .toString(),
               (origin === 'x' ?
                 x_asset_data :
                 y_asset_data
@@ -1809,18 +1839,16 @@ export default () => {
           )
 
           setSwapAmount(
-            Number(
-              utils.formatUnits(
-                BigNumber.from(
-                  _amount ||
-                  '0'
-                ),
-                (origin === 'x' ?
-                  y_asset_data :
-                  x_asset_data
-                )?.decimals ||
-                18,
-              )
+            utils.formatUnits(
+              BigNumber.from(
+                _amount ||
+                '0'
+              ),
+              (origin === 'x' ?
+                y_asset_data :
+                x_asset_data
+              )?.decimals ||
+              18,
             )
           )
         } catch (error) {
@@ -2018,9 +2046,7 @@ export default () => {
         )
       )
 
-  const x_balance_amount =
-    x_balance &&
-    Number(x_balance.amount)
+  const x_balance_amount = x_balance?.amount
 
   const y_asset_data =
     _.last(tokens) &&
@@ -2083,16 +2109,35 @@ export default () => {
         )
       )
 
-  const y_balance_amount =
-    y_balance &&
-    Number(y_balance.amount)
+  const y_balance_amount = y_balance?.amount
 
   const valid_amount =
+    typeof amount === 'string' &&
+    !isNaN(amount) &&
     amount &&
-    amount <= (
-      origin === 'x' ?
-        x_balance_amount :
-        y_balance_amount
+    utils.parseUnits(
+      amount ||
+      '0',
+      x_asset_data?.decimals ||
+      18,
+    )
+    .lte(
+      utils.parseUnits(
+        (
+          (
+            origin === 'x' ?
+              x_balance_amount :
+              y_balance_amount
+          ) ||
+          0
+        )
+        .toString(),
+        (origin === 'x' ?
+          x_asset_data :
+          y_asset_data
+        )?.decimals ||
+        18,
+      )
     )
 
   const wrong_chain =
@@ -2292,14 +2337,9 @@ export default () => {
                           !pair
                         }
                         value={
-                          typeof amount === 'number' &&
-                          amount >= 0 ?
-                            number_format(
-                              amount,
-                              '0.000000000000000000',
-                              true,
-                            ) :
-                            ''
+                          !isNaN(amount) ?
+                          amount :
+                          ''
                         }
                         onChange={e => {
                           const regex = /^[0-9.\b]+$/
@@ -2318,34 +2358,21 @@ export default () => {
                               value = `0${value}`
                             }
 
-                            if (!isNaN(value)) {
-                              value = Number(value)
-                            }
+                            value =
+                              number_to_fixed(
+                                value,
+                                (origin === 'x' ?
+                                  x_asset_data :
+                                  y_asset_data
+                                )?.decimals ||
+                                18,
+                              )
                           }
-
-                          value =
-                            value < 0 ?
-                              0 :
-                              value &&
-                              !isNaN(value) ?
-                                parseFloat(
-                                  Number(value)
-                                    .toFixed(
-                                      (origin === 'x' ?
-                                        x_asset_data :
-                                        y_asset_data
-                                      )?.decimals
-                                    )
-                                ) :
-                                value
 
                           setSwap(
                             {
                               ...swap,
-                              amount:
-                                typeof value === 'number' ?
-                                  value :
-                                  null,
+                              amount: value,
                             }
                           )
 
@@ -2384,7 +2411,12 @@ export default () => {
                                     x_balance_amount :
                                     y_balance_amount
 
-                                if (typeof amount === 'number') {
+                                if (
+                                  [
+                                    'string',
+                                    'number',
+                                  ].includes(typeof amount)
+                                ) {
                                   setSwap(
                                     {
                                       ...swap,
@@ -2435,7 +2467,12 @@ export default () => {
                                   x_balance_amount :
                                   y_balance_amount
 
-                              if (typeof amount === 'number') {
+                              if (
+                                [
+                                  'string',
+                                  'number',
+                                ].includes(typeof amount)
+                              ) {
                                 setSwap(
                                   {
                                     ...swap,
@@ -2574,14 +2611,16 @@ export default () => {
                               !pair
                             }
                             value={
-                              typeof swapAmount === 'number' &&
-                              swapAmount >= 0 ?
-                                number_format(
-                                  swapAmount,
-                                  '0.000000000000000000',
-                                  true,
-                                ) :
-                                typeof amount === 'number' ?
+                              [
+                                'string',
+                                'number',
+                              ].includes(typeof swapAmount) &&
+                              Number(swapAmount) >= 0 ?
+                                swapAmount :
+                                [
+                                  'string',
+                                  'number',
+                                ].includes(typeof amount) ?
                                   '0.00' :
                                   ''
                             }
@@ -2602,38 +2641,35 @@ export default () => {
                                   value = `0${value}`
                                 }
 
-                                if (!isNaN(value)) {
-                                  value = Number(value)
-                                }
-                              }
+                                parseFloat(
+                                  Number(
+                                    origin === 'x' ?
+                                      Number(value) / rate :
+                                      Number(value) * rate
+                                  )
+                                  .toFixed(
+                                    (origin === 'x' ?
+                                      y_asset_data :
+                                      x_asset_data
+                                    )?.decimals
+                                  )
+                                )
 
-                              value =
-                                value < 0 ?
-                                  0 :
-                                  value &&
-                                  !isNaN(value) ?
-                                    parseFloat(
-                                      Number(
-                                        origin === 'x' ?
-                                          value / rate :
-                                          value * rate
-                                      )
-                                      .toFixed(
-                                        (origin === 'x' ?
-                                          y_asset_data :
-                                          x_asset_data
-                                        )?.decimals
-                                      )
-                                    ) :
-                                    value
+                                value =
+                                  number_to_fixed(
+                                    value,
+                                    (origin === 'x' ?
+                                      y_asset_data :
+                                      x_asset_data
+                                    )?.decimals ||
+                                    18,
+                                  )
+                              }
 
                               setSwap(
                                 {
                                   ...swap,
-                                  amount:
-                                    typeof value === 'number' ?
-                                      value :
-                                      null,
+                                  amount: value,
                                 }
                               )
                             }}
@@ -2673,15 +2709,15 @@ export default () => {
 
                                 if (
                                   false &&
-                                  amount > 0
+                                  Number(amount) > 0
                                 ) {
                                   setSwap(
                                     {
                                       ...swap,
                                       amount:
                                         origin === 'x' ?
-                                          amount / rate :
-                                          amount * rate,
+                                          Number(amount) / rate :
+                                          Number(amount) * rate,
                                     }
                                   )
                                 }
@@ -2727,14 +2763,14 @@ export default () => {
                                   y_balance_amount :
                                   x_balance_amount
 
-                              if (amount > 0) {
+                              if (Number(amount) > 0) {
                                 setSwap(
                                   {
                                     ...swap,
                                     amount:
                                       origin === 'x' ?
-                                        amount / rate :
-                                        amount * rate,
+                                        Number(amount) / rate :
+                                        Number(amount) * rate,
                                   }
                                 )
                               }
@@ -2754,7 +2790,7 @@ export default () => {
                 asset &&
                 pair &&
                 !pair.error &&
-                amount > 0 &&
+                Number(amount) > 0 &&
                 (
                   <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-2.5 py-3.5 px-3">
                     <div className="flex items-center justify-between space-x-1">
@@ -3001,18 +3037,55 @@ export default () => {
                       y_balance
                     ) &&
                     (
-                      typeof amount === 'number' ||
+                      [
+                        'string',
+                        'number',
+                      ].includes(typeof amount) ||
                       web3_provider
                     ) ?
                       !callResponse &&
-                      typeof amount === 'number' &&
+                      [
+                        'string',
+                        'number',
+                      ].includes(typeof amount) &&
                       (
-                        amount > (
-                          origin === 'x' ?
-                            x_balance_amount :
-                            y_balance_amount
+                        (
+                          utils.parseUnits(
+                            amount ||
+                            '0',
+                            (origin === 'x' ?
+                              x_asset_data :
+                              y_asset_data
+                            ).decimals ||
+                            18,
+                          )
+                          .gt(
+                            utils.parseUnits(
+                              (
+                                origin === 'x' ?
+                                  x_balance_amount :
+                                  y_balance_amount
+                              ) ||
+                              '0',
+                              (origin === 'x' ?
+                                x_asset_data :
+                                y_asset_data
+                              ).decimals ||
+                              18,
+                            )
+                          ) &&
+                          [
+                            'string',
+                            'number',
+                          ].includes(
+                            typeof (
+                              origin === 'x' ?
+                                x_balance_amount :
+                                y_balance_amount
+                            )
+                          )
                         ) ||
-                        amount <= 0
+                        Number(amount) <= 0
                       ) ?
                         <Alert
                           color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
@@ -3026,16 +3099,47 @@ export default () => {
                           className="rounded p-4.5"
                         >
                           <span>
-                            {amount >
+                            {
                               (
-                                origin === 'x' ?
-                                  x_balance_amount :
-                                  y_balance_amount
+                                utils.parseUnits(
+                                  amount ||
+                                  '0',
+                                  (origin === 'x' ?
+                                    x_asset_data :
+                                    y_asset_data
+                                  ).decimals ||
+                                  18,
+                                )
+                                .gt(
+                                  utils.parseUnits(
+                                    (
+                                      origin === 'x' ?
+                                        x_balance_amount :
+                                        y_balance_amount
+                                    ) ||
+                                    '0',
+                                    (origin === 'x' ?
+                                      x_asset_data :
+                                      y_asset_data
+                                    ).decimals ||
+                                    18,
+                                  )
+                                ) &&
+                                [
+                                  'string',
+                                  'number',
+                                ].includes(
+                                  typeof (
+                                    origin === 'x' ?
+                                      x_balance_amount :
+                                      y_balance_amount
+                                  )
+                                )
                               ) ?
-                              'Insufficient Balance' :
-                              amount <= 0 ?
-                                'The amount cannot be equal to or less than 0.' :
-                                ''
+                                'Insufficient Balance' :
+                                Number(amount) <= 0 ?
+                                  'The amount cannot be equal to or less than 0.' :
+                                  ''
                             }
                           </span>
                         </Alert> :
@@ -3079,7 +3183,10 @@ export default () => {
                                         'Checking Approval' :
                                   swapAmount === true ?
                                     'Calculating' :
-                                    typeof amount === 'number' ?
+                                    [
+                                      'string',
+                                      'number',
+                                    ].includes(typeof amount) ?
                                       'Swap' :
                                       'Enter amount'
                                 }

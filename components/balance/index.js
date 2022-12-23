@@ -175,12 +175,10 @@ export default (
 
     return (
       balance &&
-      Number(
-        utils.formatUnits(
-          balance,
-          decimals ||
-          18,
-        )
+      utils.formatUnits(
+        balance,
+        decimals ||
+        18,
       ),
     )
   }
@@ -220,7 +218,7 @@ export default (
     trigger ?
       balance :
       !isNaN(amount) ?
-        Number(amount) :
+        amount :
         null
 
   symbol =
@@ -233,14 +231,14 @@ export default (
     asset &&
     (
       <div className={`flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm space-x-1 ${className}`}>
-        {typeof amount === 'number' ?
+        {!isNaN(amount) ?
           <>
             <span className="font-semibold">
               {number_format(
                 amount,
-                amount > 1000000 ?
+                Number(amount) > 1000000 ?
                   '0,0' :
-                  amount > 10000 ?
+                  Number(amount) > 10000 ?
                     '0,0.00' :
                     '0,0.00000000',
                 true,

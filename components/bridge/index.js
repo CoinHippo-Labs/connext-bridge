@@ -32,7 +32,7 @@ import Wallet from '../wallet'
 import Alert from '../alerts'
 // import Popover from '../popover'
 import Copy from '../copy'
-import { params_to_obj, number_format, ellipse, equals_ignore_case, total_time_string, loader_color, sleep, error_patterns } from '../../lib/utils'
+import { params_to_obj, number_format, number_to_fixed, ellipse, equals_ignore_case, total_time_string, loader_color, sleep, error_patterns } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
 const ROUTER_FEE_PERCENT =
@@ -267,7 +267,7 @@ export default () => {
           !isNaN(amount) &&
           Number(amount) > 0
         ) {
-          bridge.amount = Number(amount)
+          bridge.amount = amount
           updated = true
 
           if (
@@ -381,12 +381,7 @@ export default () => {
           params.asset
         ) {
           if (amount) {
-            params.amount =
-              number_format(
-                Number(amount),
-                '0.000000000000000000',
-                true,
-              )
+            params.amount = amount
           }
           
           if (
@@ -524,7 +519,7 @@ export default () => {
           forceSlow:
             destination_chain_data &&
             asset_balances_data ?
-              amount > liquidity_amount :
+              Number(amount) > liquidity_amount :
               false,
           receiveLocal,
         }
@@ -897,7 +892,7 @@ export default () => {
 
       if (
         balances_data?.[chain_id] &&
-        amount > 0
+        amount
       ) {
         setEstimateTrigger(
           moment()
@@ -1227,12 +1222,10 @@ export default () => {
                   ...contract,
                   amount:
                     balance &&
-                    Number(
-                      utils.formatUnits(
-                        balance,
-                        decimals ||
-                        18,
-                      )
+                    utils.formatUnits(
+                      balance,
+                      decimals ||
+                      18,
                     ),
                 }
               )
@@ -1493,7 +1486,7 @@ export default () => {
                 0 :
                 parseFloat(
                   (
-                    amount *
+                    Number(amount) *
                     ROUTER_FEE_PERCENT /
                     100
                   )
@@ -1574,8 +1567,11 @@ export default () => {
 
       const amount =
         utils.parseUnits(
-          _amount
-            .toString(),
+          (
+            _amount ||
+            0
+          )
+          .toString(),
           source_decimals,
         )
 
@@ -1644,11 +1640,9 @@ export default () => {
                 .map(([k, v]) => {
                   return [
                     k,
-                    Number(
-                      utils.formatUnits(
-                        v,
-                        destination_decimals,
-                      )
+                    utils.formatUnits(
+                      v,
+                      destination_decimals,
                     ),
                   ]
                 })
@@ -1706,7 +1700,7 @@ export default () => {
         const routerFee =
           parseFloat(
             (
-              _amount *
+              Number(_amount) *
               ROUTER_FEE_PERCENT /
               100
             )
@@ -1715,7 +1709,7 @@ export default () => {
 
         setEstimatedValues(
           {
-            amountReceived: _amount - routerFee,
+            amountReceived: Number(_amount) - routerFee,
             routerFee,
           }
         )
@@ -1820,83 +1814,6 @@ export default () => {
         }
       }
 
-      /*
-      const minAmount =
-        (amount || 0) *
-        (
-          100 -
-          (
-            !receiveLocal &&
-            typeof slippage === 'number' ?
-              slippage :
-              DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE
-          )
-        ) /
-        100
-      */
-
-      /*const xcallParams = {
-        params: {
-          to:
-            to ||
-            address,
-          callData:
-            callData ||
-            '0x',
-          originDomain: source_chain_data?.domain_id,
-          destinationDomain: destination_chain_data?.domain_id,
-          agent:
-            to ||
-            address,
-          callback: constants.AddressZero,
-          recovery: address,
-          forceSlow:
-            forceSlow ||
-            false,
-          receiveLocal:
-            receiveLocal ||
-            false,
-          relayerFee:
-            !forceSlow &&
-            gas ?
-              utils.parseUnits(
-                gas
-                  .toString(),
-                'ether',
-              )
-              .toString() :
-              '0',
-          destinationMinOut:
-            utils.parseUnits(
-              minAmount
-                .toString(),
-              destination_contract_data?.decimals ||
-              18,
-            )
-            .toString(),
-        },
-        transactingAsset: source_contract_data?.contract_address,
-        transactingAmount:
-          utils.parseUnits(
-            (
-              amount ||
-              0
-            )
-            .toString(),
-            source_contract_data?.decimals ||
-            18,
-          )
-          .toString(),
-        originMinOut:
-          utils.parseUnits(
-            minAmount
-              .toString(),
-            source_contract_data?.decimals ||
-            18,
-          )
-          .toString(),
-      }*/
-
       const xcallParams = {
         origin: source_chain_data?.domain_id,
         destination: destination_chain_data?.domain_id,
@@ -1947,16 +1864,6 @@ export default () => {
       let failed = false
 
       try {
-        /*
-        const approve_request =
-          await sdk.nxtpSdkBase
-            .approveIfNeeded(
-              xcallParams.params.originDomain,
-              xcallParams.transactingAsset,
-              xcallParams.transactingAmount,
-              infiniteApprove,
-            )
-        */
         const approve_request =
           await sdk.nxtpSdkBase
             .approveIfNeeded(
@@ -2375,9 +2282,7 @@ export default () => {
       )
     )
 
-  const source_amount =
-    source_balance &&
-    Number(source_balance.amount)
+  const source_amount = source_balance?.amount
 
   const source_decimals =
     source_contract_data?.decimals ||
@@ -2397,9 +2302,7 @@ export default () => {
       )
     )
 
-  const destination_amount =
-    destination_balance &&
-    Number(destination_balance.amount)
+  const destination_amount = destination_balance?.amount
 
   const destination_decimals =
     destination_contract_data?.decimals ||
@@ -2416,7 +2319,7 @@ export default () => {
     )
 
   const router_fee =
-    typeof estimatedValues?.routerFee === 'number' ?
+    estimatedValues?.routerFee ?
       estimatedValues.routerFee :
       fee &&
       (
@@ -2462,9 +2365,9 @@ export default () => {
   const estimate_received =
     estimatedValues?.amountReceived ?
       estimatedValues.amountReceived :
-      amount > 0 &&
+      Number(amount) > 0 &&
       typeof router_fee === 'number' ?
-        amount - router_fee :
+        Number(amount) - router_fee :
         null
 
   const wrong_chain =
@@ -2927,13 +2830,8 @@ export default () => {
                               !asset
                             }
                             value={
-                              typeof amount === 'number' &&
-                              amount >= 0 ?
-                                number_format(
-                                  amount,
-                                  '0.000000000000000000',
-                                  true,
-                                ) :
+                              !isNaN(amount) ?
+                                amount :
                                 ''
                             }
                             onChange={e => {
@@ -2953,42 +2851,35 @@ export default () => {
                                   value = `0${value}`
                                 }
 
-                                if (!isNaN(value)) {
-                                  value = Number(value)
-                                }
+                                value =
+                                  number_to_fixed(
+                                    value,
+                                    source_decimals ||
+                                    18,
+                                  )
                               }
-
-                              value =
-                                value < 0 ?
-                                  0 :
-                                  value &&
-                                  !isNaN(value) &&
-                                  value !== '' ?
-                                    parseFloat(
-                                      Number(value)
-                                        .toFixed(source_decimals)
-                                    ) :
-                                    value
 
                               setBridge(
                                 {
                                   ...bridge,
-                                  amount:
-                                    typeof value === 'number' ?
-                                      value :
-                                      null,
+                                  amount: value,
                                 }
                               )
 
-                              if (typeof value === 'number') {
+                              if (
+                                [
+                                  'string',
+                                  'number',
+                                ].includes(typeof value)
+                              ) {
                                 if (value) {
                                   calculateAmountReceived(value)
                                 }
                                 else {
                                   setEstimatedValues(
                                     {
-                                      amountReceived: 0,
-                                      routerFee: 0,
+                                      amountReceived: '0',
+                                      routerFee: '0',
                                     }
                                   )
                                 }
@@ -3018,7 +2909,18 @@ export default () => {
                                 <button
                                   disabled={disabled}
                                   onClick={() => {
-                                    if (max_amount > 0) {
+                                    if (
+                                      utils.parseUnits(
+                                        max_amount ||
+                                        '0',
+                                        source_decimals,
+                                      )
+                                      .gt(
+                                        BigNumber.from(
+                                          '0'
+                                        )
+                                      )
+                                    ) {
                                       setBridge(
                                         {
                                           ...bridge,
@@ -3131,10 +3033,10 @@ export default () => {
                                             Balance:
                                           </span>
                                           <span className="font-semibold">
-                                            {typeof source_amount === 'number' ?
+                                            {typeof source_amount === 'string' ?
                                               number_format(
                                                 source_amount,
-                                                source_amount > 1000 ?
+                                                Number(source_amount) > 1000 ?
                                                   '0,0.00' :
                                                   '0,0.000000000000',
                                                 true,
@@ -3165,10 +3067,10 @@ export default () => {
                                             Max:
                                           </span>
                                           <span className="font-semibold">
-                                            {typeof max_amount === 'number' ?
+                                            {typeof max_amount === 'string' ?
                                               number_format(
                                                 max_amount,
-                                                max_amount > 1000 ?
+                                                Number(max_amount) > 1000 ?
                                                   '0,0.00' :
                                                   '0,0.000000000000',
                                                 true,
@@ -3198,7 +3100,18 @@ export default () => {
                                   <button
                                     disabled={disabled}
                                     onClick={() => {
-                                      if (max_amount > 0) {
+                                      if (
+                                        utils.parseUnits(
+                                          max_amount ||
+                                          '0',
+                                          source_decimals,
+                                        )
+                                        .gt(
+                                          BigNumber.from(
+                                            '0'
+                                          )
+                                        )
+                                      ) {
                                         setBridge(
                                           {
                                             ...bridge,
@@ -3233,13 +3146,8 @@ export default () => {
                                 !asset
                               }
                               value={
-                                typeof amount === 'number' &&
-                                amount >= 0 ?
-                                  number_format(
-                                    amount,
-                                    '0.000000000000',
-                                    true,
-                                  ) :
+                                !isNaN(amount) ?
+                                  amount :
                                   ''
                               }
                               onChange={e => {
@@ -3259,32 +3167,39 @@ export default () => {
                                     value = `0${value}`
                                   }
 
-                                  if (!isNaN(value)) {
-                                    value = Number(value)
-                                  }
+                                  value =
+                                    number_to_fixed(
+                                      value,
+                                      source_decimals ||
+                                      18,
+                                    )
                                 }
-
-                                value =
-                                  value < 0 ?
-                                    0 :
-                                    value &&
-                                    !isNaN(value) &&
-                                    value !== '' ?
-                                      parseFloat(
-                                        Number(value)
-                                          .toFixed(source_decimals)
-                                      ) :
-                                      value
 
                                 setBridge(
                                   {
                                     ...bridge,
-                                    amount:
-                                      typeof value === 'number' ?
-                                        value :
-                                        null,
+                                    amount: value,
                                   }
                                 )
+
+                                if (
+                                  [
+                                    'string',
+                                    'number',
+                                  ].includes(typeof value)
+                                ) {
+                                  if (value) {
+                                    calculateAmountReceived(value)
+                                  }
+                                  else {
+                                    setEstimatedValues(
+                                      {
+                                        amountReceived: '0',
+                                        routerFee: '0',
+                                      }
+                                    )
+                                  }
+                                }
                               }}
                               onWheel={e => e.target.blur()}
                               onKeyDown={e =>
@@ -3303,7 +3218,10 @@ export default () => {
                           (
                             (
                               true ||
-                              typeof estimate_received === 'number'
+                              [
+                                'string',
+                                'number',
+                              ].includes(typeof estimate_received)
                             ) &&
                             (
                               checkSupport() &&
@@ -3311,7 +3229,7 @@ export default () => {
                                 true ||
                                 (
                                   web3_provider &&
-                                  amount > 0
+                                  Number(amount) > 0
                                 )
                               )
                             )
@@ -3321,7 +3239,10 @@ export default () => {
                               {
                                 (
                                   true ||
-                                  typeof estimate_received === 'number'
+                                  [
+                                    'string',
+                                    'number',
+                                  ].includes(typeof estimate_received)
                                 ) &&
                                 (
                                   <button
@@ -3338,14 +3259,26 @@ export default () => {
                                     <div className="col-span-3 sm:col-span-3">
                                       <div className="flex items-center justify-end sm:justify-end space-x-0.5 sm:space-x-1 -mr-0.5">
                                         {
-                                          typeof amount !== 'number' ||
-                                          typeof estimatedValues?.amountReceived === 'number' ||
+                                          ![
+                                            'string',
+                                            'number',
+                                          ].includes(typeof amount) ||
+                                          [
+                                            'string',
+                                            'number',
+                                          ].includes(typeof estimatedValues?.amountReceived) ||
                                           estimateResponse ?
                                             <div className="flex items-center space-x-2">
                                               <span className="font-semibold">
                                                 {
-                                                  typeof amount === 'number' &&
-                                                  typeof estimate_received === 'number' &&
+                                                  [
+                                                    'string',
+                                                    'number',
+                                                  ].includes(typeof amount) &&
+                                                  [
+                                                    'string',
+                                                    'number',
+                                                  ].includes(typeof estimate_received) &&
                                                   !estimateResponse ?
                                                     number_format(
                                                       estimate_received,
@@ -3386,11 +3319,23 @@ export default () => {
                                   true ||
                                   (
                                     web3_provider &&
-                                    amount > 0
+                                    Number(amount) > 0
                                   )
                                 ) &&
                                 (
-                                  <div className={`space-y-2.5 ${typeof estimate_received === 'number' || !collapse > 0 ? 'mt-2' : 'mt-0'}`}>
+                                  <div
+                                    className={
+                                      `space-y-2.5 ${
+                                        [
+                                          'string',
+                                          'number',
+                                        ].includes(typeof estimate_received) ||
+                                        !collapse > 0 ?
+                                          'mt-2' :
+                                          'mt-0'
+                                      }`
+                                    }
+                                  >
                                     {
                                       (
                                         true ||
@@ -3602,8 +3547,14 @@ export default () => {
                                                     </div>
                                                   </Tooltip>
                                                   {
-                                                    typeof amount !== 'number' ||
-                                                    typeof estimatedValues?.routerFee === 'number' ||
+                                                    ![
+                                                      'string',
+                                                      'number',
+                                                    ].includes(typeof amount) ||
+                                                    [
+                                                      'string',
+                                                      'number',
+                                                    ].includes(typeof estimatedValues?.routerFee) ||
                                                     estimateResponse ?
                                                       <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
                                                         <span>
@@ -3693,10 +3644,13 @@ export default () => {
                                       )
                                     }
                                     {
-                                      amount > 0 &&
-                                      typeof estimate_received === 'number' &&
+                                      Number(amount) > 0 &&
+                                      [
+                                        'string',
+                                        'number',
+                                      ].includes(typeof estimate_received) &&
                                       (
-                                        amount < liquidity_amount ||
+                                        Number(amount) < liquidity_amount ||
                                         asset_balances_data
                                       ) &&
                                       (
@@ -3707,7 +3661,7 @@ export default () => {
                                           <Tooltip
                                             placement="top"
                                             content={
-                                              amount > liquidity_amount ||
+                                              Number(amount) > liquidity_amount ||
                                               forceSlow ?
                                                 'Unable to leverage fast liquidity. Your transfer will still complete.' :
                                                 'Fast transfer enabled by Connext router network.'
@@ -3716,7 +3670,7 @@ export default () => {
                                           >
                                             <span className="whitespace-nowrap text-sm font-semibold space-x-1.5">
                                               {
-                                                amount > liquidity_amount ||
+                                                Number(amount) > liquidity_amount ||
                                                 forceSlow ?
                                                   <span className="text-yellow-500 dark:text-yellow-400">
                                                     90 minutes
@@ -3732,12 +3686,12 @@ export default () => {
                                     }
                                     {
                                       false &&
-                                      amount > 0 &&
+                                      Number(amount) > 0 &&
                                       (
                                         <>
                                           {
                                             asset_balances_data &&
-                                            amount > liquidity_amount &&
+                                            Number(amount) > liquidity_amount &&
                                             (
                                               <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2">
                                                 <BiMessageEdit
@@ -3750,7 +3704,7 @@ export default () => {
                                             )
                                           }
                                           {
-                                            amount < liquidity_amount &&
+                                            Number(amount) < liquidity_amount &&
                                             (
                                               forceSlow ?
                                                 <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2">
@@ -3790,7 +3744,10 @@ export default () => {
                     ) &&
                     web3_provider &&
                     (
-                      typeof amount === 'number' ||
+                      [
+                        'string',
+                        'number',
+                      ].includes(typeof amount) ||
                       (
                         web3_provider &&
                         wrong_chain
@@ -3825,14 +3782,31 @@ export default () => {
                           </span>
                         </Wallet> :
                         !xcall &&
-                        typeof amount === 'number' &&
+                        [
+                          'string',
+                          'number',
+                        ].includes(typeof amount) &&
                         (
                           (
-                            amount > source_amount &&
-                            typeof source_amount === 'number'
+                            utils.parseUnits(
+                              amount ||
+                              '0',
+                              source_decimals,
+                            )
+                            .gt(
+                              utils.parseUnits(
+                                source_amount ||
+                                '0',
+                                source_decimals,
+                              )
+                            ) &&
+                            [
+                              'string',
+                              'number',
+                            ].includes(typeof source_amount)
                           ) ||
-                          amount < min_amount ||
-                          amount <= 0
+                          Number(amount) < min_amount ||
+                          Number(amount) <= 0
                         ) ?
                           <Alert
                             color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
@@ -3847,12 +3821,26 @@ export default () => {
                           >
                             <span>
                               {
-                                amount > source_amount &&
-                                typeof source_amount === 'number' ?
+                                utils.parseUnits(
+                                  amount ||
+                                  '0',
+                                  source_decimals,
+                                )
+                                .gt(
+                                  utils.parseUnits(
+                                    source_amount ||
+                                    '0',
+                                    source_decimals,
+                                  )
+                                ) &&
+                                [
+                                  'string',
+                                  'number',
+                                ].includes(typeof source_amount) ?
                                   'Insufficient Balance' :
-                                  amount < min_amount ?
+                                  Number(amount) < min_amount ?
                                     'The amount cannot be less than the transfer fee.' :
-                                    amount <= 0 ?
+                                    Number(amount) <= 0 ?
                                       'The amount cannot be equal to or less than 0.' :
                                       ''
                               }

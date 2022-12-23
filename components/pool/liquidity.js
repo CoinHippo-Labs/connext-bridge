@@ -21,7 +21,7 @@ import Image from '../image'
 import Wallet from '../wallet'
 import Alert from '../alerts'
 import Copy from '../copy'
-import { number_format, ellipse, equals_ignore_case, loader_color, switch_color, sleep, error_patterns } from '../../lib/utils'
+import { number_format, number_to_fixed, ellipse, equals_ignore_case, loader_color, switch_color, sleep, error_patterns } from '../../lib/utils'
 
 const WRAPPED_PREFIX =
   process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
@@ -183,8 +183,10 @@ export default (
         if (
           domainId &&
           contract_address &&
-          typeof amountX === 'number' &&
-          typeof amountY === 'number'
+          typeof amountX === 'string' &&
+          !isNaN(amountX) &&
+          typeof amountY === 'string' &&
+          !isNaN(amountY)
         ) {
           setPriceImpactAdd(true)
           setCallResponse(null)
@@ -223,16 +225,11 @@ export default (
             _amountX =
               utils.parseUnits(
                 (
-                  tokenIndex === 0 ?
-                    amountX :
-                    amountY
+                  amountX ||
+                  0
                 )
                 .toString(),
-                // (
-                //   tokenIndex === 0 ?
-                //     _.head(decimals) :
-                //     _.last(decimals)
-                // ) ||
+                // _.head(decimals) ||
                 18,
               )
               .toString()
@@ -240,16 +237,11 @@ export default (
             _amountY =
               utils.parseUnits(
                 (
-                  tokenIndex === 0 ?
-                    amountY :
-                    amountX
+                  amountY ||
+                  0
                 )
                 .toString(),
-                // (
-                //   tokenIndex === 0 ?
-                //     _.last(decimals) :
-                //     _.head(decimals)
-                // ) ||
+                // _.last(decimals) ||
                 18,
               )
               .toString()
@@ -309,12 +301,23 @@ export default (
       const getData = async () => {
         setPriceImpactRemove(null)
 
-        if (typeof amount === 'number') {
-          if (amount <= 0) {
+        if (typeof amount === 'string') {
+          if (
+            utils.parseUnits(
+              amount ||
+              '0',
+              18,
+            )
+            .lte(
+              BigNumber.from(
+                '0'
+              )
+            )
+          ) {
             setRemoveAmounts(
               [
-                0,
-                0,
+                '0',
+                '0',
               ]
             )
           }
@@ -347,8 +350,11 @@ export default (
 
             const _amount =
               utils.parseUnits(
-                amount
-                  .toString(),
+                (
+                  amount ||
+                  0
+                )
+                .toString(),
                 // _.last(decimals) ||
                 18,
               )
@@ -606,8 +612,10 @@ export default (
         case 'deposit':
           if (
             !(
-              typeof amountX === 'number' &&
-              typeof amountY === 'number'
+              typeof amountX === 'string' &&
+              !isNaN(amountX) &&
+              typeof amountY === 'string' &&
+              !isNaN(amountY)
             ) ||
             !(
               amountX ||
@@ -623,15 +631,21 @@ export default (
           let amounts =
             [
               utils.parseUnits(
-                amountX
-                  .toString(),
+                (
+                  amountX ||
+                  0
+                )
+                .toString(),
                 // x_asset_data?.decimals ||
                 18,
               )
               .toString(),
               utils.parseUnits(
-                amountY
-                  .toString(),
+                (
+                  amountY ||
+                  0
+                )
+                .toString(),
                 // y_asset_data?.decimals ||
                 18,
               )
@@ -827,12 +841,12 @@ export default (
                 },
               )
 
-              if (tokenIndex === 1) {
-                amounts =
-                  _.reverse(
-                    _.cloneDeep(amounts)
-                  )
-              }
+              // if (tokenIndex === 1) {
+              //   amounts =
+              //     _.reverse(
+              //       _.cloneDeep(amounts)
+              //     )
+              // }
 
               console.log(
                 '[addLiquidity]',
@@ -973,7 +987,13 @@ export default (
           }
           break
         case 'withdraw':
-          if (!amount) {
+          if (
+            !amount ||
+            [
+              '0',
+              0,
+            ].includes(amount)
+          ) {
             failed = true
 
             setApproving(false)
@@ -982,8 +1002,11 @@ export default (
 
           const _amount =
             utils.parseUnits(
-              amount
-                .toString(),
+              (
+                amount ||
+                0
+              )
+              .toString(),
               // y_asset_data?.decimals ||
               18,
             )
@@ -1452,74 +1475,6 @@ export default (
     }
   }
 
-  const autoSetY = value => {
-    if (typeof value === 'number') {
-      if (value > 0) {
-        let _amount
-
-        try {
-          _amount = Number(
-            FixedNumber.fromString(
-              value
-                .toString()
-            )
-            .mulUnsafe(
-              FixedNumber.fromString(
-                rate
-                  .toString()
-              )
-            )
-            .toString()
-          )
-        } catch (error) {
-          _amount = 0
-        }
-
-        setAmountY(_amount)
-      }
-      else {
-        setAmountY(0)
-      }
-    }
-    else {
-      setAmountY(null)
-    }
-  }
-
-  const autoSetX = value => {
-    if (typeof value === 'number') {
-      if (value > 0) {
-        let _amount
-
-        try {
-          _amount = Number(
-            FixedNumber.fromString(
-              value
-                .toString()
-            )
-            .divUnsafe(
-              FixedNumber.fromString(
-                rate
-                  .toString()
-              )
-            )
-            .toString()
-          )
-        } catch (error) {
-          _amount = 0
-        }
-
-        setAmountX(_amount)
-      }
-      else {
-        setAmountX(0)
-      }
-    }
-    else {
-      setAmountX(null)
-    }
-  }
-
   const {
     chain,
     asset,
@@ -1660,9 +1615,7 @@ export default (
         )
       )
   
-  const x_balance_amount =
-    x_balance &&
-    Number(x_balance.amount)
+  const x_balance_amount = x_balance?.amount
 
   const y_asset_data =
     _.last(tokens) &&
@@ -1749,9 +1702,7 @@ export default (
         )
       )
   
-  const y_balance_amount =
-    y_balance &&
-    Number(y_balance.amount)
+  const y_balance_amount = y_balance?.amount
 
   const pool_loading =
     selected &&
@@ -1828,16 +1779,66 @@ export default (
 
   const valid_amount =
     action === 'withdraw' ?
+      typeof amount === 'string' &&
+      !isNaN(amount) &&
       amount &&
-      amount <= lpTokenBalance :
-      typeof amountX === 'number' &&
-      typeof amountY === 'number' &&
+      utils.parseUnits(
+        amount ||
+        '0',
+        18,
+      )
+      .lte(
+        utils.parseUnits(
+          (
+            lpTokenBalance ||
+            0
+          )
+          .toString(),
+          18,
+        )
+      ) :
+      typeof amountX === 'string' &&
+      !isNaN(amountX) &&
+      typeof amountY === 'string' &&
+      !isNaN(amountY) &&
       (
         amountX ||
         amountY
       ) &&
-      amountX <= x_balance_amount &&
-      amountY <= y_balance_amount
+      utils.parseUnits(
+        amountX ||
+        '0',
+        x_asset_data?.decimals ||
+        18,
+      )
+      .lte(
+        utils.parseUnits(
+          (
+            x_balance_amount ||
+            0
+          )
+          .toString(),
+          x_asset_data?.decimals ||
+          18,
+        )
+      ) &&
+      utils.parseUnits(
+        amountY ||
+        '0',
+        y_asset_data?.decimals ||
+        18,
+      )
+      .lte(
+        utils.parseUnits(
+          (
+            y_balance_amount ||
+            0
+          )
+          .toString(),
+          y_asset_data?.decimals ||
+          18,
+        )
+      )
 
   const wrong_chain =
     wallet_chain_id !== chain_id &&
@@ -2094,7 +2095,7 @@ export default (
     Array.isArray(user_pool_data?.balances) &&
     Array.isArray(user_pool_data.tokens) &&
     (
-      amountX +
+      Number(amountX) +
       user_pool_data.balances[
         user_pool_data.tokens
           .indexOf(t =>
@@ -2106,7 +2107,7 @@ export default (
       ]
     ) >
     (
-      amountY +
+      Number(amountY) +
       user_pool_data.balances[
         user_pool_data.tokens
           .indexOf(t =>
@@ -2165,13 +2166,21 @@ export default (
                           disabled={disabled}
                           onClick={() => {
                             if (
-                              typeof x_balance_amount === 'number' &&
-                              x_balance_amount >= 0
+                              [
+                                'string',
+                                'number',
+                              ].includes(typeof x_balance_amount)
                             ) {
-                              setAmountX(x_balance_amount)
+                              setAmountX(
+                                x_balance_amount
+                                  .toString()
+                              )
 
-                              if (typeof amountY !== 'number') {
-                                setAmountY(0)
+                              if (
+                                typeof amountY !== 'string' ||
+                                !amountY
+                              ) {
+                                setAmountY('0')
                               }
                             }
                           }}
@@ -2259,8 +2268,7 @@ export default (
                       placeholder="0.00"
                       disabled={disabled}
                       value={
-                        typeof amountX === 'number' &&
-                        amountX >= 0 ?
+                        !isNaN(amountX) ?
                           amountX :
                           ''
                       }
@@ -2281,38 +2289,22 @@ export default (
                             value = `0${value}`
                           }
 
-                          if (!isNaN(value)) {
-                            value = Number(value)
-                          }
+                          value =
+                            number_to_fixed(
+                              value,
+                              x_asset_data?.decimals ||
+                              18,
+                            )
                         }
-
-                        value =
-                          value < 0 ?
-                            0 :
-                            !isNaN(value) &&
-                            value !== '' ?
-                              parseFloat(
-                                Number(value)
-                                  .toFixed(
-                                    _.last(decimals) ||
-                                    18
-                                  )
-                              ) :
-                              value
-
-                        value =
-                          value &&
-                          !isNaN(value) ?
-                            Number(value) :
-                            value
 
                         setAmountX(value)
 
-                        if (typeof amountY !== 'number') {
-                          setAmountY(0)
+                        if (
+                          typeof amountY !== 'string' ||
+                          !amountY
+                        ) {
+                          setAmountY('0')
                         }
-
-                        // autoSetY(value)
                       }}
                       onWheel={e => e.target.blur()}
                       onKeyDown={e =>
@@ -2325,25 +2317,30 @@ export default (
                       }
                       className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
                     />
-                    {/*<div
-                      onClick={() => {
-                        setAmountX(x_balance_amount)
-
-                        if (typeof amountY !== 'number') {
-                          setAmountY(0)
-                        }
-
-                        // autoSetY(x_balance_amount)
-                      }}
-                      className={`${disabled || typeof x_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-200 dark:bg-slate-800 rounded border dark:border-slate-700 text-blue-400 dark:text-slate-200 text-base font-medium py-0.5 px-2.5`}
-                    >
-                      Max
-                    </div>*/}
                   </div>
                   {
-                    typeof amountX === 'number' &&
-                    typeof x_balance_amount === 'number' &&
-                    amountX > x_balance_amount &&
+                    typeof amountX === 'string' &&
+                    [
+                      'string',
+                      'number',
+                    ].includes(typeof x_balance_amount) &&
+                    utils.parseUnits(
+                      amountX ||
+                      '0',
+                      x_asset_data?.decimals ||
+                      18,
+                    )
+                    .gt(
+                      utils.parseUnits(
+                        (
+                          x_balance_amount ||
+                          0
+                        )
+                        .toString(),
+                        x_asset_data?.decimals ||
+                        18,
+                      )
+                    ) &&
                     (
                       <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
                         <BiMessageError
@@ -2380,13 +2377,21 @@ export default (
                           disabled={disabled}
                           onClick={() => {
                             if (
-                              typeof y_balance_amount === 'number' &&
-                              y_balance_amount >= 0
+                              [
+                                'string',
+                                'number',
+                              ].includes(typeof y_balance_amount)
                             ) {
-                              setAmountY(y_balance_amount)
+                              setAmountY(
+                                y_balance_amount
+                                  .toString()
+                              )
 
-                              if (typeof amountX !== 'number') {
-                                setAmountX(0)
+                              if (
+                                typeof amountX !== 'string' ||
+                                !amountX
+                              ) {
+                                setAmountX('0')
                               }
                             }
                           }}
@@ -2474,8 +2479,7 @@ export default (
                       placeholder="0.00"
                       disabled={disabled}
                       value={
-                        typeof amountY === 'number' &&
-                        amountY >= 0 ?
+                        !isNaN(amountY) ?
                           amountY :
                           ''
                       }
@@ -2496,43 +2500,22 @@ export default (
                             value = `0${value}`
                           }
 
-                          if (!isNaN(value)) {
-                            value = Number(value)
-                          }
+                          value =
+                            number_to_fixed(
+                              value,
+                              y_asset_data?.decimals ||
+                              18,
+                            )
                         }
-
-                        value =
-                          value < 0 ?
-                            0 :
-                            !isNaN(value) &&
-                            value !== '' ?
-                              parseFloat(
-                                Number(value)
-                                  .toFixed(
-                                    y_asset_data?.decimals ||
-                                    18
-                                  )
-                              ) :
-                              value
-
-                        value =
-                          value &&
-                          !isNaN(value) ?
-                            Number(value) :
-                            value
-
-                        value =
-                          value < 0 ?
-                            0 :
-                            value
 
                         setAmountY(value)
 
-                        if (typeof amountX !== 'number') {
-                          setAmountX(0)
+                        if (
+                          typeof amountX !== 'string' ||
+                          !amountX
+                        ) {
+                          setAmountX('0')
                         }
-
-                        // autoSetX(value)
                       }}
                       onWheel={e => e.target.blur()}
                       onKeyDown={e =>
@@ -2545,25 +2528,30 @@ export default (
                       }
                       className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
                     />
-                    {/*<div
-                      onClick={() => {
-                        setAmountY(y_balance_amount)
-
-                        if (typeof amountX !== 'number') {
-                          setAmountX(0)
-                        }
-
-                        // autoSetX(y_balance_amount)
-                      }}
-                      className={`${disabled || typeof y_balance_amount !== 'number' ? 'pointer-events-none cursor-not-allowed' : 'hover:bg-slate-300 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-white cursor-pointer'} bg-slate-200 dark:bg-slate-800 rounded border dark:border-slate-700 text-blue-400 dark:text-slate-200 text-sm font-medium py-0.5 px-2.5`}
-                    >
-                      Max
-                    </div>*/}
                   </div>
                   {
-                    typeof amountY === 'number' &&
-                    typeof y_balance_amount === 'number' &&
-                    amountY > y_balance_amount &&
+                    typeof amountY === 'string' &&
+                    [
+                      'string',
+                      'number',
+                    ].includes(typeof y_balance_amount) &&
+                    utils.parseUnits(
+                      amountY ||
+                      '0',
+                      y_asset_data?.decimals ||
+                      18,
+                    )
+                    .gt(
+                      utils.parseUnits(
+                        (
+                          y_balance_amount ||
+                          0
+                        )
+                        .toString(),
+                        y_asset_data?.decimals ||
+                        18,
+                      )
+                    ) &&
                     (
                       <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
                         <BiMessageError
@@ -3027,8 +3015,7 @@ export default (
                       placeholder="0.00"
                       disabled={disabled}
                       value={
-                        typeof amount === 'number' &&
-                        amount >= 0 ?
+                        !isNaN(amount) ?
                           amount :
                           ''
                       }
@@ -3049,30 +3036,12 @@ export default (
                             value = `0${value}`
                           }
 
-                          if (!isNaN(value)) {
-                            value = Number(value)
-                          }
+                          value =
+                            number_to_fixed(
+                              value,
+                              18,
+                            )
                         }
-
-                        value =
-                          value < 0 ?
-                            0 :
-                            !isNaN(value) &&
-                            value !== '' ?
-                              parseFloat(
-                                Number(value)
-                                  .toFixed(
-                                    x_asset_data?.decimals ||
-                                    18
-                                  )
-                              ) :
-                              value
-
-                        value =
-                          value &&
-                          !isNaN(value) ?
-                            Number(value) :
-                            value
 
                         setAmount(value)
                       }}
@@ -3089,9 +3058,26 @@ export default (
                     />
                   </div>
                   {
-                    typeof amount === 'number' &&
-                    typeof lpTokenBalance === 'number' &&
-                    amount > lpTokenBalance &&
+                    typeof amount === 'string' &&
+                    [
+                      'string',
+                      'number',
+                    ].includes(typeof lpTokenBalance) &&
+                    utils.parseUnits(
+                      amount ||
+                      '0',
+                      18,
+                    )
+                    .gt(
+                      utils.parseUnits(
+                        (
+                          lpTokenBalance ||
+                          0
+                        )
+                        .toString(),
+                        18,
+                      )
+                    ) &&
                     (
                       <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
                         <BiMessageError
@@ -3106,8 +3092,23 @@ export default (
                   }
                 </div>
                 {
-                  typeof lpTokenBalance === 'number' &&
-                  lpTokenBalance > 0 &&
+                  [
+                    'string',
+                    'number',
+                  ].includes(typeof lpTokenBalance) &&
+                  utils.parseUnits(
+                    (
+                      lpTokenBalance ||
+                      0
+                    )
+                    .toString(),
+                    18,
+                  )
+                  .gt(
+                    BigNumber.from(
+                      '0'
+                    )
+                  ) &&
                   (
                     <div className="flex items-center justify-end space-x-2.5">
                       {
@@ -3125,32 +3126,53 @@ export default (
 
                               try {
                                 _amount =
-                                  parseFloat(
-                                    Number(
-                                      FixedNumber.fromString(
-                                        (
-                                          lpTokenBalance ||
-                                          0
-                                        )
-                                        .toString()
-                                      )
-                                      .mulUnsafe(
-                                        FixedNumber.fromString(
-                                          p
-                                            .toString()
-                                        )
-                                      )
-                                      .toString()
+                                  FixedNumber.fromString(
+                                    (
+                                      lpTokenBalance ||
+                                      0
                                     )
-                                    .toFixed(18)
+                                    .toString()
                                   )
+                                  .mulUnsafe(
+                                    FixedNumber.fromString(
+                                      p
+                                        .toString()
+                                    )
+                                  )
+                                  .toString()
                               } catch (error) {
-                                _amount = 0
+                                _amount = '0'
                               }
 
                               setAmount(_amount)
                             }}
-                            className={`${disabled || typeof lpTokenBalance !== 'number' ? 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : p * amount === lpTokenBalance ? 'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'} rounded text-xs py-0.5 px-1.5`}
+                            className={
+                              `${
+                                disabled ||
+                                ![
+                                  'string',
+                                  'number',
+                                ].includes(typeof lpTokenBalance) ?
+                                  'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' :
+                                  FixedNumber.fromString(
+                                    (
+                                      lpTokenBalance ||
+                                      0
+                                    )
+                                    .toString()
+                                  )
+                                  .mulUnsafe(
+                                    FixedNumber.fromString(
+                                      p
+                                        .toString()
+                                    )
+                                  )
+                                  .toString() ===
+                                  amount ?
+                                    'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' :
+                                    'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'
+                              } rounded text-xs py-0.5 px-1.5`
+                            }
                           >
                             {p * 100} %
                           </div>
@@ -3321,7 +3343,8 @@ export default (
                       approveResponse ||
                       priceImpactAdd ||
                       priceImpactRemoveResponse,
-                    ].map((r, i) => {
+                    ]
+                    .map((r, i) => {
                       const {
                         status,
                         message,

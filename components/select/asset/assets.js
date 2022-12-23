@@ -485,19 +485,19 @@ export default (
 
               amount =
                 !isNaN(amount) ?
-                  amount = Number(amount) :
+                  amount :
                   null
 
               const balanceComponent =
                 balances_data?.[chain_id] &&
                 (
                   <div className={`${chain_id && !amount ? 'text-slate-400 dark:text-slate-500' : ''} ${selected ? 'font-semibold' : 'font-medium'} ml-auto`}>
-                    {typeof amount === 'number' ?
+                    {!isNaN(amount) ?
                       number_format(
                         amount,
-                        amount > 10000 ?
+                        Number(amount) > 10000 ?
                           '0,0' :
-                          amount > 1000 ?
+                          Number(amount) > 1000 ?
                             '0,0.00' :
                             '0,0.000000',
                         true,
