@@ -518,15 +518,13 @@ export default () => {
                       ...info,
                       symbols,
                       lpTokenBalance:
-                        Number(
-                          utils.formatUnits(
-                            BigNumber.from(
-                              lpTokenBalance ||
-                              '0',
-                            ),
-                            // _.last(decimals) ||
-                            18,
-                          )
+                        utils.formatUnits(
+                          BigNumber.from(
+                            lpTokenBalance ||
+                            '0',
+                          ),
+                          // _.last(decimals) ||
+                          18,
                         ),
                       poolTokenBalances:
                         (poolTokenBalances || [])

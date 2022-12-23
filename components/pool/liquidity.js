@@ -229,7 +229,7 @@ export default (
                   0
                 )
                 .toString(),
-                // _.head(decimals) ||
+                _.head(decimals) ||
                 18,
               )
               .toString()
@@ -241,7 +241,7 @@ export default (
                   0
                 )
                 .toString(),
-                // _.last(decimals) ||
+                _.last(decimals) ||
                 18,
               )
               .toString()
@@ -442,7 +442,7 @@ export default (
                           a ||
                           '0'
                         ),
-                        // decimals?.[i] ||
+                        decimals?.[i] ||
                         18,
                       )
                     )
@@ -636,7 +636,7 @@ export default (
                   0
                 )
                 .toString(),
-                // x_asset_data?.decimals ||
+                x_asset_data?.decimals ||
                 18,
               )
               .toString(),
@@ -646,7 +646,7 @@ export default (
                   0
                 )
                 .toString(),
-                // y_asset_data?.decimals ||
+                y_asset_data?.decimals ||
                 18,
               )
               .toString(),
@@ -3009,27 +3009,31 @@ export default (
                       web3_provider &&
                       (
                         <div className="flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs space-x-1">
-                          {typeof lpTokenBalance === 'number' ?
-                            <span className="font-semibold">
-                              {number_format(
-                                lpTokenBalance,
-                                lpTokenBalance > 1000000 ?
-                                  '0,0' :
-                                  lpTokenBalance > 10000 ?
-                                    '0,0.00' :
-                                    '0,0.000000000000000000',
-                                true,
-                              )}
-                            </span> :
-                            typeof lpTokenBalance === 'string' ?
-                              <span>
-                                n/a
+                          {
+                            [
+                              'string',
+                              'number',
+                            ].includes(typeof lpTokenBalance) ?
+                              <span className="font-semibold">
+                                {number_format(
+                                  Number(lpTokenBalance),
+                                  Number(lpTokenBalance) > 1000000 ?
+                                    '0,0' :
+                                    Number(lpTokenBalance) > 10000 ?
+                                      '0,0.00' :
+                                      '0,0.000000000000000000',
+                                  true,
+                                )}
                               </span> :
-                              <RotatingSquare
-                                color={loader_color(theme)}
-                                width="16"
-                                height="16"
-                              />
+                              typeof lpTokenBalance === 'string' ?
+                                <span>
+                                  n/a
+                                </span> :
+                                <RotatingSquare
+                                  color={loader_color(theme)}
+                                  width="16"
+                                  height="16"
+                                />
                           }
                         </div>
                       )

@@ -148,7 +148,7 @@ export default (
     pool_data?.balances
 
   const share =
-    lpTokenBalance * 100 /
+    Number(lpTokenBalance) * 100 /
     (
       Number(supply) ||
       1
@@ -559,16 +559,20 @@ export default (
                                   className={gridValueClassName}
                                 >
                                   {number_format(
-                                    lpTokenBalance ||
-                                    0,
+                                    Number(
+                                      lpTokenBalance ||
+                                      0
+                                    ),
                                     '0,0.000000000000',
                                     true,
                                   )}
                                 </a> :
                                 <span className={gridValueClassName}>
                                   {number_format(
-                                    lpTokenBalance ||
-                                    0,
+                                    Number(
+                                      lpTokenBalance ||
+                                      0
+                                    ),
                                     '0,0.000000000000',
                                     true,
                                   )}
@@ -837,15 +841,19 @@ export default (
                               rel="noopener noreferrer"
                             >
                               {number_format(
-                                lpTokenBalance ||
-                                0,
+                                Number(
+                                  lpTokenBalance ||
+                                  0
+                                ),
                                 '0,0.000000000000',
                                 true,
                               )}
                             </a> :
                             number_format(
-                              lpTokenBalance ||
-                              0,
+                              Number(
+                                lpTokenBalance ||
+                                0
+                              ),
                               '0,0.000000000000',
                               true,
                             ) :

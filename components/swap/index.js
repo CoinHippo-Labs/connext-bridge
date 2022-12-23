@@ -1282,30 +1282,22 @@ export default () => {
       }
       else {
         minDy =
-          FixedNumber.fromString(
+          (
+            Number(amount) *
             (
-              amount ||
-              0
-            )
-            .toString()
-          )
-          .mulUnsafe(
-            FixedNumber.fromString(
               (
+                100 -
                 (
-                  100 -
-                  (
-                    typeof slippage === 'number' ?
-                      slippage :
-                      DEFAULT_SWAP_SLIPPAGE_PERCENTAGE
-                  )
-                ) /
-                100
-              )
-              .toFixed(_decimals)
-              .toString()
+                  typeof slippage === 'number' ?
+                    slippage :
+                    DEFAULT_SWAP_SLIPPAGE_PERCENTAGE
+                )
+              ) /
+              100
             )
+            .toFixed(_decimals)
           )
+          .toFixed(_decimals)
 
         amount =
           utils.parseUnits(
@@ -3245,7 +3237,7 @@ export default () => {
                                   className="rounded p-4.5"
                                 >
                                   <div className="flex items-center justify-between space-x-2">
-                                    <span className="break-all text-sm font-medium">
+                                    <span className="break-words text-sm font-medium">
                                       {ellipse(
                                         (message || '')
                                           .substring(
