@@ -1888,6 +1888,7 @@ export default () => {
         callData:
           callData ||
           '0x',
+        relayerFee: fee?.gas ? utils.parseUnits(fee.gas.toString(), 18).toString() : undefined
       }
 
       let failed = false
@@ -2017,7 +2018,7 @@ export default () => {
               xcallParams,
             },
           )
-
+          
           const xcall_request =
             is_wrap_eth ?
               await sdk.nxtpSdkBase
