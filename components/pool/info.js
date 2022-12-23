@@ -817,7 +817,13 @@ export default (
                     }
                     <span className="text-sm font-semibold">
                       {
-                        !isNaN(lpTokenBalance) ||
+                        (
+                          [
+                            'string',
+                            'number',
+                          ].includes(typeof lpTokenBalance) &&
+                          !isNaN(lpTokenBalance)
+                        ) ||
                         (
                           pool_data &&
                           !error &&

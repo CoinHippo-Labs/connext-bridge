@@ -1458,6 +1458,10 @@ export default () => {
       if (
         source_contract_data &&
         destination_contract_data &&
+        [
+          'string',
+          'number',
+        ].includes(typeof amount) &&
         !isNaN(amount)
       ) {
         if (sdk) {
@@ -2830,6 +2834,10 @@ export default () => {
                               !asset
                             }
                             value={
+                              [
+                                'string',
+                                'number',
+                              ].includes(typeof amount) &&
                               !isNaN(amount) ?
                                 amount :
                                 ''
@@ -3146,6 +3154,10 @@ export default () => {
                                 !asset
                               }
                               value={
+                                [
+                                  'string',
+                                  'number',
+                                ].includes(typeof amount) &&
                                 !isNaN(amount) ?
                                   amount :
                                   ''
@@ -3417,7 +3429,7 @@ export default () => {
                                                                   !isNaN(value) ?
                                                                     parseFloat(
                                                                       Number(value)
-                                                                        .toFixed(2)
+                                                                        .toFixed(6)
                                                                     ) :
                                                                     value,
                                                               }
@@ -3485,7 +3497,7 @@ export default () => {
                                                         <span className="font-semibold">
                                                           {number_format(
                                                             slippage,
-                                                            '0,0.00',
+                                                            '0,0.000000',
                                                           )}%
                                                         </span>
                                                         <button
@@ -3629,7 +3641,7 @@ export default () => {
                                                         <span>
                                                           {number_format(
                                                             price_impact,
-                                                            '0,0.00',
+                                                            '0,0.000000',
                                                             true,
                                                           )}%
                                                         </span>

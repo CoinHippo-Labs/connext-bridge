@@ -366,7 +366,7 @@ export default (
                                     !isNaN(value) ?
                                       parseFloat(
                                         Number(value)
-                                          .toFixed(2)
+                                          .toFixed(6)
                                       ) :
                                       value,
                                 }

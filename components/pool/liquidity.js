@@ -1967,7 +1967,7 @@ export default (
                         !isNaN(value) ?
                           parseFloat(
                             Number(value)
-                              .toFixed(2)
+                              .toFixed(6)
                           ) :
                           value,
                     }
@@ -2062,7 +2062,7 @@ export default (
                         !isNaN(value) ?
                           parseFloat(
                             Number(value)
-                              .toFixed(2)
+                              .toFixed(6)
                           ) :
                           value,
                     }
@@ -2268,6 +2268,10 @@ export default (
                       placeholder="0.00"
                       disabled={disabled}
                       value={
+                        [
+                          'string',
+                          'number',
+                        ].includes(typeof amountX) &&
                         !isNaN(amountX) ?
                           amountX :
                           ''
@@ -2479,6 +2483,10 @@ export default (
                       placeholder="0.00"
                       disabled={disabled}
                       value={
+                        [
+                          'string',
+                          'number',
+                        ].includes(typeof amountY) &&
                         !isNaN(amountY) ?
                           amountY :
                           ''
@@ -2792,7 +2800,8 @@ export default (
                       approveResponse ||
                       priceImpactAddResponse ||
                       priceImpactRemoveResponse,
-                    ].map((r, i) => {
+                    ]
+                    .map((r, i) => {
                       const {
                         status,
                         message,
@@ -3015,6 +3024,10 @@ export default (
                       placeholder="0.00"
                       disabled={disabled}
                       value={
+                        [
+                          'string',
+                          'number',
+                        ].includes(typeof amount) &&
                         !isNaN(amount) ?
                           amount :
                           ''
@@ -3201,6 +3214,10 @@ export default (
                       </div>
                   }
                   {web3_provider ?
+                    [
+                      'string',
+                      'number',
+                    ].includes(typeof x_remove_amount) &&
                     !isNaN(x_remove_amount) ?
                       <span className="text-xs">
                         {number_format(
@@ -3245,6 +3262,10 @@ export default (
                       </div>
                   }
                   {web3_provider ?
+                    [
+                      'string',
+                      'number',
+                    ].includes(typeof y_remove_amount) &&
                     !isNaN(y_remove_amount) ?
                       <span className="text-xs">
                         {number_format(

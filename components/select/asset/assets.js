@@ -484,6 +484,10 @@ export default (
               } = { ...balance }
 
               amount =
+                [
+                  'string',
+                  'number',
+                ].includes(typeof amount) &&
                 !isNaN(amount) ?
                   amount :
                   null
@@ -492,17 +496,22 @@ export default (
                 balances_data?.[chain_id] &&
                 (
                   <div className={`${chain_id && !amount ? 'text-slate-400 dark:text-slate-500' : ''} ${selected ? 'font-semibold' : 'font-medium'} ml-auto`}>
-                    {!isNaN(amount) ?
-                      number_format(
-                        amount,
-                        Number(amount) > 10000 ?
-                          '0,0' :
-                          Number(amount) > 1000 ?
-                            '0,0.00' :
-                            '0,0.000000',
-                        true,
-                      ) :
-                      'n/a'
+                    {
+                      [
+                        'string',
+                        'number',
+                      ].includes(typeof amount) &&
+                      !isNaN(amount) ?
+                        number_format(
+                          amount,
+                          Number(amount) > 10000 ?
+                            '0,0' :
+                            Number(amount) > 1000 ?
+                              '0,0.00' :
+                              '0,0.000000',
+                          true,
+                        ) :
+                        'n/a'
                     }
                   </div>
                 )

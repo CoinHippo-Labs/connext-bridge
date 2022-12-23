@@ -217,6 +217,10 @@ export default (
   amount =
     trigger ?
       balance :
+      [
+        'string',
+        'number',
+      ].includes(typeof amount) &&
       !isNaN(amount) ?
         amount :
         null
@@ -231,40 +235,45 @@ export default (
     asset &&
     (
       <div className={`flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm space-x-1 ${className}`}>
-        {!isNaN(amount) ?
-          <>
-            <span className="font-semibold">
-              {number_format(
-                amount,
-                Number(amount) > 1000000 ?
-                  '0,0' :
-                  Number(amount) > 10000 ?
-                    '0,0.00' :
-                    '0,0.00000000',
-                true,
-              )}
-            </span>
-            {
-              !hideSymbol &&
+        {
+          [
+            'string',
+            'number',
+          ].includes(typeof amount) &&
+          !isNaN(amount) ?
+            <>
+              <span className="font-semibold">
+                {number_format(
+                  amount,
+                  Number(amount) > 1000000 ?
+                    '0,0' :
+                    Number(amount) > 10000 ?
+                      '0,0.00' :
+                      '0,0.00000000',
+                  true,
+                )}
+              </span>
+              {
+                !hideSymbol &&
+                (
+                  <span className="hidden sm:block font-semibold">
+                    {symbol}
+                  </span>
+                )
+              }
+            </> :
+            typeof amount === 'string' ?
+              <span>
+                n/a
+              </span> :
+              web3_provider &&
               (
-                <span className="hidden sm:block font-semibold">
-                  {symbol}
-                </span>
+                <RotatingSquare
+                  color={loader_color(theme)}
+                  width="16"
+                  height="16"
+                />
               )
-            }
-          </> :
-          typeof amount === 'string' ?
-            <span>
-              n/a
-            </span> :
-            web3_provider &&
-            (
-              <RotatingSquare
-                color={loader_color(theme)}
-                width="16"
-                height="16"
-              />
-            )
         }
       </div>
     )

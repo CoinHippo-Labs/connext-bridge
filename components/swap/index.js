@@ -1576,12 +1576,11 @@ export default () => {
             )
             .join('_')
 
-          /*if (message?.includes('revert')) {
-            message = 'More than pool balance'
-          }*/
-
           if (message?.includes('cannot estimate gas')) {
             message = 'Slippage exceeded. Please try increasing slippage tolerance and resubmitting your transfer.'
+          }
+          else if (message?.includes('dy < minDy')) {
+            message = 'Slippage tolerance succeeded. Please try again.'
           }
 
           switch (code) {
@@ -2337,9 +2336,13 @@ export default () => {
                           !pair
                         }
                         value={
+                          [
+                            'string',
+                            'number',
+                          ].includes(typeof amount) &&
                           !isNaN(amount) ?
-                          amount :
-                          ''
+                            amount :
+                            ''
                         }
                         onChange={e => {
                           const regex = /^[0-9.\b]+$/
@@ -2868,7 +2871,7 @@ export default () => {
                                         !isNaN(value) ?
                                           parseFloat(
                                             Number(value)
-                                              .toFixed(2)
+                                              .toFixed(6)
                                           ) :
                                           value,
                                     }
@@ -2936,7 +2939,7 @@ export default () => {
                               <span className="font-semibold">
                                 {number_format(
                                   slippage,
-                                  '0,0.00',
+                                  '0,0.000000',
                                 )}%
                               </span>
                               <button
@@ -3203,7 +3206,8 @@ export default () => {
                               callResponse ||
                               approveResponse ||
                               calculateSwapResponse,
-                            ].map((r, i) => {
+                            ]
+                            .map((r, i) => {
                               const {
                                 status,
                                 message,
