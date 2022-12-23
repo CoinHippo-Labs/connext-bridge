@@ -1580,7 +1580,7 @@ export default () => {
             message = 'Slippage exceeded. Please try increasing slippage tolerance and resubmitting your transfer.'
           }
           else if (message?.includes('dy < minDy')) {
-            message = 'Slippage tolerance succeeded. Please try again.'
+            message = 'Exceeded slippage tolerance. Please increase tolerance and try again.'
           }
 
           switch (code) {
