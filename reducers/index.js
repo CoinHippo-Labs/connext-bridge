@@ -14,18 +14,20 @@ import wallet from './wallet'
 import chain_id from './chain-id'
 import balances from './balances'
 
-export default combineReducers({
-  preferences,
-  announcement,
-  chains,
-  assets,
-  pool_assets,
-  ens,
-  asset_balances,
-  pools,
-  rpc_providers,
-  dev,
-  wallet,
-  chain_id,
-  balances,
-})
+export default combineReducers(
+  {
+    preferences,
+    announcement,
+    chains,
+    assets,
+    pool_assets,
+    ens,
+    asset_balances,
+    pools,
+    rpc_providers,
+    dev,
+    wallet,
+    chain_id,
+    balances,
+  },
+)

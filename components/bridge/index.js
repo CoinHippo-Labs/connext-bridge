@@ -76,6 +76,7 @@ export default () => {
     chains,
     assets,
     asset_balances,
+    pools,
     rpc_providers,
     dev,
     wallet,
@@ -87,6 +88,7 @@ export default () => {
         chains: state.chains,
         assets: state.assets,
         asset_balances: state.asset_balances,
+        pools: state.pools,
         rpc_providers: state.rpc_providers,
         dev: state.dev,
         wallet: state.wallet,
@@ -107,6 +109,9 @@ export default () => {
   const {
     asset_balances_data,
   } = { ...asset_balances }
+  const {
+    pools_data,
+  } = { ...pools }
   const {
     rpcs,
   } = { ...rpc_providers }
@@ -1581,62 +1586,78 @@ export default () => {
           destination_contract_data?.next_asset?.contract_address,
         )
 
+      let manual
+
       try {
         setEstimatedValues(null)
         setEstimateResponse(null)
 
-        console.log(
-          '[calculateAmountReceived]',
-          {
-            originDomain,
-            destinationDomain,
-            originTokenAddress,
-            destinationTokenAddress,
-            amount,
-            isNextAsset,
-          },
-        )
-
-        const response =
-          await sdk.nxtpSdkPool
-            .calculateAmountReceived(
+        if (
+          (pools_data || [])
+            .findIndex(p =>
+              [
+                source_chain_data?.id,
+                destination_chain_data?.id,
+              ].includes(p?.chain_data?.id) &&
+              !p?.tvl
+            ) < 0
+        ) {
+          console.log(
+            '[calculateAmountReceived]',
+            {
               originDomain,
               destinationDomain,
               originTokenAddress,
               destinationTokenAddress,
               amount,
               isNextAsset,
-            )
-
-        console.log(
-          '[calculateAmountReceived response]',
-          {
-            originDomain,
-            destinationDomain,
-            originTokenAddress,
-            destinationTokenAddress,
-            amount,
-            isNextAsset,
-            ...response,
-          },
-        )
-
-        setEstimatedValues(
-          Object.fromEntries(
-            Object.entries({ ...response })
-              .map(([k, v]) => {
-                return [
-                  k,
-                  Number(
-                    utils.formatUnits(
-                      v,
-                      destination_decimals,
-                    )
-                  ),
-                ]
-              })
+            },
           )
-        )
+
+          const response =
+            await sdk.nxtpSdkPool
+              .calculateAmountReceived(
+                originDomain,
+                destinationDomain,
+                originTokenAddress,
+                destinationTokenAddress,
+                amount,
+                isNextAsset,
+              )
+
+          console.log(
+            '[calculateAmountReceived response]',
+            {
+              originDomain,
+              destinationDomain,
+              originTokenAddress,
+              destinationTokenAddress,
+              amount,
+              isNextAsset,
+              ...response,
+            },
+          )
+
+          setEstimatedValues(
+            Object.fromEntries(
+              Object.entries({ ...response })
+                .map(([k, v]) => {
+                  return [
+                    k,
+                    Number(
+                      utils.formatUnits(
+                        v,
+                        destination_decimals,
+                      )
+                    ),
+                  ]
+                })
+            )
+          )
+        }
+        else {
+          manual = true
+        }
       } catch (error) {
         const message =
           error?.reason ||
@@ -1667,11 +1688,35 @@ export default () => {
           )
           .join('_')
 
-        setEstimateResponse(
+        if (message?.includes('reverted')) {
+          manual = true
+        }
+        else {
+          setEstimateResponse(
+            {
+              status: 'failed',
+              message,
+              code,
+            }
+          )
+        }
+      }
+
+      if (manual) {
+        const routerFee =
+          parseFloat(
+            (
+              _amount *
+              ROUTER_FEE_PERCENT /
+              100
+            )
+            .toFixed(source_decimals)
+          )
+
+        setEstimatedValues(
           {
-            status: 'failed',
-            message,
-            code,
+            amountReceived: _amount - routerFee,
+            routerFee,
           }
         )
       }
@@ -1888,7 +1933,15 @@ export default () => {
         callData:
           callData ||
           '0x',
-        relayerFee: fee?.gas ? utils.parseUnits(fee.gas.toString(), 18).toString() : undefined
+        relayerFee:
+          fee?.gas ?
+            utils.parseUnits(
+              fee.gas
+                .toString(),
+              18,
+            )
+            .toString() :
+            undefined,
       }
 
       let failed = false
@@ -2018,7 +2071,7 @@ export default () => {
               xcallParams,
             },
           )
-          
+
           const xcall_request =
             is_wrap_eth ?
               await sdk.nxtpSdkBase

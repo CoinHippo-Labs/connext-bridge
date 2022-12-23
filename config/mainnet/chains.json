@@ -157,7 +157,7 @@
     "id": "arbitrum",
     "chain_id": 42161,
     "domain_id": "1634886255",
-    "name": "Arbitrum One",
+    "name": "Arbitrum",
     "short_name": "ARB",
     "provider_params": [
       {
