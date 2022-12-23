@@ -2081,7 +2081,18 @@ export default () => {
                         origin_chain: source_chain_data?.chain_id,
                         origin_domain: xcallParams.origin,
                         origin_transacting_asset: xcallParams.asset,
-                        origin_transacting_amount: Number(xcallParams.amount),
+                        origin_transacting_amount:
+                          Number(
+                            utils.parseUnits(
+                              (
+                                amount ||
+                                0
+                              )
+                              .toString(),
+                              18,
+                            )
+                            .toString()
+                          ),
                         destination_chain: destination_chain_data?.chain_id,
                         destination_domain: xcallParams.destination,
                         destination_transacting_asset:
