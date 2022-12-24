@@ -17,7 +17,7 @@ export default (
     query,
   } = { ...router }
   const {
-    receive_next,
+    source,
   } = { ...query }
 
   return (
@@ -26,7 +26,9 @@ export default (
         .filter(m =>
           m?.path &&
           (
-            receive_next !== 'true' ||
+            ![
+              'pool',
+            ].includes(source) ||
             ![
               // '/',
             ].includes(m.path)

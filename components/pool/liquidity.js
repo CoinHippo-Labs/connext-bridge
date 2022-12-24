@@ -342,6 +342,8 @@ export default (
               contract_data,
               domainId,
               tokens,
+            } = { ...pool_data }
+            let {
               decimals,
             } = { ...pool_data }
             const {
@@ -355,7 +357,6 @@ export default (
                   0
                 )
                 .toString(),
-                // _.last(decimals) ||
                 18,
               )
               .toString()
@@ -423,6 +424,11 @@ export default (
                     _.reverse(
                       _.cloneDeep(amounts)
                     )
+
+                  decimals =
+                    _.reverse(
+                      _.cloneDeep(decimals)
+                    )
                 }
 
                 calculateRemoveLiquidityPriceImpact(
@@ -448,6 +454,7 @@ export default (
                     )
                   )
               )
+              setCallResponse(null)
             } catch (error) {
               let message =
                 error?.reason ||
@@ -482,6 +489,7 @@ export default (
         }
         else {
           setRemoveAmounts(null)
+          setCallResponse(null)
         }
       }
 
@@ -1626,6 +1634,18 @@ export default (
       ),
     }
 
+  const _x_asset_data =
+    _.head(tokens) &&
+    {
+      ...Object.fromEntries(
+        Object.entries({ ...asset_data })
+          .filter(([k, v]) =>
+            !['contracts'].includes(k)
+          )
+      ),
+      ...contract_data,
+    }
+
   const x_balance =
     x_asset_data &&
     (balances_data?.[chain_id] || [])
@@ -2141,7 +2161,7 @@ export default (
     ) ?
      'x' :
      'y'
-
+console.log('[qqq]',x_asset_data)
   return (
     <div className="order-1 lg:order-2 bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-3 pt-4 pb-5 px-4">
       <div className="flex items-center justify-between space-x-2">
@@ -2679,7 +2699,7 @@ export default (
                             </span>
                             <div className="flex items-center space-x-1">
                               <a
-                                href={`/${asset.toUpperCase()}-from-${_.head(chains_data)?.id}-to-${chain}?receive_next=true`}
+                                href={`/${asset.toUpperCase()}-from-${_.head(chains_data)?.id}-to-${chain}?receive_next=true&source=pool`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
@@ -2758,7 +2778,7 @@ export default (
                           <div className="flex flex-col space-y-0 mx-auto">
                             <div className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 rounded flex items-center space-x-1 pt-0.5 pb-1 px-2">
                               <a
-                                href={`/${asset.toUpperCase()}-from-${_.head(chains_data)?.id}-to-${chain}?receive_next=true`}
+                                href={`/${asset.toUpperCase()}-from-${_.head(chains_data)?.id}-to-${chain}?receive_next=true&source=pool`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
@@ -3552,14 +3572,14 @@ export default (
         }
         {
           (
-            x_asset_data?.mintable ||
-            x_asset_data?.wrapable ||
-            x_asset_data?.wrapped
+            _x_asset_data?.mintable ||
+            _x_asset_data?.wrapable ||
+            _x_asset_data?.wrapped
           ) &&
           (
             <Faucet
               token_id={asset}
-              contract_data={x_asset_data}
+              contract_data={_x_asset_data}
               className="w-full max-w-lg bg-transparent flex flex-col items-center justify-center space-y-2 mx-auto"
             />
           )

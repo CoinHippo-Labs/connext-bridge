@@ -19,7 +19,7 @@ export default (
     bridge,
     pool,
     swap,
-    receive_next,
+    source,
   } = { ...query }
 
   return (
@@ -28,7 +28,9 @@ export default (
         .filter(m =>
           m?.path &&
           (
-            receive_next !== 'true' ||
+            ![
+              'pool',
+            ].includes(source) ||
             ![
               // '/',
             ].includes(m.path)

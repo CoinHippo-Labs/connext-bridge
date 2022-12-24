@@ -148,10 +148,15 @@ export default (
     pool_data?.balances
 
   const share =
-    Number(lpTokenBalance) * 100 /
-    (
-      Number(supply) ||
-      1
+    parseFloat(
+      (
+        Number(lpTokenBalance) * 100 /
+        (
+          Number(supply) ||
+          1
+        )
+      )
+      .toFixed(18)
     )
 
   const position_loading =

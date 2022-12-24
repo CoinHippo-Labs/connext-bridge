@@ -137,7 +137,11 @@ export default () => {
   const router = useRouter()
   const {
     asPath,
+    query,
   } = { ...router }
+  const {
+    source,
+  } = { ...query }
 
   const [pageVisible, setPageVisible] = useState(true)
 
@@ -420,6 +424,10 @@ export default () => {
         bridge?.receive_next
       ) {
         params.receive_next = true
+      }
+
+      if (source) {
+        params.source = source
       }
 
       if (Object.keys(params).length > 0) {
@@ -1674,7 +1682,7 @@ export default () => {
             error: message,
           },
         )
-        
+
         const code =
           _.slice(
             (message || '')
@@ -1686,7 +1694,14 @@ export default () => {
           )
           .join('_')
 
-        if (message?.includes('reverted')) {
+        if (
+          [
+            'reverted',
+            'invalid BigNumber value',
+          ].findIndex(s =>
+            message?.includes(s)
+          ) > -1
+        ) {
           manual = true
         }
         else {
@@ -2089,6 +2104,7 @@ export default () => {
                                 0
                               )
                               .toString(),
+                              source_contract_data?.decimals ||
                               18,
                             )
                             .toString()
@@ -2507,11 +2523,15 @@ export default () => {
                               Sending
                             </span>
                             <span>
-                              {number_format(
-                                amount,
-                                '0,0.000000000000000000',
-                                true,
-                              )}
+                              {
+                                Number(amount) > 1000 ?
+                                  number_format(
+                                    amount,
+                                    '0,0.00',
+                                    true,
+                                  ) :
+                                  amount
+                              }
                             </span>
                             <div className="flex flex-wrap items-center space-x-1.5">
                               {
@@ -2606,7 +2626,9 @@ export default () => {
                         }
                       </h1>
                       {
-                        !receive_next &&
+                        ![
+                          'pool',
+                        ].includes(source) &&
                         (
                           <Options
                             disabled={disabled}
@@ -2656,7 +2678,11 @@ export default () => {
                         </div>
                         <SelectChain
                           disabled={disabled}
-                          fixed={receive_next}
+                          fixed={
+                            [
+                              'pool',
+                            ].includes(source)
+                          }
                           value={source_chain}
                           onSelect={c => {
                             const _source_chain = c
@@ -2710,7 +2736,19 @@ export default () => {
                               getBalances(destination_chain)
                             }
                           }}
-                          className={`bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} ${receive_next ? 'pointer-events-none' : ''} rounded border dark:border-slate-700 flex items-center justify-center p-1.5`}
+                          className={
+                            `bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 ${
+                              disabled ?
+                                'cursor-not-allowed' :
+                                ''
+                            } ${
+                              [
+                                'pool',
+                              ].includes(source) ?
+                                'pointer-events-none' :
+                                ''
+                            } rounded border dark:border-slate-700 flex items-center justify-center p-1.5`
+                          }
                         >
                           <HiArrowRight
                             size={18}
@@ -2739,7 +2777,11 @@ export default () => {
                         </div>
                         <SelectChain
                           disabled={disabled}
-                          fixed={receive_next}
+                          fixed={
+                            [
+                              'pool',
+                            ].includes(source)
+                          }
                           value={destination_chain}
                           onSelect={c => {
                             const _source_chain = c === source_chain ?
@@ -2800,7 +2842,11 @@ export default () => {
                         <div className="flex items-center justify-between space-x-2">
                           <SelectAsset
                             disabled={disabled}
-                            fixed={receive_next}
+                            fixed={
+                              [
+                                'pool',
+                              ].includes(source)
+                            }
                             value={asset}
                             onSelect={(a, s) => {
                               setBridge(
@@ -3377,7 +3423,9 @@ export default () => {
                                               true ||
                                               !receiveLocal
                                             ) &&
-                                            !receive_next &&
+                                            ![
+                                              'pool',
+                                            ].includes(source) &&
                                             (
                                               <div className="flex flex-col space-y-0.5">
                                                 <div className="flex items-start justify-between space-x-1">
