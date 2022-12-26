@@ -561,7 +561,10 @@ export default () => {
             [
               'string',
               'number',
-            ].includes(typeof amount)
+            ].includes(typeof amount) &&
+            ![
+              '',
+            ].includes(swapAmount)
           ) {
             setSwapAmount(true)
           }
@@ -569,7 +572,10 @@ export default () => {
             [
               'string',
               'number',
-            ].includes(typeof swapAmount)
+            ].includes(typeof swapAmount) &&
+            ![
+              '',
+            ].includes(swapAmount)
           ) {
             setSwapAmount(null)
           }
@@ -1628,7 +1634,10 @@ export default () => {
       [
         'string',
         'number',
-      ].includes(typeof amount)
+      ].includes(typeof amount) &&
+      ![
+        '',
+      ].includes(amount)
     ) {
       let {
         amount,
@@ -2332,6 +2341,9 @@ export default () => {
                             'string',
                             'number',
                           ].includes(typeof amount) &&
+                          ![
+                            '',
+                          ].includes(amount) &&
                           !isNaN(amount) ?
                             amount :
                             ''
@@ -2410,7 +2422,10 @@ export default () => {
                                   [
                                     'string',
                                     'number',
-                                  ].includes(typeof amount)
+                                  ].includes(typeof amount) &&
+                                  ![
+                                    '',
+                                  ].includes(amount)
                                 ) {
                                   setSwap(
                                     {
@@ -2466,7 +2481,10 @@ export default () => {
                                 [
                                   'string',
                                   'number',
-                                ].includes(typeof amount)
+                                ].includes(typeof amount) &&
+                                ![
+                                  '',
+                                ].includes(amount)
                               ) {
                                 setSwap(
                                   {
@@ -2610,12 +2628,18 @@ export default () => {
                                 'string',
                                 'number',
                               ].includes(typeof swapAmount) &&
+                              ![
+                                '',
+                              ].includes(swapAmount) &&
                               Number(swapAmount) >= 0 ?
                                 swapAmount :
                                 [
                                   'string',
                                   'number',
-                                ].includes(typeof amount) ?
+                                ].includes(typeof amount) &&
+                                ![
+                                  '',
+                                ].includes(amount) ?
                                   '0.00' :
                                   ''
                             }
@@ -3032,10 +3056,15 @@ export default () => {
                       y_balance
                     ) &&
                     (
-                      [
-                        'string',
-                        'number',
-                      ].includes(typeof amount) ||
+                      (
+                        [
+                          'string',
+                          'number',
+                        ].includes(typeof amount) &&
+                        ![
+                          '',
+                        ].includes(amount)
+                      ) ||
                       web3_provider
                     ) ?
                       !callResponse &&
@@ -3043,6 +3072,9 @@ export default () => {
                         'string',
                         'number',
                       ].includes(typeof amount) &&
+                      ![
+                        '',
+                      ].includes(amount) &&
                       (
                         (
                           utils.parseUnits(
@@ -3181,7 +3213,10 @@ export default () => {
                                     [
                                       'string',
                                       'number',
-                                    ].includes(typeof amount) ?
+                                    ].includes(typeof amount) &&
+                                    ![
+                                      '',
+                                    ].includes(amount) ?
                                       'Swap' :
                                       'Enter amount'
                                 }

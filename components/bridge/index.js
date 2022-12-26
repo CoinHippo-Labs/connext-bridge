@@ -1470,6 +1470,9 @@ export default () => {
           'string',
           'number',
         ].includes(typeof amount) &&
+        ![
+          '',
+        ].includes(amount) &&
         !isNaN(amount)
       ) {
         if (sdk) {
@@ -2895,6 +2898,9 @@ export default () => {
                                 'string',
                                 'number',
                               ].includes(typeof amount) &&
+                              ![
+                                '',
+                              ].includes(amount) &&
                               !isNaN(amount) ?
                                 amount :
                                 ''
@@ -3215,6 +3221,9 @@ export default () => {
                                   'string',
                                   'number',
                                 ].includes(typeof amount) &&
+                                ![
+                                  '',
+                                ].includes(amount) &&
                                 !isNaN(amount) ?
                                   amount :
                                   ''
@@ -3815,10 +3824,15 @@ export default () => {
                     ) &&
                     web3_provider &&
                     (
-                      [
-                        'string',
-                        'number',
-                      ].includes(typeof amount) ||
+                      (
+                        [
+                          'string',
+                          'number',
+                        ].includes(typeof amount) &&
+                        ![
+                          '',
+                        ].includes(amount)
+                      ) ||
                       (
                         web3_provider &&
                         wrong_chain
@@ -3857,6 +3871,9 @@ export default () => {
                           'string',
                           'number',
                         ].includes(typeof amount) &&
+                        ![
+                          '',
+                        ].includes(amount) &&
                         (
                           (
                             utils.parseUnits(
