@@ -3638,11 +3638,14 @@ export default () => {
                                                     estimateResponse ?
                                                       <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
                                                         <span>
-                                                          {number_format(
-                                                            router_fee,
-                                                            '0,0.000000000000',
-                                                            true,
-                                                          )}
+                                                          {Number(router_fee) < 1 ?
+                                                            router_fee :
+                                                            number_format(
+                                                              router_fee,
+                                                              '0,0.000000000000',
+                                                              true,
+                                                            )
+                                                          }
                                                         </span>
                                                         <span>
                                                           {source_symbol}

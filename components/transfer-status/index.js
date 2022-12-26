@@ -77,6 +77,7 @@ export default (
     destination_transacting_amount,
     destination_local_asset,
     destination_local_amount,
+    receive_local,
     to,
     xcall_timestamp,
     reconcile_transaction_hash,
@@ -196,7 +197,14 @@ export default (
           c?.chain_id === destination_chain_data?.chain_id &&
           [
             destination_transacting_asset,
-            destination_local_asset,
+            equals_ignore_case(
+              source_asset_data?.id,
+              a?.id,
+            ) ?
+              receive_local ?
+                c?.next_asset?.contract_address :
+                c?.contract_address :
+              destination_local_asset,
           ].findIndex(_a =>
             [
               c?.next_asset?.contract_address,
@@ -222,7 +230,7 @@ export default (
     destination_contract_data?.next_asset &&
     equals_ignore_case(
       destination_contract_data.next_asset.contract_address,
-      destination_local_asset,
+      destination_transacting_asset,
     )
   ) {
     destination_contract_data = {
