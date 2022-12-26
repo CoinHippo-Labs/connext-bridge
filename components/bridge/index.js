@@ -1100,10 +1100,14 @@ export default () => {
   // render latest transfer status
   useEffect(
     () => {
-      const update = () => {
+      const update = is_interval => {
         if (
           openTransferStatus &&
-          latest_transfer
+          latest_transfer &&
+          (
+            !timeTrigger ||
+            is_interval
+          )
         ) {
           setTimeTrigger(!timeTrigger)
         }
@@ -1113,7 +1117,7 @@ export default () => {
 
       const interval =
         setInterval(() =>
-          update(),
+          update(true),
           1 * 1000,
         )
 
@@ -1657,7 +1661,7 @@ export default () => {
                     k,
                     utils.formatUnits(
                       v,
-                      destination_decimals,
+                      source_decimals,
                     ),
                   ]
                 })
@@ -1827,7 +1831,10 @@ export default () => {
         )
 
       if (
-        receiveLocal &&
+        (
+          receiveLocal ||
+          estimatedValues?.isNextAsset
+        ) &&
         destination_contract_data?.next_asset
       ) {
         destination_contract_data = {
@@ -2291,7 +2298,10 @@ export default () => {
     )  
 
   if (
-    receiveLocal &&
+    (
+      receiveLocal ||
+      estimatedValues?.isNextAsset
+    ) &&
     destination_contract_data?.next_asset
   ) {
     destination_contract_data = {
@@ -3358,11 +3368,13 @@ export default () => {
                                                     'number',
                                                   ].includes(typeof estimate_received) &&
                                                   !estimateResponse ?
-                                                    number_format(
-                                                      estimate_received,
-                                                      '0,0.000000000000',
-                                                      true,
-                                                    ) :
+                                                    Number(estimate_received) >= 1000 ?
+                                                      number_format(
+                                                        estimate_received,
+                                                        '0,0.000000000000',
+                                                        true,
+                                                      ) :
+                                                      estimate_received :
                                                     '-'
                                                 }
                                               </span>
