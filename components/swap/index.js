@@ -1202,11 +1202,13 @@ export default () => {
       const x_asset_data =
         _.head(tokens) &&
         {
-          ...Object.fromEntries(
-            Object.entries({ ...asset_data }).
-              filter(([k, v]) =>
-                !['contracts'].includes(k)
-              )
+          ...(
+            Object.fromEntries(
+              Object.entries({ ...asset_data }).
+                filter(([k, v]) =>
+                  !['contracts'].includes(k)
+                )
+            )
           ),
           ...(
             equals_ignore_case(
@@ -1226,11 +1228,13 @@ export default () => {
       const y_asset_data =
         _.last(tokens) &&
         {
-          ...Object.fromEntries(
-            Object.entries({ ...asset_data })
-              .filter(([k, v]) =>
-                !['contracts'].includes(k)
-              )
+          ...(
+            Object.fromEntries(
+              Object.entries({ ...asset_data })
+                .filter(([k, v]) =>
+                  !['contracts'].includes(k)
+                )
+            )
           ),
           ...(
             equals_ignore_case(
@@ -1273,6 +1277,13 @@ export default () => {
         )?.decimals ||
         18
 
+      const recv_decimals =
+        (origin === 'x' ?
+          y_asset_data :
+          x_asset_data
+        )?.decimals ||
+        18
+
       let minDy = 0
 
       if (
@@ -1301,14 +1312,22 @@ export default () => {
               ) /
               100
             )
-            .toFixed(_decimals)
+            .toFixed(recv_decimals)
           )
-          .toFixed(_decimals)
+          .toFixed(recv_decimals)
 
         amount =
           utils.parseUnits(
             (
-              amount ||
+              (
+                typeof amount === 'string' &&
+                amount.indexOf('.') > -1 ?
+                  amount.substring(
+                    0,
+                    amount.indexOf('.') + _decimals + 1,
+                  ) :
+                  amount
+              ) ||
               0
             )
             .toString(),
@@ -1324,7 +1343,7 @@ export default () => {
             0
           )
           .toString(),
-          _decimals,
+          recv_decimals,
         )
         .toString()
 
@@ -1664,11 +1683,13 @@ export default () => {
       const x_asset_data =
         _.head(tokens) &&
         {
-          ...Object.fromEntries(
-            Object.entries({ ...asset_data })
-              .filter(([k, v]) =>
-                !['contracts'].includes(k)
-              )
+          ...(
+            Object.fromEntries(
+              Object.entries({ ...asset_data })
+                .filter(([k, v]) =>
+                  !['contracts'].includes(k)
+                )
+            )
           ),
           ...(
             equals_ignore_case(
@@ -1688,11 +1709,13 @@ export default () => {
       const y_asset_data =
         _.last(tokens) &&
         {
-          ...Object.fromEntries(
-            Object.entries({ ...asset_data })
-              .filter(([k, v]) =>
-                !['contracts'].includes(k)
-              )
+          ...(
+            Object.fromEntries(
+              Object.entries({ ...asset_data })
+                .filter(([k, v]) =>
+                  !['contracts'].includes(k)
+                )
+            )
           ),
           ...(
             equals_ignore_case(
@@ -1733,7 +1756,23 @@ export default () => {
           amount =
             utils.parseUnits(
               (
-                amount ||
+                (
+                  typeof amount === 'string' &&
+                  amount.indexOf('.') > -1 ?
+                    amount.substring(
+                      0,
+                      amount.indexOf('.') +
+                      (
+                        (origin === 'x' ?
+                          x_asset_data :
+                          y_asset_data
+                        )?.decimals ||
+                        18
+                      ) +
+                      1,
+                    ) :
+                    amount
+                ) ||
                 0
               )
               .toString(),
@@ -1988,11 +2027,13 @@ export default () => {
   const x_asset_data =
     _.head(tokens) &&
     {
-      ...Object.fromEntries(
-        Object.entries({ ...asset_data })
-          .filter(([k, v]) =>
-            !['contracts'].includes(k)
-          )
+      ...(
+        Object.fromEntries(
+          Object.entries({ ...asset_data })
+            .filter(([k, v]) =>
+              !['contracts'].includes(k)
+            )
+        )
       ),
       ...(
         equals_ignore_case(
@@ -2051,11 +2092,13 @@ export default () => {
   const y_asset_data =
     _.last(tokens) &&
     {
-      ...Object.fromEntries(
-        Object.entries({ ...asset_data })
-          .filter(([k, v]) =>
-            !['contracts'].includes(k)
-          )
+      ...(
+        Object.fromEntries(
+          Object.entries({ ...asset_data })
+            .filter(([k, v]) =>
+              !['contracts'].includes(k)
+            )
+        )
       ),
       ...(
         equals_ignore_case(
@@ -2119,9 +2162,27 @@ export default () => {
     ].includes(amount) &&
     !isNaN(amount) &&
     utils.parseUnits(
-      amount ||
+      (
+        amount.indexOf('.') > -1 ?
+          amount.substring(
+            0,
+            amount.indexOf('.') +
+            (
+              (origin === 'x' ?
+                x_asset_data :
+                y_asset_data
+              )?.decimals ||
+              18
+            ) +
+            1,
+          ) :
+          amount
+      ) ||
       '0',
-      x_asset_data?.decimals ||
+      (origin === 'x' ?
+        x_asset_data :
+        y_asset_data
+      )?.decimals ||
       18,
     )
     .lte(
@@ -3071,6 +3132,7 @@ export default () => {
                       web3_provider
                     ) ?
                       !callResponse &&
+                      !calling &&
                       [
                         'string',
                         'number',
@@ -3081,7 +3143,23 @@ export default () => {
                       (
                         (
                           utils.parseUnits(
-                            amount ||
+                            (
+                              typeof amount === 'string' &&
+                              amount.indexOf('.') > -1 ?
+                                amount.substring(
+                                  0,
+                                  amount.indexOf('.') +
+                                  (
+                                    (origin === 'x' ?
+                                      x_asset_data :
+                                      y_asset_data
+                                    )?.decimals ||
+                                    18
+                                  ) +
+                                  1,
+                                ) :
+                                amount
+                            ) ||
                             '0',
                             (origin === 'x' ?
                               x_asset_data :
@@ -3132,7 +3210,23 @@ export default () => {
                             {
                               (
                                 utils.parseUnits(
-                                  amount ||
+                                  (
+                                    typeof amount === 'string' &&
+                                    amount.indexOf('.') > -1 ?
+                                      amount.substring(
+                                        0,
+                                        amount.indexOf('.') +
+                                        (
+                                          (origin === 'x' ?
+                                            x_asset_data :
+                                            y_asset_data
+                                          )?.decimals ||
+                                          18
+                                        ) +
+                                        1,
+                                      ) :
+                                      amount
+                                  ) ||
                                   '0',
                                   (origin === 'x' ?
                                     x_asset_data :

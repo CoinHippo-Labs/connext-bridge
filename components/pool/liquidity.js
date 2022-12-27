@@ -556,11 +556,13 @@ export default (
       const x_asset_data =
         _.head(tokens) &&
         {
-          ...Object.fromEntries(
-            Object.entries({ ...asset_data })
-              .filter(([k, v]) =>
-                !['contracts'].includes(k)
-              )
+          ...(
+            Object.fromEntries(
+              Object.entries({ ...asset_data })
+                .filter(([k, v]) =>
+                  !['contracts'].includes(k)
+                )
+            )
           ),
           ...(
             equals_ignore_case(
@@ -580,11 +582,13 @@ export default (
       const y_asset_data =
         _.last(tokens) &&
         {
-          ...Object.fromEntries(
-            Object.entries({ ...asset_data })
-              .filter(([k, v]) =>
-                !['contracts'].includes(k)
-              )
+          ...(
+            Object.fromEntries(
+              Object.entries({ ...asset_data })
+                .filter(([k, v]) =>
+                  !['contracts'].includes(k)
+                )
+            )
           ),
           ...(
             equals_ignore_case(
@@ -1589,11 +1593,13 @@ export default (
   const x_asset_data =
     _.head(tokens) &&
     {
-      ...Object.fromEntries(
-        Object.entries({ ...asset_data })
-          .filter(([k, v]) =>
-            !['contracts'].includes(k)
-          )
+      ...(
+        Object.fromEntries(
+          Object.entries({ ...asset_data })
+            .filter(([k, v]) =>
+              !['contracts'].includes(k)
+            )
+        )
       ),
       ...(
         equals_ignore_case(
@@ -1640,11 +1646,13 @@ export default (
   const _x_asset_data =
     _.head(tokens) &&
     {
-      ...Object.fromEntries(
-        Object.entries({ ...asset_data })
-          .filter(([k, v]) =>
-            !['contracts'].includes(k)
-          )
+      ...(
+        Object.fromEntries(
+          Object.entries({ ...asset_data })
+            .filter(([k, v]) =>
+              !['contracts'].includes(k)
+            )
+        )
       ),
       ...contract_data,
     }
@@ -1664,11 +1672,13 @@ export default (
   const y_asset_data =
     _.last(tokens) &&
     {
-      ...Object.fromEntries(
-        Object.entries({ ...asset_data })
-          .filter(([k, v]) =>
-            !['contracts'].includes(k)
-          )
+      ...(
+        Object.fromEntries(
+          Object.entries({ ...asset_data })
+            .filter(([k, v]) =>
+              !['contracts'].includes(k)
+            )
+        )
       ),
       ...(
         equals_ignore_case(
