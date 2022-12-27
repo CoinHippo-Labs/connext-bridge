@@ -285,14 +285,50 @@ export default (
         getBalances(chain)
       }
     } catch (error) {
-      setMintResponse(
+      let message = 
+        error?.reason ||
+        error?.data?.message ||
+        error?.message
+
+      console.log(
+        `[${
+          is_wrapped ?
+            'Wrap' :
+            'Mint'
+        } error]`,
         {
-          status: 'failed',
-          message:
-            error?.data?.message ||
-            error?.message,
-        }
+          error: message,
+        },
       )
+
+      const code =
+        _.slice(
+          (message || '')
+            .toLowerCase()
+            .split(' ')
+            .filter(s => s),
+          0,
+          2,
+        )
+        .join('_')
+
+      if (message?.includes('gas required exceeds')) {
+        message = 'Insufficient balance when trying to wrap.'
+      }
+
+      switch (code) {
+        case 'user_rejected':
+          break
+        default:
+          setMintResponse(
+            {
+              status: 'failed',
+              message,
+              code,
+            }
+          )
+          break
+      }
     }
 
     setMinting(false)
@@ -391,12 +427,14 @@ export default (
 
       setWithdrawResponse(
         {
-          status: !status ?
-            'failed' :
-            'success',
-          message: !status ?
-            'Failed to unwrap' :
-            'Unwrap Successful',
+          status:
+            !status ?
+              'failed' :
+              'success',
+          message:
+            !status ?
+              'Failed to unwrap' :
+              'Unwrap Successful',
           ...response,
         }
       )
@@ -405,14 +443,46 @@ export default (
         getBalances(chain)
       }
     } catch (error) {
-      setWithdrawResponse(
+      let message = 
+        error?.reason ||
+        error?.data?.message ||
+        error?.message
+
+      console.log(
+        '[Unwrap error]',
         {
-          status: 'failed',
-          message:
-            error?.data?.message ||
-            error?.message,
-        }
+          error: message,
+        },
       )
+
+      const code =
+        _.slice(
+          (message || '')
+            .toLowerCase()
+            .split(' ')
+            .filter(s => s),
+          0,
+          2,
+        )
+        .join('_')
+
+      if (message?.includes('gas required exceeds')) {
+        message = 'Insufficient balance when trying to unwrap.'
+      }
+
+      switch (code) {
+        case 'user_rejected':
+          break
+        default:
+          setWithdrawResponse(
+            {
+              status: 'failed',
+              message,
+              code,
+            }
+          )
+          break
+      }
     }
 
     setWithdrawing(false)
