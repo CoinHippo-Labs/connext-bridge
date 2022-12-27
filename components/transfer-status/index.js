@@ -228,9 +228,12 @@ export default (
 
   if (
     destination_contract_data?.next_asset &&
-    equals_ignore_case(
-      destination_contract_data.next_asset.contract_address,
-      destination_transacting_asset,
+    (
+      equals_ignore_case(
+        destination_contract_data.next_asset.contract_address,
+        destination_transacting_asset,
+      ) ||
+      receive_local
     )
   ) {
     destination_contract_data = {

@@ -78,6 +78,9 @@ export default (
     view === 'my_positions' ?
       user_pools_data ?
         user_pools_data
+          .filter(p =>
+            p?.lpTokenBalance
+          )
           .map(p => {
             const {
               id,
