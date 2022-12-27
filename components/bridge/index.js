@@ -282,7 +282,27 @@ export default () => {
           }
         }
         else if (estimatedValues) {
-          setEstimatedValues(undefined)
+          if (
+            [
+              '',
+              '0',
+            ].includes(amount)
+          ) {
+            setEstimatedValues(
+              {
+                amountReceived: '0',
+                routerFee: '0',
+                isNextAsset:
+                  [
+                    true,
+                    'true',
+                  ].includes(receive_next),
+              }
+            )
+          }
+          else {
+            setEstimatedValues(undefined)
+          }
         }
       }
 
@@ -1608,6 +1628,12 @@ export default () => {
         setEstimateResponse(null)
 
         if (
+          amount
+            .gt(
+              BigNumber.from(
+                '0'
+              )
+            ) &&
           (pools_data || [])
             .findIndex(p =>
               [
@@ -1737,6 +1763,7 @@ export default () => {
           {
             amountReceived: Number(_amount) - routerFee,
             routerFee,
+            isNextAsset: receiveLocal,
           }
         )
       }
@@ -2956,7 +2983,13 @@ export default () => {
                                   'number',
                                 ].includes(typeof value)
                               ) {
-                                if (value) {
+                                if (
+                                  value &&
+                                  ![
+                                    '',
+                                    '0',
+                                  ].includes(value)
+                                ) {
                                   calculateAmountReceived(value)
                                 }
                                 else {
@@ -2964,6 +2997,7 @@ export default () => {
                                     {
                                       amountReceived: '0',
                                       routerFee: '0',
+                                      isNextAsset: receiveLocal,
                                     }
                                   )
                                 }
@@ -3011,6 +3045,32 @@ export default () => {
                                           amount: max_amount,
                                         }
                                       )
+
+                                      if (
+                                        [
+                                          'string',
+                                          'number',
+                                        ].includes(typeof max_amount)
+                                      ) {
+                                        if (
+                                          max_amount &&
+                                          ![
+                                            '',
+                                            '0',
+                                          ].includes(max_amount)
+                                        ) {
+                                          calculateAmountReceived(max_amount)
+                                        }
+                                        else {
+                                          setEstimatedValues(
+                                            {
+                                              amountReceived: '0',
+                                              routerFee: '0',
+                                              isNextAsset: receiveLocal,
+                                            }
+                                          )
+                                        }
+                                      }
                                     }
                                   }}
                                 >
@@ -3042,6 +3102,32 @@ export default () => {
                                           amount: max_amount,
                                         }
                                       )
+
+                                      if (
+                                        [
+                                          'string',
+                                          'number',
+                                        ].includes(typeof max_amount)
+                                      ) {
+                                        if (
+                                          max_amount &&
+                                          ![
+                                            '',
+                                            '0',
+                                          ].includes(max_amount)
+                                        ) {
+                                          calculateAmountReceived(max_amount)
+                                        }
+                                        else {
+                                          setEstimatedValues(
+                                            {
+                                              amountReceived: '0',
+                                              routerFee: '0',
+                                              isNextAsset: receiveLocal,
+                                            }
+                                          )
+                                        }
+                                      }
                                     }}
                                     className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-sm font-medium`}
                                   >
@@ -3279,7 +3365,13 @@ export default () => {
                                     'number',
                                   ].includes(typeof value)
                                 ) {
-                                  if (value) {
+                                  if (
+                                    value &&
+                                    ![
+                                      '',
+                                      '0',
+                                    ].includes(value)
+                                  ) {
                                     calculateAmountReceived(value)
                                   }
                                   else {
@@ -3287,6 +3379,7 @@ export default () => {
                                       {
                                         amountReceived: '0',
                                         routerFee: '0',
+                                        isNextAsset: receiveLocal,
                                       }
                                     )
                                   }
@@ -3912,7 +4005,7 @@ export default () => {
                             ].includes(typeof source_amount)
                           ) ||
                           Number(amount) < min_amount ||
-                          Number(amount) <= 0
+                          Number(amount) < 0
                         ) ?
                           <Alert
                             color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
@@ -3946,7 +4039,7 @@ export default () => {
                                   'Insufficient Balance' :
                                   Number(amount) < min_amount ?
                                     'The amount cannot be less than the transfer fee.' :
-                                    Number(amount) <= 0 ?
+                                    Number(amount) < 0 ?
                                       'The amount cannot be equal to or less than 0.' :
                                       ''
                               }
@@ -3956,12 +4049,35 @@ export default () => {
                           !xcallResponse &&
                           !estimateResponse ?
                             <button
-                              disabled={disabled}
+                              disabled={
+                                disabled ||
+                                [
+                                  '',
+                                  '0',
+                                ].includes(amount)
+                              }
                               onClick={() => {
                                 setSlippageEditing(false)
                                 call()
                               }}
-                              className={`w-full ${disabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'} rounded flex items-center ${calling && !approving && callProcessing ? 'justify-center' : 'justify-center'} text-white text-lg py-3 sm:py-4 px-2 sm:px-3`}
+                              className={
+                                `w-full ${
+                                  disabled ?
+                                    'bg-blue-400 dark:bg-blue-500' :
+                                    [
+                                      '',
+                                      '0',
+                                    ].includes(amount) ?
+                                      'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' :
+                                      'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
+                                } rounded flex items-center ${
+                                  calling &&
+                                  !approving &&
+                                  callProcessing ?
+                                    'justify-center' :
+                                    'justify-center'
+                                } text-white text-lg py-3 sm:py-4 px-2 sm:px-3`
+                              }
                             >
                               <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
                                 {

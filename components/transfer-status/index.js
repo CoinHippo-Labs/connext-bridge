@@ -153,7 +153,7 @@ export default (
     source_asset_data?.symbol
 
   const source_decimals =
-    source_contract_data?.decimals ||
+    // source_contract_data?.decimals ||
     18
 
   const source_asset_image =
@@ -249,7 +249,7 @@ export default (
     destination_asset_data?.symbol
 
   const destination_decimals =
-    destination_contract_data?.decimals ||
+    // destination_contract_data?.decimals ||
     18
 
   const destination_asset_image =

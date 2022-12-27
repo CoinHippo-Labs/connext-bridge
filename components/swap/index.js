@@ -2113,8 +2113,11 @@ export default () => {
 
   const valid_amount =
     typeof amount === 'string' &&
+    ![
+      '',
+      '0',
+    ].includes(amount) &&
     !isNaN(amount) &&
-    amount &&
     utils.parseUnits(
       amount ||
       '0',
@@ -3112,7 +3115,7 @@ export default () => {
                             )
                           )
                         ) ||
-                        Number(amount) <= 0
+                        Number(amount) < 0
                       ) ?
                         <Alert
                           color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
@@ -3164,7 +3167,7 @@ export default () => {
                                 )
                               ) ?
                                 'Insufficient Balance' :
-                                Number(amount) <= 0 ?
+                                Number(amount) < 0 ?
                                   'The amount cannot be equal to or less than 0.' :
                                   ''
                             }
@@ -3216,6 +3219,7 @@ export default () => {
                                     ].includes(typeof amount) &&
                                     ![
                                       '',
+                                      '0',
                                     ].includes(amount) ?
                                       'Swap' :
                                       'Enter amount'
