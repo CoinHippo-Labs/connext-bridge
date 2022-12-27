@@ -2122,13 +2122,16 @@ export default () => {
                         destination_chain: destination_chain_data?.chain_id,
                         destination_domain: xcallParams.destination,
                         destination_transacting_asset:
-                          receiveLocal ?
+                          receiveLocal ||
+                          estimatedValues?.isNextAsset ?
                             destination_contract_data?.next_asset?.contract_address ||
                             destination_contract_data?.contract_address :
                             destination_contract_data?.contract_address,
                         to: xcallParams.to,
                         force_slow: forceSlow,
-                        receive_local: receiveLocal,
+                        receive_local:
+                          receiveLocal ||
+                          estimatedValues?.isNextAsset,
                       },
                       latestTransfers,
                     ),

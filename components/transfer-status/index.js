@@ -163,8 +163,8 @@ export default (
   const source_amount =
     _.head(
       [
-        origin_bridged_amount,
         origin_transacting_amount,
+        // origin_bridged_amount,
       ]
       .map(a =>
         [
