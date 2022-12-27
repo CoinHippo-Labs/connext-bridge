@@ -280,6 +280,7 @@ export default (
               )
               .join('_')
 
+            setPriceImpactAdd(0)
             setPriceImpactAddResponse(
               {
                 status: 'failed',
@@ -1379,6 +1380,7 @@ export default (
         manual = true
       }
       else {
+        setPriceImpactAdd(0)
         setPriceImpactAddResponse(
           {
             status: 'failed',
@@ -1489,6 +1491,7 @@ export default (
         manual = true
       }
       else {
+        setPriceImpactRemove(0)
         setPriceImpactRemoveResponse(
           {
             status: 'failed',
@@ -2161,7 +2164,7 @@ export default (
     ) ?
      'x' :
      'y'
-console.log('[qqq]',x_asset_data)
+
   return (
     <div className="order-1 lg:order-2 bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-3 pt-4 pb-5 px-4">
       <div className="flex items-center justify-between space-x-2">
@@ -2632,13 +2635,15 @@ console.log('[qqq]',x_asset_data)
                       /> :
                       <>
                         <span className="whitespace-nowrap">
-                          {typeof priceImpactAdd === 'number' ?
-                            number_format(
-                              priceImpactAdd,
-                              '0,0.000000',
-                              true,
-                            ) :
-                            '-'
+                          {
+                            typeof priceImpactAdd === 'number' ||
+                            priceImpactAddResponse ?
+                              number_format(
+                                priceImpactAdd,
+                                '0,0.000000',
+                                true,
+                              ) :
+                              '-'
                           }
                         </span>
                         <span>
@@ -3345,7 +3350,8 @@ console.log('[qqq]',x_asset_data)
               </div>
               <div className="flex items-center text-xs font-semibold space-x-1">
                 {
-                  priceImpactRemove === true ?
+                  priceImpactRemove === true &&
+                  !priceImpactRemoveResponse ?
                     <Oval
                       color={loader_color(theme)}
                       width="16"
@@ -3353,13 +3359,15 @@ console.log('[qqq]',x_asset_data)
                     /> :
                     <>
                       <span className="whitespace-nowrap">
-                        {typeof priceImpactRemove === 'number' ?
-                          number_format(
-                            priceImpactRemove,
-                            '0,0.000000',
-                            true,
-                          ) :
-                          '-'
+                        {
+                          typeof priceImpactRemove === 'number' ||
+                          priceImpactRemoveResponse ?
+                            number_format(
+                              priceImpactRemove,
+                              '0,0.000000',
+                              true,
+                            ) :
+                            '-'
                         }
                       </span>
                       <span>
