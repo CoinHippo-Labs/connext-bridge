@@ -4,6 +4,10 @@
   "description": "UI of Connext Bridge",
   "main": "index.js",
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "dev-testnet-staging": "env-cmd -f .env.staging next dev",
+    "build-testnet-staging": "env-cmd -f .env.staging next build",
     "dev-testnet": "NODE_ENV=test next dev",
     "build-testnet": "NODE_ENV=test next build"
   },
