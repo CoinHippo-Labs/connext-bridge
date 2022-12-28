@@ -286,6 +286,7 @@ export default () => {
             [
               '',
               '0',
+              '0.0',
             ].includes(amount)
           ) {
             setEstimatedValues(
@@ -2988,6 +2989,7 @@ export default () => {
                                   ![
                                     '',
                                     '0',
+                                    '0.0',
                                   ].includes(value)
                                 ) {
                                   calculateAmountReceived(value)
@@ -3057,6 +3059,7 @@ export default () => {
                                           ![
                                             '',
                                             '0',
+                                            '0.0',
                                           ].includes(max_amount)
                                         ) {
                                           calculateAmountReceived(max_amount)
@@ -3114,6 +3117,7 @@ export default () => {
                                           ![
                                             '',
                                             '0',
+                                            '0.0',
                                           ].includes(max_amount)
                                         ) {
                                           calculateAmountReceived(max_amount)
@@ -3370,6 +3374,7 @@ export default () => {
                                     ![
                                       '',
                                       '0',
+                                      '0.0',
                                     ].includes(value)
                                   ) {
                                     calculateAmountReceived(value)
@@ -4056,6 +4061,7 @@ export default () => {
                                 [
                                   '',
                                   '0',
+                                  '0.0',
                                 ].includes(amount)
                               }
                               onClick={() => {
@@ -4069,6 +4075,7 @@ export default () => {
                                     [
                                       '',
                                       '0',
+                                      '0.0',
                                     ].includes(amount) ?
                                       'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' :
                                       'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'

@@ -1004,6 +1004,7 @@ export default (
             !amount ||
             [
               '0',
+              '0.0',
               0,
             ].includes(amount)
           ) {
