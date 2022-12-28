@@ -5,14 +5,11 @@
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
-    "build": "next build && next export",
-    "deploy": "aws s3 sync out/ s3://amarok.bridge.connext.network --acl public-read",
-    "dev-dev": "env-cmd -f .env.staging next dev",
-    "build-dev": "env-cmd -f .env.staging next build && next export",
-    "deploy-dev": "aws s3 sync out/ s3://staging.testnet.amarok.bridge.connext.network --acl public-read",
+    "build": "next build",
+    "dev-testnet-staging": "env-cmd -f .env.staging next dev",
+    "build-testnet-staging": "env-cmd -f .env.staging next build",
     "dev-testnet": "NODE_ENV=test next dev",
-    "build-testnet": "NODE_ENV=test next build && next export",
-    "deploy-testnet": "aws s3 sync out/ s3://testnet.amarok.bridge.connext.network --acl public-read"
+    "build-testnet": "NODE_ENV=test next build"
   },
   "repository": {
     "type": "git",
