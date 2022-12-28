@@ -1290,6 +1290,7 @@ export default () => {
         !amount ||
         [
           '0',
+          '0.0',
           0,
         ].includes(amount)
       ) {
@@ -2159,6 +2160,7 @@ export default () => {
     ![
       '',
       '0',
+      '0.0',
     ].includes(amount) &&
     !isNaN(amount) &&
     utils.parseUnits(
@@ -3314,6 +3316,7 @@ export default () => {
                                     ![
                                       '',
                                       '0',
+                                      '0.0',
                                     ].includes(amount) ?
                                       'Swap' :
                                       'Enter amount'
