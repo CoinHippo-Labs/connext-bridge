@@ -3978,6 +3978,8 @@ export default () => {
                           </span>
                         </Wallet> :
                         !xcall &&
+                        !xcallResponse &&
+                        !calling &&
                         [
                           'string',
                           'number',
