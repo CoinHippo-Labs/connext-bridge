@@ -920,7 +920,9 @@ export default () => {
       }
 
       if (
-        balances_data?.[chain_id] &&
+        chain_id &&
+        Object.keys({ ...balances_data }).length >= chains_data.length &&
+        balances_data[chain_id] &&
         amount
       ) {
         setEstimateTrigger(
@@ -941,6 +943,7 @@ export default () => {
           approving ||
           approveResponse ||
           calling ||
+          xcall ||
           xcallResponse
         )
       ) {
@@ -1447,7 +1450,8 @@ export default () => {
   const estimate = async () => {
     if (
       checkSupport() &&
-      !xcall
+      !xcall &&
+      !xcallResponse
     ) {
       const {
         source_chain,
