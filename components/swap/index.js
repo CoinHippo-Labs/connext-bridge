@@ -2398,7 +2398,10 @@ export default () => {
                         type="number"
                         placeholder="0.00"
                         disabled={
-                          disabled ||
+                          (
+                            disabled &&
+                            swapAmount !== true
+                          ) ||
                           !asset ||
                           !pair
                         }
@@ -2685,7 +2688,10 @@ export default () => {
                             placeholder="0.00"
                             disabled={
                               true ||
-                              disabled ||
+                              (
+                                disabled &&
+                                swapAmount !== true
+                              ) ||
                               !asset ||
                               !pair
                             }

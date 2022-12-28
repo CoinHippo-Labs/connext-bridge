@@ -408,7 +408,7 @@ export default () => {
           if (amount) {
             params.amount = amount
           }
-          
+
           if (
             symbol &&
             (assets_data || [])
