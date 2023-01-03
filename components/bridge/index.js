@@ -1557,12 +1557,10 @@ export default () => {
               forceSlow ?
                 0 :
                 response &&
-                Number(
-                  utils.formatUnits(
-                    response,
-                    decimals ||
-                    18,
-                  )
+                utils.formatUnits(
+                  response,
+                  decimals ||
+                  18,
                 )
 
             console.log(
@@ -3800,11 +3798,15 @@ export default () => {
                                                       </div> :
                                                       <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
                                                         <span>
-                                                          {number_format(
-                                                            gas_fee,
-                                                            '0,0.000000000000',
-                                                            true,
-                                                          )}
+                                                          {
+                                                            Number(gas_fee) >= 1000 ?
+                                                              number_format(
+                                                                gas_fee,
+                                                                '0,0.000000000000',
+                                                                true,
+                                                              ) :
+                                                              gas_fee
+                                                          }
                                                         </span>
                                                         <span>
                                                           {source_gas_native_token?.symbol}
