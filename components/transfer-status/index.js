@@ -1,7 +1,7 @@
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { BigNumber, utils } from 'ethers'
+import { BigNumber, constants, utils } from 'ethers'
 import { XTransferStatus } from '@connext/nxtp-utils'
 import { TailSpin } from 'react-loader-spinner'
 import { Tooltip } from '@material-tailwind/react'
@@ -148,6 +148,49 @@ export default (
     delete source_contract_data.next_asset
   }
 
+  if (
+    !source_contract_data &&
+    equals_ignore_case(
+      origin_transacting_asset,
+      constants.AddressZero,
+    )
+  ) {
+    const {
+      nativeCurrency,
+    } = {
+      ...(
+        _.head(source_chain_data?.provider_params)
+      ),
+    }
+    const {
+      symbol,
+    } = { ...nativeCurrency }
+
+    const _source_asset_data = (assets_data || [])
+      .find(a =>
+        [
+          a?.id,
+          a?.symbol,
+        ].findIndex(s =>
+          equals_ignore_case(
+            s,
+            symbol,
+          )
+        ) > -1
+      )
+
+    source_contract_data = {
+      ...(
+        (_source_asset_data?.contracts || [])
+          .find(c =>
+            c?.chain_id === source_chain_data?.chain_id,
+          )
+      ),
+      contract_address: origin_transacting_asset,
+      ...nativeCurrency,
+    }
+  }
+
   const source_symbol =
     source_contract_data?.symbol ||
     source_asset_data?.symbol
@@ -181,7 +224,9 @@ export default (
           )
         )
       )
-      .filter(a => a)
+      .filter(a =>
+        typeof a === 'number'
+      )
     )
 
   const destination_chain_data = (chains_data || [])
@@ -244,6 +289,49 @@ export default (
     delete destination_contract_data.next_asset
   }
 
+  if (
+    !destination_contract_data &&
+    equals_ignore_case(
+      destination_transacting_asset,
+      constants.AddressZero,
+    )
+  ) {
+    const {
+      nativeCurrency,
+    } = {
+      ...(
+        _.head(destination_chain_data?.provider_params)
+      ),
+    }
+    const {
+      symbol,
+    } = { ...nativeCurrency }
+
+    const _destination_asset_data = (assets_data || [])
+      .find(a =>
+        [
+          a?.id,
+          a?.symbol,
+        ].findIndex(s =>
+          equals_ignore_case(
+            s,
+            symbol,
+          )
+        ) > -1
+      )
+
+    destination_contract_data = {
+      ...(
+        (_destination_asset_data?.contracts || [])
+          .find(c =>
+            c?.chain_id === destination_chain_data?.chain_id,
+          )
+      ),
+      contract_address: destination_transacting_asset,
+      ...nativeCurrency,
+    }
+  }
+
   const destination_symbol =
     destination_contract_data?.symbol ||
     destination_asset_data?.symbol
@@ -277,7 +365,9 @@ export default (
           )
         )
       )
-      .filter(a => a)
+      .filter(a =>
+        typeof a === 'number'
+      )
     ) ||
     (
       source_amount *

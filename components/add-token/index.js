@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import Web3 from 'web3'
-import { providers } from 'ethers'
+import { constants, providers } from 'ethers'
 
 import Image from '../image'
 import { WALLET_DATA, CHAIN_ID } from '../../reducers/types'
@@ -225,22 +225,29 @@ export default (
     }
   }
 
+  const {
+    contract_address,
+  } = { ...token_data }
+
   return (
-    <button
-      onClick={() =>
-        addToken(
-          token_data?.chain_id,
-          token_data,
-        )
-      }
-      className="min-w-max bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 shadow rounded cursor-pointer flex items-center py-1.5 px-2"
-    >
-      <Image
-        src="/logos/wallets/metamask.png"
-        alt=""
-        width={16}
-        height={16}
-      />
-    </button>
+    contract_address !== constants.AddressZero &&
+    (
+      <button
+        onClick={() =>
+          addToken(
+            token_data?.chain_id,
+            token_data,
+          )
+        }
+        className="min-w-max bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 shadow rounded cursor-pointer flex items-center py-1.5 px-2"
+      >
+        <Image
+          src="/logos/wallets/metamask.png"
+          alt=""
+          width={16}
+          height={16}
+        />
+      </button>
+    )
   )
 }
