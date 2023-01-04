@@ -60,7 +60,7 @@ export default (
         pools_data &&
         (
           !uncollapseAssetIds ||
-          uncollapseAssetIds.length < 2
+          uncollapseAssetIds.length < 4
         )
       ) {
         const ids =
@@ -144,55 +144,135 @@ export default (
           null :
       pools_data ||
       pool_assets_data?.length === 0 ?
-        Object.entries(
-          _.groupBy(
-            pools_data ||
-            [],
-            'asset_data.id',
+        _.orderBy(
+          Object.entries(
+            _.groupBy(
+              pools_data ||
+              [],
+              'asset_data.id',
+            )
           )
-        )
-        .map(([k, v]) => {
-          return {
-            id: k,
-            asset_data: _.head(v)?.asset_data,
-            pools:
-              _.orderBy(
-                v
+          .map(([k, v]) => {
+            return {
+              id: k,
+              asset_data: _.head(v)?.asset_data,
+              i:
+                (pool_assets_data || [])
+                  .findIndex(a =>
+                    equals_ignore_case(
+                      a?.id,
+                      k,
+                    )
+                  ),
+              pools:
+                _.orderBy(
+                  _.concat(
+                    v,
+                    (pool_assets_data || [])
+                      .filter(a =>
+                        equals_ignore_case(
+                          a?.id,
+                          k,
+                        )
+                      )
+                      .flatMap(a =>
+                        (a?.contracts || [])
+                          .filter(c =>
+                            v.findIndex(d =>
+                              d?.chain_data?.chain_id === c?.chain_id
+                            ) < 0
+                          )
+                      )
+                      .map(d => {
+                        const chain_data = (chains_data || [])
+                          .find(c =>
+                            c?.chain_id === d?.chain_id
+                          )
+
+                        const asset_data = (pool_assets_data || [])
+                          .find(a =>
+                            equals_ignore_case(
+                              a?.id,
+                              k,
+                            )
+                          )
+
+                        if (
+                          chain_data &&
+                          asset_data
+                        ) {
+                          const {
+                            chain_id,
+                          } = { ...chain_data }
+
+                          const contract_data = d
+
+                          return {
+                            id: `${chain_data.id}_${asset_data.id}`,
+                            name:
+                              `${
+                                contract_data?.symbol ||
+                                asset_data.symbol
+                              }-Pool`,
+                            chain_id,
+                            chain_data,
+                            asset_data,
+                            contract_data,
+                          }
+                        }
+                        else {
+                          return null
+                        }
+                      })
+                      .filter(d => d),
+                  )
                   .map(d => {
                     const {
                       chain_data,
+                      tvl,
                       apr,
                     } = { ...d }
-                    const {
-                      id,
-                    } = { ...chain_data }
 
                     return {
                       ...d,
                       i:
                         (chains_data || [])
                           .findIndex(c =>
-                            c?.id === id
+                            equals_ignore_case(
+                              c?.id,
+                              chain_data?.id,
+                            )
                           ),
+                      _tvl:
+                        !isNaN(tvl) ?
+                          tvl :
+                          -1,
                       _apr:
                         !isNaN(apr) ?
                           apr :
                           -1,
                     }
                   }),
-                [
-                  'tvl',
-                  '_apr',
-                  'i',
-                ],
-                [
-                  'desc',
-                  'desc',
-                  'asc',
-                ],
-              ),
-          }
-        }) :
+                  [
+                    'i',
+                    '_tvl',
+                    '_apr',
+                  ],
+                  [
+                    'asc',
+                    'desc',
+                    'desc',
+                  ],
+                ),
+            }
+          }),
+          [
+            'i',
+          ],
+          [
+            'asc',
+          ],
+        ) :
         null
 
   return (
@@ -268,12 +348,12 @@ export default (
                       }
                     }),
                   [
-                    'tvl',
-                    'i',
+                    // 'i',
+                    // 'tvl',
                   ],
                   [
-                    'desc',
-                    'asc',
+                    // 'asc',
+                    // 'desc',
                   ],
                 )
                 .map((d, i) => {
@@ -866,6 +946,8 @@ export default (
                                   chain_data,
                                   asset_data,
                                   tvl,
+                                  lpTokenAddress,
+                                  error,
                                 } = { ...p }
 
                                 const chain = chain_data?.id
@@ -880,14 +962,25 @@ export default (
                                   <a
                                     className="h-6 text-base font-semibold text-right"
                                   >
-                                    <span className="uppercase">
-                                      {currency_symbol}
-                                      {number_format(
-                                        value,
-                                        '0,0.00',
-                                        true,
-                                      )}
-                                    </span>
+                                    {
+                                      !lpTokenAddress &&
+                                      !error ?
+                                        <div className="flex items-center justify-end">
+                                          <TailSpin
+                                            color={loader_color(theme)}
+                                            width="18"
+                                            height="18"
+                                          />
+                                        </div> :
+                                        <span className="uppercase">
+                                          {currency_symbol}
+                                          {number_format(
+                                            value,
+                                            '0,0.00',
+                                            true,
+                                          )}
+                                        </span>
+                                    }
                                   </a>
                                   </Link>
                                 )
