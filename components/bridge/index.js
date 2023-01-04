@@ -1,4 +1,4 @@
- import { useRouter } from 'next/router'
+import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
@@ -32,6 +32,7 @@ import Wallet from '../wallet'
 import Alert from '../alerts'
 // import Popover from '../popover'
 import Copy from '../copy'
+import DecimalsFormat from '../decimals-format'
 import { params_to_obj, number_format, number_to_fixed, ellipse, equals_ignore_case, total_time_string, loader_color, sleep, error_patterns } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
@@ -323,6 +324,22 @@ export default () => {
           }
         )
       }
+      else if (
+        [
+          false,
+          'false',
+        ].includes(receive_next)
+      ) {
+        bridge.receive_next = false
+        updated = true
+
+        setOptions(
+          {
+            ...options,
+            receiveLocal: false,
+          }
+        )
+      }
 
       if (updated) {
         setBridge(bridge)
@@ -436,9 +453,17 @@ export default () => {
         }
       }
 
-      const {
+      let {
         receiveLocal,
       } = { ...options }
+
+      if (!destination_contract_data?.next_asset) {
+        receiveLocal = false
+
+        if (bridge?.receive_next) {
+          bridge.receive_next = undefined
+        }
+      }
 
       if (
         receiveLocal ||
@@ -1126,8 +1151,13 @@ export default () => {
     () => {
       const update = is_interval => {
         if (
-          openTransferStatus &&
-          latest_transfer &&
+          (
+            openTransferStatus ||
+            (
+              latest_transfer &&
+              !latest_transfer.execute_transaction_hash
+            )
+          ) &&
           (
             !timeTrigger ||
             is_interval
@@ -1590,7 +1620,10 @@ export default () => {
     }
   }
 
-  const calculateAmountReceived = async _amount => {
+  const calculateAmountReceived = async (
+    _amount,
+    receive_local,
+  ) => {
     if (sdk) {
       const originDomain = source_chain_data?.domain_id
       const destinationDomain = destination_chain_data?.domain_id
@@ -1605,7 +1638,7 @@ export default () => {
             source_contract_data
         )?.contract_address
 
-      const destinationTokenAddress = destination_contract_data?.contract_address
+      let destinationTokenAddress = _destination_contract_data?.contract_address
 
       const amount =
         utils.parseUnits(
@@ -1618,11 +1651,19 @@ export default () => {
         )
 
       const isNextAsset =
-        !receiveLocal ||
-        equals_ignore_case(
-          destination_contract_data?.contract_address,
-          destination_contract_data?.next_asset?.contract_address,
-        )
+        typeof receive_local === 'boolean' ?
+          receive_local :
+          receiveLocal ||
+          equals_ignore_case(
+            destination_contract_data?.contract_address,
+            _destination_contract_data?.next_asset?.contract_address,
+          )
+
+      if (isNextAsset) {
+        destinationTokenAddress =
+          _destination_contract_data?.next_asset?.contract_address ||
+          destinationTokenAddress
+      }
 
       let manual
 
@@ -1766,7 +1807,10 @@ export default () => {
           {
             amountReceived: Number(_amount) - routerFee,
             routerFee,
-            isNextAsset: receiveLocal,
+            isNextAsset:
+              typeof receive_local === 'boolean' ?
+                receive_local :
+                receiveLocal,
           }
         )
       }
@@ -2114,7 +2158,7 @@ export default () => {
                 message:
                   failed ?
                     'Failed to send transaction' :
-                    `Transferring ${symbol}. (It’s ok to close the browser)`,
+                    `Transferring ${symbol}. (It's ok to close the browser)`,
                 tx_hash: hash,
               }
             )
@@ -2330,6 +2374,8 @@ export default () => {
       c?.chain_id === destination_chain_data?.chain_id
     )  
 
+  const _destination_contract_data = _.cloneDeep(destination_contract_data)
+
   if (
     (
       receiveLocal ||
@@ -2503,6 +2549,7 @@ export default () => {
                       <button
                         onClick={() => {
                           setXcall(null)
+                          setXcallResponse(null)
                           setOpenTransferStatus(false)
                         }}
                       >
@@ -2703,7 +2750,80 @@ export default () => {
                               )
                             }
                             initialData={options}
-                            onChange={o => setOptions(o)}
+                            onChange={o => {
+                              const {
+                                receiveLocal,
+                              } = { ...o }
+
+                              setOptions(o)
+
+                              if (
+                                (
+                                  receiveLocal &&
+                                  !options?.receiveLocal
+                                ) ||
+                                (
+                                  !receiveLocal &&
+                                  options?.receiveLocal
+                                )
+                              ) {
+                                if (
+                                  amount &&
+                                  ![
+                                    '',
+                                    '0',
+                                    '0.0',
+                                  ].includes(amount)
+                                ) {
+                                  calculateAmountReceived(
+                                    amount,
+                                    receiveLocal,
+                                  )
+                                }
+                                else {
+                                  setEstimatedValues(
+                                    {
+                                      amountReceived: '0',
+                                      routerFee: '0',
+                                      isNextAsset: receiveLocal,
+                                    }
+                                  )
+                                }
+
+                                if (
+                                  query?.receive_next &&
+                                  !receiveLocal
+                                ) {
+                                  const params =
+                                    {
+                                      amount,
+                                      receive_next: receiveLocal,
+                                    }
+
+                                  router
+                                    .push(
+                                      `/${
+                                        source_chain &&
+                                        destination_chain ?
+                                          `${
+                                            asset ?
+                                              `${asset.toUpperCase()}-` :
+                                              ''
+                                          }from-${source_chain}-to-${destination_chain}` :
+                                          ''
+                                      }${
+                                        Object.keys(params).length > 0 ?
+                                          `?${new URLSearchParams(params).toString()}` :
+                                          ''
+                                      }`,
+                                      undefined,
+                                      {
+                                        shallow: true,
+                                      },
+                                    )
+                                }
+                              }
+                            }}
                             hasNextAsset={destination_contract_data?.next_asset}
                           />
                         )
@@ -3471,13 +3591,17 @@ export default () => {
                                                     'number',
                                                   ].includes(typeof estimate_received) &&
                                                   !estimateResponse ?
-                                                    Number(estimate_received) >= 1000 ?
-                                                      number_format(
-                                                        estimate_received,
-                                                        '0,0.000000000000',
-                                                        true,
-                                                      ) :
-                                                      estimate_received :
+                                                    <DecimalsFormat
+                                                      value={
+                                                        Number(estimate_received) >= 1000 ?
+                                                          number_format(
+                                                            estimate_received,
+                                                            '0,0.000000000000',
+                                                            true,
+                                                          ) :
+                                                          estimate_received
+                                                      }
+                                                    /> :
                                                     '-'
                                                 }
                                               </span>
@@ -3752,16 +3876,19 @@ export default () => {
                                                     ].includes(typeof estimatedValues?.routerFee) ||
                                                     estimateResponse ?
                                                       <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
-                                                        <span>
-                                                          {Number(router_fee) < 1 ?
-                                                            router_fee :
-                                                            number_format(
-                                                              router_fee,
-                                                              '0,0.000000000000',
-                                                              true,
-                                                            )
+                                                        <DecimalsFormat
+                                                          value={
+                                                            Number(router_fee) >= 1000 ?
+                                                              number_format(
+                                                                router_fee,
+                                                                '0,0.000000000000',
+                                                                true,
+                                                              ) :
+                                                              Number(router_fee) <= 0 ?
+                                                                '0' :
+                                                                router_fee
                                                           }
-                                                        </span>
+                                                        />
                                                         <span>
                                                           {source_symbol}
                                                         </span>
@@ -3797,17 +3924,19 @@ export default () => {
                                                         />
                                                       </div> :
                                                       <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
-                                                        <span>
-                                                          {
+                                                        <DecimalsFormat
+                                                          value={
                                                             Number(gas_fee) >= 1000 ?
                                                               number_format(
                                                                 gas_fee,
                                                                 '0,0.000000000000',
                                                                 true,
                                                               ) :
-                                                              gas_fee
+                                                              Number(gas_fee) <= 0 ?
+                                                                '0' :
+                                                                gas_fee
                                                           }
-                                                        </span>
+                                                        />
                                                         <span>
                                                           {source_gas_native_token?.symbol}
                                                         </span>

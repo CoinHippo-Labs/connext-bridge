@@ -7,6 +7,7 @@ import { TiArrowRight } from 'react-icons/ti'
 
 import Datatable from '../datatable'
 import Image from '../image'
+import DecimalsFormat from '../decimals-format'
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
 
@@ -563,25 +564,33 @@ export default (
                                   rel="noopener noreferrer"
                                   className={gridValueClassName}
                                 >
-                                  {number_format(
-                                    Number(
-                                      lpTokenBalance ||
-                                      0
-                                    ),
-                                    '0,0.000000000000',
-                                    true,
-                                  )}
+                                  <DecimalsFormat
+                                    value={
+                                      number_format(
+                                        Number(
+                                          lpTokenBalance ||
+                                          0
+                                        ),
+                                        '0,0.000000000000',
+                                        true,
+                                      )
+                                    }
+                                    className={gridValueClassName}
+                                  />
                                 </a> :
-                                <span className={gridValueClassName}>
-                                  {number_format(
-                                    Number(
-                                      lpTokenBalance ||
-                                      0
-                                    ),
-                                    '0,0.000000000000',
-                                    true,
-                                  )}
-                                </span>
+                                <DecimalsFormat
+                                  value={
+                                    number_format(
+                                      Number(
+                                        lpTokenBalance ||
+                                        0
+                                      ),
+                                      '0,0.000000000000',
+                                      true,
+                                    )
+                                  }
+                                  className={gridValueClassName}
+                                />
                             }
                           </div>
                           <div className="flex flex-col space-y-1">
