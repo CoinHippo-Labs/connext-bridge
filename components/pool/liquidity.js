@@ -3600,6 +3600,11 @@ export default (
               token_id={asset}
               contract_data={_x_asset_data}
               className="w-full max-w-lg bg-transparent flex flex-col items-center justify-center space-y-2 mx-auto"
+              titleClassName={
+                wrong_chain ?
+                  'text-slate-400 dark:text-slate-600' :
+                  ''
+              }
             />
           )
         }

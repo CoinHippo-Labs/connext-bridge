@@ -36,6 +36,7 @@ export default (
       1000,
     contract_data,
     className = '',
+    titleClassName = '',
   },
 ) => {
   const dispatch = useDispatch()
@@ -784,7 +785,7 @@ export default (
       >
         <button
           onClick={() => setCollapse(!collapse)}
-          className="w-full flex items-center justify-center text-base font-semibold space-x-1.5"
+          className={`w-full flex items-center justify-center text-base font-semibold space-x-1.5 ${titleClassName}`}
         >
           {
             !signer &&
@@ -840,7 +841,7 @@ export default (
                           asset_data?.symbol
                         }
                         trigger={trigger}
-                        className="bg-slate-200 dark:bg-slate-800 rounded py-1.5 px-2.5"
+                        className="bg-slate-100 dark:bg-slate-800 rounded py-1.5 px-2.5"
                       />
                       <Balance
                         chainId={
@@ -862,7 +863,7 @@ export default (
                           contract_data?.symbol
                         }
                         trigger={trigger}
-                        className="bg-slate-200 dark:bg-slate-800 rounded py-1.5 px-2.5"
+                        className="bg-slate-100 dark:bg-slate-800 rounded py-1.5 px-2.5"
                       />
                     </div>
                   </div>
