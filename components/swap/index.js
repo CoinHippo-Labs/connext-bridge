@@ -22,6 +22,7 @@ import Image from '../image'
 import Wallet from '../wallet'
 import Alert from '../alerts'
 import Copy from '../copy'
+import DecimalsFormat from '../decimals-format'
 import { params_to_obj, number_format, number_to_fixed, ellipse, equals_ignore_case, loader_color, sleep, error_patterns } from '../../lib/utils'
 import { POOLS_DATA, BALANCES_DATA } from '../../reducers/types'
 
@@ -2681,7 +2682,7 @@ export default () => {
                               />
                             </div>
                           </div> :
-                          <DebounceInput
+                          /*<DebounceInput
                             debounceTimeout={750}
                             size="small"
                             type="number"
@@ -2774,6 +2775,38 @@ export default () => {
                               e.preventDefault()
                             }
                             className={`w-36 sm:w-48 bg-transparent ${'cursor-default' || (disabled ? 'cursor-not-allowed' : '')} rounded border-0 focus:ring-0 sm:text-lg font-semibold text-right py-1.5`}
+                          />*/
+                          <DecimalsFormat
+                            value={
+                              [
+                                'string',
+                                'number',
+                              ].includes(typeof swapAmount) &&
+                              ![
+                                '',
+                              ].includes(swapAmount) &&
+                              Number(swapAmount) >= 0 ?
+                                swapAmount :
+                                [
+                                  'string',
+                                  'number',
+                                ].includes(typeof amount) &&
+                                ![
+                                  '',
+                                ].includes(amount) ?
+                                  '0.00' :
+                                  '0.00'
+                            }
+                            className={
+                              `w-36 sm:w-48 bg-transparent ${
+                                [
+                                  '',
+                                  undefined,
+                                ].includes(amount) ?
+                                  'text-slate-500 dark:text-slate-500' :
+                                  ''
+                              } sm:text-lg font-semibold text-right py-1.5`
+                            }
                           />
                       }
                     </div>
@@ -2889,13 +2922,15 @@ export default () => {
                         Rate
                       </div>
                       <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
-                        <span>
-                          {number_format(
-                            rate,
-                            '0,0.000000000000',
-                            true,
-                          )}
-                        </span>
+                        <DecimalsFormat
+                          value={
+                            number_format(
+                              rate,
+                              '0,0.000000000000',
+                              true,
+                            )
+                          }
+                        />
                       </span>
                     </div>
                     <div className="flex flex-col space-y-0.5">
