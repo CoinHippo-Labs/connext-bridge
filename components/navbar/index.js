@@ -514,6 +514,13 @@ export default () => {
               )
           }
 
+          if (sdk.nxtpSdkPool) {
+            await sdk.nxtpSdkPool
+              .changeSignerAddress(
+                address,
+              )
+          }
+
           setCurrentAddress(address)
 
           console.log(
