@@ -11,7 +11,7 @@ import Wallet from '../wallet'
 import Balance from '../balance'
 import Image from '../image'
 import Alert from '../alerts'
-import { number_format } from '../../lib/utils'
+import { number_format, equals_ignore_case } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
 const ABI = [
@@ -45,6 +45,7 @@ export default (
     assets,
     rpc_providers,
     wallet,
+    balances,
   } = useSelector(state =>
     (
       {
@@ -52,6 +53,7 @@ export default (
         assets: state.assets,
         rpc_providers: state.rpc_providers,
         wallet: state.wallet,
+        balances: state.balances,
       }
     ),
     shallowEqual,
@@ -74,6 +76,9 @@ export default (
     address,
     signer,
   } = { ...wallet_data }
+  const {
+    balances_data,
+  } = { ...balances }
 
   const [collapse, setCollapse] = useState(true)
   const [data, setData] = useState(null)
@@ -752,6 +757,27 @@ export default (
     transaction_path,
   } = { ...explorer }
 
+  const native_balance = (balances_data?.[chain_data?.chain_id] || [])
+    .find(b =>
+      equals_ignore_case(
+        b?.contract_address,
+        constants.AddressZero,
+      )
+    )
+
+  const native_amount = native_balance?.amount
+
+  const wrapped_balance = (balances_data?.[chain_data?.chain_id] || [])
+    .find(b =>
+      equals_ignore_case(
+        b?.contract_address,
+        wrapped?.contract_address ||
+        contract_data?.contract_address,
+      )
+    )
+
+  const wrapped_amount = wrapped_balance?.amount
+
   const callResponse =
     mintResponse ||
     withdrawResponse
@@ -763,16 +789,40 @@ export default (
   } = { ...callResponse }
 
   const hasAllFields =
-    fields.length === fields
+    fields.length ===
+    fields
       .filter(f =>
         data?.[f.name]
-      ).length
+      )
+      .length
 
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
 
   const disabled =
     minting ||
     withdrawing
+
+  const wrap_disabled =
+    !!(
+      is_wrapped &&
+      native_amount &&
+      data?.amount &&
+      (
+        Number(native_amount) < Number(data.amount) ||
+        Number(data.amount) <= 0
+      )
+    )
+
+  const unwrap_disabled =
+    !!(
+      is_wrapped &&
+      wrapped_amount &&
+      data?.amount &&
+      (
+        Number(wrapped_amount) < Number(data.amount) ||
+        Number(data.amount) <= 0
+      )
+    )
 
   return (
     asset_data &&
@@ -987,9 +1037,19 @@ export default (
                       ) :
                       <>
                         <button
-                          disabled={disabled}
+                          disabled={
+                            disabled ||
+                            wrap_disabled
+                          }
                           onClick={() => mint()}
-                          className={`bg-blue-600 hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
+                          className={
+                            `${
+                              disabled ||
+                              wrap_disabled ?
+                                'bg-blue-400 dark:bg-blue-500 cursor-not-allowed' :
+                                'bg-blue-600 hover:bg-blue-700'
+                            } rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`
+                          }
                         >
                           {
                             minting &&
@@ -1033,9 +1093,19 @@ export default (
                           is_wrapped &&
                           (
                             <button
-                              disabled={disabled}
+                              disabled={
+                                disabled ||
+                                unwrap_disabled
+                              }
                               onClick={() => withdraw()}
-                              className={`bg-red-600 hover:bg-red-700 ${disabled ? 'cursor-not-allowed' : ''} rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
+                              className={
+                                `${
+                                  disabled ||
+                                  unwrap_disabled ?
+                                    'bg-red-400 dark:bg-red-500 cursor-not-allowed' :
+                                    'bg-red-600 hover:bg-red-700'
+                                } rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`
+                              }
                             >
                               {
                                 withdrawing &&
