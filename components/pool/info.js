@@ -315,7 +315,7 @@ export default (
                       pool_data &&
                       (
                         [
-                          'optimism',
+                          // 'optimism',
                         ].includes(chain) ?
                           <div className="flex items-center space-x-2">
                             {
@@ -333,7 +333,7 @@ export default (
                             <span className="uppercase text-xs font-medium">
                               {
                                 [
-                                  'optimism',
+                                  // 'optimism',
                                 ].includes(chain) ?
                                   chain
                                     .slice(
@@ -352,7 +352,7 @@ export default (
                         pool_data &&
                         !error ?
                           [
-                            'optimism',
+                            // 'optimism',
                           ].includes(chain) ?
                             !isNaN(apr) ?
                               <span className="uppercase">

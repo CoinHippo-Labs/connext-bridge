@@ -13,6 +13,7 @@ import Image from '../image'
 import EnsProfile from '../ens-profile'
 import AddToken from '../add-token'
 import Copy from '../copy'
+import DecimalsFormat from '../decimals-format'
 import TimeSpent from '../time-spent'
 import { chainName } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
@@ -454,13 +455,15 @@ export default (
             {
               typeof source_amount === 'number' &&
               (
-                <span className="font-semibold">
-                  {number_format(
-                    source_amount,
-                    '0,0.000000',
-                    true,
-                  )}
-                </span>
+                <DecimalsFormat
+                  value={
+                    number_format(
+                      source_amount,
+                      '0,0.000000',
+                      true,
+                    )
+                  }
+                />
               )
             }
             <div className="flex items-center justify-start space-x-1">
@@ -484,10 +487,12 @@ export default (
                 source_asset_data &&
                 (
                   <AddToken
-                    token_data={{
-                      ...source_asset_data,
-                      ...source_contract_data,
-                    }}
+                    token_data={
+                      {
+                        ...source_asset_data,
+                        ...source_contract_data,
+                      }
+                    }
                   />
                 )
               }
@@ -521,13 +526,15 @@ export default (
             {
               typeof destination_amount === 'number' &&
               (
-                <span className="font-semibold">
-                  {number_format(
-                    destination_amount,
-                    '0,0.000000',
-                    true,
-                  )}
-                </span>
+                <DecimalsFormat
+                  value={
+                    number_format(
+                      destination_amount,
+                      '0,0.000000',
+                      true,
+                    )
+                  }
+                />
               )
             }
             <div className="flex items-center justify-center space-x-1">
@@ -551,10 +558,12 @@ export default (
                 destination_asset_data &&
                 (
                   <AddToken
-                    token_data={{
-                      ...destination_asset_data,
-                      ...destination_contract_data,
-                    }}
+                    token_data={
+                      {
+                        ...destination_asset_data,
+                        ...destination_contract_data,
+                      }
+                    }
                   />
                 )
               }

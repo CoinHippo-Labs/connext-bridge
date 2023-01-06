@@ -17,7 +17,7 @@ import { IoWarning } from 'react-icons/io5'
 import { GiPartyPopper } from 'react-icons/gi'
 
 import Announcement from '../announcement'
-import PoweredBy from '../powered-by'
+// import PoweredBy from '../powered-by'
 import Options from './options'
 import SelectChain from '../select/chain'
 // import SelectBridgeAsset from '../select/asset/bridge'
@@ -35,6 +35,10 @@ import Copy from '../copy'
 import DecimalsFormat from '../decimals-format'
 import { params_to_obj, number_format, number_to_fixed, ellipse, equals_ignore_case, total_time_string, loader_color, sleep, error_patterns } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
+
+const WRAPPED_PREFIX =
+  process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
+  'next'
 
 const ROUTER_FEE_PERCENT =
   Number(
@@ -561,7 +565,13 @@ export default () => {
                     a?.amount ||
                     '0'
                   ),
-                  destination_decimals,
+                  equals_ignore_case(
+                    a?.contract_address,
+                    next_asset?.contract_address,
+                  ) ?
+                    next_asset?.decimals ||
+                    18 :
+                    destination_decimals,
                 )
               )
             )
@@ -2201,6 +2211,19 @@ export default () => {
                             destination_contract_data?.next_asset?.contract_address ||
                             destination_contract_data?.contract_address :
                             destination_contract_data?.contract_address,
+                        destination_transacting_amount:
+                          estimatedValues?.amountReceived ?
+                            utils.parseUnits(
+                              (
+                                estimatedValues.amountReceived ||
+                                0
+                              )
+                              .toString(),
+                              destination_contract_data?.decimals ||
+                              18,
+                            )
+                            .toString() :
+                            undefined,
                         to: xcallParams.to,
                         force_slow: forceSlow,
                         receive_local:
@@ -2477,21 +2500,72 @@ export default () => {
                 a?.amount ||
                 '0'
               ),
-              destination_decimals,
+              equals_ignore_case(
+                a?.contract_address,
+                destination_contract_data?.next_asset?.contract_address,
+              ) ?
+                destination_contract_data?.next_asset?.decimals ||
+                18 :
+                destination_decimals,
             )
           )
         )
     )
 
+  const pool_data = (pools_data || [])
+    .find(p =>
+      p?.chain_data?.id === destination_chain &&
+      p?.asset_data?.id === asset
+    )
+
+  const next_asset_index = (pool_data?.symbols || [])
+    .findIndex(s =>
+      s?.startsWith(WRAPPED_PREFIX)
+    )
+
+  const pool_amounts =
+    (pool_data?.balances || [])
+      .map((b, i) =>
+        Number(
+          utils.formatUnits(
+            b ||
+            '0',
+            pool_data?.decimals?.[i] ||
+            18,
+          )
+        )
+      )
+
+  const pool_amount =
+    next_asset_index > -1 ?
+      (
+        receiveLocal ||
+        forceSlow ||
+        Number(amount) > liquidity_amount ?
+          pool_amounts[next_asset_index] :
+          pool_amounts[
+            next_asset_index === 0 ?
+              1 :
+              0
+          ]
+      ) ||
+      _.min(pool_amounts) :
+      _.min(pool_amounts)
+
   const min_amount = 0
   const max_amount = source_amount
-  const estimate_received =
+  const estimated_received =
     estimatedValues?.amountReceived ?
       estimatedValues.amountReceived :
       Number(amount) > 0 &&
       typeof router_fee === 'number' ?
         Number(amount) - router_fee :
         null
+
+  const estimated_slippage =
+    estimatedValues?.destinationSlippage ?
+      Number(estimatedValues.destinationSlippage) * 100 :
+      null
 
   const wrong_chain =
     source_chain_data &&
@@ -3532,7 +3606,7 @@ export default () => {
                               [
                                 'string',
                                 'number',
-                              ].includes(typeof estimate_received)
+                              ].includes(typeof estimated_received)
                             ) &&
                             (
                               checkSupport() &&
@@ -3553,7 +3627,7 @@ export default () => {
                                   [
                                     'string',
                                     'number',
-                                  ].includes(typeof estimate_received)
+                                  ].includes(typeof estimated_received)
                                 ) &&
                                 (
                                   <button
@@ -3589,18 +3663,19 @@ export default () => {
                                                   [
                                                     'string',
                                                     'number',
-                                                  ].includes(typeof estimate_received) &&
+                                                  ].includes(typeof estimated_received) &&
                                                   !estimateResponse ?
                                                     <DecimalsFormat
                                                       value={
-                                                        Number(estimate_received) >= 1000 ?
+                                                        Number(estimated_received) >= 1000 ?
                                                           number_format(
-                                                            estimate_received,
+                                                            estimated_received,
                                                             '0,0.000000000000',
                                                             true,
                                                           ) :
-                                                          estimate_received
+                                                          estimated_received
                                                       }
+                                                      className="text-sm"
                                                     /> :
                                                     '-'
                                                 }
@@ -3646,7 +3721,7 @@ export default () => {
                                         [
                                           'string',
                                           'number',
-                                        ].includes(typeof estimate_received) ||
+                                        ].includes(typeof estimated_received) ||
                                         !collapse > 0 ?
                                           'mt-2' :
                                           'mt-0'
@@ -3827,19 +3902,26 @@ export default () => {
                                                 {
                                                   typeof slippage === 'number' &&
                                                   (
+                                                    estimated_slippage > slippage ||
                                                     slippage < 0.2 ||
                                                     slippage > 5.0
                                                   ) &&
                                                   (
-                                                    <div className="flex items-center space-x-1">
+                                                    <div className="flex items-start space-x-1">
                                                       <IoWarning
-                                                        size={16}
+                                                        size={14}
                                                         className="min-w-max text-yellow-500 dark:text-yellow-400 mt-0.5"
                                                       />
                                                       <div className="text-yellow-500 dark:text-yellow-400 text-xs">
-                                                        {slippage < 0.2 ?
-                                                          'Your transfer may not complete due to low slippage tolerance.' :
-                                                          'Your transfer may be frontrun due to high slippage tolerance.'
+                                                        {estimated_slippage > slippage ?
+                                                          <>
+                                                            Slippage tolerance is too low
+                                                            <br />
+                                                            (use a larger amount or set tolerance higher)
+                                                          </> :
+                                                          slippage < 0.2 ?
+                                                            'Your transfer may not complete due to low slippage tolerance.' :
+                                                            'Your transfer may be frontrun due to high slippage tolerance.'
                                                         }
                                                       </div>
                                                     </div>
@@ -3979,7 +4061,7 @@ export default () => {
                                       [
                                         'string',
                                         'number',
-                                      ].includes(typeof estimate_received) &&
+                                      ].includes(typeof estimated_received) &&
                                       (
                                         Number(amount) < liquidity_amount ||
                                         asset_balances_data
@@ -4147,7 +4229,11 @@ export default () => {
                             ].includes(typeof source_amount)
                           ) ||
                           Number(amount) < min_amount ||
-                          Number(amount) < 0
+                          Number(amount) < 0 ||
+                          (
+                            typeof pool_amount === 'number' &&
+                            Number(amount) > pool_amount
+                          )
                         ) ?
                           <Alert
                             color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
@@ -4183,7 +4269,17 @@ export default () => {
                                     'The amount cannot be less than the transfer fee.' :
                                     Number(amount) < 0 ?
                                       'The amount cannot be equal to or less than 0.' :
-                                      ''
+                                      typeof pool_amount === 'number' &&
+                                      Number(amount) > pool_amount ?
+                                        `Exceed Pool Balances: ${
+                                          pool_amount >= 1000 ?
+                                            number_format(
+                                              pool_amount,
+                                              '0,0.00',
+                                            ) :
+                                            pool_amount
+                                        }` :
+                                        ''
                               }
                             </span>
                           </Alert> :

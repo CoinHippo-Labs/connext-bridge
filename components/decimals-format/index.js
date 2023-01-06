@@ -86,6 +86,17 @@ export default (
     _value = undefined
   }
 
+  if (
+    typeof value === 'string' &&
+    value.endsWith(`${delimiter}0`)
+  ) {
+    value =
+      _.head(
+        value
+          .split(delimiter)
+      )
+  }
+
   return (
     typeof _value === 'string' ?
       <Tooltip

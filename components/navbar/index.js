@@ -744,7 +744,7 @@ export default () => {
               decimals,
             } = { ...pool }
 
-            if (Array.isArray(balances)) {
+            /*if (Array.isArray(balances)) {
               pool.balances =
                 balances
                   .map((b, i) =>
@@ -758,7 +758,7 @@ export default () => {
                         )
                       )
                   )
-            }
+            }*/
 
             let supply
 
@@ -978,7 +978,7 @@ export default () => {
 
               if (
                 [
-                  'optimism',
+                  // 'optimism',
                 ].includes(chain_data.id)
               ) {
                 const totalTokens = 250000

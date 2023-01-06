@@ -83,12 +83,17 @@ export default (
           )
           .map(p => {
             const {
-              id,
+              chain_data,
               lpTokenBalance,
             } = { ...p }
             let {
+              id,
               share,
             } = { ...p }
+
+            id =
+              id ||
+              `${chain_data?.id}_${p?.asset_data?.id}`
 
             const pool_data = (pools_data || [])
               .find(_p =>
@@ -101,11 +106,9 @@ export default (
             } = { ...pool_data }
 
             share =
-              lpTokenBalance * 100 /
-              (
-                Number(supply) ||
-                1
-              )
+              !isNaN(supply) ?
+                lpTokenBalance * 100 / Number(supply) :
+                share
 
             const asset_data = (assets_data || [])
               .find(a =>
@@ -560,7 +563,7 @@ export default (
                                 'testnet',
                               ].includes(process.env.NEXT_PUBLIC_NETWORK) &&
                               [
-                                'optimism',
+                                // 'optimism',
                               ].includes(chain) ?
                                 <Tooltip
                                   placement="top"
@@ -1359,11 +1362,15 @@ export default (
 
                       return (
                         <div className="text-base font-semibold text-right">
-                          {number_format(
-                            value,
-                            '0,0.000000',
-                            true,
-                          )}
+                          {
+                            typeof value === 'number' ?
+                              number_format(
+                                value,
+                                '0,0.000000',
+                                true,
+                              ) :
+                              '-'
+                          }
                           %
                         </div>
                       )
