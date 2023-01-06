@@ -2537,20 +2537,12 @@ export default () => {
       )
 
   const pool_amount =
-    next_asset_index > -1 ?
-      (
-        receiveLocal ||
-        forceSlow ||
-        Number(amount) > liquidity_amount ?
-          pool_amounts[next_asset_index] :
-          pool_amounts[
-            next_asset_index === 0 ?
-              1 :
-              0
-          ]
-      ) ||
-      _.min(pool_amounts) :
-      _.min(pool_amounts)
+    receiveLocal ||
+    estimatedValues?.isNextAsset ?
+      null :
+      next_asset_index > -1 ?
+        pool_amounts[next_asset_index] :
+        _.min(pool_amounts)
 
   const min_amount = 0
   const max_amount = source_amount
