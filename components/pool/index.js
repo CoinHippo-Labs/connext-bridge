@@ -949,7 +949,7 @@ export default () => {
                         />
                       )
                     }
-                    <span className="tracking-tighter text-xl sm:text-6xl font-semibold">
+                    <span className="tracking-tighter text-xl sm:text-5xl font-semibold">
                       <span className="mr-1">
                         {chainName(chain_data)}
                       </span>

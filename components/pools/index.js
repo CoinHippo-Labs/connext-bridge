@@ -16,12 +16,12 @@ const WRAPPED_PREFIX =
 const VIEWS =
   [
     {
-      id: 'my_positions',
-      title: 'My positions',
-    },
-    {
       id: 'pools',
       title: 'Pools',
+    },
+    {
+      id: 'my_positions',
+      title: 'My positions',
     },
   ]
 
@@ -69,7 +69,7 @@ export default () => {
 
   const [view, setView] =
     useState(
-      _.last(VIEWS)?.id
+      _.head(VIEWS)?.id
     )
   const [pools, setPools] = useState(null)
   const [poolsTrigger, setPoolsTrigger] = useState(null)
@@ -247,21 +247,19 @@ export default () => {
   return (
     <div className="mb-4">
       <div className="flex justify-center">
-        <div className="w-full flex flex-col space-y-4 sm:space-y-6 my-4 sm:my-12 mx-1 sm:mx-4">
+        <div className="w-full flex flex-col space-y-4 sm:space-y-8 my-4 sm:my-12 mx-1 sm:mx-4">
           <div className="grid sm:grid-cols-1 gap-4">
-            <div className="flex flex-col space-y-6 sm:space-y-16">
-              <h1 className="text-2xl sm:text-3xl font-bold">
-                Add liquidity to earn
-                <br />
-                trading fees and rewards.
+            <div className="flex flex-col space-y-6 sm:space-y-12">
+              <h1 className="tracking-tighter text-xl sm:text-5xl font-semibold">
+                Add liquidity to earn rewards.
               </h1>
-              <div className="border-b dark:border-slate-800 flex items-center">
+              <div className="border-0 dark:border-slate-800 flex items-center">
                 {VIEWS
                   .map((v, i) => (
                     <div
                       key={i}
                       onClick={() => setView(v.id)}
-                      className={`border-b-4 ${view === v.id ? 'border-slate-600 dark:border-white font-bold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} whitespace-nowrap cursor-pointer text-lg mr-2 p-3`}
+                      className={`border-b-4 ${view === v.id ? 'border-slate-600 dark:border-white font-semibold' : 'border-transparent text-slate-400 dark:text-slate-500 font-medium'} whitespace-nowrap cursor-pointer text-lg mr-2 p-2`}
                     >
                       {v.title}
                     </div>

@@ -56,8 +56,8 @@
     thead tr th {
       @apply border-slate-200;
       @apply text-slate-500;
-      background: color(theme('colors.slate.200') tint(3%));
-      border-color: color(theme('colors.slate.200') tint(3%));
+      background: color(theme('colors.slate.100') tint(3%));
+      border-color: color(theme('colors.slate.100') tint(3%));
     }
     tbody tr td {
       border-color: color(#fff shade(6%));

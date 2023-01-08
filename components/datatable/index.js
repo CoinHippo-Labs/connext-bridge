@@ -103,16 +103,20 @@ export default (
               rowSelectEnable ?
                 {
                   id: 'selection',
-                  Header: ({
-                    getToggleAllRowsSelectedProps,
-                  }) => (
+                  Header: (
+                    {
+                      getToggleAllRowsSelectedProps,
+                    }
+                  ) => (
                     <IndeterminateCheckbox
                       { ...getToggleAllRowsSelectedProps() }
                     />
                   ),
-                  Cell: ({
-                    row,
-                  }) => (
+                  Cell: (
+                    {
+                      row,
+                    }
+                  ) => (
                     <IndeterminateCheckbox
                       { ...row.getToggleRowSelectedProps() }
                     />
@@ -161,7 +165,22 @@ export default (
                       { ...c.getHeaderProps(c.getSortByToggleProps()) }
                       className={`${c.className} ${i === 0 ? 'rounded-tl' : i === hg.headers.length - 1 ? 'rounded-tr' : ''}`}
                     >
-                      <div className={`flex flex-row items-center ${c.headerClassName?.includes('justify-') ? '' : 'justify-start'} ${c.headerClassName || ''}`}>
+                      <div
+                        className={
+                          `flex flex-row items-center ${
+                            c.headerClassName?.includes('justify-') ?
+                              '' :
+                              'justify-start'
+                          } ${
+                            c.headerClassName?.includes('text-slate-') ?
+                              '' :
+                              'text-slate-600 dark:text-slate-200'
+                          } ${
+                            c.headerClassName ||
+                            ''
+                          }`
+                        }
+                      >
                         <span>
                           {c.render('Header')}
                         </span>

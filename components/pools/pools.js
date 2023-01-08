@@ -8,6 +8,7 @@ import { MdKeyboardArrowUp, MdKeyboardArrowDown } from 'react-icons/md'
 
 import Datatable from '../datatable'
 import Image from '../image'
+import DecimalsFormat from '../decimals-format'
 import { chainName } from '../../lib/object/chain'
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
@@ -278,9 +279,20 @@ export default (
         ) :
         null
 
+  const boxShadow = `#e53f3f${theme === 'light' ? '44' : '33'} 0px 16px 128px 64px`
+
   return (
     data ?
-      <div className="grid my-4 sm:my-6">
+      <div
+        className="grid my-4 sm:my-6"
+        style={
+          {
+            boxShadow,
+            WebkitBoxShadow: boxShadow,
+            MozBoxShadow: boxShadow,
+          }
+        }
+      >
         {
           false &&
           view === 'pools' ?
@@ -422,7 +434,7 @@ export default (
                           symbols?.[i],
                           number_format(
                             b,
-                            b > 1000 ?
+                            b > 100 ?
                               '0,0.00a' :
                               b > 1 ?
                                 '0,0.00' :
@@ -539,7 +551,7 @@ export default (
                                   {currency_symbol}
                                   {number_format(
                                     tvl,
-                                    tvl > 1000 ?
+                                    tvl > 100 ?
                                       '0,0.00a' :
                                       tvl > 1 ?
                                         '0,0.00' :
@@ -776,7 +788,7 @@ export default (
                               href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                             >
                             <a
-                              className="h-6 flex items-center space-x-2"
+                              className="min-w-max h-6 flex items-center space-x-2"
                             >
                               {
                                 image &&
@@ -798,7 +810,7 @@ export default (
                             <>
                               <div
                                 onClick={() => onClick()}
-                                className={`w-fit ${pools?.length > 0 ? 'cursor-pointer' : ''} flex items-center`}
+                                className={`min-w-max ${pools?.length > 0 ? 'cursor-pointer' : ''} flex items-center`}
                               >
                                 {pools?.length > 0 ?
                                   <>
@@ -933,13 +945,29 @@ export default (
 
                       return (
                         <div className="flex flex-col space-y-3">
-                          <div className="uppercase text-slate-600 dark:text-slate-400 text-base font-medium text-right">
-                            {currency_symbol}
-                            {number_format(
-                              value,
-                              '0,0.00',
-                              true,
-                            )}
+                          <div className="text-right">
+                            <DecimalsFormat
+                              value={
+                                number_format(
+                                  value,
+                                  value > 100 ?
+                                    '0,0' :
+                                    value > 1 ?
+                                      '0,0.00' :
+                                      '0,0.000000',
+                                  true,
+                                )
+                              }
+                              max_decimals={
+                                value > 100 ?
+                                  0 :
+                                  value > 1 ?
+                                    2 :
+                                    6
+                              }
+                              prefix={currency_symbol}
+                              className="uppercase text-slate-600 dark:text-slate-400 text-base font-medium"
+                            />
                           </div>
                           {
                             uncollapseAssetIds?.includes(id) &&
@@ -975,14 +1003,28 @@ export default (
                                             height="18"
                                           />
                                         </div> :
-                                        <span className="uppercase">
-                                          {currency_symbol}
-                                          {number_format(
-                                            value,
-                                            '0,0.00',
-                                            true,
-                                          )}
-                                        </span>
+                                        <DecimalsFormat
+                                          value={
+                                            number_format(
+                                              value,
+                                              value > 100 ?
+                                                '0,0' :
+                                                value > 1 ?
+                                                  '0,0.00' :
+                                                  '0,0.000000',
+                                              true,
+                                            )
+                                          }
+                                          max_decimals={
+                                            value > 100 ?
+                                              0 :
+                                              value > 1 ?
+                                                2 :
+                                                6
+                                          }
+                                          prefix={currency_symbol}
+                                          className="uppercase"
+                                        />
                                     }
                                   </a>
                                   </Link>
@@ -1022,13 +1064,29 @@ export default (
 
                       return (
                         <div className="flex flex-col space-y-3">
-                          <div className="uppercase text-slate-600 dark:text-slate-400 text-base font-medium text-right">
-                            {currency_symbol}
-                            {number_format(
-                              value,
-                              '0,0.00',
-                              true,
-                            )}
+                          <div className="text-right">
+                            <DecimalsFormat
+                              value={
+                                number_format(
+                                  value,
+                                  value > 100 ?
+                                    '0,0' :
+                                    value > 1 ?
+                                      '0,0.00' :
+                                      '0,0.000000',
+                                  true,
+                                )
+                              }
+                              max_decimals={
+                                value > 100 ?
+                                  0 :
+                                  value > 1 ?
+                                    2 :
+                                    6
+                              }
+                              prefix={currency_symbol}
+                              className="uppercase text-slate-600 dark:text-slate-400 text-base font-medium"
+                            />
                           </div>
                           {
                             uncollapseAssetIds?.includes(id) &&
@@ -1052,14 +1110,28 @@ export default (
                                   <a
                                     className="h-6 text-base font-semibold text-right"
                                   >
-                                    <span className="uppercase">
-                                      {currency_symbol}
-                                      {number_format(
-                                        value,
-                                        '0,0.00',
-                                        true,
-                                      )}
-                                    </span>
+                                    <DecimalsFormat
+                                      value={
+                                        number_format(
+                                          value,
+                                          value > 100 ?
+                                            '0,0' :
+                                            value > 1 ?
+                                              '0,0.00' :
+                                              '0,0.000000',
+                                          true,
+                                        )
+                                      }
+                                      max_decimals={
+                                        value > 100 ?
+                                          0 :
+                                          value > 1 ?
+                                            2 :
+                                            6
+                                      }
+                                      prefix={currency_symbol}
+                                      className="uppercase"
+                                    />
                                   </a>
                                   </Link>
                                 )
@@ -1098,13 +1170,29 @@ export default (
 
                       return (
                         <div className="flex flex-col space-y-3">
-                          <div className="uppercase text-slate-600 dark:text-slate-400 text-base font-medium text-right">
-                            {currency_symbol}
-                            {number_format(
-                              value,
-                              '0,0.00',
-                              true,
-                            )}
+                          <div className="text-right">
+                            <DecimalsFormat
+                              value={
+                                number_format(
+                                  value,
+                                  value > 100 ?
+                                    '0,0' :
+                                    value > 1 ?
+                                      '0,0.00' :
+                                      '0,0.000000',
+                                  true,
+                                )
+                              }
+                              max_decimals={
+                                value > 100 ?
+                                  0 :
+                                  value > 1 ?
+                                    2 :
+                                    6
+                              }
+                              prefix={currency_symbol}
+                              className="uppercase text-slate-600 dark:text-slate-400 text-base font-medium"
+                            />
                           </div>
                           {
                             uncollapseAssetIds?.includes(id) &&
@@ -1128,14 +1216,28 @@ export default (
                                   <a
                                     className="h-6 text-base font-semibold text-right"
                                   >
-                                    <span className="uppercase">
-                                      {currency_symbol}
-                                      {number_format(
-                                        value,
-                                        '0,0.00',
-                                        true,
-                                      )}
-                                    </span>
+                                    <DecimalsFormat
+                                      value={
+                                        number_format(
+                                          value,
+                                          value > 100 ?
+                                            '0,0' :
+                                            value > 1 ?
+                                              '0,0.00' :
+                                              '0,0.000000',
+                                          true,
+                                        )
+                                      }
+                                      max_decimals={
+                                        value > 100 ?
+                                          0 :
+                                          value > 1 ?
+                                            2 :
+                                            6
+                                      }
+                                      prefix={currency_symbol}
+                                      className="uppercase"
+                                    />
                                   </a>
                                   </Link>
                                 )
@@ -1250,13 +1352,27 @@ export default (
                       return (
                         <div className="flex flex-col space-y-1">
                           <div className="flex items-center text-base font-semibold text-right space-x-1">
-                            <span className="uppercase">
-                              {number_format(
-                                value,
-                                '0,0.000000',
-                                true,
-                              )}
-                            </span>
+                            <DecimalsFormat
+                              value={
+                                number_format(
+                                  value,
+                                  value > 100 ?
+                                    '0,0' :
+                                    value > 1 ?
+                                      '0,0.00' :
+                                      '0,0.000000',
+                                  true,
+                                )
+                              }
+                              max_decimals={
+                                value > 100 ?
+                                  0 :
+                                  value > 1 ?
+                                    2 :
+                                    6
+                              }
+                              className="uppercase"
+                            />
                             {
                               symbol &&
                               (
@@ -1270,14 +1386,28 @@ export default (
                             price > 0 &&
                             (
                               <div className="text-slate-800 dark:text-slate-200 text-sm text-right">
-                                <span className="uppercase">
-                                  {currency_symbol}
-                                  {number_format(
-                                    value * price,
-                                    '0,0.00',
-                                    true,
-                                  )}
-                                </span>
+                                <DecimalsFormat
+                                  value={
+                                    number_format(
+                                      value * price,
+                                      value * price > 100 ?
+                                        '0,0' :
+                                        value * price > 1 ?
+                                          '0,0.00' :
+                                          '0,0.000000',
+                                      true,
+                                    )
+                                  }
+                                  max_decimals={
+                                    value * price > 100 ?
+                                      0 :
+                                      value * price > 1 ?
+                                        2 :
+                                        6
+                                  }
+                                  prefix={currency_symbol}
+                                  className="uppercase"
+                                />
                               </div>
                             )
                           }
@@ -1307,13 +1437,27 @@ export default (
                       return (
                         <div className="flex items-center justify-end space-x-1.5">
                           <div className="flex items-center text-base font-semibold space-x-1">
-                            <span className="uppercase">
-                              {number_format(
-                                _.head(value),
-                                '0,0.000000',
-                                true,
-                              )}
-                            </span>
+                            <DecimalsFormat
+                              value={
+                                number_format(
+                                  _.head(value),
+                                  _.head(value) > 100 ?
+                                    '0.0' :
+                                    _.head(value) > 1 ?
+                                      '0.0.00' :
+                                      '0,0.000000',
+                                  true,
+                                )
+                              }
+                              max_decimals={
+                                _.head(value) > 100 ?
+                                  0 :
+                                  _.head(value) > 1 ?
+                                    2 :
+                                    6
+                              }
+                              className="uppercase"
+                            />
                             {
                               _.head(symbols) &&
                               (
@@ -1327,13 +1471,27 @@ export default (
                             /
                           </span>
                           <div className="flex items-center text-base font-semibold space-x-1">
-                            <span className="uppercase">
-                              {number_format(
-                                _.last(value),
-                                '0,0.000000',
-                                true,
-                              )}
-                            </span>
+                            <DecimalsFormat
+                              value={
+                                number_format(
+                                  _.last(value),
+                                  _.last(value) > 100 ?
+                                    '0.0' :
+                                    _.last(value) > 1 ?
+                                      '0.0.00' :
+                                      '0,0.000000',
+                                  true,
+                                )
+                              }
+                              max_decimals={
+                                _.last(value) > 100 ?
+                                  0 :
+                                  _.last(value) > 1 ?
+                                    2 :
+                                    6
+                              }
+                              className="uppercase"
+                            />
                             {
                               _.last(symbols) &&
                               (
@@ -1366,7 +1524,9 @@ export default (
                             typeof value === 'number' ?
                               number_format(
                                 value,
-                                '0,0.000000',
+                                value > 1 ?
+                                  '0,0.00' :
+                                  '0,0.000000',
                                 true,
                               ) :
                               '-'

@@ -6,6 +6,7 @@ export default (
     value,
     delimiter = '.',
     max_decimals = 6,
+    prefix = '',
     placement = 'top',
     className = 'whitespace-nowrap text-xs font-semibold',
   },
@@ -29,7 +30,12 @@ export default (
           .split(delimiter)
       )
 
-    const value_number = Number(_value)
+    const value_number =
+      Number(
+        _value
+          .split(',')
+          .join('')
+      )
 
     if (
       value_number >=
@@ -50,10 +56,14 @@ export default (
     else {
       if (decimals.length > max_decimals) {
         _value =
-          `< 0${delimiter}${
-            _.range(max_decimals - 1)
-              .map(i => '0')
-              .join('')
+          `<${
+            max_decimals > 0 ?
+              `0${delimiter}${
+                _.range(max_decimals - 1)
+                  .map(i => '0')
+                  .join('')
+              }` :
+              ''
           }1`
       }
       else {
@@ -101,15 +111,20 @@ export default (
     typeof _value === 'string' ?
       <Tooltip
         placement={placement}
-        content={value.toString()}
+        content={
+          `${prefix}${
+            value
+              .toString()
+          }`
+        }
         className="z-50 bg-dark text-white text-xs"
       >
         <span className={className}>
-          {_value}
+          {`${prefix}${_value}`}
         </span>
       </Tooltip> :
       <span className={className}>
-        {value}
+        {`${prefix}${value}`}
       </span>
   )
 }

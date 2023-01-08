@@ -16,11 +16,11 @@ module.exports = {
         ...colors,
         dark: '#000000',
         light: '#ffffff',
-        black: '#131313',
+        black: '#1a1919',
         white: '#ececec',
         slate: {
           ...colors.slate,
-          900: '#1e1e1e',
+          900: '#1d1c1c',
           800: '#292929',
           700: '#343434',
           600: '#4a4a4a',

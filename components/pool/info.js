@@ -243,6 +243,8 @@ export default (
   const valueClassName = 'text-lg sm:text-3xl font-bold'
   const gridValueClassName = 'text-lg font-bold'
 
+  const boxShadow = `#e53f3f${theme === 'light' ? '44' : '33'} 0px 16px 128px 64px`
+
   return (
     <div className="sm:min-h-full bg-transparent">
       {
@@ -254,7 +256,7 @@ export default (
                 Statistics
               </div>*/}
               <div className="grid grid-cols-2 lg:grid-cols-2 gap-2">
-                <div className={metricClassName}>
+                <div className={`z-50 ${metricClassName}`}>
                   <span className={titleClassName}>
                     TVL
                   </span>
@@ -306,7 +308,16 @@ export default (
                     </span>
                   </div>
                 </div>
-                <div className={metricClassName}>
+                <div
+                  className={metricClassName}
+                  style={
+                    {
+                      boxShadow,
+                      WebkitBoxShadow: boxShadow,
+                      MozBoxShadow: boxShadow,
+                    }
+                  }
+                >
                   <span className={titleClassName}>
                     Reward APR
                   </span>

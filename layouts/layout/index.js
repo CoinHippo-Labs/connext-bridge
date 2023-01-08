@@ -9,9 +9,11 @@ import meta from '../../lib/meta'
 import { equals_ignore_case } from '../../lib/utils'
 import { THEME } from '../../reducers/types'
 
-export default ({
-  children,
-}) => {
+export default (
+  {
+    children,
+  },
+) => {
   const dispatch = useDispatch()
   const {
     preferences,
@@ -42,20 +44,23 @@ export default ({
     asPath,
   } = { ...router }
 
-  useEffect(() => {
-    if (
-      typeof window !== 'undefined' &&
-      localStorage.getItem(THEME) &&
-      localStorage.getItem(THEME) !== theme
-    ) {
-      dispatch(
-        {
-          type: THEME,
-          value: localStorage.getItem(THEME),
-        }
-      )
-    }
-  }, [theme])
+  useEffect(
+    () => {
+      if (
+        typeof window !== 'undefined' &&
+        localStorage.getItem(THEME) &&
+        localStorage.getItem(THEME) !== theme
+      ) {
+        dispatch(
+          {
+            type: THEME,
+            value: localStorage.getItem(THEME),
+          }
+        )
+      }
+    },
+    [theme],
+  )
 
   const headMeta =
     meta(
@@ -167,20 +172,27 @@ export default ({
         data-layout="layout"
         data-background={theme}
         data-navbar={theme}
-        className={`antialiased ${'overflow-y-scroll' || 'disable-scrollbars'} text-sm ${theme}`}
+        className={
+          `antialiased ${
+            'overflow-y-scroll' ||
+            'disable-scrollbars'
+          } text-sm ${theme}`
+        }
       >
         <div className="wrapper">
           <div
             className="main w-full bg-white dark:bg-black"
-            style={{
-              minHeight: 'calc(100vh - 44px)',
-              backgroundColor:
-                theme === 'light' ?
-                  '#ececec' :
-                  '#131313',
-              // backgroundImage: `url("/images/background${theme === 'light' ? '_white' : ''}.png")`,
-              // backgroundSize: 'cover',
-            }}
+            style={
+              {
+                minHeight: 'calc(100vh - 44px)',
+                backgroundColor:
+                  theme === 'light' ?
+                    '#ececec' :
+                    '#1a1919',
+                // backgroundImage: `url("/images/background${theme === 'light' ? '_white' : ''}.png")`,
+                // backgroundSize: 'cover',
+              }
+            }
           >
             <Navbar />
             <div className="w-full px-2 sm:px-4">
