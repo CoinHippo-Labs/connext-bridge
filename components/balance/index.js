@@ -243,15 +243,18 @@ export default (
           !isNaN(amount) ?
             <>
               <span className="font-semibold">
-                {number_format(
-                  amount,
-                  Number(amount) > 1000000 ?
-                    '0,0' :
-                    Number(amount) > 10000 ?
-                      '0,0.00' :
-                      '0,0.00000000',
-                  true,
-                )}
+                {Number(amount) > 1 ?
+                  number_format(
+                    amount,
+                    Number(amount) > 1000000 ?
+                      '0,0' :
+                      Number(amount) > 10000 ?
+                        '0,0.00' :
+                        '0,0.00000000',
+                    true,
+                  ) :
+                  amount
+                }
               </span>
               {
                 !hideSymbol &&

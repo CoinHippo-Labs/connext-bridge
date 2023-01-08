@@ -23,6 +23,7 @@ export default (
     initialData,
     onChange,
     hasNextAsset = false,
+    chainData,
   },
 ) => {
   const {
@@ -39,6 +40,7 @@ export default (
     theme,
   } = { ...preferences }
 
+
   const [data, setData] = useState(initialData)
 
   useEffect(
@@ -49,6 +51,13 @@ export default (
   )
 
   const reset = () => setData(initialData)
+
+  const receiveLocalTooltip =
+    !hasNextAsset &&
+    `Unavailable on ${
+      chainData?.name ||
+      'Ethereum'
+    }`
 
   const fields =
     [
@@ -83,11 +92,11 @@ export default (
         name: 'forceSlow',
         type: 'switch',
       },*/
-      hasNextAsset &&
       {
         label: 'Receive NextAsset',
         name: 'receiveLocal',
         type: 'switch',
+        tooltip: receiveLocalTooltip,
       },
       {
         label: 'Show NextAsset',
@@ -263,32 +272,56 @@ export default (
                             /*</Popover>*/
                           }
                         </div> :
-                        <Switch
-                          checked={
-                            typeof data?.[name] === 'boolean' ?
-                              data[name] :
-                              false
-                          }
-                          onChange={e => {
-                            const _data = {
-                              ...data,
-                              [`${name}`]: !data?.[name],
+                        name === 'receiveLocal' &&
+                        receiveLocalTooltip ?
+                          <Tooltip
+                            placement="right"
+                            content={receiveLocalTooltip}
+                            className="z-50 bg-dark text-white text-xs"
+                          >
+                            <div className="w-fit">
+                              <Switch
+                                disabled={true}
+                                checked={
+                                  typeof data?.[name] === 'boolean' ?
+                                    data[name] :
+                                    false
+                                }
+                                checkedIcon={false}
+                                uncheckedIcon={false}
+                                onColor={switch_color(theme).on}
+                                onHandleColor="#f8fafc"
+                                offColor={switch_color(theme).off}
+                                offHandleColor="#f8fafc"
+                              />
+                            </div>
+                          </Tooltip> :
+                          <Switch
+                            checked={
+                              typeof data?.[name] === 'boolean' ?
+                                data[name] :
+                                false
                             }
+                            onChange={e => {
+                              const _data = {
+                                ...data,
+                                [`${name}`]: !data?.[name],
+                              }
 
-                            console.log(
-                              '[Options]',
-                              _data,
-                            )
+                              console.log(
+                                '[Options]',
+                                _data,
+                              )
 
-                            setData(_data)
-                          }}
-                          checkedIcon={false}
-                          uncheckedIcon={false}
-                          onColor={switch_color(theme).on}
-                          onHandleColor="#f8fafc"
-                          offColor={switch_color(theme).off}
-                          offHandleColor="#f8fafc"
-                        /> :
+                              setData(_data)
+                            }}
+                            checkedIcon={false}
+                            uncheckedIcon={false}
+                            onColor={switch_color(theme).on}
+                            onHandleColor="#f8fafc"
+                            offColor={switch_color(theme).off}
+                            offHandleColor="#f8fafc"
+                          /> :
                       type === 'textarea' ?
                         <textarea
                           type="text"

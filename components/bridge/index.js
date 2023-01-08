@@ -568,8 +568,9 @@ export default () => {
                   equals_ignore_case(
                     a?.contract_address,
                     next_asset?.contract_address,
-                  ) ?
-                    next_asset?.decimals ||
+                  ) &&
+                  next_asset ?
+                    next_asset.decimals ||
                     18 :
                     destination_decimals,
                 )
@@ -1741,7 +1742,17 @@ export default () => {
                     k,
                     utils.formatUnits(
                       v,
-                      source_decimals,
+                      [
+                        'amountReceived',
+                      ].includes(k) ?
+                        (
+                          isNextAsset &&
+                          _destination_contract_data?.next_asset ?
+                            _destination_contract_data?.next_asset?.decimals :
+                            destination_contract_data?.decimals
+                        ) ||
+                        18 :
+                        source_decimals,
                     ),
                   ]
                 })
@@ -2176,6 +2187,13 @@ export default () => {
             success = true
 
             if (!failed) {
+              destination_transacting_asset =
+                receiveLocal ||
+                estimatedValues?.isNextAsset ?
+                  destination_contract_data?.next_asset?.contract_address ||
+                  destination_contract_data?.contract_address :
+                  destination_contract_data?.contract_address
+
               setLatestTransfers(
                 _.orderBy(
                   _.uniqBy(
@@ -2205,12 +2223,7 @@ export default () => {
                           ),
                         destination_chain: destination_chain_data?.chain_id,
                         destination_domain: xcallParams.destination,
-                        destination_transacting_asset:
-                          receiveLocal ||
-                          estimatedValues?.isNextAsset ?
-                            destination_contract_data?.next_asset?.contract_address ||
-                            destination_contract_data?.contract_address :
-                            destination_contract_data?.contract_address,
+                        destination_transacting_asset,
                         destination_transacting_amount:
                           estimatedValues?.amountReceived ?
                             utils.parseUnits(
@@ -2219,7 +2232,15 @@ export default () => {
                                 0
                               )
                               .toString(),
-                              destination_contract_data?.decimals ||
+                              (
+                                equals_ignore_case(
+                                  destination_transacting_asset,
+                                  destination_contract_data?.next_asset?.contract_address,
+                                ) &&
+                                destination_contract_data?.next_asset ?
+                                  destination_contract_data.next_asset?.decimals :
+                                  destination_contract_data?.decimals
+                              ) ||
                               18,
                             )
                             .toString() :
@@ -2503,8 +2524,9 @@ export default () => {
               equals_ignore_case(
                 a?.contract_address,
                 destination_contract_data?.next_asset?.contract_address,
-              ) ?
-                destination_contract_data?.next_asset?.decimals ||
+              ) &&
+              destination_contract_data?.next_asset ?
+                destination_contract_data.next_asset?.decimals ||
                 18 :
                 destination_decimals,
             )
@@ -2891,6 +2913,7 @@ export default () => {
                               }
                             }}
                             hasNextAsset={destination_contract_data?.next_asset}
+                            chainData={destination_chain_data}
                           />
                         )
                       }
