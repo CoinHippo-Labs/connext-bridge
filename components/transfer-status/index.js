@@ -8,6 +8,7 @@ import { Tooltip } from '@material-tailwind/react'
 import Fade from 'react-reveal/Fade'
 import { TiArrowRight } from 'react-icons/ti'
 import { HiOutlineCheckCircle } from 'react-icons/hi'
+import { BsLightningCharge } from 'react-icons/bs'
 
 import Image from '../image'
 import EnsProfile from '../ens-profile'
@@ -638,7 +639,7 @@ export default (
                   </Tooltip>
                 </div> :
                 <span>
-                  {
+                  {/*
                     force_slow &&
                     (
                       <div className={`rounded border ${status === XTransferStatus.CompletedSlow ? 'border-green-500 dark:border-green-500 text-green-400 dark:text-green-400' : 'border-blue-500 dark:border-blue-500 text-blue-400 dark:text-blue-400'} flex items-center space-x-1 py-0.5 px-1.5`}>
@@ -646,6 +647,23 @@ export default (
                           Slow
                         </span>
                       </div>
+                    )
+                  */}
+                  {
+                    !force_slow &&
+                    (
+                      <Tooltip
+                        placement="bottom"
+                        content="Boosted by router liquidity."
+                        className="z-50 bg-dark text-white text-xs"
+                      >
+                        <div>
+                          <BsLightningCharge
+                            size={16}
+                            className="text-yellow-600 dark:text-yellow-400"
+                          />
+                        </div>
+                      </Tooltip>
                     )
                   }
                 </span>

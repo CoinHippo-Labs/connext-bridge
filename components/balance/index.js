@@ -4,6 +4,7 @@ import { Contract, constants, utils } from 'ethers'
 import moment from 'moment'
 import { RotatingSquare } from 'react-loader-spinner'
 
+import DecimalsFormat from '../decimals-format'
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
@@ -242,20 +243,22 @@ export default (
           ].includes(typeof amount) &&
           !isNaN(amount) ?
             <>
-              <span className="font-semibold">
-                {Number(amount) > 1 ?
-                  number_format(
-                    amount,
-                    Number(amount) > 1000000 ?
-                      '0,0' :
-                      Number(amount) > 10000 ?
-                        '0,0.00' :
-                        '0,0.00000000',
-                    true,
-                  ) :
-                  amount
+              <DecimalsFormat
+                value={
+                  Number(amount) > 1 ?
+                    number_format(
+                      amount,
+                      Number(amount) > 1000000 ?
+                        '0,0' :
+                        Number(amount) > 10000 ?
+                          '0,0.00' :
+                          '0,0.00000000',
+                      true,
+                    ) :
+                    amount
                 }
-              </span>
+                className="font-semibold"
+              />
               {
                 !hideSymbol &&
                 (

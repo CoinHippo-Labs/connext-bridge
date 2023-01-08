@@ -2547,14 +2547,10 @@ export default () => {
 
   const pool_amounts =
     (pool_data?.balances || [])
-      .map((b, i) =>
+      .map(b =>
         Number(
-          utils.formatUnits(
-            b ||
-            '0',
-            pool_data?.decimals?.[i] ||
-            18,
-          )
+          b ||
+          '0'
         )
       )
 
@@ -2782,7 +2778,7 @@ export default () => {
                   </div>
                 </PageVisibility> :
                 <div
-                  className="bg-white dark:bg-slate-900 rounded border dark:border-slate-700 space-y-10 pt-5 sm:pt-6 pb-6 sm:pb-7 px-4 sm:px-6"
+                  className="bg-white dark:bg-slate-900 rounded border dark:border-slate-700 space-y-6 pt-5 sm:pt-6 pb-6 sm:pb-7 px-4 sm:px-6"
                   style={
                     checkSupport() ?
                       {
@@ -3130,10 +3126,12 @@ export default () => {
                             is_bridge={true}
                             show_next_assets={showNextAssets}
                             show_native_assets={true}
-                            data={{
-                              ...source_asset_data,
-                              ...source_contract_data,
-                            }}
+                            data={
+                              {
+                                ...source_asset_data,
+                                ...source_contract_data,
+                              }
+                            }
                             className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
                           />
                           <DebounceInput
@@ -3635,7 +3633,105 @@ export default () => {
                             )
                           ) &&
                           (
-                            <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 py-3.5 px-3">
+                            <div className="space-y-2.5">
+                              <div className="text-slate-600 dark:text-slate-500 font-medium">
+                                You receive
+                              </div>
+                              <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-0.5 py-3.5 px-3">
+                                <div className="flex items-center justify-between space-x-2">
+                                  <SelectAsset
+                                    disabled={disabled}
+                                    fixed={true}
+                                    value={asset}
+                                    chain={destination_chain}
+                                    origin=""
+                                    is_bridge={true}
+                                    show_next_assets={true}
+                                    show_native_assets={true}
+                                    data={
+                                      {
+                                        ...destination_asset_data,
+                                        ...destination_contract_data,
+                                      }
+                                    }
+                                    className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
+                                  />
+                                  {
+                                    ![
+                                      'string',
+                                      'number',
+                                    ].includes(typeof amount) ||
+                                    [
+                                      'string',
+                                      'number',
+                                    ].includes(typeof estimatedValues?.amountReceived) ||
+                                    estimateResponse ?
+                                      <span className="font-semibold">
+                                        {
+                                          [
+                                            'string',
+                                            'number',
+                                          ].includes(typeof amount) &&
+                                          [
+                                            'string',
+                                            'number',
+                                          ].includes(typeof estimated_received) &&
+                                          !estimateResponse ?
+                                            <DecimalsFormat
+                                              value={
+                                                Number(estimated_received) >= 1000 ?
+                                                  number_format(
+                                                    estimated_received,
+                                                    '0,0.000000000000',
+                                                    true,
+                                                  ) :
+                                                  estimated_received
+                                              }
+                                              className={
+                                                `w-36 sm:w-48 bg-transparent ${
+                                                  [
+                                                    '',
+                                                    undefined,
+                                                  ].includes(estimated_received) ?
+                                                    'text-slate-500 dark:text-slate-500' :
+                                                    ''
+                                                } sm:text-lg font-semibold text-right py-1.5`
+                                              }
+                                            /> :
+                                            '-'
+                                        }
+                                      </span> :
+                                      <Oval
+                                        color={loader_color(theme)}
+                                        width="20"
+                                        height="20"
+                                      />
+                                  }
+                                </div>
+                                {
+                                  destination_chain_data &&
+                                  asset &&
+                                  (
+                                    <div className="flex items-center justify-between space-x-2">
+                                      <div className="flex items-center space-x-1">
+                                        <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                          Balance:
+                                        </div>
+                                        <Balance
+                                          chainId={destination_chain_data.chain_id}
+                                          asset={asset}
+                                          contractAddress={destination_contract_data?.contract_address}
+                                          decimals={destination_decimals}
+                                          symbol={destination_symbol}
+                                          hideSymbol={true}
+                                          trigger={balanceTrigger}
+                                        />
+                                      </div>
+                                    </div>
+                                  )
+                                }
+                              </div>
+                            {/*<div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 py-3.5 px-3">
                               {
                                 (
                                   true ||
@@ -3720,6 +3816,7 @@ export default () => {
                                   </button>
                                 )
                               }
+                            */}
                               {
                                 checkSupport() &&
                                 (
