@@ -2187,7 +2187,7 @@ export default () => {
             success = true
 
             if (!failed) {
-              destination_transacting_asset =
+              const destination_transacting_asset =
                 receiveLocal ||
                 estimatedValues?.isNextAsset ?
                   destination_contract_data?.next_asset?.contract_address ||
