@@ -73,6 +73,7 @@ export default (
   const {
     chain_id,
     explorer,
+    color,
   } = { ...chain_data }
   const {
     url,
@@ -243,7 +244,15 @@ export default (
   const valueClassName = 'text-lg sm:text-3xl font-bold'
   const gridValueClassName = 'text-lg font-bold'
 
-  const boxShadow = `#e53f3f${theme === 'light' ? '44' : '33'} 0px 16px 128px 64px`
+  const boxShadow =
+    `${
+      color ||
+      '#e53f3f'
+    }${
+      theme === 'light' ?
+        '44' :
+        '33'
+    } 0px 16px 128px 64px`
 
   return (
     <div className="sm:min-h-full bg-transparent">
@@ -608,15 +617,27 @@ export default (
                             <span className="text-xs font-medium">
                               Share
                             </span>
-                            <span className={gridValueClassName}>
-                              {number_format(
-                                share ||
-                                0,
-                                '0,0.000000',
-                                true,
-                              )}
-                              %
-                            </span>
+                            <DecimalsFormat
+                              value={
+                                number_format(
+                                  share ||
+                                  0,
+                                  share > 1 ?
+                                    '0,0.00' :
+                                    '0,0.000000',
+                                  true,
+                                )
+                              }
+                              max_decimals={
+                                share > 100 ?
+                                  0 :
+                                  share > 1 ?
+                                    2 :
+                                    6
+                              }
+                              suffix="%"
+                              className={gridValueClassName}
+                            />
                           </div>
                         </>
                     }

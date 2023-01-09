@@ -739,10 +739,37 @@ export default () => {
 
             const {
               lpTokenAddress,
-              symbol,
               balances,
               decimals,
             } = { ...pool }
+            let {
+              name,
+              symbol,
+            } = { ...pool }
+
+            if (symbol?.includes(`${WRAPPED_PREFIX}${WRAPPED_PREFIX}`)) {
+              name =
+                (name || '')
+                  .replace(
+                    WRAPPED_PREFIX,
+                    '',
+                  )
+
+              symbol =
+                symbol
+                  .split('-')
+                  .map(s =>
+                    s
+                      .replace(
+                        WRAPPED_PREFIX,
+                        '',
+                      )
+                  )
+                  .join('-')
+
+              pool.name = name
+              pool.symbol = symbol
+            }
 
             /*if (Array.isArray(balances)) {
               pool.balances =

@@ -983,7 +983,7 @@ export default () => {
               {
                 error &&
                 (
-                  <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-100 dark:bg-opacity-50 rounded tracking-wider text-red-600 dark:text-red-400 text-base font-medium py-1.5 px-4">
+                  <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-100 dark:bg-opacity-50 rounded break-words tracking-tighter text-red-600 dark:text-red-400 text-base font-medium py-1.5 px-4">
                     {error.message}
                   </div>
                 )

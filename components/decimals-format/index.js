@@ -7,6 +7,7 @@ export default (
     delimiter = '.',
     max_decimals = 6,
     prefix = '',
+    suffix = '',
     placement = 'top',
     className = 'whitespace-nowrap text-xs font-semibold',
   },
@@ -115,16 +116,16 @@ export default (
           `${prefix}${
             value
               .toString()
-          }`
+          }${suffix}`
         }
         className="z-50 bg-dark text-white text-xs"
       >
         <span className={className}>
-          {`${prefix}${_value}`}
+          {`${prefix}${_value}${suffix}`}
         </span>
       </Tooltip> :
       <span className={className}>
-        {`${prefix}${value}`}
+        {`${prefix}${value}${suffix}`}
       </span>
   )
 }

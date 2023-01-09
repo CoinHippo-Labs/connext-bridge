@@ -25,6 +25,7 @@ export default (
     assets,
     pool_assets,
     pools,
+    wallet,
   } = useSelector(state =>
     (
       {
@@ -33,6 +34,7 @@ export default (
         assets: state.assets,
         pool_assets: state.pool_assets,
         pools: state.pools,
+        wallet: state.wallet,
       }
     ),
     shallowEqual,
@@ -52,6 +54,13 @@ export default (
   const {
     pools_data,
   } = { ...pools }
+  const {
+    wallet_data,
+  } = { ...wallet }
+  const {
+    chain_id,
+    address,
+  } = { ...wallet_data }
 
   const [uncollapseAssetIds, setUncollapseAssetIds] = useState(null)
 
@@ -279,7 +288,26 @@ export default (
         ) :
         null
 
-  const boxShadow = `#e53f3f${theme === 'light' ? '44' : '33'} 0px 16px 128px 64px`
+  const chain_data =
+    address &&
+    (chains_data || [])
+      .find(c =>
+        c?.chain_id === chain_id
+      )
+
+  const {
+    color,
+  } = { ...chain_data }
+
+  const boxShadow =
+    `${
+      color ||
+      '#e53f3f'
+    }${
+      theme === 'light' ?
+        '44' :
+        '33'
+    } 0px 16px 128px 64px`
 
   return (
     data ?
@@ -1278,13 +1306,26 @@ export default (
                         <div className="flex flex-col space-y-3">
                           <div className="text-slate-600 dark:text-slate-400 text-base font-medium text-right">
                             {!isNaN(value) ?
-                              <span className="uppercase">
-                                {number_format(
-                                  value / 100,
-                                  '0,0.00a',
-                                  true,
-                                )} %
-                              </span> :
+                              <DecimalsFormat
+                                value={
+                                  number_format(
+                                    value / 100,
+                                    value / 100 > 1 ?
+                                      '0,0.00' :
+                                      '0,0.000000',
+                                    true,
+                                  )
+                                }
+                                max_decimals={
+                                  value / 100 > 100 ?
+                                    0 :
+                                    value / 100 > 1 ?
+                                      2 :
+                                      6
+                                }
+                                suffix="%"
+                                className="uppercase"
+                              /> :
                               'TBD'
                             }
                           </div>
@@ -1519,19 +1560,29 @@ export default (
                       } = { ...props }
 
                       return (
-                        <div className="text-base font-semibold text-right">
-                          {
-                            typeof value === 'number' ?
-                              number_format(
-                                value,
+                        <div className="text-right">
+                          <DecimalsFormat
+                            value={
+                              typeof value === 'number' ?
+                                number_format(
+                                  value,
+                                  value > 1 ?
+                                    '0,0.00' :
+                                    '0,0.000000',
+                                  true,
+                                ) :
+                                '-'
+                            }
+                            max_decimals={
+                              value > 100 ?
+                                0 :
                                 value > 1 ?
-                                  '0,0.00' :
-                                  '0,0.000000',
-                                true,
-                              ) :
-                              '-'
-                          }
-                          %
+                                  2 :
+                                  6
+                            }
+                            suffix="%"
+                            className="text-base font-semibold"
+                          />
                         </div>
                       )
                     },
