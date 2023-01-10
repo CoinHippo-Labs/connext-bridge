@@ -2965,7 +2965,7 @@ export default () => {
                           origin="from"
                         />
                       </div>
-                      <div className="flex items-center justify-center mt-6 sm:mt-7">
+                      <div className="flex items-center justify-center mt-5.5 sm:mt-7">
                         <button
                           disabled={disabled}
                           onClick={() => {
@@ -2998,7 +2998,7 @@ export default () => {
                               ].includes(source) ?
                                 'pointer-events-none' :
                                 ''
-                            } rounded border dark:border-slate-700 flex items-center justify-center p-1.5`
+                            } rounded border dark:border-slate-700 flex items-center justify-center p-1 sm:p-1.5`
                           }
                         >
                           <HiArrowRight

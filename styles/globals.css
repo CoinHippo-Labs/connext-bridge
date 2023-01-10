@@ -227,6 +227,10 @@ body {
   font-size: .5rem;
 }
 
+.mt-5\.5 {
+  margin-top: 1.375rem;
+}
+
 .p-4\.5 {
   padding: 1.125rem !important;
 }

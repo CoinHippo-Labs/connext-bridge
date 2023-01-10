@@ -8,6 +8,7 @@ import pool_assets from './pool-assets'
 import ens from './ens'
 import asset_balances from './asset-balances'
 import pools from './pools'
+import user_pools from './user-pools'
 import rpc_providers from './rpc-providers'
 import dev from './dev'
 import wallet from './wallet'
@@ -24,6 +25,7 @@ export default combineReducers(
     ens,
     asset_balances,
     pools,
+    user_pools,
     rpc_providers,
     dev,
     wallet,

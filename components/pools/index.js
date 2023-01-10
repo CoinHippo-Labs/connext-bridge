@@ -31,6 +31,7 @@ export default () => {
     chains,
     pool_assets,
     _pools,
+    user_pools,
     dev,
     wallet,
   } = useSelector(state =>
@@ -40,6 +41,7 @@ export default () => {
         chains: state.chains,
         pool_assets: state.pool_assets,
         _pools: state.pools,
+        user_pools: state.user_pools,
         dev: state.dev,
         wallet: state.wallet,
       }
@@ -58,6 +60,9 @@ export default () => {
   const {
     pools_data,
   } = { ..._pools }
+  const {
+    user_pools_data,
+  } = { ...user_pools }
   const { sdk,
   } = { ...dev }
   const {
@@ -74,11 +79,50 @@ export default () => {
   const [pools, setPools] = useState(null)
   const [poolsTrigger, setPoolsTrigger] = useState(null)
 
-  // get pools
+  // user pools
+  useEffect(
+    () => {
+      if (
+        chains_data &&
+        user_pools_data &&
+        (
+          chains_data
+            .filter(c =>
+              c?.id &&
+              !c.disabled
+            )
+            .length <=
+          Object.keys(user_pools_data)
+            .length ||
+          Object.values(user_pools_data)
+            .flatMap(d => d)
+            .filter(d =>
+              d?.lpTokenBalance > 0
+            )
+            .length >
+            0
+        )
+      ) {
+        setPools(
+          Object.values(user_pools_data)
+            .flatMap(d => d)
+        )
+      }
+    },
+    [chains_data, user_pools_data],
+  )
+
+  // user pools
   useEffect(
     () => {
       const getData = async () => {
-        if (sdk) {
+        if (
+          sdk &&
+          user_pools_data &&
+          [
+            'my_positions',
+          ].includes(view)
+        ) {
           if (address) {
             let data
 
@@ -172,8 +216,11 @@ export default () => {
                               )
                           }
 
+                          const id = `${chain_data?.id}_${asset_data?.id}`
+
                           return {
                             ...p,
+                            id,
                             chain_data,
                             asset_data,
                             ...info,
@@ -241,7 +288,7 @@ export default () => {
 
       getData()
     },
-    [sdk, address, poolsTrigger],
+    [sdk, address, view, poolsTrigger],
   )
 
   return (

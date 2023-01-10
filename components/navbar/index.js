@@ -20,7 +20,7 @@ import { announcement as getAnnouncement, chains as getChains, assets as getAsse
 import { assets as getAssetsPrice } from '../../lib/api/assets'
 import { ens as getEns } from '../../lib/api/ens'
 import { ellipse, equals_ignore_case } from '../../lib/utils'
-import { ANNOUNCEMENT_DATA, CHAINS_DATA, ASSETS_DATA, POOL_ASSETS_DATA, ENS_DATA, ASSET_BALANCES_DATA, POOLS_DATA, SDK, RPCS } from '../../reducers/types'
+import { ANNOUNCEMENT_DATA, CHAINS_DATA, ASSETS_DATA, POOL_ASSETS_DATA, ENS_DATA, ASSET_BALANCES_DATA, POOLS_DATA, USER_POOLS_DATA, SDK, RPCS } from '../../reducers/types'
 
 const WRAPPED_PREFIX =
   process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
@@ -1151,7 +1151,211 @@ export default () => {
 
       return () => clearInterval(interval)
     },
-    [pathname, sdk, chains_data, pool_assets_data],
+    [/*pathname, */sdk, chains_data, pool_assets_data],
+  )
+
+  // user pools
+  useEffect(
+    () => {
+      const getChainData = async chain_data => {
+        const {
+          id,
+        } = { ...chain_data }
+
+        if (id) {
+          let data
+
+          try {
+            const {
+              chain_id,
+              domain_id,
+            } = { ...chain_data }
+
+            const response =
+              await sdk.nxtpSdkPool
+                .getUserPools(
+                  domain_id,
+                  address,
+                )
+
+            if (Array.isArray(response)) {
+              data =
+                _.concat(
+                  data,
+                  response
+                    .map(p => {
+                      const {
+                        info,
+                        lpTokenBalance,
+                        poolTokenBalances,
+                      } = { ...p }
+                      const {
+                        symbol,
+                        decimals,
+                        balances,
+                      } = { ...info }
+
+                      let symbols =
+                        (symbol || '')
+                          .split('-')
+                          .filter(s => s)
+
+                      const asset_data = pool_assets_data
+                        .find(a =>
+                          symbols.findIndex(s =>
+                            equals_ignore_case(
+                              s,
+                              a?.symbol,
+                            )
+                          ) > -1 ||
+                          (a?.contracts || [])
+                            .findIndex(c =>
+                              c?.chain_id === chain_id &&
+                              symbols
+                                .findIndex(s =>
+                                  equals_ignore_case(
+                                    s,
+                                    c?.symbol,
+                                  )
+                                ) > -1
+                            ) > -1
+                        )
+
+                      const {
+                        contracts,
+                      } = { ...asset_data }
+
+                      const contract_data =
+                        (contracts || [])
+                          .find(c =>
+                            c?.chain_id === chain_id
+                          )
+
+                      const {
+                        next_asset,
+                      } = { ...contract_data }
+
+                      if (
+                        symbols
+                          .findIndex(s =>
+                            s?.startsWith(WRAPPED_PREFIX)
+                          ) !==
+                        (p?.tokens || [])
+                          .findIndex(t =>
+                            equals_ignore_case(
+                              t,
+                              next_asset?.contract_address,
+                            ),
+                          )
+                      ) {
+                        symbols =
+                          _.reverse(
+                            _.cloneDeep(symbols)
+                          )
+                      }
+
+                      const id = `${chain_data?.id}_${asset_data?.id}`
+
+                      return {
+                        ...p,
+                        id,
+                        chain_data,
+                        asset_data,
+                        ...info,
+                        symbols,
+                        lpTokenBalance:
+                          Number(
+                            utils.formatUnits(
+                              BigNumber.from(
+                                lpTokenBalance ||
+                                '0',
+                              ),
+                              // _.last(decimals) ||
+                              18,
+                            )
+                          ),
+                        poolTokenBalances:
+                          (poolTokenBalances || [])
+                            .map((b, i) =>
+                              Number(
+                                utils.formatUnits(
+                                  BigNumber.from(
+                                    b ||
+                                    '0',
+                                  ),
+                                  decimals?.[i] ||
+                                  18,
+                                )
+                              )
+                            ),
+                        balances:
+                          (balances || p?.balances || [])
+                            .map((b, i) =>
+                              typeof b === 'number' ?
+                                b :
+                                Number(
+                                  utils.formatUnits(
+                                    BigNumber.from(
+                                      b ||
+                                      '0',
+                                    ),
+                                    decimals?.[i] ||
+                                    18,
+                                  )
+                                )
+                            ),
+                      }
+                    }),
+                )
+                .filter(d => d)
+            }
+          } catch (error) {}
+
+          dispatch(
+            {
+              type: USER_POOLS_DATA,
+              value: {
+                [id]: data
+              },
+            }
+          )
+        }
+      }
+
+      const getData = async () => {
+        if (
+          sdk &&
+          chains_data &&
+          pool_assets_data
+        ) {
+          if (address) {
+            chains_data
+              .forEach(c =>
+                getChainData(c)
+              )
+          }
+          else {
+            dispatch(
+              {
+                type: USER_POOLS_DATA,
+                value: {},
+              }
+            )
+          }
+        }
+      }
+
+      getData()
+
+      const interval =
+        setInterval(() =>
+          getData(),
+          1 * 60 * 1000,
+        )
+
+      return () => clearInterval(interval)
+    },
+    [sdk, chains_data, pool_assets_data, address],
   )
 
   return (

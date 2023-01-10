@@ -2264,6 +2264,7 @@ export default () => {
                     }}
                     origin=""
                     is_pool={true}
+                    no_shadow={true}
                     className="w-fit flex items-center justify-center space-x-1.5 sm:space-x-2"
                   />
                   {/*

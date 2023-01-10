@@ -19,6 +19,7 @@ export default (
     destination,
     origin = 'from',
     is_pool = false,
+    no_shadow = false,
     className = '',
   },
 ) => {
@@ -65,7 +66,17 @@ export default (
     )
   const {
     image,
+    color,
   } = { ...chain_data }
+
+  const boxShadow =
+    color &&
+    !no_shadow &&
+    `${color}${
+      theme === 'light' ?
+        '44' :
+        '33'
+    } 0px 4px 16px 8px`
 
   return (
     <Modal
@@ -141,7 +152,14 @@ export default (
       }
       buttonClassName={
         className ||
-        `w-32 sm:w-40 min-w-max h-10 sm:h-12 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`
+        `w-32 sm:w-40 min-w-max h-8 sm:h-10 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`
+      }
+      buttonStyle={
+        {
+          boxShadow,
+          WebkitBoxShadow: boxShadow,
+          MozBoxShadow: boxShadow,
+        }
       }
       title={
         <span className="flex items-center uppercase space-x-1">

@@ -19,6 +19,7 @@ export const ASSET_BALANCES_DATA = 'asset_balances_data'
 
 // pools
 export const POOLS_DATA = 'pools_data'
+export const USER_POOLS_DATA = 'user_pools_data'
 
 // rpc
 export const RPCS = 'rpcs'
