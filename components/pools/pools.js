@@ -89,7 +89,7 @@ export default (
       user_pools_data ?
         user_pools_data
           .filter(p =>
-            p?.lpTokenBalance
+            p?.lpTokenBalance > 0
           )
           .map(p => {
             const {
@@ -110,14 +110,17 @@ export default (
                 _p?.id === id
               )
             const {
-              balances,
+              adopted,
+              local,
               supply,
               rate,
             } = { ...pool_data }
 
             share =
               !isNaN(supply) ?
-                lpTokenBalance * 100 / Number(supply) :
+                lpTokenBalance *
+                100 /
+                Number(supply) :
                 share
 
             const asset_data = (assets_data || [])
@@ -133,16 +136,30 @@ export default (
                 (
                   supply ||
                   _.sum(
-                    (balances || [])
-                      .map((b, i) =>
-                        b /
+                    [
+                      adopted,
+                      local,
+                    ]
+                    .filter(t => t)
+                    .map(t => {
+                      const {
+                        balance,
+                        index,
+                      } = { ...t }
+
+                      return (
+                        Number(
+                          balance ||
+                          '0'
+                        ) /
                         (
-                          i > 0 &&
+                          index > 0 &&
                           rate > 0 ?
                             rate :
                             1
                         )
                       )
+                    })
                   )
                 ) *
                 price :
@@ -351,9 +368,9 @@ export default (
                     })
                     .map((d, i) => {
                       const {
+                        adopted,
+                        local,
                         supply,
-                        balances,
-                        decimals,
                         rate,
                       } = { ...d }
                       let {
@@ -376,16 +393,30 @@ export default (
                           (
                             supply ||
                             _.sum(
-                              (balances || [])
-                                .map((b, i) =>
-                                  b /
+                              [
+                                adopted,
+                                local,
+                              ]
+                              .filter(t => t)
+                              .map(t => {
+                                const {
+                                  balance,
+                                  index,
+                                } = { ...t }
+
+                                return (
+                                  Number(
+                                    balance ||
+                                    '0'
+                                  ) /
                                   (
-                                    i > 0 &&
+                                    index > 0 &&
                                     rate > 0 ?
                                       rate :
                                       1
                                   )
                                 )
+                              })
                             )
                           ) *
                           price :
@@ -411,11 +442,10 @@ export default (
                     chain_data,
                     contract_data,
                     name,
+                    adopted,
+                    local,
                     supply,
-                    tokens,
                     symbols,
-                    balances,
-                    decimals,
                     apr,
                     rate,
                   } = { ...d }
@@ -443,16 +473,24 @@ export default (
                   const asset = asset_data?.id
 
                   const images =
-                    (tokens || [])
-                      .map(a =>
+                    [
+                      adopted,
+                      local,
+                    ]
+                    .map(t => {
+                      const {
+                        address,
+                      } = { ...t }
+
+                      return (
                         (
                           equals_ignore_case(
-                            a,
+                            address,
                             contract_address,
                           ) ?
                             contract_data?.image :
                             equals_ignore_case(
-                              a,
+                              address,
                               next_asset?.contract_address,
                             ) ?
                               next_asset?.image ||
@@ -461,17 +499,27 @@ export default (
                         ) ||
                         asset_data?.image
                       )
+                    })
 
                   const pair_balances =
-                    (balances || [])
-                      .map((b, i) =>
+                    [
+                      adopted,
+                      local,
+                    ]
+                    .map(t => {
+                      const {
+                        symbol,
+                        balance,
+                      } = { ...t }
+
+                      return (
                         [
-                          symbols?.[i],
+                          symbol,
                           number_format(
-                            b,
-                            b > 100 ?
+                            balance,
+                            balance > 100 ?
                               '0,0.00a' :
-                              b > 1 ?
+                              balance > 1 ?
                                 '0,0.00' :
                                 '0,0.000000000000',
                           )
@@ -482,23 +530,38 @@ export default (
                         )
                         .join(':\t')
                       )
-                      .join('\n')
+                    })
+                    .join('\n')
 
                   const tvl =
                     typeof price === 'number' ?
                       (
                         supply ||
                         _.sum(
-                          (balances || [])
-                            .map((b, i) =>
-                              b /
+                          [
+                            adopted,
+                            local,
+                          ]
+                          .filter(t => t)
+                          .map(t => {
+                            const {
+                              balance,
+                              index,
+                            } = { ...t }
+
+                            return (
+                              Number(
+                                balance ||
+                                '0'
+                              ) /
                               (
-                                i > 0 &&
+                                index > 0 &&
                                 rate > 0 ?
                                   rate :
                                   1
                               )
                             )
+                          })
                         )
                       ) *
                       price :
@@ -629,7 +692,8 @@ export default (
                                             apr / 100,
                                             '0,0.00a',
                                             true,
-                                          )} %
+                                          )}
+                                          %
                                         </span> :
                                         'TBD'
                                       }
@@ -654,7 +718,8 @@ export default (
                                       apr / 100,
                                       '0,0.00a',
                                       true,
-                                    )} %
+                                    )}
+                                    %
                                   </span> :
                                   '-'
                             }
@@ -1076,7 +1141,7 @@ export default (
                       headerClassName: 'whitespace-nowrap justify-end text-right',
                     },
                     {
-                      Header: 'Volume (24H)',
+                      Header: 'Volume (24h)',
                       accessor: 'volume',
                       sortType: (a, b) =>
                         _.sumBy(
@@ -1182,7 +1247,7 @@ export default (
                       headerClassName: 'whitespace-nowrap justify-end text-right',
                     },
                     {
-                      Header: 'Fees (24H)',
+                      Header: 'Fees (24h)',
                       accessor: 'fees',
                       sortType: (a, b) =>
                         _.sumBy(
@@ -1368,7 +1433,8 @@ export default (
                                             value / 100,
                                             '0,0.00a',
                                             true,
-                                          )} %
+                                          )}
+                                          %
                                         </span> :
                                         'TBD'
                                       }
@@ -1472,19 +1538,14 @@ export default (
                       Header: 'Pooled Tokens',
                       accessor: 'balances',
                       sortType: (a, b) =>
-                        a.original.lpTokenBalance *
-                        a.original.price >
-                        b.original.lpTokenBalance *
-                        b.original.price ?
+                        a.original.tvl > b.original.tvl ?
                           1 :
                           -1,
                       Cell: props => {
                         const {
-                          symbols,
+                          adopted,
+                          local,
                         } = { ...props.row.original }
-                        const {
-                          value,
-                        } = { ...props }
 
                         return (
                           <div className="flex items-center justify-end space-x-1.5">
@@ -1492,29 +1553,29 @@ export default (
                               <DecimalsFormat
                                 value={
                                   number_format(
-                                    _.head(value),
-                                    _.head(value) > 100 ?
+                                    adopted?.balance,
+                                    adopted?.balance > 100 ?
                                       '0.0' :
-                                      _.head(value) > 1 ?
+                                      adopted?.balance > 1 ?
                                         '0.0.00' :
                                         '0,0.000000',
                                     true,
                                   )
                                 }
                                 max_decimals={
-                                  _.head(value) > 100 ?
+                                  adopted?.balance > 100 ?
                                     0 :
-                                    _.head(value) > 1 ?
+                                    adopted?.balance > 1 ?
                                       2 :
                                       6
                                 }
                                 className="uppercase"
                               />
                               {
-                                _.head(symbols) &&
+                                adopted?.symbol &&
                                 (
                                   <span>
-                                    {_.head(symbols)}
+                                    {adopted.symbol}
                                   </span>
                                 )
                               }
@@ -1526,29 +1587,29 @@ export default (
                               <DecimalsFormat
                                 value={
                                   number_format(
-                                    _.last(value),
-                                    _.last(value) > 100 ?
+                                    local?.balance,
+                                    local?.balance > 100 ?
                                       '0.0' :
-                                      _.last(value) > 1 ?
+                                      local?.balance > 1 ?
                                         '0.0.00' :
                                         '0,0.000000',
                                     true,
                                   )
                                 }
                                 max_decimals={
-                                  _.last(value) > 100 ?
+                                  local?.balance > 100 ?
                                     0 :
-                                    _.last(value) > 1 ?
+                                    local?.balance > 1 ?
                                       2 :
                                       6
                                 }
                                 className="uppercase"
                               />
                               {
-                                _.last(symbols) &&
+                                local?.symbol &&
                                 (
                                   <span>
-                                    {_.last(symbols)}
+                                    {local.symbol}
                                   </span>
                                 )
                               }

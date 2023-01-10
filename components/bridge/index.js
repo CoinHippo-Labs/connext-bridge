@@ -2540,26 +2540,42 @@ export default () => {
       p?.asset_data?.id === asset
     )
 
-  const next_asset_index = (pool_data?.symbols || [])
-    .findIndex(s =>
-      s?.startsWith(WRAPPED_PREFIX)
-    )
+  const {
+    adopted,
+    local,
+  } = { ...pool_data }
+
+  const next_asset_data =
+    adopted?.symbol?.startsWith(WRAPPED_PREFIX) ?
+      adopted :
+      local?.symbol?.startsWith(WRAPPED_PREFIX) ?
+        local :
+        local
 
   const pool_amounts =
-    (pool_data?.balances || [])
-      .map(b =>
-        Number(
-          b ||
-          '0'
-        )
+    [
+      adopted,
+      local,
+    ]
+    .filter(t =>
+      [
+        'string',
+        'number',
+      ].includes(typeof t?.balance)
+    )
+    .map(t =>
+      Number(
+        t.balance ||
+        '0'
       )
+    )
 
   const pool_amount =
     receiveLocal ||
     estimatedValues?.isNextAsset ?
       null :
-      next_asset_index > -1 ?
-        pool_amounts[next_asset_index] :
+      next_asset_data > -1 ?
+        Number(next_asset_data.balance) :
         _.min(pool_amounts)
 
   const min_amount = 0
@@ -2608,7 +2624,13 @@ export default () => {
     calling ||
     approving
 
-  const boxShadow = `${color}${theme === 'light' ? '44' : '33'} 0px 16px 128px 64px`
+  const boxShadow =
+    color &&
+    `${color}${
+      theme === 'light' ?
+        '44' :
+        '33'
+    } 0px 16px 128px 64px`
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
@@ -2780,7 +2802,8 @@ export default () => {
                 <div
                   className="bg-white dark:bg-slate-900 rounded border dark:border-slate-700 space-y-6 pt-5 sm:pt-6 pb-6 sm:pb-7 px-4 sm:px-6"
                   style={
-                    checkSupport() ?
+                    checkSupport() &&
+                    boxShadow ?
                       {
                         boxShadow,
                         WebkitBoxShadow: boxShadow,

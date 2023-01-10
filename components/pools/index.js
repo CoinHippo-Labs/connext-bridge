@@ -151,25 +151,120 @@ export default () => {
                             lpTokenBalance,
                             poolTokenBalances,
                           } = { ...p }
+
                           const {
+                            adopted,
+                            local,
+                          } = { ...info }
+                          let {
+                            name,
                             symbol,
-                            decimals,
-                            balances,
                           } = { ...info }
 
-                          let symbols =
+                          if (symbol?.includes(`${WRAPPED_PREFIX}${WRAPPED_PREFIX}`)) {
+                            name =
+                              (name || '')
+                                .replace(
+                                  WRAPPED_PREFIX,
+                                  '',
+                                )
+
+                            symbol =
+                              symbol
+                                .split('-')
+                                .map(s =>
+                                  s
+                                    .replace(
+                                      WRAPPED_PREFIX,
+                                      '',
+                                    )
+                                )
+                                .join('-')
+
+                            info.name = name
+                            info.symbol = symbol
+                          }
+
+                          if (symbol?.includes('-')) {
+                            const symbols =
+                              symbol
+                                .split('-')
+
+                            if (
+                              equals_ignore_case(
+                                _.head(symbols),
+                                _.last(symbols),
+                              ) &&
+                              adopted?.symbol &&
+                              local?.symbol
+                            ) {
+                              symbol =
+                                [
+                                  adopted.symbol,
+                                  local.symbol,
+                                ]
+                                .join('-')
+
+                              info.symbol = symbol
+                            }
+                          }
+
+                          const symbols =
                             (symbol || '')
                               .split('-')
                               .filter(s => s)
 
+                          if (adopted) {
+                            const {
+                              balance,
+                              decimals,
+                            } = { ...adopted }
+
+                            adopted.balance =
+                              typeof balance === 'string' ?
+                                balance :
+                                utils.formatUnits(
+                                  BigNumber.from(
+                                    balance ||
+                                    '0'
+                                  ),
+                                  decimals ||
+                                  18,
+                                )
+
+                            info.adopted = adopted
+                          }
+
+                          if (local) {
+                            const {
+                              balance,
+                              decimals,
+                            } = { ...local }
+
+                            local.balance =
+                              typeof balance === 'string' ?
+                                balance :
+                                utils.formatUnits(
+                                  BigNumber.from(
+                                    balance ||
+                                    '0'
+                                  ),
+                                  decimals ||
+                                  18,
+                                )
+
+                            info.local = local
+                          }
+
                           const asset_data = pool_assets_data
                             .find(a =>
-                              symbols.findIndex(s =>
-                                equals_ignore_case(
-                                  s,
-                                  a?.symbol,
-                                )
-                              ) > -1 ||
+                              symbols
+                                .findIndex(s =>
+                                  equals_ignore_case(
+                                    s,
+                                    a?.symbol,
+                                  )
+                                ) > -1 ||
                               (a?.contracts || [])
                                 .findIndex(c =>
                                   c?.chain_id === chain_id &&
@@ -183,40 +278,7 @@ export default () => {
                                 ) > -1
                             )
 
-                          const {
-                            contracts,
-                          } = { ...asset_data }
-
-                          const contract_data =
-                            (contracts || [])
-                              .find(c =>
-                                c?.chain_id === chain_id
-                              )
-
-                          const {
-                            next_asset,
-                          } = { ...contract_data }
-
-                          if (
-                            symbols
-                              .findIndex(s =>
-                                s?.startsWith(WRAPPED_PREFIX)
-                              ) !==
-                            (p?.tokens || [])
-                              .findIndex(t =>
-                                equals_ignore_case(
-                                  t,
-                                  next_asset?.contract_address,
-                                ),
-                              )
-                          ) {
-                            symbols =
-                              _.reverse(
-                                _.cloneDeep(symbols)
-                              )
-                          }
-
-                          const id = `${chain_data?.id}_${asset_data?.id}`
+                          const id = `${chain_data.id}_${asset_data?.id}`
 
                           return {
                             ...p,
@@ -232,7 +294,6 @@ export default () => {
                                     lpTokenBalance ||
                                     '0',
                                   ),
-                                  // _.last(decimals) ||
                                   18,
                                 )
                               ),
@@ -245,26 +306,16 @@ export default () => {
                                         b ||
                                         '0',
                                       ),
-                                      decimals?.[i] ||
+                                      (
+                                        adopted?.index === i ?
+                                          adopted.decimals :
+                                          local?.index === i ?
+                                            local.decimals :
+                                            18
+                                      ) ||
                                       18,
                                     )
                                   )
-                                ),
-                            balances:
-                              (balances || p?.balances || [])
-                                .map((b, i) =>
-                                  typeof b === 'number' ?
-                                    b :
-                                    Number(
-                                      utils.formatUnits(
-                                        BigNumber.from(
-                                          b ||
-                                          '0',
-                                        ),
-                                        decimals?.[i] ||
-                                        18,
-                                      )
-                                    )
                                 ),
                           }
                         }),
@@ -313,6 +364,7 @@ export default () => {
                   ))
                 }
                 {
+                  false &&
                   view === 'pools' &&
                   pool_assets_data &&
                   pools_data &&

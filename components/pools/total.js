@@ -94,7 +94,8 @@ export default () => {
                 ),
                 '0,0.000000',
                 true,
-              )} %
+              )}
+              %
             </> :
             <div className="mt-1">
               <TailSpin

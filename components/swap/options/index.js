@@ -171,9 +171,12 @@ export default (
                     type === 'switch' ?
                       <Switch
                         checked={
-                          typeof data?.[name] === 'boolean' ?
-                            data[name] :
-                            false
+                          (
+                            typeof data?.[name] === 'boolean' ?
+                              data[name] :
+                              false
+                          ) ||
+                          false
                         }
                         onChange={e => {
                           const _data = {

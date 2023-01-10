@@ -173,8 +173,8 @@ export default (
         const {
           contract_data,
           domainId,
-          tokens,
-          decimals,
+          adopted,
+          local,
         } = { ...pool_data }
         const {
           contract_address,
@@ -229,7 +229,7 @@ export default (
                   0
                 )
                 .toString(),
-                _.head(decimals) ||
+                adopted?.decimals ||
                 18,
               )
               .toString()
@@ -241,7 +241,7 @@ export default (
                   0
                 )
                 .toString(),
-                _.last(decimals) ||
+                local?.decimals ||
                 18,
               )
               .toString()
@@ -342,10 +342,8 @@ export default (
             const {
               contract_data,
               domainId,
-              tokens,
-            } = { ...pool_data }
-            let {
-              decimals,
+              adopted,
+              local,
             } = { ...pool_data }
             const {
               contract_address,
@@ -425,11 +423,6 @@ export default (
                     _.reverse(
                       _.cloneDeep(amounts)
                     )
-
-                  decimals =
-                    _.reverse(
-                      _.cloneDeep(decimals)
-                    )
                 }
 
                 calculateRemoveLiquidityPriceImpact(
@@ -449,7 +442,11 @@ export default (
                           a ||
                           '0'
                         ),
-                        decimals?.[i] ||
+                        (
+                          adopted?.index === i ?
+                            adopted :
+                            local
+                        ).decimals ||
                         18,
                       )
                     )
@@ -543,18 +540,17 @@ export default (
         asset_data,
         contract_data,
         domainId,
-        tokens,
-        decimals,
         symbol,
-        symbols,
         lpTokenAddress,
+        adopted,
+        local,
       } = { ...pool_data }
       const {
         contract_address,
       } = { ...contract_data }
 
       const x_asset_data =
-        _.head(tokens) &&
+        adopted?.address &&
         {
           ...(
             Object.fromEntries(
@@ -566,21 +562,21 @@ export default (
           ),
           ...(
             equals_ignore_case(
-              _.head(tokens),
+              adopted.address,
               contract_address,
             ) ?
               contract_data :
               {
                 chain_id,
-                contract_address: _.head(tokens),
-                decimals: _.head(decimals),
-                symbol: _.head(symbols),
+                contract_address: adopted.address,
+                decimals: adopted.decimals,
+                symbol: adopted.symbol,
               }
           ),
         }
 
       const y_asset_data =
-        _.last(tokens) &&
+        local?.address &&
         {
           ...(
             Object.fromEntries(
@@ -592,15 +588,15 @@ export default (
           ),
           ...(
             equals_ignore_case(
-              _.last(tokens),
+              local.address,
               contract_address,
             ) ?
               contract_data :
               {
                 chain_id,
-                contract_address: _.last(tokens),
-                decimals: _.last(decimals),
-                symbol: _.last(symbols),
+                contract_address: local.address,
+                decimals: local.decimals,
+                symbol: local.symbol,
               }
           ),
         }
@@ -854,13 +850,6 @@ export default (
                 },
               )
 
-              // if (tokenIndex === 1) {
-              //   amounts =
-              //     _.reverse(
-              //       _.cloneDeep(amounts)
-              //     )
-              // }
-
               console.log(
                 '[addLiquidity]',
                 {
@@ -1021,7 +1010,6 @@ export default (
                 0
               )
               .toString(),
-              // y_asset_data?.decimals ||
               18,
             )
             .toString()
@@ -1565,10 +1553,8 @@ export default (
     asset_data,
     contract_data,
     lpTokenAddress,
-    tokens,
-    decimals,
-    symbol,
-    symbols,
+    adopted,
+    local,
     error,
   } = { ...pool_data }
   let {
@@ -1592,7 +1578,7 @@ export default (
   const image_name = _.last(image_paths)
 
   const x_asset_data =
-    _.head(tokens) &&
+    adopted?.address &&
     {
       ...(
         Object.fromEntries(
@@ -1604,20 +1590,20 @@ export default (
       ),
       ...(
         equals_ignore_case(
-          _.head(tokens),
+          adopted.address,
           contract_address,
         ) ?
           contract_data :
           {
             chain_id,
-            contract_address: _.head(tokens),
-            decimals: _.head(decimals),
-            symbol: _.head(symbols),
+            contract_address: adopted.address,
+            decimals: adopted.decimals,
+            symbol: adopted.symbol,
             image:
               _image ?
-                !_.head(symbols) ?
+                !adopted.symbol ?
                   _image :
-                  _.head(symbols).startsWith(WRAPPED_PREFIX) ?
+                  adopted.symbol.startsWith(WRAPPED_PREFIX) ?
                     !image_name.startsWith(WRAPPED_PREFIX) ?
                       image_paths
                         .map((s, i) =>
@@ -1645,7 +1631,7 @@ export default (
     }
 
   const _x_asset_data =
-    _.head(tokens) &&
+    adopted?.address &&
     {
       ...(
         Object.fromEntries(
@@ -1671,7 +1657,7 @@ export default (
   const x_balance_amount = x_balance?.amount
 
   const y_asset_data =
-    _.last(tokens) &&
+    local?.address &&
     {
       ...(
         Object.fromEntries(
@@ -1683,20 +1669,20 @@ export default (
       ),
       ...(
         equals_ignore_case(
-          _.last(tokens),
+          local.address,
           contract_address,
         ) ?
           contract_data :
           {
             chain_id,
-            contract_address: _.last(tokens),
-            decimals: _.last(decimals),
-            symbol: _.last(symbols),
+            contract_address: local.address,
+            decimals: local.decimals,
+            symbol: local.symbol,
             image:
               _image ?
-                !_.last(symbols) ?
+                !local.symbol ?
                   _image :
-                  _.last(symbols).startsWith(WRAPPED_PREFIX) ?
+                  local.symbol.startsWith(WRAPPED_PREFIX) ?
                     !image_name.startsWith(WRAPPED_PREFIX) ?
                       image_paths
                         .map((s, i) =>
@@ -1721,17 +1707,16 @@ export default (
                 undefined,
             mintable:
               [
-                'next',
-                'mad',
+                WRAPPED_PREFIX,
               ].findIndex(s =>
-                _.last(symbols)?.startsWith(s)
+                local.symbol?.startsWith(s)
               ) > -1 ||
               [
                 'TEST',
               ].findIndex(s =>
                 equals_ignore_case(
                   s,
-                  _.last(symbols),
+                  local.symbol,
                 )
               ) > -1,
             wrapable:
@@ -1740,7 +1725,7 @@ export default (
               ].findIndex(s =>
                 equals_ignore_case(
                   s,
-                  _.last(symbols),
+                  local.symbol,
                 )
               ) > -1,
           }
@@ -1779,7 +1764,7 @@ export default (
 
   const x_remove_amount =
     equals_ignore_case(
-      _.head(tokens),
+      adopted?.address,
       contract_address,
     ) ?
       _.head(removeAmounts) :
@@ -1787,7 +1772,7 @@ export default (
 
   const y_remove_amount =
     equals_ignore_case(
-      _.head(tokens),
+      adopted?.address,
       contract_address,
     ) ?
       _.last(removeAmounts) :
@@ -1803,34 +1788,41 @@ export default (
     )
 
   const pool_tokens_data =
-    (symbols || [])
-      .map((s, i) => {
-        const _contract_address = tokens?.[i]
+    [
+      adopted,
+      local,
+    ]
+    .map((t, i) => {
+      const {
+        address,
+        symbol,
+        decimals,
+      } = { ...t }
 
-        return {
-          i,
-          contract_address: _contract_address,
-          chain_id: chain_data?.chain_id,
-          symbol: s,
-          decimals: decimals?.[i],
-          image:
-            (
+      return {
+        i,
+        contract_address: address,
+        chain_id,
+        symbol,
+        decimals,
+        image:
+          (
+            equals_ignore_case(
+              address,
+              contract_address,
+            ) ?
+              contract_data?.image :
               equals_ignore_case(
-                _contract_address,
-                contract_address,
+                address,
+                next_asset?.contract_address,
               ) ?
+                next_asset?.image ||
                 contract_data?.image :
-                equals_ignore_case(
-                  _contract_address,
-                  next_asset?.contract_address,
-                ) ?
-                  next_asset?.image ||
-                  contract_data?.image :
-                  null
-            ) ||
-            asset_data?.image,
-        }
-      })
+                null
+          ) ||
+          asset_data?.image,
+      }
+    })
 
   const valid_amount =
     action === 'withdraw' ?
@@ -1907,6 +1899,38 @@ export default (
     calling ||
     approving
 
+  const overweighted_asset =
+    adopted &&
+    local &&
+    (
+      Number(amountX) +
+      Number(
+        (
+          equals_ignore_case(
+            adopted.address,
+            x_asset_data?.contract_address,
+          ) ?
+            adopted :
+            local
+        ).balance
+      )
+    ) >
+    (
+      Number(amountY) +
+      Number(
+        (
+          equals_ignore_case(
+            adopted.address,
+            y_asset_data?.contract_address,
+          ) ?
+            adopted :
+            local
+        ).balance
+      )
+    ) ?
+     'x' :
+     'y'
+
   const advancedOptions = (
     <div className="space-y-2">
       <div className="flex items-center justify-end">
@@ -1944,9 +1968,12 @@ export default (
               <div className="flex items-center space-x-3">
                 <Switch
                   checked={
-                    typeof infiniteApprove === 'boolean' ?
-                      infiniteApprove :
-                      false
+                    (
+                      typeof infiniteApprove === 'boolean' ?
+                        infiniteApprove :
+                        false
+                    ) ||
+                    false
                   }
                   onChange={() => {
                     setOptions(
@@ -2145,36 +2172,6 @@ export default (
       }
     </div>
   )
-
-  const overweighted_asset =
-    Array.isArray(user_pool_data?.balances) &&
-    Array.isArray(user_pool_data.tokens) &&
-    (
-      Number(amountX) +
-      user_pool_data.balances[
-        user_pool_data.tokens
-          .indexOf(t =>
-            equals_ignore_case(
-              t,
-              x_asset_data?.contract_address,
-            )
-          )
-      ]
-    ) >
-    (
-      Number(amountY) +
-      user_pool_data.balances[
-        user_pool_data.tokens
-          .indexOf(t =>
-            equals_ignore_case(
-              t,
-              y_asset_data?.contract_address,
-            )
-          )
-      ]
-    ) ?
-     'x' :
-     'y'
 
   return (
     <div className="order-1 lg:order-2 bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-3 pt-4 pb-5 px-4">

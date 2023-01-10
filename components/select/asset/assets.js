@@ -82,9 +82,8 @@ export default (
               const {
                 asset_data,
                 contract_data,
-                tokens,
-                decimals,
-                symbols,
+                adopted,
+                local,
               } = { ...p }
               const {
                 contracts,
@@ -105,25 +104,38 @@ export default (
                 )
 
               if (contract_index > -1) {
-                const pool_token_index = (tokens || [])
-                  .findIndex(a =>
+                const pool_token =
+                  adopted?.address &&
+                  !equals_ignore_case(
+                    adopted.address,
+                    contract_address,
+                  ) ?
+                    local :
+                    local?.address &&
                     !equals_ignore_case(
-                      a,
+                      local.address,
                       contract_address,
-                    )
-                  )
+                    ) ?
+                      local :
+                      null
 
-                if (pool_token_index > -1) {
-                  const symbol = symbols?.[pool_token_index]
+                if (pool_token) {
+                  const {
+                    address,
+                    symbol,
+                    decimals,
+                  } = { ...pool_token }
+
                   const image_paths =
                     (image || '')
                       .split('/')
+
                   const image_name = _.last(image_paths)
 
                   _contracts[contract_index] = {
-                    contract_address: tokens[pool_token_index],
+                    contract_address: address,
                     chain_id,
-                    decimals: decimals?.[pool_token_index],
+                    decimals,
                     symbol,
                     image:
                       image ?

@@ -319,7 +319,7 @@ export default () => {
 
           if (
             origin === 'y' &&
-            _.last(symbols) &&
+            local?.symbol &&
             (pool_assets_data || [])
               .findIndex(a =>
                 a?.id === asset &&
@@ -337,13 +337,13 @@ export default () => {
                     ].findIndex(s =>
                       equals_ignore_case(
                         s,
-                        _.last(symbols),
+                        local.symbol,
                       )
                     ) > -1
                   ) > -1
               ) > -1
           ) {
-            params.from = _.last(symbols)
+            params.from = local.symbol
           }
         }
       }
@@ -667,24 +667,50 @@ export default () => {
 
               const {
                 lpTokenAddress,
-                balances,
-                decimals,
+                adopted,
+                local,
               } = { ...pool }
 
-              if (Array.isArray(balances)) {
-                pool.balances =
-                  balances
-                    .map((b, i) =>
-                      typeof b === 'number' ?
-                        b :
-                        Number(
-                          utils.formatUnits(
-                            b,
-                            decimals?.[i] ||
-                            18,
-                          )
-                        )
+              if (adopted) {
+                const {
+                  balance,
+                  decimals,
+                } = { ...adopted }
+
+                adopted.balance =
+                  typeof balance === 'string' ?
+                    balance :
+                    utils.formatUnits(
+                      BigNumber.from(
+                        balance ||
+                        '0'
+                      ),
+                      decimals ||
+                      18,
                     )
+
+                pool.adopted = adopted
+              }
+
+              if (local) {
+                const {
+                  balance,
+                  decimals,
+                } = { ...local }
+
+                local.balance =
+                  typeof balance === 'string' ?
+                    balance :
+                    utils.formatUnits(
+                      BigNumber.from(
+                        balance ||
+                        '0'
+                      ),
+                      decimals ||
+                      18,
+                    )
+
+                pool.local = local
               }
 
               let supply
@@ -709,13 +735,22 @@ export default () => {
                   supply =
                     utils.formatUnits(
                       BigNumber.from(
-                        supply,
+                        supply
                       ),
                       18,
                     )
+
+                  console.log(
+                    '[LPTokenSupply]',
+                    {
+                      domain_id,
+                      lpTokenAddress,
+                      supply,
+                    },
+                  )
                 } catch (error) {
                   console.log(
-                    '[ERROR getLPTokenSupply]',
+                    '[getLPTokenSupply error]',
                     {
                       domain_id,
                       lpTokenAddress,
@@ -723,63 +758,110 @@ export default () => {
                     error,
                   )
                 }
-
-                console.log(
-                  '[LPTokenSupply]',
-                  {
-                    domain_id,
-                    lpTokenAddress,
-                    supply,
-                  },
-                )
               }
 
-              let rate =
-                pool &&
-                await sdk.nxtpSdkPool
-                  .getVirtualPrice(
+              let rate
+
+              if (pool) {
+                console.log(
+                  '[getVirtualPrice]',
+                  {
                     domain_id,
                     contract_address,
-                  )
-
-              rate =
-                Number(
-                  utils.formatUnits(
-                    BigNumber.from(
-                      rate ||
-                      '0'
-                    ),
-                    // _.last(decimals) ||
-                    18,
-                  )
+                  },
                 )
+
+                try {
+                  rate =
+                    await sdk.nxtpSdkPool
+                      .getVirtualPrice(
+                        domain_id,
+                        contract_address,
+                      )
+
+                  rate =
+                    Number(
+                      utils.formatUnits(
+                        BigNumber.from(
+                          rate ||
+                          '0'
+                        ),
+                        18,
+                      )
+                    )
+
+                  console.log(
+                    '[VirtualPrice]',
+                    {
+                      domain_id,
+                      contract_address,
+                      rate,
+                    },
+                  )
+                } catch (error) {
+                  console.log(
+                    '[getVirtualPrice error]',
+                    {
+                      domain_id,
+                      contract_address,
+                    },
+                    error,
+                  )
+                }
+              }
 
               let tvl
 
-              if (Array.isArray(pool.balances)) {
-                const asset_data = (assets_data || [])
-                  .find(a =>
-                    a?.id === asset
-                  )
+              if (
+                [
+                  'string',
+                  'number',
+                ].includes(typeof supply) ||
+                (
+                  adopted?.balance &&
+                  local?.balance
+                )
+              ) {
                 const {
                   price,
-                } = { ...asset_data }
+                } = {
+                  ...(
+                    (assets_data || [])
+                      .find(a =>
+                        a?.id === asset_data.id
+                      )
+                  ),
+                }
 
                 tvl =
                   typeof price === 'number' ?
                     (
                       supply ||
                       _.sum(
-                        pool.balances
-                          .map((b, i) =>
-                            b /
+                        [
+                          adopted,
+                          local,
+                        ]
+                        .filter(t => t)
+                        .map(t => {
+                          const {
+                            balance,
+                            index,
+                          } = { ...t }
+
+                          return (
+                            Number(
+                              balance ||
+                              '0'
+                            ) /
                             (
-                              i > 0 &&
+                              index > 0 &&
                               rate > 0 ?
                                 rate :
                                 1
                             )
                           )
+                        })
                       )
                     ) *
                     price :
@@ -789,80 +871,100 @@ export default () => {
               _pair =
                 (
                   pool ?
-                    [pool]
-                      .map(p => {
-                        const {
-                          symbol,
-                        } = { ...p }
+                    [
+                      pool,
+                    ]
+                    .map(p => {
+                      let {
+                        name,
+                        symbol,
+                      } = { ...p }
 
-                        let symbols =
-                          (symbol || '')
-                            .split('-')
-                            .filter(s => s)
-
-                        const asset_data = pool_assets_data
-                          .find(a =>
-                            symbols
-                              .findIndex(s =>
-                                equals_ignore_case(
-                                  s,
-                                  a?.symbol,
-                                )
-                              ) > -1 ||
-                            (a?.contracts || [])
-                              .findIndex(c =>
-                                c?.chain_id === chain_id &&
-                                symbols
-                                  .findIndex(s =>
-                                    equals_ignore_case(
-                                      s,
-                                      c?.symbol,
-                                    )
-                                  ) > -1
-                              ) > -1
-                          )
-
-                        const {
-                          contracts,
-                        } = { ...asset_data }
-
-                        const contract_data =
-                          (contracts || [])
-                            .find(c =>
-                              c?.chain_id === chain_id
+                      if (symbol?.includes(`${WRAPPED_PREFIX}${WRAPPED_PREFIX}`)) {
+                        name =
+                          (name || '')
+                            .replace(
+                              WRAPPED_PREFIX,
+                              '',
                             )
 
-                        const {
-                          next_asset,
-                        } = { ...contract_data }
+                        symbol =
+                          symbol
+                            .split('-')
+                            .map(s =>
+                              s
+                                .replace(
+                                  WRAPPED_PREFIX,
+                                  '',
+                                )
+                            )
+                            .join('-')
+
+                        pool.name = name
+                        pool.symbol = symbol
+                      }
+
+                      if (symbol?.includes('-')) {
+                        const symbols =
+                          symbol
+                            .split('-')
 
                         if (
+                          equals_ignore_case(
+                            _.head(symbols),
+                            _.last(symbols),
+                          ) &&
+                          adopted?.symbol &&
+                          local?.symbol
+                        ) {
+                          symbol =
+                            [
+                              adopted.symbol,
+                              local.symbol,
+                            ]
+                            .join('-')
+
+                          pool.symbol = symbol
+                        }
+                      }
+
+                      const symbols =
+                        (symbol || '')
+                          .split('-')
+                          .filter(s => s)
+
+                      const asset_data = pool_assets_data
+                        .find(a =>
                           symbols
                             .findIndex(s =>
-                              s?.startsWith(WRAPPED_PREFIX)
-                            ) !==
-                          (p?.tokens || [])
-                            .findIndex(t =>
                               equals_ignore_case(
-                                t,
-                                next_asset?.contract_address,
-                              ),
-                            )
-                        ) {
-                          symbols =
-                            _.reverse(
-                              _.cloneDeep(symbols)
-                            )
-                        }
+                                s,
+                                a?.symbol,
+                              )
+                            ) > -1 ||
+                          (a?.contracts || [])
+                            .findIndex(c =>
+                              c?.chain_id === chain_id &&
+                              symbols
+                                .findIndex(s =>
+                                  equals_ignore_case(
+                                    s,
+                                    c?.symbol,
+                                  )
+                                ) > -1
+                            ) > -1
+                        )
 
-                        return {
-                          ...p,
-                          chain_data,
-                          asset_data,
-                          symbols,
-                        }
-                      }) :
-                    [pair]
+                      return {
+                        ...p,
+                        chain_data,
+                        asset_data,
+                        symbols,
+                      }
+                    }) :
+                    [
+                      pair,
+                    ]
                 )
                 .find(p =>
                   equals_ignore_case(
@@ -1191,17 +1293,15 @@ export default () => {
         asset_data,
         contract_data,
         domainId,
-        tokens,
-        decimals,
-        symbol,
-        symbols,
+        adopted,
+        local,
       } = { ...pair }
       const {
         contract_address,
       } = { ...contract_data }
 
       const x_asset_data =
-        _.head(tokens) &&
+        adopted?.address &&
         {
           ...(
             Object.fromEntries(
@@ -1213,21 +1313,21 @@ export default () => {
           ),
           ...(
             equals_ignore_case(
-              _.head(tokens),
+              adopted.address,
               contract_address
             ) ?
               contract_data :
               {
                 chain_id,
-                contract_address: _.head(tokens),
-                decimals: _.head(decimals),
-                symbol: _.head(symbols),
+                contract_address: adopted.address,
+                decimals: adopted.decimals,
+                symbol: adopted.symbol,
               }
           ),
         }
 
       const y_asset_data =
-        _.last(tokens) &&
+        local?.address &&
         {
           ...(
             Object.fromEntries(
@@ -1239,15 +1339,15 @@ export default () => {
           ),
           ...(
             equals_ignore_case(
-              _.last(tokens),
+              local.address,
               contract_address,
             ) ?
               contract_data :
               {
                 chain_id,
-                contract_address: _.last(tokens),
-                decimals: _.last(decimals),
-                symbol: _.last(symbols),
+                contract_address: local.address,
+                decimals: local.decimals,
+                symbol: local.symbol,
               }
           ),
         }
@@ -1324,10 +1424,11 @@ export default () => {
               (
                 typeof amount === 'string' &&
                 amount.indexOf('.') > -1 ?
-                  amount.substring(
-                    0,
-                    amount.indexOf('.') + _decimals + 1,
-                  ) :
+                  amount
+                    .substring(
+                      0,
+                      amount.indexOf('.') + _decimals + 1,
+                    ) :
                   amount
               ) ||
               0
@@ -1674,16 +1775,15 @@ export default () => {
         contract_data,
         domainId,
         lpTokenAddress,
-        tokens,
-        decimals,
-        symbols,
+        adopted,
+        local,
       } = { ..._pair }
       const {
         contract_address,
       } = { ...contract_data }
 
       const x_asset_data =
-        _.head(tokens) &&
+        adopted?.address &&
         {
           ...(
             Object.fromEntries(
@@ -1695,21 +1795,21 @@ export default () => {
           ),
           ...(
             equals_ignore_case(
-              _.head(tokens),
+              adopted.address,
               contract_address,
             ) ?
               contract_data :
               {
                 chain_id,
-                contract_address: _.head(tokens),
-                decimals: _.head(decimals),
-                symbol: _.head(symbols),
+                contract_address: adopted.address,
+                decimals: adopted.decimals,
+                symbol: adopted.symbol,
               }
           ),
         }
 
       const y_asset_data =
-        _.last(tokens) &&
+        local?.address &&
         {
           ...(
             Object.fromEntries(
@@ -1721,15 +1821,15 @@ export default () => {
           ),
           ...(
             equals_ignore_case(
-              _.last(tokens),
+              local.address,
               contract_address,
             ) ?
               contract_data :
               {
                 chain_id,
-                contract_address: _.last(tokens),
-                decimals: _.last(decimals),
-                symbol: _.last(symbols),
+                contract_address: local.address,
+                decimals: local.decimals,
+                symbol: local.symbol,
               }
           ),
         }
@@ -1761,18 +1861,19 @@ export default () => {
                 (
                   typeof amount === 'string' &&
                   amount.indexOf('.') > -1 ?
-                    amount.substring(
-                      0,
-                      amount.indexOf('.') +
-                      (
-                        (origin === 'x' ?
-                          x_asset_data :
-                          y_asset_data
-                        )?.decimals ||
-                        18
-                      ) +
-                      1,
-                    ) :
+                    amount
+                      .substring(
+                        0,
+                        amount.indexOf('.') +
+                        (
+                          (origin === 'x' ?
+                            x_asset_data :
+                            y_asset_data
+                          )?.decimals ||
+                          18
+                        ) +
+                        1,
+                      ) :
                     amount
                 ) ||
                 0
@@ -2007,10 +2108,8 @@ export default () => {
   const {
     asset_data,
     contract_data,
-    tokens,
-    decimals,
-    symbol,
-    symbols,
+    adopted,
+    local,
     rate,
   } = { ...pair }
   const {
@@ -2021,13 +2120,15 @@ export default () => {
   } = { ...contract_data }
 
   const _image = contract_data?.image
+
   const image_paths =
     (_image || '')
       .split('/')
+
   const image_name = _.last(image_paths)
 
   const x_asset_data =
-    _.head(tokens) &&
+    adopted?.address &&
     {
       ...(
         Object.fromEntries(
@@ -2039,20 +2140,20 @@ export default () => {
       ),
       ...(
         equals_ignore_case(
-          _.head(tokens),
+          adopted.address,
           contract_address,
         ) ?
           contract_data :
           {
             chain_id,
-            contract_address: _.head(tokens),
-            decimals: _.head(decimals),
-            symbol: _.head(symbols),
+            contract_address: adopted.address,
+            decimals: adopted.decimals,
+            symbol: adopted.symbol,
             image:
               _image ?
-                !_.head(symbols) ?
+                !adopted.symbol ?
                   _image :
-                  _.head(symbols).startsWith(WRAPPED_PREFIX) ?
+                  adopted.symbol.startsWith(WRAPPED_PREFIX) ?
                     !image_name.startsWith(WRAPPED_PREFIX) ?
                       image_paths
                         .map((s, i) =>
@@ -2092,7 +2193,7 @@ export default () => {
   const x_balance_amount = x_balance?.amount
 
   const y_asset_data =
-    _.last(tokens) &&
+    local?.address &&
     {
       ...(
         Object.fromEntries(
@@ -2104,20 +2205,20 @@ export default () => {
       ),
       ...(
         equals_ignore_case(
-          _.last(tokens),
+          local.address,
           contract_address,
         ) ?
           contract_data :
           {
             chain_id,
-            contract_address: _.last(tokens),
-            decimals: _.last(decimals),
-            symbol: _.last(symbols),
+            contract_address: local.address,
+            decimals: local.decimals,
+            symbol: local.symbol,
             image:
               _image ?
-                !_.last(symbols) ?
+                !local.symbol ?
                   _image :
-                  _.last(symbols).startsWith(WRAPPED_PREFIX) ?
+                  local.symbol.startsWith(WRAPPED_PREFIX) ?
                     !image_name.startsWith(WRAPPED_PREFIX) ?
                       image_paths
                         .map((s, i) =>
@@ -2167,18 +2268,19 @@ export default () => {
     utils.parseUnits(
       (
         amount.indexOf('.') > -1 ?
-          amount.substring(
-            0,
-            amount.indexOf('.') +
-            (
-              (origin === 'x' ?
-                x_asset_data :
-                y_asset_data
-              )?.decimals ||
-              18
-            ) +
-            1,
-          ) :
+          amount
+            .substring(
+              0,
+              amount.indexOf('.') +
+              (
+                (origin === 'x' ?
+                  x_asset_data :
+                  y_asset_data
+                )?.decimals ||
+                18
+              ) +
+              1,
+            ) :
           amount
       ) ||
       '0',
@@ -2219,7 +2321,13 @@ export default () => {
     calling ||
     approving
 
-  const boxShadow = `${color}${theme === 'light' ? '44' : '33'} 0px 16px 128px 64px`
+  const boxShadow =
+    color &&
+    `${color}${
+      theme === 'light' ?
+        '44' :
+        '33'
+    } 0px 16px 128px 64px`
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4">
@@ -2231,7 +2339,7 @@ export default () => {
               className="bg-white dark:bg-slate-900 rounded border dark:border-slate-800 space-y-6 pt-4 sm:pt-5 pb-6 sm:pb-7 px-4 sm:px-6"
               style={
                 chain &&
-                color ?
+                boxShadow ?
                   {
                     boxShadow,
                     WebkitBoxShadow: boxShadow,
@@ -3190,18 +3298,19 @@ export default () => {
                             (
                               typeof amount === 'string' &&
                               amount.indexOf('.') > -1 ?
-                                amount.substring(
-                                  0,
-                                  amount.indexOf('.') +
-                                  (
-                                    (origin === 'x' ?
-                                      x_asset_data :
-                                      y_asset_data
-                                    )?.decimals ||
-                                    18
-                                  ) +
-                                  1,
-                                ) :
+                                amount
+                                  .substring(
+                                    0,
+                                    amount.indexOf('.') +
+                                    (
+                                      (origin === 'x' ?
+                                        x_asset_data :
+                                        y_asset_data
+                                      )?.decimals ||
+                                      18
+                                    ) +
+                                    1,
+                                  ) :
                                 amount
                             ) ||
                             '0',
@@ -3257,18 +3366,19 @@ export default () => {
                                   (
                                     typeof amount === 'string' &&
                                     amount.indexOf('.') > -1 ?
-                                      amount.substring(
-                                        0,
-                                        amount.indexOf('.') +
-                                        (
-                                          (origin === 'x' ?
-                                            x_asset_data :
-                                            y_asset_data
-                                          )?.decimals ||
-                                          18
-                                        ) +
-                                        1,
-                                      ) :
+                                      amount
+                                        .substring(
+                                          0,
+                                          amount.indexOf('.') +
+                                          (
+                                            (origin === 'x' ?
+                                              x_asset_data :
+                                              y_asset_data
+                                            )?.decimals ||
+                                            18
+                                          ) +
+                                          1,
+                                        ) :
                                       amount
                                   ) ||
                                   '0',

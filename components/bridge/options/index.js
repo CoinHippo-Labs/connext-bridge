@@ -220,9 +220,12 @@ export default (
                           <Switch
                             checked={
                               !(
-                                typeof data?.[name] === 'boolean' ?
-                                  data[name] :
-                                  false
+                                (
+                                  typeof data?.[name] === 'boolean' ?
+                                    data[name] :
+                                    false
+                                ) ||
+                                false
                               )
                             }
                             onChange={e => {
@@ -283,9 +286,12 @@ export default (
                               <Switch
                                 disabled={true}
                                 checked={
-                                  typeof data?.[name] === 'boolean' ?
-                                    data[name] :
-                                    false
+                                  (
+                                    typeof data?.[name] === 'boolean' ?
+                                      data[name] :
+                                      false
+                                  ) ||
+                                  false
                                 }
                                 checkedIcon={false}
                                 uncheckedIcon={false}
@@ -298,9 +304,12 @@ export default (
                           </Tooltip> :
                           <Switch
                             checked={
-                              typeof data?.[name] === 'boolean' ?
-                                data[name] :
-                                false
+                              (
+                                typeof data?.[name] === 'boolean' ?
+                                  data[name] :
+                                  false
+                              ) ||
+                              false
                             }
                             onChange={e => {
                               const _data = {
