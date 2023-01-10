@@ -3204,20 +3204,26 @@ export default (
 
                               try {
                                 _amount =
-                                  FixedNumber.fromString(
+                                  p === 1 ?
                                     (
                                       lpTokenBalance ||
                                       0
                                     )
-                                    .toString()
-                                  )
-                                  .mulUnsafe(
+                                    .toString() :
                                     FixedNumber.fromString(
-                                      p
-                                        .toString()
+                                      (
+                                        lpTokenBalance ||
+                                        0
+                                      )
+                                      .toString()
                                     )
-                                  )
-                                  .toString()
+                                    .mulUnsafe(
+                                      FixedNumber.fromString(
+                                        p
+                                          .toString()
+                                      )
+                                    )
+                                    .toString()
                               } catch (error) {
                                 _amount = '0'
                               }

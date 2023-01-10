@@ -89,7 +89,7 @@ export default (
       user_pools_data ?
         user_pools_data
           .filter(p =>
-            p?.lpTokenBalance > 0
+            Number(p?.lpTokenBalance) > 0
           )
           .map(p => {
             const {
@@ -118,7 +118,7 @@ export default (
 
             share =
               !isNaN(supply) ?
-                lpTokenBalance *
+                Number(lpTokenBalance) *
                 100 /
                 Number(supply) :
                 share
@@ -1452,9 +1452,9 @@ export default (
                       Header: 'Your Pool Tokens',
                       accessor: 'lpTokenBalance',
                       sortType: (a, b) =>
-                        a.original.lpTokenBalance *
+                        Number(a.original.lpTokenBalance) *
                         a.original.price >
-                        b.original.lpTokenBalance *
+                        Number(b.original.lpTokenBalance) *
                         b.original.price ?
                           1 :
                           -1,

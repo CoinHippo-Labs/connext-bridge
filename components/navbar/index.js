@@ -1405,14 +1405,12 @@ export default () => {
                         ...info,
                         symbols,
                         lpTokenBalance:
-                          Number(
-                            utils.formatUnits(
-                              BigNumber.from(
-                                lpTokenBalance ||
-                                '0',
-                              ),
-                              18,
-                            )
+                          utils.formatUnits(
+                            BigNumber.from(
+                              lpTokenBalance ||
+                              '0',
+                            ),
+                            18,
                           ),
                         poolTokenBalances:
                           (poolTokenBalances || [])

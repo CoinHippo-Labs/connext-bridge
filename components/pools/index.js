@@ -97,7 +97,7 @@ export default () => {
           Object.values(user_pools_data)
             .flatMap(d => d)
             .filter(d =>
-              d?.lpTokenBalance > 0
+              Number(d?.lpTokenBalance) > 0
             )
             .length >
             0
@@ -288,14 +288,12 @@ export default () => {
                             ...info,
                             symbols,
                             lpTokenBalance:
-                              Number(
-                                utils.formatUnits(
-                                  BigNumber.from(
-                                    lpTokenBalance ||
-                                    '0',
-                                  ),
-                                  18,
-                                )
+                              utils.formatUnits(
+                                BigNumber.from(
+                                  lpTokenBalance ||
+                                  '0',
+                                ),
+                                18,
                               ),
                             poolTokenBalances:
                               (poolTokenBalances || [])
