@@ -1295,6 +1295,7 @@ export default () => {
         domainId,
         adopted,
         local,
+        symbols,
       } = { ...pair }
       const {
         contract_address,
