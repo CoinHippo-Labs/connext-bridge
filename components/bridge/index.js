@@ -1716,7 +1716,7 @@ export default () => {
                 originDomain,
                 destinationDomain,
                 originTokenAddress,
-                destinationTokenAddress,
+                // destinationTokenAddress,
                 amount,
                 isNextAsset,
               )
