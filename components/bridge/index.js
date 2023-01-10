@@ -3946,7 +3946,7 @@ export default () => {
                                                                   !isNaN(value) ?
                                                                     parseFloat(
                                                                       Number(value)
-                                                                        .toFixed(6)
+                                                                        .toFixed(2)
                                                                     ) :
                                                                     value,
                                                               }
@@ -4014,7 +4014,7 @@ export default () => {
                                                         <span className="font-semibold">
                                                           {number_format(
                                                             slippage,
-                                                            '0,0.000000',
+                                                            '0,0.00',
                                                           )}%
                                                         </span>
                                                         <button

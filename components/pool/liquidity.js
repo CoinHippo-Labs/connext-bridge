@@ -191,32 +191,32 @@ export default (
           setPriceImpactAdd(true)
           setCallResponse(null)
 
-          console.log(
-            '[getPoolTokenIndex]',
-            {
-              domainId,
-              contract_address,
-              tokenAddress: contract_address,
-            },
-          )
+          // console.log(
+          //   '[getPoolTokenIndex]',
+          //   {
+          //     domainId,
+          //     contract_address,
+          //     tokenAddress: contract_address,
+          //   },
+          // )
 
-          const tokenIndex =
-            await sdk.nxtpSdkPool
-              .getPoolTokenIndex(
-                domainId,
-                contract_address,
-                contract_address,
-              )
+          // const tokenIndex =
+          //   await sdk.nxtpSdkPool
+          //     .getPoolTokenIndex(
+          //       domainId,
+          //       contract_address,
+          //       contract_address,
+          //     )
 
-          console.log(
-            '[poolTokenIndex]',
-            {
-              domainId,
-              contract_address,
-              tokenAddress: contract_address,
-              tokenIndex,
-            },
-          )
+          // console.log(
+          //   '[poolTokenIndex]',
+          //   {
+          //     domainId,
+          //     contract_address,
+          //     tokenAddress: contract_address,
+          //     tokenIndex,
+          //   },
+          // )
 
           let _amountX,
             _amountY
@@ -849,6 +849,13 @@ export default (
                   tokenIndex,
                 },
               )
+
+              if (tokenIndex === 1) {
+                amounts =
+                  _.reverse(
+                    _.cloneDeep(amounts)
+                  )
+              }
 
               console.log(
                 '[addLiquidity]',
