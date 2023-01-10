@@ -183,7 +183,8 @@ export default () => {
                     }
                   })
                   .filter(d =>
-                    d.contracts.length > 0
+                    d.contracts.length > 0 &&
+                    !d.disabled
                   ),
             }
           )

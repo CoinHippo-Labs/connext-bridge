@@ -164,7 +164,8 @@
       }
     ],
     "color": "#636890",
-    "preset": true
+    "preset": true,
+    "disabled": true
   },
   {
     "id": "kp3r",

@@ -3148,7 +3148,7 @@ export default () => {
                             origin=""
                             is_bridge={true}
                             show_next_assets={showNextAssets}
-                            show_native_assets={false}
+                            show_native_assets={true}
                             data={
                               {
                                 ...source_asset_data,

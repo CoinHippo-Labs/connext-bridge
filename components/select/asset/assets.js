@@ -67,115 +67,120 @@ export default (
   } = { ...chain_data }
 
   const _assets_data =
-    is_pool ?
-      _.concat(
-        pool_assets_data,
-        data ?
-          (pools_data || [])
-            .filter(p =>
-              equals_ignore_case(
-                p?.domainId,
-                domain_id,
-              )
-            )
-            .map(p => {
-              const {
-                asset_data,
-                contract_data,
-                adopted,
-                local,
-              } = { ...p }
-              const {
-                contracts,
-              } = { ...asset_data }
-              const {
-                contract_address,
-                image,
-              } = { ...contract_data }
-
-              const _contracts = _.cloneDeep(contracts)
-
-              const contract_index = (contracts || [])
-                .findIndex(c =>
-                  equals_ignore_case(
-                    c?.contract_address,
-                    contract_address,
-                  )
+    (
+      is_pool ?
+        _.concat(
+          pool_assets_data,
+          data ?
+            (pools_data || [])
+              .filter(p =>
+                equals_ignore_case(
+                  p?.domainId,
+                  domain_id,
                 )
+              )
+              .map(p => {
+                const {
+                  asset_data,
+                  contract_data,
+                  adopted,
+                  local,
+                } = { ...p }
+                const {
+                  contracts,
+                } = { ...asset_data }
+                const {
+                  contract_address,
+                  image,
+                } = { ...contract_data }
 
-              if (contract_index > -1) {
-                const pool_token =
-                  adopted?.address &&
-                  !equals_ignore_case(
-                    adopted.address,
-                    contract_address,
-                  ) ?
-                    local :
-                    local?.address &&
+                const _contracts = _.cloneDeep(contracts)
+
+                const contract_index = (contracts || [])
+                  .findIndex(c =>
+                    equals_ignore_case(
+                      c?.contract_address,
+                      contract_address,
+                    )
+                  )
+
+                if (contract_index > -1) {
+                  const pool_token =
+                    adopted?.address &&
                     !equals_ignore_case(
-                      local.address,
+                      adopted.address,
                       contract_address,
                     ) ?
                       local :
-                      null
+                      local?.address &&
+                      !equals_ignore_case(
+                        local.address,
+                        contract_address,
+                      ) ?
+                        local :
+                        null
 
-                if (pool_token) {
-                  const {
-                    address,
-                    symbol,
-                    decimals,
-                  } = { ...pool_token }
+                  if (pool_token) {
+                    const {
+                      address,
+                      symbol,
+                      decimals,
+                    } = { ...pool_token }
 
-                  const image_paths =
-                    (image || '')
-                      .split('/')
+                    const image_paths =
+                      (image || '')
+                        .split('/')
 
-                  const image_name = _.last(image_paths)
+                    const image_name = _.last(image_paths)
 
-                  _contracts[contract_index] = {
-                    contract_address: address,
-                    chain_id,
-                    decimals,
-                    symbol,
-                    image:
-                      image ?
-                        !symbol ?
-                          image :
-                          symbol.startsWith(WRAPPED_PREFIX) ?
-                            !image_name.startsWith(WRAPPED_PREFIX) ?
-                              image_paths
-                                .map((s, i) =>
-                                  i === image_paths.length - 1 ?
-                                    `${WRAPPED_PREFIX}${s}` :
-                                    s
-                                )
-                                .join('/') :
-                              image :
-                            !image_name.startsWith(WRAPPED_PREFIX) ?
-                              image :
-                              image_paths
-                                .map((s, i) =>
-                                  i === image_paths.length - 1 ?
-                                    s
-                                      .substring(
-                                        WRAPPED_PREFIX.length,
-                                      ) :
-                                    s
-                                )
-                                .join('/') :
-                        undefined,
+                    _contracts[contract_index] = {
+                      contract_address: address,
+                      chain_id,
+                      decimals,
+                      symbol,
+                      image:
+                        image ?
+                          !symbol ?
+                            image :
+                            symbol.startsWith(WRAPPED_PREFIX) ?
+                              !image_name.startsWith(WRAPPED_PREFIX) ?
+                                image_paths
+                                  .map((s, i) =>
+                                    i === image_paths.length - 1 ?
+                                      `${WRAPPED_PREFIX}${s}` :
+                                      s
+                                  )
+                                  .join('/') :
+                                image :
+                              !image_name.startsWith(WRAPPED_PREFIX) ?
+                                image :
+                                image_paths
+                                  .map((s, i) =>
+                                    i === image_paths.length - 1 ?
+                                      s
+                                        .substring(
+                                          WRAPPED_PREFIX.length,
+                                        ) :
+                                      s
+                                  )
+                                  .join('/') :
+                          undefined,
+                    }
                   }
                 }
-              }
 
-              return {
-                ...asset_data,
-                contracts: _contracts,
-              }
-            }) :
-          [],
-      ) :
-      assets_data
+                return {
+                  ...asset_data,
+                  contracts: _contracts,
+                }
+              }) :
+            [],
+        ) :
+        assets_data
+    )
+    .filter(a =>
+      !a?.disabled
+    )
 
   const assets_data_sorted =
     _.orderBy(
