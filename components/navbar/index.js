@@ -106,15 +106,51 @@ export default function Navbar() {
       for (let i = 0; i < chains_data.length; i++) {
         const chain = chains_data[i]
 
-        chainConfig[chain?.chain_id] = {
-          providers: chain?.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')) || [],
+        const {
+          chain_id,
+          provider_params,
+        } = { ...chain }
+        const {
+          rpcUrls,
+        } = { ..._.head(provider_params) }
+
+        const rpc_urls =
+          (rpcUrls || [])
+            .filter(url =>
+              url &&
+              !url.startsWith('wss://') &&
+              !url.startsWith('ws://')
+            )
+
+        chainConfig[chain_id] = {
+          providers: rpc_urls,
         }
 
-        // if ([42161].includes(chain?.chain_id)) {
-        //   chainConfig[chain?.chain_id].gelatoOracle = false;
+        // if ([42161].includes(chain_id)) {
+        //   chainConfig[chain_id].gelatoOracle = false;
         // }
 
-        rpcs[chain?.chain_id] = new providers.FallbackProvider(chain?.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')).map(rpc => new providers.JsonRpcProvider(rpc)) || [])
+        rpcs[chain_id] =
+          rpc_urls.length === 1 ?
+            new providers.StaticJsonRpcProvider(
+              _.head(rpc_urls),
+              chain_id,
+            ) :
+            new providers.FallbackProvider(
+              rpc_urls
+                .map((url, i) => {
+                  return {
+                    provider:
+                      new providers.StaticJsonRpcProvider(
+                        url,
+                        chain_id,
+                      ),
+                    priority: i + 1,
+                    stallTimeout: 1000,
+                  }
+                }),
+              rpc_urls.length / 3,
+            )
       }
 
       dispatch({
