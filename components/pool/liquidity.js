@@ -694,7 +694,7 @@ export default (
                 setApproveResponse(
                   {
                     status: 'pending',
-                    message: `Wait for ${x_asset_data?.symbol} approval`,
+                    message: `Waiting for ${x_asset_data?.symbol} approval`,
                     tx_hash: hash,
                   }
                 )
@@ -772,7 +772,7 @@ export default (
                   setApproveResponse(
                     {
                       status: 'pending',
-                      message: `Wait for ${y_asset_data?.symbol} approval`,
+                      message: `Waiting for ${y_asset_data?.symbol} approval`,
                       tx_hash: hash,
                     }
                   )
@@ -1059,7 +1059,7 @@ export default (
                 setApproveResponse(
                   {
                     status: 'pending',
-                    message: `Wait for ${symbol} approval`,
+                    message: `Waiting for ${symbol} approval`,
                     tx_hash: hash,
                   }
                 )

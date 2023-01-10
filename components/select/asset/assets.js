@@ -193,6 +193,7 @@ export default (
             _.concat(
               is_bridge &&
               wrapable &&
+              show_native_assets &&
               {
                 ...contract_data,
                 contract_address: constants.AddressZero,

@@ -1380,7 +1380,7 @@ export default () => {
               {
                 status: 'pending',
                 message:
-                  `Wait for ${
+                  `Waiting for ${
                     (origin === 'x' ?
                       x_asset_data :
                       y_asset_data

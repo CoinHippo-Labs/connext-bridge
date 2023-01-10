@@ -2013,7 +2013,7 @@ export default () => {
           setApproveResponse(
             {
               status: 'pending',
-              message: `Wait for ${symbol} approval`,
+              message: `Waiting for ${symbol} approval`,
               tx_hash: hash,
             }
           )
@@ -3125,7 +3125,7 @@ export default () => {
                             origin=""
                             is_bridge={true}
                             show_next_assets={showNextAssets}
-                            show_native_assets={true}
+                            show_native_assets={false}
                             data={
                               {
                                 ...source_asset_data,

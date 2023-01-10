@@ -261,11 +261,15 @@ export default (
         pools_data ?
           <div className="space-y-6">
             <div className="space-y-4">
-              {/*<div className="tracking-wider text-lg font-semibold">
-                Statistics
-              </div>*/}
               <div className="grid grid-cols-2 lg:grid-cols-2 gap-2">
-                <div className={`z-50 ${metricClassName}`}>
+                <div
+                  className={metricClassName}
+                  style={
+                    {
+                      zIndex: 1,
+                    }
+                  }
+                >
                   <span className={titleClassName}>
                     TVL
                   </span>
