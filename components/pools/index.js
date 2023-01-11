@@ -355,7 +355,7 @@ export default () => {
                     <div
                       key={i}
                       onClick={() => setView(v.id)}
-                      className={`border-b-4 ${view === v.id ? 'border-slate-600 dark:border-white font-semibold' : 'border-transparent text-slate-400 dark:text-slate-500 font-medium'} whitespace-nowrap cursor-pointer text-lg mr-2 p-2`}
+                      className={`border-b-2 ${view === v.id ? 'border-slate-600 dark:border-white font-medium' : 'border-transparent text-slate-400 dark:text-slate-500 font-medium'} whitespace-nowrap cursor-pointer text-lg mr-2 p-2`}
                     >
                       {v.title}
                     </div>

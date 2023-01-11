@@ -2484,11 +2484,8 @@ export default () => {
   const gas_fee =
     fee &&
     (
-      false &&
-      forceSlow ?
-        0 :
-        fee.gas ||
-        0
+      fee.gas ||
+      0
     )
 
   const router_fee =
@@ -4374,7 +4371,8 @@ export default () => {
                           (
                             typeof pool_amount === 'number' &&
                             Number(amount) > pool_amount
-                          )
+                          ) ||
+                          Number(gas_fee) <= 0
                         ) ?
                           <Alert
                             color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
@@ -4420,7 +4418,9 @@ export default () => {
                                             ) :
                                             pool_amount
                                         }` :
-                                        ''
+                                        Number(gas_fee) <= 0 ?
+                                          'Cannot estimate the relayer fee at the moment. Please try again later.' :
+                                          ''
                               }
                             </span>
                           </Alert> :

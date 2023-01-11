@@ -244,10 +244,10 @@ export default (
       price :
       0
 
-  const metricClassName = 'bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 flex flex-col space-y-8 py-5 px-4'
+  const metricClassName = 'bg-slate-50 dark:bg-slate-900 bg-opacity-60 dark:bg-opacity-60 rounded border dark:border-slate-800 flex flex-col space-y-12 py-5 px-4'
   const titleClassName = 'text-slate-400 dark:text-slate-200 text-base font-medium'
-  const valueClassName = 'text-lg sm:text-3xl font-bold'
-  const gridValueClassName = 'text-lg font-bold'
+  const valueClassName = 'text-lg sm:text-3xl font-semibold'
+  const gridValueClassName = 'text-lg font-semibold'
 
   const boxShadow =
     `${
@@ -257,7 +257,7 @@ export default (
       theme === 'light' ?
         '44' :
         '33'
-    } 0px 16px 128px 64px`
+    } 0px 32px 128px 64px`
 
   return (
     <div className="sm:min-h-full bg-transparent">
@@ -265,16 +265,19 @@ export default (
         true ||
         pools_data ?
           <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 lg:grid-cols-2 gap-2">
-                <div
-                  className={metricClassName}
-                  style={
-                    {
-                      zIndex: 1,
-                    }
+            <div className="space-y-0">
+              <div
+                className="w-32 sm:w-64 mx-auto sm:mr-8"
+                style={
+                  {
+                    boxShadow,
+                    WebkitBoxShadow: boxShadow,
+                    MozBoxShadow: boxShadow,
                   }
-                >
+                }
+              />
+              <div className="grid grid-cols-2 lg:grid-cols-2 gap-2">
+                <div className={metricClassName}>
                   <span className={titleClassName}>
                     TVL
                   </span>
@@ -326,16 +329,7 @@ export default (
                     </span>
                   </div>
                 </div>
-                <div
-                  className={metricClassName}
-                  style={
-                    {
-                      boxShadow,
-                      WebkitBoxShadow: boxShadow,
-                      MozBoxShadow: boxShadow,
-                    }
-                  }
-                >
+                <div className={metricClassName}>
                   <span className={titleClassName}>
                     Reward APR
                   </span>
