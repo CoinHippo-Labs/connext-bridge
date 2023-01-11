@@ -13,7 +13,7 @@ import { CountdownCircleTimer } from 'react-countdown-circle-timer'
 import { MdClose } from 'react-icons/md'
 import { HiArrowRight, HiOutlineDocumentSearch, HiOutlineCheckCircle } from 'react-icons/hi'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit, BiEditAlt, BiCheckCircle, BiChevronDown, BiChevronUp, BiBook } from 'react-icons/bi'
-import { IoWarning } from 'react-icons/io5'
+import { IoInformationCircleOutline, IoWarning } from 'react-icons/io5'
 import { GiPartyPopper } from 'react-icons/gi'
 
 import Announcement from '../announcement'
@@ -457,21 +457,39 @@ export default () => {
         }
       }
 
+      const {
+        slippage,
+      } = { ...options }
       let {
         receiveLocal,
       } = { ...options }
 
       if (!destination_contract_data?.next_asset) {
+        if (receiveLocal) {
+          bridge._receiveLocal = receiveLocal
+        }
+
         receiveLocal = false
 
-        if (bridge?.receive_next) {
+        if (bridge.receive_next) {
           bridge.receive_next = undefined
+        }
+      }
+      else {
+        if (typeof bridge._receiveLocal === 'boolean') {
+          receiveLocal =
+            bridge.receive_next === bridge._receiveLocal ||
+            bridge.receive_next === false ?
+              bridge.receive_next :
+              bridge._receiveLocal
+
+          bridge._receiveLocal = receiveLocal
         }
       }
 
       if (
         receiveLocal ||
-        bridge?.receive_next
+        bridge.receive_next
       ) {
         params.receive_next = true
       }
@@ -581,6 +599,7 @@ export default () => {
       setOptions(
         {
           ...DEFAULT_OPTIONS,
+          slippage,
           forceSlow:
             destination_chain_data &&
             asset_balances_data ?
@@ -2803,7 +2822,7 @@ export default () => {
                   </div>
                 </PageVisibility> :
                 <div
-                  className="bg-white dark:bg-slate-900 rounded border dark:border-slate-700 space-y-6 pt-5 sm:pt-6 pb-6 sm:pb-7 px-4 sm:px-6"
+                  className="bg-white dark:bg-slate-900 rounded border dark:border-slate-700 space-y-4 pt-5 sm:pt-6 pb-6 sm:pb-7 px-4 sm:px-6"
                   style={
                     checkSupport() &&
                     boxShadow ?
@@ -2815,7 +2834,7 @@ export default () => {
                       undefined
                   }
                 >
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     <div className="flex items-center justify-between space-x-2">
                       <h1 className="text-xl font-semibold">
                         Bridge
@@ -2940,148 +2959,166 @@ export default () => {
                         )
                       }
                     </div>
-                    <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
-                      <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start space-y-0.5 sm:space-y-2">
-                        <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
-                          <span className="text-slate-600 dark:text-slate-500 font-medium text-left">
-                            From
-                          </span>
-                          {/*<GasPrice
-                            chainId={source_chain_data?.chain_id}
-                            dummy={true}
-                            iconSize={18}
-                            className="text-xs"
-                          />*/}
-                        </div>
-                        <SelectChain
-                          disabled={disabled}
-                          fixed={
-                            [
-                              'pool',
-                            ].includes(source)
-                          }
-                          value={source_chain}
-                          onSelect={c => {
-                            const _source_chain = c
-                            const _destination_chain =
-                              c === destination_chain ?
-                                source_chain :
-                                destination_chain
+                    <div>
+                      <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
+                        <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start space-y-0.5 sm:space-y-2">
+                          <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
+                            <span className="text-slate-600 dark:text-slate-500 font-medium text-left">
+                              From
+                            </span>
+                            {/*<GasPrice
+                              chainId={source_chain_data?.chain_id}
+                              dummy={true}
+                              iconSize={18}
+                              className="text-xs"
+                            />*/}
+                          </div>
+                          <SelectChain
+                            disabled={disabled}
+                            fixed={
+                              [
+                                'pool',
+                              ].includes(source)
+                            }
+                            value={source_chain}
+                            onSelect={c => {
+                              const _source_chain = c
+                              const _destination_chain =
+                                c === destination_chain ?
+                                  source_chain :
+                                  destination_chain
 
-                            setBridge(
-                              {
-                                ...bridge,
-                                source_chain: _source_chain,
-                                destination_chain: _destination_chain,
-                                symbol:
-                                  equals_ignore_case(
-                                    _source_chain,
-                                    source_chain,
-                                  ) ?
-                                    symbol :
-                                    undefined,
-                              }
-                            )
-
-                            getBalances(_source_chain)
-                            getBalances(_destination_chain)
-                          }}
-                          source={source_chain}
-                          destination={destination_chain}
-                          origin="from"
-                        />
-                      </div>
-                      <div className="flex items-center justify-center mt-5.5 sm:mt-7">
-                        <button
-                          disabled={disabled}
-                          onClick={() => {
-                            if (!disabled) {
                               setBridge(
                                 {
                                   ...bridge,
-                                  source_chain: destination_chain,
-                                  destination_chain: source_chain,
-                                  amount: null,
+                                  source_chain: _source_chain,
+                                  destination_chain: _destination_chain,
+                                  symbol:
+                                    equals_ignore_case(
+                                      _source_chain,
+                                      source_chain,
+                                    ) ?
+                                      symbol :
+                                      undefined,
                                 }
                               )
 
-                              setButtonDirection(
-                                buttonDirection * -1
-                              )
+                              getBalances(_source_chain)
+                              getBalances(_destination_chain)
+                            }}
+                            source={source_chain}
+                            destination={destination_chain}
+                            origin="from"
+                          />
+                        </div>
+                        <div className="flex items-center justify-center mt-5.5 sm:mt-7">
+                          <button
+                            disabled={disabled}
+                            onClick={() => {
+                              if (!disabled) {
+                                setBridge(
+                                  {
+                                    ...bridge,
+                                    source_chain: destination_chain,
+                                    destination_chain: source_chain,
+                                    amount: null,
+                                  }
+                                )
 
-                              getBalances(source_chain)
-                              getBalances(destination_chain)
+                                setButtonDirection(
+                                  buttonDirection * -1
+                                )
+
+                                getBalances(source_chain)
+                                getBalances(destination_chain)
+                              }
+                            }}
+                            className={
+                              `bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 ${
+                                disabled ?
+                                  'cursor-not-allowed' :
+                                  ''
+                              } ${
+                                [
+                                  'pool',
+                                ].includes(source) ?
+                                  'pointer-events-none' :
+                                  ''
+                              } rounded border dark:border-slate-700 flex items-center justify-center p-1 sm:p-1.5`
                             }
-                          }}
-                          className={
-                            `bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 ${
-                              disabled ?
-                                'cursor-not-allowed' :
-                                ''
-                            } ${
+                          >
+                            <HiArrowRight
+                              size={18}
+                              style={
+                                false &&
+                                buttonDirection < 0 ?
+                                  {
+                                    transform: 'scaleX(-1)',
+                                  } :
+                                  undefined
+                              }
+                            />
+                          </button>
+                        </div>
+                        <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end space-y-0.5 sm:space-y-2">
+                          <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
+                            <span className="text-slate-600 dark:text-slate-500 font-medium text-left">
+                              To
+                            </span>
+                            {/*<GasPrice
+                              chainId={destination_chain_data?.chain_id}
+                              dummy={true}
+                              iconSize={18}
+                              className="text-xs"
+                            />*/}
+                          </div>
+                          <SelectChain
+                            disabled={disabled}
+                            fixed={
                               [
                                 'pool',
-                              ].includes(source) ?
-                                'pointer-events-none' :
-                                ''
-                            } rounded border dark:border-slate-700 flex items-center justify-center p-1 sm:p-1.5`
-                          }
-                        >
-                          <HiArrowRight
-                            size={18}
-                            style={
-                              false &&
-                              buttonDirection < 0 ?
-                                {
-                                  transform: 'scaleX(-1)',
-                                } :
-                                undefined
+                              ].includes(source)
                             }
+                            value={destination_chain}
+                            onSelect={c => {
+                              const _source_chain = c === source_chain ?
+                                destination_chain :
+                                source_chain
+                              const _destination_chain = c
+
+                              setBridge(
+                                {
+                                  ...bridge,
+                                  source_chain: _source_chain,
+                                  destination_chain: _destination_chain,
+                                }
+                              )
+
+                              getBalances(_source_chain)
+                              getBalances(_destination_chain)
+                            }}
+                            source={source_chain}
+                            destination={destination_chain}
+                            origin="to"
                           />
-                        </button>
-                      </div>
-                      <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end space-y-0.5 sm:space-y-2">
-                        <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
-                          <span className="text-slate-600 dark:text-slate-500 font-medium text-left">
-                            To
-                          </span>
-                          {/*<GasPrice
-                            chainId={destination_chain_data?.chain_id}
-                            dummy={true}
-                            iconSize={18}
-                            className="text-xs"
-                          />*/}
                         </div>
-                        <SelectChain
-                          disabled={disabled}
-                          fixed={
-                            [
-                              'pool',
-                            ].includes(source)
-                          }
-                          value={destination_chain}
-                          onSelect={c => {
-                            const _source_chain = c === source_chain ?
-                              destination_chain :
-                              source_chain
-                            const _destination_chain = c
-
-                            setBridge(
-                              {
-                                ...bridge,
-                                source_chain: _source_chain,
-                                destination_chain: _destination_chain,
-                              }
-                            )
-
-                            getBalances(_source_chain)
-                            getBalances(_destination_chain)
-                          }}
-                          source={source_chain}
-                          destination={destination_chain}
-                          origin="to"
-                        />
                       </div>
+                      {
+                        bridge._receiveLocal &&
+                        destination_contract_data &&
+                        !destination_contract_data.next_asset &&
+                        (
+                          <div className="flex items-start space-x-1 mt-2">
+                            <IoInformationCircleOutline
+                              size={14}
+                              className="min-w-max text-slate-500 dark:text-slate-500 mt-0.5"
+                            />
+                            <div className="text-slate-500 dark:text-slate-500 text-xs">
+                              Receive NextAsset setting turned off for {destination_chain_data?.name}.
+                            </div>
+                          </div>
+                        )
+                      }
                     </div>
                     {/*<div className="space-y-2">
                       <div className="text-slate-600 dark:text-slate-500 font-medium">
@@ -3688,6 +3725,9 @@ export default () => {
                                       'number',
                                     ].includes(typeof amount) ||
                                     [
+                                      '',
+                                    ].includes(amount) ||
+                                    [
                                       'string',
                                       'number',
                                     ].includes(typeof estimatedValues?.amountReceived) ||
@@ -3785,6 +3825,9 @@ export default () => {
                                             'string',
                                             'number',
                                           ].includes(typeof amount) ||
+                                          [
+                                            '',
+                                          ].includes(amount) ||
                                           [
                                             'string',
                                             'number',
@@ -4090,6 +4133,9 @@ export default () => {
                                                       'string',
                                                       'number',
                                                     ].includes(typeof amount) ||
+                                                    [
+                                                      '',
+                                                    ].includes(amount) ||
                                                     [
                                                       'string',
                                                       'number',
