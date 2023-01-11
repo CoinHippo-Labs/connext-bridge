@@ -1584,19 +1584,19 @@ export default () => {
               isHighPriority: !forceSlow,
             }
 
-            const response =
-              false &&
-              forceSlow ?
-                0 :
+            try {
+              console.log(
+                '[estimateRelayerFee]',
+                params,
+              )
+
+              const response =
                 await sdk.nxtpSdkBase
                   .estimateRelayerFee(
                     params,
                   )
 
-            const gasFee =
-              false &&
-              forceSlow ?
-                0 :
+              const gasFee =
                 response &&
                 utils.formatUnits(
                   response,
@@ -1604,22 +1604,28 @@ export default () => {
                   18,
                 )
 
-            console.log(
-              '[Estimate Fees]',
-              {
-                options,
-                params,
-                // routerFee,
-                gasFee,
-              },
-            )
+              console.log(
+                '[relayerFee]',
+                {
+                  params,
+                  response,
+                  gasFee,
+                },
+              )
 
-            setFee(
-              {
-                router: routerFee,
-                gas: gasFee,
-              }
-            )
+              setFee(
+                {
+                  router: routerFee,
+                  gas: gasFee,
+                }
+              )
+            } catch (error) {
+              console.log(
+                '[estimateRelayerFee error]',
+                params,
+                error,
+              )
+            }
           } catch (error) {}
         }
       }

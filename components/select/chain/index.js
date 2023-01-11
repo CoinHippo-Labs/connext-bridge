@@ -19,7 +19,7 @@ export default (
     destination,
     origin = 'from',
     is_pool = false,
-    no_shadow = false,
+    no_shadow = true,
     className = '',
   },
 ) => {
