@@ -14,6 +14,7 @@ export default (
   {
     trigger,
     data = [],
+    onUpdateSize,
   },
 ) => {
   const {
@@ -114,6 +115,18 @@ export default (
       return () => clearInterval(interval)
     },
     [sdk, address, trigger],
+  )
+
+  useEffect(
+    () => {
+      if (onUpdateSize) {
+        onUpdateSize(
+          (transfers || [])
+            .length
+        )
+      }
+    },
+    [onUpdateSize, transfers],
   )
 
   const transfersComponent =

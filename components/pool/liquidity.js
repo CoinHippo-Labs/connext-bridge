@@ -2379,7 +2379,7 @@ export default (
                         ].includes(e.key) &&
                         e.preventDefault()
                       }
-                      className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
+                      className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 ${typeof priceImpactAdd === 'number' && priceImpactAdd > 0 ? 'text-red-500 dark:text-red-500' : ''} text-base font-medium text-right`}
                     />
                   </div>
                   {
@@ -2594,7 +2594,7 @@ export default (
                         ].includes(e.key) &&
                         e.preventDefault()
                       }
-                      className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
+                      className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 ${typeof priceImpactAdd === 'number' && priceImpactAdd > 0 ? 'text-red-500 dark:text-red-500' : ''} text-base font-medium text-right`}
                     />
                   </div>
                   {
@@ -2637,9 +2637,15 @@ export default (
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between space-x-1">
-                <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
-                  Price Impact
-                </div>
+                <Tooltip
+                  placement="top"
+                  content="The adjusted amount you are paying for LP tokens above or below current market prices."
+                  className="w-80 z-50 bg-dark text-white text-xs"
+                >
+                  <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
+                    Price impact
+                  </div>
+                </Tooltip>
                 <div className="flex items-center text-xs font-semibold space-x-1">
                   {
                     priceImpactAdd === true &&
@@ -2763,28 +2769,31 @@ export default (
                           Heads Up!
                         </span>
                         <span className="leading-4 text-xs font-bold">
-                          The pool is currently overweighted in {
+                          {
                             (overweighted_asset === 'x' ?
                               x_asset_data :
                               y_asset_data
                             )?.symbol
-                          }.
+                          } is currently overweighted in this pool.
                         </span>
                         <div className="flex flex-col items-center space-y-1">
                           <span className="leading-4 text-xs text-center">
-                            Providing {
-                              (overweighted_asset === 'x' ?
-                                y_asset_data :
-                                x_asset_data
-                              )?.symbol
-                            } instead
-                          </span>
-                          <span className="leading-4 text-xs text-center">
+                            <span className="mr-1">
+                              Instead, balancing the pool out with additional
+                            </span>
+                            <span className="font-semibold mr-1">
+                              {
+                                (overweighted_asset === 'x' ?
+                                  y_asset_data :
+                                  x_asset_data
+                                )?.symbol
+                              }
+                            </span>
                             <span className="mr-1">
                               may result in
                             </span>
                             <span className="font-bold">
-                              bonus LP tokens!
+                              bonus LP tokens
                             </span>
                           </span>
                         </div>
@@ -2799,7 +2808,16 @@ export default (
                           <div className="flex flex-col space-y-0 mx-auto">
                             <div className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 rounded flex items-center space-x-1 pt-0.5 pb-1 px-2">
                               <a
-                                href={`/${asset.toUpperCase()}-from-${_.head(chains_data)?.id}-to-${chain}?receive_next=true&source=pool`}
+                                href={
+                                  `/${asset.toUpperCase()}-from-${_.head(chains_data)?.id}-to-${chain}?${
+                                    (overweighted_asset === 'x' ?
+                                      y_asset_data :
+                                      x_asset_data
+                                    )?.symbol?.includes(WRAPPED_PREFIX) ?
+                                      'receive_next=true&' :
+                                      ''
+                                  }source=pool`
+                                }
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
@@ -3133,7 +3151,7 @@ export default (
                         ].includes(e.key) &&
                         e.preventDefault()
                       }
-                      className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
+                      className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 ${typeof priceImpactRemove === 'number' && priceImpactRemove > 0 ? 'text-red-500 dark:text-red-500' : ''} text-base font-medium text-right`}
                     />
                   </div>
                   {
@@ -3367,9 +3385,15 @@ export default (
               </div>
             </div>
             <div className="flex items-center justify-between space-x-1">
-              <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
-                Price Impact
-              </div>
+              <Tooltip
+                placement="top"
+                content="The adjusted amount you are paying for LP tokens above or below current market prices."
+                className="w-80 z-50 bg-dark text-white text-xs"
+              >
+                <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
+                  Price impact
+                </div>
+              </Tooltip>
               <div className="flex items-center text-xs font-semibold space-x-1">
                 {
                   priceImpactRemove === true &&

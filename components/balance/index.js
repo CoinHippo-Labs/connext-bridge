@@ -235,7 +235,7 @@ export default (
     chainId &&
     asset &&
     (
-      <div className={`flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm space-x-1 ${className}`}>
+      <div className={`flex items-center justify-center text-slate-600 dark:text-slate-50 text-sm space-x-1 ${className}`}>
         {
           [
             'string',
