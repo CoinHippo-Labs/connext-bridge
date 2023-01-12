@@ -803,6 +803,8 @@ export default () => {
                     WRAPPED_PREFIX,
                     '',
                   )
+
+              pool.name = name
             }
 
             const symbols =
