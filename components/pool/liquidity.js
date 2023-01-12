@@ -1851,6 +1851,16 @@ export default (
           .toString(),
           18,
         )
+      ) &&
+      utils.parseUnits(
+        amount ||
+        '0',
+        18,
+      )
+      .gt(
+        BigNumber.from(
+          '0'
+        )
       ) :
       typeof amountX === 'string' &&
       !isNaN(amountX) &&
@@ -1892,6 +1902,30 @@ export default (
           .toString(),
           y_asset_data?.decimals ||
           18,
+        )
+      ) &&
+      (
+        utils.parseUnits(
+          amountX ||
+          '0',
+          x_asset_data?.decimals ||
+          18,
+        )
+        .gt(
+          BigNumber.from(
+            '0'
+          )
+        ) ||
+        utils.parseUnits(
+          amountY ||
+          '0',
+          y_asset_data?.decimals ||
+          18,
+        )
+        .gt(
+          BigNumber.from(
+            '0'
+          )
         )
       )
 
