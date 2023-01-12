@@ -796,6 +796,15 @@ export default () => {
               }
             }
 
+            if (name?.startsWith(WRAPPED_PREFIX)) {
+              name =
+                name
+                  .replace(
+                    WRAPPED_PREFIX,
+                    '',
+                  )
+            }
+
             const symbols =
               (symbol || '')
                 .split('-')

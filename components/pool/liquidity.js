@@ -1559,6 +1559,7 @@ export default (
   const {
     asset_data,
     contract_data,
+    symbol,
     lpTokenAddress,
     adopted,
     local,
