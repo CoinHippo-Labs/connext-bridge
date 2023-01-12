@@ -8,7 +8,7 @@ import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
 import PageVisibility from 'react-page-visibility'
 import { TailSpin, Oval } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
-import { Tooltip } from '@material-tailwind/react'
+import { Tooltip, Alert as AlertNotification } from '@material-tailwind/react'
 import { CountdownCircleTimer } from 'react-countdown-circle-timer'
 import { MdClose } from 'react-icons/md'
 import { HiArrowRight, HiOutlineDocumentSearch, HiOutlineCheckCircle } from 'react-icons/hi'
@@ -177,6 +177,8 @@ export default () => {
   const [openTransferStatus, setOpenTransferStatus] = useState(false)
   const [timeTrigger, setTimeTrigger] = useState(false)
 
+  const [displayReceiveNextInfo, setDisplayReceiveNextInfo] = useState(null)
+  const [receiveNextInfoTimeout, setReceiveNextInfoTimeout] = useState(null)
   const [latestTransfersSize, setLatestTransfersSize] = useState(null)
 
   // get bridge from path
@@ -474,6 +476,8 @@ export default () => {
         if (bridge.receive_next) {
           bridge.receive_next = undefined
         }
+
+        setDisplayReceiveNextInfo(true)
       }
       else {
         if (typeof bridge._receiveLocal === 'boolean') {
@@ -1208,6 +1212,34 @@ export default () => {
       return () => clearInterval(interval)
     },
     [timeTrigger],
+  )
+
+  // countdown receive next info
+  useEffect(
+    () => {
+      if (displayReceiveNextInfo) {
+        const interval =
+          setInterval(() =>
+            {
+              setReceiveNextInfoTimeout(
+                (
+                  receiveNextInfoTimeout ||
+                  5
+                ) -
+                1
+              )
+
+              if (receiveNextInfoTimeout === 1) {
+                setDisplayReceiveNextInfo(false)
+              }
+            },
+            1000,
+          )
+
+        return () => clearInterval(interval)
+      }
+    },
+    [displayReceiveNextInfo, receiveNextInfoTimeout],
   )
 
   const getBalances = chain => {
@@ -2829,145 +2861,180 @@ export default () => {
                     </button>*/}
                   </div>
                 </PageVisibility> :
-                <div
-                  className="bg-white dark:bg-slate-900 rounded border dark:border-slate-700 space-y-8 pt-5 sm:pt-6 pb-6 sm:pb-7 px-4 sm:px-6"
-                  style={
-                    checkSupport() &&
-                    boxShadow ?
-                      {
-                        boxShadow,
-                        WebkitBoxShadow: boxShadow,
-                        MozBoxShadow: boxShadow,
-                      } :
-                      undefined
+                <div className="space-y-3">
+                  {
+                    bridge._receiveLocal &&
+                    destination_contract_data &&
+                    !destination_contract_data.next_asset &&
+                    (
+                      <AlertNotification
+                        show={
+                          typeof displayReceiveNextInfo !== 'boolean' ||
+                          displayReceiveNextInfo
+                        }
+                        icon={
+                          <IoInformationCircleOutline
+                            size={26}
+                            className="mb-0.5"
+                          />
+                        }
+                        animate={
+                          {
+                            mount: { y: 0 },
+                            unmount: { y: 32 },
+                          }
+                        }
+                        dismissible={
+                          {
+                            onClose: () => setDisplayReceiveNextInfo(false),
+                          }
+                        }
+                        className="alert-box flex"
+                      >
+                        <span className="text-sm">
+                          Receive NextAsset setting turned off for {destination_chain_data?.name}.
+                        </span>
+                      </AlertNotification>
+                    )
                   }
-                >
-                  <div className="space-y-7">
-                    <div className="flex items-center justify-between space-x-2">
-                      <h1 className="text-xl font-semibold">
-                        Bridge
+                  <div
+                    className="bg-white dark:bg-slate-900 rounded border dark:border-slate-700 space-y-8 pt-5 sm:pt-6 pb-6 sm:pb-7 px-4 sm:px-6"
+                    style={
+                      checkSupport() &&
+                      boxShadow ?
                         {
-                          receive_next &&
+                          boxShadow,
+                          WebkitBoxShadow: boxShadow,
+                          MozBoxShadow: boxShadow,
+                        } :
+                        undefined
+                    }
+                  >
+                    <div className="space-y-7">
+                      <div className="flex items-center justify-between space-x-2">
+                        <h1 className="text-xl font-semibold">
+                          Bridge
+                          {
+                            receive_next &&
+                            (
+                              <span className="ml-1">
+                                into nextAsset
+                              </span>
+                            )
+                          }
+                        </h1>
+                        {
+                          ![
+                            'pool',
+                          ].includes(source) &&
                           (
-                            <span className="ml-1">
-                              into nextAsset
-                            </span>
+                            <Options
+                              disabled={disabled}
+                              applied={
+                                !_.isEqual(
+                                  Object.fromEntries(
+                                    Object.entries(options)
+                                      .filter(([k, v]) =>
+                                        ![
+                                          'slippage',
+                                          'forceSlow',
+                                          'showNextAssets',
+                                        ].includes(k)
+                                      )
+                                  ),
+                                  Object.fromEntries(
+                                    Object.entries(DEFAULT_OPTIONS)
+                                      .filter(([k, v]) =>
+                                        ![
+                                          'slippage',
+                                          'forceSlow',
+                                          'showNextAssets',
+                                        ].includes(k)
+                                      )
+                                  ),
+                                )
+                              }
+                              initialData={options}
+                              onChange={o => {
+                                const {
+                                  receiveLocal,
+                                } = { ...o }
+
+                                setOptions(o)
+
+                                if (
+                                  (
+                                    receiveLocal &&
+                                    !options?.receiveLocal
+                                  ) ||
+                                  (
+                                    !receiveLocal &&
+                                    options?.receiveLocal
+                                  )
+                                ) {
+                                  if (
+                                    amount &&
+                                    ![
+                                      '',
+                                      '0',
+                                      '0.0',
+                                    ].includes(amount)
+                                  ) {
+                                    calculateAmountReceived(
+                                      amount,
+                                      receiveLocal,
+                                    )
+                                  }
+                                  else {
+                                    setEstimatedValues(
+                                      {
+                                        amountReceived: '0',
+                                        routerFee: '0',
+                                        isNextAsset: receiveLocal,
+                                      }
+                                    )
+                                  }
+
+                                  if (
+                                    query?.receive_next &&
+                                    !receiveLocal
+                                  ) {
+                                    const params =
+                                      {
+                                        amount,
+                                        receive_next: receiveLocal,
+                                      }
+
+                                    router
+                                      .push(
+                                        `/${
+                                          source_chain &&
+                                          destination_chain ?
+                                            `${
+                                              asset ?
+                                                `${asset.toUpperCase()}-` :
+                                                ''
+                                            }from-${source_chain}-to-${destination_chain}` :
+                                            ''
+                                        }${
+                                          Object.keys(params).length > 0 ?
+                                            `?${new URLSearchParams(params).toString()}` :
+                                            ''
+                                        }`,
+                                        undefined,
+                                        {
+                                          shallow: true,
+                                        },
+                                      )
+                                  }
+                                }
+                              }}
+                              hasNextAsset={destination_contract_data?.next_asset}
+                              chainData={destination_chain_data}
+                            />
                           )
                         }
-                      </h1>
-                      {
-                        ![
-                          'pool',
-                        ].includes(source) &&
-                        (
-                          <Options
-                            disabled={disabled}
-                            applied={
-                              !_.isEqual(
-                                Object.fromEntries(
-                                  Object.entries(options)
-                                    .filter(([k, v]) =>
-                                      ![
-                                        'slippage',
-                                        'forceSlow',
-                                        'showNextAssets',
-                                      ].includes(k)
-                                    )
-                                ),
-                                Object.fromEntries(
-                                  Object.entries(DEFAULT_OPTIONS)
-                                    .filter(([k, v]) =>
-                                      ![
-                                        'slippage',
-                                        'forceSlow',
-                                        'showNextAssets',
-                                      ].includes(k)
-                                    )
-                                ),
-                              )
-                            }
-                            initialData={options}
-                            onChange={o => {
-                              const {
-                                receiveLocal,
-                              } = { ...o }
-
-                              setOptions(o)
-
-                              if (
-                                (
-                                  receiveLocal &&
-                                  !options?.receiveLocal
-                                ) ||
-                                (
-                                  !receiveLocal &&
-                                  options?.receiveLocal
-                                )
-                              ) {
-                                if (
-                                  amount &&
-                                  ![
-                                    '',
-                                    '0',
-                                    '0.0',
-                                  ].includes(amount)
-                                ) {
-                                  calculateAmountReceived(
-                                    amount,
-                                    receiveLocal,
-                                  )
-                                }
-                                else {
-                                  setEstimatedValues(
-                                    {
-                                      amountReceived: '0',
-                                      routerFee: '0',
-                                      isNextAsset: receiveLocal,
-                                    }
-                                  )
-                                }
-
-                                if (
-                                  query?.receive_next &&
-                                  !receiveLocal
-                                ) {
-                                  const params =
-                                    {
-                                      amount,
-                                      receive_next: receiveLocal,
-                                    }
-
-                                  router
-                                    .push(
-                                      `/${
-                                        source_chain &&
-                                        destination_chain ?
-                                          `${
-                                            asset ?
-                                              `${asset.toUpperCase()}-` :
-                                              ''
-                                          }from-${source_chain}-to-${destination_chain}` :
-                                          ''
-                                      }${
-                                        Object.keys(params).length > 0 ?
-                                          `?${new URLSearchParams(params).toString()}` :
-                                          ''
-                                      }`,
-                                      undefined,
-                                      {
-                                        shallow: true,
-                                      },
-                                    )
-                                }
-                              }
-                            }}
-                            hasNextAsset={destination_contract_data?.next_asset}
-                            chainData={destination_chain_data}
-                          />
-                        )
-                      }
-                    </div>
-                    <div>
+                      </div>
                       <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
                         <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start space-y-0.5 sm:space-y-2">
                           <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
@@ -3089,9 +3156,10 @@ export default () => {
                             }
                             value={destination_chain}
                             onSelect={c => {
-                              const _source_chain = c === source_chain ?
-                                destination_chain :
-                                source_chain
+                              const _source_chain =
+                                c === source_chain ?
+                                  destination_chain :
+                                  source_chain
                               const _destination_chain = c
 
                               setBridge(
@@ -3111,619 +3179,371 @@ export default () => {
                           />
                         </div>
                       </div>
-                      {
-                        bridge._receiveLocal &&
-                        destination_contract_data &&
-                        !destination_contract_data.next_asset &&
-                        (
-                          <div className="flex items-start space-x-1 mt-2">
-                            <IoInformationCircleOutline
-                              size={14}
-                              className="min-w-max text-slate-500 dark:text-slate-500 mt-0.5"
-                            />
-                            <div className="text-slate-500 dark:text-slate-500 text-xs">
-                              Receive NextAsset setting turned off for {destination_chain_data?.name}.
-                            </div>
-                          </div>
-                        )
-                      }
                     </div>
-                  </div>
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between space-x-2">
-                      <div className="text-slate-600 dark:text-slate-500 font-medium">
-                        You send
-                      </div>
-                      {
-                        source_chain_data &&
-                        asset &&
-                        (
-                          <div className="flex items-center justify-between space-x-2">
-                            <div className="flex items-center space-x-1">
-                              <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
-                                Balance:
-                              </div>
-                              <button
-                                disabled={disabled}
-                                onClick={() => {
-                                  if (
-                                    utils.parseUnits(
-                                      max_amount ||
-                                      '0',
-                                      source_decimals,
-                                    )
-                                    .gt(
-                                      BigNumber.from(
-                                        '0'
-                                      )
-                                    )
-                                  ) {
-                                    setBridge(
-                                      {
-                                        ...bridge,
-                                        amount: max_amount,
-                                      }
-                                    )
-
-                                    if (
-                                      [
-                                        'string',
-                                        'number',
-                                      ].includes(typeof max_amount)
-                                    ) {
-                                      if (
-                                        max_amount &&
-                                        ![
-                                          '',
-                                          '0',
-                                          '0.0',
-                                        ].includes(max_amount)
-                                      ) {
-                                        calculateAmountReceived(max_amount)
-                                      }
-                                      else {
-                                        setEstimatedValues(
-                                          {
-                                            amountReceived: '0',
-                                            routerFee: '0',
-                                            isNextAsset: receiveLocal,
-                                          }
-                                        )
-                                      }
-                                    }
-                                  }
-                                }}
-                              >
-                                <Balance
-                                  chainId={source_chain_data.chain_id}
-                                  asset={asset}
-                                  contractAddress={source_contract_data?.contract_address}
-                                  decimals={source_decimals}
-                                  symbol={source_symbol}
-                                  hideSymbol={false}
-                                  trigger={balanceTrigger}
-                                />
-                              </button>
-                            </div>
-                          </div>
-                        )
-                      }
-                    </div>
-                    <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-0.5 py-2.5 px-3">
+                    <div className="space-y-2.5">
                       <div className="flex items-center justify-between space-x-2">
-                        <SelectAsset
-                          disabled={disabled}
-                          fixed={
-                            [
-                              'pool',
-                            ].includes(source)
-                          }
-                          value={asset}
-                          onSelect={(a, s) => {
-                            setBridge(
-                              {
-                                ...bridge,
-                                asset: a,
-                                symbol: s,
-                                amount:
-                                  a !== asset ||
-                                  !equals_ignore_case(
-                                    s,
-                                    symbol,
-                                  ) ?
-                                    null :
-                                    amount,
-                              }
-                            )
-
-                            if (a !== asset) {
-                              getBalances(source_chain)
-                              getBalances(destination_chain)
-                            }
-                          }}
-                          chain={source_chain}
-                          origin=""
-                          is_bridge={true}
-                          show_next_assets={showNextAssets}
-                          show_native_assets={true}
-                          data={
-                            {
-                              ...source_asset_data,
-                              ...source_contract_data,
-                            }
-                          }
-                          className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
-                        />
-                        <DebounceInput
-                          debounceTimeout={750}
-                          size="small"
-                          type="number"
-                          placeholder="0.00"
-                          disabled={
-                            disabled ||
-                            !asset
-                          }
-                          value={
-                            [
-                              'string',
-                              'number',
-                            ].includes(typeof amount) &&
-                            ![
-                              '',
-                            ].includes(amount) &&
-                            !isNaN(amount) ?
-                              amount :
-                              ''
-                          }
-                          onChange={e => {
-                            const regex = /^[0-9.\b]+$/
-
-                            let value
-
-                            if (
-                              e.target.value === '' ||
-                              regex.test(e.target.value)
-                            ) {
-                              value = e.target.value
-                            }
-
-                            if (typeof value === 'string') {
-                              if (value.startsWith('.')) {
-                                value = `0${value}`
-                              }
-
-                              value =
-                                number_to_fixed(
-                                  value,
-                                  source_decimals ||
-                                  18,
-                                )
-                            }
-
-                            setBridge(
-                              {
-                                ...bridge,
-                                amount: value,
-                              }
-                            )
-
-                            if (
-                              [
-                                'string',
-                                'number',
-                              ].includes(typeof value)
-                            ) {
-                              if (
-                                value &&
-                                ![
-                                  '',
-                                  '0',
-                                  '0.0',
-                                ].includes(value)
-                              ) {
-                                calculateAmountReceived(value)
-                              }
-                              else {
-                                setEstimatedValues(
-                                  {
-                                    amountReceived: '0',
-                                    routerFee: '0',
-                                    isNextAsset: receiveLocal,
-                                  }
-                                )
-                              }
-                            }
-                          }}
-                          onWheel={e => e.target.blur()}
-                          onKeyDown={e =>
-                            [
-                              'e',
-                              'E',
-                              '-',
-                            ].includes(e.key) &&
-                            e.preventDefault()
-                          }
-                          className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg font-semibold text-right py-1.5`}
-                        />
-                      </div>
-                      {
-                        false &&
-                        source_chain_data &&
-                        asset &&
-                        (
-                          <div className="flex items-center justify-between space-x-2">
-                            <div className="flex items-center space-x-1">
-                              <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
-                                Balance:
-                              </div>
-                              <button
-                                disabled={disabled}
-                                onClick={() => {
-                                  if (
-                                    utils.parseUnits(
-                                      max_amount ||
-                                      '0',
-                                      source_decimals,
-                                    )
-                                    .gt(
-                                      BigNumber.from(
-                                        '0'
-                                      )
-                                    )
-                                  ) {
-                                    setBridge(
-                                      {
-                                        ...bridge,
-                                        amount: max_amount,
-                                      }
-                                    )
-
-                                    if (
-                                      [
-                                        'string',
-                                        'number',
-                                      ].includes(typeof max_amount)
-                                    ) {
-                                      if (
-                                        max_amount &&
-                                        ![
-                                          '',
-                                          '0',
-                                          '0.0',
-                                        ].includes(max_amount)
-                                      ) {
-                                        calculateAmountReceived(max_amount)
-                                      }
-                                      else {
-                                        setEstimatedValues(
-                                          {
-                                            amountReceived: '0',
-                                            routerFee: '0',
-                                            isNextAsset: receiveLocal,
-                                          }
-                                        )
-                                      }
-                                    }
-                                  }
-                                }}
-                              >
-                                <Balance
-                                  chainId={source_chain_data.chain_id}
-                                  asset={asset}
-                                  contractAddress={source_contract_data?.contract_address}
-                                  decimals={source_decimals}
-                                  symbol={source_symbol}
-                                  hideSymbol={true}
-                                  trigger={balanceTrigger}
-                                />
-                              </button>
-                            </div>
-                            {
-                              destination_chain &&
-                              !checkSupport() ?
-                              <div className="text-slate-400 dark:text-slate-500">
-                                Route not supported
-                              </div> :
-                              address &&
-                              (
+                        <div className="text-slate-600 dark:text-slate-500 font-medium">
+                          You send
+                        </div>
+                        {
+                          source_chain_data &&
+                          asset &&
+                          (
+                            <div className="flex items-center justify-between space-x-2">
+                              <div className="flex items-center space-x-1">
+                                <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                  Balance:
+                                </div>
                                 <button
                                   disabled={disabled}
                                   onClick={() => {
-                                    setBridge(
-                                      {
-                                        ...bridge,
-                                        amount: max_amount,
-                                      }
-                                    )
-
                                     if (
-                                      [
-                                        'string',
-                                        'number',
-                                      ].includes(typeof max_amount)
-                                    ) {
-                                      if (
-                                        max_amount &&
-                                        ![
-                                          '',
-                                          '0',
-                                          '0.0',
-                                        ].includes(max_amount)
-                                      ) {
-                                        calculateAmountReceived(max_amount)
-                                      }
-                                      else {
-                                        setEstimatedValues(
-                                          {
-                                            amountReceived: '0',
-                                            routerFee: '0',
-                                            isNextAsset: receiveLocal,
-                                          }
+                                      utils.parseUnits(
+                                        max_amount ||
+                                        '0',
+                                        source_decimals,
+                                      )
+                                      .gt(
+                                        BigNumber.from(
+                                          '0'
                                         )
+                                      )
+                                    ) {
+                                      setBridge(
+                                        {
+                                          ...bridge,
+                                          amount: max_amount,
+                                        }
+                                      )
+
+                                      if (
+                                        [
+                                          'string',
+                                          'number',
+                                        ].includes(typeof max_amount)
+                                      ) {
+                                        if (
+                                          max_amount &&
+                                          ![
+                                            '',
+                                            '0',
+                                            '0.0',
+                                          ].includes(max_amount)
+                                        ) {
+                                          calculateAmountReceived(max_amount)
+                                        }
+                                        else {
+                                          setEstimatedValues(
+                                            {
+                                              amountReceived: '0',
+                                              routerFee: '0',
+                                              isNextAsset: receiveLocal,
+                                            }
+                                          )
+                                        }
                                       }
                                     }
                                   }}
-                                  className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-sm font-medium`}
                                 >
-                                  Select Max
+                                  <Balance
+                                    chainId={source_chain_data.chain_id}
+                                    asset={asset}
+                                    contractAddress={source_contract_data?.contract_address}
+                                    decimals={source_decimals}
+                                    symbol={source_symbol}
+                                    hideSymbol={false}
+                                    trigger={balanceTrigger}
+                                  />
                                 </button>
-                              )
+                              </div>
+                            </div>
+                          )
+                        }
+                      </div>
+                      <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-0.5 py-2.5 px-3">
+                        <div className="flex items-center justify-between space-x-2">
+                          <SelectAsset
+                            disabled={disabled}
+                            fixed={
+                              [
+                                'pool',
+                              ].includes(source)
                             }
-                          </div>
-                        )
-                      }
-                    </div>
-                  </div>
-                  {
-                    source_chain &&
-                    destination_chain &&
-                    asset &&
-                    !checkSupport() ?
-                      <div className="text-slate-400 dark:text-slate-200 font-medium text-center">
-                        Route not supported
-                      </div> :
-                      <>
-                        {
-                          (
-                            (
-                              true ||
+                            value={asset}
+                            onSelect={(a, s) => {
+                              setBridge(
+                                {
+                                  ...bridge,
+                                  asset: a,
+                                  symbol: s,
+                                  amount:
+                                    a !== asset ||
+                                    !equals_ignore_case(
+                                      s,
+                                      symbol,
+                                    ) ?
+                                      null :
+                                      amount,
+                                }
+                              )
+
+                              if (a !== asset) {
+                                getBalances(source_chain)
+                                getBalances(destination_chain)
+                              }
+                            }}
+                            chain={source_chain}
+                            origin=""
+                            is_bridge={true}
+                            show_next_assets={showNextAssets}
+                            show_native_assets={true}
+                            data={
+                              {
+                                ...source_asset_data,
+                                ...source_contract_data,
+                              }
+                            }
+                            className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
+                          />
+                          <DebounceInput
+                            debounceTimeout={750}
+                            size="small"
+                            type="number"
+                            placeholder="0.00"
+                            disabled={
+                              disabled ||
+                              !asset
+                            }
+                            value={
                               [
                                 'string',
                                 'number',
-                              ].includes(typeof estimated_received)
-                            ) &&
+                              ].includes(typeof amount) &&
+                              ![
+                                '',
+                              ].includes(amount) &&
+                              !isNaN(amount) ?
+                                amount :
+                                ''
+                            }
+                            onChange={e => {
+                              const regex = /^[0-9.\b]+$/
+
+                              let value
+
+                              if (
+                                e.target.value === '' ||
+                                regex.test(e.target.value)
+                              ) {
+                                value = e.target.value
+                              }
+
+                              if (typeof value === 'string') {
+                                if (value.startsWith('.')) {
+                                  value = `0${value}`
+                                }
+
+                                value =
+                                  number_to_fixed(
+                                    value,
+                                    source_decimals ||
+                                    18,
+                                  )
+                              }
+
+                              setBridge(
+                                {
+                                  ...bridge,
+                                  amount: value,
+                                }
+                              )
+
+                              if (
+                                [
+                                  'string',
+                                  'number',
+                                ].includes(typeof value)
+                              ) {
+                                if (
+                                  value &&
+                                  ![
+                                    '',
+                                    '0',
+                                    '0.0',
+                                  ].includes(value)
+                                ) {
+                                  calculateAmountReceived(value)
+                                }
+                                else {
+                                  setEstimatedValues(
+                                    {
+                                      amountReceived: '0',
+                                      routerFee: '0',
+                                      isNextAsset: receiveLocal,
+                                    }
+                                  )
+                                }
+                              }
+                            }}
+                            onWheel={e => e.target.blur()}
+                            onKeyDown={e =>
+                              [
+                                'e',
+                                'E',
+                                '-',
+                              ].includes(e.key) &&
+                              e.preventDefault()
+                            }
+                            className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg font-semibold text-right py-1.5`}
+                          />
+                        </div>
+                        {
+                          false &&
+                          source_chain_data &&
+                          asset &&
+                          (
+                            <div className="flex items-center justify-between space-x-2">
+                              <div className="flex items-center space-x-1">
+                                <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                  Balance:
+                                </div>
+                                <button
+                                  disabled={disabled}
+                                  onClick={() => {
+                                    if (
+                                      utils.parseUnits(
+                                        max_amount ||
+                                        '0',
+                                        source_decimals,
+                                      )
+                                      .gt(
+                                        BigNumber.from(
+                                          '0'
+                                        )
+                                      )
+                                    ) {
+                                      setBridge(
+                                        {
+                                          ...bridge,
+                                          amount: max_amount,
+                                        }
+                                      )
+
+                                      if (
+                                        [
+                                          'string',
+                                          'number',
+                                        ].includes(typeof max_amount)
+                                      ) {
+                                        if (
+                                          max_amount &&
+                                          ![
+                                            '',
+                                            '0',
+                                            '0.0',
+                                          ].includes(max_amount)
+                                        ) {
+                                          calculateAmountReceived(max_amount)
+                                        }
+                                        else {
+                                          setEstimatedValues(
+                                            {
+                                              amountReceived: '0',
+                                              routerFee: '0',
+                                              isNextAsset: receiveLocal,
+                                            }
+                                          )
+                                        }
+                                      }
+                                    }
+                                  }}
+                                >
+                                  <Balance
+                                    chainId={source_chain_data.chain_id}
+                                    asset={asset}
+                                    contractAddress={source_contract_data?.contract_address}
+                                    decimals={source_decimals}
+                                    symbol={source_symbol}
+                                    hideSymbol={true}
+                                    trigger={balanceTrigger}
+                                  />
+                                </button>
+                              </div>
+                              {
+                                destination_chain &&
+                                !checkSupport() ?
+                                <div className="text-slate-400 dark:text-slate-500">
+                                  Route not supported
+                                </div> :
+                                address &&
+                                (
+                                  <button
+                                    disabled={disabled}
+                                    onClick={() => {
+                                      setBridge(
+                                        {
+                                          ...bridge,
+                                          amount: max_amount,
+                                        }
+                                      )
+
+                                      if (
+                                        [
+                                          'string',
+                                          'number',
+                                        ].includes(typeof max_amount)
+                                      ) {
+                                        if (
+                                          max_amount &&
+                                          ![
+                                            '',
+                                            '0',
+                                            '0.0',
+                                          ].includes(max_amount)
+                                        ) {
+                                          calculateAmountReceived(max_amount)
+                                        }
+                                        else {
+                                          setEstimatedValues(
+                                            {
+                                              amountReceived: '0',
+                                              routerFee: '0',
+                                              isNextAsset: receiveLocal,
+                                            }
+                                          )
+                                        }
+                                      }
+                                    }}
+                                    className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-sm font-medium`}
+                                  >
+                                    Select Max
+                                  </button>
+                                )
+                              }
+                            </div>
+                          )
+                        }
+                      </div>
+                    </div>
+                    {
+                      source_chain &&
+                      destination_chain &&
+                      asset &&
+                      !checkSupport() ?
+                        <div className="text-slate-400 dark:text-slate-200 font-medium text-center">
+                          Route not supported
+                        </div> :
+                        <>
+                          {
                             (
-                              checkSupport() &&
                               (
                                 true ||
-                                (
-                                  web3_provider &&
-                                  Number(amount) > 0
-                                )
-                              )
-                            )
-                          ) &&
-                          (
-                            <div className={`${is_staging ? 'space-y-6' : 'space-y-2.5'}`}>
-                              {is_staging ?
-                                <div className="space-y-2.5">
-                                  <div className="flex items-center justify-between space-x-2">
-                                    <div className="text-slate-600 dark:text-slate-500 font-medium">
-                                      You receive
-                                    </div>
-                                    {
-                                      destination_chain_data &&
-                                      asset &&
-                                      (
-                                        <div className="flex items-center justify-between space-x-2">
-                                          <div className="flex items-center space-x-1">
-                                            <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
-                                              Balance:
-                                            </div>
-                                            <Balance
-                                              chainId={destination_chain_data.chain_id}
-                                              asset={asset}
-                                              contractAddress={destination_contract_data?.contract_address}
-                                              decimals={destination_decimals}
-                                              symbol={destination_symbol}
-                                              hideSymbol={false}
-                                              trigger={balanceTrigger}
-                                            />
-                                          </div>
-                                        </div>
-                                      )
-                                    }
-                                  </div>
-                                  <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-0.5 py-4 px-3">
-                                    <div className="flex items-center justify-between space-x-2">
-                                      <SelectAsset
-                                        disabled={disabled}
-                                        fixed={true}
-                                        value={asset}
-                                        chain={destination_chain}
-                                        origin=""
-                                        is_bridge={true}
-                                        show_next_assets={true}
-                                        show_native_assets={true}
-                                        data={
-                                          {
-                                            ...destination_asset_data,
-                                            ...destination_contract_data,
-                                          }
-                                        }
-                                        className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
-                                      />
-                                      {
-                                        ![
-                                          'string',
-                                          'number',
-                                        ].includes(typeof amount) ||
-                                        [
-                                          '',
-                                        ].includes(amount) ||
-                                        [
-                                          'string',
-                                          'number',
-                                        ].includes(typeof estimatedValues?.amountReceived) ||
-                                        estimateResponse ?
-                                          <span className="font-semibold">
-                                            {
-                                              [
-                                                'string',
-                                                'number',
-                                              ].includes(typeof amount) &&
-                                              [
-                                                'string',
-                                                'number',
-                                              ].includes(typeof estimated_received) &&
-                                              !estimateResponse ?
-                                                <DecimalsFormat
-                                                  value={
-                                                    Number(estimated_received) >= 1000 ?
-                                                      number_format(
-                                                        estimated_received,
-                                                        '0,0.000000000000',
-                                                        true,
-                                                      ) :
-                                                      estimated_received
-                                                  }
-                                                  className={
-                                                    `w-36 sm:w-48 bg-transparent ${
-                                                      [
-                                                        '',
-                                                        undefined,
-                                                      ].includes(estimated_received) ?
-                                                        'text-slate-500 dark:text-slate-500' :
-                                                        ''
-                                                    } sm:text-lg font-semibold text-right py-1.5`
-                                                  }
-                                                /> :
-                                                '-'
-                                            }
-                                          </span> :
-                                          <Oval
-                                            color={loader_color(theme)}
-                                            width="20"
-                                            height="20"
-                                          />
-                                      }
-                                    </div>
-                                    {
-                                      false &&
-                                      destination_chain_data &&
-                                      asset &&
-                                      (
-                                        <div className="flex items-center justify-between space-x-2">
-                                          <div className="flex items-center space-x-1">
-                                            <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
-                                              Balance:
-                                            </div>
-                                            <Balance
-                                              chainId={destination_chain_data.chain_id}
-                                              asset={asset}
-                                              contractAddress={destination_contract_data?.contract_address}
-                                              decimals={destination_decimals}
-                                              symbol={destination_symbol}
-                                              hideSymbol={true}
-                                              trigger={balanceTrigger}
-                                            />
-                                          </div>
-                                        </div>
-                                      )
-                                    }
-                                  </div>
-                                </div> :
-                                <div className="bg-slate-100 dark:bg-slate-900">
-                                  {
-                                    (
-                                      true ||
-                                      [
-                                        'string',
-                                        'number',
-                                      ].includes(typeof estimated_received)
-                                    ) &&
-                                    (
-                                      <button
-                                        onClick={() => setCollapse(!collapse)}
-                                        className="w-full grid grid-cols-5 sm:grid-cols-5 gap-6"
-                                      >
-                                        <div className="col-span-2 sm:col-span-2">
-                                          <div className="flex items-center">
-                                            <span className="whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
-                                              You receive
-                                            </span>
-                                          </div>
-                                        </div>
-                                        <div className="col-span-3 sm:col-span-3">
-                                          <div className="flex items-center justify-end sm:justify-end space-x-0.5 sm:space-x-1 -mr-0.5">
-                                            {
-                                              ![
-                                                'string',
-                                                'number',
-                                              ].includes(typeof amount) ||
-                                              [
-                                                '',
-                                              ].includes(amount) ||
-                                              [
-                                                'string',
-                                                'number',
-                                              ].includes(typeof estimatedValues?.amountReceived) ||
-                                              estimateResponse ?
-                                                <div className="flex items-center space-x-2">
-                                                  <span className="font-semibold">
-                                                    {
-                                                      [
-                                                        'string',
-                                                        'number',
-                                                      ].includes(typeof amount) &&
-                                                      [
-                                                        'string',
-                                                        'number',
-                                                      ].includes(typeof estimated_received) &&
-                                                      !estimateResponse ?
-                                                        <DecimalsFormat
-                                                          value={
-                                                            Number(estimated_received) >= 1000 ?
-                                                              number_format(
-                                                                estimated_received,
-                                                                '0,0.000000000000',
-                                                                true,
-                                                              ) :
-                                                              estimated_received
-                                                          }
-                                                          className="text-sm"
-                                                        /> :
-                                                        '-'
-                                                    }
-                                                  </span>
-                                                  <span className="font-semibold">
-                                                    {destination_symbol}
-                                                  </span>
-                                                </div> :
-                                                <Oval
-                                                  color={loader_color(theme)}
-                                                  width="16"
-                                                  height="16"
-                                                />
-                                            }
-                                            {collapse ?
-                                              <BiChevronDown
-                                                size={18}
-                                                className="text-slate-600 dark:text-slate-200"
-                                              /> :
-                                              <BiChevronUp
-                                                size={18}
-                                                className="text-slate-600 dark:text-slate-200"
-                                              />
-                                            }
-                                          </div>
-                                        </div>
-                                      </button>
-                                    )
-                                  }
-                                </div>
-                              }
-                              {
+                                [
+                                  'string',
+                                  'number',
+                                ].includes(typeof estimated_received)
+                              ) &&
+                              (
                                 checkSupport() &&
                                 (
                                   true ||
@@ -3731,773 +3551,1005 @@ export default () => {
                                     web3_provider &&
                                     Number(amount) > 0
                                   )
-                                ) &&
-                                (
-                                  <div
-                                    className={
-                                      `space-y-2.5 ${
-                                        [
-                                          'string',
-                                          'number',
-                                        ].includes(typeof estimated_received) ||
-                                        !collapse > 0 ?
-                                          'mt-2' :
-                                          'mt-0'
-                                      }`
-                                    }
-                                  >
+                                )
+                              )
+                            ) &&
+                            (
+                              <div className={`${is_staging ? 'space-y-6' : 'space-y-2.5'}`}>
+                                {is_staging ?
+                                  <div className="space-y-2.5">
+                                    <div className="flex items-center justify-between space-x-2">
+                                      <div className="text-slate-600 dark:text-slate-500 font-medium">
+                                        You receive
+                                      </div>
+                                      {
+                                        destination_chain_data &&
+                                        asset &&
+                                        (
+                                          <div className="flex items-center justify-between space-x-2">
+                                            <div className="flex items-center space-x-1">
+                                              <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                                Balance:
+                                              </div>
+                                              <Balance
+                                                chainId={destination_chain_data.chain_id}
+                                                asset={asset}
+                                                contractAddress={destination_contract_data?.contract_address}
+                                                decimals={destination_decimals}
+                                                symbol={destination_symbol}
+                                                hideSymbol={false}
+                                                trigger={balanceTrigger}
+                                              />
+                                            </div>
+                                          </div>
+                                        )
+                                      }
+                                    </div>
+                                    <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-0.5 py-4 px-3">
+                                      <div className="flex items-center justify-between space-x-2">
+                                        <SelectAsset
+                                          disabled={disabled}
+                                          fixed={true}
+                                          value={asset}
+                                          chain={destination_chain}
+                                          origin=""
+                                          is_bridge={true}
+                                          show_next_assets={true}
+                                          show_native_assets={true}
+                                          data={
+                                            {
+                                              ...destination_asset_data,
+                                              ...destination_contract_data,
+                                            }
+                                          }
+                                          className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
+                                        />
+                                        {
+                                          ![
+                                            'string',
+                                            'number',
+                                          ].includes(typeof amount) ||
+                                          [
+                                            '',
+                                          ].includes(amount) ||
+                                          [
+                                            'string',
+                                            'number',
+                                          ].includes(typeof estimatedValues?.amountReceived) ||
+                                          estimateResponse ?
+                                            <span className="font-semibold">
+                                              {
+                                                [
+                                                  'string',
+                                                  'number',
+                                                ].includes(typeof amount) &&
+                                                [
+                                                  'string',
+                                                  'number',
+                                                ].includes(typeof estimated_received) &&
+                                                !estimateResponse ?
+                                                  <DecimalsFormat
+                                                    value={
+                                                      Number(estimated_received) >= 1000 ?
+                                                        number_format(
+                                                          estimated_received,
+                                                          '0,0.000000000000',
+                                                          true,
+                                                        ) :
+                                                        estimated_received
+                                                    }
+                                                    className={
+                                                      `w-36 sm:w-48 bg-transparent ${
+                                                        [
+                                                          '',
+                                                          undefined,
+                                                        ].includes(estimated_received) ?
+                                                          'text-slate-500 dark:text-slate-500' :
+                                                          ''
+                                                      } sm:text-lg font-semibold text-right py-1.5`
+                                                    }
+                                                  /> :
+                                                  '-'
+                                              }
+                                            </span> :
+                                            <Oval
+                                              color={loader_color(theme)}
+                                              width="20"
+                                              height="20"
+                                            />
+                                        }
+                                      </div>
+                                      {
+                                        false &&
+                                        destination_chain_data &&
+                                        asset &&
+                                        (
+                                          <div className="flex items-center justify-between space-x-2">
+                                            <div className="flex items-center space-x-1">
+                                              <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                                Balance:
+                                              </div>
+                                              <Balance
+                                                chainId={destination_chain_data.chain_id}
+                                                asset={asset}
+                                                contractAddress={destination_contract_data?.contract_address}
+                                                decimals={destination_decimals}
+                                                symbol={destination_symbol}
+                                                hideSymbol={true}
+                                                trigger={balanceTrigger}
+                                              />
+                                            </div>
+                                          </div>
+                                        )
+                                      }
+                                    </div>
+                                  </div> :
+                                  <div className="bg-slate-100 dark:bg-slate-900">
                                     {
                                       (
                                         true ||
-                                        feeEstimating ||
-                                        fee
+                                        [
+                                          'string',
+                                          'number',
+                                        ].includes(typeof estimated_received)
                                       ) &&
                                       (
-                                        true ||
-                                        !forceSlow
-                                      ) &&
-                                      !collapse &&
-                                      (
-                                        <div className="space-y-2.5">
-                                          {
-                                            (
-                                              true ||
-                                              !receiveLocal
-                                            ) &&
-                                            ![
-                                              'pool',
-                                            ].includes(source) &&
-                                            (
-                                              <div className="flex flex-col space-y-0.5">
-                                                <div className="flex items-start justify-between space-x-1">
-                                                  <Tooltip
-                                                    placement="top"
-                                                    content="The maximum percentage you are willing to lose due to market changes."
-                                                    className="z-50 bg-dark text-white text-xs"
-                                                  >
-                                                    <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
-                                                      Slippage tolerance
-                                                    </div>
-                                                  </Tooltip>
-                                                  <div className="flex flex-col sm:items-end space-y-1.5">
-                                                    {slippageEditing ?
-                                                      <>
-                                                        <div className="flex items-center justify-end space-x-1.5">
-                                                          <DebounceInput
-                                                            debounceTimeout={750}
-                                                            size="small"
-                                                            type="number"
-                                                            placeholder="0.00"
+                                        <button
+                                          onClick={() => setCollapse(!collapse)}
+                                          className="w-full grid grid-cols-5 sm:grid-cols-5 gap-6"
+                                        >
+                                          <div className="col-span-2 sm:col-span-2">
+                                            <div className="flex items-center">
+                                              <span className="whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
+                                                You receive
+                                              </span>
+                                            </div>
+                                          </div>
+                                          <div className="col-span-3 sm:col-span-3">
+                                            <div className="flex items-center justify-end sm:justify-end space-x-0.5 sm:space-x-1 -mr-0.5">
+                                              {
+                                                ![
+                                                  'string',
+                                                  'number',
+                                                ].includes(typeof amount) ||
+                                                [
+                                                  '',
+                                                ].includes(amount) ||
+                                                [
+                                                  'string',
+                                                  'number',
+                                                ].includes(typeof estimatedValues?.amountReceived) ||
+                                                estimateResponse ?
+                                                  <div className="flex items-center space-x-2">
+                                                    <span className="font-semibold">
+                                                      {
+                                                        [
+                                                          'string',
+                                                          'number',
+                                                        ].includes(typeof amount) &&
+                                                        [
+                                                          'string',
+                                                          'number',
+                                                        ].includes(typeof estimated_received) &&
+                                                        !estimateResponse ?
+                                                          <DecimalsFormat
                                                             value={
-                                                              typeof slippage === 'number' &&
-                                                              slippage >= 0 ?
-                                                                slippage :
-                                                                ''
+                                                              Number(estimated_received) >= 1000 ?
+                                                                number_format(
+                                                                  estimated_received,
+                                                                  '0,0.000000000000',
+                                                                  true,
+                                                                ) :
+                                                                estimated_received
                                                             }
-                                                            onChange={e => {
-                                                              const regex = /^[0-9.\b]+$/
-
-                                                              let value
-
-                                                              if (
-                                                                e.target.value === '' ||
-                                                                regex.test(e.target.value)
-                                                              ) {
-                                                                value = e.target.value
+                                                            className="text-sm"
+                                                          /> :
+                                                          '-'
+                                                      }
+                                                    </span>
+                                                    <span className="font-semibold">
+                                                      {destination_symbol}
+                                                    </span>
+                                                  </div> :
+                                                  <Oval
+                                                    color={loader_color(theme)}
+                                                    width="16"
+                                                    height="16"
+                                                  />
+                                              }
+                                              {collapse ?
+                                                <BiChevronDown
+                                                  size={18}
+                                                  className="text-slate-600 dark:text-slate-200"
+                                                /> :
+                                                <BiChevronUp
+                                                  size={18}
+                                                  className="text-slate-600 dark:text-slate-200"
+                                                />
+                                              }
+                                            </div>
+                                          </div>
+                                        </button>
+                                      )
+                                    }
+                                  </div>
+                                }
+                                {
+                                  checkSupport() &&
+                                  (
+                                    true ||
+                                    (
+                                      web3_provider &&
+                                      Number(amount) > 0
+                                    )
+                                  ) &&
+                                  (
+                                    <div
+                                      className={
+                                        `space-y-2.5 ${
+                                          [
+                                            'string',
+                                            'number',
+                                          ].includes(typeof estimated_received) ||
+                                          !collapse > 0 ?
+                                            'mt-2' :
+                                            'mt-0'
+                                        }`
+                                      }
+                                    >
+                                      {
+                                        (
+                                          true ||
+                                          feeEstimating ||
+                                          fee
+                                        ) &&
+                                        (
+                                          true ||
+                                          !forceSlow
+                                        ) &&
+                                        !collapse &&
+                                        (
+                                          <div className="space-y-2.5">
+                                            {
+                                              (
+                                                true ||
+                                                !receiveLocal
+                                              ) &&
+                                              ![
+                                                'pool',
+                                              ].includes(source) &&
+                                              (
+                                                <div className="flex flex-col space-y-0.5">
+                                                  <div className="flex items-start justify-between space-x-1">
+                                                    <Tooltip
+                                                      placement="top"
+                                                      content="The maximum percentage you are willing to lose due to market changes."
+                                                      className="z-50 bg-dark text-white text-xs"
+                                                    >
+                                                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
+                                                        Slippage tolerance
+                                                      </div>
+                                                    </Tooltip>
+                                                    <div className="flex flex-col sm:items-end space-y-1.5">
+                                                      {slippageEditing ?
+                                                        <>
+                                                          <div className="flex items-center justify-end space-x-1.5">
+                                                            <DebounceInput
+                                                              debounceTimeout={750}
+                                                              size="small"
+                                                              type="number"
+                                                              placeholder="0.00"
+                                                              value={
+                                                                typeof slippage === 'number' &&
+                                                                slippage >= 0 ?
+                                                                  slippage :
+                                                                  ''
                                                               }
+                                                              onChange={e => {
+                                                                const regex = /^[0-9.\b]+$/
 
-                                                              if (typeof value === 'string') {
-                                                                if (value.startsWith('.')) {
-                                                                  value = `0${value}`
+                                                                let value
+
+                                                                if (
+                                                                  e.target.value === '' ||
+                                                                  regex.test(e.target.value)
+                                                                ) {
+                                                                  value = e.target.value
                                                                 }
 
-                                                                if (!isNaN(value)) {
-                                                                  value = Number(value)
+                                                                if (typeof value === 'string') {
+                                                                  if (value.startsWith('.')) {
+                                                                    value = `0${value}`
+                                                                  }
+
+                                                                  if (!isNaN(value)) {
+                                                                    value = Number(value)
+                                                                  }
                                                                 }
+
+                                                                value =
+                                                                  value <= 0 ||
+                                                                  value > 100 ?
+                                                                    DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
+                                                                    value
+
+                                                                const _data = {
+                                                                  ...options,
+                                                                  slippage:
+                                                                    value &&
+                                                                    !isNaN(value) ?
+                                                                      parseFloat(
+                                                                        Number(value)
+                                                                          .toFixed(2)
+                                                                      ) :
+                                                                      value,
+                                                                }
+
+                                                                console.log(
+                                                                  '[Options]',
+                                                                  _data,
+                                                                )
+
+                                                                setOptions(_data)
+                                                              }}
+                                                              onWheel={e => e.target.blur()}
+                                                              onKeyDown={e =>
+                                                                [
+                                                                  'e',
+                                                                  'E',
+                                                                  '-',
+                                                                ].includes(e.key) &&
+                                                                e.preventDefault()
                                                               }
-
-                                                              value =
-                                                                value <= 0 ||
-                                                                value > 100 ?
-                                                                  DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
-                                                                  value
-
-                                                              const _data = {
-                                                                ...options,
-                                                                slippage:
-                                                                  value &&
-                                                                  !isNaN(value) ?
-                                                                    parseFloat(
-                                                                      Number(value)
-                                                                        .toFixed(2)
-                                                                    ) :
-                                                                    value,
-                                                              }
-
-                                                              console.log(
-                                                                '[Options]',
-                                                                _data,
-                                                              )
-
-                                                              setOptions(_data)
-                                                            }}
-                                                            onWheel={e => e.target.blur()}
-                                                            onKeyDown={e =>
+                                                              className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 font-semibold text-right py-1 px-2`}
+                                                            />
+                                                            <button
+                                                              onClick={() => setSlippageEditing(false)}
+                                                              className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                                                            >
+                                                              <BiCheckCircle
+                                                                size={16}
+                                                              />
+                                                            </button>
+                                                          </div>
+                                                          <div className="flex items-center space-x-1.5 -mr-1.5">
+                                                            {
                                                               [
-                                                                'e',
-                                                                'E',
-                                                                '-',
-                                                              ].includes(e.key) &&
-                                                              e.preventDefault()
+                                                                3.0,
+                                                                1.0,
+                                                                0.5,
+                                                              ]
+                                                              .map((s, i) => (
+                                                                <div
+                                                                  key={i}
+                                                                  onClick={() => {
+                                                                    const _data = {
+                                                                      ...options,
+                                                                      slippage: s,
+                                                                    }
+
+                                                                    console.log(
+                                                                      '[Options]',
+                                                                      _data,
+                                                                    )
+
+                                                                    setOptions(_data)
+                                                                    setSlippageEditing(false)
+                                                                  }}
+                                                                  className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
+                                                                >
+                                                                  {s} %
+                                                                </div>
+                                                              ))
                                                             }
-                                                            className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 font-semibold text-right py-1 px-2`}
-                                                          />
+                                                          </div>
+                                                        </> :
+                                                        <div className="flex items-center space-x-1.5">
+                                                          <span className="font-semibold">
+                                                            {number_format(
+                                                              slippage,
+                                                              '0,0.00',
+                                                            )}%
+                                                          </span>
                                                           <button
-                                                            onClick={() => setSlippageEditing(false)}
-                                                            className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                                                            disabled={disabled}
+                                                            onClick={() => {
+                                                              if (!disabled) {
+                                                                setSlippageEditing(true)
+                                                              }
+                                                            }}
+                                                            className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
                                                           >
-                                                            <BiCheckCircle
+                                                            <BiEditAlt
                                                               size={16}
                                                             />
                                                           </button>
                                                         </div>
-                                                        <div className="flex items-center space-x-1.5 -mr-1.5">
-                                                          {
-                                                            [
-                                                              3.0,
-                                                              1.0,
-                                                              0.5,
-                                                            ]
-                                                            .map((s, i) => (
-                                                              <div
-                                                                key={i}
-                                                                onClick={() => {
-                                                                  const _data = {
-                                                                    ...options,
-                                                                    slippage: s,
-                                                                  }
-
-                                                                  console.log(
-                                                                    '[Options]',
-                                                                    _data,
-                                                                  )
-
-                                                                  setOptions(_data)
-                                                                  setSlippageEditing(false)
-                                                                }}
-                                                                className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
-                                                              >
-                                                                {s} %
-                                                              </div>
-                                                            ))
+                                                      }
+                                                    </div>
+                                                  </div>
+                                                  {
+                                                    typeof slippage === 'number' &&
+                                                    (
+                                                      estimated_slippage > slippage ||
+                                                      slippage < 0.2 ||
+                                                      slippage > 5.0
+                                                    ) &&
+                                                    (
+                                                      <div className="flex items-start space-x-1">
+                                                        <IoWarning
+                                                          size={14}
+                                                          className="min-w-max text-yellow-500 dark:text-yellow-400 mt-0.5"
+                                                        />
+                                                        <div className="text-yellow-500 dark:text-yellow-400 text-xs">
+                                                          {estimated_slippage > slippage ?
+                                                            <>
+                                                              Slippage tolerance is too low
+                                                              <br />
+                                                              (use a larger amount or set tolerance higher)
+                                                            </> :
+                                                            slippage < 0.2 ?
+                                                              'Your transfer may not complete due to low slippage tolerance.' :
+                                                              'Your transfer may be frontrun due to high slippage tolerance.'
                                                           }
                                                         </div>
-                                                      </> :
-                                                      <div className="flex items-center space-x-1.5">
-                                                        <span className="font-semibold">
-                                                          {number_format(
-                                                            slippage,
-                                                            '0,0.00',
-                                                          )}%
-                                                        </span>
-                                                        <button
-                                                          disabled={disabled}
-                                                          onClick={() => {
-                                                            if (!disabled) {
-                                                              setSlippageEditing(true)
-                                                            }
-                                                          }}
-                                                          className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
-                                                        >
-                                                          <BiEditAlt
-                                                            size={16}
-                                                          />
-                                                        </button>
                                                       </div>
-                                                    }
-                                                  </div>
-                                                </div>
-                                                {
-                                                  typeof slippage === 'number' &&
-                                                  (
-                                                    estimated_slippage > slippage ||
-                                                    slippage < 0.2 ||
-                                                    slippage > 5.0
-                                                  ) &&
-                                                  (
-                                                    <div className="flex items-start space-x-1">
-                                                      <IoWarning
-                                                        size={14}
-                                                        className="min-w-max text-yellow-500 dark:text-yellow-400 mt-0.5"
-                                                      />
-                                                      <div className="text-yellow-500 dark:text-yellow-400 text-xs">
-                                                        {estimated_slippage > slippage ?
-                                                          <>
-                                                            Slippage tolerance is too low
-                                                            <br />
-                                                            (use a larger amount or set tolerance higher)
-                                                          </> :
-                                                          slippage < 0.2 ?
-                                                            'Your transfer may not complete due to low slippage tolerance.' :
-                                                            'Your transfer may be frontrun due to high slippage tolerance.'
-                                                        }
-                                                      </div>
-                                                    </div>
-                                                  )
-                                                }
-                                              </div>
-                                            )
-                                          }
-                                          {
-                                            (
-                                              true ||
-                                              !forceSlow
-                                            ) &&
-                                            (
-                                              <>
-                                                <div className="flex items-center justify-between space-x-1">
-                                                  <Tooltip
-                                                    placement="top"
-                                                    content="This supports our router users providing fast liquidity."
-                                                    className="z-50 bg-dark text-white text-xs"
-                                                  >
-                                                    <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
-                                                      Bridge fee
-                                                    </div>
-                                                  </Tooltip>
-                                                  {
-                                                    ![
-                                                      'string',
-                                                      'number',
-                                                    ].includes(typeof amount) ||
-                                                    [
-                                                      '',
-                                                    ].includes(amount) ||
-                                                    [
-                                                      'string',
-                                                      'number',
-                                                    ].includes(typeof estimatedValues?.routerFee) ||
-                                                    estimateResponse ?
-                                                      <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-semibold space-x-1.5">
-                                                        <DecimalsFormat
-                                                          value={
-                                                            Number(router_fee) >= 1000 ?
-                                                              number_format(
-                                                                router_fee,
-                                                                '0,0.000000000000',
-                                                                true,
-                                                              ) :
-                                                              Number(router_fee) <= 0 ?
-                                                                '0' :
-                                                                router_fee
-                                                          }
-                                                        />
-                                                        <span>
-                                                          {source_symbol}
-                                                        </span>
-                                                      </span> :
-                                                      <Oval
-                                                        color={loader_color(theme)}
-                                                        width="16"
-                                                        height="16"
-                                                      />
+                                                    )
                                                   }
                                                 </div>
-                                                <div className="flex items-center justify-between space-x-1">
-                                                  <Tooltip
-                                                    placement="top"
-                                                    content="This covers costs to execute your transfer on the destination chain."
-                                                    className="z-50 bg-dark text-white text-xs"
-                                                  >
-                                                    <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
-                                                      Destination gas fee
-                                                    </div>
-                                                  </Tooltip>
-                                                  {
-                                                    false &&
-                                                    feeEstimating ?
-                                                      <div className="flex items-center space-x-1.5">
-                                                        <span className="text-slate-600 dark:text-slate-200 font-medium">
-                                                          estimating
-                                                        </span>
+                                              )
+                                            }
+                                            {
+                                              (
+                                                true ||
+                                                !forceSlow
+                                              ) &&
+                                              (
+                                                <>
+                                                  <div className="flex items-center justify-between space-x-1">
+                                                    <Tooltip
+                                                      placement="top"
+                                                      content="This supports our router users providing fast liquidity."
+                                                      className="z-50 bg-dark text-white text-xs"
+                                                    >
+                                                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
+                                                        Bridge fee
+                                                      </div>
+                                                    </Tooltip>
+                                                    {
+                                                      ![
+                                                        'string',
+                                                        'number',
+                                                      ].includes(typeof amount) ||
+                                                      [
+                                                        '',
+                                                      ].includes(amount) ||
+                                                      [
+                                                        'string',
+                                                        'number',
+                                                      ].includes(typeof estimatedValues?.routerFee) ||
+                                                      estimateResponse ?
+                                                        <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-semibold space-x-1.5">
+                                                          <DecimalsFormat
+                                                            value={
+                                                              Number(router_fee) >= 1000 ?
+                                                                number_format(
+                                                                  router_fee,
+                                                                  '0,0.000000000000',
+                                                                  true,
+                                                                ) :
+                                                                Number(router_fee) <= 0 ?
+                                                                  '0' :
+                                                                  router_fee
+                                                            }
+                                                          />
+                                                          <span>
+                                                            {source_symbol}
+                                                          </span>
+                                                        </span> :
                                                         <Oval
                                                           color={loader_color(theme)}
-                                                          width="20"
-                                                          height="20"
+                                                          width="16"
+                                                          height="16"
                                                         />
-                                                      </div> :
-                                                      <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-semibold space-x-1.5">
-                                                        <DecimalsFormat
-                                                          value={
-                                                            Number(gas_fee) >= 1000 ?
-                                                              number_format(
-                                                                gas_fee,
-                                                                '0,0.000000000000',
-                                                                true,
-                                                              ) :
-                                                              Number(gas_fee) <= 0 ?
-                                                                '0' :
-                                                                gas_fee
-                                                          }
-                                                        />
-                                                        <span>
-                                                          {source_gas_native_token?.symbol}
+                                                    }
+                                                  </div>
+                                                  <div className="flex items-center justify-between space-x-1">
+                                                    <Tooltip
+                                                      placement="top"
+                                                      content="This covers costs to execute your transfer on the destination chain."
+                                                      className="z-50 bg-dark text-white text-xs"
+                                                    >
+                                                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
+                                                        Destination gas fee
+                                                      </div>
+                                                    </Tooltip>
+                                                    {
+                                                      false &&
+                                                      feeEstimating ?
+                                                        <div className="flex items-center space-x-1.5">
+                                                          <span className="text-slate-600 dark:text-slate-200 font-medium">
+                                                            estimating
+                                                          </span>
+                                                          <Oval
+                                                            color={loader_color(theme)}
+                                                            width="20"
+                                                            height="20"
+                                                          />
+                                                        </div> :
+                                                        <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-semibold space-x-1.5">
+                                                          <DecimalsFormat
+                                                            value={
+                                                              Number(gas_fee) >= 1000 ?
+                                                                number_format(
+                                                                  gas_fee,
+                                                                  '0,0.000000000000',
+                                                                  true,
+                                                                ) :
+                                                                Number(gas_fee) <= 0 ?
+                                                                  '0' :
+                                                                  gas_fee
+                                                            }
+                                                          />
+                                                          <span>
+                                                            {source_gas_native_token?.symbol}
+                                                          </span>
                                                         </span>
-                                                      </span>
+                                                    }
+                                                  </div>
+                                                  {
+                                                    typeof price_impact === 'number' &&
+                                                    (
+                                                      <div className="flex items-center justify-between space-x-1">
+                                                        <Tooltip
+                                                          placement="top"
+                                                          content="Price impact"
+                                                          className="z-50 bg-dark text-white text-xs"
+                                                        >
+                                                          <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
+                                                            Price impact
+                                                          </div>
+                                                        </Tooltip>
+                                                        <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-semibold space-x-1.5">
+                                                          <span>
+                                                            {number_format(
+                                                              price_impact,
+                                                              '0,0.000000',
+                                                              true,
+                                                            )}%
+                                                          </span>
+                                                        </span>
+                                                      </div>
+                                                    )
                                                   }
-                                                </div>
-                                                {
-                                                  typeof price_impact === 'number' &&
-                                                  (
-                                                    <div className="flex items-center justify-between space-x-1">
-                                                      <Tooltip
-                                                        placement="top"
-                                                        content="Price impact"
-                                                        className="z-50 bg-dark text-white text-xs"
-                                                      >
-                                                        <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
-                                                          Price impact
-                                                        </div>
-                                                      </Tooltip>
-                                                      <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-semibold space-x-1.5">
-                                                        <span>
-                                                          {number_format(
-                                                            price_impact,
-                                                            '0,0.000000',
-                                                            true,
-                                                          )}%
-                                                        </span>
-                                                      </span>
-                                                    </div>
-                                                  )
-                                                }
-                                              </>
-                                            )
-                                          }
-                                        </div>
-                                      )
-                                    }
-                                    {
-                                      Number(amount) > 0 &&
-                                      [
-                                        'string',
-                                        'number',
-                                      ].includes(typeof estimated_received) &&
-                                      (
-                                        Number(amount) < liquidity_amount ||
-                                        asset_balances_data
-                                      ) &&
-                                      (
-                                        <div className="flex items-center justify-between space-x-1">
-                                          <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
-                                            Estimated time
-                                          </div>
-                                          <Tooltip
-                                            placement="top"
-                                            content={
-                                              Number(amount) > liquidity_amount ||
-                                              forceSlow ?
-                                                'Unable to leverage fast liquidity. Your transfer will still complete.' :
-                                                'Fast transfer enabled by Connext router network.'
+                                                </>
+                                              )
                                             }
-                                            className="z-50 bg-dark text-white text-xs"
-                                          >
-                                            <span className="whitespace-nowrap text-sm font-semibold space-x-1.5">
-                                              {
+                                          </div>
+                                        )
+                                      }
+                                      {
+                                        Number(amount) > 0 &&
+                                        [
+                                          'string',
+                                          'number',
+                                        ].includes(typeof estimated_received) &&
+                                        (
+                                          Number(amount) < liquidity_amount ||
+                                          asset_balances_data
+                                        ) &&
+                                        (
+                                          <div className="flex items-center justify-between space-x-1">
+                                            <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
+                                              Estimated time
+                                            </div>
+                                            <Tooltip
+                                              placement="top"
+                                              content={
                                                 Number(amount) > liquidity_amount ||
                                                 forceSlow ?
-                                                  <span className="text-yellow-500 dark:text-yellow-400">
-                                                    90 minutes
-                                                  </span> :
-                                                  <span className="text-green-500 dark:text-green-500">
-                                                    4 minutes
-                                                  </span>
+                                                  'Unable to leverage fast liquidity. Your transfer will still complete.' :
+                                                  'Fast transfer enabled by Connext router network.'
                                               }
-                                            </span>
-                                          </Tooltip>
-                                        </div>
-                                      )
-                                    }
-                                    {
-                                      false &&
-                                      Number(amount) > 0 &&
-                                      (
-                                        <>
-                                          {
-                                            asset_balances_data &&
-                                            Number(amount) > liquidity_amount &&
-                                            (
-                                              <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2">
-                                                <BiMessageEdit
-                                                  size={20}
-                                                />
-                                                <span className="text-sm">
-                                                  Insufficient router liquidity. Funds must transfer through the bridge directly.
-                                                </span>
-                                              </div>
-                                            )
-                                          }
-                                          {
-                                            Number(amount) < liquidity_amount &&
-                                            (
-                                              forceSlow ?
+                                              className="z-50 bg-dark text-white text-xs"
+                                            >
+                                              <span className="whitespace-nowrap text-sm font-semibold space-x-1.5">
+                                                {
+                                                  Number(amount) > liquidity_amount ||
+                                                  forceSlow ?
+                                                    <span className="text-yellow-500 dark:text-yellow-400">
+                                                      90 minutes
+                                                    </span> :
+                                                    <span className="text-green-500 dark:text-green-500">
+                                                      4 minutes
+                                                    </span>
+                                                }
+                                              </span>
+                                            </Tooltip>
+                                          </div>
+                                        )
+                                      }
+                                      {
+                                        false &&
+                                        Number(amount) > 0 &&
+                                        (
+                                          <>
+                                            {
+                                              asset_balances_data &&
+                                              Number(amount) > liquidity_amount &&
+                                              (
                                                 <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2">
-                                                  <BiMessageDetail
+                                                  <BiMessageEdit
                                                     size={20}
                                                   />
-                                                  <span className="text-sm sm:text-base">
-                                                    Use bridge only (wait 30-60 mins, no fees)
-                                                  </span>
-                                                </div> :
-                                                <div className="flex items-center text-blue-500 dark:text-green-500 space-x-2">
-                                                  <GiPartyPopper
-                                                    size={20}
-                                                  />
-                                                  <span className="text-sm sm:text-base">
-                                                    Fast liquidity available!
+                                                  <span className="text-sm">
+                                                    Insufficient router liquidity. Funds must transfer through the bridge directly.
                                                   </span>
                                                 </div>
-                                            )
-                                          }
-                                        </>
-                                      )
-                                    }
-                                  </div>
-                                )
-                              }
-                            </div>
-                          )
-                        }
-                      </>
-                  }
-                  {
-                    checkSupport() &&
-                    (
-                      xcall ||
-                      source_balance
-                    ) &&
-                    web3_provider &&
-                    (
-                      (
-                        [
-                          'string',
-                          'number',
-                        ].includes(typeof amount) &&
-                        ![
-                          '',
-                        ].includes(amount)
-                      ) ||
-                      (
-                        web3_provider &&
-                        wrong_chain
-                      )
-                    ) ?
-                      web3_provider &&
-                      wrong_chain ?
-                        <Wallet
-                          connectChainId={source_chain_data?.chain_id}
-                          className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
-                        >
-                          <span className="mr-1.5 sm:mr-2">
-                            {is_walletconnect ?
-                              'Reconnect' :
-                              'Switch'
-                            } to
-                          </span>
-                          {
-                            source_chain_data?.image &&
-                            (
-                              <Image
-                                src={source_chain_data.image}
-                                alt=""
-                                width={28}
-                                height={28}
-                                className="rounded-full"
-                              />
+                                              )
+                                            }
+                                            {
+                                              Number(amount) < liquidity_amount &&
+                                              (
+                                                forceSlow ?
+                                                  <div className="flex items-center text-blue-600 dark:text-yellow-400 space-x-2">
+                                                    <BiMessageDetail
+                                                      size={20}
+                                                    />
+                                                    <span className="text-sm sm:text-base">
+                                                      Use bridge only (wait 30-60 mins, no fees)
+                                                    </span>
+                                                  </div> :
+                                                  <div className="flex items-center text-blue-500 dark:text-green-500 space-x-2">
+                                                    <GiPartyPopper
+                                                      size={20}
+                                                    />
+                                                    <span className="text-sm sm:text-base">
+                                                      Fast liquidity available!
+                                                    </span>
+                                                  </div>
+                                              )
+                                            }
+                                          </>
+                                        )
+                                      }
+                                    </div>
+                                  )
+                                }
+                              </div>
                             )
                           }
-                          <span className="font-semibold">
-                            {source_chain_data?.name}
-                          </span>
-                        </Wallet> :
-                        !xcall &&
-                        !xcallResponse &&
-                        !calling &&
-                        [
-                          'string',
-                          'number',
-                        ].includes(typeof amount) &&
-                        ![
-                          '',
-                        ].includes(amount) &&
+                        </>
+                    }
+                    {
+                      checkSupport() &&
+                      (
+                        xcall ||
+                        source_balance
+                      ) &&
+                      web3_provider &&
+                      (
                         (
+                          [
+                            'string',
+                            'number',
+                          ].includes(typeof amount) &&
+                          ![
+                            '',
+                          ].includes(amount)
+                        ) ||
+                        (
+                          web3_provider &&
+                          wrong_chain
+                        )
+                      ) ?
+                        web3_provider &&
+                        wrong_chain ?
+                          <Wallet
+                            connectChainId={source_chain_data?.chain_id}
+                            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                          >
+                            <span className="mr-1.5 sm:mr-2">
+                              {is_walletconnect ?
+                                'Reconnect' :
+                                'Switch'
+                              } to
+                            </span>
+                            {
+                              source_chain_data?.image &&
+                              (
+                                <Image
+                                  src={source_chain_data.image}
+                                  alt=""
+                                  width={28}
+                                  height={28}
+                                  className="rounded-full"
+                                />
+                              )
+                            }
+                            <span className="font-semibold">
+                              {source_chain_data?.name}
+                            </span>
+                          </Wallet> :
+                          !xcall &&
+                          !xcallResponse &&
+                          !calling &&
+                          [
+                            'string',
+                            'number',
+                          ].includes(typeof amount) &&
+                          ![
+                            '',
+                          ].includes(amount) &&
                           (
-                            utils.parseUnits(
-                              amount ||
-                              '0',
-                              source_decimals,
-                            )
-                            .gt(
+                            (
                               utils.parseUnits(
-                                source_amount ||
+                                amount ||
                                 '0',
                                 source_decimals,
                               )
-                            ) &&
-                            [
-                              'string',
-                              'number',
-                            ].includes(typeof source_amount)
-                          ) ||
-                          Number(amount) < min_amount ||
-                          Number(amount) < 0 ||
-                          (
-                            typeof pool_amount === 'number' &&
-                            Number(amount) > pool_amount
-                          ) ||
-                          Number(gas_fee) <= 0
-                        ) ?
-                          <Alert
-                            color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
-                            icon={
-                              <BiMessageError
-                                className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                              />
-                            }
-                            closeDisabled={true}
-                            rounded={true}
-                            className="rounded p-4.5"
-                          >
-                            <span>
-                              {
+                              .gt(
                                 utils.parseUnits(
-                                  amount ||
+                                  source_amount ||
                                   '0',
                                   source_decimals,
                                 )
-                                .gt(
+                              ) &&
+                              [
+                                'string',
+                                'number',
+                              ].includes(typeof source_amount)
+                            ) ||
+                            Number(amount) < min_amount ||
+                            Number(amount) < 0 ||
+                            (
+                              typeof pool_amount === 'number' &&
+                              Number(amount) > pool_amount
+                            ) ||
+                            Number(gas_fee) <= 0
+                          ) ?
+                            <Alert
+                              color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
+                              icon={
+                                <BiMessageError
+                                  className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                                />
+                              }
+                              closeDisabled={true}
+                              rounded={true}
+                              className="rounded p-4.5"
+                            >
+                              <span>
+                                {
                                   utils.parseUnits(
-                                    source_amount ||
+                                    amount ||
                                     '0',
                                     source_decimals,
                                   )
-                                ) &&
-                                [
-                                  'string',
-                                  'number',
-                                ].includes(typeof source_amount) ?
-                                  'Insufficient Balance' :
-                                  Number(amount) < min_amount ?
-                                    'The amount cannot be less than the transfer fee.' :
-                                    Number(amount) < 0 ?
-                                      'The amount cannot be equal to or less than 0.' :
-                                      typeof pool_amount === 'number' &&
-                                      Number(amount) > pool_amount ?
-                                        `Exceed Pool Balances: ${
-                                          pool_amount >= 1000 ?
-                                            number_format(
-                                              pool_amount,
-                                              '0,0.00',
-                                            ) :
-                                            pool_amount
-                                        }` :
-                                        Number(gas_fee) <= 0 ?
-                                          'Cannot estimate the relayer fee at the moment. Please try again later.' :
-                                          ''
-                              }
-                            </span>
-                          </Alert> :
-                          !xcall &&
-                          !xcallResponse &&
-                          !estimateResponse ?
-                            <button
-                              disabled={
-                                disabled ||
-                                [
-                                  '',
-                                  '0',
-                                  '0.0',
-                                ].includes(amount)
-                              }
-                              onClick={() => {
-                                setSlippageEditing(false)
-                                call()
-                              }}
-                              className={
-                                `w-full ${
-                                  disabled ?
-                                    'bg-blue-400 dark:bg-blue-500' :
-                                    [
-                                      '',
+                                  .gt(
+                                    utils.parseUnits(
+                                      source_amount ||
                                       '0',
-                                      '0.0',
-                                    ].includes(amount) ?
-                                      'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' :
-                                      'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
-                                } rounded flex items-center ${
-                                  calling &&
-                                  !approving &&
-                                  callProcessing ?
-                                    'justify-center' :
-                                    'justify-center'
-                                } text-white text-lg py-3 sm:py-4 px-2 sm:px-3`
-                              }
-                            >
-                              <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
-                                {
-                                  disabled &&
-                                  (
-                                    <TailSpin
-                                      color="white"
-                                      width="20"
-                                      height="20"
-                                    />
-                                  )
+                                      source_decimals,
+                                    )
+                                  ) &&
+                                  [
+                                    'string',
+                                    'number',
+                                  ].includes(typeof source_amount) ?
+                                    'Insufficient Balance' :
+                                    Number(amount) < min_amount ?
+                                      'The amount cannot be less than the transfer fee.' :
+                                      Number(amount) < 0 ?
+                                        'The amount cannot be equal to or less than 0.' :
+                                        typeof pool_amount === 'number' &&
+                                        Number(amount) > pool_amount ?
+                                          `Exceed Pool Balances: ${
+                                            pool_amount >= 1000 ?
+                                              number_format(
+                                                pool_amount,
+                                                '0,0.00',
+                                              ) :
+                                              pool_amount
+                                          }` :
+                                          Number(gas_fee) <= 0 ?
+                                            'Cannot estimate the relayer fee at the moment. Please try again later.' :
+                                            ''
                                 }
-                                <span>
-                                  {calling ?
-                                    approving ?
-                                      approveProcessing ?
-                                        'Approving' :
-                                        'Please Approve' :
-                                      callProcessing ?
-                                        'Transfer in progress ...' :
-                                        typeof approving === 'boolean' ?
-                                          'Please Confirm' :
-                                          'Checking Approval' :
-                                    'Send'
-                                  }
-                                </span>
                               </span>
-                            </button> :
-                            (
-                              xcallResponse ||
-                              (
-                                !xcall &&
-                                approveResponse
-                              ) ||
-                              estimateResponse
-                            ) &&
-                            (
-                              [
-                                xcallResponse ||
-                                approveResponse ||
-                                estimateResponse,
-                              ]
-                              .map((r, i) => {
-                                const {
-                                  status,
-                                  message,
-                                  code,
-                                } = { ...r }
-
-                                return (
-                                  <Alert
-                                    key={i}
-                                    color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? xcallResponse ? 'bg-blue-500 dark:bg-blue-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
-                                    icon={
-                                      status === 'failed' ?
-                                        <BiMessageError
-                                          className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                        /> :
-                                        status === 'success' ?
-                                          xcallResponse ?
-                                            <div className="mr-3">
-                                              <TailSpin
-                                                color="white"
-                                                width="20"
-                                                height="20"
-                                              />
-                                            </div> :
-                                            <BiMessageCheck
-                                              className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                            /> :
-                                          <BiMessageDetail
-                                            className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                          />
+                            </Alert> :
+                            !xcall &&
+                            !xcallResponse &&
+                            !estimateResponse ?
+                              <button
+                                disabled={
+                                  disabled ||
+                                  [
+                                    '',
+                                    '0',
+                                    '0.0',
+                                  ].includes(amount)
+                                }
+                                onClick={() => {
+                                  setSlippageEditing(false)
+                                  call()
+                                }}
+                                className={
+                                  `w-full ${
+                                    disabled ?
+                                      'bg-blue-400 dark:bg-blue-500' :
+                                      [
+                                        '',
+                                        '0',
+                                        '0.0',
+                                      ].includes(amount) ?
+                                        'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' :
+                                        'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
+                                  } rounded flex items-center ${
+                                    calling &&
+                                    !approving &&
+                                    callProcessing ?
+                                      'justify-center' :
+                                      'justify-center'
+                                  } text-white text-lg py-3 sm:py-4 px-2 sm:px-3`
+                                }
+                              >
+                                <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
+                                  {
+                                    disabled &&
+                                    (
+                                      <TailSpin
+                                        color="white"
+                                        width="20"
+                                        height="20"
+                                      />
+                                    )
+                                  }
+                                  <span>
+                                    {calling ?
+                                      approving ?
+                                        approveProcessing ?
+                                          'Approving' :
+                                          'Please Approve' :
+                                        callProcessing ?
+                                          'Transfer in progress ...' :
+                                          typeof approving === 'boolean' ?
+                                            'Please Confirm' :
+                                            'Checking Approval' :
+                                      'Send'
                                     }
-                                    closeDisabled={true}
-                                    rounded={true}
-                                    className="rounded p-4.5"
-                                  >
-                                    <div className="flex items-center justify-between space-x-2">
-                                      <span className="break-all text-sm font-medium">
-                                        {ellipse(
-                                          (message || '')
-                                            .substring(
-                                              0,
-                                              status === 'failed' &&
-                                              error_patterns
-                                                .findIndex(c =>
-                                                  message?.indexOf(c) > -1
-                                                ) > -1 ?
-                                                message.indexOf(
-                                                  error_patterns
-                                                    .find(c =>
-                                                      message.indexOf(c) > -1
-                                                    )
-                                                ) :
-                                                undefined,
-                                            )
-                                            .trim() ||
-                                          message,
-                                          128,
-                                        )}
-                                      </span>
-                                      <div className="flex items-center space-x-1">
-                                        {
-                                          status === 'failed' &&
-                                          message &&
-                                          (
-                                            <Copy
-                                              value={message}
-                                              className="cursor-pointer text-slate-200 hover:text-white"
-                                            />
-                                          )
-                                        }
-                                        {status === 'failed' ?
-                                          <button
-                                            onClick={() => reset(code)}
-                                            className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                                          >
-                                            <MdClose
-                                              size={14}
-                                            />
-                                          </button> :
+                                  </span>
+                                </span>
+                              </button> :
+                              (
+                                xcallResponse ||
+                                (
+                                  !xcall &&
+                                  approveResponse
+                                ) ||
+                                estimateResponse
+                              ) &&
+                              (
+                                [
+                                  xcallResponse ||
+                                  approveResponse ||
+                                  estimateResponse,
+                                ]
+                                .map((r, i) => {
+                                  const {
+                                    status,
+                                    message,
+                                    code,
+                                  } = { ...r }
+
+                                  return (
+                                    <Alert
+                                      key={i}
+                                      color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? xcallResponse ? 'bg-blue-500 dark:bg-blue-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                                      icon={
+                                        status === 'failed' ?
+                                          <BiMessageError
+                                            className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                                          /> :
                                           status === 'success' ?
+                                            xcallResponse ?
+                                              <div className="mr-3">
+                                                <TailSpin
+                                                  color="white"
+                                                  width="20"
+                                                  height="20"
+                                                />
+                                              </div> :
+                                              <BiMessageCheck
+                                                className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                                              /> :
+                                            <BiMessageDetail
+                                              className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                                            />
+                                      }
+                                      closeDisabled={true}
+                                      rounded={true}
+                                      className="rounded p-4.5"
+                                    >
+                                      <div className="flex items-center justify-between space-x-2">
+                                        <span className="break-all text-sm font-medium">
+                                          {ellipse(
+                                            (message || '')
+                                              .substring(
+                                                0,
+                                                status === 'failed' &&
+                                                error_patterns
+                                                  .findIndex(c =>
+                                                    message?.indexOf(c) > -1
+                                                  ) > -1 ?
+                                                  message.indexOf(
+                                                    error_patterns
+                                                      .find(c =>
+                                                        message.indexOf(c) > -1
+                                                      )
+                                                  ) :
+                                                  undefined,
+                                              )
+                                              .trim() ||
+                                            message,
+                                            128,
+                                          )}
+                                        </span>
+                                        <div className="flex items-center space-x-1">
+                                          {
+                                            status === 'failed' &&
+                                            message &&
+                                            (
+                                              <Copy
+                                                value={message}
+                                                className="cursor-pointer text-slate-200 hover:text-white"
+                                              />
+                                            )
+                                          }
+                                          {status === 'failed' ?
                                             <button
-                                              onClick={() => reset()}
-                                              className={`${xcallResponse ? 'bg-blue-600 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
+                                              onClick={() => reset(code)}
+                                              className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                                             >
                                               <MdClose
                                                 size={14}
                                               />
                                             </button> :
-                                            null
-                                        }
+                                            status === 'success' ?
+                                              <button
+                                                onClick={() => reset()}
+                                                className={`${xcallResponse ? 'bg-blue-600 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
+                                              >
+                                                <MdClose
+                                                  size={14}
+                                                />
+                                              </button> :
+                                              null
+                                          }
+                                        </div>
                                       </div>
-                                    </div>
-                                  </Alert>
-                                )
-                              })
-                            ) :
-                      web3_provider ?
-                        <button
-                          disabled={true}
-                          className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
-                        >
-                          Send
-                        </button> :
-                        <Wallet
-                          connectChainId={source_chain_data?.chain_id}
-                          buttonConnectTitle="Connect Wallet"
-                          className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-lg font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
-                        >
-                          <span>
-                            Connect Wallet
-                          </span>
-                        </Wallet>
-                  }
+                                    </Alert>
+                                  )
+                                })
+                              ) :
+                        web3_provider ?
+                          <button
+                            disabled={true}
+                            className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
+                          >
+                            Send
+                          </button> :
+                          <Wallet
+                            connectChainId={source_chain_data?.chain_id}
+                            buttonConnectTitle="Connect Wallet"
+                            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-lg font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                          >
+                            <span>
+                              Connect Wallet
+                            </span>
+                          </Wallet>
+                    }
+                  </div>
                 </div>
             }
             {/*<div className="flex items-center justify-end space-x-4 mr-3">

@@ -293,3 +293,13 @@ a {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
+
+.alert-box {
+  .transition-all {
+    @apply relative right-0 ml-auto;
+
+    svg {
+      @apply w-5 h-5;
+    }
+  }
+}
