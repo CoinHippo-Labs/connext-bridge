@@ -7,7 +7,6 @@ import { Tooltip } from '@material-tailwind/react'
 import { RiSettings3Line } from 'react-icons/ri'
 
 import Modal from '../../modals'
-import Popover from '../../popover'
 import { switch_color } from '../../../lib/utils'
 
 const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE =
@@ -185,11 +184,6 @@ export default (
                           [`${name}`]: e.target.value,
                         }
 
-                        console.log(
-                          '[Options]',
-                          _data,
-                        )
-
                         setData(_data)
                       }}
                       className="form-select bg-slate-50 rounded border-0 focus:ring-0"
@@ -234,11 +228,6 @@ export default (
                                 [`${name}`]: !data?.[name],
                               }
 
-                              console.log(
-                                '[Options]',
-                                _data,
-                              )
-
                               setData(_data)
                             }}
                             checkedIcon={false}
@@ -249,30 +238,16 @@ export default (
                             offHandleColor="#f8fafc"
                           />
                           {forceSlow ?
-                            /*<Popover
-                              placement="top"
-                              title="Slow Path (Nomad)"
-                              content="Use bridge only (wait 30-60 mins, no fees)"
-                              titleClassName="normal-case font-semibold py-1.5"*/
-                            <div
-                            >
+                            <div>
                               <span className="uppercase font-bold">
                                 Slow
                               </span>
                             </div> :
-                            /*</Popover>*/
-                            /*<Popover
-                              placement="top"
-                              title="Fast Path"
-                              content="Connext Router (+ Nomad) (less than 3 mins, .05% fees)"
-                              titleClassName="normal-case font-semibold py-1.5"*/
-                            <div
-                            >
+                            <div>
                               <span className="uppercase font-bold">
                                 Fast
                               </span>
                             </div>
-                            /*</Popover>*/
                           }
                         </div> :
                         name === 'receiveLocal' &&
@@ -317,11 +292,6 @@ export default (
                                 [`${name}`]: !data?.[name],
                               }
 
-                              console.log(
-                                '[Options]',
-                                _data,
-                              )
-
                               setData(_data)
                             }}
                             checkedIcon={false}
@@ -342,11 +312,6 @@ export default (
                               ...data,
                               [`${name}`]: e.target.value,
                             }
-
-                            console.log(
-                              '[Options]',
-                              _data,
-                            )
 
                             setData(_data)
                           }}
@@ -413,11 +378,6 @@ export default (
                                       value,
                                 }
 
-                                console.log(
-                                  '[Options]',
-                                  _data,
-                                )
-
                                 setData(_data)
                               }}
                               onWheel={e => e.target.blur()}
@@ -445,11 +405,6 @@ export default (
                                             [`${name}`]: p,
                                           }
 
-                                          console.log(
-                                            '[Options]',
-                                            _data,
-                                          )
-
                                           setData(_data)
                                         }}
                                         className={`${data?.[name] === p ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer py-1 px-2`}
@@ -471,11 +426,6 @@ export default (
                                 ...data,
                                 [`${name}`]: e.target.value,
                               }
-
-                              console.log(
-                                '[Options]',
-                                _data,
-                              )
 
                               setData(_data)
                             }}

@@ -671,10 +671,12 @@ export default (
               <Tooltip
                 placement="top"
                 content={
-                  /*moment(
+                  /*
+                  moment(
                     xcall_timestamp * 1000
                   )
-                  .format('MMM D, YYYY h:mm:ss A')*/
+                  .format('MMM D, YYYY h:mm:ss A')
+                  */
                   'Transferred at'
                 }
                 className="z-50 bg-dark text-white text-xs"

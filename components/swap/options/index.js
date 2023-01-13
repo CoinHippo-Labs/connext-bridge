@@ -139,11 +139,6 @@ export default (
                           [`${name}`]: e.target.value,
                         }
 
-                        console.log(
-                          '[Swap Options]',
-                          _data,
-                        )
-
                         setData(_data)
                       }}
                       className="form-select bg-slate-50 rounded border-0 focus:ring-0"
@@ -184,11 +179,6 @@ export default (
                             [`${name}`]: !data?.[name],
                           }
 
-                          console.log(
-                            '[Swap Options]',
-                            _data,
-                          )
-
                           setData(_data)
                         }}
                         checkedIcon={false}
@@ -209,11 +199,6 @@ export default (
                               ...data,
                               [`${name}`]: e.target.value,
                             }
-
-                            console.log(
-                              '[Swap Options]',
-                              _data,
-                            )
 
                             setData(_data)
                           }}
@@ -280,11 +265,6 @@ export default (
                                       value,
                                 }
 
-                                console.log(
-                                  '[Swap Options]',
-                                  _data,
-                                )
-
                                 setData(_data)
                               }}
                               onWheel={e => e.target.blur()}
@@ -312,11 +292,6 @@ export default (
                                             [`${name}`]: p,
                                           }
 
-                                          console.log(
-                                            '[Swap Options]',
-                                            _data,
-                                          )
-
                                           setData(_data)
                                         }}
                                         className={`${data?.[name] === p ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer py-1 px-2`}
@@ -338,11 +313,6 @@ export default (
                                 ...data,
                                 [`${name}`]: e.target.value,
                               }
-
-                              console.log(
-                                '[Swap Options]',
-                                _data,
-                              )
 
                               setData(_data)
                             }}

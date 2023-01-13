@@ -200,8 +200,8 @@ export default (
 
       console.log(
         is_wrapped ?
-          '[Wrap]' :
-          '[Mint]',
+          '[wrap]' :
+          '[mint]',
         is_wrapped ?
           /*{
             to: _address,
@@ -234,10 +234,12 @@ export default (
 
       const response =
         is_wrapped ?
-          /*await signer
+          /*
+          await signer
             .sendTransaction(
               wrap_request,
-            )*/
+            )
+          */
           await contract
             .deposit(
               {
@@ -299,11 +301,11 @@ export default (
       console.log(
         `[${
           is_wrapped ?
-            'Wrap' :
-            'Mint'
+            'wrap' :
+            'mint'
         } error]`,
         {
-          error: message,
+          error,
         },
       )
 
@@ -405,7 +407,7 @@ export default (
       const gasLimit = 500000
 
       console.log(
-        '[Unwrap]',
+        '[unwrap]',
         {
           amount: _amount,
         },
@@ -455,9 +457,9 @@ export default (
         error?.message
 
       console.log(
-        '[Unwrap error]',
+        '[unwrap error]',
         {
-          error: message,
+          error,
         },
       )
 

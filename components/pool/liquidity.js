@@ -191,33 +191,6 @@ export default (
           setPriceImpactAdd(true)
           setCallResponse(null)
 
-          // console.log(
-          //   '[getPoolTokenIndex]',
-          //   {
-          //     domainId,
-          //     contract_address,
-          //     tokenAddress: contract_address,
-          //   },
-          // )
-
-          // const tokenIndex =
-          //   await sdk.nxtpSdkPool
-          //     .getPoolTokenIndex(
-          //       domainId,
-          //       contract_address,
-          //       contract_address,
-          //     )
-
-          // console.log(
-          //   '[poolTokenIndex]',
-          //   {
-          //     domainId,
-          //     contract_address,
-          //     tokenAddress: contract_address,
-          //     tokenIndex,
-          //   },
-          // )
-
           let _amountX,
             _amountY
 
@@ -265,7 +238,7 @@ export default (
                 contract_address,
                 _amountX,
                 _amountY,
-                error: message,
+                error,
               },
             )
 
@@ -465,7 +438,7 @@ export default (
                   domainId,
                   contract_address,
                   amount: _amount,
-                  error: message,
+                  error,
                 },
               )
 
@@ -961,7 +934,7 @@ export default (
                   amounts,
                   minToMint,
                   deadline,
-                  error: message,
+                  error,
                 },
               )
 
@@ -1212,7 +1185,7 @@ export default (
                   amount: _amount,
                   minAmounts,
                   deadline,
-                  error: message,
+                  error,
                 },
               )
 
@@ -1361,7 +1334,7 @@ export default (
           contract_address,
           amountX,
           amountY,
-          error: message,
+          error,
         },
       )
       
@@ -1472,7 +1445,7 @@ export default (
           contract_address,
           amountX,
           amountY,
-          error: message,
+          error,
         },
       )
       
@@ -2748,10 +2721,6 @@ export default (
                           <div className="flex flex-col space-y-0">
                             <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
                               Convert to {
-                                /*pool_tokens_data
-                                  .find(d =>
-                                    d.symbol?.includes(WRAPPED_PREFIX)
-                                  )?.symbol*/
                                 (overweighted_asset === 'x' ?
                                   y_asset_data :
                                   x_asset_data

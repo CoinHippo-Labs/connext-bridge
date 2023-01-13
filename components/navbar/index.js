@@ -730,7 +730,7 @@ export default () => {
                 )
 
             console.log(
-              '[Pool]',
+              '[pool]',
               {
                 domain_id,
                 contract_address,
@@ -975,7 +975,7 @@ export default () => {
                   )
 
                 console.log(
-                  '[VirtualPrice]',
+                  '[virtualPrice]',
                   {
                     domain_id,
                     contract_address,
@@ -1227,7 +1227,7 @@ export default () => {
 
       return () => clearInterval(interval)
     },
-    [/*pathname, */sdk, chains_data, pool_assets_data],
+    [sdk, chains_data, pool_assets_data],
   )
 
   // user pools
@@ -1260,7 +1260,7 @@ export default () => {
                 )
 
             console.log(
-              '[UserPools]',
+              '[userPools]',
               {
                 domain_id,
                 address,

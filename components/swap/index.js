@@ -791,7 +791,7 @@ export default () => {
                     )
 
                   console.log(
-                    '[VirtualPrice]',
+                    '[virtualPrice]',
                     {
                       domain_id,
                       contract_address,
@@ -1563,7 +1563,7 @@ export default () => {
       if (!failed) {
         try {
           console.log(
-            '[Swap]',
+            '[swap]',
             {
               domainId,
               contract_address,
@@ -3109,11 +3109,6 @@ export default () => {
                                           value,
                                     }
 
-                                    console.log(
-                                      '[Options]',
-                                      _data,
-                                    )
-
                                     setOptions(_data)
                                   }}
                                   onWheel={e => e.target.blur()}
@@ -3151,11 +3146,6 @@ export default () => {
                                           ...options,
                                           slippage: s,
                                         }
-
-                                        console.log(
-                                          '[Options]',
-                                          _data,
-                                        )
 
                                         setOptions(_data)
                                         setSlippageEditing(false)

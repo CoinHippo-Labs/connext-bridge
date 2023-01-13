@@ -132,10 +132,10 @@
         "chainId": "0xa",
         "chainName": "Optimism",
         "rpcUrls": [
-          "https://mainnet.optimism.io",
           "https://rpc.ankr.com/optimism",
           "https://optimism-mainnet.public.blastapi.io",
-          "https://1rpc.io/op"
+          "https://1rpc.io/op",
+          "https://mainnet.optimism.io"
         ],
         "nativeCurrency": {
           "name": "Ethereum",

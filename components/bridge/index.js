@@ -11,8 +11,8 @@ import { DebounceInput } from 'react-debounce-input'
 import { Tooltip, Alert as AlertNotification } from '@material-tailwind/react'
 import { CountdownCircleTimer } from 'react-countdown-circle-timer'
 import { MdClose } from 'react-icons/md'
-import { HiArrowRight, HiOutlineDocumentSearch, HiOutlineCheckCircle } from 'react-icons/hi'
-import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit, BiEditAlt, BiCheckCircle, BiChevronDown, BiChevronUp, BiBook } from 'react-icons/bi'
+import { HiArrowRight, HiOutlineCheckCircle } from 'react-icons/hi'
+import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit, BiEditAlt, BiCheckCircle, BiChevronDown, BiChevronUp } from 'react-icons/bi'
 import { IoInformationCircleOutline, IoWarning } from 'react-icons/io5'
 import { GiPartyPopper } from 'react-icons/gi'
 
@@ -1773,13 +1773,12 @@ export default () => {
                 originDomain,
                 destinationDomain,
                 originTokenAddress,
-                // destinationTokenAddress,
                 amount,
                 isNextAsset,
               )
 
           console.log(
-            '[calculateAmountReceived response]',
+            '[amountReceived]',
             {
               originDomain,
               destinationDomain,
@@ -1834,7 +1833,7 @@ export default () => {
             destinationTokenAddress,
             amount,
             isNextAsset,
-            error: message,
+            error,
           },
         )
 
@@ -2333,7 +2332,7 @@ export default () => {
                 'xcall'
             } error]`,
             {
-              error: message,
+              error,
             },
           )
 
@@ -2347,10 +2346,6 @@ export default () => {
               2,
             )
             .join('_')
-
-          /*if (message?.includes('revert')) {
-            message = 'More than pool balance'
-          }*/
 
           switch (code) {
             case 'user_rejected':
@@ -3896,11 +3891,6 @@ export default () => {
                                                                       value,
                                                                 }
 
-                                                                console.log(
-                                                                  '[Options]',
-                                                                  _data,
-                                                                )
-
                                                                 setOptions(_data)
                                                               }}
                                                               onWheel={e => e.target.blur()}
@@ -3938,11 +3928,6 @@ export default () => {
                                                                       ...options,
                                                                       slippage: s,
                                                                     }
-
-                                                                    console.log(
-                                                                      '[Options]',
-                                                                      _data,
-                                                                    )
 
                                                                     setOptions(_data)
                                                                     setSlippageEditing(false)
@@ -4563,39 +4548,6 @@ export default () => {
                   </div>
                 </div>
             }
-            {/*<div className="flex items-center justify-end space-x-4 mr-3">
-              {
-                process.env.NEXT_PUBLIC_DOCS_URL &&
-                (
-                  <a
-                    href={process.env.NEXT_PUBLIC_DOCS_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center text-slate-700 dark:text-slate-300 space-x-1"
-                  >
-                    <BiBook
-                      size={18}
-                    />
-                    <span className="text-sm font-medium">
-                      Docs
-                    </span>
-                  </a>
-                )
-              }
-              <a
-                href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}${destination_chain_data?.id ? `/${destination_chain_data.id}` : ''}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center text-slate-700 dark:text-slate-300 space-x-1"
-              >
-                <HiOutlineDocumentSearch
-                  size={18}
-                />
-                <span className="text-sm font-medium">
-                  Explorer
-                </span>
-              </a>
-            </div>*/}
           </div>
           {
             !openTransferStatus &&
