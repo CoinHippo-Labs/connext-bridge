@@ -3555,224 +3555,235 @@ export default () => {
                               )
                             ) &&
                             (
-                              <div className={`${is_staging ? 'space-y-6' : 'space-y-2.5'}`}>
-                                {is_staging ?
-                                  <div className="space-y-2.5">
-                                    <div className="flex items-center justify-between space-x-2">
-                                      <div className="text-slate-600 dark:text-slate-500 font-medium">
-                                        You receive
-                                      </div>
-                                      {
-                                        destination_chain_data &&
-                                        asset &&
-                                        (
-                                          <div className="flex items-center justify-between space-x-2">
-                                            <div className="flex items-center space-x-1">
-                                              <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
-                                                Balance:
-                                              </div>
-                                              <Balance
-                                                chainId={destination_chain_data.chain_id}
-                                                asset={asset}
-                                                contractAddress={destination_contract_data?.contract_address}
-                                                decimals={destination_decimals}
-                                                symbol={destination_symbol}
-                                                hideSymbol={false}
-                                                trigger={balanceTrigger}
-                                              />
-                                            </div>
-                                          </div>
-                                        )
-                                      }
-                                    </div>
-                                    <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-0.5 py-4 px-3">
+                              <div
+                                className={
+                                  `${
+                                    true ||
+                                    is_staging ?
+                                      'space-y-6' :
+                                      'space-y-2.5'
+                                  }`
+                                }
+                              >
+                                {
+                                  true ||
+                                  is_staging ?
+                                    <div className="space-y-2.5">
                                       <div className="flex items-center justify-between space-x-2">
-                                        <SelectAsset
-                                          disabled={disabled}
-                                          fixed={true}
-                                          value={asset}
-                                          chain={destination_chain}
-                                          origin=""
-                                          is_bridge={true}
-                                          show_next_assets={true}
-                                          show_native_assets={true}
-                                          data={
-                                            {
-                                              ...destination_asset_data,
-                                              ...destination_contract_data,
-                                            }
-                                          }
-                                          className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
-                                        />
+                                        <div className="text-slate-600 dark:text-slate-500 font-medium">
+                                          You receive
+                                        </div>
                                         {
-                                          ![
-                                            'string',
-                                            'number',
-                                          ].includes(typeof amount) ||
-                                          [
-                                            '',
-                                          ].includes(amount) ||
-                                          [
-                                            'string',
-                                            'number',
-                                          ].includes(typeof estimatedValues?.amountReceived) ||
-                                          estimateResponse ?
-                                            <span className="font-semibold">
-                                              {
-                                                [
-                                                  'string',
-                                                  'number',
-                                                ].includes(typeof amount) &&
-                                                [
-                                                  'string',
-                                                  'number',
-                                                ].includes(typeof estimated_received) &&
-                                                !estimateResponse ?
-                                                  <DecimalsFormat
-                                                    value={
-                                                      Number(estimated_received) >= 1000 ?
-                                                        number_format(
-                                                          estimated_received,
-                                                          '0,0.000000000000',
-                                                          true,
-                                                        ) :
-                                                        estimated_received
-                                                    }
-                                                    className={
-                                                      `w-36 sm:w-48 bg-transparent ${
-                                                        [
-                                                          '',
-                                                          undefined,
-                                                        ].includes(estimated_received) ?
-                                                          'text-slate-500 dark:text-slate-500' :
-                                                          ''
-                                                      } sm:text-lg font-semibold text-right py-1.5`
-                                                    }
-                                                  /> :
-                                                  '-'
-                                              }
-                                            </span> :
-                                            <Oval
-                                              color={loader_color(theme)}
-                                              width="20"
-                                              height="20"
-                                            />
+                                          destination_chain_data &&
+                                          asset &&
+                                          (
+                                            <div className="flex items-center justify-between space-x-2">
+                                              <div className="flex items-center space-x-1">
+                                                <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                                  Balance:
+                                                </div>
+                                                <Balance
+                                                  chainId={destination_chain_data.chain_id}
+                                                  asset={asset}
+                                                  contractAddress={destination_contract_data?.contract_address}
+                                                  decimals={destination_decimals}
+                                                  symbol={destination_symbol}
+                                                  hideSymbol={false}
+                                                  trigger={balanceTrigger}
+                                                />
+                                              </div>
+                                            </div>
+                                          )
                                         }
                                       </div>
-                                      {
-                                        false &&
-                                        destination_chain_data &&
-                                        asset &&
-                                        (
-                                          <div className="flex items-center justify-between space-x-2">
-                                            <div className="flex items-center space-x-1">
-                                              <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
-                                                Balance:
-                                              </div>
-                                              <Balance
-                                                chainId={destination_chain_data.chain_id}
-                                                asset={asset}
-                                                contractAddress={destination_contract_data?.contract_address}
-                                                decimals={destination_decimals}
-                                                symbol={destination_symbol}
-                                                hideSymbol={true}
-                                                trigger={balanceTrigger}
+                                      <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-0.5 py-4 px-3">
+                                        <div className="flex items-center justify-between space-x-2">
+                                          <SelectAsset
+                                            disabled={disabled}
+                                            fixed={true}
+                                            value={asset}
+                                            chain={destination_chain}
+                                            origin=""
+                                            is_bridge={true}
+                                            show_next_assets={true}
+                                            show_native_assets={true}
+                                            data={
+                                              {
+                                                ...destination_asset_data,
+                                                ...destination_contract_data,
+                                              }
+                                            }
+                                            className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
+                                          />
+                                          {
+                                            ![
+                                              'string',
+                                              'number',
+                                            ].includes(typeof amount) ||
+                                            [
+                                              '',
+                                            ].includes(amount) ||
+                                            [
+                                              'string',
+                                              'number',
+                                            ].includes(typeof estimatedValues?.amountReceived) ||
+                                            estimateResponse ?
+                                              <span className="font-semibold">
+                                                {
+                                                  [
+                                                    'string',
+                                                    'number',
+                                                  ].includes(typeof amount) &&
+                                                  [
+                                                    'string',
+                                                    'number',
+                                                  ].includes(typeof estimated_received) &&
+                                                  !estimateResponse ?
+                                                    <DecimalsFormat
+                                                      value={
+                                                        Number(estimated_received) >= 1000 ?
+                                                          number_format(
+                                                            estimated_received,
+                                                            '0,0.000000000000',
+                                                            true,
+                                                          ) :
+                                                          estimated_received
+                                                      }
+                                                      className={
+                                                        `w-36 sm:w-48 bg-transparent ${
+                                                          [
+                                                            '',
+                                                            undefined,
+                                                          ].includes(estimated_received) ?
+                                                            'text-slate-500 dark:text-slate-500' :
+                                                            ''
+                                                        } sm:text-lg font-semibold text-right py-1.5`
+                                                      }
+                                                    /> :
+                                                    '-'
+                                                }
+                                              </span> :
+                                              <Oval
+                                                color={loader_color(theme)}
+                                                width="20"
+                                                height="20"
                                               />
+                                          }
+                                        </div>
+                                        {
+                                          false &&
+                                          destination_chain_data &&
+                                          asset &&
+                                          (
+                                            <div className="flex items-center justify-between space-x-2">
+                                              <div className="flex items-center space-x-1">
+                                                <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                                  Balance:
+                                                </div>
+                                                <Balance
+                                                  chainId={destination_chain_data.chain_id}
+                                                  asset={asset}
+                                                  contractAddress={destination_contract_data?.contract_address}
+                                                  decimals={destination_decimals}
+                                                  symbol={destination_symbol}
+                                                  hideSymbol={true}
+                                                  trigger={balanceTrigger}
+                                                />
+                                              </div>
                                             </div>
-                                          </div>
+                                          )
+                                        }
+                                      </div>
+                                    </div> :
+                                    <div className="bg-slate-100 dark:bg-slate-900">
+                                      {
+                                        (
+                                          true ||
+                                          [
+                                            'string',
+                                            'number',
+                                          ].includes(typeof estimated_received)
+                                        ) &&
+                                        (
+                                          <button
+                                            onClick={() => setCollapse(!collapse)}
+                                            className="w-full grid grid-cols-5 sm:grid-cols-5 gap-6"
+                                          >
+                                            <div className="col-span-2 sm:col-span-2">
+                                              <div className="flex items-center">
+                                                <span className="whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
+                                                  You receive
+                                                </span>
+                                              </div>
+                                            </div>
+                                            <div className="col-span-3 sm:col-span-3">
+                                              <div className="flex items-center justify-end sm:justify-end space-x-0.5 sm:space-x-1 -mr-0.5">
+                                                {
+                                                  ![
+                                                    'string',
+                                                    'number',
+                                                  ].includes(typeof amount) ||
+                                                  [
+                                                    '',
+                                                  ].includes(amount) ||
+                                                  [
+                                                    'string',
+                                                    'number',
+                                                  ].includes(typeof estimatedValues?.amountReceived) ||
+                                                  estimateResponse ?
+                                                    <div className="flex items-center space-x-2">
+                                                      <span className="font-semibold">
+                                                        {
+                                                          [
+                                                            'string',
+                                                            'number',
+                                                          ].includes(typeof amount) &&
+                                                          [
+                                                            'string',
+                                                            'number',
+                                                          ].includes(typeof estimated_received) &&
+                                                          !estimateResponse ?
+                                                            <DecimalsFormat
+                                                              value={
+                                                                Number(estimated_received) >= 1000 ?
+                                                                  number_format(
+                                                                    estimated_received,
+                                                                    '0,0.000000000000',
+                                                                    true,
+                                                                  ) :
+                                                                  estimated_received
+                                                              }
+                                                              className="text-sm"
+                                                            /> :
+                                                            '-'
+                                                        }
+                                                      </span>
+                                                      <span className="font-semibold">
+                                                        {destination_symbol}
+                                                      </span>
+                                                    </div> :
+                                                    <Oval
+                                                      color={loader_color(theme)}
+                                                      width="16"
+                                                      height="16"
+                                                    />
+                                                }
+                                                {collapse ?
+                                                  <BiChevronDown
+                                                    size={18}
+                                                    className="text-slate-600 dark:text-slate-200"
+                                                  /> :
+                                                  <BiChevronUp
+                                                    size={18}
+                                                    className="text-slate-600 dark:text-slate-200"
+                                                  />
+                                                }
+                                              </div>
+                                            </div>
+                                          </button>
                                         )
                                       }
                                     </div>
-                                  </div> :
-                                  <div className="bg-slate-100 dark:bg-slate-900">
-                                    {
-                                      (
-                                        true ||
-                                        [
-                                          'string',
-                                          'number',
-                                        ].includes(typeof estimated_received)
-                                      ) &&
-                                      (
-                                        <button
-                                          onClick={() => setCollapse(!collapse)}
-                                          className="w-full grid grid-cols-5 sm:grid-cols-5 gap-6"
-                                        >
-                                          <div className="col-span-2 sm:col-span-2">
-                                            <div className="flex items-center">
-                                              <span className="whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
-                                                You receive
-                                              </span>
-                                            </div>
-                                          </div>
-                                          <div className="col-span-3 sm:col-span-3">
-                                            <div className="flex items-center justify-end sm:justify-end space-x-0.5 sm:space-x-1 -mr-0.5">
-                                              {
-                                                ![
-                                                  'string',
-                                                  'number',
-                                                ].includes(typeof amount) ||
-                                                [
-                                                  '',
-                                                ].includes(amount) ||
-                                                [
-                                                  'string',
-                                                  'number',
-                                                ].includes(typeof estimatedValues?.amountReceived) ||
-                                                estimateResponse ?
-                                                  <div className="flex items-center space-x-2">
-                                                    <span className="font-semibold">
-                                                      {
-                                                        [
-                                                          'string',
-                                                          'number',
-                                                        ].includes(typeof amount) &&
-                                                        [
-                                                          'string',
-                                                          'number',
-                                                        ].includes(typeof estimated_received) &&
-                                                        !estimateResponse ?
-                                                          <DecimalsFormat
-                                                            value={
-                                                              Number(estimated_received) >= 1000 ?
-                                                                number_format(
-                                                                  estimated_received,
-                                                                  '0,0.000000000000',
-                                                                  true,
-                                                                ) :
-                                                                estimated_received
-                                                            }
-                                                            className="text-sm"
-                                                          /> :
-                                                          '-'
-                                                      }
-                                                    </span>
-                                                    <span className="font-semibold">
-                                                      {destination_symbol}
-                                                    </span>
-                                                  </div> :
-                                                  <Oval
-                                                    color={loader_color(theme)}
-                                                    width="16"
-                                                    height="16"
-                                                  />
-                                              }
-                                              {collapse ?
-                                                <BiChevronDown
-                                                  size={18}
-                                                  className="text-slate-600 dark:text-slate-200"
-                                                /> :
-                                                <BiChevronUp
-                                                  size={18}
-                                                  className="text-slate-600 dark:text-slate-200"
-                                                />
-                                              }
-                                            </div>
-                                          </div>
-                                        </button>
-                                      )
-                                    }
-                                  </div>
                                 }
                                 {
                                   checkSupport() &&
