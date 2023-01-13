@@ -11,7 +11,6 @@
         "chainName": "Ethereum",
         "rpcUrls": [
           "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-          "https://rpc.ankr.com/eth",
           "https://eth-mainnet.public.blastapi.io",
           "https://rpc.builder0x69.io"
         ],
@@ -52,7 +51,6 @@
         "chainName": "BNB Chain",
         "rpcUrls": [
           "https://bsc-mainnet.public.blastapi.io",
-          "https://rpc.ankr.com/bsc",
           "https://bscrpc.com",
           "https://1rpc.io/bnb"
         ],
@@ -92,7 +90,6 @@
         "chainName": "Polygon",
         "rpcUrls": [
           "https://matic-mainnet.chainstacklabs.com",
-          "https://rpc.ankr.com/polygon",
           "https://polygon-mainnet.public.blastapi.io",
           "https://rpc-mainnet.matic.quiknode.pro",
           "https://1rpc.io/matic"
@@ -132,7 +129,6 @@
         "chainId": "0xa",
         "chainName": "Optimism",
         "rpcUrls": [
-          "https://rpc.ankr.com/optimism",
           "https://optimism-mainnet.public.blastapi.io",
           "https://1rpc.io/op",
           "https://mainnet.optimism.io"
@@ -173,7 +169,6 @@
         "chainName": "Arbitrum One",
         "rpcUrls": [
           "https://arb1.arbitrum.io/rpc",
-          "https://rpc.ankr.com/arbitrum",
           "https://1rpc.io/arb"
         ],
         "nativeCurrency": {
@@ -212,7 +207,6 @@
         "chainName": "Gnosis",
         "rpcUrls": [
           "https://rpc.gnosischain.com",
-          "https://rpc.ankr.com/gnosis",
           "https://gnosis-mainnet.public.blastapi.io",
           "https://rpc.ap-southeast-1.gateway.fm/v1/gnosis/non-archival/mainnet"
         ],
