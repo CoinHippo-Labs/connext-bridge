@@ -2413,7 +2413,7 @@ export default (
                         ].includes(e.key) &&
                         e.preventDefault()
                       }
-                      className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 ${typeof priceImpactAdd === 'number' && priceImpactAdd > 0 ? 'text-red-500 dark:text-red-500' : ''} text-base font-medium text-right`}
+                      className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
                     />
                   </div>
                   {
@@ -2628,7 +2628,7 @@ export default (
                         ].includes(e.key) &&
                         e.preventDefault()
                       }
-                      className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 ${typeof priceImpactAdd === 'number' && priceImpactAdd > 0 ? 'text-red-500 dark:text-red-500' : ''} text-base font-medium text-right`}
+                      className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
                     />
                   </div>
                   {
@@ -2689,7 +2689,7 @@ export default (
                         width="16"
                         height="16"
                       /> :
-                      <>
+                      <span className={`${typeof priceImpactAdd === 'number' && priceImpactAdd > 0 ? 'text-red-500 dark:text-red-500' : ''}`}>
                         <span className="whitespace-nowrap">
                           {
                             typeof priceImpactAdd === 'number' ||
@@ -2705,7 +2705,7 @@ export default (
                         <span>
                           %
                         </span>
-                      </>
+                      </span>
                   }
                 </div>
               </div>
@@ -2813,7 +2813,7 @@ export default (
                         <div className="flex flex-col items-center space-y-1">
                           <span className="leading-4 text-xs text-center">
                             <span className="mr-1">
-                              Instead, balancing the pool out with additional
+                              Providing additional
                             </span>
                             <span className="font-semibold mr-1">
                               {
@@ -2824,10 +2824,10 @@ export default (
                               }
                             </span>
                             <span className="mr-1">
-                              may result in
+                              to help balance the pool may result in
                             </span>
                             <span className="font-bold">
-                              bonus LP tokens
+                              bonus LP tokens.
                             </span>
                           </span>
                         </div>
@@ -2838,6 +2838,10 @@ export default (
                             d.symbol?.includes(WRAPPED_PREFIX)
                           )
                           .length > 0 &&
+                        (overweighted_asset === 'x' ?
+                          y_asset_data :
+                          x_asset_data
+                        )?.symbol?.includes(WRAPPED_PREFIX) &&
                         (
                           <div className="flex flex-col space-y-0 mx-auto">
                             <div className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 rounded flex items-center space-x-1 pt-0.5 pb-1 px-2">
@@ -3185,7 +3189,7 @@ export default (
                         ].includes(e.key) &&
                         e.preventDefault()
                       }
-                      className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 ${typeof priceImpactRemove === 'number' && priceImpactRemove > 0 ? 'text-red-500 dark:text-red-500' : ''} text-base font-medium text-right`}
+                      className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
                     />
                   </div>
                   {
@@ -3421,7 +3425,7 @@ export default (
             <div className="flex items-center justify-between space-x-1">
               <Tooltip
                 placement="top"
-                content="The adjusted amount you are paying for LP tokens above or below current market prices."
+                content="The adjusted amount you are paying for LP tokens above or below current market price."
                 className="w-80 z-50 bg-dark text-white text-xs"
               >
                 <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
@@ -3437,7 +3441,7 @@ export default (
                       width="16"
                       height="16"
                     /> :
-                    <>
+                    <span className={`${typeof priceImpactRemove === 'number' && priceImpactRemove > 0 ? 'text-red-500 dark:text-red-500' : ''}`}>
                       <span className="whitespace-nowrap">
                         {
                           typeof priceImpactRemove === 'number' ||
@@ -3453,7 +3457,7 @@ export default (
                       <span>
                         %
                       </span>
-                    </>
+                    </span>
                 }
               </div>
             </div>

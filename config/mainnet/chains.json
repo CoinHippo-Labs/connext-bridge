@@ -10,8 +10,10 @@
         "chainId": "0x1",
         "chainName": "Ethereum",
         "rpcUrls": [
+          "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
           "https://rpc.ankr.com/eth",
-          "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
+          "https://eth-mainnet.public.blastapi.io",
+          "https://rpc.builder0x69.io"
         ],
         "nativeCurrency": {
           "name": "Ethereum",
@@ -49,8 +51,10 @@
         "chainId": "0x38",
         "chainName": "BNB Chain",
         "rpcUrls": [
+          "https://bsc-mainnet.public.blastapi.io",
           "https://rpc.ankr.com/bsc",
-          "https://bsc-mainnet.public.blastapi.io"
+          "https://bscrpc.com",
+          "https://1rpc.io/bnb"
         ],
         "nativeCurrency": {
           "name": "BNB",
@@ -87,9 +91,11 @@
         "chainId": "0x89",
         "chainName": "Polygon",
         "rpcUrls": [
-          "https://rpc.ankr.com/polygon",
           "https://matic-mainnet.chainstacklabs.com",
-          "https://rpc-mainnet.matic.quiknode.pro"
+          "https://rpc.ankr.com/polygon",
+          "https://polygon-mainnet.public.blastapi.io",
+          "https://rpc-mainnet.matic.quiknode.pro",
+          "https://1rpc.io/matic"
         ],
         "nativeCurrency": {
           "name": "Polygon",
@@ -126,8 +132,10 @@
         "chainId": "0xa",
         "chainName": "Optimism",
         "rpcUrls": [
+          "https://mainnet.optimism.io",
           "https://rpc.ankr.com/optimism",
-          "https://mainnet.optimism.io"
+          "https://optimism-mainnet.public.blastapi.io",
+          "https://1rpc.io/op"
         ],
         "nativeCurrency": {
           "name": "Ethereum",
@@ -164,8 +172,9 @@
         "chainId": "0xa4b1",
         "chainName": "Arbitrum One",
         "rpcUrls": [
+          "https://arb1.arbitrum.io/rpc",
           "https://rpc.ankr.com/arbitrum",
-          "https://arb1.arbitrum.io/rpc"
+          "https://1rpc.io/arb"
         ],
         "nativeCurrency": {
           "name": "Ethereum",
@@ -202,7 +211,10 @@
         "chainId": "0x64",
         "chainName": "Gnosis",
         "rpcUrls": [
-          "https://rpc.ankr.com/gnosis"
+          "https://rpc.gnosischain.com",
+          "https://rpc.ankr.com/gnosis",
+          "https://gnosis-mainnet.public.blastapi.io",
+          "https://rpc.ap-southeast-1.gateway.fm/v1/gnosis/non-archival/mainnet"
         ],
         "nativeCurrency": {
           "name": "xDAI",
