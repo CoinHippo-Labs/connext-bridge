@@ -11,8 +11,7 @@
         "chainName": "Ethereum Goerli",
         "rpcUrls": [
           "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-          "https://rpc.ankr.com/eth_goerli",
-          "https://eth-goerli.public.blastapi.io"
+          "https://rpc.ankr.com/eth_goerli"
         ],
         "nativeCurrency": {
           "name": "Ethereum",
@@ -53,7 +52,6 @@
           "https://polygon-mumbai.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
           "https://matic-mumbai.chainstacklabs.com",
           "https://rpc.ankr.com/polygon_mumbai",
-          "https://polygon-testnet.public.blastapi.io",
           "https://matic-testnet-archive-rpc.bwarelabs.com"
         ],
         "nativeCurrency": {
@@ -91,8 +89,8 @@
         "chainId": "0x1a4",
         "chainName": "Optimism Goerli",
         "rpcUrls": [
-          "https://rpc.ankr.com/optimism_testnet",
-          "https://goerli.optimism.io"
+          "https://optimism-goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+          "https://rpc.ankr.com/optimism_testnet"
         ],
         "nativeCurrency": {
           "name": "Ethereum",

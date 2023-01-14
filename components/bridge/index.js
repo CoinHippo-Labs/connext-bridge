@@ -4302,7 +4302,12 @@ export default () => {
                               typeof pool_amount === 'number' &&
                               Number(amount) > pool_amount
                             ) ||
-                            Number(gas_fee) <= 0
+                            (
+                              Number(gas_fee) <= 0 &&
+                              ![
+                                'test',
+                              ].includes(asset)
+                            )
                           ) ?
                             <Alert
                               color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
