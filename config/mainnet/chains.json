@@ -49,8 +49,12 @@
         "chainId": "0x38",
         "chainName": "BNB Chain",
         "rpcUrls": [
-          "https://bscrpc.com",
-          "https://1rpc.io/bnb"
+          "https://bsc-dataseed.binance.org",
+          "https://bsc-dataseed1.ninicoin.io",
+          "https://bsc-dataseed1.defibit.io",
+          "https://bsc-mainnet.nodereal.io/v1/64a9df0874fb4a93b9d0a3849de012d3",
+          "https://1rpc.io/bnb",
+          "https://bscrpc.com"
         ],
         "nativeCurrency": {
           "name": "BNB",
