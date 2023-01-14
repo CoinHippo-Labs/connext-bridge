@@ -126,8 +126,8 @@
         "chainId": "0xa",
         "chainName": "Optimism",
         "rpcUrls": [
-          "https://1rpc.io/op",
-          "https://mainnet.optimism.io"
+          "https://optimism-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+          "https://1rpc.io/op"
         ],
         "nativeCurrency": {
           "name": "Ethereum",
