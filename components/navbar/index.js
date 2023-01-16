@@ -903,31 +903,34 @@ export default () => {
 
             let stats
 
-            if (pool) {
-              // console.log(
-              //   '[getYieldData]',
-              //   {
-              //     domain_id,
-              //     contract_address,
-              //   },
-              // )
+            if (
+              pool &&
+              is_staging
+            ) {
+              console.log(
+                '[getYieldData]',
+                {
+                  domain_id,
+                  contract_address,
+                },
+              )
 
               try {
-                // stats =
-                //   await sdk.nxtpSdkPool
-                //     .getYieldData(
-                //       domain_id,
-                //       contract_address,
-                //     )
+                stats =
+                  await sdk.nxtpSdkPool
+                    .getYieldData(
+                      domain_id,
+                      contract_address,
+                    )
 
-                // console.log(
-                //   '[yieldData]',
-                //   {
-                //     domain_id,
-                //     contract_address,
-                //     stats,
-                //   },
-                // )
+                console.log(
+                  '[yieldData]',
+                  {
+                    domain_id,
+                    contract_address,
+                    stats,
+                  },
+                )
               } catch (error) {
                 console.log(
                   '[getYieldData error]',
@@ -1505,6 +1508,10 @@ export default () => {
     },
     [sdk, chains_data, pool_assets_data, address],
   )
+
+  const is_staging =
+    process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' ||
+    process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
 
   return (
     <>
