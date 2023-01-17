@@ -8,7 +8,10 @@
       {
         "chainId": "0x1",
         "chainName": "Ethereum Mainnet",
-        "rpcUrls": ["https://rpc.ankr.com/eth"],
+        "rpcUrls": [
+          "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+          "https://rpc.builder0x69.io"
+        ],
         "nativeCurrency": {
           "name": "Ether",
           "symbol": "ETH",
@@ -41,7 +44,14 @@
       {
         "chainId": "0x38",
         "chainName": "BNB Chain Mainnet",
-        "rpcUrls": ["https://rpc.ankr.com/bsc", "https://bsc-dataseed.binance.org", "https://bsc-dataseed1.defibit.io", "https://bsc-dataseed1.ninicoin.io", "https://bsc-dataseed1.binance.org"],
+        "rpcUrls": [
+          "https://bsc-dataseed.binance.org",
+          "https://bsc-dataseed1.ninicoin.io",
+          "https://bsc-dataseed1.defibit.io",
+          "https://bsc-mainnet.nodereal.io/v1/64a9df0874fb4a93b9d0a3849de012d3",
+          "https://1rpc.io/bnb",
+          "https://bscrpc.com"
+        ],
         "nativeCurrency": {
           "name": "BNB Token",
           "symbol": "BNB",
@@ -71,7 +81,11 @@
       {
         "chainId": "0x89",
         "chainName": "Matic Mainnet",
-        "rpcUrls": ["https://rpc.ankr.com/polygon"],
+        "rpcUrls": [
+          "https://matic-mainnet.chainstacklabs.com",
+          "https://rpc-mainnet.matic.quiknode.pro",
+          "https://1rpc.io/matic"
+        ],
         "nativeCurrency": {
           "name": "Matic",
           "symbol": "MATIC",
@@ -101,7 +115,11 @@
       {
         "chainId": "0xa86a",
         "chainName": "Avalanche Mainnet C-Chain",
-        "rpcUrls": ["https://api.avax.network/ext/bc/C/rpc", "https://rpc.ankr.com/avalanche"],
+        "rpcUrls": [
+          "https://api.avax.network/ext/bc/C/rpc",
+          "https://avalanche-evm.publicnode.com",
+          "https://1rpc.io/avax/c"
+        ],
         "nativeCurrency": {
           "name": "Avalanche",
           "symbol": "AVAX",
@@ -131,7 +149,13 @@
       {
         "chainId": "0xfa",
         "chainName": "Fantom Opera",
-        "rpcUrls": ["https://rpc.ftm.tools", "https://rpc.ankr.com/fantom", "https://rpcapi.fantom.network"],
+        "rpcUrls": [
+          "https://rpc.ftm.tools",
+          "https://rpcapi.fantom.network",
+          "https://rpc2.fantom.network",
+          "https://rpc3.fantom.network",
+          "https://1rpc.io/ftm"
+        ],
         "nativeCurrency": {
           "name": "Fantom",
           "symbol": "FTM",
@@ -161,7 +185,10 @@
       {
         "chainId": "0x64",
         "chainName": "Gnosis Chain",
-        "rpcUrls": ["https://rpc.ankr.com/gnosis"],
+        "rpcUrls": [
+          "https://rpc.gnosischain.com",
+          "https://rpc.ap-southeast-1.gateway.fm/v1/gnosis/non-archival/mainnet"
+        ],
         "nativeCurrency": {
           "name": "xDAI",
           "symbol": "xDAI",
@@ -191,7 +218,10 @@
       {
         "chainId": "0xa4b1",
         "chainName": "Arbitrum One",
-        "rpcUrls": ["https://arb1.arbitrum.io/rpc", "https://rpc.ankr.com/arbitrum"],
+        "rpcUrls": [
+          "https://arb1.arbitrum.io/rpc",
+          "https://1rpc.io/arb"
+        ],
         "nativeCurrency": {
           "name": "Arbitrum Ether",
           "symbol": "aETH",
@@ -221,7 +251,9 @@
       {
         "chainId": "0xa4ba",
         "chainName": "Arbitrum Nova",
-        "rpcUrls": ["https://nova.arbitrum.io/rpc"],
+        "rpcUrls": [
+          "https://nova.arbitrum.io/rpc"
+        ],
         "nativeCurrency": {
           "name": "Arbitrum Ether",
           "symbol": "aETH",
@@ -251,7 +283,10 @@
       {
         "chainId": "0xa",
         "chainName": "Optimism Mainnet",
-        "rpcUrls": ["https://rpc.ankr.com/optimism", "https://mainnet.optimism.io"],
+        "rpcUrls": [
+          "https://optimism-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+          "https://1rpc.io/op"
+        ],
         "nativeCurrency": {
           "name": "Ether",
           "symbol": "OETH",
@@ -281,7 +316,9 @@
       {
         "chainId": "0x505",
         "chainName": "Moonriver",
-        "rpcUrls": ["https://rpc.api.moonriver.moonbeam.network"],
+        "rpcUrls": [
+          "https://rpc.api.moonriver.moonbeam.network"
+        ],
         "nativeCurrency": {
           "name": "Moonriver",
           "symbol": "MOVR",
@@ -311,7 +348,9 @@
       {
         "chainId": "0x120",
         "chainName": "Boba L2",
-        "rpcUrls": ["https://mainnet.boba.network"],
+        "rpcUrls": [
+          "https://mainnet.boba.network"
+        ],
         "nativeCurrency": {
           "name": "Ethereum",
           "symbol": "ETH",
@@ -341,7 +380,9 @@
       {
         "chainId": "0xb7e7759",
         "chainName": "Gather Network",
-        "rpcUrls": ["https://mainnet.gather.network"],
+        "rpcUrls": [
+          "https://mainnet.gather.network"
+        ],
         "nativeCurrency": {
           "name": "Gather",
           "symbol": "GTH",
@@ -371,7 +412,9 @@
       {
         "chainId": "0x19",
         "chainName": "Cronos",
-        "rpcUrls": ["https://evm.cronos.org"],
+        "rpcUrls": [
+          "https://evm.cronos.org"
+        ],
         "nativeCurrency": {
           "name": "Cronos",
           "symbol": "CRO",
