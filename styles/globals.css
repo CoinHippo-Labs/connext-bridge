@@ -80,7 +80,7 @@ button {
 }
 
 body {
-  @apply /*font-sans */antialiased text-sm /*disable-scrollbars*/;
+  @apply /*font-sans */antialiased text-sm disable-scrollbars;
 }
 
 [data-background="light"] {
@@ -225,6 +225,10 @@ body {
 
 .text-3xs {
   font-size: .5rem;
+}
+
+.mt-0\.25 {
+  margin-top: 0.0625rem;
 }
 
 .mt-5\.5 {

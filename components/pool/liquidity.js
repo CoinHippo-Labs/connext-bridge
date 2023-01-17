@@ -219,6 +219,13 @@ export default (
               )
               .toString()
 
+            if (adopted?.index === 1) {
+              const _amount = _amountX
+
+              _amountX = _amountY
+              _amountY = _amount
+            }
+
             calculateAddLiquidityPriceImpact(
               domainId,
               contract_address,
