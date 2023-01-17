@@ -614,39 +614,40 @@ export default (
           (
             <div className="flex items-center justify-between mt-0.5">
               {pending ?
-                /*<div className="flex items-center space-x-1">
-                  <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
-                    Est. time:
-                  </div>
-                  <Tooltip
-                    placement="top"
-                    content={
-                      force_slow ?
-                        'Unable to leverage fast liquidity. Your transfer will still complete.' :
-                        'Fast transfer enabled by Connext router network.'
-                    }
-                    className="z-50 bg-dark text-white text-xs"
-                  >
-                    <div className="flex items-center">
-                      <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
-                        {
-                          force_slow ?
-                            <span className="text-yellow-500 dark:text-yellow-400">
-                              90 mins
-                            </span> :
-                            <span className="text-green-500 dark:text-green-500">
-                              4 mins
-                            </span>
-                        }
-                      </span>
-                      <BiInfoCircle
-                        size={14}
-                        className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                      />
+                <div className="flex items-center space-x-1">
+                  {/*
+                    <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
+                      Est. time:
                     </div>
-                  </Tooltip>
-                </div>*/
-                null :
+                    <Tooltip
+                      placement="top"
+                      content={
+                        force_slow ?
+                          'Unable to leverage fast liquidity. Your transfer will still complete.' :
+                          'Fast transfer enabled by Connext router network.'
+                      }
+                      className="z-50 bg-dark text-white text-xs"
+                    >
+                      <div className="flex items-center">
+                        <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
+                          {
+                            force_slow ?
+                              <span className="text-yellow-500 dark:text-yellow-400">
+                                90 mins
+                              </span> :
+                              <span className="text-green-500 dark:text-green-500">
+                                4 mins
+                              </span>
+                          }
+                        </span>
+                        <BiInfoCircle
+                          size={14}
+                          className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                        />
+                      </div>
+                    </Tooltip>
+                  */}
+                </div> :
                 <span>
                   {
                     !force_slow &&
