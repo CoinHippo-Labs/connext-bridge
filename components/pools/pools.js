@@ -725,7 +725,7 @@ export default (
               <div className="whitespace-nowrap text-slate-800 dark:text-slate-200 ml-2">
                 You currently don't have any positions.
               </div> :
-              <div>
+              <>
                 <div
                   className="w-32 sm:w-64 mx-auto"
                   style={
@@ -1683,7 +1683,7 @@ export default (
                   defaultPageSize={50}
                   className="no-border"
                 />
-              </div>
+              </>
         }
       </div> :
       <div className="my-4 sm:my-6 ml-2">

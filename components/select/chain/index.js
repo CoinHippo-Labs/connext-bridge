@@ -162,15 +162,15 @@ export default (
         }
       }
       title={
-        <span className="flex items-center uppercase space-x-1">
-          <span>
+        <span className="flex items-center space-x-1 pt-1 pb-2">
+          <span className="capitalize">
             {
               origin ||
               'select'
             }
           </span>
-          <span>
-            Chain
+          <span className="normal-case">
+            chain
           </span>
         </span>
       }

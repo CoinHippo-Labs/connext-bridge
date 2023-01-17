@@ -30,7 +30,7 @@ export default (
             className="w-4 h-4 stroke-current"
           />
         </div>
-        <div className="w-full mx-auto py-2">
+        <div className="w-full mx-auto pt-4 pb-2">
           <Chains
             value={value}
             inputSearch={inputSearch}

@@ -10,7 +10,7 @@ import { TailSpin, Watch, RotatingSquare, Oval } from 'react-loader-spinner'
 import { Tooltip } from '@material-tailwind/react'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
-import { BiPlus, BiCaretUp, BiCaretDown, BiMessageError, BiMessageCheck, BiMessageDetail } from 'react-icons/bi'
+import { BiPlus, BiCaretUp, BiCaretDown, BiMessageError, BiMessageCheck, BiMessageDetail, BiInfoCircle } from 'react-icons/bi'
 import { HiSwitchHorizontal } from 'react-icons/hi'
 import { IoWarning } from 'react-icons/io5'
 
@@ -1983,8 +1983,14 @@ export default (
                 content="This allows you to only need to pay for approval on your first time providing liquidity."
                 className="z-50 bg-dark text-white text-xs"
               >
-                <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 font-medium">
-                  Infinite Approval
+                <div className="flex items-center">
+                  <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 text-xs font-medium">
+                    Infinite approval
+                  </div>
+                  <BiInfoCircle
+                    size={14}
+                    className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                  />
                 </div>
               </Tooltip>
               <div className="flex items-center space-x-3">
@@ -2020,8 +2026,14 @@ export default (
                 content="The maximum percentage you are willing to lose due to market changes."
                 className="z-50 bg-dark text-white text-xs"
               >
-                <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 font-medium">
-                  Slippage Tolerance
+                <div className="flex items-center">
+                  <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 text-xs font-medium">
+                    Slippage tolerance
+                  </div>
+                  <BiInfoCircle
+                    size={14}
+                    className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                  />
                 </div>
               </Tooltip>
               <div className="flex items-center space-x-3">
@@ -2087,7 +2099,7 @@ export default (
                     ].includes(e.key) &&
                     e.preventDefault()
                   }
-                  className={`w-20 bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 font-semibold text-right py-1 px-2`}
+                  className={`w-20 bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-xs font-semibold text-right py-1 px-2`}
                 />
                 <div className="flex items-center space-x-2.5">
                   {
@@ -2117,8 +2129,8 @@ export default (
               </div>
             </div>
             <div className="form-element">
-              <div className="form-label text-slate-600 dark:text-slate-200 font-medium">
-                Transaction Deadline
+              <div className="form-label text-slate-600 dark:text-slate-200 text-xs font-medium">
+                Transaction deadline
               </div>
               <div className="flex items-center space-x-3">
                 <DebounceInput
@@ -2182,7 +2194,7 @@ export default (
                     ].includes(e.key) &&
                     e.preventDefault()
                   }
-                  className={`w-20 bg-slate-200 dark:bg-slate-800 rounded border-0 focus:ring-0 font-semibold py-1.5 px-2.5`}
+                  className={`w-20 bg-slate-200 dark:bg-slate-800 rounded border-0 focus:ring-0 text-xs font-semibold py-1.5 px-2.5`}
                 />
                 <span className="font-medium">
                   minutes
@@ -2656,8 +2668,14 @@ export default (
                   content="The adjusted amount you are paying for LP tokens above or below current market prices."
                   className="w-80 z-50 bg-dark text-white text-xs"
                 >
-                  <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
-                    Price impact
+                  <div className="flex items-center">
+                    <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
+                      Price impact
+                    </div>
+                    <BiInfoCircle
+                      size={14}
+                      className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                    />
                   </div>
                 </Tooltip>
                 <div className="flex items-center text-xs font-semibold space-x-1">
@@ -2861,7 +2879,7 @@ export default (
                 wrong_chain ?
                   <Wallet
                     connectChainId={chain_id}
-                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
+                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
                   >
                     <span className="mr-1.5 sm:mr-2">
                       {is_walletconnect ?
@@ -3009,7 +3027,7 @@ export default (
                           !valid_amount
                         }
                         onClick={() => call(pool_data)}
-                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-lg text-center py-3 px-2 sm:px-3`}
+                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base text-center py-3 px-2 sm:px-3`}
                       >
                         <span className="flex items-center justify-center space-x-1.5">
                           {
@@ -3046,7 +3064,7 @@ export default (
                       <Wallet
                         connectChainId={chain_id}
                         buttonConnectTitle="Connect Wallet"
-                        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-lg font-medium text-center py-3 px-2 sm:px-3"
+                        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base font-medium text-center py-3 px-2 sm:px-3"
                       >
                         <span>
                           Connect Wallet
@@ -3404,8 +3422,14 @@ export default (
                 content="The adjusted amount you are paying for LP tokens above or below current market price."
                 className="w-80 z-50 bg-dark text-white text-xs"
               >
-                <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
-                  Price impact
+                <div className="flex items-center">
+                  <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
+                    Price impact
+                  </div>
+                  <BiInfoCircle
+                    size={14}
+                    className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                  />
                 </div>
               </Tooltip>
               <div className="flex items-center text-xs font-semibold space-x-1">
@@ -3444,7 +3468,7 @@ export default (
                 wrong_chain ?
                   <Wallet
                     connectChainId={chain_id}
-                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3  px-2 sm:px-3"
+                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3  px-2 sm:px-3"
                   >
                     <span className="mr-1.5 sm:mr-2">
                       {is_walletconnect ?
@@ -3591,7 +3615,7 @@ export default (
                           !valid_amount
                         }
                         onClick={() => call(pool_data)}
-                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded text-lg text-center py-3 px-2 sm:px-3`}
+                        className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded text-base text-center py-3 px-2 sm:px-3`}
                       >
                         <span className="flex items-center justify-center space-x-1.5">
                           {
@@ -3628,7 +3652,7 @@ export default (
                       <Wallet
                         connectChainId={chain_id}
                         buttonConnectTitle="Connect Wallet"
-                        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-lg font-medium text-center py-3 px-2 sm:px-3"
+                        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base font-medium text-center py-3 px-2 sm:px-3"
                       >
                         <span>
                           Connect Wallet

@@ -12,7 +12,7 @@ import { Tooltip, Alert as AlertNotification } from '@material-tailwind/react'
 import { CountdownCircleTimer } from 'react-countdown-circle-timer'
 import { MdClose } from 'react-icons/md'
 import { HiArrowRight, HiOutlineCheckCircle } from 'react-icons/hi'
-import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit, BiEditAlt, BiCheckCircle, BiChevronDown, BiChevronUp } from 'react-icons/bi'
+import { BiMessageError, BiMessageCheck, BiMessageDetail, BiMessageEdit, BiEditAlt, BiCheckCircle, BiChevronDown, BiChevronUp, BiInfoCircle } from 'react-icons/bi'
 import { IoInformationCircleOutline, IoWarning } from 'react-icons/io5'
 import { GiPartyPopper } from 'react-icons/gi'
 
@@ -3033,7 +3033,7 @@ export default () => {
                       <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
                         <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start space-y-0.5 sm:space-y-2">
                           <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
-                            <span className="text-slate-600 dark:text-slate-500 font-medium text-left">
+                            <span className="text-slate-600 dark:text-slate-500 text-xs font-medium text-left">
                               From
                             </span>
                             {/*<GasPrice
@@ -3132,7 +3132,7 @@ export default () => {
                         </div>
                         <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end space-y-0.5 sm:space-y-2">
                           <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
-                            <span className="text-slate-600 dark:text-slate-500 font-medium text-left">
+                            <span className="text-slate-600 dark:text-slate-500 text-xs font-medium text-left">
                               To
                             </span>
                             {/*<GasPrice
@@ -3177,7 +3177,7 @@ export default () => {
                     </div>
                     <div className="space-y-2.5">
                       <div className="flex items-center justify-between space-x-2">
-                        <div className="text-slate-600 dark:text-slate-500 font-medium">
+                        <div className="text-slate-600 dark:text-slate-500 text-xs font-medium">
                           You send
                         </div>
                         {
@@ -3186,7 +3186,7 @@ export default () => {
                           (
                             <div className="flex items-center justify-between space-x-2">
                               <div className="flex items-center space-x-1">
-                                <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
                                   Balance:
                                 </div>
                                 <button
@@ -3389,7 +3389,7 @@ export default () => {
                               ].includes(e.key) &&
                               e.preventDefault()
                             }
-                            className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg font-semibold text-right py-1.5`}
+                            className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-base font-semibold text-right py-1.5`}
                           />
                         </div>
                         {
@@ -3399,7 +3399,7 @@ export default () => {
                           (
                             <div className="flex items-center justify-between space-x-2">
                               <div className="flex items-center space-x-1">
-                                <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
                                   Balance:
                                 </div>
                                 <button
@@ -3467,7 +3467,7 @@ export default () => {
                               {
                                 destination_chain &&
                                 !checkSupport() ?
-                                <div className="text-slate-400 dark:text-slate-500">
+                                <div className=" text-slate-400 dark:text-slate-500">
                                   Route not supported
                                 </div> :
                                 address &&
@@ -3509,7 +3509,7 @@ export default () => {
                                         }
                                       }
                                     }}
-                                    className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-sm font-medium`}
+                                    className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-xs font-medium`}
                                   >
                                     Select Max
                                   </button>
@@ -3565,7 +3565,7 @@ export default () => {
                                   is_staging ?
                                     <div className="space-y-2.5">
                                       <div className="flex items-center justify-between space-x-2">
-                                        <div className="text-slate-600 dark:text-slate-500 font-medium">
+                                        <div className="text-slate-600 dark:text-slate-500 text-xs font-medium">
                                           You receive
                                         </div>
                                         {
@@ -3574,7 +3574,7 @@ export default () => {
                                           (
                                             <div className="flex items-center justify-between space-x-2">
                                               <div className="flex items-center space-x-1">
-                                                <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                                <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
                                                   Balance:
                                                 </div>
                                                 <Balance
@@ -3623,7 +3623,7 @@ export default () => {
                                               'number',
                                             ].includes(typeof estimatedValues?.amountReceived) ||
                                             estimateResponse ?
-                                              <span className="font-semibold">
+                                              <span className="text-base font-semibold">
                                                 {
                                                   [
                                                     'string',
@@ -3652,7 +3652,7 @@ export default () => {
                                                           ].includes(estimated_received) ?
                                                             'text-slate-500 dark:text-slate-500' :
                                                             ''
-                                                        } sm:text-lg font-semibold text-right py-1.5`
+                                                        } text-base font-semibold text-right py-1.5`
                                                       }
                                                     /> :
                                                     '-'
@@ -3672,7 +3672,7 @@ export default () => {
                                           (
                                             <div className="flex items-center justify-between space-x-2">
                                               <div className="flex items-center space-x-1">
-                                                <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                                <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
                                                   Balance:
                                                 </div>
                                                 <Balance
@@ -3706,7 +3706,7 @@ export default () => {
                                           >
                                             <div className="col-span-2 sm:col-span-2">
                                               <div className="flex items-center">
-                                                <span className="whitespace-nowrap text-slate-600 dark:text-slate-200 font-medium">
+                                                <span className="whitespace-nowrap text-slate-600 dark:text-slate-200 text-xs font-medium">
                                                   You receive
                                                 </span>
                                               </div>
@@ -3727,7 +3727,7 @@ export default () => {
                                                   ].includes(typeof estimatedValues?.amountReceived) ||
                                                   estimateResponse ?
                                                     <div className="flex items-center space-x-2">
-                                                      <span className="font-semibold">
+                                                      <span className="text-base font-semibold">
                                                         {
                                                           [
                                                             'string',
@@ -3748,7 +3748,7 @@ export default () => {
                                                                   ) :
                                                                   estimated_received
                                                               }
-                                                              className="text-sm"
+                                                              className="text-base"
                                                             /> :
                                                             '-'
                                                         }
@@ -3832,8 +3832,14 @@ export default () => {
                                                       content="The maximum percentage you are willing to lose due to market changes."
                                                       className="z-50 bg-dark text-white text-xs"
                                                     >
-                                                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
-                                                        Slippage tolerance
+                                                      <div className="flex items-center">
+                                                        <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-medium">
+                                                          Slippage tolerance
+                                                        </div>
+                                                        <BiInfoCircle
+                                                          size={14}
+                                                          className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                                        />
                                                       </div>
                                                     </Tooltip>
                                                     <div className="flex flex-col sm:items-end space-y-1.5">
@@ -3902,7 +3908,7 @@ export default () => {
                                                                 ].includes(e.key) &&
                                                                 e.preventDefault()
                                                               }
-                                                              className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 font-semibold text-right py-1 px-2`}
+                                                              className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-xs font-semibold text-right py-1 px-2`}
                                                             />
                                                             <button
                                                               onClick={() => setSlippageEditing(false)}
@@ -3941,7 +3947,7 @@ export default () => {
                                                           </div>
                                                         </> :
                                                         <div className="flex items-center space-x-1.5">
-                                                          <span className="font-semibold">
+                                                          <span className="text-xs font-semibold">
                                                             {number_format(
                                                               slippage,
                                                               '0,0.00',
@@ -4008,8 +4014,14 @@ export default () => {
                                                       content="This supports our router users providing fast liquidity."
                                                       className="z-50 bg-dark text-white text-xs"
                                                     >
-                                                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
-                                                        Bridge fee
+                                                      <div className="flex items-center">
+                                                        <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-medium">
+                                                          Bridge fee
+                                                        </div>
+                                                        <BiInfoCircle
+                                                          size={14}
+                                                          className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                                        />
                                                       </div>
                                                     </Tooltip>
                                                     {
@@ -4056,15 +4068,21 @@ export default () => {
                                                       content="This covers costs to execute your transfer on the destination chain."
                                                       className="z-50 bg-dark text-white text-xs"
                                                     >
-                                                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
-                                                        Destination gas fee
+                                                      <div className="flex items-center">
+                                                        <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-medium">
+                                                          Destination gas fee
+                                                        </div>
+                                                        <BiInfoCircle
+                                                          size={14}
+                                                          className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                                        />
                                                       </div>
                                                     </Tooltip>
                                                     {
                                                       false &&
                                                       feeEstimating ?
                                                         <div className="flex items-center space-x-1.5">
-                                                          <span className="text-slate-600 dark:text-slate-200 font-medium">
+                                                          <span className="text-slate-600 dark:text-slate-200 text-xs font-medium">
                                                             estimating
                                                           </span>
                                                           <Oval
@@ -4102,8 +4120,14 @@ export default () => {
                                                           content="Price impact"
                                                           className="z-50 bg-dark text-white text-xs"
                                                         >
-                                                          <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
-                                                            Price impact
+                                                          <div className="flex items-center">
+                                                            <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-medium">
+                                                              Price impact
+                                                            </div>
+                                                            <BiInfoCircle
+                                                              size={14}
+                                                              className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                                            />
                                                           </div>
                                                         </Tooltip>
                                                         <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-semibold space-x-1.5">
@@ -4136,7 +4160,7 @@ export default () => {
                                         ) &&
                                         (
                                           <div className="flex items-center justify-between space-x-1">
-                                            <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
+                                            <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-medium">
                                               Estimated time
                                             </div>
                                             <Tooltip
@@ -4149,18 +4173,24 @@ export default () => {
                                               }
                                               className="z-50 bg-dark text-white text-xs"
                                             >
-                                              <span className="whitespace-nowrap text-sm font-semibold space-x-1.5">
-                                                {
-                                                  Number(amount) > liquidity_amount ||
-                                                  forceSlow ?
-                                                    <span className="text-yellow-500 dark:text-yellow-400">
-                                                      90 minutes
-                                                    </span> :
-                                                    <span className="text-green-500 dark:text-green-500">
-                                                      4 minutes
-                                                    </span>
-                                                }
-                                              </span>
+                                              <div className="flex items-center">
+                                                <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
+                                                  {
+                                                    Number(amount) > liquidity_amount ||
+                                                    forceSlow ?
+                                                      <span className="text-yellow-500 dark:text-yellow-400">
+                                                        90 minutes
+                                                      </span> :
+                                                      <span className="text-green-500 dark:text-green-500">
+                                                        4 minutes
+                                                      </span>
+                                                  }
+                                                </span>
+                                                <BiInfoCircle
+                                                  size={14}
+                                                  className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                                />
+                                              </div>
                                             </Tooltip>
                                           </div>
                                         )
@@ -4178,7 +4208,7 @@ export default () => {
                                                   <BiMessageEdit
                                                     size={20}
                                                   />
-                                                  <span className="text-sm">
+                                                  <span className="text-xs sm:text-sm">
                                                     Insufficient router liquidity. Funds must transfer through the bridge directly.
                                                   </span>
                                                 </div>
@@ -4192,7 +4222,7 @@ export default () => {
                                                     <BiMessageDetail
                                                       size={20}
                                                     />
-                                                    <span className="text-sm sm:text-base">
+                                                    <span className="text-xs sm:text-sm">
                                                       Use bridge only (wait 30-60 mins, no fees)
                                                     </span>
                                                   </div> :
@@ -4200,7 +4230,7 @@ export default () => {
                                                     <GiPartyPopper
                                                       size={20}
                                                     />
-                                                    <span className="text-sm sm:text-base">
+                                                    <span className="text-xs sm:text-sm">
                                                       Fast liquidity available!
                                                     </span>
                                                   </div>
@@ -4243,7 +4273,7 @@ export default () => {
                         wrong_chain ?
                           <Wallet
                             connectChainId={source_chain_data?.chain_id}
-                            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                           >
                             <span className="mr-1.5 sm:mr-2">
                               {is_walletconnect ?
@@ -4392,7 +4422,7 @@ export default () => {
                                     callProcessing ?
                                       'justify-center' :
                                       'justify-center'
-                                  } text-white text-lg py-3 sm:py-4 px-2 sm:px-3`
+                                  } text-white text-base py-3 sm:py-4 px-2 sm:px-3`
                                 }
                               >
                                 <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
@@ -4536,14 +4566,14 @@ export default () => {
                         web3_provider ?
                           <button
                             disabled={true}
-                            className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
+                            className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base text-center py-3 sm:py-4 px-2 sm:px-3"
                           >
                             Send
                           </button> :
                           <Wallet
                             connectChainId={source_chain_data?.chain_id}
                             buttonConnectTitle="Connect Wallet"
-                            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-lg font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                           >
                             <span>
                               Connect Wallet

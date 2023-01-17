@@ -10,7 +10,7 @@ import { Tooltip } from '@material-tailwind/react'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
 import { HiSwitchVertical } from 'react-icons/hi'
-import { BiMessageError, BiMessageCheck, BiMessageDetail, BiEditAlt, BiCheckCircle } from 'react-icons/bi'
+import { BiMessageError, BiMessageCheck, BiMessageDetail, BiEditAlt, BiCheckCircle, BiInfoCircle } from 'react-icons/bi'
 import { IoWarning } from 'react-icons/io5'
 
 import Options from './options'
@@ -2444,7 +2444,7 @@ export default () => {
               <div className="space-y-7">
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between space-x-2">
-                    <span className="text-slate-600 dark:text-slate-500 font-medium">
+                    <span className="text-slate-600 dark:text-slate-500 text-xs font-medium">
                       Pay with
                     </span>
                     {/*<GasPrice
@@ -2462,7 +2462,7 @@ export default () => {
                       (
                         <div className="flex items-center justify-between space-x-2">
                           <div className="flex items-center space-x-1">
-                            <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                            <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
                               Balance:
                             </div>
                             <button
@@ -2644,7 +2644,7 @@ export default () => {
                           ].includes(e.key) &&
                           e.preventDefault()
                         }
-                        className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg font-semibold text-right py-1.5`}
+                        className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-base font-semibold text-right py-1.5`}
                       />
                     </div>
                     {
@@ -2652,7 +2652,7 @@ export default () => {
                       (
                         <div className="flex items-center justify-between space-x-2">
                           <div className="flex items-center space-x-1">
-                            <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                            <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
                               Balance:
                             </div>
                             {
@@ -2749,7 +2749,7 @@ export default () => {
                                     setSwapAmount(true)
                                   }
                                 }}
-                                className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} font-medium`}
+                                className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-xs font-medium`}
                               >
                                 Select Max
                               </button>
@@ -2809,7 +2809,7 @@ export default () => {
                 }
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between space-x-2">
-                    <span className="text-slate-600 dark:text-slate-500 font-medium">
+                    <span className="text-slate-600 dark:text-slate-500 text-xs font-medium">
                       You Receive
                     </span>
                     {
@@ -2822,7 +2822,7 @@ export default () => {
                       (
                         <div className="flex items-center justify-between space-x-2">
                           <div className="flex items-center space-x-1">
-                            <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                            <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
                               Balance:
                             </div>
                             <button
@@ -3033,7 +3033,7 @@ export default () => {
                               ].includes(e.key) &&
                               e.preventDefault()
                             }
-                            className={`w-36 sm:w-48 bg-transparent ${'cursor-default' || (disabled ? 'cursor-not-allowed' : '')} rounded border-0 focus:ring-0 sm:text-lg font-semibold text-right py-1.5`}
+                            className={`w-36 sm:w-48 bg-transparent ${'cursor-default' || (disabled ? 'cursor-not-allowed' : '')} rounded border-0 focus:ring-0 sm:text-base font-semibold text-right py-1.5`}
                           />*/
                           <DecimalsFormat
                             value={
@@ -3064,7 +3064,7 @@ export default () => {
                                 ].includes(amount) ?
                                   'text-slate-500 dark:text-slate-500' :
                                   ''
-                              } sm:text-lg font-semibold text-right py-1.5`
+                              } sm:text-base font-semibold text-right py-1.5`
                             }
                           />
                       }
@@ -3074,7 +3074,7 @@ export default () => {
                       (
                         <div className="flex items-center justify-between space-x-2">
                           <div className="flex items-center space-x-1">
-                            <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                            <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
                               Balance:
                             </div>
                             {
@@ -3161,7 +3161,7 @@ export default () => {
                                     )
                                   }
                                 }}
-                                className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-sm font-medium`}
+                                className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-xs font-medium`}
                               >
                                 Select Max
                               </button>
@@ -3182,7 +3182,7 @@ export default () => {
                 (
                   <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-2.5 py-3.5 px-3">
                     <div className="flex items-center justify-between space-x-1">
-                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
+                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-medium">
                         Rate
                       </div>
                       <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
@@ -3204,8 +3204,14 @@ export default () => {
                           content="The maximum percentage you are willing to lose due to market changes."
                           className="z-50 bg-dark text-white text-xs"
                         >
-                          <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
-                            Slippage Tolerance
+                          <div className="flex items-center">
+                            <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-medium">
+                              Slippage Tolerance
+                            </div>
+                            <BiInfoCircle
+                              size={14}
+                              className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                            />
                           </div>
                         </Tooltip>
                         <div className="flex flex-col sm:items-end space-y-1.5">
@@ -3274,7 +3280,7 @@ export default () => {
                                     ].includes(e.key) &&
                                     e.preventDefault()
                                   }
-                                  className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 font-semibold text-right py-1 px-2`}
+                                  className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-xs font-semibold text-right py-1 px-2`}
                                 />
                                 <button
                                   onClick={() => setSlippageEditing(false)}
@@ -3313,7 +3319,7 @@ export default () => {
                               </div>
                             </> :
                             <div className="flex items-center space-x-1.5">
-                              <span className="font-semibold">
+                              <span className="text-xs font-semibold">
                                 {number_format(
                                   slippage,
                                   '0,0.000000',
@@ -3362,9 +3368,21 @@ export default () => {
                       typeof priceImpact === 'number' &&
                       (
                         <div className="flex items-center justify-between space-x-1">
-                          <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 font-medium">
-                            Price Impact
-                          </div>
+                          <Tooltip
+                            placement="top"
+                            content="Price impact"
+                            className="z-50 bg-dark text-white text-xs"
+                          >
+                            <div className="flex items-center">
+                              <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-medium">
+                                Price Impact
+                              </div>
+                              <BiInfoCircle
+                                size={14}
+                                className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                              />
+                            </div>
+                          </Tooltip>
                           <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
                             <span>
                               {number_format(
@@ -3386,7 +3404,7 @@ export default () => {
                 wrong_chain ?
                   <Wallet
                     connectChainId={chain_id}
-                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-lg font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                   >
                     <span className="mr-1.5 sm:mr-2">
                       {is_walletconnect ?
@@ -3580,7 +3598,7 @@ export default () => {
                               setSlippageEditing(false)
                               call()
                             }}
-                            className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-lg text-center py-3 sm:py-4 px-2 sm:px-3`}
+                            className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base text-center py-3 sm:py-4 px-2 sm:px-3`}
                           >
                             <span className="flex items-center justify-center space-x-1.5">
                               {
@@ -3751,7 +3769,7 @@ export default () => {
                       <button
                         disabled={true}
                         onClick={() => call()}
-                        className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base sm:text-lg text-center py-3 sm:py-4 px-2 sm:px-3"
+                        className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base sm:text-base text-center py-3 sm:py-4 px-2 sm:px-3"
                       >
                         {
                           !asset ?
@@ -3772,7 +3790,7 @@ export default () => {
                                       height="20"
                                     />
                                   </div>
-                                  <span className="text-slate-400 dark:text-slate-500 text-lg">
+                                  <span className="text-slate-400 dark:text-slate-500 text-base">
                                     Fetching pair information ...
                                   </span>
                                 </div>
@@ -3781,7 +3799,7 @@ export default () => {
                       <Wallet
                         connectChainId={chain_id}
                         buttonConnectTitle="Connect Wallet"
-                        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-lg font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                       >
                         <span>
                           Connect Wallet

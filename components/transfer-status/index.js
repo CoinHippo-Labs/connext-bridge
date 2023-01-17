@@ -9,6 +9,7 @@ import Fade from 'react-reveal/Fade'
 import { TiArrowRight } from 'react-icons/ti'
 import { HiOutlineCheckCircle } from 'react-icons/hi'
 import { BsLightningCharge } from 'react-icons/bs'
+import { BiInfoCircle } from 'react-icons/bi'
 
 import Image from '../image'
 import EnsProfile from '../ens-profile'
@@ -502,12 +503,13 @@ export default (
           <div className="flex flex-col items-center">
             {
               pending ?
-                <TimeSpent
+                /*<TimeSpent
                   title="Time spent"
                   from_time={xcall_timestamp}
                   to_time={execute_timestamp}
                   className={`${pending ? 'text-blue-500 dark:text-blue-300' : 'text-yellow-600 dark:text-yellow-400'} font-semibold`}
-                /> :
+                />*/
+                null :
                 <a
                   href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', execute_transaction_hash)}`}
                   target="_blank"
@@ -612,7 +614,7 @@ export default (
           (
             <div className="flex items-center justify-between mt-0.5">
               {pending ?
-                <div className="flex items-center space-x-1">
+                /*<div className="flex items-center space-x-1">
                   <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
                     Est. time:
                   </div>
@@ -625,30 +627,27 @@ export default (
                     }
                     className="z-50 bg-dark text-white text-xs"
                   >
-                    <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
-                      {
-                        force_slow ?
-                          <span className="text-yellow-500 dark:text-yellow-400">
-                            90 mins
-                          </span> :
-                          <span className="text-green-500 dark:text-green-500">
-                            4 mins
-                          </span>
-                      }
-                    </span>
+                    <div className="flex items-center">
+                      <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
+                        {
+                          force_slow ?
+                            <span className="text-yellow-500 dark:text-yellow-400">
+                              90 mins
+                            </span> :
+                            <span className="text-green-500 dark:text-green-500">
+                              4 mins
+                            </span>
+                        }
+                      </span>
+                      <BiInfoCircle
+                        size={14}
+                        className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                      />
+                    </div>
                   </Tooltip>
-                </div> :
+                </div>*/
+                null :
                 <span>
-                  {/*
-                    force_slow &&
-                    (
-                      <div className={`rounded border ${status === XTransferStatus.CompletedSlow ? 'border-green-500 dark:border-green-500 text-green-400 dark:text-green-400' : 'border-blue-500 dark:border-blue-500 text-blue-400 dark:text-blue-400'} flex items-center space-x-1 py-0.5 px-1.5`}>
-                        <span className="uppercase text-xs font-bold">
-                          Slow
-                        </span>
-                      </div>
-                    )
-                  */}
                   {
                     !force_slow &&
                     (
@@ -657,10 +656,14 @@ export default (
                         content="Boosted by router liquidity."
                         className="z-50 bg-dark text-white text-xs"
                       >
-                        <div>
+                        <div className="flex items-center">
                           <BsLightningCharge
                             size={16}
                             className="text-yellow-600 dark:text-yellow-400"
+                          />
+                          <BiInfoCircle
+                            size={14}
+                            className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
                           />
                         </div>
                       </Tooltip>
@@ -681,15 +684,17 @@ export default (
                 }
                 className="z-50 bg-dark text-white text-xs"
               >
-                <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
-                  {
-                    moment(
-                      xcall_timestamp * 1000
-                    )
-                    .format('MMM D, YYYY h:mm:ss A')
-                    // .fromNow()
-                  }
-                </span>
+                <div className="flex items-center">
+                  <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                    {
+                      moment(
+                        xcall_timestamp * 1000
+                      )
+                      .format('MMM D, YYYY h:mm:ss A')
+                      // .fromNow()
+                    }
+                  </span>
+                </div>
               </Tooltip>
             </div>
           )

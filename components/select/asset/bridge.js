@@ -198,7 +198,7 @@ export default (
       buttonClassName={`w-full min-w-max h-16 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded border dark:border-slate-700 ${disabled ? 'cursor-not-allowed' : ''} grid grid-cols-2 sm:grid-cols-3 items-center gap-2 py-2 px-3`}
       title={
         <div className="flex items-center justify-between space-x-2">
-          <span>
+          <span className="normal-case">
             Select token
           </span>
           {
@@ -222,7 +222,7 @@ export default (
                           />
                         )
                       }
-                      <span className="text-xs font-semibold">
+                      <span className="normal-case text-xs font-semibold">
                         {chainName(source_chain_data)}
                       </span>
                     </div>
@@ -247,7 +247,7 @@ export default (
                           />
                         )
                       }
-                      <span className="text-xs font-semibold">
+                      <span className="normal-case text-xs font-semibold">
                         {chainName(destination_chain_data)}
                       </span>
                     </div>

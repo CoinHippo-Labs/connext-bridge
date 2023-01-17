@@ -5,6 +5,7 @@ import Switch from 'react-switch'
 import { DebounceInput } from 'react-debounce-input'
 import { Tooltip } from '@material-tailwind/react'
 import { RiSettings3Line } from 'react-icons/ri'
+import { BiInfoCircle } from 'react-icons/bi'
 
 import Modal from '../../modals'
 import { switch_color } from '../../../lib/utils'
@@ -90,7 +91,11 @@ export default (
         </div>
       }
       buttonClassName={`min-w-max ${disabled ? 'cursor-not-allowed' : ''} rounded ${applied ? 'border border-blue-400 dark:border-blue-500' : ''} flex items-center justify-center`}
-      title="Advanced Options"
+      title={
+        <span className="normal-case">
+          Advanced options
+        </span>
+      }
       body={
         <div className="form mt-2">
           {fields
@@ -120,8 +125,14 @@ export default (
                         content={tooltip}
                         className="z-50 bg-dark text-white text-xs"
                       >
-                        <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 font-medium">
-                          {label}
+                        <div className="w-fit flex items-center">
+                          <div className="max-w-fit text-slate-600 dark:text-slate-200 font-medium mb-1">
+                            {label}
+                          </div>
+                          <BiInfoCircle
+                            size={16}
+                            className="block sm:hidden text-slate-400 dark:text-slate-500 mb-0.5 ml-1 sm:ml-0"
+                          />
                         </div>
                       </Tooltip> :
                       <div className="form-label text-slate-600 dark:text-slate-200 font-medium">
