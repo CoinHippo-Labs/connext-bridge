@@ -2,12 +2,12 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, constants, utils } from 'ethers'
-import { XTransferStatus } from '@connext/nxtp-utils'
+import { XTransferStatus, XTransferErrorStatus } from '@connext/nxtp-utils'
 import { TailSpin } from 'react-loader-spinner'
 import { Tooltip } from '@material-tailwind/react'
 import Fade from 'react-reveal/Fade'
 import { TiArrowRight } from 'react-icons/ti'
-import { HiOutlineCheckCircle } from 'react-icons/hi'
+import { HiOutlineCheckCircle, HiOutlineXCircle } from 'react-icons/hi'
 import { BsLightningCharge } from 'react-icons/bs'
 import { BiInfoCircle } from 'react-icons/bi'
 
@@ -68,6 +68,7 @@ export default (
   const {
     transfer_id,
     status,
+    error_status,
     origin_chain,
     origin_domain,
     origin_transacting_asset,
@@ -387,6 +388,14 @@ export default (
       XTransferStatus.CompletedSlow,
     ].includes(status)
 
+  const errored =
+    [
+      // XTransferErrorStatus.LowSlippage,
+      // XTransferErrorStatus.InsufficientRelayerFee,
+      'LowSlippage',
+      'InsufficientRelayerFee',
+    ].includes(error_status)
+
   return (
     data &&
     (
@@ -411,6 +420,7 @@ export default (
           </div>
           {
             pending &&
+            !errored &&
             (
               <div className="flex items-center justify-center">
                 <div
@@ -502,24 +512,35 @@ export default (
           </div>
           <div className="flex flex-col items-center">
             {
-              pending ?
-                /*<TimeSpent
-                  title="Time spent"
-                  from_time={xcall_timestamp}
-                  to_time={execute_timestamp}
-                  className={`${pending ? 'text-blue-500 dark:text-blue-300' : 'text-yellow-600 dark:text-yellow-400'} font-semibold`}
-                />*/
-                null :
-                <a
-                  href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', execute_transaction_hash)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+              errored ?
+                <Tooltip
+                  placement="top"
+                  content={error_status}
+                  className="z-50 bg-dark text-white text-xs"
                 >
-                  <HiOutlineCheckCircle
+                  <HiOutlineXCircle
                     size={32}
-                    className="text-green-500 dark:text-green-400"
+                    className="text-red-500 dark:text-red-400"
                   />
-                </a>
+                </Tooltip> :
+                pending ?
+                  /*<TimeSpent
+                    title="Time spent"
+                    from_time={xcall_timestamp}
+                    to_time={execute_timestamp}
+                    className={`${pending ? 'text-blue-500 dark:text-blue-300' : 'text-yellow-600 dark:text-yellow-400'} font-semibold`}
+                  />*/
+                  null :
+                  <a
+                    href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', execute_transaction_hash)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <HiOutlineCheckCircle
+                      size={32}
+                      className="text-green-500 dark:text-green-400"
+                    />
+                  </a>
             }
           </div>
           <div
@@ -613,64 +634,66 @@ export default (
           xcall_timestamp &&
           (
             <div className="flex items-center justify-between mt-0.5">
-              {pending ?
-                <div className="flex items-center space-x-1">
-                  {/*
-                    <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
-                      Est. time:
-                    </div>
-                    <Tooltip
-                      placement="top"
-                      content={
-                        force_slow ?
-                          'Unable to leverage fast liquidity. Your transfer will still complete.' :
-                          'Fast transfer enabled by Connext router network.'
-                      }
-                      className="z-50 bg-dark text-white text-xs"
-                    >
-                      <div className="flex items-center">
-                        <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
-                          {
-                            force_slow ?
-                              <span className="text-yellow-500 dark:text-yellow-400">
-                                90 mins
-                              </span> :
-                              <span className="text-green-500 dark:text-green-500">
-                                4 mins
-                              </span>
-                          }
-                        </span>
-                        <BiInfoCircle
-                          size={14}
-                          className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                        />
+              {
+                pending &&
+                !errored ?
+                  <div className="flex items-center space-x-1">
+                    {/*
+                      <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
+                        Est. time:
                       </div>
-                    </Tooltip>
-                  */}
-                </div> :
-                <span>
-                  {
-                    !force_slow &&
-                    (
                       <Tooltip
-                        placement="bottom"
-                        content="Boosted by router liquidity."
+                        placement="top"
+                        content={
+                          force_slow ?
+                            'Unable to leverage fast liquidity. Your transfer will still complete.' :
+                            'Fast transfer enabled by Connext router network.'
+                        }
                         className="z-50 bg-dark text-white text-xs"
                       >
                         <div className="flex items-center">
-                          <BsLightningCharge
-                            size={16}
-                            className="text-yellow-600 dark:text-yellow-400"
-                          />
+                          <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
+                            {
+                              force_slow ?
+                                <span className="text-yellow-500 dark:text-yellow-400">
+                                  90 mins
+                                </span> :
+                                <span className="text-green-500 dark:text-green-500">
+                                  4 mins
+                                </span>
+                            }
+                          </span>
                           <BiInfoCircle
                             size={14}
                             className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
                           />
                         </div>
                       </Tooltip>
-                    )
-                  }
-                </span>
+                    */}
+                  </div> :
+                  <span>
+                    {
+                      !force_slow &&
+                      (
+                        <Tooltip
+                          placement="bottom"
+                          content="Boosted by router liquidity."
+                          className="z-50 bg-dark text-white text-xs"
+                        >
+                          <div className="flex items-center">
+                            <BsLightningCharge
+                              size={16}
+                              className="text-yellow-600 dark:text-yellow-400"
+                            />
+                            <BiInfoCircle
+                              size={14}
+                              className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                            />
+                          </div>
+                        </Tooltip>
+                      )
+                    }
+                  </span>
               }
               <Tooltip
                 placement="top"
