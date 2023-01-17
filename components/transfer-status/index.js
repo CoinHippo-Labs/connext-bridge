@@ -399,7 +399,7 @@ export default (
   return (
     data &&
     (
-      <div className={`bg-slate-100 dark:bg-slate-900 max-w-xs sm:max-w-none rounded ${pending ? 'border-0 border-blue-500' : 'border-0 border-green-500'} mx-auto py-5 px-4`}>
+      <div className={`bg-slate-100 dark:bg-slate-900 max-w-xs sm:max-w-none rounded ${errored ? 'border-0 border-red-500' : pending ? 'border-0 border-blue-500' : 'border-0 border-green-500'} mx-auto py-5 px-4`}>
         <div className="flex items-center justify-between space-x-2">
           <div className="flex items-center space-x-1.5">
             {
