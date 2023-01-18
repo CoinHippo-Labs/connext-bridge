@@ -6,7 +6,8 @@ import { XTransferStatus, XTransferErrorStatus } from '@connext/nxtp-utils'
 import { Tooltip } from '@material-tailwind/react'
 import Fade from 'react-reveal/Fade'
 import { TiArrowRight } from 'react-icons/ti'
-import { HiOutlineCheckCircle, HiOutlineXCircle } from 'react-icons/hi'
+import { HiOutlineCheckCircle } from 'react-icons/hi'
+import { IoWarning } from 'react-icons/io5'
 import { BsLightningCharge } from 'react-icons/bs'
 import { BiInfoCircle } from 'react-icons/bi'
 
@@ -517,18 +518,22 @@ export default (
                   content={error_status}
                   className="z-50 bg-dark text-white text-xs"
                 >
-                  <HiOutlineXCircle
-                    size={32}
-                    className="text-red-500 dark:text-red-400"
-                  />
+                  <div>
+                    <IoWarning
+                      size={24}
+                      className="text-red-600 dark:text-red-500"
+                    />
+                  </div>
                 </Tooltip> :
                 pending ?
-                  /*<TimeSpent
+                  /*
+                  <TimeSpent
                     title="Time spent"
                     from_time={xcall_timestamp}
                     to_time={execute_timestamp}
                     className={`${pending ? 'text-blue-500 dark:text-blue-300' : 'text-yellow-600 dark:text-yellow-400'} font-semibold`}
-                  />*/
+                  />
+                  */
                   null :
                   <a
                     href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', execute_transaction_hash)}`}
