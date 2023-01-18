@@ -5,13 +5,10 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, Contract, constants, utils } from 'ethers'
-import { TailSpin } from 'react-loader-spinner'
 import { TiArrowLeft, TiArrowRight } from 'react-icons/ti'
 
 import Info from './info'
 import Liquidity from './liquidity'
-import SelectChain from '../select/chain'
-import SelectAsset from '../select/asset'
 import Image from '../image'
 import { chainName } from '../../lib/object/chain'
 import { number_format, params_to_obj, equals_ignore_case, loader_color } from '../../lib/utils'
@@ -926,63 +923,6 @@ export default () => {
           </Link>
           <div className="space-y-6 sm:space-y-16">
             <div className="space-y-2">
-              {/*<div className="grid sm:flex sm:items-center sm:justify-between sm:space-x-2 gap-2">
-                <div className="order-2 sm:order-1 flex items-center space-x-4 sm:space-x-6">
-                  <SelectAsset
-                    value={asset}
-                    onSelect={a => {
-                      setPool(
-                        {
-                          ...pool,
-                          asset: a,
-                        }
-                      )
-                    }}
-                    chain={chain}
-                    origin=""
-                    is_pool={true}
-                  />
-                  <div className="uppercase text-xs sm:text-sm font-medium">
-                    on
-                  </div>
-                  <SelectChain
-                    value={chain}
-                    onSelect={c => {
-                      setPool(
-                        {
-                          ...pool,
-                          chain: c,
-                        }
-                      )
-                    }}
-                    origin=""
-                    is_pool={true}
-                  />
-                </div>
-                {
-                  no_pool &&
-                  (
-                    <div className="order-2 tracking-normal text-slate-400 dark:text-slate-400 text-base font-medium py-1.5 px-4">
-                      Pool doesn't exist
-                    </div>
-                  )
-                }
-                {
-                  name &&
-                  lpTokenAddress &&
-                  url &&
-                  (
-                    <a
-                      href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="order-1 sm:order-2 w-fit underline text-base font-semibold py-1.5 px-4"
-                    >
-                      {name}
-                    </a>
-                  )
-                }
-              </div>*/}
               <div className="flex flex-wrap items-center justify-between space-y-4 lg:space-y-0 sm:space-x-2">
                 <div className="flex items-center space-x-1">
                   <div className="flex items-center space-x-3 sm:space-x-4">

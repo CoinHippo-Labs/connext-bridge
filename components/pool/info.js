@@ -648,39 +648,41 @@ export default (
                     </span>
                   </div>
                 </div>
-                {/*<div className={metricClassName}>
-                  <span className={titleClassName}>
-                    Fees (24h)
-                  </span>
-                  <span className={valueClassName}>
-                    {
-                      pool_data &&
-                      !error ?
-                        <>
-                          {currency_symbol}
-                          {number_format(
-                            fees,
-                            '0,0.000000',
-                            true,
-                          )}
-                        </> :
-                        selected &&
-                        !no_pool &&
-                        !error &&
-                        (
-                          pool_loading ?
-                            <div className="mt-1">
-                              <TailSpin
-                                color={loader_color(theme)}
-                                width="24"
-                                height="24"
-                              />
-                            </div> :
-                            '-'
-                        )
-                    }
-                  </span>
-                </div>*/}
+                {/*
+                  <div className={metricClassName}>
+                    <span className={titleClassName}>
+                      Fees (24h)
+                    </span>
+                    <span className={valueClassName}>
+                      {
+                        pool_data &&
+                        !error ?
+                          <>
+                            {currency_symbol}
+                            {number_format(
+                              fees,
+                              '0,0.000000',
+                              true,
+                            )}
+                          </> :
+                          selected &&
+                          !no_pool &&
+                          !error &&
+                          (
+                            pool_loading ?
+                              <div className="mt-1">
+                                <TailSpin
+                                  color={loader_color(theme)}
+                                  width="24"
+                                  height="24"
+                                />
+                              </div> :
+                              '-'
+                          )
+                      }
+                    </span>
+                  </div>
+                */}
               </div>
             </div>
           </div> :

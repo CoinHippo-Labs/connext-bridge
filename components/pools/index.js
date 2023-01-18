@@ -4,10 +4,8 @@ import _ from 'lodash'
 import { BigNumber, utils } from 'ethers'
 import { TailSpin } from 'react-loader-spinner'
 
-import Total from './total'
 import Pools from './pools'
-import { currency_symbol } from '../../lib/object/currency'
-import { number_format, name, equals_ignore_case, loader_color } from '../../lib/utils'
+import { equals_ignore_case, loader_color } from '../../lib/utils'
 
 const WRAPPED_PREFIX =
   process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
@@ -395,13 +393,6 @@ export default () => {
                 }
               </div>
             </div>
-            {
-              false &&
-              view === 'pools' &&
-              (
-                <Total />
-              )
-            }
           </div>
           <Pools
             view={view}

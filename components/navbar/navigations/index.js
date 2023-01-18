@@ -70,7 +70,8 @@ export default (
               }
               break
             case 'pools':
-              /*if (
+              /*
+              if (
                 pathname === '/pool/[pool]' &&
                 pool
               ) {
@@ -85,7 +86,8 @@ export default (
               }
               else {
                 path = '/pools'
-              }*/
+              }
+              */
               path = '/pools'
               // path = '/pool'
               break

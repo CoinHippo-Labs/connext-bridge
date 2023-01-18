@@ -203,13 +203,15 @@ export default (
           '[wrap]' :
           '[mint]',
         is_wrapped ?
-          /*{
+          /*
+          {
             to: _address,
             value: _amount,
             overrides: {
               gasLimit,
             },
-          }*/
+          }
+          */
           {
             value: _amount,
           } :

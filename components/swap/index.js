@@ -2376,44 +2376,6 @@ export default () => {
                     no_shadow={true}
                     className="w-fit flex items-center justify-center space-x-1.5 sm:space-x-2 mt-0.25"
                   />
-                  {/*
-                    name &&
-                    (
-                      <div className="flex items-center space-x-1.5">
-                        <span className="text-lg font-semibold">
-                          on
-                        </span>
-                        {
-                          image &&
-                          (
-                            <>
-                              <div className="flex sm:hidden">
-                                <Image
-                                  src={image}
-                                  alt=""
-                                  width={18}
-                                  height={18}
-                                  className="rounded-full"
-                                />
-                              </div>
-                              <div className="hidden sm:flex">
-                                <Image
-                                  src={image}
-                                  alt=""
-                                  width={24}
-                                  height={24}
-                                  className="rounded-full"
-                                />
-                              </div>
-                            </>
-                          )
-                        }
-                        <span className="whitespace-nowrap text-base sm:text-xl font-semibold">
-                          {name}
-                        </span>
-                      </div>
-                    )
-                  */}
                 </div>
                 <Options
                   disabled={disabled}
@@ -2444,14 +2406,16 @@ export default () => {
               <div className="space-y-7">
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between space-x-2">
-                    <span className="text-slate-600 dark:text-slate-500 text-xs font-medium">
+                    <span className="text-slate-600 dark:text-slate-500 text-sm font-medium">
                       Pay with
                     </span>
-                    {/*<GasPrice
-                      chainId={chain_id}
-                      iconSize={18}
-                      className="text-xs pr-1"
-                    />*/}
+                    {/*
+                      <GasPrice
+                        chainId={chain_id}
+                        iconSize={18}
+                        className="text-xs pr-1"
+                      />
+                    */}
                     {
                       chain_data &&
                       asset &&
@@ -2462,7 +2426,7 @@ export default () => {
                       (
                         <div className="flex items-center justify-between space-x-2">
                           <div className="flex items-center space-x-1">
-                            <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                            <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
                               Balance:
                             </div>
                             <button
@@ -2644,7 +2608,7 @@ export default () => {
                           ].includes(e.key) &&
                           e.preventDefault()
                         }
-                        className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-base font-semibold text-right py-1.5`}
+                        className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg font-semibold text-right py-1.5`}
                       />
                     </div>
                     {
@@ -2652,7 +2616,7 @@ export default () => {
                       (
                         <div className="flex items-center justify-between space-x-2">
                           <div className="flex items-center space-x-1">
-                            <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                            <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
                               Balance:
                             </div>
                             {
@@ -2749,7 +2713,7 @@ export default () => {
                                     setSwapAmount(true)
                                   }
                                 }}
-                                className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-xs font-medium`}
+                                className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-sm font-medium`}
                               >
                                 Select Max
                               </button>
@@ -2809,7 +2773,7 @@ export default () => {
                 }
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between space-x-2">
-                    <span className="text-slate-600 dark:text-slate-500 text-xs font-medium">
+                    <span className="text-slate-600 dark:text-slate-500 text-sm font-medium">
                       You Receive
                     </span>
                     {
@@ -2822,7 +2786,7 @@ export default () => {
                       (
                         <div className="flex items-center justify-between space-x-2">
                           <div className="flex items-center space-x-1">
-                            <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                            <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
                               Balance:
                             </div>
                             <button
@@ -3033,7 +2997,7 @@ export default () => {
                               ].includes(e.key) &&
                               e.preventDefault()
                             }
-                            className={`w-36 sm:w-48 bg-transparent ${'cursor-default' || (disabled ? 'cursor-not-allowed' : '')} rounded border-0 focus:ring-0 sm:text-base font-semibold text-right py-1.5`}
+                            className={`w-36 sm:w-48 bg-transparent ${'cursor-default' || (disabled ? 'cursor-not-allowed' : '')} rounded border-0 focus:ring-0 sm:text-lg font-semibold text-right py-1.5`}
                           />*/
                           <DecimalsFormat
                             value={
@@ -3064,7 +3028,7 @@ export default () => {
                                 ].includes(amount) ?
                                   'text-slate-500 dark:text-slate-500' :
                                   ''
-                              } sm:text-base font-semibold text-right py-1.5`
+                              } sm:text-lg font-semibold text-right py-1.5`
                             }
                           />
                       }
@@ -3074,7 +3038,7 @@ export default () => {
                       (
                         <div className="flex items-center justify-between space-x-2">
                           <div className="flex items-center space-x-1">
-                            <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                            <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
                               Balance:
                             </div>
                             {
@@ -3161,7 +3125,7 @@ export default () => {
                                     )
                                   }
                                 }}
-                                className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-xs font-medium`}
+                                className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-sm font-medium`}
                               >
                                 Select Max
                               </button>
@@ -3182,10 +3146,10 @@ export default () => {
                 (
                   <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-2.5 py-3.5 px-3">
                     <div className="flex items-center justify-between space-x-1">
-                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-medium">
+                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-medium">
                         Rate
                       </div>
-                      <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
+                      <span className="whitespace-nowrap text-sm font-semibold space-x-1.5">
                         <DecimalsFormat
                           value={
                             number_format(
@@ -3194,6 +3158,7 @@ export default () => {
                               true,
                             )
                           }
+                          className="text-sm"
                         />
                       </span>
                     </div>
@@ -3205,7 +3170,7 @@ export default () => {
                           className="z-50 bg-dark text-white text-xs"
                         >
                           <div className="flex items-center">
-                            <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-medium">
+                            <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-medium">
                               Slippage Tolerance
                             </div>
                             <BiInfoCircle
@@ -3280,7 +3245,7 @@ export default () => {
                                     ].includes(e.key) &&
                                     e.preventDefault()
                                   }
-                                  className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-xs font-semibold text-right py-1 px-2`}
+                                  className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm font-semibold text-right py-1 px-2`}
                                 />
                                 <button
                                   onClick={() => setSlippageEditing(false)}
@@ -3319,7 +3284,7 @@ export default () => {
                               </div>
                             </> :
                             <div className="flex items-center space-x-1.5">
-                              <span className="text-xs font-semibold">
+                              <span className="text-sm font-semibold">
                                 {number_format(
                                   slippage,
                                   '0,0.000000',
@@ -3374,7 +3339,7 @@ export default () => {
                             className="z-50 bg-dark text-white text-xs"
                           >
                             <div className="flex items-center">
-                              <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-xs font-medium">
+                              <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-medium">
                                 Price Impact
                               </div>
                               <BiInfoCircle
@@ -3383,7 +3348,7 @@ export default () => {
                               />
                             </div>
                           </Tooltip>
-                          <span className="whitespace-nowrap text-xs font-semibold space-x-1.5">
+                          <span className="whitespace-nowrap text-sm font-semibold space-x-1.5">
                             <span>
                               {number_format(
                                 priceImpact,

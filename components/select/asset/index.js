@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import { Puff } from 'react-loader-spinner'
-import { IoRadioButtonOn } from 'react-icons/io5'
 import { BiChevronDown } from 'react-icons/bi'
 
 import Image from '../../image'
@@ -165,7 +164,7 @@ export default (
                 </>
               )
             }
-            <span className={`whitespace-nowrap sm:text-base font-semibold ${!image ? 'sm:ml-3' : ''}`}>
+            <span className={`whitespace-nowrap sm:text-lg font-semibold ${!image ? 'sm:ml-3' : ''}`}>
               {symbol}
             </span>
             {

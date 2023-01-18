@@ -149,7 +149,8 @@ export default (
           )
         }
 
-        /*if (window.clover) {
+        /*
+        if (window.clover) {
           providerOptions['custom-clover'] = {
             package: async () => {
               let provider = null
@@ -213,7 +214,8 @@ export default (
               logo: '/logos/wallets/clover.png',
             },
           }
-        }*/
+        }
+        */
 
         web3Modal =
           new Web3Modal(

@@ -5,34 +5,38 @@ import { BiChevronDown, BiChevronUp, BiLeftArrowAlt, BiRightArrowAlt } from 'rea
 
 import { PageWithText, Pagination } from '../paginations'
 
-const IndeterminateCheckbox = forwardRef(
-  (
-    {
-      indeterminate,
-      ...rest
-    },
-    ref
-  ) => {
-    const defaultRef = useRef()
+const IndeterminateCheckbox =
+  forwardRef(
+    (
+      {
+        indeterminate,
+        ...rest
+      },
+      ref
+    ) => {
+      const defaultRef = useRef()
 
-    const resolvedRef =
-      ref ||
-      defaultRef
+      const resolvedRef =
+        ref ||
+        defaultRef
 
-    useEffect(() => {
-      resolvedRef.current.indeterminate = indeterminate
-    }, [resolvedRef, indeterminate])
+      useEffect(
+        () => {
+          resolvedRef.current.indeterminate = indeterminate
+        },
+        [resolvedRef, indeterminate],
+      )
 
-    return (
-      <input
-        ref={resolvedRef}
-        type="checkbox"
-        { ...rest }
-        className="form-checkbox w-4 h-4"
-      />
-    )
-  }
-)
+      return (
+        <input
+          ref={resolvedRef}
+          type="checkbox"
+          { ...rest }
+          className="form-checkbox w-4 h-4"
+        />
+      )
+    }
+  )
 
 export default (
   {
@@ -40,12 +44,13 @@ export default (
     data,
     rowSelectEnable = false,
     defaultPageSize = 10,
-    pageSizes = [
-      10,
-      25,
-      50,
-      100,
-    ],
+    pageSizes =
+      [
+        10,
+        25,
+        50,
+        100,
+      ],
     noPagination = false,
     noRecordPerPage = false,
     className = '',
