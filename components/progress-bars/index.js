@@ -4,6 +4,8 @@ export const ProgressBar = (
     color,
     className = '',
     backgroundClassName = '',
+    style,
+    backgroundStyle,
   },
 ) => {
   width =
@@ -14,11 +16,19 @@ export const ProgressBar = (
         width
 
   return (
-    <div className={`w-full h-1 relative flex flex-row items-center text-xs text-center ${backgroundClassName}`}>
+    <div
+      className={`w-full h-1 relative flex flex-row items-center text-xs text-center ${backgroundClassName}`}
+      style={
+        {
+          ...backgroundStyle,
+        }
+      }
+    >
       <div
         className={`w-full h-1 top-0 left-0 ${color} ${className}`}
         style={
           {
+            ...style,
             width: `${width}%`,
           }
         }

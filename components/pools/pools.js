@@ -790,7 +790,7 @@ export default (
                                 </a>
                                 </Link> :
                                 <>
-                                  <div className="flex items-center space-x-2">
+                                  <div className="h-10 flex items-center space-x-2">
                                     {
                                       image &&
                                       (
@@ -840,7 +840,7 @@ export default (
                                             href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                           >
                                           <a
-                                            className="h-6 flex items-center font-medium ml-8"
+                                            className="h-10 flex items-center font-medium ml-8"
                                           >
                                             {name}
                                           </a>
@@ -919,7 +919,7 @@ export default (
                                 <>
                                   <div
                                     onClick={() => onClick()}
-                                    className={`w-fit ${pools?.length > 0 ? 'cursor-pointer' : ''} flex items-center`}
+                                    className={`w-fit h-10 ${pools?.length > 0 ? 'cursor-pointer' : ''} flex items-center`}
                                   >
                                     {pools?.length > 0 ?
                                       <>
@@ -1013,7 +1013,7 @@ export default (
                                             href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                           >
                                           <a
-                                            className="h-6 flex items-center space-x-2"
+                                            className="h-10 flex items-center space-x-2"
                                           >
                                             {
                                               image &&
@@ -1041,7 +1041,7 @@ export default (
                           )
                         },
                       },
-                      /*{
+                      {
                         Header: 'Assets',
                         accessor: 'assets',
                         sortType: (a, b) =>
@@ -1051,11 +1051,12 @@ export default (
                         Cell: props => {
                           const {
                             id,
+                            asset_data,
                             pools,
                           } = { ...props.row.original }
 
                           const native_assets =
-                            pools
+                            (pools || [])
                               .map(p => {
                                 const {
                                   adopted,
@@ -1074,7 +1075,7 @@ export default (
                               })
 
                           const wrapped_assets =
-                            pools
+                            (pools || [])
                               .map(p => {
                                 const {
                                   adopted,
@@ -1091,6 +1092,10 @@ export default (
                                   asset,
                                 }
                               })
+
+                          const native_asset = _.head(native_assets)
+
+                          const wrapped_asset = _.head(wrapped_assets)
 
                           const native_amount =
                             _.sum(
@@ -1116,59 +1121,131 @@ export default (
 
                           const total_amount = native_amount + wrapped_amount
 
+                          const {
+                            color,
+                          } = { ...asset_data }
+
                           return (
                             <div className="flex flex-col space-y-3">
-                              <div className="flex flex-col items-end space-y-2 my-1">
-                                <ProgressBar
-                                  width={native_amount * 100 / total_amount}
-                                  color="bg-yellow-500"
-                                  className="h-1.5 rounded-lg"
-                                />
-                                <div className="flex items-center justify-between space-x-2">
-                                  <DecimalsFormat
-                                    value={
-                                      number_format(
-                                        native_amount,
-                                        native_amount > 100 ?
-                                          '0,0' :
-                                          native_amount > 1 ?
-                                            '0,0.00' :
-                                            '0,0.000000',
-                                        true,
-                                      )
-                                    }
-                                    max_decimals={
-                                      native_amount > 100 ?
-                                        0 :
-                                        native_amount > 1 ?
-                                          2 :
-                                          6
-                                    }
-                                    className="text-slate-500 dark:text-slate-400 text-xs font-medium"
-                                  />
-                                  <DecimalsFormat
-                                    value={
-                                      number_format(
-                                        wrapped_amount,
-                                        wrapped_amount > 100 ?
-                                          '0,0' :
-                                          wrapped_amount > 1 ?
-                                            '0,0.00' :
-                                            '0,0.000000',
-                                        true,
-                                      )
-                                    }
-                                    max_decimals={
-                                      wrapped_amount > 100 ?
-                                        0 :
-                                        wrapped_amount > 1 ?
-                                          2 :
-                                          6
-                                    }
-                                    className="text-slate-500 dark:text-slate-400 text-xs font-medium"
-                                  />
-                                </div>
-                              </div>
+                              {
+                                total_amount > 0 ?
+                                  <div className="w-full h-10 flex flex-col items-end space-y-1 py-1">
+                                    <ProgressBar
+                                      width={native_amount * 100 / total_amount}
+                                      className="w-full h-1.5 rounded-lg"
+                                      backgroundClassName="rounded-lg"
+                                      style={
+                                        {
+                                          backgroundColor: color,
+                                        }
+                                      }
+                                      backgroundStyle={
+                                        {
+                                          backgroundColor: `${color}66`,
+                                        }
+                                      }
+                                    />
+                                    <div className="w-full flex items-center justify-between space-x-2">
+                                      <div className="flex flex-col items-start space-y-0.5">
+                                        <DecimalsFormat
+                                          value={
+                                            number_format(
+                                              native_amount,
+                                              native_amount > 100 ?
+                                                '0,0' :
+                                                native_amount > 1 ?
+                                                  '0,0.00' :
+                                                  '0,0.000000',
+                                              true,
+                                            )
+                                          }
+                                          max_decimals={
+                                            native_amount > 100 ?
+                                              0 :
+                                              native_amount > 1 ?
+                                                2 :
+                                                6
+                                          }
+                                          className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
+                                        />
+                                        <div className="flex items-center space-x-1">
+                                          {
+                                            native_asset?.asset_data?.image &&
+                                            (
+                                              <Image
+                                                src={native_asset.asset_data.image}
+                                                alt=""
+                                                width={14}
+                                                height={14}
+                                                className="rounded-full"
+                                              />
+                                            )
+                                          }
+                                          <span className="leading-3 text-2xs font-medium">
+                                            {
+                                              native_asset?.asset?.symbol ||
+                                              native_asset?.asset_data?.symbol
+                                            }
+                                          </span>
+                                        </div>
+                                      </div>
+                                      <div className="flex flex-col items-end space-y-0.5">
+                                        <DecimalsFormat
+                                          value={
+                                            number_format(
+                                              wrapped_amount,
+                                              wrapped_amount > 100 ?
+                                                '0,0' :
+                                                wrapped_amount > 1 ?
+                                                  '0,0.00' :
+                                                  '0,0.000000',
+                                              true,
+                                            )
+                                          }
+                                          max_decimals={
+                                            wrapped_amount > 100 ?
+                                              0 :
+                                              wrapped_amount > 1 ?
+                                                2 :
+                                                6
+                                          }
+                                          className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
+                                        />
+                                        <div className="flex items-center space-x-1">
+                                          {
+                                            (
+                                              wrapped_asset?.contract_data?.next_asset?.image ||
+                                              wrapped_asset?.asset_data?.image
+                                            ) &&
+                                            (
+                                              <Image
+                                                src={
+                                                  wrapped_asset?.contract_data?.next_asset?.image ||
+                                                  wrapped_asset?.asset_data?.image
+                                                }
+                                                alt=""
+                                                width={14}
+                                                height={15}
+                                                className="rounded-full"
+                                              />
+                                            )
+                                          }
+                                          <span className="leading-3 text-2xs font-medium">
+                                            {
+                                              wrapped_asset?.asset?.symbol ||
+                                              wrapped_asset?.contract_data?.next_asset?.symbol
+                                            }
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div> :
+                                  <div className="h-10 flex items-center justify-end">
+                                    <span className="text-slate-400 dark:text-slate-500">
+                                      No liquidity
+                                    </span>
+                                  </div>
+                              }
                               {
                                 uncollapseAssetIds?.includes(id) &&
                                 (pools || [])
@@ -1176,14 +1253,43 @@ export default (
                                     const {
                                       chain_data,
                                       asset_data,
-                                      tvl,
+                                      contract_data,
+                                      adopted,
+                                      local,
                                       lpTokenAddress,
                                       error,
                                     } = { ...p }
 
                                     const chain = chain_data?.id
                                     const asset = asset_data?.id
-                                    const value = tvl
+
+                                    const native_asset =
+                                      !adopted?.symbol?.startsWith(WRAPPED_PREFIX) ?
+                                        adopted :
+                                        local
+
+                                    const wrapped_asset =
+                                      adopted?.symbol?.startsWith(WRAPPED_PREFIX) ?
+                                        adopted :
+                                        local
+
+                                    const native_amount =
+                                      Number(
+                                        native_asset?.balance ||
+                                        '0'
+                                      )
+
+                                    const wrapped_amount =
+                                      Number(
+                                        wrapped_asset?.balance ||
+                                        '0'
+                                      )
+
+                                    const total_amount = native_amount + wrapped_amount
+
+                                    const {
+                                      color,
+                                    } = { ...asset_data }
 
                                     return (
                                       <Link
@@ -1191,7 +1297,7 @@ export default (
                                         href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                       >
                                       <a
-                                        className="h-6 text-sm font-medium text-right"
+                                        className="w-full h-10 flex items-center justify-end text-sm font-medium text-right"
                                       >
                                         {
                                           !lpTokenAddress &&
@@ -1203,28 +1309,123 @@ export default (
                                                 height="18"
                                               />
                                             </div> :
-                                            <DecimalsFormat
-                                              value={
-                                                number_format(
-                                                  value,
-                                                  value > 100 ?
-                                                    '0,0' :
-                                                    value > 1 ?
-                                                      '0,0.00' :
-                                                      '0,0.000000',
-                                                  true,
-                                                )
-                                              }
-                                              max_decimals={
-                                                value > 100 ?
-                                                  0 :
-                                                  value > 1 ?
-                                                    2 :
-                                                    6
-                                              }
-                                              prefix={currency_symbol}
-                                              className="uppercase"
-                                            />
+                                            total_amount > 0 ?
+                                              <div className="w-full h-10 flex flex-col items-end space-y-1 py-1">
+                                                <ProgressBar
+                                                  width={native_amount * 100 / total_amount}
+                                                  className="w-full h-1.5 rounded-lg"
+                                                  backgroundClassName="rounded-lg"
+                                                  style={
+                                                    {
+                                                      backgroundColor: color,
+                                                    }
+                                                  }
+                                                  backgroundStyle={
+                                                    {
+                                                      backgroundColor: `${color}66`,
+                                                    }
+                                                  }
+                                                />
+                                                <div className="w-full flex items-center justify-between space-x-2">
+                                                  <div className="flex flex-col items-start space-y-0.5">
+                                                    <DecimalsFormat
+                                                      value={
+                                                        number_format(
+                                                          native_amount,
+                                                          native_amount > 100 ?
+                                                            '0,0' :
+                                                            native_amount > 1 ?
+                                                              '0,0.00' :
+                                                              '0,0.000000',
+                                                          true,
+                                                        )
+                                                      }
+                                                      max_decimals={
+                                                        native_amount > 100 ?
+                                                          0 :
+                                                          native_amount > 1 ?
+                                                            2 :
+                                                            6
+                                                      }
+                                                      className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
+                                                    />
+                                                    <div className="flex items-center space-x-1">
+                                                      {
+                                                        asset_data?.image &&
+                                                        (
+                                                          <Image
+                                                            src={asset_data.image}
+                                                            alt=""
+                                                            width={14}
+                                                            height={14}
+                                                            className="rounded-full"
+                                                          />
+                                                        )
+                                                      }
+                                                      <span className="leading-3 text-2xs font-medium">
+                                                        {
+                                                          native_asset?.symbol ||
+                                                          asset_data?.symbol
+                                                        }
+                                                      </span>
+                                                    </div>
+                                                  </div>
+                                                  <div className="flex flex-col items-end space-y-0.5">
+                                                    <DecimalsFormat
+                                                      value={
+                                                        number_format(
+                                                          wrapped_amount,
+                                                          wrapped_amount > 100 ?
+                                                            '0,0' :
+                                                            wrapped_amount > 1 ?
+                                                              '0,0.00' :
+                                                              '0,0.000000',
+                                                          true,
+                                                        )
+                                                      }
+                                                      max_decimals={
+                                                        wrapped_amount > 100 ?
+                                                          0 :
+                                                          wrapped_amount > 1 ?
+                                                            2 :
+                                                            6
+                                                      }
+                                                      className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
+                                                    />
+                                                    <div className="flex items-center space-x-1">
+                                                      {
+                                                        (
+                                                          contract_data?.next_asset?.image ||
+                                                          asset_data?.image
+                                                        ) &&
+                                                        (
+                                                          <Image
+                                                            src={
+                                                              contract_data?.next_asset?.image ||
+                                                              asset_data?.image
+                                                            }
+                                                            alt=""
+                                                            width={14}
+                                                            height={15}
+                                                            className="rounded-full"
+                                                          />
+                                                        )
+                                                      }
+                                                      <span className="leading-3 text-2xs font-medium">
+                                                        {
+                                                          wrapped_asset?.symbol ||
+                                                          contract_data?.next_asset?.symbol
+                                                        }
+                                                      </span>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div> :
+                                              <div className="h-10 flex items-center justify-end">
+                                                <span className="text-slate-400 dark:text-slate-500">
+                                                  No liquidity
+                                                </span>
+                                              </div>
                                         }
                                       </a>
                                       </Link>
@@ -1235,7 +1436,7 @@ export default (
                           )
                         },
                         headerClassName: 'whitespace-nowrap justify-end text-right',
-                      },*/
+                      },
                       {
                         Header: 'Liquidity',
                         accessor: 'tvl',
@@ -1264,7 +1465,7 @@ export default (
 
                           return (
                             <div className="flex flex-col space-y-3">
-                              <div className="h-6 text-right">
+                              <div className="h-10 flex items-center justify-end text-right">
                                 <DecimalsFormat
                                   value={
                                     number_format(
@@ -1310,7 +1511,7 @@ export default (
                                         href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                       >
                                       <a
-                                        className="h-6 text-sm font-medium text-right"
+                                        className="h-10 flex items-center justify-end text-sm font-medium text-right"
                                       >
                                         {
                                           !lpTokenAddress &&
@@ -1383,7 +1584,7 @@ export default (
 
                           return (
                             <div className="flex flex-col space-y-3">
-                              <div className="h-6 text-right">
+                              <div className="h-10 flex items-center justify-end text-right">
                                 <DecimalsFormat
                                   value={
                                     number_format(
@@ -1427,7 +1628,7 @@ export default (
                                         href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                       >
                                       <a
-                                        className="h-6 text-sm font-medium text-right"
+                                        className="h-10 flex items-center justify-end text-sm font-medium text-right"
                                       >
                                         <DecimalsFormat
                                           value={
@@ -1489,7 +1690,7 @@ export default (
 
                           return (
                             <div className="flex flex-col space-y-3">
-                              <div className="h-6 text-right">
+                              <div className="h-10 flex items-center justify-end text-right">
                                 <DecimalsFormat
                                   value={
                                     number_format(
@@ -1533,7 +1734,7 @@ export default (
                                         href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                       >
                                       <a
-                                        className="h-6 text-sm font-medium text-right"
+                                        className="h-10 flex items-center justify-end text-sm font-medium text-right"
                                       >
                                         <DecimalsFormat
                                           value={
@@ -1595,7 +1796,7 @@ export default (
 
                           return (
                             <div className="flex flex-col space-y-3">
-                              <div className="h-6 text-slate-600 dark:text-slate-400 text-sm font-medium text-right">
+                              <div className="h-10 flex items-center justify-end text-slate-600 dark:text-slate-400 text-sm font-medium text-right">
                                 {!isNaN(value) ?
                                   <DecimalsFormat
                                     value={
@@ -1640,7 +1841,7 @@ export default (
                                         href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                       >
                                       <a
-                                        className="h-6 text-sm font-medium text-right"
+                                        className="h-10 flex items-center justify-end text-sm font-medium text-right"
                                       >
                                         {!isNaN(value) ?
                                           <span className="uppercase">
@@ -1683,7 +1884,7 @@ export default (
                           } = { ...props }
 
                           return (
-                            <div className="flex flex-col space-y-1">
+                            <div className="h-6 flex flex-col justify-center space-y-1">
                               <div className="flex items-center text-sm font-medium text-right space-x-1">
                                 <DecimalsFormat
                                   value={
@@ -1763,7 +1964,7 @@ export default (
                           } = { ...props.row.original }
 
                           return (
-                            <div className="flex items-center justify-end space-x-1.5">
+                            <div className="h-6 flex items-center justify-end space-x-1.5">
                               <div className="flex items-center text-sm font-medium space-x-1">
                                 <DecimalsFormat
                                   value={
@@ -1847,7 +2048,7 @@ export default (
                           } = { ...props }
 
                           return (
-                            <div className="text-right">
+                            <div className="h-6 flex items-center justify-end text-right">
                               <DecimalsFormat
                                 value={
                                   typeof value === 'number' ?
@@ -1880,6 +2081,7 @@ export default (
                       !(
                         view === 'my_positions' ?
                           [
+                            'assets',
                             'tvl',
                             'volume',
                             'fees',
