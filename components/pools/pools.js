@@ -915,7 +915,7 @@ export default (
                                 <>
                                   <div
                                     onClick={() => onClick()}
-                                    className={`min-w-max ${pools?.length > 0 ? 'cursor-pointer' : ''} flex items-center`}
+                                    className={`w-fit ${pools?.length > 0 ? 'cursor-pointer' : ''} flex items-center`}
                                   >
                                     {pools?.length > 0 ?
                                       <>
@@ -1039,21 +1039,16 @@ export default (
                       },
                       /*{
                         Header: 'Assets',
-                        accessor: 'tvl',
+                        accessor: 'assets',
                         sortType: (a, b) =>
-                          _.sumBy(
-                            a.original.pools,
-                            'tvl',
-                          ) >
-                          _.sumBy(
-                            b.original.pools,
-                            'tvl',
-                          ) ?
+                          a.original.tvl > b.original.tvl ?
                             1 :
                             -1,
                         Cell: props => {
                           const {
                             id,
+                            adopted,
+                            local,
                             pools,
                           } = { ...props.row.original }
 
