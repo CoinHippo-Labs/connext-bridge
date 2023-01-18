@@ -14,6 +14,10 @@ import { chainName } from '../../lib/object/chain'
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
 
+const WRAPPED_PREFIX =
+  process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
+  'next'
+
 export default (
   {
     view,
@@ -938,7 +942,7 @@ export default (
                                               <div
                                                 key={i}
                                                 title={name}
-                                                className="h-6 flex items-center mr-1.5"
+                                                className="w-5 h-6 flex items-center mr-1.5"
                                               >
                                                 {
                                                   image &&
@@ -1047,42 +1051,123 @@ export default (
                         Cell: props => {
                           const {
                             id,
-                            adopted,
-                            local,
                             pools,
                           } = { ...props.row.original }
 
-                          const value =
-                            _.sumBy(
-                              pools,
-                              'tvl',
+                          const native_assets =
+                            pools
+                              .map(p => {
+                                const {
+                                  adopted,
+                                  local,
+                                } = { ...p }
+
+                                const asset =
+                                  !adopted?.symbol?.startsWith(WRAPPED_PREFIX) ?
+                                    adopted :
+                                    local
+
+                                return {
+                                  ...p,
+                                  asset,
+                                }
+                              })
+
+                          const wrapped_assets =
+                            pools
+                              .map(p => {
+                                const {
+                                  adopted,
+                                  local,
+                                } = { ...p }
+
+                                const asset =
+                                  adopted?.symbol?.startsWith(WRAPPED_PREFIX) ?
+                                    adopted :
+                                    local
+
+                                return {
+                                  ...p,
+                                  asset,
+                                }
+                              })
+
+                          const native_amount =
+                            _.sum(
+                              native_assets
+                                .map(a =>
+                                  Number(
+                                    a?.asset?.balance ||
+                                    '0'
+                                  )
+                                ),
                             )
+
+                          const wrapped_amount =
+                            _.sum(
+                              wrapped_assets
+                                .map(a =>
+                                  Number(
+                                    a?.asset?.balance ||
+                                    '0'
+                                  )
+                                ),
+                            )
+
+                          const total_amount = native_amount + wrapped_amount
 
                           return (
                             <div className="flex flex-col space-y-3">
-                              <div className="h-6 text-right">
-                                <DecimalsFormat
-                                  value={
-                                    number_format(
-                                      value,
-                                      value > 100 ?
-                                        '0,0' :
-                                        value > 1 ?
-                                          '0,0.00' :
-                                          '0,0.000000',
-                                      true,
-                                    )
-                                  }
-                                  max_decimals={
-                                    value > 100 ?
-                                      0 :
-                                      value > 1 ?
-                                        2 :
-                                        6
-                                  }
-                                  prefix={currency_symbol}
-                                  className="uppercase text-slate-600 dark:text-slate-400 text-sm font-medium"
+                              <div className="flex flex-col items-end space-y-2 my-1">
+                                <ProgressBar
+                                  width={native_amount * 100 / total_amount}
+                                  color="bg-yellow-500"
+                                  className="h-1.5 rounded-lg"
                                 />
+                                <div className="flex items-center justify-between space-x-2">
+                                  <DecimalsFormat
+                                    value={
+                                      number_format(
+                                        native_amount,
+                                        native_amount > 100 ?
+                                          '0,0' :
+                                          native_amount > 1 ?
+                                            '0,0.00' :
+                                            '0,0.000000',
+                                        true,
+                                      )
+                                    }
+                                    max_decimals={
+                                      native_amount > 100 ?
+                                        0 :
+                                        native_amount > 1 ?
+                                          2 :
+                                          6
+                                    }
+                                    className="text-slate-500 dark:text-slate-400 text-xs font-medium"
+                                  />
+                                  <DecimalsFormat
+                                    value={
+                                      number_format(
+                                        wrapped_amount,
+                                        wrapped_amount > 100 ?
+                                          '0,0' :
+                                          wrapped_amount > 1 ?
+                                            '0,0.00' :
+                                            '0,0.000000',
+                                        true,
+                                      )
+                                    }
+                                    max_decimals={
+                                      wrapped_amount > 100 ?
+                                        0 :
+                                        wrapped_amount > 1 ?
+                                          2 :
+                                          6
+                                    }
+                                    className="text-slate-500 dark:text-slate-400 text-xs font-medium"
+                                  />
+                                </div>
                               </div>
                               {
                                 uncollapseAssetIds?.includes(id) &&
