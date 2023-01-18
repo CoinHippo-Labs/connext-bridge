@@ -40,7 +40,6 @@ export default (
     theme,
   } = { ...preferences }
 
-
   const [data, setData] = useState(initialData)
 
   useEffect(
@@ -94,9 +93,9 @@ export default (
       },*/
       {
         label: 'Receive NextAsset',
+        tooltip: receiveLocalTooltip,
         name: 'receiveLocal',
         type: 'switch',
-        tooltip: receiveLocalTooltip,
       },
       {
         label: 'Show NextAsset',

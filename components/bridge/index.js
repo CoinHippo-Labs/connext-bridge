@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { XTransferStatus } from '@connext/nxtp-utils'
+import { XTransferStatus, XTransferErrorStatus } from '@connext/nxtp-utils'
 import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
 import PageVisibility from 'react-page-visibility'
 import { TailSpin, Oval } from 'react-loader-spinner'
@@ -25,6 +25,7 @@ import SelectAsset from '../select/asset'
 import Balance from '../balance'
 import TimeSpent from '../time-spent'
 import LatestTransfers from '../latest-transfers'
+import ActionRequired from '../action-required'
 import Faucet from '../faucet'
 import Image from '../image'
 import Wallet from '../wallet'
@@ -2629,6 +2630,7 @@ export default () => {
 
   const min_amount = 0
   const max_amount = source_amount
+
   const estimated_received =
     estimatedValues?.amountReceived ?
       estimatedValues.amountReceived :
@@ -2638,8 +2640,12 @@ export default () => {
         null
 
   const estimated_slippage =
-    estimatedValues?.destinationSlippage ?
-      Number(estimatedValues.destinationSlippage) * 100 :
+    estimatedValues?.destinationSlippage &&
+    estimatedValues?.originSlippage ?
+      (
+        Number(estimatedValues.destinationSlippage) +
+        Number(estimatedValues.originSlippage)
+      ) * 100 :
       null
 
   const wrong_chain =
@@ -2654,10 +2660,12 @@ export default () => {
     address
 
   const latest_transfer = _.head(latestTransfers)
+
   const estimated_time_seconds =
     latest_transfer?.force_slow ?
       5400 :
       240
+
   const time_spent_seconds =
     moment()
       .diff(
@@ -2668,6 +2676,14 @@ export default () => {
         ),
         'seconds',
       )
+
+  const errored =
+    [
+      // XTransferErrorStatus.LowSlippage,
+      // XTransferErrorStatus.InsufficientRelayerFee,
+      'LowSlippage',
+      'InsufficientRelayerFee',
+    ].includes(latest_transfer?.error_status)
 
   const disabled =
     calling ||
@@ -2738,34 +2754,52 @@ export default () => {
                             Completed
                           </span>
                         </a> :
-                        <CountdownCircleTimer
-                          isPlaying
-                          duration={estimated_time_seconds}
-                          colors={
-                            latest_transfer.force_slow ?
-                              '#facc15' :
-                              '#22c55e'
-                          }
-                          size={140}
-                        >
-                          {({ remainingTime }) => (
-                            time_spent_seconds > estimated_time_seconds ?
-                              <span className="text-sm font-semibold">
-                                Processing ...
-                              </span> :
-                              <div className="flex flex-col items-center space-y-1">
-                                <span className="text-slate-400 dark:text-slate-500 text-sm font-medium">
-                                  Time left
-                                </span>
-                                <span className="text-lg font-semibold">
-                                  {total_time_string(
-                                    time_spent_seconds,
-                                    estimated_time_seconds,
-                                  )}
-                                </span>
-                              </div>
-                          )}
-                        </CountdownCircleTimer>
+                        errored ?
+                          <ActionRequired
+                            transferData={latest_transfer}
+                            buttonTitle={
+                              <Tooltip
+                                placement="top"
+                                content={latest_transfer.error_status}
+                                className="z-50 bg-dark text-white text-xs"
+                              >
+                                <div>
+                                  <IoWarning
+                                    size={72}
+                                    className="text-red-600 dark:text-red-500"
+                                  />
+                                </div>
+                              </Tooltip>
+                            }
+                          /> :
+                          <CountdownCircleTimer
+                            isPlaying
+                            duration={estimated_time_seconds}
+                            colors={
+                              latest_transfer.force_slow ?
+                                '#facc15' :
+                                '#22c55e'
+                            }
+                            size={140}
+                          >
+                            {({ remainingTime }) => (
+                              time_spent_seconds > estimated_time_seconds ?
+                                <span className="text-sm font-semibold">
+                                  Processing ...
+                                </span> :
+                                <div className="flex flex-col items-center space-y-1">
+                                  <span className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                    Time left
+                                  </span>
+                                  <span className="text-lg font-semibold">
+                                    {total_time_string(
+                                      time_spent_seconds,
+                                      estimated_time_seconds,
+                                    )}
+                                  </span>
+                                </div>
+                            )}
+                          </CountdownCircleTimer>
                       }
                     </div>
                     <div className="flex flex-col items-center space-y-2">
@@ -2774,45 +2808,60 @@ export default () => {
                           <span className="text-lg font-semibold">
                             Funds received!
                           </span> :
-                          <div className="flex flex-wrap items-center text-lg font-semibold space-x-1.5">
-                            <span>
-                              Sending
-                            </span>
-                            <span>
-                              {
-                                Number(amount) > 1000 ?
-                                  number_format(
-                                    amount,
-                                    '0,0.00',
-                                    true,
-                                  ) :
-                                  amount
+                          errored ?
+                            <ActionRequired
+                              transferData={latest_transfer}
+                              buttonTitle={
+                                <Tooltip
+                                  placement="top"
+                                  content={latest_transfer.error_status}
+                                  className="z-50 bg-dark text-white text-xs"
+                                >
+                                  <span className="text-lg font-semibold">
+                                    Action required
+                                  </span>
+                                </Tooltip>
                               }
-                            </span>
-                            <div className="flex flex-wrap items-center space-x-1.5">
-                              {
-                                (
-                                  source_contract_data?.image ||
-                                  source_asset_data?.image
-                                ) &&
-                                (
-                                  <Image
-                                    src={
-                                      source_contract_data?.image ||
-                                      source_asset_data?.image
-                                    }
-                                    alt=""
-                                    width={24}
-                                    height={24}
-                                    className="rounded-full"
-                                  />
-                                )
-                              }
+                            /> :
+                            <div className="flex flex-wrap items-center text-lg font-semibold space-x-1.5">
                               <span>
-                                {source_symbol}
+                                Sending
                               </span>
+                              <span>
+                                {
+                                  Number(amount) > 1000 ?
+                                    number_format(
+                                      amount,
+                                      '0,0.00',
+                                      true,
+                                    ) :
+                                    amount
+                                }
+                              </span>
+                              <div className="flex flex-wrap items-center space-x-1.5">
+                                {
+                                  (
+                                    source_contract_data?.image ||
+                                    source_asset_data?.image
+                                  ) &&
+                                  (
+                                    <Image
+                                      src={
+                                        source_contract_data?.image ||
+                                        source_asset_data?.image
+                                      }
+                                      alt=""
+                                      width={24}
+                                      height={24}
+                                      className="rounded-full"
+                                    />
+                                  )
+                                }
+                                <span>
+                                  {source_symbol}
+                                </span>
+                              </div>
                             </div>
-                          </div>
                         }
                       </div>
                       <span className="text-slate-500 dark:text-slate-500 text-xs sm:text-sm font-medium">
@@ -3990,15 +4039,16 @@ export default () => {
                                                           className="min-w-max text-yellow-500 dark:text-yellow-400 mt-0.5"
                                                         />
                                                         <div className="text-yellow-500 dark:text-yellow-400 text-xs">
-                                                          {estimated_slippage > slippage ?
-                                                            <>
-                                                              Slippage tolerance is too low
-                                                              <br />
-                                                              (use a larger amount or set tolerance higher)
-                                                            </> :
-                                                            slippage < 0.2 ?
-                                                              'Your transfer may not complete due to low slippage tolerance.' :
-                                                              'Your transfer may be frontrun due to high slippage tolerance.'
+                                                          {
+                                                            estimated_slippage > slippage ?
+                                                              <>
+                                                                Slippage tolerance is too low
+                                                                <br />
+                                                                (use a larger amount or set tolerance higher)
+                                                              </> :
+                                                              slippage < 0.2 ?
+                                                                'Your transfer may not complete due to low slippage tolerance.' :
+                                                                'Your transfer may be frontrun due to high slippage tolerance.'
                                                           }
                                                         </div>
                                                       </div>

@@ -11,6 +11,7 @@ import { IoWarning } from 'react-icons/io5'
 import { BsLightningCharge } from 'react-icons/bs'
 import { BiInfoCircle } from 'react-icons/bi'
 
+import ActionRequired from '../action-required'
 import Image from '../image'
 import EnsProfile from '../ens-profile'
 import AddToken from '../add-token'
@@ -35,7 +36,6 @@ export default (
     preferences,
     chains,
     assets,
-    dev,
     wallet,
   } = useSelector(state =>
     (
@@ -43,7 +43,6 @@ export default (
         preferences: state.preferences,
         chains: state.chains,
         assets: state.assets,
-        dev: state.dev,
         wallet: state.wallet,
       }
     ),
@@ -513,25 +512,36 @@ export default (
           <div className="flex flex-col items-center">
             {
               errored ?
-                <Tooltip
-                  placement="top"
-                  content={error_status}
-                  className="z-50 bg-dark text-white text-xs"
-                >
-                  <div>
-                    <IoWarning
-                      size={24}
-                      className="text-red-600 dark:text-red-500"
-                    />
-                  </div>
-                </Tooltip> :
+                <ActionRequired
+                  transferData={data}
+                  buttonTitle={
+                    <Tooltip
+                      placement="top"
+                      content={error_status}
+                      className="z-50 bg-dark text-white text-xs"
+                    >
+                      <div>
+                        <IoWarning
+                          size={24}
+                          className="text-red-600 dark:text-red-500"
+                        />
+                      </div>
+                    </Tooltip>
+                  }
+                /> :
                 pending ?
                   /*
                   <TimeSpent
                     title="Time spent"
                     from_time={xcall_timestamp}
                     to_time={execute_timestamp}
-                    className={`${pending ? 'text-blue-500 dark:text-blue-300' : 'text-yellow-600 dark:text-yellow-400'} font-semibold`}
+                    className={
+                      `${
+                        pending ?
+                          'text-blue-500 dark:text-blue-300' :
+                          'text-yellow-600 dark:text-yellow-400'
+                      } font-semibold`
+                    }
                   />
                   */
                   null :
@@ -675,29 +685,44 @@ export default (
                       </Tooltip>
                     */}
                   </div> :
-                  <span>
-                    {
-                      !force_slow &&
-                      (
+                  errored ?
+                    <ActionRequired
+                      transferData={data}
+                      buttonTitle={
                         <Tooltip
-                          placement="bottom"
-                          content="Boosted by router liquidity."
+                          placement="top"
+                          content={error_status}
                           className="z-50 bg-dark text-white text-xs"
                         >
-                          <div className="flex items-center">
-                            <BsLightningCharge
-                              size={16}
-                              className="text-yellow-600 dark:text-yellow-400"
-                            />
-                            <BiInfoCircle
-                              size={14}
-                              className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                            />
-                          </div>
+                          <span className="whitespace-nowrap text-red-600 dark:text-red-500 text-xs font-semibold">
+                            Action required
+                          </span>
                         </Tooltip>
-                      )
-                    }
-                  </span>
+                      }
+                    /> :
+                    <span>
+                      {
+                        !force_slow &&
+                        (
+                          <Tooltip
+                            placement="bottom"
+                            content="Boosted by router liquidity."
+                            className="z-50 bg-dark text-white text-xs"
+                          >
+                            <div className="flex items-center">
+                              <BsLightningCharge
+                                size={16}
+                                className="text-yellow-600 dark:text-yellow-400"
+                              />
+                              <BiInfoCircle
+                                size={14}
+                                className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                              />
+                            </div>
+                          </Tooltip>
+                        )
+                      }
+                    </span>
               }
               <Tooltip
                 placement="top"

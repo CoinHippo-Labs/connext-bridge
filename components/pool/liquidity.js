@@ -2988,7 +2988,8 @@ export default (
                                       className="transform -rotate-45"
                                     />
                                   </a>
-                                )}
+                                )
+                              }
                               {status === 'failed' ?
                                 <>
                                   <Copy
