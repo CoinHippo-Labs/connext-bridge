@@ -206,8 +206,9 @@
         "chainId": "0x64",
         "chainName": "Gnosis",
         "rpcUrls": [
-          "https://rpc.gnosischain.com",
-          "https://rpc.ap-southeast-1.gateway.fm/v1/gnosis/non-archival/mainnet"
+          "https://rpc.ap-southeast-1.gateway.fm/v1/gnosis/non-archival/mainnet",
+          "https://rpc.gnosis.gateway.fm",
+          "https://gnosis.blockpi.network/v1/rpc/public"
         ],
         "nativeCurrency": {
           "name": "xDAI",

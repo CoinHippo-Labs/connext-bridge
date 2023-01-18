@@ -8,6 +8,7 @@ import { MdKeyboardArrowUp, MdKeyboardArrowDown } from 'react-icons/md'
 
 import Datatable from '../datatable'
 import Image from '../image'
+import { ProgressBar } from '../progress-bars'
 import DecimalsFormat from '../decimals-format'
 import { chainName } from '../../lib/object/chain'
 import { currency_symbol } from '../../lib/object/currency'
@@ -918,7 +919,12 @@ export default (
                                   >
                                     {pools?.length > 0 ?
                                       <>
-                                        {pools
+                                        {
+                                          _.slice(
+                                            pools,
+                                            0,
+                                            3,
+                                          )
                                           .map((p, i) => {
                                             const {
                                               chain_data,
@@ -932,7 +938,7 @@ export default (
                                               <div
                                                 key={i}
                                                 title={name}
-                                                className="h-6 mr-1.5"
+                                                className="h-6 flex items-center mr-1.5"
                                               >
                                                 {
                                                   image &&
@@ -940,8 +946,8 @@ export default (
                                                     <Image
                                                       src={image}
                                                       alt=""
-                                                      width={24}
-                                                      height={24}
+                                                      width={20}
+                                                      height={20}
                                                       className="rounded-full"
                                                     />
                                                   )
@@ -950,23 +956,33 @@ export default (
                                             )
                                           })
                                         }
+                                        {
+                                          pools.length > 3 &&
+                                          (
+                                            <div className="h-6 flex items-center">
+                                              <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                                                (+{pools.length - 3})
+                                              </span>
+                                            </div>
+                                          )
+                                        }
                                         <div className="mr-1.5">
                                           <button
                                             onClick={() => onClick()}
-                                            className="w-6 h-6 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full flex items-center justify-center p-1"
+                                            className="w-5 h-6 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full flex items-center justify-center"
                                           >
                                             {uncollapseAssetIds?.includes(id) ?
                                               <MdKeyboardArrowUp
-                                                size={18}
+                                                size={16}
                                               /> :
                                               <MdKeyboardArrowDown
-                                                size={18}
+                                                size={16}
                                               />
                                             }
                                           </button>
                                         </div>
                                       </> :
-                                      <span className="tracking-wider text-slate-400 dark:text-slate-500">
+                                      <span className="text-slate-400 dark:text-slate-500">
                                         No chains supported
                                       </span>
                                     }
@@ -1007,7 +1023,7 @@ export default (
                                                 />
                                               )
                                             }
-                                            <span className="text-sm font-medium">
+                                            <span className="hidden sm:block text-sm font-medium">
                                               {name}
                                             </span>
                                           </a>
@@ -1021,6 +1037,125 @@ export default (
                           )
                         },
                       },
+                      /*{
+                        Header: 'Assets',
+                        accessor: 'tvl',
+                        sortType: (a, b) =>
+                          _.sumBy(
+                            a.original.pools,
+                            'tvl',
+                          ) >
+                          _.sumBy(
+                            b.original.pools,
+                            'tvl',
+                          ) ?
+                            1 :
+                            -1,
+                        Cell: props => {
+                          const {
+                            id,
+                            pools,
+                          } = { ...props.row.original }
+
+                          const value =
+                            _.sumBy(
+                              pools,
+                              'tvl',
+                            )
+
+                          return (
+                            <div className="flex flex-col space-y-3">
+                              <div className="h-6 text-right">
+                                <DecimalsFormat
+                                  value={
+                                    number_format(
+                                      value,
+                                      value > 100 ?
+                                        '0,0' :
+                                        value > 1 ?
+                                          '0,0.00' :
+                                          '0,0.000000',
+                                      true,
+                                    )
+                                  }
+                                  max_decimals={
+                                    value > 100 ?
+                                      0 :
+                                      value > 1 ?
+                                        2 :
+                                        6
+                                  }
+                                  prefix={currency_symbol}
+                                  className="uppercase text-slate-600 dark:text-slate-400 text-sm font-medium"
+                                />
+                              </div>
+                              {
+                                uncollapseAssetIds?.includes(id) &&
+                                (pools || [])
+                                  .map((p, i) => {
+                                    const {
+                                      chain_data,
+                                      asset_data,
+                                      tvl,
+                                      lpTokenAddress,
+                                      error,
+                                    } = { ...p }
+
+                                    const chain = chain_data?.id
+                                    const asset = asset_data?.id
+                                    const value = tvl
+
+                                    return (
+                                      <Link
+                                        key={i}
+                                        href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                                      >
+                                      <a
+                                        className="h-6 text-sm font-medium text-right"
+                                      >
+                                        {
+                                          !lpTokenAddress &&
+                                          !error ?
+                                            <div className="flex items-center justify-end">
+                                              <TailSpin
+                                                color={loader_color(theme)}
+                                                width="18"
+                                                height="18"
+                                              />
+                                            </div> :
+                                            <DecimalsFormat
+                                              value={
+                                                number_format(
+                                                  value,
+                                                  value > 100 ?
+                                                    '0,0' :
+                                                    value > 1 ?
+                                                      '0,0.00' :
+                                                      '0,0.000000',
+                                                  true,
+                                                )
+                                              }
+                                              max_decimals={
+                                                value > 100 ?
+                                                  0 :
+                                                  value > 1 ?
+                                                    2 :
+                                                    6
+                                              }
+                                              prefix={currency_symbol}
+                                              className="uppercase"
+                                            />
+                                        }
+                                      </a>
+                                      </Link>
+                                    )
+                                  })
+                              }
+                            </div>
+                          )
+                        },
+                        headerClassName: 'whitespace-nowrap justify-end text-right',
+                      },*/
                       {
                         Header: 'Liquidity',
                         accessor: 'tvl',
