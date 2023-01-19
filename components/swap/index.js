@@ -2403,7 +2403,7 @@ export default () => {
                   onChange={o => setOptions(o)}
                 />
               </div>
-              <div className="space-y-7">
+              <div>
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between space-x-2">
                     <span className="text-slate-600 dark:text-slate-500 text-sm font-medium">
@@ -2724,53 +2724,48 @@ export default () => {
                     }
                   </div>
                 </div>
-                {
-                  false &&
-                  (
-                    <div className="flex items-center justify-center mt-2.5 mb-0.5">
-                      <button
-                        disabled={
-                          disabled ||
-                          !pair
-                        }
-                        onClick={() => {
-                          if (!disabled) {
-                            setSwap(
-                              {
-                                ...swap,
-                                origin:
-                                  origin === 'x' ?
-                                    'y' :
-                                    'x',
-                                amount: null,
-                              }
-                            )
-
-                            setSwapAmount(null)
-
-                            setButtonDirection(
-                              buttonDirection * -1
-                            )
-
-                            getBalances(chain)
+                <div className="flex items-center justify-center mt-2 mb-0.5">
+                  <button
+                    disabled={
+                      disabled ||
+                      !pair
+                    }
+                    onClick={() => {
+                      if (!disabled) {
+                        setSwap(
+                          {
+                            ...swap,
+                            origin:
+                              origin === 'x' ?
+                                'y' :
+                                'x',
+                            amount: null,
                           }
-                        }}
-                        className={`bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} rounded-full sm:border dark:border-slate-800 flex items-center justify-center p-1.5 sm:p-4`}
-                      >
-                        <HiSwitchVertical
-                          size={28}
-                          style={
-                            buttonDirection < 0 ?
-                              {
-                                transform: 'scaleX(-1)',
-                              } :
-                              undefined
-                          }
-                        />
-                      </button>
-                    </div>
-                  )
-                }
+                        )
+
+                        setSwapAmount(null)
+
+                        setButtonDirection(
+                          buttonDirection * -1
+                        )
+
+                        getBalances(chain)
+                      }
+                    }}
+                    className={`bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} rounded-full sm:border dark:border-slate-800 flex items-center justify-center p-1.5 sm:p-4`}
+                  >
+                    <HiSwitchVertical
+                      size={28}
+                      style={
+                        buttonDirection < 0 ?
+                          {
+                            transform: 'scaleX(-1)',
+                          } :
+                          undefined
+                      }
+                    />
+                  </button>
+                </div>
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between space-x-2">
                     <span className="text-slate-600 dark:text-slate-500 text-sm font-medium">

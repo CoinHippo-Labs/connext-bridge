@@ -174,7 +174,7 @@ export default (
         data-navbar={theme}
         className={
           `antialiased ${
-            'overflow-y-scroll' ||
+            // 'overflow-y-scroll' ||
             'disable-scrollbars'
           } text-sm ${theme}`
         }

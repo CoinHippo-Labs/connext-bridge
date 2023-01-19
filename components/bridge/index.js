@@ -2679,10 +2679,8 @@ export default () => {
 
   const errored =
     [
-      // XTransferErrorStatus.LowSlippage,
-      // XTransferErrorStatus.InsufficientRelayerFee,
-      'LowSlippage',
-      'InsufficientRelayerFee',
+      XTransferErrorStatus.LowSlippage,
+      XTransferErrorStatus.InsufficientRelayerFee,
     ].includes(latest_transfer?.error_status)
 
   const disabled =

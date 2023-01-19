@@ -76,7 +76,6 @@ export default (
     sdk,
   } = { ...dev }
   const {
-    chain_id,
     provider,
     web3_provider,
     address,
@@ -126,10 +125,10 @@ export default (
         } = { ...data }
 
         switch (error_status) {
-          case 'LowSlippage':
+          case XTransferErrorStatus.LowSlippage:
             calculateAmountReceived(origin_transacting_amount)
             break
-          case 'InsufficientRelayerFee':
+          case XTransferErrorStatus.InsufficientRelayerFee:
             estimate()
             break
           default:
@@ -487,7 +486,7 @@ export default (
         params
 
       switch (error_status) {
-        case 'LowSlippage':
+        case XTransferErrorStatus.LowSlippage:
           try {
             params = {
               domainId: origin_domain,
@@ -618,7 +617,7 @@ export default (
             failed = true
           }
           break
-        case 'InsufficientRelayerFee':
+        case XTransferErrorStatus.InsufficientRelayerFee:
           try {
             params = {
               domainId: origin_domain,
@@ -1141,9 +1140,9 @@ export default (
           <div className="flex items-center justify-between">
             <span className="normal-case">
               Action Required: {
-                error_status === 'LowSlippage' ?
+                error_status === XTransferErrorStatus.LowSlippage ?
                   'Slippage exceeded' :
-                  error_status === 'InsufficientRelayerFee' ?
+                  error_status === XTransferErrorStatus.InsufficientRelayerFee ?
                     'Relayer fee insufficient' :
                     error_status
               }
@@ -1161,7 +1160,7 @@ export default (
         body={
           <div className="space-y-8 mt-4">
             {
-              error_status === 'LowSlippage' ?
+              error_status === XTransferErrorStatus.LowSlippage ?
                 <>
                   <div className="space-y-3">
                     <div className="text-slate-600 dark:text-slate-400 text-sm">
@@ -1363,7 +1362,7 @@ export default (
                     </div>
                   </div>
                 </> :
-                error_status === 'InsufficientRelayerFee' ?
+                error_status === XTransferErrorStatus.InsufficientRelayerFee ?
                   <>
                     <div className="space-y-3">
                       <div className="text-slate-600 dark:text-slate-400 text-sm">
@@ -1446,9 +1445,9 @@ export default (
                     'number',
                   ].includes(
                     typeof (
-                      error_status === 'LowSlippage' ?
+                      error_status === XTransferErrorStatus.LowSlippage ?
                         newSlippage :
-                        error_status === 'InsufficientRelayerFee' ?
+                        error_status === XTransferErrorStatus.InsufficientRelayerFee ?
                           newRelayerFee :
                           null
                     )
@@ -1456,9 +1455,9 @@ export default (
                   ![
                     '',
                   ].includes(
-                    error_status === 'LowSlippage' ?
+                    error_status === XTransferErrorStatus.LowSlippage ?
                       newSlippage :
-                      error_status === 'InsufficientRelayerFee' ?
+                      error_status === XTransferErrorStatus.InsufficientRelayerFee ?
                         newRelayerFee :
                         null
                   )
@@ -1503,9 +1502,9 @@ export default (
                     'number',
                   ].includes(
                     typeof (
-                      error_status === 'LowSlippage' ?
+                      error_status === XTransferErrorStatus.LowSlippage ?
                         newSlippage :
-                        error_status === 'InsufficientRelayerFee' ?
+                        error_status === XTransferErrorStatus.InsufficientRelayerFee ?
                           newRelayerFee :
                           null
                     )
@@ -1513,16 +1512,16 @@ export default (
                   ![
                     '',
                   ].includes(
-                    error_status === 'LowSlippage' ?
+                    error_status === XTransferErrorStatus.LowSlippage ?
                       newSlippage :
-                      error_status === 'InsufficientRelayerFee' ?
+                      error_status === XTransferErrorStatus.InsufficientRelayerFee ?
                         newRelayerFee :
                         null
                   ) &&
                   (
-                    error_status === 'LowSlippage' ?
+                    error_status === XTransferErrorStatus.LowSlippage ?
                       newSlippage <= _slippage :
-                      error_status === 'InsufficientRelayerFee' ?
+                      error_status === XTransferErrorStatus.InsufficientRelayerFee ?
                         !newRelayerFee :
                         null
                   ) ?
@@ -1539,10 +1538,10 @@ export default (
                     >
                       <span>
                         {
-                          error_status === 'LowSlippage' &&
+                          error_status === XTransferErrorStatus.LowSlippage &&
                           newSlippage <= _slippage ?
                             'New amount must be higher than existing slippage tolerance' :
-                            error_status === 'InsufficientRelayerFee' &&
+                            error_status === XTransferErrorStatus.InsufficientRelayerFee &&
                             !newRelayerFee ?
                               'Cannot estimate the relayer fee at the moment. Please try again later.' :
                               ''
