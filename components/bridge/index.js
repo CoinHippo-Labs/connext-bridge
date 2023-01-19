@@ -4390,9 +4390,7 @@ export default () => {
                             ) ||
                             (
                               Number(gas_fee) <= 0 &&
-                              ![
-                                'test',
-                              ].includes(asset)
+                              process.env.NEXT_PUBLIC_NETWORK !== 'testnet'
                             )
                           ) ?
                             <Alert
