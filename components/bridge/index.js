@@ -4393,6 +4393,7 @@ export default () => {
                               Number(amount) > pool_amount
                             ) ||
                             (
+                              fee &&
                               Number(gas_fee) <= 0 &&
                               process.env.NEXT_PUBLIC_NETWORK !== 'testnet'
                             )
@@ -4441,6 +4442,7 @@ export default () => {
                                               ) :
                                               pool_amount
                                           }` :
+                                          fee &&
                                           Number(gas_fee) <= 0 ?
                                             'Cannot estimate the relayer fee at the moment. Please try again later.' :
                                             ''

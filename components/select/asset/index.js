@@ -116,8 +116,11 @@ export default (
     !data ?
       asset_data?.image ||
       image :
-      image ||
-      asset_data?.image
+      data ?
+        asset_data?.image ||
+        image :
+        image ||
+        asset_data?.image
 
   return (
     <Modal
