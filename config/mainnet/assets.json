@@ -20,7 +20,8 @@
         "next_asset": {
           "contract_address": "0x5e7D83dA751F4C9694b13aF351B30aC108f32C38",
           "decimals": 6,
-          "symbol": "nextUSDC"
+          "symbol": "nextUSDC",
+          "image": "/logos/assets/nextusdc.png"
         },
         "is_pool": true
       },
@@ -32,7 +33,8 @@
         "next_asset": {
           "contract_address": "0xF96C6d2537e1af1a9503852eB2A4AF264272a5B6",
           "decimals": 6,
-          "symbol": "nextUSDC"
+          "symbol": "nextUSDC",
+          "image": "/logos/assets/nextusdc.png"
         },
         "is_pool": true
       },
@@ -44,7 +46,8 @@
         "next_asset": {
           "contract_address": "0x67E51f46e8e14D4E4cab9dF48c59ad8F512486DD",
           "decimals": 6,
-          "symbol": "nextUSDC"
+          "symbol": "nextUSDC",
+          "image": "/logos/assets/nextusdc.png"
         },
         "is_pool": true
       },
@@ -56,7 +59,8 @@
         "next_asset": {
           "contract_address": "0x8c556cF37faa0eeDAC7aE665f1Bb0FbD4b2eae36",
           "decimals": 6,
-          "symbol": "nextUSDC"
+          "symbol": "nextUSDC",
+          "image": "/logos/assets/nextusdc.png"
         },
         "is_pool": true
       },
@@ -68,7 +72,8 @@
         "next_asset": {
           "contract_address": "0x44CF74238d840a5fEBB0eAa089D05b763B73faB8",
           "decimals": 6,
-          "symbol": "nextUSDC"
+          "symbol": "nextUSDC",
+          "image": "/logos/assets/nextusdc.png"
         },
         "is_pool": true
       }
