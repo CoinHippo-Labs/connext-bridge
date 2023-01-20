@@ -749,6 +749,10 @@ export default (
               )
               .join('_')
 
+            if (message?.includes('insufficient funds')) {
+              message = 'Insufficient Balance'
+            }
+
             switch (code) {
               case 'user_rejected':
                 break

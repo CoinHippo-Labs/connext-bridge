@@ -600,7 +600,7 @@ export default (
                           <span className="text-slate-400 dark:text-slate-500 font-medium">
                             Assets
                           </span>
-                          <div className="h-7 flex items-center">
+                          <div className="h-6 flex items-center">
                             {
                               images
                                 .map((image, i) => (
@@ -790,7 +790,7 @@ export default (
                                 </a>
                                 </Link> :
                                 <>
-                                  <div className="h-10 flex items-center space-x-2">
+                                  <div className="h-6 flex items-center space-x-2">
                                     {
                                       image &&
                                       (
@@ -840,7 +840,7 @@ export default (
                                             href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                           >
                                           <a
-                                            className="h-10 flex items-center font-medium ml-8"
+                                            className="h-6 flex items-center font-medium ml-8"
                                           >
                                             {name}
                                           </a>
@@ -919,7 +919,7 @@ export default (
                                 <>
                                   <div
                                     onClick={() => onClick()}
-                                    className={`w-fit h-10 ${pools?.length > 0 ? 'cursor-pointer' : ''} flex items-center`}
+                                    className={`w-fit h-6 ${pools?.length > 0 ? 'cursor-pointer' : ''} flex items-center`}
                                   >
                                     {pools?.length > 0 ?
                                       <>
@@ -1013,7 +1013,7 @@ export default (
                                             href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                           >
                                           <a
-                                            className="h-10 flex items-center space-x-2"
+                                            className="h-6 flex items-center space-x-2"
                                           >
                                             {
                                               image &&
@@ -1129,7 +1129,7 @@ export default (
                             <div className="flex flex-col space-y-3">
                               {
                                 total_amount > 0 ?
-                                  <div className="w-full h-10 flex flex-col items-end justify-center space-y-0 pt-2 pb-1">
+                                  <div className="w-full h-6 flex flex-col items-end justify-center space-y-0 pt-2 pb-1">
                                     <ProgressBar
                                       width={native_amount * 100 / total_amount}
                                       className="w-full h-1.5 rounded-lg"
@@ -1258,7 +1258,7 @@ export default (
                                       </div>
                                     </div>
                                   </div> :
-                                  <div className="h-10 flex items-center justify-end">
+                                  <div className="h-6 flex items-center justify-end">
                                     <span className="text-slate-400 dark:text-slate-500">
                                       No liquidity
                                     </span>
@@ -1315,7 +1315,7 @@ export default (
                                         href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                       >
                                       <a
-                                        className="w-full h-10 flex items-center justify-end text-sm font-medium text-right"
+                                        className="w-full h-6 flex items-center justify-end text-sm font-medium text-right"
                                       >
                                         {
                                           !lpTokenAddress &&
@@ -1328,7 +1328,7 @@ export default (
                                               />
                                             </div> :
                                             total_amount > 0 ?
-                                              <div className="w-full h-10 flex flex-col items-end justify-center space-y-0 pt-2 pb-1">
+                                              <div className="w-full h-6 flex flex-col items-end justify-center space-y-0 pt-2 pb-1">
                                                 <ProgressBar
                                                   width={native_amount * 100 / total_amount}
                                                   className="w-full h-1.5 rounded-lg"
@@ -1457,7 +1457,7 @@ export default (
                                                   </div>
                                                 </div>
                                               </div> :
-                                              <div className="h-10 flex items-center justify-end">
+                                              <div className="h-6 flex items-center justify-end">
                                                 <span className="text-slate-400 dark:text-slate-500">
                                                   No liquidity
                                                 </span>
@@ -1501,7 +1501,7 @@ export default (
 
                           return (
                             <div className="flex flex-col space-y-3">
-                              <div className="h-10 flex items-center justify-end text-right">
+                              <div className="h-6 flex items-center justify-end text-right">
                                 <DecimalsFormat
                                   value={
                                     number_format(
@@ -1547,7 +1547,7 @@ export default (
                                         href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                       >
                                       <a
-                                        className="h-10 flex items-center justify-end text-sm font-medium text-right"
+                                        className="h-6 flex items-center justify-end text-sm font-medium text-right"
                                       >
                                         {
                                           !lpTokenAddress &&
@@ -1620,7 +1620,7 @@ export default (
 
                           return (
                             <div className="flex flex-col space-y-3">
-                              <div className="h-10 flex items-center justify-end text-right">
+                              <div className="h-6 flex items-center justify-end text-right">
                                 <DecimalsFormat
                                   value={
                                     number_format(
@@ -1664,7 +1664,7 @@ export default (
                                         href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                       >
                                       <a
-                                        className="h-10 flex items-center justify-end text-sm font-medium text-right"
+                                        className="h-6 flex items-center justify-end text-sm font-medium text-right"
                                       >
                                         <DecimalsFormat
                                           value={
@@ -1726,7 +1726,7 @@ export default (
 
                           return (
                             <div className="flex flex-col space-y-3">
-                              <div className="h-10 flex items-center justify-end text-right">
+                              <div className="h-6 flex items-center justify-end text-right">
                                 <DecimalsFormat
                                   value={
                                     number_format(
@@ -1770,7 +1770,7 @@ export default (
                                         href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                       >
                                       <a
-                                        className="h-10 flex items-center justify-end text-sm font-medium text-right"
+                                        className="h-6 flex items-center justify-end text-sm font-medium text-right"
                                       >
                                         <DecimalsFormat
                                           value={
@@ -1832,7 +1832,7 @@ export default (
 
                           return (
                             <div className="flex flex-col space-y-3">
-                              <div className="h-10 flex items-center justify-end text-slate-600 dark:text-slate-400 text-sm font-medium text-right">
+                              <div className="h-6 flex items-center justify-end text-slate-600 dark:text-slate-400 text-sm font-medium text-right">
                                 {!isNaN(value) ?
                                   <DecimalsFormat
                                     value={
@@ -1877,7 +1877,7 @@ export default (
                                         href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                       >
                                       <a
-                                        className="h-10 flex items-center justify-end text-sm font-medium text-right"
+                                        className="h-6 flex items-center justify-end text-sm font-medium text-right"
                                       >
                                         {!isNaN(value) ?
                                           <span className="uppercase">

@@ -2786,6 +2786,11 @@ export default (
                 typeof priceImpactAdd === 'number' &&
                 priceImpactAdd > 0 &&
                 (
+                  overweighted_asset === 'x' ?
+                    amountX > amountY :
+                    amountY < amountX
+                ) &&
+                (
                   <div className="bg-yellow-50 dark:bg-yellow-200 bg-opacity-50 dark:bg-opacity-10 rounded flex items-start space-x-2 pt-2 pb-3 px-2">
                     <IoWarning
                       size={18}

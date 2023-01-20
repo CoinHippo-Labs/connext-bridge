@@ -2096,6 +2096,7 @@ export default () => {
     name,
     image,
     explorer,
+    color,
   } = { ...chain_data }
   const {
     url,
@@ -2113,9 +2114,9 @@ export default () => {
     local,
     rate,
   } = { ...pair }
-  const {
-    color,
-  } = { ...asset_data }
+  // const {
+  //   color,
+  // } = { ...asset_data }
   const {
     contract_address,
   } = { ...contract_data }

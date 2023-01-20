@@ -2416,6 +2416,10 @@ export default () => {
       c?.id === source_chain
     )
 
+  const {
+    color,
+  } = { ...source_chain_data }
+
   const source_asset_data = (assets_data || [])
     .find(a =>
       a?.id === asset
@@ -2486,9 +2490,9 @@ export default () => {
     }
   }
 
-  const {
-    color,
-  } = { ...source_asset_data }
+  // const {
+  //   color,
+  // } = { ...source_asset_data }
 
   const source_symbol =
     source_contract_data?.symbol ||

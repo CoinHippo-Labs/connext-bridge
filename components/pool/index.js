@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
+import { TailSpin } from 'react-loader-spinner'
 import { BigNumber, Contract, constants, utils } from 'ethers'
 import { TiArrowLeft, TiArrowRight } from 'react-icons/ti'
 
@@ -856,6 +857,7 @@ export default () => {
     .find(c =>
       c?.id === chain
     )
+
   const {
     explorer,
   } = { ...chain_data }
@@ -893,6 +895,7 @@ export default () => {
     name,
     lpTokenAddress,
     volume,
+    apr,
     error,
   } = { ...pool_data }
 
@@ -967,6 +970,92 @@ export default () => {
                       </a>
                     )
                   */}
+                </div>
+                <div>
+                  <span className="text-slate-400 dark:text-slate-200 text-base font-medium">
+                    Reward APR
+                  </span>
+                  <div className="flex flex-col items-end space-y-1">
+                    {
+                      pool_data &&
+                      (
+                        [
+                          // 'optimism',
+                        ].includes(chain) ?
+                          <div className="flex items-center space-x-2">
+                            {
+                              chain_data?.image &&
+                              (
+                                <Image
+                                  src={chain_data.image}
+                                  alt=""
+                                  width={16}
+                                  height={16}
+                                  className="rounded-full"
+                                />
+                              )
+                            }
+                            <span className="uppercase text-xs font-medium">
+                              {
+                                [
+                                  // 'optimism',
+                                ].includes(chain) ?
+                                  chain
+                                    .slice(
+                                      0,
+                                      2,
+                                    ) :
+                                  chain_data?.short_name
+                              }
+                            </span>
+                          </div> :
+                          <div className="h-0" />
+                      )
+                    }
+                    <span className="text-lg sm:text-3xl font-semibold">
+                      {
+                        pool_data &&
+                        !error ?
+                          [
+                            // 'optimism',
+                          ].includes(chain) ?
+                            !isNaN(apr) ?
+                              <span className="uppercase">
+                                {number_format(
+                                  apr / 100,
+                                  '0,0.00a',
+                                  true,
+                                )}
+                                %
+                              </span> :
+                              'TBD' :
+                            !isNaN(apr) ?
+                              <span className="uppercase">
+                                {number_format(
+                                  apr / 100,
+                                  '0,0.00a',
+                                  true,
+                                )}
+                                %
+                              </span> :
+                              'TBD' :
+                          selected &&
+                          !no_pool &&
+                          !error &&
+                          (
+                            pool_loading ?
+                              <div className="mt-1">
+                                <TailSpin
+                                  color={loader_color(theme)}
+                                  width="24"
+                                  height="24"
+                                />
+                              </div> :
+                              '-'
+                          )
+                      }
+                    </span>
+                  </div>
                 </div>
               </div>
               {

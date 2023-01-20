@@ -562,92 +562,94 @@ export default (
                     }
                   </div>
                 </div>
-                <div className={metricClassName}>
-                  <span className={titleClassName}>
-                    Reward APR
-                  </span>
-                  <div className="flex flex-col space-y-1">
-                    {
-                      pool_data &&
-                      (
-                        [
-                          // 'optimism',
-                        ].includes(chain) ?
-                          <div className="flex items-center space-x-2">
-                            {
-                              chain_data?.image &&
-                              (
-                                <Image
-                                  src={chain_data.image}
-                                  alt=""
-                                  width={16}
-                                  height={16}
-                                  className="rounded-full"
-                                />
-                              )
-                            }
-                            <span className="uppercase text-xs font-medium">
-                              {
-                                [
-                                  // 'optimism',
-                                ].includes(chain) ?
-                                  chain
-                                    .slice(
-                                      0,
-                                      2,
-                                    ) :
-                                  chain_data?.short_name
-                              }
-                            </span>
-                          </div> :
-                          <div className="h-0" />
-                      )
-                    }
-                    <span className={valueClassName}>
+                {/*
+                  <div className={metricClassName}>
+                    <span className={titleClassName}>
+                      Reward APR
+                    </span>
+                    <div className="flex flex-col space-y-1">
                       {
                         pool_data &&
-                        !error ?
+                        (
                           [
                             // 'optimism',
                           ].includes(chain) ?
-                            !isNaN(apr) ?
-                              <span className="uppercase">
-                                {number_format(
-                                  apr / 100,
-                                  '0,0.00a',
-                                  true,
-                                )}
-                                %
-                              </span> :
-                              'TBD' :
-                            !isNaN(apr) ?
-                              <span className="uppercase">
-                                {number_format(
-                                  apr / 100,
-                                  '0,0.00a',
-                                  true,
-                                )}
-                                %
-                              </span> :
-                              'TBD' :
-                          selected &&
-                          !no_pool &&
-                          !error &&
-                          (
-                            pool_loading ?
-                              <div className="mt-1">
-                                <TailSpin
-                                  color={loader_color(theme)}
-                                  width="24"
-                                  height="24"
-                                />
-                              </div> :
-                              '-'
-                          )
+                            <div className="flex items-center space-x-2">
+                              {
+                                chain_data?.image &&
+                                (
+                                  <Image
+                                    src={chain_data.image}
+                                    alt=""
+                                    width={16}
+                                    height={16}
+                                    className="rounded-full"
+                                  />
+                                )
+                              }
+                              <span className="uppercase text-xs font-medium">
+                                {
+                                  [
+                                    // 'optimism',
+                                  ].includes(chain) ?
+                                    chain
+                                      .slice(
+                                        0,
+                                        2,
+                                      ) :
+                                    chain_data?.short_name
+                                }
+                              </span>
+                            </div> :
+                            <div className="h-0" />
+                        )
                       }
-                    </span>
+                      <span className={valueClassName}>
+                        {
+                          pool_data &&
+                          !error ?
+                            [
+                              // 'optimism',
+                            ].includes(chain) ?
+                              !isNaN(apr) ?
+                                <span className="uppercase">
+                                  {number_format(
+                                    apr / 100,
+                                    '0,0.00a',
+                                    true,
+                                  )}
+                                  %
+                                </span> :
+                                'TBD' :
+                              !isNaN(apr) ?
+                                <span className="uppercase">
+                                  {number_format(
+                                    apr / 100,
+                                    '0,0.00a',
+                                    true,
+                                  )}
+                                  %
+                                </span> :
+                                'TBD' :
+                            selected &&
+                            !no_pool &&
+                            !error &&
+                            (
+                              pool_loading ?
+                                <div className="mt-1">
+                                  <TailSpin
+                                    color={loader_color(theme)}
+                                    width="24"
+                                    height="24"
+                                  />
+                                </div> :
+                                '-'
+                            )
+                        }
+                      </span>
+                    </div>
                   </div>
-                </div>
+                */}
                 {/*
                   <div className={metricClassName}>
                     <span className={titleClassName}>
