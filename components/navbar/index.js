@@ -860,7 +860,7 @@ export default () => {
               await sleep(1.5 * 1000)
 
               console.log(
-                '[getLPTokenSupply]',
+                '[getTokenSupply]',
                 {
                   domain_id,
                   lpTokenAddress,
@@ -870,7 +870,7 @@ export default () => {
               try {
                 supply =
                   await sdk.nxtpSdkPool
-                    .getLPTokenSupply(
+                    .getTokenSupply(
                       domain_id,
                       lpTokenAddress,
                     )
@@ -893,7 +893,7 @@ export default () => {
                 )
               } catch (error) {
                 console.log(
-                  '[getLPTokenSupply error]',
+                  '[getTokenSupply error]',
                   {
                     domain_id,
                     lpTokenAddress,
