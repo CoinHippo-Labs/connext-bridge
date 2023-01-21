@@ -53,7 +53,7 @@ export default (
           try {
             let response =
               await sdk.nxtpSdkUtils
-                .getTransfersByUser(
+                .getTransfers(
                   {
                     userAddress: address,
                   },

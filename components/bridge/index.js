@@ -1036,8 +1036,10 @@ export default () => {
             try {
               const response =
                 await sdk.nxtpSdkUtils
-                  .getTransferByTransactionHash(
-                    transactionHash,
+                  .getTransfers(
+                    {
+                      transactionHash,
+                    },
                   )
 
               if (Array.isArray(response)) {
@@ -1058,7 +1060,7 @@ export default () => {
               try {
                 const response =
                   await sdk.nxtpSdkUtils
-                    .getTransfersByUser(
+                    .getTransfers(
                       {
                         userAddress: address,
                       },
@@ -1115,8 +1117,10 @@ export default () => {
           else if (transfer_id) {
             const response =
               await sdk.nxtpSdkUtils
-                .getTransferById(
-                  transfer_id,
+                .getTransfers(
+                  {
+                    transferId: transfer_id,
+                  },
                 )
 
             if (Array.isArray(response)) {
