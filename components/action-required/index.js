@@ -822,10 +822,6 @@ export default (
       !execute_transaction_hash
     )
 
-  relayer_fee =
-    relayer_fee ||
-    '0'
-
   const source_chain_data = (chains_data || [])
     .find(c =>
       c?.chain_id === Number(origin_chain) ||
@@ -1129,6 +1125,16 @@ export default (
         Number(estimatedValues.originSlippage)
       ) * 100 :
       null
+
+  relayer_fee =
+    utils.formatUnits(
+      BigNumber.from(
+        relayer_fee ||
+        '0'
+      ),
+      source_gas_native_token?.decimals ||
+      18,
+    )
 
   const disabled =
     updating
