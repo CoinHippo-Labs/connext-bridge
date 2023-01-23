@@ -391,7 +391,13 @@ export default (
     [
       XTransferErrorStatus.LowSlippage,
       XTransferErrorStatus.InsufficientRelayerFee,
-    ].includes(error_status)
+    ].
+    includes(error_status) &&
+    ![
+      XTransferStatus.CompletedFast,
+      XTransferStatus.CompletedSlow,
+    ]
+    .includes(status)
 
   return (
     data &&

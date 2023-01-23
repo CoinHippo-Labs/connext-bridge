@@ -2712,7 +2712,13 @@ export default () => {
     [
       XTransferErrorStatus.LowSlippage,
       XTransferErrorStatus.InsufficientRelayerFee,
-    ].includes(latest_transfer?.error_status)
+    ]
+    .includes(latest_transfer?.error_status) &&
+    ![
+      XTransferStatus.CompletedFast,
+      XTransferStatus.CompletedSlow,
+    ]
+    .includes(latest_transfer?.status)
 
   const disabled =
     calling ||
