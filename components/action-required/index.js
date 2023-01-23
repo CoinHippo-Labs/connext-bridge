@@ -40,6 +40,7 @@ export default (
   {
     transferData,
     buttonTitle,
+    onTransferBumped,
   },
 ) => {
   const {
@@ -723,6 +724,15 @@ export default (
                   tx_hash: hash,
                 }
               )
+
+              if (
+                !failed &&
+                onTransferBumped
+              ) {
+                onTransferBumped(
+                  params.relayerFee,
+                )
+              }
             }
           } catch (error) {
             let message = 
