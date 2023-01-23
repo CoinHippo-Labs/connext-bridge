@@ -773,10 +773,6 @@ export default (
         default:
           break
       }
-
-      if (!failed) {
-        setUpdateResponse(null)
-      }
     }
 
     setUpdateProcessing(false)
