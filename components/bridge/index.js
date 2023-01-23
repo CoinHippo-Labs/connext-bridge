@@ -1681,6 +1681,12 @@ export default () => {
                 params,
                 error,
               )
+
+              setFee(
+                {
+                  router: routerFee,
+                }
+              )
             }
           } catch (error) {}
         }
@@ -2048,96 +2054,113 @@ export default () => {
 
       let failed = false
 
-      try {
-        const approve_request =
-          await sdk.nxtpSdkBase
-            .approveIfNeeded(
-              xcallParams.origin,
-              xcallParams.asset,
-              xcallParams.amount,
-              infiniteApprove,
-            )
+      if (
+        process.env.NEXT_PUBLIC_NETWORK !== 'testnet' &&
+        !fee?.gas
+      ) {
+        setXcallResponse(
+          {
+            status: 'failed',
+            message: 'Cannot estimate the relayer fee at the moment. Please try again later.',
+            code: XTransferErrorStatus.InsufficientRelayerFee,
+          }
+        )
 
-        if (approve_request) {
-          setApproving(true)
+        failed = true
+      }
 
-          const approve_response =
-            await signer
-              .sendTransaction(
-                approve_request,
+      if (!failed) {
+        try {
+          const approve_request =
+            await sdk.nxtpSdkBase
+              .approveIfNeeded(
+                xcallParams.origin,
+                xcallParams.asset,
+                xcallParams.amount,
+                infiniteApprove,
               )
 
-          const {
-            hash,
-          } = { ...approve_response }
+          if (approve_request) {
+            setApproving(true)
+
+            const approve_response =
+              await signer
+                .sendTransaction(
+                  approve_request,
+                )
+
+            const {
+              hash,
+            } = { ...approve_response }
+
+            setApproveResponse(
+              {
+                status: 'pending',
+                message: `Waiting for ${symbol} approval`,
+                tx_hash: hash,
+              }
+            )
+
+            setApproveProcessing(true)
+
+            const approve_receipt =
+              await signer.provider
+                .waitForTransaction(
+                  hash,
+                )
+
+            const {
+              status,
+            } = { ...approve_receipt }
+
+            setApproveResponse(
+              status ?
+                null :
+                {
+                  status: 'failed',
+                  message: `Failed to approve ${symbol}`,
+                  tx_hash: hash,
+                }
+            )
+
+            failed = !status
+
+            setApproveProcessing(false)
+            setApproving(false)
+          }
+          else {
+            setApproving(false)
+          }
+        } catch (error) {
+          failed = true
+
+          const message =
+            error?.reason ||
+            error?.data?.message ||
+            error?.message
+
+          const code =
+            _.slice(
+              (message || '')
+                .toLowerCase()
+                .split(' ')
+                .filter(s => s),
+              0,
+              2,
+            )
+            .join('_')
 
           setApproveResponse(
             {
-              status: 'pending',
-              message: `Waiting for ${symbol} approval`,
-              tx_hash: hash,
+              status: 'failed',
+              message,
+              code,
             }
           )
-
-          setApproveProcessing(true)
-
-          const approve_receipt =
-            await signer.provider
-              .waitForTransaction(
-                hash,
-              )
-
-          const {
-            status,
-          } = { ...approve_receipt }
-
-          setApproveResponse(
-            status ?
-              null :
-              {
-                status: 'failed',
-                message: `Failed to approve ${symbol}`,
-                tx_hash: hash,
-              }
-          )
-
-          failed = !status
 
           setApproveProcessing(false)
           setApproving(false)
         }
-        else {
-          setApproving(false)
-        }
-      } catch (error) {
-        failed = true
-
-        const message =
-          error?.reason ||
-          error?.data?.message ||
-          error?.message
-
-        const code =
-          _.slice(
-            (message || '')
-              .toLowerCase()
-              .split(' ')
-              .filter(s => s),
-            0,
-            2,
-          )
-          .join('_')
-
-        setApproveResponse(
-          {
-            status: 'failed',
-            message,
-            code,
-          }
-        )
-
-        setApproveProcessing(false)
-        setApproving(false)
       }
 
       if (!failed) {
@@ -2156,8 +2179,8 @@ export default () => {
           }
 
           console.log(
-            is_wrap_eth ?
-              '[wrapEthAndXCall]' :
+            // is_wrap_eth ?
+            //   '[wrapEthAndXCall]' :
               '[xcall]',
             {
               xcallParams,
@@ -2165,11 +2188,11 @@ export default () => {
           )
 
           const xcall_request =
-            is_wrap_eth ?
-              await sdk.nxtpSdkBase
-                .wrapEthAndXCall(
-                  xcallParams,
-                ) :
+            // is_wrap_eth ?
+            //   await sdk.nxtpSdkBase
+            //     .wrapEthAndXCall(
+            //       xcallParams,
+            //     ) :
               await sdk.nxtpSdkBase
                 .xcall(
                   xcallParams,
@@ -2332,8 +2355,8 @@ export default () => {
 
           console.log(
             `[${
-              is_wrap_eth ?
-                'wrapEthAndXCall' :
+              // is_wrap_eth ?
+              //   'wrapEthAndXCall' :
                 'xcall'
             } error]`,
             {
