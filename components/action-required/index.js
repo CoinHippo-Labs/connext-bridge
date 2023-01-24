@@ -38,6 +38,7 @@ const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE =
 
 export default (
   {
+    initialHidden = true,
     transferData,
     buttonTitle,
     onTransferBumped,
@@ -84,7 +85,7 @@ export default (
     signer,
   } = { ...wallet_data }
 
-  const [hidden, setHidden] = useState(true)
+  const [hidden, setHidden] = useState(initialHidden)
   const [data, setData] = useState(null)
   const [loaded, setLoaded] = useState(false)
   const [newSlippage, setNewSlippage] = useState(null)
