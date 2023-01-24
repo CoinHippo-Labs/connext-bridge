@@ -2687,7 +2687,19 @@ export default (
                         width="16"
                         height="16"
                       /> :
-                      <span className={`${typeof priceImpactAdd === 'number' && priceImpactAdd > 0 ? 'text-red-500 dark:text-red-500' : ''}`}>
+                      <span
+                        className={
+                          `${
+                            typeof priceImpactAdd === 'number' ?
+                              priceImpactAdd < 0 ?
+                                'text-red-500 dark:text-red-500' :
+                                priceImpactAdd > 0 ?
+                                  'text-green-500 dark:text-green-500' :
+                                  '' :
+                              ''
+                          }`
+                        }
+                      >
                         <span className="whitespace-nowrap">
                           {
                             typeof priceImpactAdd === 'number' ||
@@ -2708,88 +2720,10 @@ export default (
                 </div>
               </div>
               {
-                false &&
                 typeof priceImpactAdd === 'number' &&
                 priceImpactAdd < 0 &&
-                (
-                  <div className="bg-yellow-50 dark:bg-yellow-200 bg-opacity-50 dark:bg-opacity-10 rounded flex items-start space-x-2 p-2">
-                    <IoWarning
-                      size={18}
-                      className="min-w-max text-yellow-500 dark:text-yellow-400 mt-0.5"
-                    />
-                    <div className="flex flex-col space-y-1.5">
-                      <div className="flex flex-col space-y-1">
-                        <span className="text-sm font-bold">
-                          Price impact is negative
-                        </span>
-                        <span className="leading-4 text-xs">
-                          The pool is currently overweighted in {
-                            (overweighted_asset === 'x' ?
-                              x_asset_data :
-                              y_asset_data
-                            )?.symbol
-                          }. Providing more {
-                            (overweighted_asset === 'x' ?
-                              y_asset_data :
-                              x_asset_data
-                            )?.symbol
-                          } will grant bonus LP tokens.
-                        </span>
-                      </div>
-                      {
-                        pool_tokens_data
-                          .filter(d =>
-                            d.symbol?.includes(WRAPPED_PREFIX)
-                          )
-                          .length > 0 &&
-                        (
-                          <div className="flex flex-col space-y-0">
-                            <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
-                              Convert to {
-                                (overweighted_asset === 'x' ?
-                                  y_asset_data :
-                                  x_asset_data
-                                )?.symbol
-                              }
-                            </span>
-                            <div className="flex items-center space-x-1">
-                              <a
-                                href={`/${asset.toUpperCase()}-from-${_.head(chains_data)?.id}-to-${chain}?receive_next=true&source=pool`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <span className="leading-3 text-xs font-medium">
-                                  Using Bridge
-                                </span>
-                              </a>
-                              <span className="leading-3 text-base text-slate-400 dark:text-slate-500 mt-0.5">
-                                |
-                              </span>
-                              <a
-                                href={`/swap/${asset.toUpperCase()}-on-${chain}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <span className="leading-3 text-xs font-medium">
-                                  Using AMM
-                                </span>
-                              </a>
-                            </div>
-                          </div>
-                        )
-                      }
-                    </div>
-                  </div>
-                )
-              }
-              {
-                typeof priceImpactAdd === 'number' &&
-                priceImpactAdd > 0 &&
-                (
-                  overweighted_asset === 'x' ?
-                    amountX > amountY :
-                    amountY < amountX
-                ) &&
+                overweighted_asset === 'x' &&
+                amountX > amountY &&
                 (
                   <div className="bg-yellow-50 dark:bg-yellow-200 bg-opacity-50 dark:bg-opacity-10 rounded flex items-start space-x-2 pt-2 pb-3 px-2">
                     <IoWarning
@@ -2807,10 +2741,10 @@ export default (
                               x_asset_data :
                               y_asset_data
                             )?.symbol
-                          } is currently overweighted in this pool.
+                          } will be overweighted in this pool.
                         </span>
                         <div className="flex flex-col items-center space-y-1">
-                          <span className="leading-4 text-xs text-center">
+                          <span className="leading-4 text-xs text-left">
                             <span className="mr-1">
                               Providing additional
                             </span>
@@ -2842,8 +2776,8 @@ export default (
                           x_asset_data
                         )?.symbol?.includes(WRAPPED_PREFIX) &&
                         (
-                          <div className="flex flex-col space-y-0 mx-auto">
-                            <div className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 rounded flex items-center space-x-1 pt-0.5 pb-1 px-2">
+                          <div className="flex flex-col space-y-0">
+                            <div className="w-fit bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 rounded flex items-center space-x-1 pt-0.5 pb-1 px-2">
                               <a
                                 href={
                                   `/${asset.toUpperCase()}-from-${_.head(chains_data)?.id}-to-${chain}?${
@@ -3447,7 +3381,19 @@ export default (
                       width="16"
                       height="16"
                     /> :
-                    <span className={`${typeof priceImpactRemove === 'number' && priceImpactRemove > 0 ? 'text-red-500 dark:text-red-500' : ''}`}>
+                    <span
+                      className={
+                        `${
+                          typeof priceImpactRemove === 'number' ?
+                            priceImpactRemove < 0 ?
+                              'text-red-500 dark:text-red-500' :
+                              priceImpactRemove > 0 ?
+                                'text-green-500 dark:text-green-500' :
+                                '' :
+                            ''
+                        }`
+                      }
+                    >
                       <span className="whitespace-nowrap">
                         {
                           typeof priceImpactRemove === 'number' ||

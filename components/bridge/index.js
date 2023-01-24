@@ -2176,27 +2176,25 @@ export default () => {
         try {
           if (is_wrap_eth) {
             xcallParams.asset = _source_contract_data?.contract_address
+            xcallParams.wrapNativeOnOrigin = true
+
+            if (_.head(destination_chain_data?.provider_params)?.nativeCurrency?.symbol?.endpoints('ETH')) {
+              xcallParams.unwrapNativeOnDestination = true
+            }
           }
 
           console.log(
-            // is_wrap_eth ?
-            //   '[wrapEthAndXCall]' :
-              '[xcall]',
+            '[xcall]',
             {
               xcallParams,
             },
           )
 
           const xcall_request =
-            // is_wrap_eth ?
-            //   await sdk.nxtpSdkBase
-            //     .wrapEthAndXCall(
-            //       xcallParams,
-            //     ) :
-              await sdk.nxtpSdkBase
-                .xcall(
-                  xcallParams,
-                )
+            await sdk.nxtpSdkBase
+              .xcall(
+                xcallParams,
+              )
 
           if (xcall_request) {
             let gasLimit =
@@ -2354,11 +2352,7 @@ export default () => {
             error?.message
 
           console.log(
-            `[${
-              // is_wrap_eth ?
-              //   'wrapEthAndXCall' :
-                'xcall'
-            } error]`,
+            '[xcall error]',
             {
               error,
             },

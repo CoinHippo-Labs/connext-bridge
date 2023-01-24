@@ -338,14 +338,16 @@ export default (
                       {
                         pool_data &&
                         !error ?
-                          <span className="uppercase">
-                            {currency_symbol}
-                            {number_format(
-                              volume,
-                              '0,0.00',
-                              true,
-                            )}
-                          </span> :
+                          !isNaN(volume) ?
+                            <span className="uppercase">
+                              {currency_symbol}
+                              {number_format(
+                                volume,
+                                '0,0.00',
+                                true,
+                              )}
+                            </span> :
+                            'TBD' :
                           selected &&
                           !no_pool &&
                           !error &&

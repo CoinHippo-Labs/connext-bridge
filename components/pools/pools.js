@@ -1621,28 +1621,31 @@ export default (
                           return (
                             <div className="flex flex-col space-y-3">
                               <div className="h-6 flex items-center justify-end text-right">
-                                <DecimalsFormat
-                                  value={
-                                    number_format(
-                                      value,
+                                {!isNaN(value) ?
+                                  <DecimalsFormat
+                                    value={
+                                      number_format(
+                                        value,
+                                        value > 100 ?
+                                          '0,0' :
+                                          value > 1 ?
+                                            '0,0.00' :
+                                            '0,0.000000',
+                                        true,
+                                      )
+                                    }
+                                    max_decimals={
                                       value > 100 ?
-                                        '0,0' :
+                                        0 :
                                         value > 1 ?
-                                          '0,0.00' :
-                                          '0,0.000000',
-                                      true,
-                                    )
-                                  }
-                                  max_decimals={
-                                    value > 100 ?
-                                      0 :
-                                      value > 1 ?
-                                        2 :
-                                        6
-                                  }
-                                  prefix={currency_symbol}
-                                  className="uppercase text-slate-600 dark:text-slate-400 text-sm font-medium"
-                                />
+                                          2 :
+                                          6
+                                    }
+                                    prefix={currency_symbol}
+                                    className="uppercase text-slate-600 dark:text-slate-400 text-sm font-medium"
+                                  /> :
+                                  'TBD'
+                                }
                               </div>
                               {
                                 uncollapseAssetIds?.includes(id) &&
@@ -1666,28 +1669,31 @@ export default (
                                       <a
                                         className="h-6 flex items-center justify-end text-sm font-medium text-right"
                                       >
-                                        <DecimalsFormat
-                                          value={
-                                            number_format(
-                                              value,
+                                        {!isNaN(value) ?
+                                          <DecimalsFormat
+                                            value={
+                                              number_format(
+                                                value,
+                                                value > 100 ?
+                                                  '0,0' :
+                                                  value > 1 ?
+                                                    '0,0.00' :
+                                                    '0,0.000000',
+                                                true,
+                                              )
+                                            }
+                                            max_decimals={
                                               value > 100 ?
-                                                '0,0' :
+                                                0 :
                                                 value > 1 ?
-                                                  '0,0.00' :
-                                                  '0,0.000000',
-                                              true,
-                                            )
-                                          }
-                                          max_decimals={
-                                            value > 100 ?
-                                              0 :
-                                              value > 1 ?
-                                                2 :
-                                                6
-                                          }
-                                          prefix={currency_symbol}
-                                          className="uppercase"
-                                        />
+                                                  2 :
+                                                  6
+                                            }
+                                            prefix={currency_symbol}
+                                            className="uppercase"
+                                          /> :
+                                          'TBD'
+                                        }
                                       </a>
                                       </Link>
                                     )
@@ -1727,28 +1733,31 @@ export default (
                           return (
                             <div className="flex flex-col space-y-3">
                               <div className="h-6 flex items-center justify-end text-right">
-                                <DecimalsFormat
-                                  value={
-                                    number_format(
-                                      value,
+                                {!isNaN(value) ?
+                                  <DecimalsFormat
+                                    value={
+                                      number_format(
+                                        value,
+                                        value > 100 ?
+                                          '0,0' :
+                                          value > 1 ?
+                                            '0,0.00' :
+                                            '0,0.000000',
+                                        true,
+                                      )
+                                    }
+                                    max_decimals={
                                       value > 100 ?
-                                        '0,0' :
+                                        0 :
                                         value > 1 ?
-                                          '0,0.00' :
-                                          '0,0.000000',
-                                      true,
-                                    )
-                                  }
-                                  max_decimals={
-                                    value > 100 ?
-                                      0 :
-                                      value > 1 ?
-                                        2 :
-                                        6
-                                  }
-                                  prefix={currency_symbol}
-                                  className="uppercase text-slate-600 dark:text-slate-400 text-sm font-medium"
-                                />
+                                          2 :
+                                          6
+                                    }
+                                    prefix={currency_symbol}
+                                    className="uppercase text-slate-600 dark:text-slate-400 text-sm font-medium"
+                                  /> :
+                                  'TBD'
+                                }
                               </div>
                               {
                                 uncollapseAssetIds?.includes(id) &&
@@ -1772,28 +1781,31 @@ export default (
                                       <a
                                         className="h-6 flex items-center justify-end text-sm font-medium text-right"
                                       >
-                                        <DecimalsFormat
-                                          value={
-                                            number_format(
-                                              value,
+                                        {!isNaN(value) ?
+                                          <DecimalsFormat
+                                            value={
+                                              number_format(
+                                                value,
+                                                value > 100 ?
+                                                  '0,0' :
+                                                  value > 1 ?
+                                                    '0,0.00' :
+                                                    '0,0.000000',
+                                                true,
+                                              )
+                                            }
+                                            max_decimals={
                                               value > 100 ?
-                                                '0,0' :
+                                                0 :
                                                 value > 1 ?
-                                                  '0,0.00' :
-                                                  '0,0.000000',
-                                              true,
-                                            )
-                                          }
-                                          max_decimals={
-                                            value > 100 ?
-                                              0 :
-                                              value > 1 ?
-                                                2 :
-                                                6
-                                          }
-                                          prefix={currency_symbol}
-                                          className="uppercase"
-                                        />
+                                                  2 :
+                                                  6
+                                            }
+                                            prefix={currency_symbol}
+                                            className="uppercase"
+                                          /> :
+                                          'TBD'
+                                        }
                                       </a>
                                       </Link>
                                     )
