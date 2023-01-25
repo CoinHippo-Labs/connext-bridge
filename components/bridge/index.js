@@ -1654,7 +1654,7 @@ export default () => {
                     params,
                   )
 
-              const gasFee =
+              const relayerFee =
                 response &&
                 utils.formatUnits(
                   response,
@@ -1667,14 +1667,14 @@ export default () => {
                 {
                   params,
                   response,
-                  gasFee,
+                  relayerFee,
                 },
               )
 
               setFee(
                 {
-                  router: routerFee,
-                  gas: gasFee,
+                  routerFee,
+                  relayerFee,
                 }
               )
             } catch (error) {
@@ -1686,7 +1686,7 @@ export default () => {
 
               setFee(
                 {
-                  router: routerFee,
+                  routerFee,
                 }
               )
             }
@@ -1934,7 +1934,7 @@ export default () => {
       } = { ...options }
 
       const {
-        gas,
+        relayerFee,
       } = { ...fee }
 
       const source_chain_data = (chains_data || [])
@@ -2044,9 +2044,9 @@ export default () => {
           callData ||
           '0x',
         relayerFee:
-          fee?.gas ?
+          relayerFee ?
             utils.parseUnits(
-              fee.gas
+              relayerFee
                 .toString(),
               18,
             )
@@ -2058,7 +2058,7 @@ export default () => {
 
       if (
         process.env.NEXT_PUBLIC_NETWORK !== 'testnet' &&
-        !fee?.gas
+        !xcallParams.relayerFee
       ) {
         setXcallResponse(
           {
@@ -2181,7 +2181,10 @@ export default () => {
             xcallParams.wrapNativeOnOrigin = true
 
             if (_.head(destination_chain_data?.provider_params)?.nativeCurrency?.symbol?.endsWith('ETH')) {
-              xcallParams.unwrapNativeOnDestination = true
+              xcallParams.unwrapNativeOnDestination =
+                xcallParams.receiveLocal ?
+                  false :
+                  true
             }
           }
 
@@ -2571,10 +2574,10 @@ export default () => {
     destination_contract_data?.decimals ||
     18
 
-  const gas_fee =
+  const relayer_fee =
     fee &&
     (
-      fee.gas ||
+      fee.relayerFee ||
       0
     )
 
@@ -2585,7 +2588,7 @@ export default () => {
       (
         forceSlow ?
           0 :
-          fee.router ||
+          fee.routerFee ||
           0
       )
 
@@ -4240,15 +4243,15 @@ export default () => {
                                                         <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-semibold space-x-1.5">
                                                           <DecimalsFormat
                                                             value={
-                                                              Number(gas_fee) >= 1000 ?
+                                                              Number(relayer_fee) >= 1000 ?
                                                                 number_format(
-                                                                  gas_fee,
+                                                                  relayer_fee,
                                                                   '0,0.000000000000',
                                                                   true,
                                                                 ) :
-                                                                Number(gas_fee) <= 0 ?
+                                                                Number(relayer_fee) <= 0 ?
                                                                   '0' :
-                                                                  gas_fee
+                                                                  relayer_fee
                                                             }
                                                             className="text-sm"
                                                           />
@@ -4481,7 +4484,10 @@ export default () => {
                             ) ||
                             (
                               fee &&
-                              Number(gas_fee) <= 0 &&
+                              (
+                                !relayer_fee ||
+                                Number(relayer_fee) <= 0
+                              ) &&
                               process.env.NEXT_PUBLIC_NETWORK !== 'testnet'
                             )
                           ) ?
@@ -4530,7 +4536,10 @@ export default () => {
                                               pool_amount
                                           }` :
                                           fee &&
-                                          Number(gas_fee) <= 0 ?
+                                          (
+                                            !relayer_fee ||
+                                            Number(relayer_fee) <= 0
+                                          ) ?
                                             'Cannot estimate the relayer fee at the moment. Please try again later.' :
                                             ''
                                 }
