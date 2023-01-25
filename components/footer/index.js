@@ -61,17 +61,17 @@ export default () => {
           </span>
         </a>
         {
-          dependencies?.['@connext/nxtp-sdk'] &&
+          dependencies?.['@connext/sdk'] &&
           (
             <a
-              href="https://github.com/connext/nxtp"
+              href="https://github.com/connext/monorepo"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 dark:text-white font-medium"
             >
               SDK v
               {
-                dependencies['@connext/nxtp-sdk']
+                dependencies['@connext/sdk']
                   .replace(
                     '^',
                     '',

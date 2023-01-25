@@ -88,7 +88,8 @@ export default (
                     XTransferStatus.Executed,
                     XTransferStatus.CompletedFast,
                     XTransferStatus.CompletedSlow,
-                  ].includes(t.status)
+                  ]
+                  .includes(t.status)
                 ) > -1
             ) {
               setCollapse(false)

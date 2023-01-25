@@ -70,7 +70,7 @@ const DEFAULT_OPTIONS = {
   slippage: DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE,
   forceSlow: false,
   receiveLocal: false,
-  showNextAssets: false,
+  showNextAssets: true,
 }
 
 export default () => {
@@ -1087,7 +1087,8 @@ export default () => {
                 XTransferStatus.Executed,
                 XTransferStatus.CompletedFast,
                 XTransferStatus.CompletedSlow,
-              ].includes(status)
+              ]
+              .includes(status)
             ) {
               setLatestTransfers(
                 _.orderBy(
@@ -1141,7 +1142,8 @@ export default () => {
                   XTransferStatus.Executed,
                   XTransferStatus.CompletedFast,
                   XTransferStatus.CompletedSlow,
-                ].includes(status)
+                ]
+                .includes(status)
               ) {
                 setLatestTransfers(
                   _.orderBy(
@@ -2178,7 +2180,7 @@ export default () => {
             xcallParams.asset = _source_contract_data?.contract_address
             xcallParams.wrapNativeOnOrigin = true
 
-            if (_.head(destination_chain_data?.provider_params)?.nativeCurrency?.symbol?.endpoints('ETH')) {
+            if (_.head(destination_chain_data?.provider_params)?.nativeCurrency?.symbol?.endsWith('ETH')) {
               xcallParams.unwrapNativeOnDestination = true
             }
           }
@@ -2354,6 +2356,7 @@ export default () => {
           console.log(
             '[xcall error]',
             {
+              xcallParams,
               error,
             },
           )
@@ -2508,6 +2511,21 @@ export default () => {
     destination_contract_data = {
       ...destination_contract_data,
       ...destination_contract_data.next_asset,
+    }
+  }
+  else if (
+    symbol &&
+    destination_contract_data?.wrapable &&
+    equals_ignore_case(
+      destination_asset_data?.symbol,
+      symbol,
+    )
+  ) {
+    destination_contract_data = {
+      ...destination_contract_data,
+      contract_address: constants.AddressZero,
+      symbol: destination_asset_data.symbol,
+      image: destination_asset_data.image,
     }
   }
 

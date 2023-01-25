@@ -1,5 +1,5 @@
 # Connext Bridge UI
-Connext Bridge is a bridge app built on top of [Connext's NXTP Protocol](https://github.com/connext/nxtp). The app supports assets transfer between Layer 2 systems and Ethereum Virtual Machine (EVM) compatible chains. 
+Connext Bridge is a bridge app built on top of [Connext's Protocol](https://github.com/connext/monorepo). The app supports assets transfer between Layer 2 systems and Ethereum Virtual Machine (EVM) compatible chains. 
 
 ## URLs
 - mainnet: [https://bridge.connext.network](https://bridge.connext.network)

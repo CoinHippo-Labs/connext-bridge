@@ -226,6 +226,7 @@ export default (
               {
                 ...contract_data,
                 ...next_asset,
+                is_next_asset: true,
               },
 
             )
@@ -234,6 +235,10 @@ export default (
           return (
             _contracts_data
               .map(c => {
+                const {
+                  is_next_asset,
+                } = { ...c }
+
                 const _contracts = _.cloneDeep(contracts)
 
                 const contract_index = (_contracts || [])
@@ -247,6 +252,7 @@ export default (
 
                 return {
                   ...a,
+                  is_next_asset,
                   contracts: _contracts,
                   scores:
                     _.concat(
@@ -302,6 +308,7 @@ export default (
         })
         .map(a => {
           const {
+            is_next_asset,
             group,
             scores,
           } = { ...a }
@@ -310,7 +317,11 @@ export default (
             ...a,
             group:
               group ||
-              '',
+              (
+                is_next_asset ?
+                  'NextAssets' :
+                  ''
+              ),
             max_score:
               _.max(
                 scores,
