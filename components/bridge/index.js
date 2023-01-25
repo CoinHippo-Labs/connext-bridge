@@ -2818,6 +2818,27 @@ export default () => {
                                 </div>
                               </Tooltip>
                             }
+                            onTransferBumped={
+                              relayer_fee => {
+                                if (latestTransfers) {
+                                  const index = latestTransfers
+                                    .findIndex(t =>
+                                      t?.transfer_id === latest_transfer?.transfer_id
+                                    )
+
+                                  if (index > -1) {
+                                    latestTransfers[index] =
+                                      {
+                                        ...latestTransfers[index],
+                                        relayer_fee,
+                                        error_status: null,
+                                      }
+
+                                    setLatestTransfers(latestTransfers)
+                                  }
+                                }
+                              }
+                            }
                           /> :
                           <CountdownCircleTimer
                             isPlaying
@@ -2868,6 +2889,27 @@ export default () => {
                                     Action required
                                   </span>
                                 </Tooltip>
+                              }
+                              onTransferBumped={
+                                relayer_fee => {
+                                  if (latestTransfers) {
+                                    const index = latestTransfers
+                                      .findIndex(t =>
+                                        t?.transfer_id === latest_transfer?.transfer_id
+                                      )
+
+                                    if (index > -1) {
+                                      latestTransfers[index] =
+                                        {
+                                          ...latestTransfers[index],
+                                          relayer_fee,
+                                          error_status: null,
+                                        }
+
+                                      setLatestTransfers(latestTransfers)
+                                    }
+                                  }
+                                }
                               }
                             /> :
                             <div className="flex flex-wrap items-center text-lg font-semibold space-x-1.5">

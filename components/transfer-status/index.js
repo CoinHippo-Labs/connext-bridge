@@ -1,4 +1,5 @@
 import { useSelector, shallowEqual } from 'react-redux'
+import { useState, useEffect } from 'react'
 import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, constants, utils } from 'ethers'
@@ -64,6 +65,17 @@ export default (
     address,
   } = { ...wallet_data }
 
+  const [transferData, setTransferData] = useState(null)
+
+  useEffect(
+    () => {
+      if (data) {
+        setTransferData(data)
+      }
+    },
+    [data],
+  )
+
   const {
     transfer_id,
     status,
@@ -86,10 +98,10 @@ export default (
     reconcile_transaction_hash,
     execute_transaction_hash,
     execute_timestamp,
-  } = { ...data }
+  } = { ...transferData }
   let {
     force_slow,
-  } = { ...data }
+  } = { ...transferData }
 
   force_slow =
     force_slow ||
@@ -401,7 +413,7 @@ export default (
     .includes(status)
 
   return (
-    data &&
+    transferData &&
     (
       <div className={`bg-slate-100 dark:bg-slate-900 max-w-xs sm:max-w-none rounded ${errored ? 'border-0 border-red-500' : pending ? 'border-0 border-blue-500' : 'border-0 border-green-500'} mx-auto py-5 px-4`}>
         <div className="flex items-center justify-between space-x-2">
@@ -518,7 +530,7 @@ export default (
             {
               errored ?
                 <ActionRequired
-                  transferData={data}
+                  transferData={transferData}
                   buttonTitle={
                     <Tooltip
                       placement="top"
@@ -532,6 +544,19 @@ export default (
                         />
                       </div>
                     </Tooltip>
+                  }
+                  onTransferBumped={
+                    relayer_fee => {
+                      if (data) {
+                        setTransferData(
+                          {
+                            ...data,
+                            relayer_fee,
+                            error_status: null,
+                          }
+                        )
+                      }
+                    }
                   }
                 /> :
                 pending ?
@@ -692,7 +717,7 @@ export default (
                   </div> :
                   errored ?
                     <ActionRequired
-                      transferData={data}
+                      transferData={transferData}
                       buttonTitle={
                         <Tooltip
                           placement="top"
@@ -703,6 +728,19 @@ export default (
                             Action required
                           </span>
                         </Tooltip>
+                      }
+                      onTransferBumped={
+                        relayer_fee => {
+                          if (data) {
+                            setTransferData(
+                              {
+                                ...data,
+                                relayer_fee,
+                                error_status: null,
+                              }
+                            )
+                          }
+                        }
                       }
                     /> :
                     <span>
