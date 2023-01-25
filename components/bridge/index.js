@@ -153,6 +153,7 @@ export default () => {
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [buttonDirection, setButtonDirection] = useState(1)
   const [collapse, setCollapse] = useState(false)
+  const [recipientEditing, setRecipientEditing] = useState(false)
   const [slippageEditing, setSlippageEditing] = useState(false)
   const [estimatedValues, setEstimatedValues] = useState(undefined)
   const [estimateResponse, setEstimateResponse] = useState(null)
@@ -3964,6 +3965,106 @@ export default () => {
                                         (
                                           <div className="space-y-2.5">
                                             {
+                                              'to' in options &&
+                                              to &&
+                                              (
+                                                <div className="flex items-center justify-between space-x-1">
+                                                  <Tooltip
+                                                    placement="top"
+                                                    content="The desitination address that you want to send asset to."
+                                                    className="z-50 bg-dark text-white text-xs"
+                                                  >
+                                                    <div className="flex items-center">
+                                                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-medium">
+                                                        Recipient address
+                                                      </div>
+                                                      <BiInfoCircle
+                                                        size={14}
+                                                        className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                                      />
+                                                    </div>
+                                                  </Tooltip>
+                                                  <div className="flex flex-col sm:items-end space-y-1.5">
+                                                    {recipientEditing ?
+                                                      <>
+                                                        <div className="flex items-center justify-end space-x-1.5">
+                                                          <DebounceInput
+                                                            debounceTimeout={750}
+                                                            size="small"
+                                                            type="text"
+                                                            placeholder={address}
+                                                            value={to}
+                                                            onChange={e => {
+                                                              let value = e.target.value
+
+                                                              try {
+                                                                value = 
+                                                                  value
+                                                                    .trim()
+                                                                    .split(' ')
+                                                                    .filter(s => s)
+                                                                    .join('')
+
+                                                                value =
+                                                                  utils.getAddress(
+                                                                    value
+                                                                  )
+                                                              } catch (error) {
+                                                                value = address
+                                                              }
+
+                                                              const _data = {
+                                                                ...options,
+                                                                to: value,
+                                                              }
+
+                                                              setOptions(_data)
+                                                            }}
+                                                            className={`w-40 sm:w-56 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm font-semibold text-right py-1.5 px-2`}
+                                                          />
+                                                          <button
+                                                            onClick={() => setRecipientEditing(false)}
+                                                            className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                                                          >
+                                                            <BiCheckCircle
+                                                              size={16}
+                                                            />
+                                                          </button>
+                                                        </div>
+                                                      </> :
+                                                      <div className="flex items-center space-x-1.5">
+                                                        <Tooltip
+                                                          placement="top"
+                                                          content={to}
+                                                          className="z-50 bg-dark text-white text-xs"
+                                                        >
+                                                          <span className="text-sm font-semibold">
+                                                            {ellipse(
+                                                              to,
+                                                              8,
+                                                            )}
+                                                          </span>
+                                                        </Tooltip>
+                                                        <button
+                                                          disabled={disabled}
+                                                          onClick={() => {
+                                                            if (!disabled) {
+                                                              setRecipientEditing(true)
+                                                            }
+                                                          }}
+                                                          className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
+                                                        >
+                                                          <BiEditAlt
+                                                            size={16}
+                                                          />
+                                                        </button>
+                                                      </div>
+                                                    }
+                                                  </div>
+                                                </div>
+                                              )
+                                            }
+                                            {
                                               (
                                                 true ||
                                                 !receiveLocal
@@ -4558,6 +4659,7 @@ export default () => {
                                   ].includes(amount)
                                 }
                                 onClick={() => {
+                                  setRecipientEditing(false)
                                   setSlippageEditing(false)
                                   call()
                                 }}
