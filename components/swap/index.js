@@ -659,7 +659,7 @@ export default () => {
 
               const pool =
                 is_pool &&
-                await sdk.nxtpSdkPool
+                await sdk.sdkPool
                   .getPool(
                     domain_id,
                     contract_address,
@@ -726,7 +726,7 @@ export default () => {
 
                 try {
                   supply =
-                    await sdk.nxtpSdkPool
+                    await sdk.sdkPool
                       .getTokenSupply(
                         domain_id,
                         lpTokenAddress,
@@ -773,7 +773,7 @@ export default () => {
 
                 try {
                   rate =
-                    await sdk.nxtpSdkPool
+                    await sdk.sdkPool
                       .getVirtualPrice(
                         domain_id,
                         contract_address,
@@ -1454,7 +1454,7 @@ export default () => {
       if (!failed) {
         try {
           const approve_request =
-            await sdk.nxtpSdkBase
+            await sdk.sdkBase
               .approveIfNeeded(
                 domainId,
                 (origin === 'x' ?
@@ -1584,7 +1584,7 @@ export default () => {
           )
 
           const swap_request =
-            await sdk.nxtpSdkPool
+            await sdk.sdkPool
               .swap(
                 domainId,
                 contract_address,
@@ -1915,7 +1915,7 @@ export default () => {
           )
 
           const tokenIndexFrom =
-            await sdk.nxtpSdkPool
+            await sdk.sdkPool
               .getPoolTokenIndex(
                 domainId,
                 contract_address,
@@ -1939,7 +1939,7 @@ export default () => {
           )
 
           const tokenIndexTo =
-            await sdk.nxtpSdkPool
+            await sdk.sdkPool
               .getPoolTokenIndex(
                 domainId,
                 contract_address,
@@ -1961,7 +1961,7 @@ export default () => {
           )
 
           const _amount =
-            await sdk.nxtpSdkPool
+            await sdk.sdkPool
               .calculateSwap(
                 domainId,
                 contract_address,
@@ -2041,7 +2041,7 @@ export default () => {
     )
 
     const price_impact =
-      await sdk.nxtpSdkPool
+      await sdk.sdkPool
         .calculateSwapPriceImpact(
           domainId,
           amount,

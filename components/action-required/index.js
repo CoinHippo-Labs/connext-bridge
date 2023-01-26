@@ -193,7 +193,7 @@ export default (
               )
 
               const response =
-                await sdk.nxtpSdkBase
+                await sdk.sdkBase
                   .estimateRelayerFee(
                     params,
                   )
@@ -330,7 +330,7 @@ export default (
           )
 
           const response =
-            await sdk.nxtpSdkPool
+            await sdk.sdkPool
               .calculateAmountReceived(
                 originDomain,
                 destinationDomain,
@@ -510,7 +510,7 @@ export default (
             )
 
             const request =
-              await sdk.nxtpSdkBase
+              await sdk.sdkBase
                 .updateSlippage(
                   params,
                 )
@@ -661,7 +661,7 @@ export default (
             )
 
             const request =
-              await sdk.nxtpSdkBase
+              await sdk.sdkBase
                 .bumpTransfer(
                   params,
                 )

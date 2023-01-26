@@ -419,7 +419,7 @@ export default () => {
             )
 
             const response =
-              await sdk.nxtpSdkPool
+              await sdk.sdkPool
                 .getUserPools(
                   domain_id,
                   address,

@@ -132,7 +132,7 @@ export default () => {
                 } = { ...chain_data }
 
                 const response =
-                  await sdk.nxtpSdkPool
+                  await sdk.sdkPool
                     .getUserPools(
                       domain_id,
                       address,

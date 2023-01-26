@@ -353,7 +353,7 @@ export default (
               )
 
               let amounts =
-                await sdk.nxtpSdkPool
+                await sdk.sdkPool
                   .calculateRemoveSwapLiquidity(
                     domainId,
                     contract_address,
@@ -381,7 +381,7 @@ export default (
                 )
 
                 const tokenIndex =
-                  await sdk.nxtpSdkPool
+                  await sdk.sdkPool
                     .getPoolTokenIndex(
                       domainId,
                       contract_address,
@@ -646,7 +646,7 @@ export default (
           if (!failed) {
             try {
               const approve_request =
-                await sdk.nxtpSdkBase
+                await sdk.sdkBase
                   .approveIfNeeded(
                     domainId,
                     x_asset_data?.contract_address,
@@ -724,7 +724,7 @@ export default (
             if (!failed) {
               try {
                 const approve_request =
-                  await sdk.nxtpSdkBase
+                  await sdk.sdkBase
                     .approveIfNeeded(
                       domainId,
                       y_asset_data?.contract_address,
@@ -813,7 +813,7 @@ export default (
               )
 
               const tokenIndex =
-                await sdk.nxtpSdkPool
+                await sdk.sdkPool
                   .getPoolTokenIndex(
                     domainId,
                     contract_address,
@@ -849,7 +849,7 @@ export default (
               )
 
               const add_request =
-                await sdk.nxtpSdkPool
+                await sdk.sdkPool
                   .addLiquidity(
                     domainId,
                     contract_address,
@@ -1010,7 +1010,7 @@ export default (
           if (!failed) {
             try {
               const approve_request =
-                await sdk.nxtpSdkBase
+                await sdk.sdkBase
                   .approveIfNeeded(
                     domainId,
                     lpTokenAddress,
@@ -1100,7 +1100,7 @@ export default (
               )
 
               const remove_request =
-                await sdk.nxtpSdkPool
+                await sdk.sdkPool
                   .removeLiquidity(
                     domainId,
                     contract_address,
@@ -1293,7 +1293,7 @@ export default (
         )
 
         const price_impact =
-          await sdk.nxtpSdkPool
+          await sdk.sdkPool
             .calculateAddLiquidityPriceImpact(
               domainId,
               contract_address,
@@ -1404,7 +1404,7 @@ export default (
         )
 
         const price_impact =
-          await sdk.nxtpSdkPool
+          await sdk.sdkPool
             .calculateRemoveLiquidityPriceImpact(
               domainId,
               contract_address,

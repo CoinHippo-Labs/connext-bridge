@@ -1036,7 +1036,7 @@ export default () => {
 
             try {
               const response =
-                await sdk.nxtpSdkUtils
+                await sdk.sdkUtils
                   .getTransfers(
                     {
                       transactionHash,
@@ -1060,7 +1060,7 @@ export default () => {
             ) {
               try {
                 const response =
-                  await sdk.nxtpSdkUtils
+                  await sdk.sdkUtils
                     .getTransfers(
                       {
                         userAddress: address,
@@ -1118,7 +1118,7 @@ export default () => {
           }
           else if (transfer_id) {
             const response =
-              await sdk.nxtpSdkUtils
+              await sdk.sdkUtils
                 .getTransfers(
                   {
                     transferId: transfer_id,
@@ -1650,7 +1650,7 @@ export default () => {
               )
 
               const response =
-                await sdk.nxtpSdkBase
+                await sdk.sdkBase
                   .estimateRelayerFee(
                     params,
                   )
@@ -1782,7 +1782,7 @@ export default () => {
           )
 
           const response =
-            await sdk.nxtpSdkPool
+            await sdk.sdkPool
               .calculateAmountReceived(
                 originDomain,
                 destinationDomain,
@@ -2075,7 +2075,7 @@ export default () => {
       if (!failed) {
         try {
           const approve_request =
-            await sdk.nxtpSdkBase
+            await sdk.sdkBase
               .approveIfNeeded(
                 xcallParams.origin,
                 xcallParams.asset,
@@ -2197,7 +2197,7 @@ export default () => {
           )
 
           const xcall_request =
-            await sdk.nxtpSdkBase
+            await sdk.sdkBase
               .xcall(
                 xcallParams,
               )
