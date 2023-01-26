@@ -2757,13 +2757,13 @@ export default () => {
     process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
 
   return (
-    <div className={`grid grid-cols-1 ${has_latest_transfers ? 'lg:grid-cols-8' : ''} items-start gap-4 my-4`}>
+    <div className={`grid grid-cols-1 ${has_latest_transfers ? 'lg:grid-cols-8' : ''} items-start gap-4 my-4 sm:my-0 xl:my-4`}>
       <div className="hidden xl:block col-span-0 xl:col-span-2" />
       <div className={`col-span-1 ${has_latest_transfers ? 'lg:col-span-5' : ''} xl:col-span-4`}>
-        <div className="mt-4 sm:mt-8">
+        <div className="mt-4 sm:mt-0 xl:mt-8">
           <Announcement />
         </div>
-        <div className="flex flex-col items-center justify-center space-y-6 sm:space-y-6 my-4 sm:my-6 mx-1 sm:mx-4">
+        <div className="flex flex-col items-center justify-center space-y-6 sm:space-y-6 my-4 sm:my-0 xl:my-6 mx-1 sm:mx-4">
           <div className="w-full max-w-md space-y-3">
             {
               openTransferStatus &&
