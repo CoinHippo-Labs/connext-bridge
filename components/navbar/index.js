@@ -153,16 +153,34 @@ export default function Navbar() {
             )
       }
 
-      dispatch({
-        type: SDK_DATA,
-        value: await NxtpSdk.create({ chainConfig, signer: signer || EthersWallet.createRandom(), skipPolling: false }),
-      })
+      const config =
+        {
+          chainConfig,
+          signer:
+            signer ||
+            EthersWallet.createRandom(),
+          skipPolling: false,
+        }
+
+      console.log(
+        '[SDK config]',
+        config,
+      )
+
+      dispatch(
+        {
+          type: SDK_DATA,
+          value: await NxtpSdk.create(config),
+        }
+      )
 
       if (!rpcs_data) {
-        dispatch({
-          type: RPCS_DATA,
-          value: rpcs,
-        })
+        dispatch(
+          {
+            type: RPCS_DATA,
+            value: rpcs,
+          }
+        )
       }
     }
   }, [chains_data, chain_id, address])
