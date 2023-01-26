@@ -42,6 +42,7 @@ export default (
     transferData,
     buttonTitle,
     onTransferBumped,
+    onSlippageUpdated,
   },
 ) => {
   const {
@@ -502,7 +503,7 @@ export default (
             }
 
             console.log(
-              '[forceUpdateSlippage]',
+              '[updateSlippage]',
               {
                 params,
               },
@@ -510,7 +511,7 @@ export default (
 
             const request =
               await sdk.nxtpSdkBase
-                .forceUpdateSlippage(
+                .updateSlippage(
                   params,
                 )
 
@@ -583,6 +584,15 @@ export default (
                   tx_hash: hash,
                 }
               )
+
+              if (
+                !failed &&
+                onSlippageUpdated
+              ) {
+                onSlippageUpdated(
+                  params.slippage,
+                )
+              }
             }
           } catch (error) {
             let message = 
@@ -591,7 +601,7 @@ export default (
               error?.message
 
             console.log(
-              '[forceUpdateSlippage error]',
+              '[updateSlippage error]',
               {
                 params,
                 error,

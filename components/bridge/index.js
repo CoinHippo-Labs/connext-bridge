@@ -2843,6 +2843,27 @@ export default () => {
                                 }
                               }
                             }
+                            onSlippageUpdated={
+                              slippage => {
+                                if (latestTransfers) {
+                                  const index = latestTransfers
+                                    .findIndex(t =>
+                                      t?.transfer_id === latest_transfer?.transfer_id
+                                    )
+
+                                  if (index > -1) {
+                                    latestTransfers[index] =
+                                      {
+                                        ...latestTransfers[index],
+                                        slippage,
+                                        error_status: null,
+                                      }
+
+                                    setLatestTransfers(latestTransfers)
+                                  }
+                                }
+                              }
+                            }
                           /> :
                           <CountdownCircleTimer
                             isPlaying
@@ -2907,6 +2928,27 @@ export default () => {
                                         {
                                           ...latestTransfers[index],
                                           relayer_fee,
+                                          error_status: null,
+                                        }
+
+                                      setLatestTransfers(latestTransfers)
+                                    }
+                                  }
+                                }
+                              }
+                              onSlippageUpdated={
+                                slippage => {
+                                  if (latestTransfers) {
+                                    const index = latestTransfers
+                                      .findIndex(t =>
+                                        t?.transfer_id === latest_transfer?.transfer_id
+                                      )
+
+                                    if (index > -1) {
+                                      latestTransfers[index] =
+                                        {
+                                          ...latestTransfers[index],
+                                          slippage,
                                           error_status: null,
                                         }
 
