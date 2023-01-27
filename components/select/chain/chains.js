@@ -62,7 +62,6 @@ export default (
                 'short_name',
                 'name',
                 'id',
-                // 'group',
               ]
               .map(f =>
                 (c[f] || '')
@@ -143,7 +142,6 @@ export default (
                     (
                       <Image
                         src={image}
-                        alt=""
                         width={32}
                         height={32}
                         className="rounded-full"
@@ -154,40 +152,17 @@ export default (
                     {c.name}
                   </span>
                 </div>
-                {/*
-                  [
-                    source,
-                    destination,
-                  ].includes(id) &&
-                  (
-                    <div className="flex items-center space-x-2 ml-auto">
-                      {
-                        _.uniq(
-                          [
-                            c.id === source ?
-                              'o' :
-                              'd',
-                            id === destination ?
-                              'd' :
-                              'o',
-                          ]
-                        )
-                        .map((o, i) => (
-                          <div
-                            key={i}
-                            className="bg-blue-600 rounded uppercase text-white text-lg font-semibold px-2"
-                          >
-                            {o}
-                          </div>
-                        ))
-                      }
-                    </div>
-                  )
-                */}
               </>
             )
 
-            const className = `dropdown-item ${disabled ? 'cursor-not-allowed' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'} rounded flex items-center justify-between space-x-2 my-1 p-2`
+            const className =
+              `dropdown-item ${
+                disabled ?
+                  'cursor-not-allowed' :
+                  selected ?
+                    'bg-slate-100 dark:bg-slate-800 cursor-pointer' :
+                    'hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'
+              } rounded flex items-center justify-between space-x-2 my-1 p-2`
 
             return (
               <div key={i}>

@@ -6,7 +6,6 @@ import { TiArrowRight } from 'react-icons/ti'
 import { BiChevronDown, BiChevronUp } from 'react-icons/bi'
 
 import TransferStatus from '../transfer-status'
-import { equals_ignore_case } from '../../lib/utils'
 
 const NUM_TRANSFER_DISPLAY = 3
 
@@ -154,7 +153,10 @@ export default (
     (
       <div className="lg:max-w-xs xl:ml-auto">
         <button
-          onClick={() => setCollapse(!collapse)}
+          onClick={
+            () =>
+              setCollapse(!collapse)
+          }
           className={`w-full flex items-center justify-center ${collapse ? 'text-slate-300 hover:text-slate-800 dark:text-slate-700 dark:hover:text-slate-200 font-medium' : 'font-semibold'} space-x-1 mb-3`}
         >
           <span className="capitalize text-sm">

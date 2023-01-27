@@ -42,7 +42,6 @@ export default () => {
             <div className="flex dark:hidden items-center">
               <Image
                 src="/logos/logo.png"
-                alt=""
                 width={20}
                 height={20}
               />
@@ -50,7 +49,6 @@ export default () => {
             <div className="hidden dark:flex items-center">
               <Image
                 src="/logos/logo_white.png"
-                alt=""
                 width={20}
                 height={20}
               />
@@ -154,7 +152,6 @@ export default () => {
                 <div className="flex dark:hidden items-center">
                   <Image
                     src="/logos/externals/ens/logo.png"
-                    alt=""
                     width={20}
                     height={20}
                   />
@@ -162,7 +159,6 @@ export default () => {
                 <div className="hidden dark:flex items-center">
                   <Image
                     src="/logos/externals/ens/logo_white.png"
-                    alt=""
                     width={20}
                     height={20}
                   />

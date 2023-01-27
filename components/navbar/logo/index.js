@@ -4,7 +4,10 @@ export default () => {
   const is_testnet =
     [
       'testnet',
-    ].includes(process.env.NEXT_PUBLIC_NETWORK)
+    ]
+    .includes(
+      process.env.NEXT_PUBLIC_NETWORK
+    )
 
   return (
     <div className="logo ml-3 mr-0.5 sm:mr-3">
@@ -20,7 +23,6 @@ export default () => {
             <div className="flex sm:hidden">
               <Image
                 src="/logos/logo.png"
-                alt=""
                 width={32}
                 height={32}
               />
@@ -28,7 +30,6 @@ export default () => {
             <div className="hidden sm:flex">
               <Image
                 src="/logos/logo_with_name.png"
-                alt=""
                 width={128}
                 height={32}
               />
@@ -38,7 +39,6 @@ export default () => {
             <div className="flex sm:hidden">
               <Image
                 src="/logos/logo_white.png"
-                alt=""
                 width={32}
                 height={32}
               />
@@ -46,7 +46,6 @@ export default () => {
             <div className="hidden sm:flex">
               <Image
                 src="/logos/logo_with_name_white.png"
-                alt=""
                 width={128}
                 height={32}
               />

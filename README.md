@@ -1,8 +1,9 @@
 # Connext Bridge UI
-Connext Bridge is a bridge app built on top of [Connext's Protocol](https://github.com/connext/monorepo). The app supports assets transfer between Layer 2 systems and Ethereum Virtual Machine (EVM) compatible chains. 
+Connext Bridge is a bridge app built on top of [Connext's Protocol](https://github.com/connext/monorepo).
+The app supports assets transfer between Layer 2 systems and Ethereum Virtual Machine (EVM) compatible chains. 
 
 ## URLs
-- mainnet: [https://bridge.connext.network](https://bridge.connext.network)
+- mainnet: [https://amarok.bridge.connext.network](https://amarok.bridge.connext.network)
 - testnet: [https://testnet.bridge.connext.network](https://testnet.bridge.connext.network)
 
 ### Prerequisites

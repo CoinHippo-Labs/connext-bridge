@@ -2,10 +2,9 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import { BigNumber, utils } from 'ethers'
-import { TailSpin } from 'react-loader-spinner'
 
 import Pools from './pools'
-import { equals_ignore_case, loader_color } from '../../lib/utils'
+import { equals_ignore_case } from '../../lib/utils'
 
 const WRAPPED_PREFIX =
   process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
@@ -25,7 +24,6 @@ const VIEWS =
 
 export default () => {
   const {
-    preferences,
     chains,
     pool_assets,
     _pools,
@@ -35,7 +33,6 @@ export default () => {
   } = useSelector(state =>
     (
       {
-        preferences: state.preferences,
         chains: state.chains,
         pool_assets: state.pool_assets,
         _pools: state.pools,
@@ -46,9 +43,6 @@ export default () => {
     ),
     shallowEqual,
   )
-  const {
-    theme,
-  } = { ...preferences }
   const {
     chains_data,
   } = { ...chains }
@@ -369,38 +363,6 @@ export default () => {
                       {v.title}
                     </div>
                   ))
-                }
-                {
-                  false &&
-                  view === 'pools' &&
-                  pool_assets_data &&
-                  pools_data &&
-                  pools_data.length <
-                  pool_assets_data
-                    .flatMap(p =>
-                      (p?.contracts || [])
-                        .filter(c =>
-                          c?.is_pool
-                        )
-                    )
-                    .length &&
-                  (
-                    <div className="flex items-center space-x-2 ml-auto">
-                      <TailSpin
-                        color={loader_color(theme)}
-                        width="18"
-                        height="18"
-                      />
-                      <div className="flex items-center text-xs font-medium">
-                        <span>
-                          Loading ...
-                        </span>
-                        <span className="hidden sm:block ml-1">
-                          Please wait
-                        </span>
-                      </div>
-                    </div>
-                  )
                 }
               </div>
             </div>

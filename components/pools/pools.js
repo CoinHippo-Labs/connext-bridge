@@ -10,7 +10,6 @@ import Datatable from '../datatable'
 import Image from '../image'
 import { ProgressBar } from '../progress-bars'
 import DecimalsFormat from '../decimals-format'
-import { chainName } from '../../lib/object/chain'
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
 
@@ -340,1168 +339,894 @@ export default (
     data ?
       <div className="grid my-4 sm:my-6">
         {
-          false &&
-          view === 'pools' ?
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {
-                _.orderBy(
-                  data
-                    .flatMap(d => {
-                      const {
-                        pools,
-                      } = { ...d }
-
-                      return (
-                        (pools || [])
-                          .map(p => {
-                            return {
-                              ...p,
-                            }
-                          })
-                      )
-                    })
-                    .map((d, i) => {
-                      const {
-                        adopted,
-                        local,
-                        supply,
-                        rate,
-                      } = { ...d }
-                      let {
-                        asset_data,
-                      } = { ...d }
-
-                      asset_data =
-                        (assets_data || [])
-                          .find(a =>
-                            a?.id === asset_data?.id
-                          ) ||
-                        asset_data
-
-                      const {
-                        price,
-                      } = { ...asset_data }
-
-                      const tvl =
-                        typeof price === 'number' ?
-                          (
-                            supply ||
-                            _.sum(
-                              [
-                                adopted,
-                                local,
-                              ]
-                              .filter(t => t)
-                              .map(t => {
-                                const {
-                                  balance,
-                                  index,
-                                } = { ...t }
-
-                                return (
-                                  Number(
-                                    balance ||
-                                    '0'
-                                  ) /
-                                  (
-                                    index > 0 &&
-                                    rate > 0 ?
-                                      rate :
-                                      1
-                                  )
-                                )
-                              })
-                            )
-                          ) *
-                          price :
-                          0
-
-                      return {
-                        ...d,
-                        tvl,
-                        i,
-                      }
-                    }),
-                  [
-                    // 'i',
-                    // 'tvl',
-                  ],
-                  [
-                    // 'asc',
-                    // 'desc',
-                  ],
-                )
-                .map((d, i) => {
-                  const {
-                    chain_data,
-                    contract_data,
-                    name,
-                    adopted,
-                    local,
-                    supply,
-                    symbols,
-                    apr,
-                    rate,
-                  } = { ...d }
-                  let {
-                    asset_data,
-                  } = { ...d }
-
-                  const {
-                    contract_address,
-                    next_asset,
-                  } = { ...contract_data }
-
-                  asset_data =
-                    (assets_data || [])
-                      .find(a =>
-                        a?.id === asset_data?.id
-                      ) ||
-                    asset_data
-
-                  const {
-                    price,
-                  } = { ...asset_data }
-
-                  const chain = chain_data?.id
-                  const asset = asset_data?.id
-
-                  const images =
-                    [
-                      adopted,
-                      local,
-                    ]
-                    .map(t => {
-                      const {
-                        address,
-                      } = { ...t }
-
-                      return (
-                        (
-                          equals_ignore_case(
-                            address,
-                            contract_address,
-                          ) ?
-                            contract_data?.image :
-                            equals_ignore_case(
-                              address,
-                              next_asset?.contract_address,
-                            ) ?
-                              next_asset?.image ||
-                              contract_data?.image :
-                              null
-                        ) ||
-                        asset_data?.image
-                      )
-                    })
-
-                  const pair_balances =
-                    [
-                      adopted,
-                      local,
-                    ]
-                    .map(t => {
-                      const {
-                        symbol,
-                        balance,
-                      } = { ...t }
-
-                      return (
-                        [
-                          symbol,
-                          number_format(
-                            balance,
-                            balance > 100 ?
-                              '0,0.00a' :
-                              balance > 1 ?
-                                '0,0.00' :
-                                '0,0.000000000000',
-                          )
-                          .toUpperCase(),
-                        ]
-                        .filter(s =>
-                          typeof s === 'string'
-                        )
-                        .join(':\t')
-                      )
-                    })
-                    .join('\n')
-
-                  const tvl =
-                    typeof price === 'number' ?
-                      (
-                        supply ||
-                        _.sum(
-                          [
-                            adopted,
-                            local,
-                          ]
-                          .filter(t => t)
-                          .map(t => {
-                            const {
-                              balance,
-                              index,
-                            } = { ...t }
-
-                            return (
-                              Number(
-                                balance ||
-                                '0'
-                              ) /
-                              (
-                                index > 0 &&
-                                rate > 0 ?
-                                  rate :
-                                  1
-                              )
-                            )
-                          })
-                        )
-                      ) *
-                      price :
-                      pair_balances
-
-                  return (
-                    <Link
-                      key={i}
-                      href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                    >
-                    <a
-                      className="bg-slate-50 hover:bg-slate-100 dark:bg-black dark:hover:bg-slate-900 rounded border dark:border-slate-800 space-y-12 p-5"
-                    >
-                      <div className="flex items-center space-x-3">
-                        {
-                          chain_data?.image &&
-                          (
-                            <Image
-                              src={chain_data.image}
-                              alt=""
-                              width={24}
-                              height={24}
-                              className="rounded-full"
-                            />
-                          )
-                        }
-                        <span className="text-lg font-bold">
-                          <span className="mr-1">
-                            {chainName(chain_data)}
-                          </span>
-                          <span>
-                            {
-                              (name || '')
-                                .split('-')
-                                .join(' ')
-                            }
-                          </span>
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
-                        <div className="flex flex-col space-y-1">
-                          <span className="text-slate-400 dark:text-slate-500 font-medium">
-                            Assets
-                          </span>
-                          <div className="h-6 flex items-center">
-                            {
-                              images
-                                .map((image, i) => (
-                                  <div
-                                    key={i}
-                                    className={`flex items-center ${i > 0 ? '-ml-1' : ''}`}
-                                  >
-                                    <Tooltip
-                                      placement="top"
-                                      content={symbols?.[i]}
-                                      className="z-50 bg-dark text-white text-xs"
-                                    >
-                                      <div className="flex items-center">
-                                        <Image
-                                          src={image}
-                                          alt=""
-                                          width={20}
-                                          height={20}
-                                          className="rounded-full"
-                                        />
-                                      </div>
-                                    </Tooltip>
-                                  </div>
-                                ))
-                            }
-                          </div>
-                        </div>
-                        <div className="flex flex-col space-y-1">
-                          <span className="text-slate-400 dark:text-slate-500 font-medium">
-                            TVL
-                          </span>
-                          <span className="text-lg font-semibold">
-                            {typeof tvl === 'number' ?
-                              <Tooltip
-                                placement="top"
-                                content={pair_balances}
-                                className="z-50 bg-dark whitespace-pre-wrap text-white text-xs"
-                              >
-                                <span className="uppercase">
-                                  {currency_symbol}
-                                  {number_format(
-                                    tvl,
-                                    tvl > 100 ?
-                                      '0,0.00a' :
-                                      tvl > 1 ?
-                                        '0,0.00' :
-                                        '0,0.000000000000',
-                                  )}
-                                </span>
-                              </Tooltip> :
-                              tvl ||
-                              '-'
-                            }
-                          </span>
-                        </div>
-                        <div className="flex flex-col space-y-1">
-                          <span className="text-slate-400 dark:text-slate-500 font-medium">
-                            APR
-                          </span>
-                          <span className="text-lg font-semibold">
-                            {
-                              [
-                                'mainnet',
-                                'testnet',
-                              ].includes(process.env.NEXT_PUBLIC_NETWORK) &&
-                              [
-                                // 'optimism',
-                              ].includes(chain) ?
-                                <Tooltip
-                                  placement="top"
-                                  content={
-                                    <>
-                                      Rewards: $OP tokens
-                                    </>
-                                  }
-                                  className="z-50 bg-dark whitespace-pre-wrap text-white text-xs"
-                                >
-                                  <div className="min-w-max flex items-center">
-                                    <span className="mr-1.5">
-                                      {!isNaN(apr) ?
-                                        <span className="uppercase">
-                                          {number_format(
-                                            apr / 100,
-                                            '0,0.00a',
-                                            true,
-                                          )}
-                                          %
-                                        </span> :
-                                        'TBD'
-                                      }
-                                    </span>
-                                    {
-                                      chain_data?.image &&
-                                      (
-                                        <Image
-                                          src={chain_data.image}
-                                          alt=""
-                                          width={20}
-                                          height={20}
-                                          className="rounded-full"
-                                        />
-                                      )
-                                    }
-                                  </div>
-                                </Tooltip> :
-                                !isNaN(apr) ?
-                                  <span className="uppercase">
-                                    {number_format(
-                                      apr / 100,
-                                      '0,0.00a',
-                                      true,
-                                    )}
-                                    %
-                                  </span> :
-                                  '-'
-                            }
-                          </span>
-                        </div>
-                      </div>
-                    </a>
-                    </Link>
-                  )
-                })
-              }
+          no_positions ?
+            <div className="whitespace-nowrap text-slate-800 dark:text-slate-200 ml-2">
+              You currently don't have any positions.
             </div> :
-            no_positions ?
-              <div className="whitespace-nowrap text-slate-800 dark:text-slate-200 ml-2">
-                You currently don't have any positions.
-              </div> :
-              <>
-                <div
-                  className="w-32 sm:w-64 mx-auto"
-                  style={
-                    {
-                      boxShadow,
-                      WebkitBoxShadow: boxShadow,
-                      MozBoxShadow: boxShadow,
-                    }
+            <>
+              <div
+                className="w-32 sm:w-64 mx-auto"
+                style={
+                  {
+                    boxShadow,
+                    WebkitBoxShadow: boxShadow,
+                    MozBoxShadow: boxShadow,
                   }
-                />
-                <Datatable
-                  columns={
-                    [
-                      {
-                        Header: 'Token',
-                        accessor: 'asset_data',
-                        disableSortBy: true,
-                        Cell: props => {
-                          const {
-                            id,
-                            pools,
-                            chain_data,
-                            asset_data,
-                            contract_data,
-                          } = { ...props.row.original }
-                          let {
-                            name,
-                          } = { ...props.row.original }
-                          const {
-                            image,
-                            symbol,
-                          } = { ...props.value }
+                }
+              />
+              <Datatable
+                columns={
+                  [
+                    {
+                      Header: 'Token',
+                      accessor: 'asset_data',
+                      disableSortBy: true,
+                      Cell: props => {
+                        const {
+                          id,
+                          pools,
+                          chain_data,
+                          asset_data,
+                          contract_data,
+                        } = { ...props.row.original }
+                        let {
+                          name,
+                        } = { ...props.row.original }
+                        const {
+                          image,
+                          symbol,
+                        } = { ...props.value }
 
-                          const _symbol =
-                            view === 'my_positions' ?
-                              contract_data?.symbol ||
-                              symbol :
-                              symbol
+                        const _symbol =
+                          view === 'my_positions' ?
+                            contract_data?.symbol ||
+                            symbol :
+                            symbol
 
-                          name =
-                            name ||
-                            _symbol
+                        name =
+                          name ||
+                          _symbol
 
-                          const chain = chain_data?.id
-                          const asset = asset_data?.id
+                        const chain = chain_data?.id
+                        const asset = asset_data?.id
 
-                          return (
-                            <div className="flex flex-col space-y-3">
-                              {view === 'my_positions' ?
-                                <Link
-                                  href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                                >
-                                <a
-                                  className="h-6 flex items-center font-medium"
-                                >
-                                  {name}
-                                </a>
-                                </Link> :
-                                <>
-                                  <div className="h-6 flex items-center space-x-2">
-                                    {
-                                      image &&
-                                      (
-                                        <Image
-                                          src={image}
-                                          alt=""
-                                          width={24}
-                                          height={24}
-                                          className="rounded-full"
-                                        />
-                                      )
-                                    }
-                                    <span className="text-slate-600 dark:text-slate-400 text-sm font-medium">
-                                      {_symbol}
-                                    </span>
-                                  </div>
-                                  {
-                                    uncollapseAssetIds?.includes(id) &&
-                                    (pools || [])
-                                      .map((p, i) => {
-                                        const {
-                                          chain_data,
-                                          asset_data,
-                                          contract_data,
-                                        } = { ...p }
-                                        let {
-                                          name,
-                                        } = { ...p }
-                                        let {
-                                          symbol,
-                                        } = {  ...contract_data }
-
-                                        symbol =
-                                          symbol ||
-                                          asset_data?.symbol
-
-                                        name =
-                                          name ||
-                                          symbol
-
-                                        const chain = chain_data?.id
-                                        const asset = asset_data?.id
-
-                                        return (
-                                          <Link
-                                            key={i}
-                                            href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                                          >
-                                          <a
-                                            className="h-6 flex items-center font-medium ml-8"
-                                          >
-                                            {name}
-                                          </a>
-                                          </Link>
-                                        )
-                                      })
-                                  }
-                                </>
-                              }
-                            </div>
-                          )
-                        },
-                      },
-                      {
-                        Header: 'Chains',
-                        accessor: 'chain_data',
-                        disableSortBy: true,
-                        Cell: props => {
-                          const {
-                            id,
-                            pools,
-                            chain_data,
-                            asset_data,
-                          } = { ...props.row.original }
-                          const {
-                            name,
-                            image,
-                          } = { ...props.value }
-
-                          const chain = chain_data?.id
-                          const asset = asset_data?.id
-
-                          const onClick = () => {
-                            if (pools?.length > 0) {
-                              setUncollapseAssetIds(
-                                uncollapseAssetIds?.includes(id) ?
-                                  uncollapseAssetIds
-                                    .filter(_id =>
-                                      _id !== id
-                                    ) :
-                                  _.concat(
-                                    uncollapseAssetIds ||
-                                    [],
-                                    id,
-                                  )
-                              )
-                            }
-                          }
-
-                          return (
-                            <div className="flex flex-col space-y-3">
-                              {view === 'my_positions' ?
-                                <Link
-                                  href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                                >
-                                <a
-                                  className="min-w-max h-6 flex items-center space-x-2"
-                                >
+                        return (
+                          <div className="flex flex-col space-y-3">
+                            {view === 'my_positions' ?
+                              <Link
+                                href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                              >
+                              <a
+                                className="h-6 flex items-center font-medium"
+                              >
+                                {name}
+                              </a>
+                              </Link> :
+                              <>
+                                <div className="h-6 flex items-center space-x-2">
                                   {
                                     image &&
                                     (
                                       <Image
                                         src={image}
-                                        alt=""
                                         width={24}
                                         height={24}
                                         className="rounded-full"
                                       />
                                     )
                                   }
-                                  <span className="text-sm font-medium">
-                                    {name}
+                                  <span className="text-slate-600 dark:text-slate-400 text-sm font-medium">
+                                    {_symbol}
                                   </span>
-                                </a>
-                                </Link> :
-                                <>
-                                  <div
-                                    onClick={() => onClick()}
-                                    className={`w-fit h-6 ${pools?.length > 0 ? 'cursor-pointer' : ''} flex items-center`}
-                                  >
-                                    {pools?.length > 0 ?
-                                      <>
-                                        {
-                                          _.slice(
-                                            pools,
-                                            0,
-                                            3,
-                                          )
-                                          .map((p, i) => {
-                                            const {
-                                              chain_data,
-                                            } = { ...p }
-                                            const {
-                                              name,
-                                              image,
-                                            } = { ...chain_data }
+                                </div>
+                                {
+                                  uncollapseAssetIds?.includes(id) &&
+                                  (pools || [])
+                                    .map((p, i) => {
+                                      const {
+                                        chain_data,
+                                        asset_data,
+                                        contract_data,
+                                      } = { ...p }
+                                      let {
+                                        name,
+                                      } = { ...p }
+                                      let {
+                                        symbol,
+                                      } = {  ...contract_data }
 
-                                            return (
-                                              <div
-                                                key={i}
-                                                title={name}
-                                                className="w-5 h-6 flex items-center mr-1.5"
-                                              >
-                                                {
-                                                  image &&
-                                                  (
-                                                    <Image
-                                                      src={image}
-                                                      alt=""
-                                                      width={20}
-                                                      height={20}
-                                                      className="rounded-full"
-                                                    />
-                                                  )
-                                                }
-                                              </div>
-                                            )
-                                          })
-                                        }
-                                        {
-                                          pools.length > 3 &&
-                                          (
-                                            <div className="h-6 flex items-center">
-                                              <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                                                (+{pools.length - 3})
-                                              </span>
+                                      symbol =
+                                        symbol ||
+                                        asset_data?.symbol
+
+                                      name =
+                                        name ||
+                                        symbol
+
+                                      const chain = chain_data?.id
+                                      const asset = asset_data?.id
+
+                                      return (
+                                        <Link
+                                          key={i}
+                                          href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                                        >
+                                        <a
+                                          className="h-6 flex items-center font-medium ml-8"
+                                        >
+                                          {name}
+                                        </a>
+                                        </Link>
+                                      )
+                                    })
+                                }
+                              </>
+                            }
+                          </div>
+                        )
+                      },
+                    },
+                    {
+                      Header: 'Chains',
+                      accessor: 'chain_data',
+                      disableSortBy: true,
+                      Cell: props => {
+                        const {
+                          id,
+                          pools,
+                          chain_data,
+                          asset_data,
+                        } = { ...props.row.original }
+                        const {
+                          name,
+                          image,
+                        } = { ...props.value }
+
+                        const chain = chain_data?.id
+                        const asset = asset_data?.id
+
+                        const onClick = () => {
+                          if (pools?.length > 0) {
+                            setUncollapseAssetIds(
+                              uncollapseAssetIds?.includes(id) ?
+                                uncollapseAssetIds
+                                  .filter(_id =>
+                                    _id !== id
+                                  ) :
+                                _.concat(
+                                  uncollapseAssetIds ||
+                                  [],
+                                  id,
+                                )
+                            )
+                          }
+                        }
+
+                        return (
+                          <div className="flex flex-col space-y-3">
+                            {view === 'my_positions' ?
+                              <Link
+                                href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                              >
+                              <a
+                                className="min-w-max h-6 flex items-center space-x-2"
+                              >
+                                {
+                                  image &&
+                                  (
+                                    <Image
+                                      src={image}
+                                      width={24}
+                                      height={24}
+                                      className="rounded-full"
+                                    />
+                                  )
+                                }
+                                <span className="text-sm font-medium">
+                                  {name}
+                                </span>
+                              </a>
+                              </Link> :
+                              <>
+                                <div
+                                  onClick={() => onClick()}
+                                  className={`w-fit h-6 ${pools?.length > 0 ? 'cursor-pointer' : ''} flex items-center`}
+                                >
+                                  {pools?.length > 0 ?
+                                    <>
+                                      {
+                                        _.slice(
+                                          pools,
+                                          0,
+                                          3,
+                                        )
+                                        .map((p, i) => {
+                                          const {
+                                            chain_data,
+                                          } = { ...p }
+                                          const {
+                                            name,
+                                            image,
+                                          } = { ...chain_data }
+
+                                          return (
+                                            <div
+                                              key={i}
+                                              title={name}
+                                              className="w-5 h-6 flex items-center mr-1.5"
+                                            >
+                                              {
+                                                image &&
+                                                (
+                                                  <Image
+                                                    src={image}
+                                                    width={20}
+                                                    height={20}
+                                                    className="rounded-full"
+                                                  />
+                                                )
+                                              }
                                             </div>
                                           )
-                                        }
-                                        <div className="mr-1.5">
-                                          <button
-                                            onClick={() => onClick()}
-                                            className="w-5 h-6 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full flex items-center justify-center"
-                                          >
-                                            {uncollapseAssetIds?.includes(id) ?
-                                              <MdKeyboardArrowUp
-                                                size={16}
-                                              /> :
-                                              <MdKeyboardArrowDown
-                                                size={16}
+                                        })
+                                      }
+                                      {
+                                        pools.length > 3 &&
+                                        (
+                                          <div className="h-6 flex items-center">
+                                            <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                                              (+{pools.length - 3})
+                                            </span>
+                                          </div>
+                                        )
+                                      }
+                                      <div className="mr-1.5">
+                                        <button
+                                          onClick={() => onClick()}
+                                          className="w-5 h-6 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full flex items-center justify-center"
+                                        >
+                                          {uncollapseAssetIds?.includes(id) ?
+                                            <MdKeyboardArrowUp
+                                              size={16}
+                                            /> :
+                                            <MdKeyboardArrowDown
+                                              size={16}
+                                            />
+                                          }
+                                        </button>
+                                      </div>
+                                    </> :
+                                    <span className="text-slate-400 dark:text-slate-500">
+                                      No chains supported
+                                    </span>
+                                  }
+                                </div>
+                                {
+                                  uncollapseAssetIds?.includes(id) &&
+                                  (pools || [])
+                                    .map((p, i) => {
+                                      const {
+                                        chain_data,
+                                        asset_data,
+                                      } = { ...p }
+                                      const {
+                                        name,
+                                        image,
+                                      } = { ...chain_data }
+
+                                      const chain = chain_data?.id
+                                      const asset = asset_data?.id
+
+                                      return (
+                                        <Link
+                                          key={i}
+                                          href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                                        >
+                                        <a
+                                          className="h-6 flex items-center space-x-2"
+                                        >
+                                          {
+                                            image &&
+                                            (
+                                              <Image
+                                                src={image}
+                                                width={24}
+                                                height={24}
+                                                className="rounded-full"
                                               />
-                                            }
-                                          </button>
-                                        </div>
-                                      </> :
-                                      <span className="text-slate-400 dark:text-slate-500">
-                                        No chains supported
-                                      </span>
+                                            )
+                                          }
+                                          <span className="hidden sm:block text-sm font-medium">
+                                            {name}
+                                          </span>
+                                        </a>
+                                        </Link>
+                                      )
+                                    })
+                                }
+                              </>
+                            }
+                          </div>
+                        )
+                      },
+                    },
+                    {
+                      Header: 'Assets',
+                      accessor: 'assets',
+                      sortType: (a, b) =>
+                        a.original.tvl > b.original.tvl ?
+                          1 :
+                          -1,
+                      Cell: props => {
+                        const {
+                          id,
+                          asset_data,
+                          pools,
+                        } = { ...props.row.original }
+
+                        const native_assets =
+                          (pools || [])
+                            .map(p => {
+                              const {
+                                adopted,
+                                local,
+                              } = { ...p }
+
+                              const asset =
+                                !adopted?.symbol?.startsWith(WRAPPED_PREFIX) ?
+                                  adopted :
+                                  local
+
+                              return {
+                                ...p,
+                                asset,
+                              }
+                            })
+
+                        const wrapped_assets =
+                          (pools || [])
+                            .map(p => {
+                              const {
+                                adopted,
+                                local,
+                              } = { ...p }
+
+                              const asset =
+                                adopted?.symbol?.startsWith(WRAPPED_PREFIX) ?
+                                  adopted :
+                                  local
+
+                              return {
+                                ...p,
+                                asset,
+                              }
+                            })
+
+                        const native_asset = _.head(native_assets)
+
+                        const wrapped_asset = _.head(wrapped_assets)
+
+                        const native_amount =
+                          _.sum(
+                            native_assets
+                              .map(a =>
+                                Number(
+                                  a?.asset?.balance ||
+                                  '0'
+                                )
+                              ),
+                          )
+
+                        const wrapped_amount =
+                          _.sum(
+                            wrapped_assets
+                              .map(a =>
+                                Number(
+                                  a?.asset?.balance ||
+                                  '0'
+                                )
+                              ),
+                          )
+
+                        const total_amount = native_amount + wrapped_amount
+
+                        const {
+                          color,
+                        } = { ...asset_data }
+
+                        return (
+                          <div className="flex flex-col space-y-3">
+                            {
+                              total_amount > 0 ?
+                                <div className="w-full h-6 flex flex-col items-end justify-center space-y-0 pt-2 pb-1">
+                                  <ProgressBar
+                                    width={native_amount * 100 / total_amount}
+                                    className="w-full h-1.5 rounded-lg"
+                                    backgroundClassName="rounded-lg"
+                                    style={
+                                      {
+                                        backgroundColor: color,
+                                      }
                                     }
-                                  </div>
-                                  {
-                                    uncollapseAssetIds?.includes(id) &&
-                                    (pools || [])
-                                      .map((p, i) => {
-                                        const {
-                                          chain_data,
-                                          asset_data,
-                                        } = { ...p }
-                                        const {
-                                          name,
-                                          image,
-                                        } = { ...chain_data }
-
-                                        const chain = chain_data?.id
-                                        const asset = asset_data?.id
-
-                                        return (
-                                          <Link
-                                            key={i}
-                                            href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                                          >
-                                          <a
-                                            className="h-6 flex items-center space-x-2"
-                                          >
+                                    backgroundStyle={
+                                      {
+                                        backgroundColor: `${color}66`,
+                                      }
+                                    }
+                                  />
+                                  <div className="w-full flex items-center justify-between space-x-2">
+                                    <div className="flex flex-col items-start space-y-0.5">
+                                      <Tooltip
+                                        placement="top"
+                                        content={
+                                          <div className="flex items-center space-x-1">
                                             {
-                                              image &&
+                                              native_asset?.asset_data?.image &&
                                               (
                                                 <Image
-                                                  src={image}
-                                                  alt=""
-                                                  width={24}
-                                                  height={24}
+                                                  src={native_asset.asset_data.image}
+                                                  width={14}
+                                                  height={14}
                                                   className="rounded-full"
                                                 />
                                               )
                                             }
-                                            <span className="hidden sm:block text-sm font-medium">
-                                              {name}
+                                            <span className="leading-3 text-2xs font-medium">
+                                              {
+                                                native_asset?.asset?.symbol ||
+                                                native_asset?.asset_data?.symbol
+                                              }
                                             </span>
-                                          </a>
-                                          </Link>
-                                        )
-                                      })
-                                  }
-                                </>
-                              }
-                            </div>
-                          )
-                        },
-                      },
-                      {
-                        Header: 'Assets',
-                        accessor: 'assets',
-                        sortType: (a, b) =>
-                          a.original.tvl > b.original.tvl ?
-                            1 :
-                            -1,
-                        Cell: props => {
-                          const {
-                            id,
-                            asset_data,
-                            pools,
-                          } = { ...props.row.original }
-
-                          const native_assets =
-                            (pools || [])
-                              .map(p => {
-                                const {
-                                  adopted,
-                                  local,
-                                } = { ...p }
-
-                                const asset =
-                                  !adopted?.symbol?.startsWith(WRAPPED_PREFIX) ?
-                                    adopted :
-                                    local
-
-                                return {
-                                  ...p,
-                                  asset,
-                                }
-                              })
-
-                          const wrapped_assets =
-                            (pools || [])
-                              .map(p => {
-                                const {
-                                  adopted,
-                                  local,
-                                } = { ...p }
-
-                                const asset =
-                                  adopted?.symbol?.startsWith(WRAPPED_PREFIX) ?
-                                    adopted :
-                                    local
-
-                                return {
-                                  ...p,
-                                  asset,
-                                }
-                              })
-
-                          const native_asset = _.head(native_assets)
-
-                          const wrapped_asset = _.head(wrapped_assets)
-
-                          const native_amount =
-                            _.sum(
-                              native_assets
-                                .map(a =>
-                                  Number(
-                                    a?.asset?.balance ||
-                                    '0'
-                                  )
-                                ),
-                            )
-
-                          const wrapped_amount =
-                            _.sum(
-                              wrapped_assets
-                                .map(a =>
-                                  Number(
-                                    a?.asset?.balance ||
-                                    '0'
-                                  )
-                                ),
-                            )
-
-                          const total_amount = native_amount + wrapped_amount
-
-                          const {
-                            color,
-                          } = { ...asset_data }
-
-                          return (
-                            <div className="flex flex-col space-y-3">
-                              {
-                                total_amount > 0 ?
-                                  <div className="w-full h-6 flex flex-col items-end justify-center space-y-0 pt-2 pb-1">
-                                    <ProgressBar
-                                      width={native_amount * 100 / total_amount}
-                                      className="w-full h-1.5 rounded-lg"
-                                      backgroundClassName="rounded-lg"
-                                      style={
-                                        {
-                                          backgroundColor: color,
+                                          </div>
                                         }
-                                      }
-                                      backgroundStyle={
-                                        {
-                                          backgroundColor: `${color}66`,
-                                        }
-                                      }
-                                    />
-                                    <div className="w-full flex items-center justify-between space-x-2">
-                                      <div className="flex flex-col items-start space-y-0.5">
-                                        <Tooltip
-                                          placement="top"
-                                          content={
-                                            <div className="flex items-center space-x-1">
-                                              {
-                                                native_asset?.asset_data?.image &&
-                                                (
-                                                  <Image
-                                                    src={native_asset.asset_data.image}
-                                                    alt=""
-                                                    width={14}
-                                                    height={14}
-                                                    className="rounded-full"
-                                                  />
-                                                )
-                                              }
-                                              <span className="leading-3 text-2xs font-medium">
-                                                {
-                                                  native_asset?.asset?.symbol ||
-                                                  native_asset?.asset_data?.symbol
-                                                }
-                                              </span>
-                                            </div>
-                                          }
-                                          className="z-50 bg-dark text-white text-xs"
-                                        >
-                                          <div>
-                                            <DecimalsFormat
-                                              value={
-                                                number_format(
-                                                  native_amount,
-                                                  native_amount > 100 ?
-                                                    '0,0' :
-                                                    native_amount > 1 ?
-                                                      '0,0.00' :
-                                                      '0,0.000000',
-                                                  true,
-                                                )
-                                              }
-                                              max_decimals={
+                                        className="z-50 bg-dark text-white text-xs"
+                                      >
+                                        <div>
+                                          <DecimalsFormat
+                                            value={
+                                              number_format(
+                                                native_amount,
                                                 native_amount > 100 ?
-                                                  0 :
+                                                  '0,0' :
                                                   native_amount > 1 ?
-                                                    2 :
-                                                    6
-                                              }
-                                              className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
-                                            />
-                                          </div>
-                                        </Tooltip>
-                                      </div>
-                                      <div className="flex flex-col items-end space-y-0.5">
-                                        <Tooltip
-                                          placement="top"
-                                          content={
-                                            <div className="flex items-center space-x-1">
+                                                    '0,0.00' :
+                                                    '0,0.000000',
+                                                true,
+                                              )
+                                            }
+                                            max_decimals={
+                                              native_amount > 100 ?
+                                                0 :
+                                                native_amount > 1 ?
+                                                  2 :
+                                                  6
+                                            }
+                                            className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
+                                          />
+                                        </div>
+                                      </Tooltip>
+                                    </div>
+                                    <div className="flex flex-col items-end space-y-0.5">
+                                      <Tooltip
+                                        placement="top"
+                                        content={
+                                          <div className="flex items-center space-x-1">
+                                            {
+                                              (
+                                                wrapped_asset?.contract_data?.next_asset?.image ||
+                                                wrapped_asset?.asset_data?.image
+                                              ) &&
+                                              (
+                                                <Image
+                                                  src={
+                                                    wrapped_asset?.contract_data?.next_asset?.image ||
+                                                    wrapped_asset?.asset_data?.image
+                                                  }
+                                                  width={14}
+                                                  height={14}
+                                                  className="rounded-full"
+                                                />
+                                              )
+                                            }
+                                            <span className="leading-3 text-2xs font-medium">
                                               {
-                                                (
-                                                  wrapped_asset?.contract_data?.next_asset?.image ||
-                                                  wrapped_asset?.asset_data?.image
-                                                ) &&
-                                                (
-                                                  <Image
-                                                    src={
-                                                      wrapped_asset?.contract_data?.next_asset?.image ||
-                                                      wrapped_asset?.asset_data?.image
-                                                    }
-                                                    alt=""
-                                                    width={14}
-                                                    height={15}
-                                                    className="rounded-full"
-                                                  />
-                                                )
+                                                wrapped_asset?.asset?.symbol ||
+                                                wrapped_asset?.contract_data?.next_asset?.symbol
                                               }
-                                              <span className="leading-3 text-2xs font-medium">
-                                                {
-                                                  wrapped_asset?.asset?.symbol ||
-                                                  wrapped_asset?.contract_data?.next_asset?.symbol
+                                            </span>
+                                          </div>
+                                        }
+                                        className="z-50 bg-dark text-white text-xs"
+                                      >
+                                        <div>
+                                          <DecimalsFormat
+                                            value={
+                                              number_format(
+                                                wrapped_amount,
+                                                wrapped_amount > 100 ?
+                                                  '0,0' :
+                                                  wrapped_amount > 1 ?
+                                                    '0,0.00' :
+                                                    '0,0.000000',
+                                                true,
+                                              )
+                                            }
+                                            max_decimals={
+                                              wrapped_amount > 100 ?
+                                                0 :
+                                                wrapped_amount > 1 ?
+                                                  2 :
+                                                  6
+                                            }
+                                            className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
+                                          />
+                                        </div>
+                                      </Tooltip>
+                                    </div>
+                                  </div>
+                                </div> :
+                                <div className="h-6 flex items-center justify-end">
+                                  <span className="text-slate-400 dark:text-slate-500">
+                                    No liquidity
+                                  </span>
+                                </div>
+                            }
+                            {
+                              uncollapseAssetIds?.includes(id) &&
+                              (pools || [])
+                                .map((p, i) => {
+                                  const {
+                                    chain_data,
+                                    asset_data,
+                                    contract_data,
+                                    adopted,
+                                    local,
+                                    lpTokenAddress,
+                                    error,
+                                  } = { ...p }
+
+                                  const chain = chain_data?.id
+                                  const asset = asset_data?.id
+
+                                  const native_asset =
+                                    !adopted?.symbol?.startsWith(WRAPPED_PREFIX) ?
+                                      adopted :
+                                      local
+
+                                  const wrapped_asset =
+                                    adopted?.symbol?.startsWith(WRAPPED_PREFIX) ?
+                                      adopted :
+                                      local
+
+                                  const native_amount =
+                                    Number(
+                                      native_asset?.balance ||
+                                      '0'
+                                    )
+
+                                  const wrapped_amount =
+                                    Number(
+                                      wrapped_asset?.balance ||
+                                      '0'
+                                    )
+
+                                  const total_amount = native_amount + wrapped_amount
+
+                                  const {
+                                    color,
+                                  } = { ...asset_data }
+
+                                  return (
+                                    <Link
+                                      key={i}
+                                      href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                                    >
+                                    <a
+                                      className="w-full h-6 flex items-center justify-end text-sm font-medium text-right"
+                                    >
+                                      {
+                                        !lpTokenAddress &&
+                                        !error ?
+                                          <div className="flex items-center justify-end">
+                                            <TailSpin
+                                              color={loader_color(theme)}
+                                              width="18"
+                                              height="18"
+                                            />
+                                          </div> :
+                                          total_amount > 0 ?
+                                            <div className="w-full h-6 flex flex-col items-end justify-center space-y-0 pt-2 pb-1">
+                                              <ProgressBar
+                                                width={native_amount * 100 / total_amount}
+                                                className="w-full h-1.5 rounded-lg"
+                                                backgroundClassName="rounded-lg"
+                                                style={
+                                                  {
+                                                    backgroundColor: color,
+                                                  }
                                                 }
+                                                backgroundStyle={
+                                                  {
+                                                    backgroundColor: `${color}66`,
+                                                  }
+                                                }
+                                              />
+                                              <div className="w-full flex items-center justify-between space-x-2">
+                                                <div className="flex flex-col items-start space-y-0.5">
+                                                  <Tooltip
+                                                    placement="top"
+                                                    content={
+                                                      <div className="flex items-center space-x-1">
+                                                        {
+                                                          asset_data?.image &&
+                                                          (
+                                                            <Image
+                                                              src={asset_data.image}
+                                                              width={14}
+                                                              height={14}
+                                                              className="rounded-full"
+                                                            />
+                                                          )
+                                                        }
+                                                        <span className="leading-3 text-2xs font-medium">
+                                                          {
+                                                            native_asset?.symbol ||
+                                                            asset_data?.symbol
+                                                          }
+                                                        </span>
+                                                      </div>
+                                                    }
+                                                    className="z-50 bg-dark text-white text-xs"
+                                                  >
+                                                    <div>
+                                                      <DecimalsFormat
+                                                        value={
+                                                          number_format(
+                                                            native_amount,
+                                                            native_amount > 100 ?
+                                                              '0,0' :
+                                                              native_amount > 1 ?
+                                                                '0,0.00' :
+                                                                '0,0.000000',
+                                                            true,
+                                                          )
+                                                        }
+                                                        max_decimals={
+                                                          native_amount > 100 ?
+                                                            0 :
+                                                            native_amount > 1 ?
+                                                              2 :
+                                                              6
+                                                        }
+                                                        className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
+                                                      />
+                                                    </div>
+                                                  </Tooltip>
+                                                </div>
+                                                <div className="flex flex-col items-end space-y-0.5">
+                                                  <Tooltip
+                                                    placement="top"
+                                                    content={
+                                                      <div className="flex items-center space-x-1">
+                                                        {
+                                                          (
+                                                            contract_data?.next_asset?.image ||
+                                                            asset_data?.image
+                                                          ) &&
+                                                          (
+                                                            <Image
+                                                              src={
+                                                                contract_data?.next_asset?.image ||
+                                                                asset_data?.image
+                                                              }
+                                                              width={14}
+                                                              height={14}
+                                                              className="rounded-full"
+                                                            />
+                                                          )
+                                                        }
+                                                        <span className="leading-3 text-2xs font-medium">
+                                                          {
+                                                            wrapped_asset?.symbol ||
+                                                            contract_data?.next_asset?.symbol
+                                                          }
+                                                        </span>
+                                                      </div>
+                                                    }
+                                                    className="z-50 bg-dark text-white text-xs"
+                                                  >
+                                                    <div>
+                                                      <DecimalsFormat
+                                                        value={
+                                                          number_format(
+                                                            wrapped_amount,
+                                                            wrapped_amount > 100 ?
+                                                              '0,0' :
+                                                              wrapped_amount > 1 ?
+                                                                '0,0.00' :
+                                                                '0,0.000000',
+                                                            true,
+                                                          )
+                                                        }
+                                                        max_decimals={
+                                                          wrapped_amount > 100 ?
+                                                            0 :
+                                                            wrapped_amount > 1 ?
+                                                              2 :
+                                                              6
+                                                        }
+                                                        className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
+                                                      />
+                                                    </div>
+                                                  </Tooltip>
+                                                </div>
+                                              </div>
+                                            </div> :
+                                            <div className="h-6 flex items-center justify-end">
+                                              <span className="text-slate-400 dark:text-slate-500">
+                                                No liquidity
                                               </span>
                                             </div>
-                                          }
-                                          className="z-50 bg-dark text-white text-xs"
-                                        >
-                                          <div>
-                                            <DecimalsFormat
-                                              value={
-                                                number_format(
-                                                  wrapped_amount,
-                                                  wrapped_amount > 100 ?
-                                                    '0,0' :
-                                                    wrapped_amount > 1 ?
-                                                      '0,0.00' :
-                                                      '0,0.000000',
-                                                  true,
-                                                )
-                                              }
-                                              max_decimals={
-                                                wrapped_amount > 100 ?
-                                                  0 :
-                                                  wrapped_amount > 1 ?
-                                                    2 :
-                                                    6
-                                              }
-                                              className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
-                                            />
-                                          </div>
-                                        </Tooltip>
-                                      </div>
-                                    </div>
-                                  </div> :
-                                  <div className="h-6 flex items-center justify-end">
-                                    <span className="text-slate-400 dark:text-slate-500">
-                                      No liquidity
-                                    </span>
-                                  </div>
-                              }
-                              {
-                                uncollapseAssetIds?.includes(id) &&
-                                (pools || [])
-                                  .map((p, i) => {
-                                    const {
-                                      chain_data,
-                                      asset_data,
-                                      contract_data,
-                                      adopted,
-                                      local,
-                                      lpTokenAddress,
-                                      error,
-                                    } = { ...p }
-
-                                    const chain = chain_data?.id
-                                    const asset = asset_data?.id
-
-                                    const native_asset =
-                                      !adopted?.symbol?.startsWith(WRAPPED_PREFIX) ?
-                                        adopted :
-                                        local
-
-                                    const wrapped_asset =
-                                      adopted?.symbol?.startsWith(WRAPPED_PREFIX) ?
-                                        adopted :
-                                        local
-
-                                    const native_amount =
-                                      Number(
-                                        native_asset?.balance ||
-                                        '0'
-                                      )
-
-                                    const wrapped_amount =
-                                      Number(
-                                        wrapped_asset?.balance ||
-                                        '0'
-                                      )
-
-                                    const total_amount = native_amount + wrapped_amount
-
-                                    const {
-                                      color,
-                                    } = { ...asset_data }
-
-                                    return (
-                                      <Link
-                                        key={i}
-                                        href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                                      >
-                                      <a
-                                        className="w-full h-6 flex items-center justify-end text-sm font-medium text-right"
-                                      >
-                                        {
-                                          !lpTokenAddress &&
-                                          !error ?
-                                            <div className="flex items-center justify-end">
-                                              <TailSpin
-                                                color={loader_color(theme)}
-                                                width="18"
-                                                height="18"
-                                              />
-                                            </div> :
-                                            total_amount > 0 ?
-                                              <div className="w-full h-6 flex flex-col items-end justify-center space-y-0 pt-2 pb-1">
-                                                <ProgressBar
-                                                  width={native_amount * 100 / total_amount}
-                                                  className="w-full h-1.5 rounded-lg"
-                                                  backgroundClassName="rounded-lg"
-                                                  style={
-                                                    {
-                                                      backgroundColor: color,
-                                                    }
-                                                  }
-                                                  backgroundStyle={
-                                                    {
-                                                      backgroundColor: `${color}66`,
-                                                    }
-                                                  }
-                                                />
-                                                <div className="w-full flex items-center justify-between space-x-2">
-                                                  <div className="flex flex-col items-start space-y-0.5">
-                                                    <Tooltip
-                                                      placement="top"
-                                                      content={
-                                                        <div className="flex items-center space-x-1">
-                                                          {
-                                                            asset_data?.image &&
-                                                            (
-                                                              <Image
-                                                                src={asset_data.image}
-                                                                alt=""
-                                                                width={14}
-                                                                height={14}
-                                                                className="rounded-full"
-                                                              />
-                                                            )
-                                                          }
-                                                          <span className="leading-3 text-2xs font-medium">
-                                                            {
-                                                              native_asset?.symbol ||
-                                                              asset_data?.symbol
-                                                            }
-                                                          </span>
-                                                        </div>
-                                                      }
-                                                      className="z-50 bg-dark text-white text-xs"
-                                                    >
-                                                      <div>
-                                                        <DecimalsFormat
-                                                          value={
-                                                            number_format(
-                                                              native_amount,
-                                                              native_amount > 100 ?
-                                                                '0,0' :
-                                                                native_amount > 1 ?
-                                                                  '0,0.00' :
-                                                                  '0,0.000000',
-                                                              true,
-                                                            )
-                                                          }
-                                                          max_decimals={
-                                                            native_amount > 100 ?
-                                                              0 :
-                                                              native_amount > 1 ?
-                                                                2 :
-                                                                6
-                                                          }
-                                                          className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
-                                                        />
-                                                      </div>
-                                                    </Tooltip>
-                                                  </div>
-                                                  <div className="flex flex-col items-end space-y-0.5">
-                                                    <Tooltip
-                                                      placement="top"
-                                                      content={
-                                                        <div className="flex items-center space-x-1">
-                                                          {
-                                                            (
-                                                              contract_data?.next_asset?.image ||
-                                                              asset_data?.image
-                                                            ) &&
-                                                            (
-                                                              <Image
-                                                                src={
-                                                                  contract_data?.next_asset?.image ||
-                                                                  asset_data?.image
-                                                                }
-                                                                alt=""
-                                                                width={14}
-                                                                height={15}
-                                                                className="rounded-full"
-                                                              />
-                                                            )
-                                                          }
-                                                          <span className="leading-3 text-2xs font-medium">
-                                                            {
-                                                              wrapped_asset?.symbol ||
-                                                              contract_data?.next_asset?.symbol
-                                                            }
-                                                          </span>
-                                                        </div>
-                                                      }
-                                                      className="z-50 bg-dark text-white text-xs"
-                                                    >
-                                                      <div>
-                                                        <DecimalsFormat
-                                                          value={
-                                                            number_format(
-                                                              wrapped_amount,
-                                                              wrapped_amount > 100 ?
-                                                                '0,0' :
-                                                                wrapped_amount > 1 ?
-                                                                  '0,0.00' :
-                                                                  '0,0.000000',
-                                                              true,
-                                                            )
-                                                          }
-                                                          max_decimals={
-                                                            wrapped_amount > 100 ?
-                                                              0 :
-                                                              wrapped_amount > 1 ?
-                                                                2 :
-                                                                6
-                                                          }
-                                                          className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
-                                                        />
-                                                      </div>
-                                                    </Tooltip>
-                                                  </div>
-                                                </div>
-                                              </div> :
-                                              <div className="h-6 flex items-center justify-end">
-                                                <span className="text-slate-400 dark:text-slate-500">
-                                                  No liquidity
-                                                </span>
-                                              </div>
-                                        }
-                                      </a>
-                                      </Link>
-                                    )
-                                  })
-                              }
-                            </div>
-                          )
-                        },
-                        headerClassName: 'whitespace-nowrap justify-end text-right',
+                                      }
+                                    </a>
+                                    </Link>
+                                  )
+                                })
+                            }
+                          </div>
+                        )
                       },
-                      {
-                        Header: 'Liquidity',
-                        accessor: 'tvl',
-                        sortType: (a, b) =>
+                      headerClassName: 'whitespace-nowrap justify-end text-right',
+                    },
+                    {
+                      Header: 'Liquidity',
+                      accessor: 'tvl',
+                      sortType: (a, b) =>
+                        _.sumBy(
+                          a.original.pools,
+                          'tvl',
+                        ) >
+                        _.sumBy(
+                          b.original.pools,
+                          'tvl',
+                        ) ?
+                          1 :
+                          -1,
+                      Cell: props => {
+                        const {
+                          id,
+                          pools,
+                        } = { ...props.row.original }
+
+                        const value =
                           _.sumBy(
-                            a.original.pools,
-                            'tvl',
-                          ) >
-                          _.sumBy(
-                            b.original.pools,
-                            'tvl',
-                          ) ?
-                            1 :
-                            -1,
-                        Cell: props => {
-                          const {
-                            id,
                             pools,
-                          } = { ...props.row.original }
+                            'tvl',
+                          )
 
-                          const value =
-                            _.sumBy(
-                              pools,
-                              'tvl',
-                            )
+                        return (
+                          <div className="flex flex-col space-y-3">
+                            <div className="h-6 flex items-center justify-end text-right">
+                              <DecimalsFormat
+                                value={
+                                  number_format(
+                                    value,
+                                    value > 100 ?
+                                      '0,0' :
+                                      value > 1 ?
+                                        '0,0.00' :
+                                        '0,0.000000',
+                                    true,
+                                  )
+                                }
+                                max_decimals={
+                                  value > 100 ?
+                                    0 :
+                                    value > 1 ?
+                                      2 :
+                                      6
+                                }
+                                prefix={currency_symbol}
+                                className="uppercase text-slate-600 dark:text-slate-400 text-sm font-medium"
+                              />
+                            </div>
+                            {
+                              uncollapseAssetIds?.includes(id) &&
+                              (pools || [])
+                                .map((p, i) => {
+                                  const {
+                                    chain_data,
+                                    asset_data,
+                                    tvl,
+                                    lpTokenAddress,
+                                    error,
+                                  } = { ...p }
 
-                          return (
-                            <div className="flex flex-col space-y-3">
-                              <div className="h-6 flex items-center justify-end text-right">
+                                  const chain = chain_data?.id
+                                  const asset = asset_data?.id
+                                  const value = tvl
+
+                                  return (
+                                    <Link
+                                      key={i}
+                                      href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                                    >
+                                    <a
+                                      className="h-6 flex items-center justify-end text-sm font-medium text-right"
+                                    >
+                                      {
+                                        !lpTokenAddress &&
+                                        !error ?
+                                          <div className="flex items-center justify-end">
+                                            <TailSpin
+                                              color={loader_color(theme)}
+                                              width="18"
+                                              height="18"
+                                            />
+                                          </div> :
+                                          <DecimalsFormat
+                                            value={
+                                              number_format(
+                                                value,
+                                                value > 100 ?
+                                                  '0,0' :
+                                                  value > 1 ?
+                                                    '0,0.00' :
+                                                    '0,0.000000',
+                                                true,
+                                              )
+                                            }
+                                            max_decimals={
+                                              value > 100 ?
+                                                0 :
+                                                value > 1 ?
+                                                  2 :
+                                                  6
+                                            }
+                                            prefix={currency_symbol}
+                                            className="uppercase"
+                                          />
+                                      }
+                                    </a>
+                                    </Link>
+                                  )
+                                })
+                            }
+                          </div>
+                        )
+                      },
+                      headerClassName: 'whitespace-nowrap justify-end text-right',
+                    },
+                    {
+                      Header: 'Volume (24h)',
+                      accessor: 'volume',
+                      sortType: (a, b) =>
+                        _.sumBy(
+                          a.original.pools,
+                          'volume',
+                        ) >
+                        _.sumBy(
+                          b.original.pools,
+                          'volume',
+                        ) ?
+                          1 :
+                          -1,
+                      Cell: props => {
+                        const {
+                          id,
+                          pools,
+                        } = { ...props.row.original }
+
+                        const value =
+                          _.sumBy(
+                            pools,
+                            'volume',
+                          )
+
+                        return (
+                          <div className="flex flex-col space-y-3">
+                            <div className="h-6 flex items-center justify-end text-right">
+                              {!isNaN(value) ?
                                 <DecimalsFormat
                                   value={
                                     number_format(
@@ -1523,417 +1248,97 @@ export default (
                                   }
                                   prefix={currency_symbol}
                                   className="uppercase text-slate-600 dark:text-slate-400 text-sm font-medium"
-                                />
-                              </div>
-                              {
-                                uncollapseAssetIds?.includes(id) &&
-                                (pools || [])
-                                  .map((p, i) => {
-                                    const {
-                                      chain_data,
-                                      asset_data,
-                                      tvl,
-                                      lpTokenAddress,
-                                      error,
-                                    } = { ...p }
-
-                                    const chain = chain_data?.id
-                                    const asset = asset_data?.id
-                                    const value = tvl
-
-                                    return (
-                                      <Link
-                                        key={i}
-                                        href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                                      >
-                                      <a
-                                        className="h-6 flex items-center justify-end text-sm font-medium text-right"
-                                      >
-                                        {
-                                          !lpTokenAddress &&
-                                          !error ?
-                                            <div className="flex items-center justify-end">
-                                              <TailSpin
-                                                color={loader_color(theme)}
-                                                width="18"
-                                                height="18"
-                                              />
-                                            </div> :
-                                            <DecimalsFormat
-                                              value={
-                                                number_format(
-                                                  value,
-                                                  value > 100 ?
-                                                    '0,0' :
-                                                    value > 1 ?
-                                                      '0,0.00' :
-                                                      '0,0.000000',
-                                                  true,
-                                                )
-                                              }
-                                              max_decimals={
-                                                value > 100 ?
-                                                  0 :
-                                                  value > 1 ?
-                                                    2 :
-                                                    6
-                                              }
-                                              prefix={currency_symbol}
-                                              className="uppercase"
-                                            />
-                                        }
-                                      </a>
-                                      </Link>
-                                    )
-                                  })
+                                /> :
+                                'TBD'
                               }
                             </div>
-                          )
-                        },
-                        headerClassName: 'whitespace-nowrap justify-end text-right',
-                      },
-                      {
-                        Header: 'Volume (24h)',
-                        accessor: 'volume',
-                        sortType: (a, b) =>
-                          _.sumBy(
-                            a.original.pools,
-                            'volume',
-                          ) >
-                          _.sumBy(
-                            b.original.pools,
-                            'volume',
-                          ) ?
-                            1 :
-                            -1,
-                        Cell: props => {
-                          const {
-                            id,
-                            pools,
-                          } = { ...props.row.original }
+                            {
+                              uncollapseAssetIds?.includes(id) &&
+                              (pools || [])
+                                .map((p, i) => {
+                                  const {
+                                    chain_data,
+                                    asset_data,
+                                    volume,
+                                  } = { ...p }
 
-                          const value =
-                            _.sumBy(
-                              pools,
-                              'volume',
-                            )
+                                  const chain = chain_data?.id
+                                  const asset = asset_data?.id
+                                  const value = volume
 
-                          return (
-                            <div className="flex flex-col space-y-3">
-                              <div className="h-6 flex items-center justify-end text-right">
-                                {!isNaN(value) ?
-                                  <DecimalsFormat
-                                    value={
-                                      number_format(
-                                        value,
-                                        value > 100 ?
-                                          '0,0' :
-                                          value > 1 ?
-                                            '0,0.00' :
-                                            '0,0.000000',
-                                        true,
-                                      )
-                                    }
-                                    max_decimals={
-                                      value > 100 ?
-                                        0 :
-                                        value > 1 ?
-                                          2 :
-                                          6
-                                    }
-                                    prefix={currency_symbol}
-                                    className="uppercase text-slate-600 dark:text-slate-400 text-sm font-medium"
-                                  /> :
-                                  'TBD'
-                                }
-                              </div>
-                              {
-                                uncollapseAssetIds?.includes(id) &&
-                                (pools || [])
-                                  .map((p, i) => {
-                                    const {
-                                      chain_data,
-                                      asset_data,
-                                      volume,
-                                    } = { ...p }
-
-                                    const chain = chain_data?.id
-                                    const asset = asset_data?.id
-                                    const value = volume
-
-                                    return (
-                                      <Link
-                                        key={i}
-                                        href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                                      >
-                                      <a
-                                        className="h-6 flex items-center justify-end text-sm font-medium text-right"
-                                      >
-                                        {!isNaN(value) ?
-                                          <DecimalsFormat
-                                            value={
-                                              number_format(
-                                                value,
-                                                value > 100 ?
-                                                  '0,0' :
-                                                  value > 1 ?
-                                                    '0,0.00' :
-                                                    '0,0.000000',
-                                                true,
-                                              )
-                                            }
-                                            max_decimals={
+                                  return (
+                                    <Link
+                                      key={i}
+                                      href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                                    >
+                                    <a
+                                      className="h-6 flex items-center justify-end text-sm font-medium text-right"
+                                    >
+                                      {!isNaN(value) ?
+                                        <DecimalsFormat
+                                          value={
+                                            number_format(
+                                              value,
                                               value > 100 ?
-                                                0 :
+                                                '0,0' :
                                                 value > 1 ?
-                                                  2 :
-                                                  6
-                                            }
-                                            prefix={currency_symbol}
-                                            className="uppercase"
-                                          /> :
-                                          'TBD'
-                                        }
-                                      </a>
-                                      </Link>
-                                    )
-                                  })
-                              }
-                            </div>
-                          )
-                        },
-                        headerClassName: 'whitespace-nowrap justify-end text-right',
-                      },
-                      {
-                        Header: 'Fees (24h)',
-                        accessor: 'fees',
-                        sortType: (a, b) =>
-                          _.sumBy(
-                            a.original.pools,
-                            'fees',
-                          ) >
-                          _.sumBy(
-                            b.original.pools,
-                            'fees',
-                          ) ?
-                            1 :
-                            -1,
-                        Cell: props => {
-                          const {
-                            id,
-                            pools,
-                          } = { ...props.row.original }
-
-                          const value =
-                            _.sumBy(
-                              pools,
-                              'fees',
-                            )
-
-                          return (
-                            <div className="flex flex-col space-y-3">
-                              <div className="h-6 flex items-center justify-end text-right">
-                                {!isNaN(value) ?
-                                  <DecimalsFormat
-                                    value={
-                                      number_format(
-                                        value,
-                                        value > 100 ?
-                                          '0,0' :
-                                          value > 1 ?
-                                            '0,0.00' :
-                                            '0,0.000000',
-                                        true,
-                                      )
-                                    }
-                                    max_decimals={
-                                      value > 100 ?
-                                        0 :
-                                        value > 1 ?
-                                          2 :
-                                          6
-                                    }
-                                    prefix={currency_symbol}
-                                    className="uppercase text-slate-600 dark:text-slate-400 text-sm font-medium"
-                                  /> :
-                                  'TBD'
-                                }
-                              </div>
-                              {
-                                uncollapseAssetIds?.includes(id) &&
-                                (pools || [])
-                                  .map((p, i) => {
-                                    const {
-                                      chain_data,
-                                      asset_data,
-                                      fees,
-                                    } = { ...p }
-
-                                    const chain = chain_data?.id
-                                    const asset = asset_data?.id
-                                    const value = fees
-
-                                    return (
-                                      <Link
-                                        key={i}
-                                        href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                                      >
-                                      <a
-                                        className="h-6 flex items-center justify-end text-sm font-medium text-right"
-                                      >
-                                        {!isNaN(value) ?
-                                          <DecimalsFormat
-                                            value={
-                                              number_format(
-                                                value,
-                                                value > 100 ?
-                                                  '0,0' :
-                                                  value > 1 ?
-                                                    '0,0.00' :
-                                                    '0,0.000000',
-                                                true,
-                                              )
-                                            }
-                                            max_decimals={
-                                              value > 100 ?
-                                                0 :
-                                                value > 1 ?
-                                                  2 :
-                                                  6
-                                            }
-                                            prefix={currency_symbol}
-                                            className="uppercase"
-                                          /> :
-                                          'TBD'
-                                        }
-                                      </a>
-                                      </Link>
-                                    )
-                                  })
-                              }
-                            </div>
-                          )
-                        },
-                        headerClassName: 'whitespace-nowrap justify-end text-right',
-                      },
-                      {
-                        Header: 'APR',
-                        accessor: 'apr',
-                        sortType: (a, b) =>
-                          _.meanBy(
-                            a.original.pools,
-                            'apr',
-                          ) >
-                          _.sumBy(
-                            b.original.pools,
-                            'apr',
-                          ) ?
-                            1 :
-                            -1,
-                        Cell: props => {
-                          const {
-                            id,
-                            pools,
-                          } = { ...props.row.original }
-
-                          const value =
-                            _.sumBy(
-                              pools,
-                              'apr',
-                            )
-
-                          return (
-                            <div className="flex flex-col space-y-3">
-                              <div className="h-6 flex items-center justify-end text-slate-600 dark:text-slate-400 text-sm font-medium text-right">
-                                {!isNaN(value) ?
-                                  <DecimalsFormat
-                                    value={
-                                      number_format(
-                                        value / 100,
-                                        value / 100 > 1 ?
-                                          '0,0.00' :
-                                          '0,0.000000',
-                                        true,
-                                      )
-                                    }
-                                    max_decimals={
-                                      value / 100 > 100 ?
-                                        0 :
-                                        value / 100 > 1 ?
-                                          2 :
-                                          6
-                                    }
-                                    suffix="%"
-                                    className="uppercase"
-                                  /> :
-                                  'TBD'
-                                }
-                              </div>
-                              {
-                                uncollapseAssetIds?.includes(id) &&
-                                (pools || [])
-                                  .map((p, i) => {
-                                    const {
-                                      chain_data,
-                                      asset_data,
-                                      apr,
-                                    } = { ...p }
-
-                                    const chain = chain_data?.id
-                                    const asset = asset_data?.id
-                                    const value = apr
-
-                                    return (
-                                      <Link
-                                        key={i}
-                                        href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                                      >
-                                      <a
-                                        className="h-6 flex items-center justify-end text-sm font-medium text-right"
-                                      >
-                                        {!isNaN(value) ?
-                                          <span className="uppercase">
-                                            {number_format(
-                                              value / 100,
-                                              '0,0.00a',
+                                                  '0,0.00' :
+                                                  '0,0.000000',
                                               true,
-                                            )}
-                                            %
-                                          </span> :
-                                          'TBD'
-                                        }
-                                      </a>
-                                      </Link>
-                                    )
-                                  })
-                              }
-                            </div>
-                          )
-                        },
-                        headerClassName: 'whitespace-nowrap justify-end text-right',
+                                            )
+                                          }
+                                          max_decimals={
+                                            value > 100 ?
+                                              0 :
+                                              value > 1 ?
+                                                2 :
+                                                6
+                                          }
+                                          prefix={currency_symbol}
+                                          className="uppercase"
+                                        /> :
+                                        'TBD'
+                                      }
+                                    </a>
+                                    </Link>
+                                  )
+                                })
+                            }
+                          </div>
+                        )
                       },
-                      {
-                        Header: 'Your Pool Tokens',
-                        accessor: 'lpTokenBalance',
-                        sortType: (a, b) =>
-                          Number(a.original.lpTokenBalance) *
-                          a.original.price >
-                          Number(b.original.lpTokenBalance) *
-                          b.original.price ?
-                            1 :
-                            -1,
-                        Cell: props => {
-                          const {
-                            symbol,
-                            price,
-                          } = { ...props.row.original }
-                          const {
-                            value,
-                          } = { ...props }
+                      headerClassName: 'whitespace-nowrap justify-end text-right',
+                    },
+                    {
+                      Header: 'Fees (24h)',
+                      accessor: 'fees',
+                      sortType: (a, b) =>
+                        _.sumBy(
+                          a.original.pools,
+                          'fees',
+                        ) >
+                        _.sumBy(
+                          b.original.pools,
+                          'fees',
+                        ) ?
+                          1 :
+                          -1,
+                      Cell: props => {
+                        const {
+                          id,
+                          pools,
+                        } = { ...props.row.original }
 
-                          return (
-                            <div className="h-6 flex flex-col justify-center space-y-1">
-                              <div className="flex items-center text-sm font-medium text-right space-x-1">
+                        const value =
+                          _.sumBy(
+                            pools,
+                            'fees',
+                          )
+
+                        return (
+                          <div className="flex flex-col space-y-3">
+                            <div className="h-6 flex items-center justify-end text-right">
+                              {!isNaN(value) ?
                                 <DecimalsFormat
                                   value={
                                     number_format(
@@ -1953,161 +1358,198 @@ export default (
                                         2 :
                                         6
                                   }
-                                  className="uppercase"
-                                />
-                                {
-                                  symbol &&
-                                  (
-                                    <span>
-                                      {symbol}
-                                    </span>
-                                  )
-                                }
-                              </div>
-                              {
-                                price > 0 &&
-                                (
-                                  <div className="text-slate-800 dark:text-slate-200 text-sm text-right">
-                                    <DecimalsFormat
-                                      value={
-                                        number_format(
-                                          value * price,
-                                          value * price > 100 ?
-                                            '0,0' :
-                                            value * price > 1 ?
-                                              '0,0.00' :
-                                              '0,0.000000',
-                                          true,
-                                        )
-                                      }
-                                      max_decimals={
-                                        value * price > 100 ?
-                                          0 :
-                                          value * price > 1 ?
-                                            2 :
-                                            6
-                                      }
-                                      prefix={currency_symbol}
-                                      className="uppercase"
-                                    />
-                                  </div>
-                                )
+                                  prefix={currency_symbol}
+                                  className="uppercase text-slate-600 dark:text-slate-400 text-sm font-medium"
+                                /> :
+                                'TBD'
                               }
                             </div>
-                          )
-                        },
-                        headerClassName: 'whitespace-nowrap',
-                      },
-                      {
-                        Header: 'Pooled Tokens',
-                        accessor: 'balances',
-                        sortType: (a, b) =>
-                          a.original.tvl > b.original.tvl ?
-                            1 :
-                            -1,
-                        Cell: props => {
-                          const {
-                            adopted,
-                            local,
-                          } = { ...props.row.original }
+                            {
+                              uncollapseAssetIds?.includes(id) &&
+                              (pools || [])
+                                .map((p, i) => {
+                                  const {
+                                    chain_data,
+                                    asset_data,
+                                    fees,
+                                  } = { ...p }
 
-                          return (
-                            <div className="h-6 flex items-center justify-end space-x-1.5">
-                              <div className="flex items-center text-sm font-medium space-x-1">
+                                  const chain = chain_data?.id
+                                  const asset = asset_data?.id
+                                  const value = fees
+
+                                  return (
+                                    <Link
+                                      key={i}
+                                      href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                                    >
+                                    <a
+                                      className="h-6 flex items-center justify-end text-sm font-medium text-right"
+                                    >
+                                      {!isNaN(value) ?
+                                        <DecimalsFormat
+                                          value={
+                                            number_format(
+                                              value,
+                                              value > 100 ?
+                                                '0,0' :
+                                                value > 1 ?
+                                                  '0,0.00' :
+                                                  '0,0.000000',
+                                              true,
+                                            )
+                                          }
+                                          max_decimals={
+                                            value > 100 ?
+                                              0 :
+                                              value > 1 ?
+                                                2 :
+                                                6
+                                          }
+                                          prefix={currency_symbol}
+                                          className="uppercase"
+                                        /> :
+                                        'TBD'
+                                      }
+                                    </a>
+                                    </Link>
+                                  )
+                                })
+                            }
+                          </div>
+                        )
+                      },
+                      headerClassName: 'whitespace-nowrap justify-end text-right',
+                    },
+                    {
+                      Header: 'APR',
+                      accessor: 'apr',
+                      sortType: (a, b) =>
+                        _.meanBy(
+                          a.original.pools,
+                          'apr',
+                        ) >
+                        _.sumBy(
+                          b.original.pools,
+                          'apr',
+                        ) ?
+                          1 :
+                          -1,
+                      Cell: props => {
+                        const {
+                          id,
+                          pools,
+                        } = { ...props.row.original }
+
+                        const value =
+                          _.sumBy(
+                            pools,
+                            'apr',
+                          )
+
+                        return (
+                          <div className="flex flex-col space-y-3">
+                            <div className="h-6 flex items-center justify-end text-slate-600 dark:text-slate-400 text-sm font-medium text-right">
+                              {!isNaN(value) ?
                                 <DecimalsFormat
                                   value={
                                     number_format(
-                                      adopted?.balance,
-                                      adopted?.balance > 100 ?
-                                        '0.0' :
-                                        adopted?.balance > 1 ?
-                                          '0.0.00' :
-                                          '0,0.000000',
-                                      true,
-                                    )
-                                  }
-                                  max_decimals={
-                                    adopted?.balance > 100 ?
-                                      0 :
-                                      adopted?.balance > 1 ?
-                                        2 :
-                                        6
-                                  }
-                                  className="uppercase"
-                                />
-                                {
-                                  adopted?.symbol &&
-                                  (
-                                    <span>
-                                      {adopted.symbol}
-                                    </span>
-                                  )
-                                }
-                              </div>
-                              <span className="text-sm font-medium">
-                                /
-                              </span>
-                              <div className="flex items-center text-sm font-medium space-x-1">
-                                <DecimalsFormat
-                                  value={
-                                    number_format(
-                                      local?.balance,
-                                      local?.balance > 100 ?
-                                        '0.0' :
-                                        local?.balance > 1 ?
-                                          '0.0.00' :
-                                          '0,0.000000',
-                                      true,
-                                    )
-                                  }
-                                  max_decimals={
-                                    local?.balance > 100 ?
-                                      0 :
-                                      local?.balance > 1 ?
-                                        2 :
-                                        6
-                                  }
-                                  className="uppercase"
-                                />
-                                {
-                                  local?.symbol &&
-                                  (
-                                    <span>
-                                      {local.symbol}
-                                    </span>
-                                  )
-                                }
-                              </div>
-                            </div>
-                          )
-                        },
-                        headerClassName: 'whitespace-nowrap justify-end text-right',
-                      },
-                      {
-                        Header: 'Pool Share',
-                        accessor: 'share',
-                        sortType: (a, b) =>
-                          a.original.share > b.original.share ?
-                            1 :
-                            -1,
-                        Cell: props => {
-                          const {
-                            value,
-                          } = { ...props }
-
-                          return (
-                            <div className="h-6 flex items-center justify-end text-right">
-                              <DecimalsFormat
-                                value={
-                                  typeof value === 'number' ?
-                                    number_format(
-                                      value,
-                                      value > 1 ?
+                                      value / 100,
+                                      value / 100 > 1 ?
                                         '0,0.00' :
                                         '0,0.000000',
                                       true,
-                                    ) :
-                                    '-'
+                                    )
+                                  }
+                                  max_decimals={
+                                    value / 100 > 100 ?
+                                      0 :
+                                      value / 100 > 1 ?
+                                        2 :
+                                        6
+                                  }
+                                  suffix="%"
+                                  className="uppercase"
+                                /> :
+                                'TBD'
+                              }
+                            </div>
+                            {
+                              uncollapseAssetIds?.includes(id) &&
+                              (pools || [])
+                                .map((p, i) => {
+                                  const {
+                                    chain_data,
+                                    asset_data,
+                                    apr,
+                                  } = { ...p }
+
+                                  const chain = chain_data?.id
+                                  const asset = asset_data?.id
+                                  const value = apr
+
+                                  return (
+                                    <Link
+                                      key={i}
+                                      href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                                    >
+                                    <a
+                                      className="h-6 flex items-center justify-end text-sm font-medium text-right"
+                                    >
+                                      {!isNaN(value) ?
+                                        <span className="uppercase">
+                                          {number_format(
+                                            value / 100,
+                                            '0,0.00a',
+                                            true,
+                                          )}
+                                          %
+                                        </span> :
+                                        'TBD'
+                                      }
+                                    </a>
+                                    </Link>
+                                  )
+                                })
+                            }
+                          </div>
+                        )
+                      },
+                      headerClassName: 'whitespace-nowrap justify-end text-right',
+                    },
+                    {
+                      Header: 'Your Pool Tokens',
+                      accessor: 'lpTokenBalance',
+                      sortType: (a, b) =>
+                        Number(a.original.lpTokenBalance) *
+                        a.original.price >
+                        Number(b.original.lpTokenBalance) *
+                        b.original.price ?
+                          1 :
+                          -1,
+                      Cell: props => {
+                        const {
+                          symbol,
+                          price,
+                        } = { ...props.row.original }
+                        const {
+                          value,
+                        } = { ...props }
+
+                        return (
+                          <div className="h-6 flex flex-col justify-center space-y-1">
+                            <div className="flex items-center text-sm font-medium text-right space-x-1">
+                              <DecimalsFormat
+                                value={
+                                  number_format(
+                                    value,
+                                    value > 100 ?
+                                      '0,0' :
+                                      value > 1 ?
+                                        '0,0.00' :
+                                        '0,0.000000',
+                                    true,
+                                  )
                                 }
                                 max_decimals={
                                   value > 100 ?
@@ -2116,39 +1558,202 @@ export default (
                                       2 :
                                       6
                                 }
-                                suffix="%"
-                                className="text-sm font-medium"
+                                className="uppercase"
                               />
+                              {
+                                symbol &&
+                                (
+                                  <span>
+                                    {symbol}
+                                  </span>
+                                )
+                              }
                             </div>
-                          )
-                        },
-                        headerClassName: 'whitespace-nowrap justify-end text-right',
+                            {
+                              price > 0 &&
+                              (
+                                <div className="text-slate-800 dark:text-slate-200 text-sm text-right">
+                                  <DecimalsFormat
+                                    value={
+                                      number_format(
+                                        value * price,
+                                        value * price > 100 ?
+                                          '0,0' :
+                                          value * price > 1 ?
+                                            '0,0.00' :
+                                            '0,0.000000',
+                                        true,
+                                      )
+                                    }
+                                    max_decimals={
+                                      value * price > 100 ?
+                                        0 :
+                                        value * price > 1 ?
+                                          2 :
+                                          6
+                                    }
+                                    prefix={currency_symbol}
+                                    className="uppercase"
+                                  />
+                                </div>
+                              )
+                            }
+                          </div>
+                        )
                       },
-                    ]
-                    .filter(c =>
-                      !(
-                        view === 'my_positions' ?
-                          [
-                            'assets',
-                            'tvl',
-                            'volume',
-                            'fees',
-                            'apr',
-                          ] :
-                          [
-                            'lpTokenBalance',
-                            'balances',
-                            'share',
-                          ]
-                      ).includes(c.accessor)
-                    )
-                  }
-                  data={data}
-                  noPagination={data.length <= 10}
-                  defaultPageSize={50}
-                  className="no-border"
-                />
-              </>
+                      headerClassName: 'whitespace-nowrap',
+                    },
+                    {
+                      Header: 'Pooled Tokens',
+                      accessor: 'balances',
+                      sortType: (a, b) =>
+                        a.original.tvl > b.original.tvl ?
+                          1 :
+                          -1,
+                      Cell: props => {
+                        const {
+                          adopted,
+                          local,
+                        } = { ...props.row.original }
+
+                        return (
+                          <div className="h-6 flex items-center justify-end space-x-1.5">
+                            <div className="flex items-center text-sm font-medium space-x-1">
+                              <DecimalsFormat
+                                value={
+                                  number_format(
+                                    adopted?.balance,
+                                    adopted?.balance > 100 ?
+                                      '0.0' :
+                                      adopted?.balance > 1 ?
+                                        '0.0.00' :
+                                        '0,0.000000',
+                                    true,
+                                  )
+                                }
+                                max_decimals={
+                                  adopted?.balance > 100 ?
+                                    0 :
+                                    adopted?.balance > 1 ?
+                                      2 :
+                                      6
+                                }
+                                className="uppercase"
+                              />
+                              {
+                                adopted?.symbol &&
+                                (
+                                  <span>
+                                    {adopted.symbol}
+                                  </span>
+                                )
+                              }
+                            </div>
+                            <span className="text-sm font-medium">
+                              /
+                            </span>
+                            <div className="flex items-center text-sm font-medium space-x-1">
+                              <DecimalsFormat
+                                value={
+                                  number_format(
+                                    local?.balance,
+                                    local?.balance > 100 ?
+                                      '0.0' :
+                                      local?.balance > 1 ?
+                                        '0.0.00' :
+                                        '0,0.000000',
+                                    true,
+                                  )
+                                }
+                                max_decimals={
+                                  local?.balance > 100 ?
+                                    0 :
+                                    local?.balance > 1 ?
+                                      2 :
+                                      6
+                                }
+                                className="uppercase"
+                              />
+                              {
+                                local?.symbol &&
+                                (
+                                  <span>
+                                    {local.symbol}
+                                  </span>
+                                )
+                              }
+                            </div>
+                          </div>
+                        )
+                      },
+                      headerClassName: 'whitespace-nowrap justify-end text-right',
+                    },
+                    {
+                      Header: 'Pool Share',
+                      accessor: 'share',
+                      sortType: (a, b) =>
+                        a.original.share > b.original.share ?
+                          1 :
+                          -1,
+                      Cell: props => {
+                        const {
+                          value,
+                        } = { ...props }
+
+                        return (
+                          <div className="h-6 flex items-center justify-end text-right">
+                            <DecimalsFormat
+                              value={
+                                typeof value === 'number' ?
+                                  number_format(
+                                    value,
+                                    value > 1 ?
+                                      '0,0.00' :
+                                      '0,0.000000',
+                                    true,
+                                  ) :
+                                  '-'
+                              }
+                              max_decimals={
+                                value > 100 ?
+                                  0 :
+                                  value > 1 ?
+                                    2 :
+                                    6
+                              }
+                              suffix="%"
+                              className="text-sm font-medium"
+                            />
+                          </div>
+                        )
+                      },
+                      headerClassName: 'whitespace-nowrap justify-end text-right',
+                    },
+                  ]
+                  .filter(c =>
+                    !(
+                      view === 'my_positions' ?
+                        [
+                          'assets',
+                          'tvl',
+                          'volume',
+                          'fees',
+                          'apr',
+                        ] :
+                        [
+                          'lpTokenBalance',
+                          'balances',
+                          'share',
+                        ]
+                    ).includes(c.accessor)
+                  )
+                }
+                data={data}
+                noPagination={data.length <= 10}
+                defaultPageSize={50}
+                className="no-border"
+              />
+            </>
         }
       </div> :
       <div className="my-4 sm:my-6 ml-2">

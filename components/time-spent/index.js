@@ -20,9 +20,10 @@ export default (
   useEffect(
     () => {
       const timeout =
-        setTimeout(() =>
-          setTrigger(!trigger),
-          1 * 1000,
+        setTimeout(
+          () =>
+            setTrigger(!trigger),
+            1 * 1000,
         )
 
       return () => clearTimeout(timeout)

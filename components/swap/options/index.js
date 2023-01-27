@@ -56,19 +56,22 @@ export default (
       name: 'infiniteApprove',
       type: 'switch',
     },
-    /*{
+    /*
+    {
       label: 'Slippage Tolerance',
       tooltip: 'The maximum percentage you are willing to lose due to market changes.',
       name: 'slippage',
       type: 'number',
       placeholder: '0.00',
-      presets: [
-        3.0,
-        1.0,
-        0.5,
-      ],
+      presets:
+        [
+          3.0,
+          1.0,
+          0.5,
+        ],
       postfix: '%',
-    },*/
+    },
+    */
   ]
 
   const changed =
@@ -85,14 +88,19 @@ export default (
           <RiSettings3Line
             size={20}
           />
-          {/*
-            <span className="text-sm font-medium">
-              Settings
-            </span>
-          */}
         </div>
       }
-      buttonClassName={`min-w-max ${disabled ? 'cursor-not-allowed' : ''} rounded ${applied ? 'border border-blue-400 dark:border-blue-500' : ''} flex items-center justify-center`}
+      buttonClassName={
+        `min-w-max ${
+          disabled ?
+            'cursor-not-allowed' :
+            ''
+        } rounded ${
+          applied ?
+            'border border-blue-400 dark:border-blue-500' :
+            ''
+        } flex items-center justify-center`
+      }
       title={
         <span className="normal-case">
           Advanced options

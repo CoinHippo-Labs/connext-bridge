@@ -408,7 +408,6 @@ export default (
                       (
                         <Image
                           src={a.image}
-                          alt=""
                           width={20}
                           height={20}
                           className="rounded-full"
@@ -487,7 +486,6 @@ export default (
                     (
                       <Image
                         src={image}
-                        alt=""
                         width={32}
                         height={32}
                         className="rounded-full"
@@ -516,7 +514,8 @@ export default (
                 [
                   'string',
                   'number',
-                ].includes(typeof amount) &&
+                ]
+                .includes(typeof amount) &&
                 !isNaN(amount) ?
                   amount :
                   null
@@ -545,7 +544,14 @@ export default (
                   </div>
                 )
 
-              const className = `dropdown-item ${disabled ? 'cursor-not-allowed' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'} rounded flex items-center justify-between space-x-2 my-1 p-2`
+              const className =
+                `dropdown-item ${
+                  disabled ?
+                    'cursor-not-allowed' :
+                    selected ?
+                      'bg-slate-100 dark:bg-slate-800 cursor-pointer' :
+                      'hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'
+                } rounded flex items-center justify-between space-x-2 my-1 p-2`
 
               return (
                 <div key={i}>

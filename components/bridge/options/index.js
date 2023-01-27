@@ -73,24 +73,22 @@ export default (
         name: 'infiniteApprove',
         type: 'switch',
       },
-      /*{
+      /*
+      {
         label: 'Slippage Tolerance',
         tooltip: 'The maximum percentage you are willing to lose due to market changes.',
         name: 'slippage',
         type: 'number',
         placeholder: '0.00',
-        presets: [
-          3.0,
-          1.0,
-          0.5,
-        ],
+        presets:
+          [
+            3.0,
+            1.0,
+            0.5,
+          ],
         postfix: '%',
-      },*/
-      /*{
-        label: 'Bridge Path',
-        name: 'forceSlow',
-        type: 'switch',
-      },*/
+      },
+      */
       {
         label: 'Receive NextAsset',
         tooltip: receiveLocalTooltip,
@@ -102,12 +100,6 @@ export default (
         name: 'showNextAssets',
         type: 'switch',
       },
-      /*{
-        label: 'Call Data',
-        name: 'callData',
-        type: 'textarea',
-        placeholder: 'encoded calldata to execute on receiving chain',
-      },*/
     ]
     .filter(f => f)
 
@@ -129,11 +121,6 @@ export default (
           <RiSettings3Line
             size={20}
           />
-          {/*
-            <span className="text-sm font-medium">
-              Settings
-            </span>
-          */}
         </div>
       }
       buttonClassName={`min-w-max ${disabled ? 'cursor-not-allowed' : ''} ${applied ? 'border border-blue-400 dark:border-blue-500' : ''} rounded flex items-center justify-center`}

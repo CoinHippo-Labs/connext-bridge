@@ -6,7 +6,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import { TailSpin } from 'react-loader-spinner'
 import { BigNumber, Contract, constants, utils } from 'ethers'
-import { TiArrowLeft, TiArrowRight } from 'react-icons/ti'
+import { TiArrowLeft } from 'react-icons/ti'
 
 import Info from './info'
 import Liquidity from './liquidity'
@@ -934,7 +934,6 @@ export default () => {
                       (
                         <Image
                           src={chain_data.image}
-                          alt=""
                           width={48}
                           height={48}
                           className="rounded-full"
@@ -954,22 +953,6 @@ export default () => {
                       </span>
                     </span>
                   </div>
-                  {/*
-                    lpTokenAddress &&
-                    url &&
-                    (
-                      <a
-                        href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <TiArrowRight
-                          size={32}
-                          className="transform -rotate-45 mt-1"
-                        />
-                      </a>
-                    )
-                  */}
                 </div>
                 <div>
                   <span className="text-slate-400 dark:text-slate-200 text-base font-medium">
@@ -981,14 +964,14 @@ export default () => {
                       (
                         [
                           // 'optimism',
-                        ].includes(chain) ?
+                        ]
+                        .includes(chain) ?
                           <div className="flex items-center space-x-2">
                             {
                               chain_data?.image &&
                               (
                                 <Image
                                   src={chain_data.image}
-                                  alt=""
                                   width={16}
                                   height={16}
                                   className="rounded-full"
@@ -999,7 +982,8 @@ export default () => {
                               {
                                 [
                                   // 'optimism',
-                                ].includes(chain) ?
+                                ]
+                                .includes(chain) ?
                                   chain
                                     .slice(
                                       0,
@@ -1018,7 +1002,8 @@ export default () => {
                         !error ?
                           [
                             // 'optimism',
-                          ].includes(chain) ?
+                          ]
+                          .includes(chain) ?
                             !isNaN(apr) ?
                               <span className="uppercase">
                                 {number_format(

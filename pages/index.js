@@ -13,17 +13,21 @@ export default () => {
 
   const _asPath =
     asPath.includes('?') ?
-      asPath.substring(
-        0,
-        asPath.indexOf('?'),
-      ) :
+      asPath
+        .substring(
+          0,
+          asPath.indexOf('?'),
+        ) :
       asPath
 
   const [ssr, setSsr] = useState(true)
 
-  useEffect(() => {
-    setSsr(false)
-  }, [])
+  useEffect(
+    () => {
+      setSsr(false)
+    },
+    [],
+  )
 
   if (
     !ssr &&

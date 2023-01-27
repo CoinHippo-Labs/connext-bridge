@@ -93,7 +93,10 @@ export default () => {
       </div>
       <button
         disabled={disabled}
-        onClick={() => update()}
+        onClick={
+          () =>
+            update()
+        }
         className="btn btn-default btn-rounded bg-blue-600 hover:bg-blue-500 text-white -mt-1"
       >
         Update

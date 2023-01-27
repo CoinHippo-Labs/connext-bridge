@@ -17,7 +17,7 @@ import Chains from './chains'
 import Theme from './theme'
 import Copy from '../copy'
 import { announcement as getAnnouncement, chains as getChains, assets as getAssets } from '../../lib/api/config'
-import { assets as getAssetsPrice } from '../../lib/api/assets'
+import { assets_price } from '../../lib/api/assets'
 import { ens as getEns } from '../../lib/api/ens'
 import { ellipse, equals_ignore_case, sleep } from '../../lib/utils'
 import { ANNOUNCEMENT_DATA, CHAINS_DATA, ASSETS_DATA, POOL_ASSETS_DATA, ENS_DATA, ASSET_BALANCES_DATA, POOLS_DATA, USER_POOLS_DATA, SDK, RPCS } from '../../reducers/types'
@@ -241,7 +241,7 @@ export default () => {
 
                 if (addresses.length > 0) {
                   const response =
-                    await getAssetsPrice(
+                    await assets_price(
                       {
                         chain_id,
                         addresses,
@@ -462,7 +462,6 @@ export default () => {
 
           const sdkConfig = {
             chains: chains_config,
-            // signerAddress: address,
             logLevel: 'info',
             network: process.env.NEXT_PUBLIC_NETWORK,
             environment: process.env.NEXT_PUBLIC_ENVIRONMENT,
@@ -1088,7 +1087,8 @@ export default () => {
               if (
                 [
                   // 'optimism',
-                ].includes(chain_data.id)
+                ]
+                .includes(chain_data.id)
               ) {
                 const totalTokens = 250000
                 const totalBlocks = 657436

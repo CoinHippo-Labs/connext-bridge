@@ -87,7 +87,10 @@ export default (
         disabled ||
         fixed
       }
-      onClick={open => setHidden(!open)}
+      onClick={
+        open =>
+          setHidden(!open)
+      }
       buttonTitle={
         chains_data ?
           <div
@@ -106,7 +109,6 @@ export default (
                     <div className="flex sm:hidden">
                       <Image
                         src={image}
-                        alt=""
                         width={18}
                         height={18}
                         className="rounded-full"
@@ -115,7 +117,6 @@ export default (
                     <div className="hidden sm:flex">
                       <Image
                         src={image}
-                        alt=""
                         width={20}
                         height={20}
                         className="rounded-full"

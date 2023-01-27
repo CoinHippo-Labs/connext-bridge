@@ -14,7 +14,6 @@ import { BiMessageError, BiMessageCheck, BiMessageDetail, BiEditAlt, BiCheckCirc
 import { IoWarning } from 'react-icons/io5'
 
 import Options from './options'
-import GasPrice from '../gas-price'
 import SelectChain from '../select/chain'
 import SelectAsset from '../select/asset'
 import Balance from '../balance'
@@ -369,7 +368,10 @@ export default () => {
                 ''
             }${
               Object.keys(params).length > 0 ?
-                `?${new URLSearchParams(params).toString()}` :
+                `?${
+                  new URLSearchParams(params)
+                    .toString()
+                }` :
                 ''
             }`,
             undefined,
@@ -511,8 +513,9 @@ export default () => {
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(),
+        setInterval(
+          () =>
+            getData(),
           0.25 * 60 * 1000,
         )
 
@@ -2114,9 +2117,7 @@ export default () => {
     local,
     rate,
   } = { ...pair }
-  // const {
-  //   color,
-  // } = { ...asset_data }
+
   const {
     contract_address,
   } = { ...contract_data }
@@ -2410,13 +2411,6 @@ export default () => {
                     <span className="text-slate-600 dark:text-slate-500 text-sm font-medium">
                       Pay with
                     </span>
-                    {/*
-                      <GasPrice
-                        chainId={chain_id}
-                        iconSize={18}
-                        className="text-xs pr-1"
-                      />
-                    */}
                     {
                       chain_data &&
                       asset &&
@@ -2612,117 +2606,6 @@ export default () => {
                         className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg font-semibold text-right py-1.5`}
                       />
                     </div>
-                    {
-                      false &&
-                      (
-                        <div className="flex items-center justify-between space-x-2">
-                          <div className="flex items-center space-x-1">
-                            <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
-                              Balance:
-                            </div>
-                            {
-                              chain_data &&
-                              asset &&
-                              (origin === 'x' ?
-                                x_asset_data :
-                                y_asset_data
-                              ) &&
-                              (
-                                <button
-                                  disabled={disabled}
-                                  onClick={() => {
-                                    const amount =
-                                      origin === 'x' ?
-                                        x_balance_amount :
-                                        y_balance_amount
-
-                                    if (
-                                      [
-                                        'string',
-                                        'number',
-                                      ].includes(typeof amount) &&
-                                      ![
-                                        '',
-                                      ].includes(amount)
-                                    ) {
-                                      setSwap(
-                                        {
-                                          ...swap,
-                                          amount,
-                                        }
-                                      )
-
-                                      setSwapAmount(true)
-                                    }
-                                  }}
-                                >
-                                  <Balance
-                                    chainId={chain_id}
-                                    asset={asset}
-                                    contractAddress={
-                                      (origin === 'x' ?
-                                        x_asset_data :
-                                        y_asset_data
-                                      ).contract_address
-                                    }
-                                    decimals={
-                                      (origin === 'x' ?
-                                        x_asset_data :
-                                        y_asset_data
-                                      ).decimals
-                                    }
-                                    symbol={
-                                      (origin === 'x' ?
-                                        x_asset_data :
-                                        y_asset_data
-                                      ).symbol
-                                    }
-                                    hideSymbol={true}
-                                    trigger={balanceTrigger}
-                                  />
-                                </button>
-                              )
-                            }
-                          </div>
-                          {
-                            web3_provider &&
-                            (
-                              <button
-                                disabled={disabled}
-                                onClick={() => {
-                                  const amount =
-                                    origin === 'x' ?
-                                      x_balance_amount :
-                                      y_balance_amount
-
-                                  if (
-                                    [
-                                      'string',
-                                      'number',
-                                    ].includes(typeof amount) &&
-                                    ![
-                                      '',
-                                    ].includes(amount)
-                                  ) {
-                                    setSwap(
-                                      {
-                                        ...swap,
-                                        amount,
-                                      }
-                                    )
-
-                                    setSwapAmount(true)
-                                  }
-                                }}
-                                className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-sm font-medium`}
-                              >
-                                Select Max
-                              </button>
-                            )
-                          }
-                        </div>
-                      )
-                    }
                   </div>
                 </div>
                 <div className="flex items-center justify-center mt-2 mb-0.5">
@@ -2787,27 +2670,6 @@ export default () => {
                             </div>
                             <button
                               disabled={disabled}
-                              onClick={() => {
-                                const amount =
-                                  origin === 'x' ?
-                                    y_balance_amount :
-                                    x_balance_amount
-
-                                if (
-                                  false &&
-                                  Number(amount) > 0
-                                ) {
-                                  setSwap(
-                                    {
-                                      ...swap,
-                                      amount:
-                                        origin === 'x' ?
-                                          Number(amount) / rate :
-                                          Number(amount) * rate,
-                                    }
-                                  )
-                                }
-                              }}
                               className="cursor-default"
                             >
                               <Balance
@@ -2901,100 +2763,6 @@ export default () => {
                               />
                             </div>
                           </div> :
-                          /*<DebounceInput
-                            debounceTimeout={750}
-                            size="small"
-                            type="number"
-                            placeholder="0.00"
-                            disabled={
-                              true ||
-                              (
-                                disabled &&
-                                swapAmount !== true
-                              ) ||
-                              !asset ||
-                              !pair
-                            }
-                            value={
-                              [
-                                'string',
-                                'number',
-                              ].includes(typeof swapAmount) &&
-                              ![
-                                '',
-                              ].includes(swapAmount) &&
-                              Number(swapAmount) >= 0 ?
-                                swapAmount :
-                                [
-                                  'string',
-                                  'number',
-                                ].includes(typeof amount) &&
-                                ![
-                                  '',
-                                ].includes(amount) ?
-                                  '0.00' :
-                                  ''
-                            }
-                            onChange={e => {
-                              const regex = /^[0-9.\b]+$/
-
-                              let value
-
-                              if (
-                                e.target.value === '' ||
-                                regex.test(e.target.value)
-                              ) {
-                                value = e.target.value
-                              }
-
-                              if (typeof value === 'string') {
-                                if (value.startsWith('.')) {
-                                  value = `0${value}`
-                                }
-
-                                parseFloat(
-                                  Number(
-                                    origin === 'x' ?
-                                      Number(value) / rate :
-                                      Number(value) * rate
-                                  )
-                                  .toFixed(
-                                    (origin === 'x' ?
-                                      y_asset_data :
-                                      x_asset_data
-                                    )?.decimals
-                                  )
-                                )
-
-                                value =
-                                  number_to_fixed(
-                                    value,
-                                    (origin === 'x' ?
-                                      y_asset_data :
-                                      x_asset_data
-                                    )?.decimals ||
-                                    18,
-                                  )
-                              }
-
-                              setSwap(
-                                {
-                                  ...swap,
-                                  amount: value,
-                                }
-                              )
-                            }}
-                            onWheel={e => e.target.blur()}
-                            onKeyDown={e =>
-                              [
-                                'e',
-                                'E',
-                                '-',
-                              ].includes(e.key) &&
-                              e.preventDefault()
-                            }
-                            className={`w-36 sm:w-48 bg-transparent ${'cursor-default' || (disabled ? 'cursor-not-allowed' : '')} rounded border-0 focus:ring-0 sm:text-lg font-semibold text-right py-1.5`}
-                          />*/
                           <DecimalsFormat
                             value={
                               [
@@ -3029,107 +2797,6 @@ export default () => {
                           />
                       }
                     </div>
-                    {
-                      false &&
-                      (
-                        <div className="flex items-center justify-between space-x-2">
-                          <div className="flex items-center space-x-1">
-                            <div className="text-slate-400 dark:text-slate-500 text-sm font-medium">
-                              Balance:
-                            </div>
-                            {
-                              chain_data &&
-                              asset &&
-                              (origin === 'x' ?
-                                y_asset_data :
-                                x_asset_data
-                              ) &&
-                              (
-                                <button
-                                  disabled={disabled}
-                                  onClick={() => {
-                                    const amount =
-                                      origin === 'x' ?
-                                        y_balance_amount :
-                                        x_balance_amount
-
-                                    if (
-                                      false &&
-                                      Number(amount) > 0
-                                    ) {
-                                      setSwap(
-                                        {
-                                          ...swap,
-                                          amount:
-                                            origin === 'x' ?
-                                              Number(amount) / rate :
-                                              Number(amount) * rate,
-                                        }
-                                      )
-                                    }
-                                  }}
-                                  className="cursor-default"
-                                >
-                                  <Balance
-                                    chainId={chain_id}
-                                    asset={asset}
-                                    contractAddress={
-                                      (origin === 'x' ?
-                                        y_asset_data :
-                                        x_asset_data
-                                      ).contract_address
-                                    }
-                                    decimals={
-                                      (origin === 'x' ?
-                                        y_asset_data :
-                                        x_asset_data
-                                      ).decimals
-                                    }
-                                    symbol={
-                                      (origin === 'x' ?
-                                        y_asset_data :
-                                        x_asset_data
-                                      ).symbol
-                                    }
-                                    hideSymbol={true}
-                                    trigger={balanceTrigger}
-                                  />
-                                </button>
-                              )
-                            }
-                          </div>
-                          {/*
-                            web3_provider &&
-                            (
-                              <button
-                                disabled={disabled}
-                                onClick={() => {
-                                  const amount =
-                                    origin === 'x' ?
-                                      y_balance_amount :
-                                      x_balance_amount
-
-                                  if (Number(amount) > 0) {
-                                    setSwap(
-                                      {
-                                        ...swap,
-                                        amount:
-                                          origin === 'x' ?
-                                            Number(amount) / rate :
-                                            Number(amount) * rate,
-                                      }
-                                    )
-                                  }
-                                }}
-                                className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-sm font-medium`}
-                              >
-                                Select Max
-                              </button>
-                            )
-                          */}
-                        </div>
-                      )
-                    }
                   </div>
                 </div>
               </div>
@@ -3378,7 +3045,6 @@ export default () => {
                       (
                         <Image
                           src={image}
-                          alt=""
                           width={28}
                           height={28}
                           className="rounded-full"

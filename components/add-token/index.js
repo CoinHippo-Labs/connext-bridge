@@ -233,17 +233,17 @@ export default (
     contract_address !== constants.AddressZero &&
     (
       <button
-        onClick={() =>
-          addToken(
-            token_data?.chain_id,
-            token_data,
-          )
+        onClick={
+          () =>
+            addToken(
+              token_data?.chain_id,
+              token_data,
+            )
         }
         className="min-w-max bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 shadow rounded cursor-pointer flex items-center py-1.5 px-2"
       >
         <Image
           src="/logos/wallets/metamask.png"
-          alt=""
           width={16}
           height={16}
         />

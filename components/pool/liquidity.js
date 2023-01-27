@@ -1,17 +1,14 @@
-import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, FixedNumber, utils } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
-import Switch from 'react-switch'
 import { TailSpin, Watch, RotatingSquare, Oval } from 'react-loader-spinner'
 import { Tooltip } from '@material-tailwind/react'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
-import { BiPlus, BiCaretUp, BiCaretDown, BiMessageError, BiMessageCheck, BiMessageDetail, BiInfoCircle } from 'react-icons/bi'
-import { HiSwitchHorizontal } from 'react-icons/hi'
+import { BiPlus, BiMessageError, BiMessageCheck, BiMessageDetail, BiInfoCircle } from 'react-icons/bi'
 import { IoWarning } from 'react-icons/io5'
 
 import GasPrice from '../gas-price'
@@ -21,7 +18,7 @@ import Image from '../image'
 import Wallet from '../wallet'
 import Alert from '../alerts'
 import Copy from '../copy'
-import { number_format, number_to_fixed, ellipse, equals_ignore_case, loader_color, switch_color, sleep, error_patterns } from '../../lib/utils'
+import { number_format, number_to_fixed, ellipse, equals_ignore_case, loader_color, sleep, error_patterns } from '../../lib/utils'
 
 const WRAPPED_PREFIX =
   process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
@@ -1934,7 +1931,8 @@ export default (
           ) ?
             adopted :
             local
-        ).balance
+        )
+        .balance
       )
     ) >
     (
@@ -1947,265 +1945,12 @@ export default (
           ) ?
             adopted :
             local
-        ).balance
+        )
+        .balance
       )
     ) ?
      'x' :
      'y'
-
-  const advancedOptions = (
-    <div className="space-y-2">
-      <div className="flex items-center justify-end">
-        <div
-          onClick={() => setOpenOptions(!openOptions)}
-          className="cursor-pointer flex items-center text-slate-400 dark:text-slate-200 space-x-2"
-        >
-          <span className="font-semibold">
-            Advanced
-          </span>
-          {openOptions ?
-            <BiCaretUp
-              size={18}
-            /> :
-            <BiCaretDown
-              size={18}
-            />
-          }
-        </div>
-      </div>
-      {
-        openOptions &&
-        (
-          <div className="form">
-            <div className="form-element">
-              <Tooltip
-                placement="right"
-                content="This allows you to only need to pay for approval on your first time providing liquidity."
-                className="z-50 bg-dark text-white text-xs"
-              >
-                <div className="flex items-center">
-                  <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 text-xs font-medium">
-                    Infinite approval
-                  </div>
-                  <BiInfoCircle
-                    size={14}
-                    className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                  />
-                </div>
-              </Tooltip>
-              <div className="flex items-center space-x-3">
-                <Switch
-                  checked={
-                    (
-                      typeof infiniteApprove === 'boolean' ?
-                        infiniteApprove :
-                        false
-                    ) ||
-                    false
-                  }
-                  onChange={() => {
-                    setOptions(
-                      {
-                        ...options,
-                        infiniteApprove: !infiniteApprove,
-                      }
-                    )
-                  }}
-                  checkedIcon={false}
-                  uncheckedIcon={false}
-                  onColor={switch_color(theme).on}
-                  onHandleColor="#f8fafc"
-                  offColor={switch_color(theme).off}
-                  offHandleColor="#f8fafc"
-                />
-              </div>
-            </div>
-            <div className="form-element">
-              <Tooltip
-                placement="right"
-                content="The maximum percentage you are willing to lose due to market changes."
-                className="z-50 bg-dark text-white text-xs"
-              >
-                <div className="flex items-center">
-                  <div className="form-label max-w-fit text-slate-600 dark:text-slate-200 text-xs font-medium">
-                    Slippage tolerance
-                  </div>
-                  <BiInfoCircle
-                    size={14}
-                    className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                  />
-                </div>
-              </Tooltip>
-              <div className="flex items-center space-x-3">
-                <DebounceInput
-                  debounceTimeout={750}
-                  size="small"
-                  type="number"
-                  placeholder="Slippage Tolerance"
-                  value={
-                    typeof slippage === 'number' &&
-                    slippage >= 0 ?
-                      slippage :
-                      ''
-                  }
-                  onChange={e => {
-                    const regex = /^[0-9.\b]+$/
-
-                    let value
-
-                    if (
-                      e.target.value === '' ||
-                      regex.test(e.target.value)
-                    ) {
-                      value = e.target.value
-                    }
-
-                    if (typeof value === 'string') {
-                      if (value.startsWith('.')) {
-                        value = `0${value}`
-                      }
-
-                      if (!isNaN(value)) {
-                        value = Number(value)
-                      }
-                    }
-
-                    value =
-                      value <= 0 ||
-                      value > 100 ?
-                        DEFAULT_POOL_SLIPPAGE_PERCENTAGE :
-                        value
-
-                    const _data = {
-                      ...options,
-                      slippage:
-                        value &&
-                        !isNaN(value) ?
-                          parseFloat(
-                            Number(value)
-                              .toFixed(6)
-                          ) :
-                          value,
-                    }
-
-                    setOptions(_data)
-                  }}
-                  onWheel={e => e.target.blur()}
-                  onKeyDown={e =>
-                    [
-                      'e',
-                      'E',
-                      '-',
-                    ].includes(e.key) &&
-                    e.preventDefault()
-                  }
-                  className={`w-20 bg-slate-200 focus:bg-slate-300 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-xs font-semibold text-right py-1 px-2`}
-                />
-                <div className="flex items-center space-x-2.5">
-                  {
-                    [
-                      3.0,
-                      1.0,
-                      0.5,
-                    ]
-                    .map((p, i) => (
-                      <div
-                        key={i}
-                        onClick={() =>
-                          setOptions(
-                            {
-                              ...options,
-                              slippage: p,
-                            }
-                          )
-                        }
-                        className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-medium hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
-                      >
-                        {p} %
-                      </div>
-                    ))
-                  }
-                </div>
-              </div>
-            </div>
-            <div className="form-element">
-              <div className="form-label text-slate-600 dark:text-slate-200 text-xs font-medium">
-                Transaction deadline
-              </div>
-              <div className="flex items-center space-x-3">
-                <DebounceInput
-                  debounceTimeout={750}
-                  size="small"
-                  type="number"
-                  placeholder="Transaction Deadline (minutes)"
-                  value={
-                    typeof options?.deadline === 'number' &&
-                    options.deadline >= 0 ?
-                      options.deadline :
-                      ''
-                  }
-                  onChange={e => {
-                    const regex = /^[0-9.\b]+$/
-
-                    let value
-
-                    if (
-                      e.target.value === '' ||
-                      regex.test(e.target.value)
-                    ) {
-                      value = e.target.value
-                    }
-
-                    if (typeof value === 'string') {
-                      if (value.startsWith('.')) {
-                        value = `0${value}`
-                      }
-
-                      if (!isNaN(value)) {
-                        value = Number(value)
-                      }
-                    }
-
-                    value =
-                      value < 0 ?
-                        DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES :
-                        value
-
-                    const _data = {
-                      ...options,
-                      deadline:
-                        value &&
-                        !isNaN(value) ?
-                          parseFloat(
-                            Number(value)
-                              .toFixed(6)
-                          ) :
-                          value,
-                    }
-
-                    setOptions(_data)
-                  }}
-                  onWheel={e => e.target.blur()}
-                  onKeyDown={e =>
-                    [
-                      'e',
-                      'E',
-                      '-',
-                    ].includes(e.key) &&
-                    e.preventDefault()
-                  }
-                  className={`w-20 bg-slate-200 dark:bg-slate-800 rounded border-0 focus:ring-0 text-xs font-semibold py-1.5 px-2.5`}
-                />
-                <span className="font-medium">
-                  minutes
-                </span>
-              </div>
-            </div>
-          </div>
-        )
-      }
-    </div>
-  )
 
   return (
     <div className="order-1 lg:order-2 bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-3 pt-4 pb-5 px-4">
@@ -2306,7 +2051,6 @@ export default (
                                 (
                                   <Image
                                     src={x_asset_data.image}
-                                    alt=""
                                     width={20}
                                     height={20}
                                     className="rounded-full"
@@ -2317,32 +2061,6 @@ export default (
                                 {x_asset_data.symbol}
                               </span>
                             </a>
-                            {
-                              false &&
-                              chain &&
-                              asset &&
-                              (
-                                <Link
-                                  href={`/swap/${asset.toUpperCase()}-on-${chain}?from=${y_asset_data.symbol}`}
-                                >
-                                <a
-                                  className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
-                                >
-                                  <Tooltip
-                                    placement="top"
-                                    content={`Click here to swap ${y_asset_data.symbol} into ${x_asset_data.symbol}`}
-                                    className="z-50 bg-dark text-white text-xs"
-                                  >
-                                    <div>
-                                      <HiSwitchHorizontal
-                                        size={14}
-                                      />
-                                    </div>
-                                  </Tooltip>
-                                </a>
-                                </Link>
-                              )
-                            }
                           </div>
                         </div>
                       )
@@ -2521,7 +2239,6 @@ export default (
                                 (
                                   <Image
                                     src={y_asset_data.image}
-                                    alt=""
                                     width={20}
                                     height={20}
                                     className="rounded-full"
@@ -2532,32 +2249,6 @@ export default (
                                 {y_asset_data.symbol}
                               </span>
                             </a>
-                            {
-                              false &&
-                              chain &&
-                              asset &&
-                              (
-                                <Link
-                                  href={`/swap/${asset.toUpperCase()}-on-${chain}`}
-                                >
-                                <a
-                                  className="text-blue-500 hover:text-blue-600 dark:text-slate-200 dark:hover:text-white"
-                                >
-                                  <Tooltip
-                                    placement="top"
-                                    content={`Click here to swap ${x_asset_data.symbol} into ${y_asset_data.symbol}`}
-                                    className="z-50 bg-dark text-white text-xs"
-                                  >
-                                    <div>
-                                      <HiSwitchHorizontal
-                                        size={14}
-                                      />
-                                    </div>
-                                  </Tooltip>
-                                </a>
-                                </Link>
-                              )
-                            }
                           </div>
                         </div>
                       )
@@ -2810,7 +2501,6 @@ export default (
                 )
               }
             </div>
-            {/*advancedOptions*/}
             <div className="flex items-end">
               {
                 chain &&
@@ -2831,7 +2521,6 @@ export default (
                       (
                         <Image
                           src={image}
-                          alt=""
                           width={28}
                           height={28}
                           className="rounded-full"
@@ -3413,7 +3102,6 @@ export default (
                 }
               </div>
             </div>
-            {/*advancedOptions*/}
             <div className="flex items-end">
               {
                 web3_provider &&
@@ -3433,7 +3121,6 @@ export default (
                       (
                         <Image
                           src={image}
-                          alt=""
                           width={28}
                           height={28}
                           className="rounded-full"

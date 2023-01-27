@@ -15,10 +15,8 @@ import { BiInfoCircle } from 'react-icons/bi'
 import ActionRequired from '../action-required'
 import Image from '../image'
 import EnsProfile from '../ens-profile'
-import AddToken from '../add-token'
 import Copy from '../copy'
 import DecimalsFormat from '../decimals-format'
-import TimeSpent from '../time-spent'
 import { chainName } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
 
@@ -222,7 +220,6 @@ export default (
     _.head(
       [
         origin_transacting_amount,
-        // origin_bridged_amount,
       ]
       .map(a =>
         [
@@ -363,7 +360,6 @@ export default (
     _.head(
       [
         destination_transacting_amount,
-        // destination_local_amount,
       ]
       .map(a =>
         [
@@ -423,7 +419,6 @@ export default (
               (
                 <Image
                   src={source_chain_data.image}
-                  alt=""
                   width={20}
                   height={20}
                   className="rounded-full"
@@ -450,11 +445,13 @@ export default (
                 >
                   <div
                     className="w-2 h-2 rounded-full"
-                    style={{
-                      background:
-                        `${source_asset_data?.color ||
-                        loader_color(theme)}aa`,
-                    }}
+                    style={
+                      {
+                        background:
+                          `${source_asset_data?.color ||
+                          loader_color(theme)}aa`,
+                      }
+                    }
                   />
                 </Fade>
               </div>
@@ -466,7 +463,6 @@ export default (
               (
                 <Image
                   src={destination_chain_data.image}
-                  alt=""
                   width={20}
                   height={20}
                   className="rounded-full"
@@ -500,7 +496,6 @@ export default (
                 (
                   <Image
                     src={source_asset_image}
-                    alt=""
                     width={16}
                     height={16}
                     className="rounded-full"
@@ -510,20 +505,6 @@ export default (
               <span className="text-xs font-medium">
                 {source_symbol}
               </span>
-              {
-                false &&
-                source_asset_data &&
-                (
-                  <AddToken
-                    token_data={
-                      {
-                        ...source_asset_data,
-                        ...source_contract_data,
-                      }
-                    }
-                  />
-                )
-              }
             </div>
           </div>
           <div className="flex flex-col items-center">
@@ -560,20 +541,6 @@ export default (
                   }
                 /> :
                 pending ?
-                  /*
-                  <TimeSpent
-                    title="Time spent"
-                    from_time={xcall_timestamp}
-                    to_time={execute_timestamp}
-                    className={
-                      `${
-                        pending ?
-                          'text-blue-500 dark:text-blue-300' :
-                          'text-yellow-600 dark:text-yellow-400'
-                      } font-semibold`
-                    }
-                  />
-                  */
                   null :
                   <a
                     href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', execute_transaction_hash)}`}
@@ -589,7 +556,11 @@ export default (
           </div>
           <div
             className="flex flex-col items-end space-y-1.5"
-            style={{ minWidth: '4rem' }}
+            style={
+              {
+                minWidth: '4rem',
+              }
+            }
           >
             {
               typeof destination_amount === 'number' &&
@@ -611,7 +582,6 @@ export default (
                 (
                   <Image
                     src={destination_asset_image}
-                    alt=""
                     width={16}
                     height={16}
                     className="rounded-full"
@@ -621,20 +591,6 @@ export default (
               <span className="text-xs font-medium">
                 {destination_symbol}
               </span>
-              {
-                false &&
-                destination_asset_data &&
-                (
-                  <AddToken
-                    token_data={
-                      {
-                        ...destination_asset_data,
-                        ...destination_contract_data,
-                      }
-                    }
-                  />
-                )
-              }
             </div>
           </div>
         </div>
@@ -654,20 +610,22 @@ export default (
                 fallback={
                   <Copy
                     value={to}
-                    title={<span className="cursor-pointer text-slate-600 dark:text-white text-sm">
-                      <span className="sm:hidden">
-                        {ellipse(
-                          to,
-                          12,
-                        )}
+                    title={
+                      <span className="cursor-pointer text-slate-600 dark:text-white text-sm">
+                        <span className="sm:hidden">
+                          {ellipse(
+                            to,
+                            12,
+                          )}
+                        </span>
+                        <span className="hidden sm:block">
+                          {ellipse(
+                            to,
+                            8,
+                          )}
+                        </span>
                       </span>
-                      <span className="hidden sm:block">
-                        {ellipse(
-                          to,
-                          8,
-                        )}
-                      </span>
-                    </span>}
+                    }
                   />
                 }
               />
@@ -681,40 +639,7 @@ export default (
               {
                 pending &&
                 !errored ?
-                  <div className="flex items-center space-x-1">
-                    {/*
-                      <div className="tracking-normal whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
-                        Est. time:
-                      </div>
-                      <Tooltip
-                        placement="top"
-                        content={
-                          force_slow ?
-                            'Unable to leverage fast liquidity. Your transfer will still complete.' :
-                            'Fast transfer enabled by Connext router network.'
-                        }
-                        className="z-50 bg-dark text-white text-xs"
-                      >
-                        <div className="flex items-center">
-                          <span className="tracking-normal whitespace-nowrap text-xs font-semibold space-x-1.5">
-                            {
-                              force_slow ?
-                                <span className="text-yellow-500 dark:text-yellow-400">
-                                  90 mins
-                                </span> :
-                                <span className="text-green-500 dark:text-green-500">
-                                  4 mins
-                                </span>
-                            }
-                          </span>
-                          <BiInfoCircle
-                            size={14}
-                            className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                          />
-                        </div>
-                      </Tooltip>
-                    */}
-                  </div> :
+                  <div /> :
                   errored ?
                     <ActionRequired
                       transferData={transferData}
@@ -769,15 +694,7 @@ export default (
               }
               <Tooltip
                 placement="top"
-                content={
-                  /*
-                  moment(
-                    xcall_timestamp * 1000
-                  )
-                  .format('MMM D, YYYY h:mm:ss A')
-                  */
-                  'Transferred at'
-                }
+                content="Transferred at"
                 className="z-50 bg-dark text-white text-xs"
               >
                 <div className="flex items-center">
@@ -787,7 +704,6 @@ export default (
                         xcall_timestamp * 1000
                       )
                       .format('MMM D, YYYY h:mm:ss A')
-                      // .fromNow()
                     }
                   </span>
                 </div>

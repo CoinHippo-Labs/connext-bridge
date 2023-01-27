@@ -960,7 +960,6 @@ export default (
     _.head(
       [
         origin_transacting_amount,
-        // origin_bridged_amount,
       ]
       .map(a =>
         [
@@ -1103,7 +1102,6 @@ export default (
     _.head(
       [
         destination_transacting_amount,
-        // destination_local_amount,
       ]
       .map(a =>
         [
@@ -1521,7 +1519,6 @@ export default (
                       (
                         <Image
                           src={source_chain_data.image}
-                          alt=""
                           width={28}
                           height={28}
                           className="rounded-full"

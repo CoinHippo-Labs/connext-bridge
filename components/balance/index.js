@@ -240,7 +240,8 @@ export default (
           [
             'string',
             'number',
-          ].includes(typeof amount) &&
+          ]
+          .includes(typeof amount) &&
           !isNaN(amount) ?
             <>
               <DecimalsFormat

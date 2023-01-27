@@ -14,17 +14,18 @@ import Alert from '../alerts'
 import { number_format, equals_ignore_case } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
-const ABI = [
-  // Read-Only Functions
-  'function balanceOf(address owner) view returns (uint256)',
-  'function decimals() view returns (uint8)',
-  'function symbol() view returns (string)',
-  // Authenticated Functions
-  'function transfer(address to, uint amount) returns (boolean)',
-  'function mint(address account, uint256 amount)',
-  'function deposit() payable',
-  'function withdraw(uint256 amount)',
-]
+const ABI =
+  [
+    // Read-Only Functions
+    'function balanceOf(address owner) view returns (uint256)',
+    'function decimals() view returns (uint8)',
+    'function symbol() view returns (string)',
+    // Authenticated Functions
+    'function transfer(address to, uint amount) returns (boolean)',
+    'function mint(address account, uint256 amount)',
+    'function deposit() payable',
+    'function withdraw(uint256 amount)',
+  ]
 
 export default (
   {
@@ -203,15 +204,6 @@ export default (
           '[wrap]' :
           '[mint]',
         is_wrapped ?
-          /*
-          {
-            to: _address,
-            value: _amount,
-            overrides: {
-              gasLimit,
-            },
-          }
-          */
           {
             value: _amount,
           } :
@@ -221,27 +213,8 @@ export default (
           },
       )
 
-      /*
-      const wrap_request =
-        is_wrapped &&
-        await signer
-          .populateTransaction(
-            {
-              to: _address,
-              value: _amount,
-              gasLimit,
-            },
-          )
-      */
-
       const response =
         is_wrapped ?
-          /*
-          await signer
-            .sendTransaction(
-              wrap_request,
-            )
-          */
           await contract
             .deposit(
               {
@@ -946,7 +919,7 @@ export default (
                         )
                       }
                       {type === 'select-chain' ?
-                        <div className="-mt-2">
+                        <div>
                           <SelectChain
                             disabled={disabled}
                             value={data?.[name]}
@@ -1027,7 +1000,6 @@ export default (
                             (
                               <Image
                                 src={image}
-                                alt=""
                                 width={24}
                                 height={24}
                                 className="rounded-full"
