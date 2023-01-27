@@ -722,8 +722,11 @@ export default function CrosschainBridge() {
               setStartingSwap(false)
               setSwapData(null)
               setSwapResponse(null)
+
+              let params
+
               try {
-                const response = await sdk_data.getTransferQuote({
+                params = {
                   sendingChainId: swapConfig.fromChainId,
                   sendingAssetId: fromContract.contract_address,
                   receivingChainId: swapConfig.toChainId,
@@ -737,7 +740,18 @@ export default function CrosschainBridge() {
                   initiator: advancedOptions?.initiator || undefined,
                   preferredRouters: advancedOptions?.preferred_router?.length > 0 ? advancedOptions.preferred_router.split(',') : undefined,
                   dryRun: false,
-                })
+                }
+
+                const response = await sdk_data.getTransferQuote(params)
+
+                console.log(
+                  '[getTransferQuote]',
+                  {
+                    ...params,
+                  },
+                  response,
+                )
+
                 if (!controller.signal.aborted) {
                   if (response?.bid?.sendingChainId === swapConfig.fromChainId && response?.bid?.receivingChainId === swapConfig.toChainId && response?.bid?.sendingAssetId === fromContract.contract_address) {
                     getDomains([address, response?.bid?.router, advancedOptions?.receiving_address])
@@ -759,6 +773,14 @@ export default function CrosschainBridge() {
                   }
                 }
               } catch (error) {
+                console.log(
+                  '[getTransferQuote error]',
+                  {
+                    ...params,
+                  },
+                  error,
+                )
+
                 if (!controller.signal.aborted) {
                   setEstimatedAmountResponse({ status: 'failed', message: error?.data?.message || error?.message })
                 }
@@ -775,14 +797,26 @@ export default function CrosschainBridge() {
               setEstimatingFees(true)
               setEstimatedAmount(null)
               setEstimatingAmount(false)
+              
+              const params = {
+                amount: '0',
+                sendingChainId: swapConfig.fromChainId,
+                sendingAssetId: fromContract?.contract_address,
+                receivingChainId: swapConfig.toChainId,
+                receivingAssetId: toContract?.contract_address,
+              }
+
               try {
-                const response = await sdk_data.getEstimateReceiverAmount({
-                  amount: '0',
-                  sendingChainId: swapConfig.fromChainId,
-                  sendingAssetId: fromContract?.contract_address,
-                  receivingChainId: swapConfig.toChainId,
-                  receivingAssetId: toContract?.contract_address,
-                })
+                const response = await sdk_data.getEstimateReceiverAmount(params)
+
+                console.log(
+                  '[getEstimateReceiverAmount]',
+                  {
+                    ...params,
+                  },
+                  response,
+                )
+
                 if (!controller.signal.aborted) {
                   setFees({
                     relayer: BigNumber(response?.relayerFee || 0).shiftedBy(-toContract.contract_decimals).toNumber(),
@@ -793,6 +827,14 @@ export default function CrosschainBridge() {
                   })
                 }
               } catch (error) {
+                console.log(
+                  '[getEstimateReceiverAmount error]',
+                  {
+                    ...params,
+                  },
+                  error,
+                )
+
                 if (!controller.signal.aborted) {
                   setEstimatedAmountResponse({ status: 'failed', message: error?.data?.message || error?.message })
                 }
@@ -815,9 +857,26 @@ export default function CrosschainBridge() {
     if (sdk_data) {
       try {
         const response = await sdk_data.prepareTransfer(estimatedAmount, infiniteApproval)
+
+        console.log(
+          '[prepareTransfer error]',
+          {
+            ...estimatedAmount,
+          },
+          response,
+        )
+
         setSwapData({ ...response, sendingChainId: estimatedAmount?.bid?.sendingChainId, receivingChainId: estimatedAmount?.bid?.receivingChainId })
         setSwapResponse(null)
       } catch (error) {
+        console.log(
+          '[prepareTransfer error]',
+          {
+            ...estimatedAmount,
+          },
+          error,
+        )
+
         setSwapResponse({ status: 'failed', message: error?.data?.message || error?.message })
       }
       setTransactionId(getRandomBytes32())
