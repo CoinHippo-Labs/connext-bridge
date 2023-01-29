@@ -1996,6 +1996,10 @@ export default () => {
       console.log(
         '[xcall setup]',
         {
+          relayerFee,
+          fee,
+        },
+        {
           xcallParams,
         },
       )
