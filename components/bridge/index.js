@@ -1848,7 +1848,9 @@ export default () => {
     }
   }
 
-  const call = async () => {
+  const call = async (
+    relayerFee = fee?.relayerFee,
+  ) => {
     setApproving(null)
     setCalling(true)
 
@@ -1873,10 +1875,6 @@ export default () => {
         forceSlow,
         receiveLocal,
       } = { ...options }
-
-      const {
-        relayerFee,
-      } = { ...fee }
 
       const source_chain_data = (chains_data || [])
         .find(c =>
@@ -3780,21 +3778,24 @@ export default () => {
                                                             }
 
                                                             value =
-                                                              value <= 0 ||
-                                                              value > 100 ?
-                                                                DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
+                                                              value &&
+                                                              !isNaN(value) ?
+                                                                parseFloat(
+                                                                  Number(value)
+                                                                    .toFixed(2)
+                                                                ) :
                                                                 value
+
+                                                            value =
+                                                              value <= 0 ?
+                                                                0.01 :
+                                                                value > 100 ?
+                                                                  DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
+                                                                  value
 
                                                             const _data = {
                                                               ...options,
-                                                              slippage:
-                                                                value &&
-                                                                !isNaN(value) ?
-                                                                  parseFloat(
-                                                                    Number(value)
-                                                                      .toFixed(2)
-                                                                  ) :
-                                                                  value,
+                                                              slippage: value,
                                                             }
 
                                                             setOptions(_data)
@@ -4249,7 +4250,7 @@ export default () => {
                                 onClick={() => {
                                   setRecipientEditing(false)
                                   setSlippageEditing(false)
-                                  call()
+                                  call(relayer_fee)
                                 }}
                                 className={
                                   `w-full ${
