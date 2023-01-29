@@ -1993,6 +1993,13 @@ export default () => {
             undefined,
       }
 
+      console.log(
+        '[xcall setup]',
+        {
+          xcallParams,
+        },
+      )
+
       let failed = false
 
       if (
