@@ -67,7 +67,7 @@ export default () => {
           >
             <a
               href="https://bridge.connext.network"
-              className="bg-slate-200 dark:bg-slate-800 rounded text-blue-500 dark:text-blue-500 text-xs font-medium py-1 px-2"
+              className="bg-slate-200 dark:bg-slate-800 rounded whitespace-nowrap text-blue-500 dark:text-blue-500 text-xs font-medium py-1 px-2"
             >
               ← NXTP v1
             </a>
