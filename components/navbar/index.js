@@ -1608,22 +1608,24 @@ export default () => {
         !hiddenStatus &&
         process.env.NEXT_PUBLIC_STATUS_MESSAGE &&
         (
-          <div className="w-full bg-slate-100 dark:bg-slate-900 overflow-x-auto flex items-center py-2 sm:py-3 px-2 sm:px-4">
-            <span className="flex flex-wrap items-center font-mono text-blue-500 dark:text-white text-2xs xl:text-sm space-x-1.5 xl:space-x-2 mx-auto">
-              <Linkify>
-                {parse(
-                  process.env.NEXT_PUBLIC_STATUS_MESSAGE
-                )}
-              </Linkify>
+          <div className="w-full bg-slate-100 dark:bg-slate-800 dark:bg-opacity-50 overflow-x-auto flex items-center py-2 sm:py-3 px-2 sm:px-4">
+            <div className="flex flex-wrap items-centertext-blue-500 dark:text-white text-2xs xl:text-sm font-medium space-x-1.5 xl:space-x-2 mx-auto">
+              <span>
+                <Linkify>
+                  {parse(
+                    process.env.NEXT_PUBLIC_STATUS_MESSAGE
+                  )}
+                </Linkify>
+              </span>
               <button
                 onClick={() => setHiddenStatus(true)}
-                className="hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full mt-0.5 p-1"
+                className="hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full mt-0.5 p-1 ml-auto"
               >
                 <MdClose
                   size={12}
                 />
               </button>
-            </span>
+            </div>
           </div>
         )
       }
