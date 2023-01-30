@@ -22,6 +22,7 @@ export default (
     applied = false,
     initialData,
     onChange,
+    showInfiniteApproval = true,
     hasNextAsset = false,
     chainData,
   },
@@ -67,6 +68,7 @@ export default (
         type: 'text',
         placeholder: 'target recipient address',
       },
+      showInfiniteApproval &&
       {
         label: 'Infinite Approval',
         tooltip: 'This allows you to only need to pay for approval on your first transfer.',

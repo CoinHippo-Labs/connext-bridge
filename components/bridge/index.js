@@ -148,6 +148,7 @@ export default () => {
   const [slippageEditing, setSlippageEditing] = useState(false)
   const [estimatedValues, setEstimatedValues] = useState(undefined)
   const [estimateResponse, setEstimateResponse] = useState(null)
+  const [isApproveNeeded, setIsApproveNeeded] = useState(undefined)
 
   const [fee, setFee] = useState(null)
   const [estimateTrigger, setEstimateTrigger] = useState(null)
@@ -272,11 +273,14 @@ export default () => {
           bridge.amount = amount
           updated = true
 
-          if (
-            sdk &&
-            estimatedValues === undefined
-          ) {
-            calculateAmountReceived(bridge.amount)
+          if (sdk) {
+            if (estimatedValues === undefined) {
+              calculateAmountReceived(bridge.amount)
+            }
+
+            if (isApproveNeeded === undefined) {
+              checkApprovedNeeded(bridge.amount)
+            }
           }
         }
         else if (estimatedValues) {
@@ -1460,6 +1464,7 @@ export default () => {
       setXcall(null)
       setEstimatedValues(null)
       setEstimateResponse(null)
+      setIsApproveNeeded(undefined)
     }
 
     if (
@@ -1854,6 +1859,96 @@ export default () => {
                 receive_local :
                 receiveLocal,
           }
+        )
+      }
+    }
+  }
+
+  const checkApprovedNeeded = async _amount => {
+    if (sdk) {
+      let {
+        symbol,
+      } = { ...bridge }
+
+      const {
+        domain_id,
+      } = { ...source_chain_data }
+
+      const {
+        contract_address,
+      } = { ...source_contract_data }
+
+      const amount =
+        utils.parseUnits(
+          (
+            _amount ||
+            0
+          )
+          .toString(),
+          source_decimals,
+        )
+
+      try {
+        setIsApproveNeeded(undefined)
+
+        if (
+          amount
+            .gt(
+              BigNumber.from(
+                '0'
+              )
+            )
+        ) {
+          console.log(
+            '[approveIfNeeded]',
+            {
+              domain_id,
+              contract_address,
+              amount,
+            },
+          )
+
+          const response =
+            await sdk.sdkBase
+              .approveIfNeeded(
+                domain_id,
+                contract_address,
+                amount,
+              )
+
+          const _isApproveNeeded = !!response
+
+          console.log(
+            '[isApproveNeeded]',
+            {
+              domain_id,
+              contract_address,
+              amount,
+              isApproveNeeded: _isApproveNeeded,
+              response,
+            },
+          )
+
+          setIsApproveNeeded(_isApproveNeeded)
+        }
+        else {
+          setIsApproveNeeded(false)
+        }
+      } catch (error) {
+        const message =
+          error?.reason ||
+          error?.data?.message ||
+          error?.message
+
+        console.log(
+          '[approveIfNeeded error]',
+          {
+            domain_id,
+            contract_address,
+            amount,
+            error,
+            message,
+          },
         )
       }
     }
@@ -2981,21 +3076,33 @@ export default () => {
                                   Object.fromEntries(
                                     Object.entries(options)
                                       .filter(([k, v]) =>
-                                        ![
-                                          'slippage',
-                                          'forceSlow',
-                                          'showNextAssets',
-                                        ].includes(k)
+                                        !(
+                                          [
+                                            'slippage',
+                                            'forceSlow',
+                                            'showNextAssets',
+                                            isApproveNeeded !== false &&
+                                            'infiniteApprove',
+                                          ]
+                                          .filter(f => f)
+                                        )
+                                        .includes(k)
                                       )
                                   ),
                                   Object.fromEntries(
                                     Object.entries(DEFAULT_OPTIONS)
                                       .filter(([k, v]) =>
-                                        ![
-                                          'slippage',
-                                          'forceSlow',
-                                          'showNextAssets',
-                                        ].includes(k)
+                                        !(
+                                          [
+                                            'slippage',
+                                            'forceSlow',
+                                            'showNextAssets',
+                                            isApproveNeeded !== false &&
+                                            'infiniteApprove',
+                                          ]
+                                          .filter(f => f)
+                                        )
+                                        .includes(k)
                                       )
                                   ),
                                 )
@@ -3024,12 +3131,15 @@ export default () => {
                                       '',
                                       '0',
                                       '0.0',
-                                    ].includes(amount)
+                                    ]
+                                    .includes(amount)
                                   ) {
                                     calculateAmountReceived(
                                       amount,
                                       receiveLocal,
                                     )
+
+                                    checkApprovedNeeded(amount)
                                   }
                                   else {
                                     setEstimatedValues(
@@ -3039,6 +3149,8 @@ export default () => {
                                         isNextAsset: receiveLocal,
                                       }
                                     )
+
+                                    setIsApproveNeeded(false)
                                   }
 
                                   if (
@@ -3075,6 +3187,7 @@ export default () => {
                                   }
                                 }
                               }}
+                              showInfiniteApproval={isApproveNeeded}
                               hasNextAsset={destination_contract_data?.next_asset}
                               chainData={destination_chain_data}
                             />
@@ -3246,7 +3359,8 @@ export default () => {
                                         [
                                           'string',
                                           'number',
-                                        ].includes(typeof max_amount)
+                                        ]
+                                        .includes(typeof max_amount)
                                       ) {
                                         if (
                                           max_amount &&
@@ -3254,9 +3368,12 @@ export default () => {
                                             '',
                                             '0',
                                             '0.0',
-                                          ].includes(max_amount)
+                                          ]
+                                          .includes(max_amount)
                                         ) {
                                           calculateAmountReceived(max_amount)
+
+                                          checkApprovedNeeded(max_amount)
                                         }
                                         else {
                                           setEstimatedValues(
@@ -3266,6 +3383,8 @@ export default () => {
                                               isNextAsset: receiveLocal,
                                             }
                                           )
+
+                                          setIsApproveNeeded(false)
                                         }
                                       }
                                     }
@@ -3388,7 +3507,8 @@ export default () => {
                                 [
                                   'string',
                                   'number',
-                                ].includes(typeof value)
+                                ]
+                                .includes(typeof value)
                               ) {
                                 if (
                                   value &&
@@ -3396,9 +3516,12 @@ export default () => {
                                     '',
                                     '0',
                                     '0.0',
-                                  ].includes(value)
+                                  ]
+                                  .includes(value)
                                 ) {
                                   calculateAmountReceived(value)
+
+                                  checkApprovedNeeded(value)
                                 }
                                 else {
                                   setEstimatedValues(
@@ -3408,6 +3531,8 @@ export default () => {
                                       isNextAsset: receiveLocal,
                                     }
                                   )
+
+                                  setIsApproveNeeded(false)
                                 }
                               }
                             }}
