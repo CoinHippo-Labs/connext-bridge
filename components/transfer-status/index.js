@@ -539,6 +539,19 @@ export default (
                       }
                     }
                   }
+                  onSlippageUpdated={
+                    slippage => {
+                      if (data) {
+                        setTransferData(
+                          {
+                            ...data,
+                            slippage,
+                            error_status: null,
+                          }
+                        )
+                      }
+                    }
+                  }
                 /> :
                 pending ?
                   null :
@@ -661,6 +674,19 @@ export default (
                               {
                                 ...data,
                                 relayer_fee,
+                                error_status: null,
+                              }
+                            )
+                          }
+                        }
+                      }
+                      onSlippageUpdated={
+                        slippage => {
+                          if (data) {
+                            setTransferData(
+                              {
+                                ...data,
+                                slippage,
                                 error_status: null,
                               }
                             )
