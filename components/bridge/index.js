@@ -2815,7 +2815,16 @@ export default () => {
           <Announcement />
         </div>
         <div className="flex flex-col items-center justify-center space-y-6 sm:space-y-6 my-4 sm:my-0 xl:my-6 mx-1 sm:mx-4">
-          <div className="w-full max-w-md space-y-3">
+          <div
+            className={
+              `w-full ${
+                openTransferStatus &&
+                latest_transfer ?
+                  'max-w-xl' :
+                  'max-w-md'
+              } space-y-3`
+            }
+          >
             {
               openTransferStatus &&
               latest_transfer ?
@@ -2849,8 +2858,8 @@ export default () => {
                         >
                           <Image
                             src="/images/transfer-statuses/Success-End.gif"
-                            width={398}
-                            height={223.875}
+                            width={526}
+                            height={295.875}
                           />
                         </a> :
                         errored ?
@@ -2867,8 +2876,8 @@ export default () => {
                                         'Error-Generic.gif'
                                   }`
                                 }
-                                width={398}
-                                height={223.875}
+                                width={526}
+                                height={295.875}
                               />
                             }
                             onTransferBumped={
@@ -2931,13 +2940,14 @@ export default () => {
                           <Image
                             src={
                               `/images/transfer-statuses/${
+                                latest_transfer?.transfer_id ||
                                 time_spent_seconds > estimated_time_seconds ?
                                   'Processing.gif' :
                                   'Start.gif'
                               }`
                             }
-                            width={398}
-                            height={223.875}
+                            width={526}
+                            height={295.875}
                           />
                           /*
                           <CountdownCircleTimer

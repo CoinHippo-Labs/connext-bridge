@@ -1170,7 +1170,7 @@ export default (
         disabled={disabled}
         onClick={() => setHidden(false)}
         buttonTitle={buttonTitle}
-        buttonClassName={`min-w-max ${disabled ? 'cursor-not-allowed' : ''} rounded flex items-center justify-center`}
+        buttonClassName={`${disabled ? 'cursor-not-allowed' : ''} rounded flex items-center justify-center`}
         title={
           <div className="flex items-center justify-between">
             <span className="normal-case">

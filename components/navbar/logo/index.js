@@ -1,4 +1,5 @@
 import { Tooltip } from '@material-tailwind/react'
+import { BsArrowLeft } from 'react-icons/bs'
 
 import Image from '../../image'
 
@@ -21,7 +22,7 @@ export default () => {
       >
         <div
           title="Cross-Chain Bridge"
-          className="min-w-max sm:mr-3"
+          className="min-w-max flex items-center space-x-1 sm:mr-3"
         >
           <div className="flex dark:hidden items-center">
             <div className="flex sm:hidden">
@@ -55,11 +56,11 @@ export default () => {
               />
             </div>
           </div>
-        </div>
-        <div className="flex items-center space-x-2 ml-0 sm:ml-10">
-          <div className="max-w-min bg-slate-200 dark:bg-slate-800 rounded whitespace-nowrap uppercase text-slate-600 dark:text-white text-xs font-medium py-1 px-2">
+          <div className="max-w-min bg-slate-200 dark:bg-slate-800 whitespace-nowrap uppercase text-slate-600 dark:text-white text-xs font-semibold py-1 px-2">
             Beta
           </div>
+        </div>
+        <div className="flex items-center space-x-2 ml-0 sm:ml-11">
           <Tooltip
             placement="bottom"
             content="return back to nxtp-v1"
@@ -67,9 +68,14 @@ export default () => {
           >
             <a
               href="https://bridge.connext.network"
-              className="bg-slate-200 dark:bg-slate-800 rounded whitespace-nowrap text-blue-500 dark:text-blue-500 text-xs font-medium py-1 px-2"
+              className="bg-slate-200 dark:bg-slate-800 flex items-center text-blue-500 dark:text-blue-500 space-x-1 py-1 px-2"
             >
-              ← NXTP v1
+              <BsArrowLeft
+                size={12}
+              />
+              <span className="whitespace-nowrap text-xs font-semibold">
+                NXTPv1
+              </span>
             </a>
           </Tooltip>
           <div className="hidden sm:block">
