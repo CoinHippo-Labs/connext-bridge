@@ -416,8 +416,8 @@ export default function Navbar() {
         </div>
       </div>
       {((!chains_status_data && address) || (!hiddenStatus && process.env.NEXT_PUBLIC_STATUS_TITLE)) && (
-        <div className="w-full h-8 xl:h-10 bg-gray-100 dark:bg-gray-900 overflow-x-auto flex items-center py-2 px-2 sm:px-4">
-          <span className="flex flex-wrap items-center font-mono text-blue-600 dark:text-blue-400 text-2xs xl:text-sm space-x-1.5 xl:space-x-2 mx-auto">
+        <div className="w-full h-8 xl:h-10 bg-blue-600 dark:bg-blue-700 overflow-x-auto flex items-center py-2 px-2 sm:px-4">
+          <span className="flex flex-wrap items-center text-white text-2xs xl:text-sm font-medium space-x-1.5 xl:space-x-2 mx-auto">
             {!chains_status_data && address ?
               <>
                 <Grid color={theme === 'dark' ? '#60A5FA' : '#2563EB'} width="16" height="16" />
@@ -426,12 +426,14 @@ export default function Navbar() {
               :
               <>
                 <Linkify>{parse(process.env.NEXT_PUBLIC_STATUS_TITLE)}</Linkify>
-                <button
-                  onClick={() => setHiddenStatus(true)}
-                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-full mt-0.5 p-1"
-                >
-                  <MdClose size={12} />
-                </button>
+                {/*
+                  <button
+                    onClick={() => setHiddenStatus(true)}
+                    className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-full mt-0.5 p-1"
+                  >
+                    <MdClose size={12} />
+                  </button>
+                */}
               </>
             }
           </span>
