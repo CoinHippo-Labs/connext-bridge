@@ -118,8 +118,9 @@ export default () => {
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(),
+        setInterval(
+          () =>
+            getData(),
           1 * 60 * 1000,
         )
 
@@ -306,8 +307,9 @@ export default () => {
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(true),
+        setInterval(
+          () =>
+            getData(true),
           5 * 60 * 1000,
         )
 
@@ -329,15 +331,29 @@ export default () => {
               chain_id,
               provider_params,
             } = { ...chain_data }
+            let {
+              rpc_urls,
+            } = { ...chain_data }
 
             if (!disabled) {
               const {
                 rpcUrls,
-              } = { ..._.head(provider_params) }
+              } = {
+                ...(
+                  _.head(provider_params)
+                ),
+              }
    
-              const rpc_urls =
-                (rpcUrls || [])
-                  .filter(url => url)
+              rpc_urls =
+                (
+                  Array.isArray(rpc_urls) ?
+                    rpc_urls :
+                    (
+                      rpcUrls ||
+                      []
+                    )
+                )
+                .filter(url => url)
 
               const provider =
                 rpc_urls.length === 1 ?
@@ -403,15 +419,29 @@ export default () => {
               provider_params,
               disabled,
             } = { ...chain_data }
+            let {
+              rpc_urls,
+            } = { ...chain_data }
 
             if (!disabled) {
               const {
                 rpcUrls,
-              } = { ..._.head(provider_params) }
+              } = {
+                ...(
+                  _.head(provider_params)
+                ),
+              }
    
-              const rpc_urls =
-                (rpcUrls || [])
-                  .filter(url => url)
+              rpc_urls =
+                (
+                  Array.isArray(rpc_urls) ?
+                    rpc_urls :
+                    (
+                      rpcUrls ||
+                      []
+                    )
+                )
+                .filter(url => url)
 
               if (domain_id) {
                 chains_config[domain_id] = {
@@ -630,8 +660,9 @@ export default () => {
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(),
+        setInterval(
+          () =>
+            getData(),
           1 * 60 * 1000,
         )
 
@@ -1230,8 +1261,9 @@ export default () => {
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(),
+        setInterval(
+          () =>
+            getData(),
           1 * 60 * 1000,
         )
 
@@ -1517,8 +1549,9 @@ export default () => {
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(),
+        setInterval(
+          () =>
+            getData(),
           1 * 60 * 1000,
         )
 
