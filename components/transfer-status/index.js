@@ -399,7 +399,7 @@ export default (
   const errored =
     [
       XTransferErrorStatus.LowSlippage,
-      XTransferErrorStatus.InsufficientRelayerFee,
+      XTransferErrorStatus.LowRelayerFee,
     ]
     .includes(error_status) &&
     ![

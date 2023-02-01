@@ -1109,7 +1109,7 @@ export default () => {
 
                 if (latest_transfer?.error_status === null) {
                   switch (error_status) {
-                    case XTransferErrorStatus.InsufficientRelayerFee:
+                    case XTransferErrorStatus.LowRelayerFee:
                       updated = latest_transfer?.relayerFee === relayerFee
                       break
                     case XTransferErrorStatus.LowSlippage:
@@ -2188,7 +2188,7 @@ export default () => {
           {
             status: 'failed',
             message: 'Cannot estimate the relayer fee at the moment. Please try again later.',
-            code: XTransferErrorStatus.InsufficientRelayerFee,
+            code: XTransferErrorStatus.LowRelayerFee,
           }
         )
 
@@ -2966,7 +2966,7 @@ export default () => {
                               <Image
                                 src={
                                   `/images/transfer-statuses/${
-                                    latest_transfer.error_status === XTransferErrorStatus.InsufficientRelayerFee ?
+                                    latest_transfer.error_status === XTransferErrorStatus.LowRelayerFee ?
                                       'Error-Gas.gif' :
                                       latest_transfer.error_status === XTransferErrorStatus.LowSlippage ?
                                         'Error-Slippage.gif' :
@@ -2975,7 +2975,7 @@ export default () => {
                                 }
                                 src_end={
                                   `/images/transfer-statuses/${
-                                    latest_transfer.error_status === XTransferErrorStatus.InsufficientRelayerFee ?
+                                    latest_transfer.error_status === XTransferErrorStatus.LowRelayerFee ?
                                       'Error-Gas.jpeg' :
                                       latest_transfer.error_status === XTransferErrorStatus.LowSlippage ?
                                         'Error-Slippage.jpeg' :
