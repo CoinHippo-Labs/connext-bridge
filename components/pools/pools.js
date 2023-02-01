@@ -1550,8 +1550,33 @@ export default (
 
                         const value =
                           _.sumBy(
+                            pools
+                              .map(p => {
+                                const {
+                                  apr,
+                                  tvl,
+                                } = { ...p }
+
+                                return {
+                                  ...p,
+                                  weighted_apr:
+                                    (
+                                      (
+                                        apr ||
+                                        0
+                                      ) *
+                                      (
+                                        tvl ||
+                                        0
+                                      )
+                                    ),
+                                }
+                              }),
+                            'weighted_apr',
+                          ) /
+                          _.sumBy(
                             pools,
-                            'apr',
+                            'tvl',
                           )
 
                         return (
