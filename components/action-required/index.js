@@ -122,6 +122,7 @@ export default (
             calculateAmountReceived(origin_transacting_amount)
             break
           case XTransferErrorStatus.LowRelayerFee:
+          case 'LowRelayerFee':
             estimate()
             break
           default:
@@ -640,6 +641,7 @@ export default (
           }
           break
         case XTransferErrorStatus.LowRelayerFee:
+        case 'LowRelayerFee':
           try {
             params = {
               domainId: origin_domain,
@@ -1182,7 +1184,8 @@ export default (
               Action Required: {
                 error_status === XTransferErrorStatus.LowSlippage ?
                   'Slippage exceeded' :
-                  error_status === XTransferErrorStatus.LowRelayerFee ?
+                  error_status === XTransferErrorStatus.LowRelayerFee ||
+                  error_status === 'LowRelayerFee' ?
                     'Relayer fee insufficient' :
                     error_status
               }
@@ -1403,7 +1406,8 @@ export default (
                     </div>
                   </div>
                 </> :
-                error_status === XTransferErrorStatus.LowRelayerFee ?
+                error_status === XTransferErrorStatus.LowRelayerFee ||
+                error_status === 'LowRelayerFee' ?
                   <>
                     <div className="space-y-3">
                       <div className="text-slate-600 dark:text-slate-400 text-sm">
@@ -1489,7 +1493,8 @@ export default (
                     typeof (
                       error_status === XTransferErrorStatus.LowSlippage ?
                         newSlippage :
-                        error_status === XTransferErrorStatus.LowRelayerFee ?
+                        error_status === XTransferErrorStatus.LowRelayerFee ||
+                        error_status === 'LowRelayerFee' ?
                           newRelayerFee :
                           null
                     )
@@ -1500,7 +1505,8 @@ export default (
                   .includes(
                     error_status === XTransferErrorStatus.LowSlippage ?
                       newSlippage :
-                      error_status === XTransferErrorStatus.LowRelayerFee ?
+                      error_status === XTransferErrorStatus.LowRelayerFee ||
+                      error_status === 'LowRelayerFee' ?
                         newRelayerFee :
                         null
                   )
@@ -1547,7 +1553,8 @@ export default (
                     typeof (
                       error_status === XTransferErrorStatus.LowSlippage ?
                         newSlippage :
-                        error_status === XTransferErrorStatus.LowRelayerFee ?
+                        error_status === XTransferErrorStatus.LowRelayerFee ||
+                        error_status === 'LowRelayerFee' ?
                           newRelayerFee :
                           null
                     )
@@ -1558,14 +1565,16 @@ export default (
                   .includes(
                     error_status === XTransferErrorStatus.LowSlippage ?
                       newSlippage :
-                      error_status === XTransferErrorStatus.LowRelayerFee ?
+                      error_status === XTransferErrorStatus.LowRelayerFee ||
+                      error_status === 'LowRelayerFee' ?
                         newRelayerFee :
                         null
                   ) &&
                   (
                     error_status === XTransferErrorStatus.LowSlippage ?
                       newSlippage <= _slippage :
-                      error_status === XTransferErrorStatus.LowRelayerFee ?
+                      error_status === XTransferErrorStatus.LowRelayerFee ||
+                      error_status === 'LowRelayerFee' ?
                         !newRelayerFee :
                         null
                   ) ?
@@ -1585,7 +1594,10 @@ export default (
                           error_status === XTransferErrorStatus.LowSlippage &&
                           newSlippage <= _slippage ?
                             'New amount must be higher than existing slippage tolerance' :
-                            error_status === XTransferErrorStatus.LowRelayerFee &&
+                            (
+                              error_status === XTransferErrorStatus.LowRelayerFee ||
+                              error_status === 'LowRelayerFee'
+                            ) &&
                             !newRelayerFee ?
                               'Cannot estimate the relayer fee at the moment. Please try again later.' :
                               ''

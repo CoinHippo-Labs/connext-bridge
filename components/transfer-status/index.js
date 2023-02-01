@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, constants, utils } from 'ethers'
-import { XTransferStatus, XTransferErrorStatus } from '@connext/nxtp-utils'
+import { XTransferStatus } from '@connext/nxtp-utils'
 import { Tooltip } from '@material-tailwind/react'
 import Fade from 'react-reveal/Fade'
 import { TiArrowRight } from 'react-icons/ti'
@@ -397,11 +397,7 @@ export default (
     .includes(status)
 
   const errored =
-    [
-      XTransferErrorStatus.LowSlippage,
-      XTransferErrorStatus.LowRelayerFee,
-    ]
-    .includes(error_status) &&
+    error_status &&
     ![
       XTransferStatus.CompletedFast,
       XTransferStatus.CompletedSlow,

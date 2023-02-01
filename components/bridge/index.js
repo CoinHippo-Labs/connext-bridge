@@ -1109,11 +1109,11 @@ export default () => {
 
                 if (latest_transfer?.error_status === null) {
                   switch (error_status) {
-                    case XTransferErrorStatus.LowRelayerFee:
-                      updated = latest_transfer?.relayerFee === relayerFee
-                      break
                     case XTransferErrorStatus.LowSlippage:
                       updated = latest_transfer?.slippage === slippage
+                      break
+                    case XTransferErrorStatus.LowRelayerFee:
+                      updated = latest_transfer?.relayerFee === relayerFee
                       break
                     default:
                       updated = true
@@ -2966,19 +2966,19 @@ export default () => {
                               <Image
                                 src={
                                   `/images/transfer-statuses/${
-                                    latest_transfer.error_status === XTransferErrorStatus.LowRelayerFee ?
-                                      'Error-Gas.gif' :
-                                      latest_transfer.error_status === XTransferErrorStatus.LowSlippage ?
-                                        'Error-Slippage.gif' :
+                                    latest_transfer.error_status === XTransferErrorStatus.LowSlippage ?
+                                      'Error-Slippage.gif' :
+                                      latest_transfer.error_status === XTransferErrorStatus.LowRelayerFee ?
+                                        'Error-Gas.gif' :
                                         'Error-Generic.gif'
                                   }`
                                 }
                                 src_end={
                                   `/images/transfer-statuses/${
-                                    latest_transfer.error_status === XTransferErrorStatus.LowRelayerFee ?
-                                      'Error-Gas.jpeg' :
-                                      latest_transfer.error_status === XTransferErrorStatus.LowSlippage ?
-                                        'Error-Slippage.jpeg' :
+                                    latest_transfer.error_status === XTransferErrorStatus.LowSlippage ?
+                                      'Error-Slippage.jpeg' :
+                                      latest_transfer.error_status === XTransferErrorStatus.LowRelayerFee ?
+                                        'Error-Gas.jpeg' :
                                         'Error-Generic.jpeg'
                                   }`
                                 }
