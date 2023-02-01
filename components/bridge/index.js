@@ -3456,7 +3456,10 @@ export default () => {
                                 <button
                                   disabled={
                                     disabled ||
-                                    !fee
+                                    (
+                                      amount &&
+                                      !fee
+                                    )
                                   }
                                   onClick={() => {
                                     if (
