@@ -2809,7 +2809,24 @@ export default () => {
         _.min(pool_amounts)
 
   const min_amount = 0
-  const max_amount = source_amount
+  const max_amount =
+    source_amount &&
+    utils.formatUnits(
+      utils.parseUnits(
+        source_amount,
+        source_decimals,
+      )
+      .sub(
+        utils.parseUnits(
+          relayer_fee &&
+          source_contract_data?.contract_address === constants.AddressZero ?
+            relayer_fee :
+            '0',
+          source_decimals,
+        )
+      ),
+      source_decimals,
+    )
 
   const estimated_received =
     estimatedValues?.amountReceived ?
@@ -3437,7 +3454,10 @@ export default () => {
                                   Balance:
                                 </div>
                                 <button
-                                  disabled={disabled}
+                                  disabled={
+                                    disabled ||
+                                    !fee
+                                  }
                                   onClick={() => {
                                     if (
                                       utils.parseUnits(
@@ -4368,7 +4388,7 @@ export default () => {
                                 .add(
                                   utils.parseEther(
                                     source_contract_data?.contract_address === constants.AddressZero ?
-                                      source_amount :
+                                      amount :
                                       '0'
                                   )
                                 )

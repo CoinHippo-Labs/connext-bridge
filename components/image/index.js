@@ -53,6 +53,15 @@ export default (
 
   useEffect(
     () => {
+      if (src) {
+        setImageSrc(src)
+      }
+    },
+    [src],
+  )
+
+  useEffect(
+    () => {
       if (
         src_end &&
         timer > duration_second
