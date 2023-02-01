@@ -568,10 +568,12 @@ export default () => {
             [
               'string',
               'number',
-            ].includes(typeof amount) &&
+            ]
+            .includes(typeof amount) &&
             ![
               '',
-            ].includes(swapAmount)
+            ]
+            .includes(swapAmount)
           ) {
             setSwapAmount(true)
           }
@@ -579,7 +581,8 @@ export default () => {
             [
               'string',
               'number',
-            ].includes(typeof swapAmount) &&
+            ]
+            .includes(typeof swapAmount) &&
             ![
               '',
             ].includes(swapAmount)
@@ -684,14 +687,16 @@ export default () => {
                 } = { ...adopted }
 
                 adopted.balance =
-                  utils.formatUnits(
-                    BigNumber.from(
-                      balance ||
-                      '0'
-                    ),
-                    decimals ||
-                    18,
-                  )
+                  typeof balance === 'string' ?
+                    balance :
+                    utils.formatUnits(
+                      BigNumber.from(
+                        balance ||
+                        '0'
+                      ),
+                      decimals ||
+                      18,
+                    )
 
                 pool.adopted = adopted
               }
@@ -703,14 +708,16 @@ export default () => {
                 } = { ...local }
 
                 local.balance =
-                  utils.formatUnits(
-                    BigNumber.from(
-                      balance ||
-                      '0'
-                    ),
-                    decimals ||
-                    18,
-                  )
+                  typeof balance === 'string' ?
+                    balance :
+                    utils.formatUnits(
+                      BigNumber.from(
+                        balance ||
+                        '0'
+                      ),
+                      decimals ||
+                      18,
+                    )
 
                 pool.local = local
               }
@@ -818,7 +825,8 @@ export default () => {
                 [
                   'string',
                   'number',
-                ].includes(typeof supply) ||
+                ]
+                .includes(typeof supply) ||
                 (
                   adopted?.balance &&
                   local?.balance
@@ -1013,6 +1021,12 @@ export default () => {
                 )
               }
             } catch (error) {
+              console.log(
+                '[getPair error]',
+                swap,
+                error,
+              )
+
               setPair(
                 {
                   error,
@@ -1234,7 +1248,8 @@ export default () => {
       ![
         'address',
         'user_rejected',
-      ].includes(origin)
+      ]
+      .includes(origin)
 
     if (reset_swap) {
       setSwap(
