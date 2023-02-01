@@ -419,11 +419,13 @@ export default () => {
             )
 
             const response =
-              await sdk.sdkPool
-                .getUserPools(
-                  domain_id,
-                  address,
-                )
+              _.cloneDeep(
+                await sdk.sdkPool
+                  .getUserPools(
+                    domain_id,
+                    address,
+                  )
+              )
 
             console.log(
               '[UserPools]',
@@ -513,17 +515,14 @@ export default () => {
                       } = { ...adopted }
 
                       adopted.balance =
-                        typeof balance === 'string' &&
-                        balance.includes('.') ?
-                          balance :
-                          utils.formatUnits(
-                            BigNumber.from(
-                              balance ||
-                              '0'
-                            ),
-                            decimals ||
-                            18,
-                          )
+                        utils.formatUnits(
+                          BigNumber.from(
+                            balance ||
+                            '0'
+                          ),
+                          decimals ||
+                          18,
+                        )
 
                       info.adopted = adopted
                     }
@@ -535,17 +534,14 @@ export default () => {
                       } = { ...local }
 
                       local.balance =
-                        typeof balance === 'string' &&
-                        balance.includes('.') ?
-                          balance :
-                          utils.formatUnits(
-                            BigNumber.from(
-                              balance ||
-                              '0'
-                            ),
-                            decimals ||
-                            18,
-                          )
+                        utils.formatUnits(
+                          BigNumber.from(
+                            balance ||
+                            '0'
+                          ),
+                          decimals ||
+                          18,
+                        )
 
                       info.local = local
                     }
@@ -1009,7 +1005,7 @@ export default () => {
                             !isNaN(apr) ?
                               <span className="uppercase">
                                 {number_format(
-                                  apr / 100,
+                                  apr * 100,
                                   '0,0.00a',
                                   true,
                                 )}
@@ -1019,7 +1015,7 @@ export default () => {
                             !isNaN(apr) ?
                               <span className="uppercase">
                                 {number_format(
-                                  apr / 100,
+                                  apr * 100,
                                   '0,0.00a',
                                   true,
                                 )}

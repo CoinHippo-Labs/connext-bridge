@@ -1561,17 +1561,17 @@ export default (
                                 <DecimalsFormat
                                   value={
                                     number_format(
-                                      value / 100,
-                                      value / 100 > 1 ?
+                                      value * 100,
+                                      value * 100 > 1 ?
                                         '0,0.00' :
                                         '0,0.000000',
                                       true,
                                     )
                                   }
                                   max_decimals={
-                                    value / 100 > 100 ?
+                                    value * 100 > 100 ?
                                       0 :
-                                      value / 100 > 1 ?
+                                      value * 100 > 1 ?
                                         2 :
                                         6
                                   }
@@ -1606,7 +1606,7 @@ export default (
                                       {!isNaN(value) ?
                                         <span className="uppercase">
                                           {number_format(
-                                            value / 100,
+                                            value * 100,
                                             '0,0.00a',
                                             true,
                                           )}

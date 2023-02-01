@@ -748,11 +748,13 @@ export default () => {
             )
 
             const pool =
-              await sdk.sdkPool
-                .getPool(
-                  domain_id,
-                  contract_address,
-                )
+              _.cloneDeep(
+                await sdk.sdkPool
+                  .getPool(
+                    domain_id,
+                    contract_address,
+                  )
+              )
 
             console.log(
               '[pool]',
@@ -844,17 +846,14 @@ export default () => {
               } = { ...adopted }
 
               adopted.balance =
-                typeof balance === 'string' &&
-                balance.includes('.') ?
-                  balance :
-                  utils.formatUnits(
-                    BigNumber.from(
-                      balance ||
-                      '0'
-                    ),
-                    decimals ||
-                    18,
-                  )
+                utils.formatUnits(
+                  BigNumber.from(
+                    balance ||
+                    '0'
+                  ),
+                  decimals ||
+                  18,
+                )
 
               pool.adopted = adopted
             }
@@ -866,17 +865,14 @@ export default () => {
               } = { ...local }
 
               local.balance =
-                typeof balance === 'string' &&
-                balance.includes('.') ?
-                  balance :
-                  utils.formatUnits(
-                    BigNumber.from(
-                      balance ||
-                      '0'
-                    ),
-                    decimals ||
-                    18,
-                  )
+                utils.formatUnits(
+                  BigNumber.from(
+                    balance ||
+                    '0'
+                  ),
+                  decimals ||
+                  18,
+                )
 
               pool.local = local
             }
@@ -935,8 +931,8 @@ export default () => {
             if (
               pool &&
               (
-                is_staging/* ||
-                process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'*/
+                is_staging ||
+                process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'
               )
             ) {
               await sleep(1.5 * 1000)
@@ -951,11 +947,13 @@ export default () => {
 
               try {
                 stats =
-                  await sdk.sdkPool
-                    .getYieldData(
-                      domain_id,
-                      contract_address,
-                    )
+                  _.cloneDeep(
+                    await sdk.sdkPool
+                      .getYieldData(
+                        domain_id,
+                        contract_address,
+                      )
+                  )
 
                 console.log(
                   '[yieldData]',
@@ -1141,14 +1139,16 @@ export default () => {
                   )
 
                   const apr =
-                    await sdk.sdkPool
-                      .getLiquidityMiningAprPerPool(
-                        totalTokens,
-                        totalBlocks,
-                        numPools,
-                        symbol,
-                        tvl,
-                      )
+                    _.cloneDeep(
+                      await sdk.sdkPool
+                        .getLiquidityMiningAprPerPool(
+                          totalTokens,
+                          totalBlocks,
+                          numPools,
+                          symbol,
+                          tvl,
+                        )
+                    )
 
                   console.log(
                     '[liquidityMiningAprPerPool]',
@@ -1295,11 +1295,13 @@ export default () => {
             )
 
             const response =
-              await sdk.sdkPool
-                .getUserPools(
-                  domain_id,
-                  address,
-                )
+              _.cloneDeep(
+                await sdk.sdkPool
+                  .getUserPools(
+                    domain_id,
+                    address,
+                  )
+              )
 
             console.log(
               '[userPools]',
@@ -1402,17 +1404,14 @@ export default () => {
                         } = { ...adopted }
 
                         adopted.balance =
-                          typeof balance === 'string' &&
-                          balance.includes('.') ?
-                            balance :
-                            utils.formatUnits(
-                              BigNumber.from(
-                                balance ||
-                                '0'
-                              ),
-                              decimals ||
-                              18,
-                            )
+                          utils.formatUnits(
+                            BigNumber.from(
+                              balance ||
+                              '0'
+                            ),
+                            decimals ||
+                            18,
+                          )
 
                         info.adopted = adopted
                       }
@@ -1424,17 +1423,14 @@ export default () => {
                         } = { ...local }
 
                         local.balance =
-                          typeof balance === 'string' &&
-                          balance.includes('.') ?
-                            balance :
-                            utils.formatUnits(
-                              BigNumber.from(
-                                balance ||
-                                '0'
-                              ),
-                              decimals ||
-                              18,
-                            )
+                          utils.formatUnits(
+                            BigNumber.from(
+                              balance ||
+                              '0'
+                            ),
+                            decimals ||
+                            18,
+                          )
 
                         info.local = local
                       }

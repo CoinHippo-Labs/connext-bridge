@@ -668,11 +668,13 @@ export default () => {
 
               const pool =
                 is_pool &&
-                await sdk.sdkPool
-                  .getPool(
-                    domain_id,
-                    contract_address,
-                  )
+                _.cloneDeep(
+                  await sdk.sdkPool
+                    .getPool(
+                      domain_id,
+                      contract_address,
+                    )
+                )
 
               const {
                 lpTokenAddress,
@@ -687,17 +689,14 @@ export default () => {
                 } = { ...adopted }
 
                 adopted.balance =
-                  typeof balance === 'string' &&
-                  balance.includes('.') ?
-                    balance :
-                    utils.formatUnits(
-                      BigNumber.from(
-                        balance ||
-                        '0'
-                      ),
-                      decimals ||
-                      18,
-                    )
+                  utils.formatUnits(
+                    BigNumber.from(
+                      balance ||
+                      '0'
+                    ),
+                    decimals ||
+                    18,
+                  )
 
                 pool.adopted = adopted
               }
@@ -709,17 +708,14 @@ export default () => {
                 } = { ...local }
 
                 local.balance =
-                  typeof balance === 'string' &&
-                  balance.includes('.') ?
-                    balance :
-                    utils.formatUnits(
-                      BigNumber.from(
-                        balance ||
-                        '0'
-                      ),
-                      decimals ||
-                      18,
-                    )
+                  utils.formatUnits(
+                    BigNumber.from(
+                      balance ||
+                      '0'
+                    ),
+                    decimals ||
+                    18,
+                  )
 
                 pool.local = local
               }

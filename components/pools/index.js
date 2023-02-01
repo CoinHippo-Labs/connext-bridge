@@ -126,11 +126,13 @@ export default () => {
                 } = { ...chain_data }
 
                 const response =
-                  await sdk.sdkPool
-                    .getUserPools(
-                      domain_id,
-                      address,
-                    )
+                  _.cloneDeep(
+                    await sdk.sdkPool
+                      .getUserPools(
+                        domain_id,
+                        address,
+                      )
+                  )
 
                 if (Array.isArray(response)) {
                   data =
@@ -224,17 +226,14 @@ export default () => {
                             } = { ...adopted }
 
                             adopted.balance =
-                              typeof balance === 'string' &&
-                              balance.includes('.') ?
-                                balance :
-                                utils.formatUnits(
-                                  BigNumber.from(
-                                    balance ||
-                                    '0'
-                                  ),
-                                  decimals ||
-                                  18,
-                                )
+                              utils.formatUnits(
+                                BigNumber.from(
+                                  balance ||
+                                  '0'
+                                ),
+                                decimals ||
+                                18,
+                              )
 
                             info.adopted = adopted
                           }
@@ -246,17 +245,14 @@ export default () => {
                             } = { ...local }
 
                             local.balance =
-                              typeof balance === 'string' &&
-                              balance.includes('.') ?
-                                balance :
-                                utils.formatUnits(
-                                  BigNumber.from(
-                                    balance ||
-                                    '0'
-                                  ),
-                                  decimals ||
-                                  18,
-                                )
+                              utils.formatUnits(
+                                BigNumber.from(
+                                  balance ||
+                                  '0'
+                                ),
+                                decimals ||
+                                18,
+                              )
 
                             info.local = local
                           }

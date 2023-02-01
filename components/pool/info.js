@@ -109,7 +109,6 @@ export default (
     supply,
     volume,
     fees,
-    apr,
     symbols,
     rate,
     error,
