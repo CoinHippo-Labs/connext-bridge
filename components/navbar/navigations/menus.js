@@ -90,7 +90,7 @@ export default
     {
       id: 'feedback',
       title: 'Feedback',
-      // path: process.env.NEXT_PUBLIC_FEEDBACK_URL,
+      path: process.env.NEXT_PUBLIC_FEEDBACK_URL,
       external: true,
       emphasize: true,
       icon: (

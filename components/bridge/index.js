@@ -1610,7 +1610,7 @@ export default () => {
 
       if (
         source_contract_data &&
-        destination_contract_data &&
+        destination_contract_data/* &&
         [
           'string',
           'number',
@@ -1620,7 +1620,7 @@ export default () => {
           '',
         ]
         .includes(amount) &&
-        !isNaN(amount)
+        !isNaN(amount)*/
       ) {
         if (sdk) {
           setFee(null)
@@ -3457,6 +3457,7 @@ export default () => {
                                   disabled={
                                     disabled ||
                                     (
+                                      source_contract_data?.contract_address === constants.AddressZero &&
                                       amount &&
                                       !fee
                                     )
