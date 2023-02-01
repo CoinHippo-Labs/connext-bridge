@@ -246,7 +246,10 @@ export default () => {
           .push(
             `/swap/on-${_chain}${
               Object.keys(params).length > 0 ?
-                `?${new URLSearchParams(params).toString()}` :
+                `?${
+                  new URLSearchParams(params)
+                    .toString()
+                }` :
                 ''
             }`,
             undefined,

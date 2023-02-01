@@ -691,7 +691,8 @@ export default () => {
         Object.keys(bridge).length > 0 ||
         [
           '/',
-        ].includes(asPath)
+        ]
+        .includes(asPath)
       ) {
         source_chain =
           source_chain ||
