@@ -687,7 +687,8 @@ export default () => {
                 } = { ...adopted }
 
                 adopted.balance =
-                  typeof balance === 'string' ?
+                  typeof balance === 'string' &&
+                  balance.includes('.') ?
                     balance :
                     utils.formatUnits(
                       BigNumber.from(
@@ -708,7 +709,8 @@ export default () => {
                 } = { ...local }
 
                 local.balance =
-                  typeof balance === 'string' ?
+                  typeof balance === 'string' &&
+                  balance.includes('.') ?
                     balance :
                     utils.formatUnits(
                       BigNumber.from(

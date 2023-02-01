@@ -844,14 +844,17 @@ export default () => {
               } = { ...adopted }
 
               adopted.balance =
-                utils.formatUnits(
-                  BigNumber.from(
-                    balance ||
-                    '0'
-                  ),
-                  decimals ||
-                  18,
-                )
+                typeof balance === 'string' &&
+                balance.includes('.') ?
+                  balance :
+                  utils.formatUnits(
+                    BigNumber.from(
+                      balance ||
+                      '0'
+                    ),
+                    decimals ||
+                    18,
+                  )
 
               pool.adopted = adopted
             }
@@ -863,14 +866,17 @@ export default () => {
               } = { ...local }
 
               local.balance =
-                utils.formatUnits(
-                  BigNumber.from(
-                    balance ||
-                    '0'
-                  ),
-                  decimals ||
-                  18,
-                )
+                typeof balance === 'string' &&
+                balance.includes('.') ?
+                  balance :
+                  utils.formatUnits(
+                    BigNumber.from(
+                      balance ||
+                      '0'
+                    ),
+                    decimals ||
+                    18,
+                  )
 
               pool.local = local
             }
@@ -1396,14 +1402,17 @@ export default () => {
                         } = { ...adopted }
 
                         adopted.balance =
-                          utils.formatUnits(
-                            BigNumber.from(
-                              balance ||
-                              '0'
-                            ),
-                            decimals ||
-                            18,
-                          )
+                          typeof balance === 'string' &&
+                          balance.includes('.') ?
+                            balance :
+                            utils.formatUnits(
+                              BigNumber.from(
+                                balance ||
+                                '0'
+                              ),
+                              decimals ||
+                              18,
+                            )
 
                         info.adopted = adopted
                       }
@@ -1415,14 +1424,17 @@ export default () => {
                         } = { ...local }
 
                         local.balance =
-                          utils.formatUnits(
-                            BigNumber.from(
-                              balance ||
-                              '0'
-                            ),
-                            decimals ||
-                            18,
-                          )
+                          typeof balance === 'string' &&
+                          balance.includes('.') ?
+                            balance :
+                            utils.formatUnits(
+                              BigNumber.from(
+                                balance ||
+                                '0'
+                              ),
+                              decimals ||
+                              18,
+                            )
 
                         info.local = local
                       }
