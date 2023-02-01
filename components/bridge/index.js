@@ -526,7 +526,10 @@ export default () => {
                 ''
             }${
               Object.keys(params).length > 0 ?
-                `?${new URLSearchParams(params).toString()}` :
+                `?${
+                  new URLSearchParams(params)
+                    .toString()
+                }` :
                 ''
             }`,
             undefined,
@@ -901,8 +904,9 @@ export default () => {
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(),
+        setInterval(
+          () =>
+            getData(),
           10 * 1000,
         )
 
@@ -1091,6 +1095,8 @@ export default () => {
                 )
 
               const {
+                relayerFee,
+                slippage,
                 status,
               } = { ...transfer_data }
 
@@ -1098,19 +1104,40 @@ export default () => {
                 status ||
                 error_status
               ) {
-                setLatestTransfers(
-                  _.orderBy(
-                    _.uniqBy(
-                      _.concat(
-                        transfer_data,
-                        latestTransfers,
+                let updated
+
+                if (latest_transfer?.error_status === null) {
+                  switch (error_status) {
+                    case XTransferErrorStatus.InsufficientRelayerFee:
+                      updated = latest_transfer?.relayerFee === relayerFee
+                      break
+                    case XTransferErrorStatus.LowSlippage:
+                      updated = latest_transfer?.slippage === slippage
+                      break
+                    default:
+                      updated = true
+                      break
+                  }
+                }
+                else {
+                  updated = true
+                }
+
+                if (updated) {
+                  setLatestTransfers(
+                    _.orderBy(
+                      _.uniqBy(
+                        _.concat(
+                          transfer_data,
+                          latestTransfers,
+                        ),
+                        'xcall_transaction_hash',
                       ),
-                      'xcall_transaction_hash',
-                    ),
-                    ['xcall_timestamp'],
-                    ['desc'],
+                      ['xcall_timestamp'],
+                      ['desc'],
+                    )
                   )
-                )
+                }
 
                 if (
                   [
@@ -1131,8 +1158,9 @@ export default () => {
       update()
 
       const interval =
-        setInterval(() =>
-          update(),
+        setInterval(
+          () =>
+            update(),
           7.5 * 1000,
         )
 
@@ -1173,8 +1201,9 @@ export default () => {
       update()
 
       const interval =
-        setInterval(() =>
-          update(true),
+        setInterval(
+          () =>
+            update(true),
           1 * 1000,
         )
 
@@ -1188,20 +1217,21 @@ export default () => {
     () => {
       if (displayReceiveNextInfo) {
         const interval =
-          setInterval(() =>
-            {
-              setReceiveNextInfoTimeout(
-                (
-                  receiveNextInfoTimeout ||
-                  5
-                ) -
-                1
-              )
+          setInterval(
+            () =>
+              {
+                setReceiveNextInfoTimeout(
+                  (
+                    receiveNextInfoTimeout ||
+                    5
+                  ) -
+                  1
+                )
 
-              if (receiveNextInfoTimeout === 1) {
-                setDisplayReceiveNextInfo(false)
-              }
-            },
+                if (receiveNextInfoTimeout === 1) {
+                  setDisplayReceiveNextInfo(false)
+                }
+              },
             1000,
           )
 
@@ -1344,6 +1374,7 @@ export default () => {
 
     const {
       chain_id,
+      provider_params,
     } = {
       ...(
         (chains_data || [])
@@ -1353,7 +1384,17 @@ export default () => {
       ),
     }
 
-    const contracts_data =
+    const {
+      nativeCurrency,
+    } = {
+      ...(
+        _.head(
+          provider_params
+        )
+      ),
+    }
+
+    let contracts_data =
       (assets_data || [])
         .map(a => {
           const {
@@ -1391,6 +1432,22 @@ export default () => {
             next_asset,
           }
         })
+
+    if (
+      contracts_data
+        .findIndex(c =>
+          c?.contract_address === constants.AddressZero
+        ) < 0
+    ) {
+      contracts_data =
+        _.concat(
+          {
+            ...nativeCurrency,
+            contract_address: constants.AddressZero,
+          },
+          contracts_data,
+        )
+    }
 
     contracts_data
       .forEach(c =>
@@ -1556,13 +1613,16 @@ export default () => {
         [
           'string',
           'number',
-        ].includes(typeof amount) &&
+        ]
+        .includes(typeof amount) &&
         ![
           '',
-        ].includes(amount) &&
+        ]
+        .includes(amount) &&
         !isNaN(amount)
       ) {
         if (sdk) {
+          setFee(null)
           setApproveResponse(null)
           setXcall(null)
           setCallProcessing(false)
@@ -1578,7 +1638,13 @@ export default () => {
             } = { ...source_chain_data }
             const {
               nativeCurrency,
-            } = { ..._.head(provider_params) }
+            } = {
+              ...(
+                _.head(
+                  provider_params
+                )
+              ),
+            }
             const {
               decimals,
             } = { ...nativeCurrency }
@@ -2089,7 +2155,8 @@ export default () => {
           callData ||
           '0x',
         relayerFee:
-          relayerFee ?
+          relayerFee &&
+          Number(relayerFee) > 0 ?
             utils.parseUnits(
               relayerFee
                 .toString(),
@@ -2113,8 +2180,8 @@ export default () => {
       let failed = false
 
       if (
-        process.env.NEXT_PUBLIC_NETWORK !== 'testnet' &&
-        !xcallParams.relayerFee
+        !xcallParams.relayerFee &&
+        process.env.NEXT_PUBLIC_NETWORK !== 'testnet'
       ) {
         setXcallResponse(
           {
@@ -2431,6 +2498,10 @@ export default () => {
             )
             .join('_')
 
+          if (message?.includes('insufficient funds for gas')) {
+            message = 'Insufficient gas for the destination gas fee.'
+          }
+
           switch (code) {
             case 'user_rejected':
               reset(code)
@@ -2626,6 +2697,16 @@ export default () => {
     destination_contract_data?.decimals ||
     18
 
+  const source_gas_balance = (balances_data?.[source_chain_data?.chain_id] || [])
+    .find(b =>
+      equals_ignore_case(
+        b?.contract_address,
+        constants.AddressZero,
+      )
+    )
+
+  const source_gas_amount = source_gas_balance?.amount
+
   const relayer_fee =
     fee &&
     (
@@ -2776,11 +2857,7 @@ export default () => {
       )
 
   const errored =
-    [
-      XTransferErrorStatus.LowSlippage,
-      XTransferErrorStatus.InsufficientRelayerFee,
-    ]
-    .includes(latest_transfer?.error_status) &&
+    latest_transfer?.error_status &&
     ![
       XTransferStatus.CompletedFast,
       XTransferStatus.CompletedSlow,
@@ -2858,6 +2935,8 @@ export default () => {
                         >
                           <Image
                             src="/images/transfer-statuses/Success-End.gif"
+                            src_end="/images/transfer-statuses/Success-End.jpeg"
+                            duration_second={2}
                             width={526}
                             height={295.875}
                           />
@@ -2876,6 +2955,16 @@ export default () => {
                                         'Error-Generic.gif'
                                   }`
                                 }
+                                src_end={
+                                  `/images/transfer-statuses/${
+                                    latest_transfer.error_status === XTransferErrorStatus.InsufficientRelayerFee ?
+                                      'Error-Gas.jpeg' :
+                                      latest_transfer.error_status === XTransferErrorStatus.LowSlippage ?
+                                        'Error-Slippage.jpeg' :
+                                        'Error-Generic.jpeg'
+                                  }`
+                                }
+                                duration_second={2}
                                 width={526}
                                 height={295.875}
                               />
@@ -2941,7 +3030,7 @@ export default () => {
                             src={
                               `/images/transfer-statuses/${
                                 latest_transfer?.transfer_id ||
-                                time_spent_seconds > estimated_time_seconds ?
+                                time_spent_seconds > 2 ?
                                   'Processing.gif' :
                                   'Start.gif'
                               }`
@@ -3186,7 +3275,10 @@ export default () => {
                                             ''
                                         }${
                                           Object.keys(params).length > 0 ?
-                                            `?${new URLSearchParams(params).toString()}` :
+                                            `?${
+                                              new URLSearchParams(params)
+                                                .toString()
+                                            }` :
                                             ''
                                         }`,
                                         undefined,
@@ -4244,7 +4336,8 @@ export default () => {
                               [
                                 'string',
                                 'number',
-                              ].includes(typeof source_amount)
+                              ]
+                              .includes(typeof source_amount)
                             ) ||
                             Number(amount) < min_amount ||
                             Number(amount) < 0 ||
@@ -4259,6 +4352,26 @@ export default () => {
                                 Number(relayer_fee) <= 0
                               ) &&
                               process.env.NEXT_PUBLIC_NETWORK !== 'testnet'
+                            ) ||
+                            (
+                              fee &&
+                              Number(relayer_fee) > 0 &&
+                              source_gas_amount &&
+                              utils.parseEther(
+                                source_gas_amount,
+                              )
+                              .lt(
+                                utils.parseEther(
+                                  relayer_fee,
+                                )
+                                .add(
+                                  utils.parseEther(
+                                    source_contract_data?.contract_address === constants.AddressZero ?
+                                      source_amount :
+                                      '0'
+                                  )
+                                )
+                              )
                             )
                           ) ?
                             <Alert
@@ -4289,7 +4402,8 @@ export default () => {
                                   [
                                     'string',
                                     'number',
-                                  ].includes(typeof source_amount) ?
+                                  ]
+                                  .includes(typeof source_amount) ?
                                     'Insufficient Balance' :
                                     Number(amount) < min_amount ?
                                       'The amount cannot be less than the transfer fee.' :
@@ -4311,7 +4425,26 @@ export default () => {
                                             Number(relayer_fee) <= 0
                                           ) ?
                                             'Cannot estimate the relayer fee at the moment. Please try again later.' :
-                                            ''
+                                            fee &&
+                                            Number(relayer_fee) > 0 &&
+                                            source_gas_amount &&
+                                            utils.parseEther(
+                                              source_gas_amount,
+                                            )
+                                            .lt(
+                                              utils.parseEther(
+                                                relayer_fee,
+                                              )
+                                              .add(
+                                                utils.parseEther(
+                                                  source_contract_data?.contract_address === constants.AddressZero ?
+                                                    source_amount :
+                                                    '0'
+                                                )
+                                              )
+                                            ) ?
+                                              'Insufficient gas for the destination gas fee.' :
+                                              ''
                                 }
                               </span>
                             </Alert> :
@@ -4325,7 +4458,15 @@ export default () => {
                                     '',
                                     '0',
                                     '0.0',
-                                  ].includes(amount)
+                                  ]
+                                  .includes(amount) ||
+                                  (
+                                    (
+                                      !relayer_fee ||
+                                      Number(relayer_fee) <= 0
+                                    ) &&
+                                    process.env.NEXT_PUBLIC_NETWORK !== 'testnet'
+                                  )
                                 }
                                 onClick={() => {
                                   setRecipientEditing(false)
@@ -4340,7 +4481,15 @@ export default () => {
                                         '',
                                         '0',
                                         '0.0',
-                                      ].includes(amount) ?
+                                      ]
+                                      .includes(amount)  ||
+                                      (
+                                        (
+                                          !relayer_fee ||
+                                          Number(relayer_fee) <= 0
+                                        ) &&
+                                        process.env.NEXT_PUBLIC_NETWORK !== 'testnet'
+                                      ) ?
                                         'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' :
                                         'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
                                   } rounded flex items-center ${

@@ -23,7 +23,7 @@ export default (
         setTimeout(
           () =>
             setTrigger(!trigger),
-            1 * 1000,
+          1 * 1000,
         )
 
       return () => clearTimeout(timeout)

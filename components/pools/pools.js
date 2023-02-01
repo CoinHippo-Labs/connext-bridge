@@ -735,10 +735,19 @@ export default (
                         } = { ...asset_data }
 
                         return (
-                          <div className="flex flex-col space-y-3">
+                          <div
+                            className="flex flex-col items-end space-y-3"
+                            style={
+                              {
+                                minWidth: '8rem',
+                              }
+                            }
+                          >
                             {
                               total_amount > 0 ?
-                                <div className="w-full h-6 flex flex-col items-end justify-center space-y-0 pt-2 pb-1">
+                                <div
+                                  className="w-full h-6 flex flex-col items-end justify-center space-y-0 pt-2 pb-1"
+                                >
                                   <ProgressBar
                                     width={native_amount * 100 / total_amount}
                                     className="w-full h-1.5 rounded-lg"
@@ -759,24 +768,48 @@ export default (
                                       <Tooltip
                                         placement="top"
                                         content={
-                                          <div className="flex items-center space-x-1">
-                                            {
-                                              native_asset?.asset_data?.image &&
-                                              (
-                                                <Image
-                                                  src={native_asset.asset_data.image}
-                                                  width={14}
-                                                  height={14}
-                                                  className="rounded-full"
-                                                />
-                                              )
-                                            }
-                                            <span className="leading-3 text-2xs font-medium">
+                                          <div className="flex flex-col items-end space-y-1">
+                                            <div className="flex items-center space-x-1">
                                               {
-                                                native_asset?.asset?.symbol ||
-                                                native_asset?.asset_data?.symbol
+                                                native_asset?.asset_data?.image &&
+                                                (
+                                                  <Image
+                                                    src={native_asset.asset_data.image}
+                                                    width={14}
+                                                    height={14}
+                                                    className="rounded-full"
+                                                  />
+                                                )
                                               }
-                                            </span>
+                                              <span className="leading-3 text-2xs font-medium">
+                                                {
+                                                  native_asset?.asset?.symbol ||
+                                                  native_asset?.asset_data?.symbol
+                                                }
+                                              </span>
+                                            </div>
+                                            <DecimalsFormat
+                                              value={
+                                                number_format(
+                                                  native_amount * 100 / total_amount,
+                                                  native_amount * 100 / total_amount > 100 ?
+                                                    '0,0' :
+                                                    native_amount * 100 / total_amount > 1 ?
+                                                      '0,0.00' :
+                                                      '0,0.000000',
+                                                  true,
+                                                )
+                                              }
+                                              max_decimals={
+                                                native_amount * 100 / total_amount > 100 ?
+                                                  0 :
+                                                  native_amount * 100 / total_amount > 1 ?
+                                                    2 :
+                                                    6
+                                              }
+                                              suffix="%"
+                                              className="leading-3 text-2xs font-medium"
+                                            />
                                           </div>
                                         }
                                         className="z-50 bg-dark text-white text-xs"
@@ -810,30 +843,54 @@ export default (
                                       <Tooltip
                                         placement="top"
                                         content={
-                                          <div className="flex items-center space-x-1">
-                                            {
-                                              (
-                                                wrapped_asset?.contract_data?.next_asset?.image ||
-                                                wrapped_asset?.asset_data?.image
-                                              ) &&
-                                              (
-                                                <Image
-                                                  src={
-                                                    wrapped_asset?.contract_data?.next_asset?.image ||
-                                                    wrapped_asset?.asset_data?.image
-                                                  }
-                                                  width={14}
-                                                  height={14}
-                                                  className="rounded-full"
-                                                />
-                                              )
-                                            }
-                                            <span className="leading-3 text-2xs font-medium">
+                                          <div className="flex flex-col items-end space-y-1">
+                                            <div className="flex items-center space-x-1">
                                               {
-                                                wrapped_asset?.asset?.symbol ||
-                                                wrapped_asset?.contract_data?.next_asset?.symbol
+                                                (
+                                                  wrapped_asset?.contract_data?.next_asset?.image ||
+                                                  wrapped_asset?.asset_data?.image
+                                                ) &&
+                                                (
+                                                  <Image
+                                                    src={
+                                                      wrapped_asset?.contract_data?.next_asset?.image ||
+                                                      wrapped_asset?.asset_data?.image
+                                                    }
+                                                    width={14}
+                                                    height={14}
+                                                    className="rounded-full"
+                                                  />
+                                                )
                                               }
-                                            </span>
+                                              <span className="leading-3 text-2xs font-medium">
+                                                {
+                                                  wrapped_asset?.asset?.symbol ||
+                                                  wrapped_asset?.contract_data?.next_asset?.symbol
+                                                }
+                                              </span>
+                                            </div>
+                                            <DecimalsFormat
+                                              value={
+                                                number_format(
+                                                  100 - (native_amount * 100 / total_amount),
+                                                  100 - (native_amount * 100 / total_amount) > 100 ?
+                                                    '0,0' :
+                                                    100 - (native_amount * 100 / total_amount) > 1 ?
+                                                      '0,0.00' :
+                                                      '0,0.000000',
+                                                  true,
+                                                )
+                                              }
+                                              max_decimals={
+                                                100 - (native_amount * 100 / total_amount) > 100 ?
+                                                  0 :
+                                                  100 - (native_amount * 100 / total_amount) > 1 ?
+                                                    2 :
+                                                    6
+                                              }
+                                              suffix="%"
+                                              className="leading-3 text-2xs font-medium"
+                                            />
                                           </div>
                                         }
                                         className="z-50 bg-dark text-white text-xs"
@@ -935,7 +992,9 @@ export default (
                                             />
                                           </div> :
                                           total_amount > 0 ?
-                                            <div className="w-full h-6 flex flex-col items-end justify-center space-y-0 pt-2 pb-1">
+                                            <div
+                                              className="w-full h-6 flex flex-col items-end justify-center space-y-0 pt-2 pb-1"
+                                            >
                                               <ProgressBar
                                                 width={native_amount * 100 / total_amount}
                                                 className="w-full h-1.5 rounded-lg"
@@ -956,24 +1015,48 @@ export default (
                                                   <Tooltip
                                                     placement="top"
                                                     content={
-                                                      <div className="flex items-center space-x-1">
-                                                        {
-                                                          asset_data?.image &&
-                                                          (
-                                                            <Image
-                                                              src={asset_data.image}
-                                                              width={14}
-                                                              height={14}
-                                                              className="rounded-full"
-                                                            />
-                                                          )
-                                                        }
-                                                        <span className="leading-3 text-2xs font-medium">
+                                                      <div className="flex flex-col items-end space-y-1">
+                                                        <div className="flex items-center space-x-1">
                                                           {
-                                                            native_asset?.symbol ||
-                                                            asset_data?.symbol
+                                                            asset_data?.image &&
+                                                            (
+                                                              <Image
+                                                                src={asset_data.image}
+                                                                width={14}
+                                                                height={14}
+                                                                className="rounded-full"
+                                                              />
+                                                            )
                                                           }
-                                                        </span>
+                                                          <span className="leading-3 text-2xs font-medium">
+                                                            {
+                                                              native_asset?.symbol ||
+                                                              asset_data?.symbol
+                                                            }
+                                                          </span>
+                                                        </div>
+                                                        <DecimalsFormat
+                                                          value={
+                                                            number_format(
+                                                              native_amount * 100 / total_amount,
+                                                              native_amount * 100 / total_amount > 100 ?
+                                                                '0,0' :
+                                                                native_amount * 100 / total_amount > 1 ?
+                                                                  '0,0.00' :
+                                                                  '0,0.000000',
+                                                              true,
+                                                            )
+                                                          }
+                                                          max_decimals={
+                                                            native_amount * 100 / total_amount > 100 ?
+                                                              0 :
+                                                              native_amount * 100 / total_amount > 1 ?
+                                                                2 :
+                                                                6
+                                                          }
+                                                          suffix="%"
+                                                          className="leading-3 text-2xs font-medium"
+                                                        />
                                                       </div>
                                                     }
                                                     className="z-50 bg-dark text-white text-xs"
@@ -1007,30 +1090,54 @@ export default (
                                                   <Tooltip
                                                     placement="top"
                                                     content={
-                                                      <div className="flex items-center space-x-1">
-                                                        {
-                                                          (
-                                                            contract_data?.next_asset?.image ||
-                                                            asset_data?.image
-                                                          ) &&
-                                                          (
-                                                            <Image
-                                                              src={
-                                                                contract_data?.next_asset?.image ||
-                                                                asset_data?.image
-                                                              }
-                                                              width={14}
-                                                              height={14}
-                                                              className="rounded-full"
-                                                            />
-                                                          )
-                                                        }
-                                                        <span className="leading-3 text-2xs font-medium">
+                                                      <div className="flex flex-col items-end space-y-1">
+                                                        <div className="flex items-center space-x-1">
                                                           {
-                                                            wrapped_asset?.symbol ||
-                                                            contract_data?.next_asset?.symbol
+                                                            (
+                                                              contract_data?.next_asset?.image ||
+                                                              asset_data?.image
+                                                            ) &&
+                                                            (
+                                                              <Image
+                                                                src={
+                                                                  contract_data?.next_asset?.image ||
+                                                                  asset_data?.image
+                                                                }
+                                                                width={14}
+                                                                height={14}
+                                                                className="rounded-full"
+                                                              />
+                                                            )
                                                           }
-                                                        </span>
+                                                          <span className="leading-3 text-2xs font-medium">
+                                                            {
+                                                              wrapped_asset?.symbol ||
+                                                              contract_data?.next_asset?.symbol
+                                                            }
+                                                          </span>
+                                                        </div>
+                                                        <DecimalsFormat
+                                                          value={
+                                                            number_format(
+                                                              100 - (native_amount * 100 / total_amount),
+                                                              100 - (native_amount * 100 / total_amount) > 100 ?
+                                                                '0,0' :
+                                                                100 - (native_amount * 100 / total_amount) > 1 ?
+                                                                  '0,0.00' :
+                                                                  '0,0.000000',
+                                                              true,
+                                                            )
+                                                          }
+                                                          max_decimals={
+                                                            100 - (native_amount * 100 / total_amount) > 100 ?
+                                                              0 :
+                                                              100 - (native_amount * 100 / total_amount) > 1 ?
+                                                                2 :
+                                                                6
+                                                          }
+                                                          suffix="%"
+                                                          className="leading-3 text-2xs font-medium"
+                                                        />
                                                       </div>
                                                     }
                                                     className="z-50 bg-dark text-white text-xs"

@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { useState, useEffect } from 'react'
 
 const loader = (
   {
@@ -27,13 +28,54 @@ const loader = (
 
 export default (
   {
+    src,
+    src_end,
+    duration_second = 2,
     ...rest
   }
 ) => {
+  const [imageSrc, setImageSrc] = useState(src)
+  const [timer, setTimer] = useState(0)
+
+  useEffect(
+    () => {
+      const timeout =
+        setTimeout(
+          () =>
+            setTimer(timer + 1),
+          1 * 1000,
+        )
+
+      return () => clearTimeout(timeout)
+    },
+    [timer],
+  )
+
+  useEffect(
+    () => {
+      if (
+        src_end &&
+        timer > duration_second
+      ) {
+        setImageSrc(src_end)
+      }
+    },
+    [src_end, timer],
+  )
+
   return (
     <Image
       { ...rest }
-      loader={loader}
+      src={imageSrc}
+      loader={
+        () =>
+          loader(
+            {
+              ...rest,
+              src: imageSrc,
+            }
+          )
+      }
     />
   )
 }
