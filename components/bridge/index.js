@@ -3457,9 +3457,9 @@ export default () => {
                                   disabled={
                                     disabled ||
                                     (
-                                      source_contract_data?.contract_address === constants.AddressZero &&
-                                      amount &&
-                                      !fee
+                                      source_contract_data?.contract_address === constants.AddressZero ?
+                                        !fee :
+                                        false
                                     )
                                   }
                                   onClick={() => {
