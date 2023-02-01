@@ -356,26 +356,21 @@ export default () => {
                 .filter(url => url)
 
               const provider =
-                rpc_urls.length === 1 ?
-                  new providers.StaticJsonRpcProvider(
-                    _.head(rpc_urls),
-                    chain_id,
-                  ) :
-                  new providers.FallbackProvider(
-                    rpc_urls
-                      .map((url, i) => {
-                        return {
-                          provider:
-                            new providers.StaticJsonRpcProvider(
-                              url,
-                              chain_id,
-                            ),
-                          priority: i + 1,
-                          stallTimeout: 1000,
-                        }
-                      }),
-                    rpc_urls.length / 3,
-                  )
+                new providers.FallbackProvider(
+                  rpc_urls
+                    .map((url, i) => {
+                      return {
+                        provider:
+                          new providers.StaticJsonRpcProvider(
+                            url,
+                            chain_id,
+                          ),
+                        priority: i + 1,
+                        stallTimeout: 1000,
+                      }
+                    }),
+                  rpc_urls.length / 3,
+                )
 
               _rpcs[chain_id] = provider
             }
@@ -849,16 +844,14 @@ export default () => {
               } = { ...adopted }
 
               adopted.balance =
-                typeof balance === 'string' ?
-                  balance :
-                  utils.formatUnits(
-                    BigNumber.from(
-                      balance ||
-                      '0'
-                    ),
-                    decimals ||
-                    18,
-                  )
+                utils.formatUnits(
+                  BigNumber.from(
+                    balance ||
+                    '0'
+                  ),
+                  decimals ||
+                  18,
+                )
 
               pool.adopted = adopted
             }
@@ -870,16 +863,14 @@ export default () => {
               } = { ...local }
 
               local.balance =
-                typeof balance === 'string' ?
-                  balance :
-                  utils.formatUnits(
-                    BigNumber.from(
-                      balance ||
-                      '0'
-                    ),
-                    decimals ||
-                    18,
-                  )
+                utils.formatUnits(
+                  BigNumber.from(
+                    balance ||
+                    '0'
+                  ),
+                  decimals ||
+                  18,
+                )
 
               pool.local = local
             }
@@ -937,7 +928,10 @@ export default () => {
 
             if (
               pool &&
-              is_staging
+              (
+                is_staging/* ||
+                process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'*/
+              )
             ) {
               await sleep(1.5 * 1000)
 
@@ -1402,16 +1396,14 @@ export default () => {
                         } = { ...adopted }
 
                         adopted.balance =
-                          typeof balance === 'string' ?
-                            balance :
-                            utils.formatUnits(
-                              BigNumber.from(
-                                balance ||
-                                '0'
-                              ),
-                              decimals ||
-                              18,
-                            )
+                          utils.formatUnits(
+                            BigNumber.from(
+                              balance ||
+                              '0'
+                            ),
+                            decimals ||
+                            18,
+                          )
 
                         info.adopted = adopted
                       }
@@ -1423,16 +1415,14 @@ export default () => {
                         } = { ...local }
 
                         local.balance =
-                          typeof balance === 'string' ?
-                            balance :
-                            utils.formatUnits(
-                              BigNumber.from(
-                                balance ||
-                                '0'
-                              ),
-                              decimals ||
-                              18,
-                            )
+                          utils.formatUnits(
+                            BigNumber.from(
+                              balance ||
+                              '0'
+                            ),
+                            decimals ||
+                            18,
+                          )
 
                         info.local = local
                       }
