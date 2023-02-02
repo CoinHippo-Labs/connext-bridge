@@ -66,7 +66,7 @@ export default () => {
           className="z-50 bg-dark text-white text-xs"
         >
           <a
-            href="https://bridge.connext.network"
+            href="https://v1.bridge.connext.network"
             className="bg-slate-200 dark:bg-slate-800 flex items-center text-blue-500 dark:text-blue-500 space-x-1 py-1 px-2"
           >
             <BsArrowLeft
