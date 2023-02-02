@@ -1,4 +1,4 @@
-# Bridge | Connext Network
+# Bridge | Connext Network NXTPv1
 
 Connext Bridge is a bridge app built on top of [Connext's nxtp protocol](https://github.com/connext/monorepo/tree/legacy). The app supports assets transfer between Layer 2 systems and Ethereum Virtual Machine (EVM) compatible chains. 
 
@@ -13,10 +13,10 @@ Connext Bridge is a bridge app built on top of [Connext's nxtp protocol](https:/
 
 ## URLs
 ### Mainnet
-- App: [https://bridge.connext.network](https://v1.bridge.connext.network)
-- Explorer: [https://connextscan.io](https://v1.connextscan.io)
+- App: [https://v1.bridge.connext.network](https://v1.bridge.connext.network)
+- Explorer: [https://v1.connextscan.io](https://v1.connextscan.io)
 ### Testnet
-- Explorer: [https://testnet.connextscan.io](https://v1.testnet.connextscan.io)
+- Explorer: [https://v1.testnet.connextscan.io](https://v1.testnet.connextscan.io)
 ### Connext Protocol
 - Website: [https://connext.nextwork](https:/connext.nextwork)
 - Doc: [https://docs.connext.network](https://docs.connext.network)
