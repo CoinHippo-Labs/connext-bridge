@@ -8,11 +8,7 @@
     "build": "next build && next export",
     "deploy": "aws s3 sync out/ s3://bridge.connext.network --acl public-read",
     "dev-dev": "env-cmd -f .env.staging next dev",
-    "build-dev": "env-cmd -f .env.staging next build && next export",
-    "deploy-dev": "aws s3 sync out/ s3://staging.bridge.connext.network --acl public-read",
     "dev-testnet": "NODE_ENV=test next dev",
-    "build-testnet": "NODE_ENV=test next build && next export",
-    "deploy-testnet": "aws s3 sync out/ s3://testnet.bridge.connext.network --acl public-read"
   },
   "dependencies": {
     "@connext/nxtp-sdk": "^0.1.40",

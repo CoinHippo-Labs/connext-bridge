@@ -2,4 +2,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://bridge.connext.network/sitemap.xml
+Sitemap: https://v1.bridge.connext.network/sitemap.xml
