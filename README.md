@@ -1,6 +1,6 @@
 # Bridge | Connext Network
 
-Connext Bridge is a bridge app built on top of [Connext's nxtp protocol](https://github.com/connext/nxtp). The app supports assets transfer between Layer 2 systems and Ethereum Virtual Machine (EVM) compatible chains. 
+Connext Bridge is a bridge app built on top of [Connext's nxtp protocol](https://github.com/connext/monorepo/tree/legacy). The app supports assets transfer between Layer 2 systems and Ethereum Virtual Machine (EVM) compatible chains. 
 
 
 <br>
@@ -13,11 +13,10 @@ Connext Bridge is a bridge app built on top of [Connext's nxtp protocol](https:/
 
 ## URLs
 ### Mainnet
-- App: [https://bridge.connext.network](https://bridge.connext.network)
-- Explorer: [https://connextscan.io](https://connextscan.io)
+- App: [https://bridge.connext.network](https://v1.bridge.connext.network)
+- Explorer: [https://connextscan.io](https://v1.connextscan.io)
 ### Testnet
-- App: [https://testnet.bridge.connext.network](https://testnet.bridge.connext.network)
-- Explorer: [https://testnet.connextscan.io](https://testnet.connextscan.io)
+- Explorer: [https://testnet.connextscan.io](https://v1.testnet.connextscan.io)
 ### Connext Protocol
 - Website: [https://connext.nextwork](https:/connext.nextwork)
 - Doc: [https://docs.connext.network](https://docs.connext.network)
@@ -25,12 +24,12 @@ Connext Bridge is a bridge app built on top of [Connext's nxtp protocol](https:/
 <br>
 
 ## Data provider / APIs
-- [Connext Subgraph](https://github.com/connext/nxtp/tree/main/packages/subgraph)
+- [Connext Subgraph](https://github.com/connext/monorepo/tree/legacy/packages/subgraph)
 - [Connextscan API](https://github.com/CoinHippo-Labs/connextscan-lambda)
 
 ## Technology stacks
 - [Next.js](https://nextjs.org/)
-- [Connext SDK](https://github.com/connext/nxtp)
+- [Connext SDK](https://github.com/connext/monorepo/tree/legacy)
 - [Nomad SDK](https://github.com/nomad-xyz/nomad-monorepo)
 - [web3.js](https://github.com/ChainSafe/web3.js)
 - [ethers.js](https://github.com/ethers-io/ethers.js)
