@@ -163,32 +163,6 @@ export default () => {
               value: response,
             }
           )
-
-          dispatch(
-            {
-              type: POOL_ASSETS_DATA,
-              value:
-                response
-                  .map(d => {
-                    const {
-                      contracts,
-                    } = { ...d }
-
-                    return {
-                      ...d,
-                      contracts:
-                        (contracts || [])
-                          .filter(c =>
-                            c?.is_pool
-                          ),
-                    }
-                  })
-                  .filter(d =>
-                    d.contracts.length > 0 &&
-                    !d.disabled
-                  ),
-            }
-          )
         }
       }
 
@@ -300,6 +274,44 @@ export default () => {
                 }
               )
             }
+          }
+
+          const pool_assets_data =
+            assets_data
+              .map(d => {
+                const {
+                  contracts,
+                } = { ...d }
+
+                return {
+                  ...d,
+                  contracts:
+                    (contracts || [])
+                      .filter(c =>
+                        c?.is_pool
+                      ),
+                }
+              })
+              .filter(d =>
+                d.contracts.length > 0 &&
+                !d.disabled
+              )
+
+          if (
+            pool_assets_data
+              .findIndex(d =>
+                !updated_ids
+                  .includes(
+                    d?.id
+                  )
+              ) < 0
+          ) {
+            dispatch(
+              {
+                type: POOL_ASSETS_DATA,
+                value: pool_assets_data,
+              }
+            )
           }
         }
       }
