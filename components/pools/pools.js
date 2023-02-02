@@ -1306,15 +1306,15 @@ export default (
                     },
                     {
                       Header: 'Volume (24h)',
-                      accessor: 'volume',
+                      accessor: 'volume_value',
                       sortType: (a, b) =>
                         _.sumBy(
                           a.original.pools,
-                          'volume',
+                          'volume_value',
                         ) >
                         _.sumBy(
                           b.original.pools,
-                          'volume',
+                          'volume_value',
                         ) ?
                           1 :
                           -1,
@@ -1327,7 +1327,7 @@ export default (
                         const value =
                           _.sumBy(
                             pools,
-                            'volume',
+                            'volume_value',
                           )
 
                         return (
@@ -1366,12 +1366,12 @@ export default (
                                   const {
                                     chain_data,
                                     asset_data,
-                                    volume,
+                                    volume_value,
                                   } = { ...p }
 
                                   const chain = chain_data?.id
                                   const asset = asset_data?.id
-                                  const value = volume
+                                  const value = volume_value
 
                                   return (
                                     <Link
@@ -1418,15 +1418,15 @@ export default (
                     },
                     {
                       Header: 'Fees (24h)',
-                      accessor: 'fees',
+                      accessor: 'fees_value',
                       sortType: (a, b) =>
                         _.sumBy(
                           a.original.pools,
-                          'fees',
+                          'fees_value',
                         ) >
                         _.sumBy(
                           b.original.pools,
-                          'fees',
+                          'fees_value',
                         ) ?
                           1 :
                           -1,
@@ -1439,7 +1439,7 @@ export default (
                         const value =
                           _.sumBy(
                             pools,
-                            'fees',
+                            'fees_value',
                           )
 
                         return (
@@ -1478,12 +1478,12 @@ export default (
                                   const {
                                     chain_data,
                                     asset_data,
-                                    fees,
+                                    fees_value,
                                   } = { ...p }
 
                                   const chain = chain_data?.id
                                   const asset = asset_data?.id
-                                  const value = fees
+                                  const value = fees_value
 
                                   return (
                                     <Link
@@ -1582,14 +1582,14 @@ export default (
                         return (
                           <div className="flex flex-col space-y-3">
                             <div className="h-6 flex items-center justify-end text-slate-600 dark:text-slate-400 text-sm font-medium text-right">
-                              {!isNaN(value) ?
+                              {/*!isNaN(value) ?
                                 <DecimalsFormat
                                   value={
                                     number_format(
                                       value * 100,
                                       value * 100 > 1 ?
                                         '0,0.00' :
-                                        '0,0.000000',
+                                        '0,0.000',
                                       true,
                                     )
                                   }
@@ -1604,7 +1604,7 @@ export default (
                                   className="uppercase"
                                 /> :
                                 'TBD'
-                              }
+                              */}
                             </div>
                             {
                               uncollapseAssetIds?.includes(id) &&
@@ -1629,14 +1629,26 @@ export default (
                                       className="h-6 flex items-center justify-end text-sm font-medium text-right"
                                     >
                                       {!isNaN(value) ?
-                                        <span className="uppercase">
-                                          {number_format(
-                                            value * 100,
-                                            '0,0.00a',
-                                            true,
-                                          )}
-                                          %
-                                        </span> :
+                                        <DecimalsFormat
+                                          value={
+                                            number_format(
+                                              value * 100,
+                                              value * 100 > 1 ?
+                                                '0,0.00' :
+                                                '0,0.000',
+                                              true,
+                                            )
+                                          }
+                                          max_decimals={
+                                            value * 100 > 100 ?
+                                              0 :
+                                              value * 100 > 1 ?
+                                                2 :
+                                                6
+                                          }
+                                          suffix="%"
+                                          className="uppercase"
+                                        /> :
                                         'TBD'
                                       }
                                     </a>
@@ -1868,8 +1880,8 @@ export default (
                         [
                           'assets',
                           'tvl',
-                          'volume',
-                          'fees',
+                          'volume_value',
+                          'fees_value',
                           'apr',
                         ] :
                         [

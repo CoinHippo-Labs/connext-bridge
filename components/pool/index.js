@@ -11,6 +11,7 @@ import { TiArrowLeft } from 'react-icons/ti'
 import Info from './info'
 import Liquidity from './liquidity'
 import Image from '../image'
+import DecimalsFormat from '../decimals-format'
 import { chainName } from '../../lib/object/chain'
 import { number_format, params_to_obj, equals_ignore_case, loader_color } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
@@ -892,7 +893,6 @@ export default () => {
     contract_data,
     name,
     lpTokenAddress,
-    volume,
     apr,
     error,
   } = { ...pool_data }
@@ -1003,24 +1003,48 @@ export default () => {
                           ]
                           .includes(chain) ?
                             !isNaN(apr) ?
-                              <span className="uppercase">
-                                {number_format(
-                                  apr * 100,
-                                  '0,0.00a',
-                                  true,
-                                )}
-                                %
-                              </span> :
+                              <DecimalsFormat
+                                value={
+                                  number_format(
+                                    apr * 100,
+                                    apr * 100 > 1 ?
+                                      '0,0.00' :
+                                      '0,0.000',
+                                    true,
+                                  )
+                                }
+                                max_decimals={
+                                  apr * 100 > 100 ?
+                                    0 :
+                                    apr * 100 > 1 ?
+                                      2 :
+                                      6
+                                }
+                                suffix="%"
+                                className="uppercase"
+                              /> :
                               'TBD' :
                             !isNaN(apr) ?
-                              <span className="uppercase">
-                                {number_format(
-                                  apr * 100,
-                                  '0,0.00a',
-                                  true,
-                                )}
-                                %
-                              </span> :
+                              <DecimalsFormat
+                                value={
+                                  number_format(
+                                    apr * 100,
+                                    apr * 100 > 1 ?
+                                      '0,0.00' :
+                                      '0,0.000',
+                                    true,
+                                  )
+                                }
+                                max_decimals={
+                                  apr * 100 > 100 ?
+                                    0 :
+                                    apr * 100 > 1 ?
+                                      2 :
+                                      6
+                                }
+                                suffix="%"
+                                className="uppercase"
+                              /> :
                               'TBD' :
                           selected &&
                           !no_pool &&

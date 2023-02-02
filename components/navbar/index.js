@@ -613,7 +613,8 @@ export default () => {
                               [
                                 adopted,
                                 local,
-                              ].findIndex(_a =>
+                              ]
+                              .findIndex(_a =>
                                 equals_ignore_case(
                                   c?.contract_address,
                                   _a,
@@ -976,7 +977,9 @@ export default () => {
             }
 
             const {
+              liquidity,
               volumeFormatted,
+              fees,
             } = { ...stats }
 
             let rate = 1
@@ -1032,29 +1035,34 @@ export default () => {
               }
             }
 
+            let {
+              price,
+            } = {
+              ...(
+                (assets_data || [])
+                  .find(a =>
+                    a?.id === asset_data.id
+                  )
+              ),
+            }
+
+            price =
+              price ||
+              0
+
             let tvl
 
             if (
               [
                 'string',
                 'number',
-              ].includes(typeof supply) ||
+              ]
+              .includes(typeof supply) ||
               (
                 adopted?.balance &&
                 local?.balance
               )
             ) {
-              const {
-                price,
-              } = {
-                ...(
-                  (assets_data || [])
-                    .find(a =>
-                      a?.id === asset_data.id
-                    )
-                ),
-              }
-
               tvl =
                 typeof price === 'number' ?
                   (
@@ -1111,6 +1119,24 @@ export default () => {
                 volume: volumeFormatted,
                 rate,
                 tvl,
+                liquidity_value:
+                  (
+                    liquidity ||
+                    0
+                  ) *
+                  price,
+                volume_value:
+                  (
+                    volumeFormatted ||
+                    0
+                  ) *
+                  price,
+                fees_value:
+                  (
+                    fees ||
+                    0
+                  ) *
+                  price,
               }
 
               if (

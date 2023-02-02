@@ -336,7 +336,8 @@ export default () => {
                       a?.symbol,
                       c?.symbol,
                       c?.next_asset?.symbol,
-                    ].findIndex(s =>
+                    ]
+                    .findIndex(s =>
                       equals_ignore_case(
                         s,
                         local.symbol,
@@ -503,7 +504,8 @@ export default () => {
           !calling &&
           ![
             'pending',
-          ].includes(status)
+          ]
+          .includes(status)
         ) {
           const {
             chain,
@@ -585,7 +587,8 @@ export default () => {
             .includes(typeof swapAmount) &&
             ![
               '',
-            ].includes(swapAmount)
+            ]
+            .includes(swapAmount)
           ) {
             setSwapAmount(null)
           }
@@ -1409,7 +1412,8 @@ export default () => {
           '0',
           '0.0',
           0,
-        ].includes(amount)
+        ]
+        .includes(amount)
       ) {
         failed = true
 
@@ -1772,10 +1776,12 @@ export default () => {
       [
         'string',
         'number',
-      ].includes(typeof amount) &&
+      ]
+      .includes(typeof amount) &&
       ![
         '',
-      ].includes(amount)
+      ]
+      .includes(amount)
     ) {
       let {
         amount,
@@ -2278,7 +2284,8 @@ export default () => {
       '',
       '0',
       '0.0',
-    ].includes(amount) &&
+    ]
+    .includes(amount) &&
     !isNaN(amount) &&
     utils.parseUnits(
       (
@@ -2400,7 +2407,8 @@ export default () => {
                           .filter(([k, v]) =>
                             ![
                               'slippage',
-                            ].includes(k)
+                            ]
+                            .includes(k)
                           )
                       ),
                       Object.fromEntries(
@@ -2408,7 +2416,8 @@ export default () => {
                           .filter(([k, v]) =>
                             ![
                               'slippage',
-                            ].includes(k)
+                            ]
+                            .includes(k)
                           )
                       ),
                     )
@@ -2448,10 +2457,12 @@ export default () => {
                                   [
                                     'string',
                                     'number',
-                                  ].includes(typeof amount) &&
+                                  ]
+                                  .includes(typeof amount) &&
                                   ![
                                     '',
-                                  ].includes(amount)
+                                  ]
+                                  .includes(amount)
                                 ) {
                                   setSwap(
                                     {
@@ -2509,7 +2520,8 @@ export default () => {
                                 [
                                   x_asset_data?.contract_address,
                                   y_asset_data?.contract_address,
-                                ].findIndex(_c =>
+                                ]
+                                .findIndex(_c =>
                                   equals_ignore_case(
                                     _c,
                                     c,
@@ -2561,10 +2573,12 @@ export default () => {
                           [
                             'string',
                             'number',
-                          ].includes(typeof amount) &&
+                          ]
+                          .includes(typeof amount) &&
                           ![
                             '',
-                          ].includes(amount) &&
+                          ]
+                          .includes(amount) &&
                           !isNaN(amount) ?
                             amount :
                             ''
@@ -2612,7 +2626,8 @@ export default () => {
                             'e',
                             'E',
                             '-',
-                          ].includes(e.key) &&
+                          ]
+                          .includes(e.key) &&
                           e.preventDefault()
                         }
                         className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg font-semibold text-right py-1.5`}
@@ -2729,7 +2744,8 @@ export default () => {
                                 [
                                   x_asset_data?.contract_address,
                                   y_asset_data?.contract_address,
-                                ].findIndex(_c =>
+                                ]
+                                .findIndex(_c =>
                                   equals_ignore_case(
                                     _c,
                                     c,
@@ -2780,19 +2796,23 @@ export default () => {
                               [
                                 'string',
                                 'number',
-                              ].includes(typeof swapAmount) &&
+                              ]
+                              .includes(typeof swapAmount) &&
                               ![
                                 '',
-                              ].includes(swapAmount) &&
+                              ]
+                              .includes(swapAmount) &&
                               Number(swapAmount) >= 0 ?
                                 swapAmount :
                                 [
                                   'string',
                                   'number',
-                                ].includes(typeof amount) &&
+                                ]
+                                .includes(typeof amount) &&
                                 ![
                                   '',
-                                ].includes(amount) ?
+                                ]
+                                .includes(amount) ?
                                   '0.00' :
                                   '0.00'
                             }
@@ -2801,7 +2821,8 @@ export default () => {
                                 [
                                   '',
                                   undefined,
-                                ].includes(amount) ?
+                                ]
+                                .includes(amount) ?
                                   'text-slate-500 dark:text-slate-500' :
                                   ''
                               } sm:text-lg font-semibold text-right py-1.5`
@@ -2917,7 +2938,8 @@ export default () => {
                                       'e',
                                       'E',
                                       '-',
-                                    ].includes(e.key) &&
+                                    ]
+                                    .includes(e.key) &&
                                     e.preventDefault()
                                   }
                                   className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm font-semibold text-right py-1 px-2`}
@@ -3078,10 +3100,12 @@ export default () => {
                         [
                           'string',
                           'number',
-                        ].includes(typeof amount) &&
+                        ]
+                        .includes(typeof amount) &&
                         ![
                           '',
-                        ].includes(amount)
+                        ]
+                        .includes(amount)
                       ) ||
                       web3_provider
                     ) ?
@@ -3090,10 +3114,12 @@ export default () => {
                       [
                         'string',
                         'number',
-                      ].includes(typeof amount) &&
+                      ]
+                      .includes(typeof amount) &&
                       ![
                         '',
-                      ].includes(amount) &&
+                      ]
+                      .includes(amount) &&
                       (
                         (
                           utils.parseUnits(
@@ -3140,7 +3166,8 @@ export default () => {
                           [
                             'string',
                             'number',
-                          ].includes(
+                          ]
+                          .includes(
                             typeof (
                               origin === 'x' ?
                                 x_balance_amount :
@@ -3208,7 +3235,8 @@ export default () => {
                                 [
                                   'string',
                                   'number',
-                                ].includes(
+                                ]
+                                .includes(
                                   typeof (
                                     origin === 'x' ?
                                       x_balance_amount :
@@ -3266,12 +3294,14 @@ export default () => {
                                     [
                                       'string',
                                       'number',
-                                    ].includes(typeof amount) &&
+                                    ]
+                                    .includes(typeof amount) &&
                                     ![
                                       '',
                                       '0',
                                       '0.0',
-                                    ].includes(amount) ?
+                                    ]
+                                    .includes(amount) ?
                                       'Swap' :
                                       'Enter amount'
                                 }

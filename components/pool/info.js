@@ -107,8 +107,7 @@ export default (
     adopted,
     local,
     supply,
-    volume,
-    fees,
+    volume_value,
     symbols,
     rate,
     error,
@@ -316,11 +315,11 @@ export default (
                   {
                     pool_data &&
                     !error ?
-                      !isNaN(volume) ?
+                      !isNaN(volume_value) ?
                         <span className="uppercase">
                           {currency_symbol}
                           {number_format(
-                            volume,
+                            volume_value,
                             '0,0.00',
                             true,
                           )}

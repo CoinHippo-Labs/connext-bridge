@@ -3091,7 +3091,11 @@ export default () => {
                     <div className="flex flex-col items-center space-y-2">
                       <span className="text-slate-500 dark:text-slate-500 text-xs sm:text-sm font-medium">
                         {latest_transfer.execute_transaction_hash ?
-                          null :
+                          <div className="flex flex-col items-center space-y-1">
+                            <span className="text-center">
+                              Transfer completed.
+                            </span>
+                          </div> :
                           <div className="flex flex-col items-center space-y-1">
                             {time_spent_seconds > estimated_time_seconds ?
                               <span className="text-center">
