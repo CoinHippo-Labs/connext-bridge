@@ -53,7 +53,6 @@
         "chainName": "BNB Chain",
         "rpcUrls": [
           "https://rpc.ankr.com/bsc",
-          "https://bsc.rpc.blxrbdn.com",
           "https://bsc-mainnet.nodereal.io/v1/64a9df0874fb4a93b9d0a3849de012d3",
           "https://1rpc.io/bnb",
           "https://bscrpc.com"

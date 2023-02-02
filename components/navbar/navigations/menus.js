@@ -1,5 +1,5 @@
 import { CgArrowRightR } from 'react-icons/cg'
-import { RiCopperCoinLine, RiQuestionAnswerLine } from 'react-icons/ri'
+import { RiCopperCoinLine } from 'react-icons/ri'
 import { HiSwitchVertical, HiOutlineDocumentSearch } from 'react-icons/hi'
 import { BiBook, BiCommentDetail } from 'react-icons/bi'
 
@@ -70,18 +70,6 @@ export default
       external: true,
       icon: (
         <BiBook
-          size={20}
-          className="stroke-current"
-        />
-      ),
-    },
-    {
-      id: 'support',
-      title: 'Support',
-      path: process.env.NEXT_PUBLIC_SUPPORT_URL,
-      external: true,
-      icon: (
-        <RiQuestionAnswerLine
           size={20}
           className="stroke-current"
         />
