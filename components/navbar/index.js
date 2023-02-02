@@ -932,8 +932,8 @@ export default () => {
             if (
               pool &&
               (
-                is_staging/* ||
-                process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'*/
+                is_staging ||
+                process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'
               )
             ) {
               await sleep(1.5 * 1000)
