@@ -2861,6 +2861,10 @@ export default () => {
   const latest_transfer = _.head(latestTransfers)
 
   const estimated_time_seconds =
+    (
+      latest_transfer?.routers &&
+      latest_transfer.routers.length < 1
+    ) ||
     latest_transfer?.force_slow ?
       5400 :
       240
@@ -3056,7 +3060,11 @@ export default () => {
                           isPlaying
                           duration={estimated_time_seconds}
                           colors={
-                            latest_transfer.force_slow ?
+                            (
+                              latest_transfer?.routers &&
+                              latest_transfer.routers.length < 1
+                            ) ||
+                            latest_transfer?.force_slow ?
                               '#facc15' :
                               '#22c55e'
                           }

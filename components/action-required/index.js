@@ -184,7 +184,7 @@ export default (
             const params = {
               originDomain: source_chain_data?.domain_id,
               destinationDomain: destination_chain_data?.domain_id,
-              isHighPriority: !force_slow,
+              isHighPriority: true,
             }
 
             try {
@@ -805,7 +805,6 @@ export default (
 
   const {
     transfer_id,
-    status,
     error_status,
     origin_chain,
     origin_domain,
@@ -822,25 +821,10 @@ export default (
     slippage,
     receive_local,
     to,
-    xcall_timestamp,
-    reconcile_transaction_hash,
-    execute_transaction_hash,
-    execute_timestamp,
   } = { ...data }
   let {
-    force_slow,
     relayer_fee,
   } = { ...data }
-
-  force_slow =
-    force_slow ||
-    (status || '')
-      .toLowerCase()
-      .includes('slow') ||
-    !!(
-      reconcile_transaction_hash &&
-      !execute_transaction_hash
-    )
 
   const source_chain_data = (chains_data || [])
     .find(c =>

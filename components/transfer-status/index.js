@@ -93,23 +93,9 @@ export default (
     receive_local,
     to,
     xcall_timestamp,
-    reconcile_transaction_hash,
     execute_transaction_hash,
-    execute_timestamp,
+    routers,
   } = { ...transferData }
-  let {
-    force_slow,
-  } = { ...transferData }
-
-  force_slow =
-    force_slow ||
-    (status || '')
-      .toLowerCase()
-      .includes('slow') ||
-    !!(
-      reconcile_transaction_hash &&
-      !execute_transaction_hash
-    )
 
   const source_chain_data = (chains_data || [])
     .find(c =>
@@ -692,17 +678,25 @@ export default (
                     /> :
                     <span>
                       {
-                        !force_slow &&
+                        routers &&
                         (
                           <Tooltip
                             placement="bottom"
-                            content="Boosted by router liquidity."
+                            content={
+                              routers.length > 0 ?
+                                'Boosted by router network.' :
+                                'Not boost by router network.'
+                            }
                             className="z-50 bg-dark text-white text-xs"
                           >
                             <div className="flex items-center">
                               <BsLightningCharge
                                 size={16}
-                                className="text-yellow-600 dark:text-yellow-400"
+                                className={
+                                  routers.length > 0 ?
+                                    'text-yellow-600 dark:text-yellow-400' :
+                                    'text-slate-400 dark:text-slate-500'
+                                }
                               />
                               <BiInfoCircle
                                 size={14}
