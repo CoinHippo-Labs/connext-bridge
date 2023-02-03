@@ -30,6 +30,16 @@ export default (
         ...state,
         [`${PAGE_VISIBLE}`]: action.value,
       }
+    case STATUS_MESSAGE:
+      return {
+        ...state,
+        [`${STATUS_MESSAGE}`]: action.value,
+      }
+    case ANNOUNCEMENT:
+      return {
+        ...state,
+        [`${ANNOUNCEMENT}`]: action.value,
+      }
     default:
       return state
   }

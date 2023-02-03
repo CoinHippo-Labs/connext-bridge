@@ -20,7 +20,7 @@ import { chains as getChains, assets as getAssets } from '../../lib/api/config'
 import { assets_price } from '../../lib/api/assets'
 import { ens as getEns } from '../../lib/api/ens'
 import { ellipse, equals_ignore_case, sleep } from '../../lib/utils'
-import { CHAINS_DATA, ASSETS_DATA, POOL_ASSETS_DATA, ENS_DATA, ASSET_BALANCES_DATA, POOLS_DATA, USER_POOLS_DATA, SDK, RPCS } from '../../reducers/types'
+import { STATUS_MESSAGE, ANNOUNCEMENT, CHAINS_DATA, ASSETS_DATA, POOL_ASSETS_DATA, ENS_DATA, ASSET_BALANCES_DATA, POOLS_DATA, USER_POOLS_DATA, SDK, RPCS } from '../../reducers/types'
 
 const WRAPPED_PREFIX =
   process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
@@ -104,6 +104,44 @@ export default () => {
 
   const [hiddenStatus, setHiddenStatus] = useState(false)
   const [currentAddress, setCurrentAddress] = useState(null)
+
+  // status
+  useEffect(
+    () => {
+      const status_message =
+        process.env.STATUS_MESSAGE ||
+        process.env.NEXT_PUBLIC_STATUS_MESSAGE
+
+      if (status_message) {
+        dispatch(
+          {
+            type: STATUS_MESSAGE,
+            value: status_message,
+          }
+        )
+      }
+    },
+    [process.env.STATUS_MESSAGE, process.env.NEXT_PUBLIC_STATUS_MESSAGE],
+  )
+
+  // announcement
+  useEffect(
+    () => {
+      const announcement =
+        process.env.ANNOUNCEMENT ||
+        process.env.NEXT_PUBLIC_ANNOUNCEMENT
+
+      if (announcement) {
+        dispatch(
+          {
+            type: ANNOUNCEMENT,
+            value: announcement,
+          }
+        )
+      }
+    },
+    [process.env.ANNOUNCEMENT, process.env.NEXT_PUBLIC_ANNOUNCEMENT],
+  )
 
   // chains
   useEffect(
