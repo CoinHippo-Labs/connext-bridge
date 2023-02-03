@@ -1563,7 +1563,7 @@ export default () => {
   const status_message =
     process.env.STATUS_MESSAGE ||
     process.env.NEXT_PUBLIC_STATUS_MESSAGE
-
+console.log('[env]', process.env)
   return (
     <>
       <div className="navbar">
