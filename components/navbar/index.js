@@ -59,6 +59,7 @@ export default () => {
   const {
     theme,
     page_visible,
+    status_message,
   } = { ...preferences }
   const {
     chains_data,
@@ -1559,10 +1560,6 @@ export default () => {
   const is_staging =
     process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' ||
     process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
-
-  const status_message =
-    process.env.NEXT_PUBLIC_STATUS_MESSAGE_VERCEL ||
-    process.env.NEXT_PUBLIC_STATUS_MESSAGE
 
   return (
     <>

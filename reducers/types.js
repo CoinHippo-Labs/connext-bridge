@@ -1,6 +1,8 @@
 // preferences
 export const THEME = 'theme'
 export const PAGE_VISIBLE = 'page_visible'
+export const STATUS_MESSAGE = 'status_message'
+export const ANNOUNCEMENT = 'announcement'
 
 // chains
 export const CHAINS_DATA = 'chains_data'

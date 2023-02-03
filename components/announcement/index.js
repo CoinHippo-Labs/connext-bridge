@@ -1,3 +1,4 @@
+import { useSelector, shallowEqual } from 'react-redux'
 import Linkify from 'react-linkify'
 import parse from 'html-react-parser'
 import { HiSpeakerphone } from 'react-icons/hi'
@@ -5,9 +6,19 @@ import { HiSpeakerphone } from 'react-icons/hi'
 import Alert from '../alerts'
 
 export default () => {
-  const announcement =
-    process.env.ANNOUNCEMENT ||
-    process.env.NEXT_PUBLIC_ANNOUNCEMENT
+  const {
+    preferences,
+  } = useSelector(state =>
+    (
+      {
+        preferences: state.preferences,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    announcement,
+  } = { ...preferences }
 
   return (
     announcement &&

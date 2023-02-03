@@ -1,9 +1,15 @@
-import { THEME, PAGE_VISIBLE } from './types'
+import { THEME, PAGE_VISIBLE, STATUS_MESSAGE, ANNOUNCEMENT } from './types'
 
 export default (
   state = {
     [`${THEME}`]: 'dark',
     [`${PAGE_VISIBLE}`]: true,
+    [`${STATUS_MESSAGE}`]:
+      process.env.STATUS_MESSAGE ||
+      process.env.NEXT_PUBLIC_STATUS_MESSAGE,
+    [`${ANNOUNCEMENT}`]:
+      process.env.ANNOUNCEMENT ||
+      process.env.NEXT_PUBLIC_ANNOUNCEMENT,
   },
   action,
 ) => {
