@@ -388,7 +388,8 @@ export default (
       XTransferStatus.CompletedFast,
       XTransferStatus.CompletedSlow,
     ]
-    .includes(status)
+    .includes(status) &&
+    !execute_transaction_hash
 
   return (
     transferData &&

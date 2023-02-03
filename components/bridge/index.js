@@ -2886,7 +2886,8 @@ export default () => {
       XTransferStatus.CompletedFast,
       XTransferStatus.CompletedSlow,
     ]
-    .includes(latest_transfer?.status)
+    .includes(latest_transfer.status) &&
+    !latest_transfer.execute_transaction_hash
 
   const disabled =
     calling ||
