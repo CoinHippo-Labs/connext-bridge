@@ -28,6 +28,7 @@ export default ({
   const router = useRouter()
   const store = useStore(pageProps.initialReduxState)
 
+  const [rendered, setRendered] = useState(false)
   const [initiated, setInitiated] = useState(null)
 
   useEffect(() => {
@@ -45,18 +46,31 @@ export default ({
     )
   }, [router.events])
 
-  useEffect(() => {
-    if (
-      process.env.NEXT_PUBLIC_GTM_ID &&
-      !initiated
-    ) {
-      TagManager.initialize({
-        gtmId: process.env.NEXT_PUBLIC_GTM_ID,
-      })
+  useEffect(
+    () => {
+      setRendered(true)
+    },
+    [],
+  )
 
-      setInitiated(true)
-    }
-  }, [initiated])
+  useEffect(
+    () => {
+      if (
+        process.env.NEXT_PUBLIC_GTM_ID &&
+        rendered &&
+        !initiated
+      ) {
+        TagManager.initialize(
+          {
+            gtmId: process.env.NEXT_PUBLIC_GTM_ID,
+          },
+        )
+
+        setInitiated(true)
+      }
+    },
+    [rendered, initiated],
+  )
 
   return (
     <>
@@ -68,30 +82,29 @@ export default ({
         <meta name="msapplication-TileColor" content="#050707" />
         <meta name="msapplication-TileImage" content="/icons/mstile-150x150.png" />
         <meta name="theme-color" content="#050707" />
-        {
+        {/*
           process.env.NEXT_PUBLIC_GA_TRACKING_ID &&
           (
             <>
-              {/* Global Site Tag (gtag.js) - Google Analytics */}
-                <script
-                  async
-                  src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_TRACKING_ID}`}
-                />
-                <script
-                  dangerouslySetInnerHTML={{
-                    __html: `
-                      window.dataLayer = window.dataLayer || [];
-                      function gtag(){dataLayer.push(arguments);}
-                      gtag('js', new Date());
-                      gtag('config', '${process.env.NEXT_PUBLIC_GA_TRACKING_ID}', {
-                        page_path: window.location.pathname,
-                      });
-                    `,
-                  }}
-                />
+              <script
+                async
+                src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_TRACKING_ID}`}
+              />
+              <script
+                dangerouslySetInnerHTML={{
+                  __html: `
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', '${process.env.NEXT_PUBLIC_GA_TRACKING_ID}', {
+                      page_path: window.location.pathname,
+                    });
+                  `,
+                }}
+              />
             </>
           )
-        }
+        */}
       </Head>
       <Provider store={store}>
         <Layout>
