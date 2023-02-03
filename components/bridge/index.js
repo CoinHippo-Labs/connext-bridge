@@ -5,7 +5,6 @@ import _ from 'lodash'
 import moment from 'moment'
 import { XTransferStatus, XTransferErrorStatus } from '@connext/nxtp-utils'
 import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
-import PageVisibility from 'react-page-visibility'
 import { TailSpin, Oval } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { Tooltip, Alert as AlertNotification } from '@material-tailwind/react'
@@ -94,6 +93,7 @@ export default () => {
   )
   const {
     theme,
+    page_visible,
   } = { ...preferences }
   const {
     chains_data,
@@ -137,8 +137,6 @@ export default () => {
   const {
     source,
   } = { ...query }
-
-  const [pageVisible, setPageVisible] = useState(true)
 
   const [bridge, setBridge] = useState({})
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
@@ -885,6 +883,7 @@ export default () => {
         } = { ...approveResponse }
 
         if (
+          page_visible &&
           address &&
           !xcall &&
           !calling &&
@@ -913,7 +912,7 @@ export default () => {
 
       return () => clearInterval(interval)
     },
-    [rpcs],
+    [page_visible, rpcs],
   )
 
   // trigger estimate
@@ -974,6 +973,7 @@ export default () => {
     () => {
       const update = async () => {
         if (
+          page_visible &&
           sdk &&
           address &&
           xcall
@@ -1167,7 +1167,7 @@ export default () => {
 
       return () => clearInterval(interval)
     },
-    [sdk, address, xcall, pageVisible],
+    [page_visible, sdk, address, xcall, page_visible],
   )
 
   // trigger render latest transfer
@@ -1373,90 +1373,92 @@ export default () => {
       }
     }
 
-    const {
-      chain_id,
-      provider_params,
-    } = {
-      ...(
-        (chains_data || [])
-          .find(c =>
-            c?.id === chain
+    if (page_visible) {
+      const {
+        chain_id,
+        provider_params,
+      } = {
+        ...(
+          (chains_data || [])
+            .find(c =>
+              c?.id === chain
+            )
+        ),
+      }
+
+      const {
+        nativeCurrency,
+      } = {
+        ...(
+          _.head(
+            provider_params
           )
-      ),
-    }
+        ),
+      }
 
-    const {
-      nativeCurrency,
-    } = {
-      ...(
-        _.head(
-          provider_params
-        )
-      ),
-    }
+      let contracts_data =
+        (assets_data || [])
+          .map(a => {
+            const {
+              contracts,
+            } = { ...a }
 
-    let contracts_data =
-      (assets_data || [])
-        .map(a => {
-          const {
-            contracts,
-          } = { ...a }
+            return {
+              ...a,
+              ...(
+                (contracts || [])
+                  .find(c =>
+                    c?.chain_id === chain_id
+                  )
+              ),
+            }
+          })
+          .filter(a => a?.contract_address)
+          .map(a => {
+            const {
+              next_asset,
+            } = { ...a };
+            let {
+              contract_address,
+            } = {  ...a }
 
-          return {
-            ...a,
-            ...(
-              (contracts || [])
-                .find(c =>
-                  c?.chain_id === chain_id
-                )
-            ),
-          }
-        })
-        .filter(a => a?.contract_address)
-        .map(a => {
-          const {
-            next_asset,
-          } = { ...a };
-          let {
-            contract_address,
-          } = {  ...a }
+            contract_address = contract_address.toLowerCase()
 
-          contract_address = contract_address.toLowerCase()
+            if (next_asset?.contract_address) {
+              next_asset.contract_address = next_asset.contract_address.toLowerCase()
+            }
 
-          if (next_asset?.contract_address) {
-            next_asset.contract_address = next_asset.contract_address.toLowerCase()
-          }
+            return {
+              ...a,
+              contract_address,
+              next_asset,
+            }
+          })
 
-          return {
-            ...a,
-            contract_address,
-            next_asset,
-          }
-        })
+      if (
+        contracts_data
+          .findIndex(c =>
+            c?.contract_address === constants.AddressZero
+          ) < 0
+      ) {
+        contracts_data =
+          _.concat(
+            {
+              ...nativeCurrency,
+              contract_address: constants.AddressZero,
+            },
+            contracts_data,
+          )
+      }
 
-    if (
       contracts_data
-        .findIndex(c =>
-          c?.contract_address === constants.AddressZero
-        ) < 0
-    ) {
-      contracts_data =
-        _.concat(
-          {
-            ...nativeCurrency,
-            contract_address: constants.AddressZero,
-          },
-          contracts_data,
+        .forEach(c =>
+          getBalance(
+            chain_id,
+            c,
+          )
         )
     }
-
-    contracts_data
-      .forEach(c =>
-        getBalance(
-          chain_id,
-          c,
-        )
-      )
   }
 
   const checkSupport = () => {
@@ -2898,10 +2900,6 @@ export default () => {
     typeof latestTransfersSize === 'number' &&
     latestTransfersSize > 0
 
-  const is_staging =
-    process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' ||
-    process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
-
   return (
     <div className={`grid grid-cols-1 ${has_latest_transfers ? 'lg:grid-cols-8' : ''} items-start gap-4 my-4 sm:my-0 xl:my-4`}>
       <div className="hidden xl:block col-span-0 xl:col-span-2" />
@@ -2923,206 +2921,202 @@ export default () => {
             {
               openTransferStatus &&
               latest_transfer ?
-                <PageVisibility
-                  onChange={v => setPageVisible(v)}
-                >
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-4 pt-5 sm:pt-5 pb-6 sm:pb-6 px-4 sm:px-6">
-                    <div className="flex items-center justify-between space-x-2">
-                      <span className="text-lg font-semibold">
-                        Transfer status
-                      </span>
-                      <button
-                        onClick={() => {
-                          setXcall(null)
-                          setXcallResponse(null)
-                          setOpenTransferStatus(false)
-                        }}
-                      >
-                        <MdClose
-                          size={20}
-                          className="-mr-1"
-                        />
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-center">
-                      {latest_transfer.execute_transaction_hash ?
-                        <a
-                          href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', latest_transfer.execute_transaction_hash)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Image
-                            src="/images/transfer-statuses/Success-End.gif"
-                            src_end="/images/transfer-statuses/Success-End.jpeg"
-                            duration_second={2}
-                            width={526}
-                            height={295.875}
-                          />
-                        </a> :
-                        errored ?
-                          <ActionRequired
-                            transferData={latest_transfer}
-                            buttonTitle={
-                              <Image
-                                src={
-                                  `/images/transfer-statuses/${
-                                    latest_transfer.error_status === XTransferErrorStatus.LowSlippage ?
-                                      'Error-Slippage.gif' :
-                                      latest_transfer.error_status === XTransferErrorStatus.LowRelayerFee ?
-                                        'Error-Gas.gif' :
-                                        'Error-Generic.gif'
-                                  }`
-                                }
-                                src_end={
-                                  `/images/transfer-statuses/${
-                                    latest_transfer.error_status === XTransferErrorStatus.LowSlippage ?
-                                      'Error-Slippage.jpeg' :
-                                      latest_transfer.error_status === XTransferErrorStatus.LowRelayerFee ?
-                                        'Error-Gas.jpeg' :
-                                        'Error-Generic.jpeg'
-                                  }`
-                                }
-                                duration_second={2}
-                                width={526}
-                                height={295.875}
-                              />
-                            }
-                            onTransferBumped={
-                              relayer_fee => {
-                                if (latestTransfers) {
-                                  const index = latestTransfers
-                                    .findIndex(t =>
-                                      (
-                                        t?.transfer_id &&
-                                        t.transfer_id === latest_transfer?.transfer_id
-                                      ) ||
-                                      (
-                                        t?.xcall_transaction_hash &&
-                                        t.xcall_transaction_hash === latest_transfer?.transaction_hash
-                                      )
-                                    )
-
-                                  if (index > -1) {
-                                    latestTransfers[index] =
-                                      {
-                                        ...latestTransfers[index],
-                                        relayer_fee,
-                                        error_status: null,
-                                      }
-
-                                    setLatestTransfers(latestTransfers)
-                                  }
-                                }
-                              }
-                            }
-                            onSlippageUpdated={
-                              slippage => {
-                                if (latestTransfers) {
-                                  const index = latestTransfers
-                                    .findIndex(t =>
-                                      (
-                                        t?.transfer_id &&
-                                        t.transfer_id === latest_transfer?.transfer_id
-                                      ) ||
-                                      (
-                                        t?.xcall_transaction_hash &&
-                                        t.xcall_transaction_hash === latest_transfer?.transaction_hash
-                                      )
-                                    )
-
-                                  if (index > -1) {
-                                    latestTransfers[index] =
-                                      {
-                                        ...latestTransfers[index],
-                                        slippage,
-                                        error_status: null,
-                                      }
-
-                                    setLatestTransfers(latestTransfers)
-                                  }
-                                }
-                              }
-                            }
-                          /> :
-                          <Image
-                            src={
-                              `/images/transfer-statuses/${
-                                latest_transfer?.transfer_id ||
-                                time_spent_seconds > 2 ?
-                                  'Processing.gif' :
-                                  'Start.gif'
-                              }`
-                            }
-                            width={526}
-                            height={295.875}
-                          />
-                          /*
-                          <CountdownCircleTimer
-                            isPlaying
-                            duration={estimated_time_seconds}
-                            colors={
-                              latest_transfer.force_slow ?
-                                '#facc15' :
-                                '#22c55e'
-                            }
-                            size={140}
-                          >
-                            {({ remainingTime }) => (
-                              time_spent_seconds > estimated_time_seconds ?
-                                <span className="text-sm font-semibold">
-                                  Processing ...
-                                </span> :
-                                <div className="flex flex-col items-center space-y-1">
-                                  <span className="text-slate-400 dark:text-slate-500 text-sm font-medium">
-                                    Time left
-                                  </span>
-                                  <span className="text-lg font-semibold">
-                                    {total_time_string(
-                                      time_spent_seconds,
-                                      estimated_time_seconds,
-                                    )}
-                                  </span>
-                                </div>
-                            )}
-                          </CountdownCircleTimer>
-                          */
-                      }
-                    </div>
-                    <div className="flex flex-col items-center space-y-2">
-                      <span className="text-slate-500 dark:text-slate-500 text-xs sm:text-sm font-medium">
-                        {latest_transfer.execute_transaction_hash ?
-                          <div className="flex flex-col items-center space-y-1">
-                            <span className="text-center">
-                              Transfer completed.
-                            </span>
-                          </div> :
-                          <div className="flex flex-col items-center space-y-1">
-                            {time_spent_seconds > estimated_time_seconds ?
-                              <span className="text-center">
-                                Your assets are on the way! We will keep you informed.
-                              </span> :
-                              <div className="flex flex-wrap items-center justify-center space-x-1">
-                                <span>
-                                  Your funds will arrive at the destination in about
-                                </span>
-                                <TimeSpent
-                                  from_time={time_spent_seconds}
-                                  to_time={estimated_time_seconds}
-                                  no_tooltip={true}
-                                  className="text-black dark:text-white font-semibold"
-                                />
-                                .
-                              </div>
-                            }
-                            <span className="text-center">
-                              If you close this window, your transaction will still be processed.
-                            </span>
-                          </div>
-                        }
-                      </span>
-                    </div>
+                <div className="bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-4 pt-5 sm:pt-5 pb-6 sm:pb-6 px-4 sm:px-6">
+                  <div className="flex items-center justify-between space-x-2">
+                    <span className="text-lg font-semibold">
+                      Transfer status
+                    </span>
+                    <button
+                      onClick={() => {
+                        setXcall(null)
+                        setXcallResponse(null)
+                        setOpenTransferStatus(false)
+                      }}
+                    >
+                      <MdClose
+                        size={20}
+                        className="-mr-1"
+                      />
+                    </button>
                   </div>
-                </PageVisibility> :
+                  <div className="flex items-center justify-center">
+                    {latest_transfer.execute_transaction_hash ?
+                      <a
+                        href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', latest_transfer.execute_transaction_hash)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Image
+                          src="/images/transfer-statuses/Success-End.gif"
+                          src_end="/images/transfer-statuses/Success-End.jpeg"
+                          duration_second={2}
+                          width={526}
+                          height={295.875}
+                        />
+                      </a> :
+                      errored ?
+                        <ActionRequired
+                          transferData={latest_transfer}
+                          buttonTitle={
+                            <Image
+                              src={
+                                `/images/transfer-statuses/${
+                                  latest_transfer.error_status === XTransferErrorStatus.LowSlippage ?
+                                    'Error-Slippage.gif' :
+                                    latest_transfer.error_status === XTransferErrorStatus.LowRelayerFee ?
+                                      'Error-Gas.gif' :
+                                      'Error-Generic.gif'
+                                }`
+                              }
+                              src_end={
+                                `/images/transfer-statuses/${
+                                  latest_transfer.error_status === XTransferErrorStatus.LowSlippage ?
+                                    'Error-Slippage.jpeg' :
+                                    latest_transfer.error_status === XTransferErrorStatus.LowRelayerFee ?
+                                      'Error-Gas.jpeg' :
+                                      'Error-Generic.jpeg'
+                                }`
+                              }
+                              duration_second={2}
+                              width={526}
+                              height={295.875}
+                            />
+                          }
+                          onTransferBumped={
+                            relayer_fee => {
+                              if (latestTransfers) {
+                                const index = latestTransfers
+                                  .findIndex(t =>
+                                    (
+                                      t?.transfer_id &&
+                                      t.transfer_id === latest_transfer?.transfer_id
+                                    ) ||
+                                    (
+                                      t?.xcall_transaction_hash &&
+                                      t.xcall_transaction_hash === latest_transfer?.transaction_hash
+                                    )
+                                  )
+
+                                if (index > -1) {
+                                  latestTransfers[index] =
+                                    {
+                                      ...latestTransfers[index],
+                                      relayer_fee,
+                                      error_status: null,
+                                    }
+
+                                  setLatestTransfers(latestTransfers)
+                                }
+                              }
+                            }
+                          }
+                          onSlippageUpdated={
+                            slippage => {
+                              if (latestTransfers) {
+                                const index = latestTransfers
+                                  .findIndex(t =>
+                                    (
+                                      t?.transfer_id &&
+                                      t.transfer_id === latest_transfer?.transfer_id
+                                    ) ||
+                                    (
+                                      t?.xcall_transaction_hash &&
+                                      t.xcall_transaction_hash === latest_transfer?.transaction_hash
+                                    )
+                                  )
+
+                                if (index > -1) {
+                                  latestTransfers[index] =
+                                    {
+                                      ...latestTransfers[index],
+                                      slippage,
+                                      error_status: null,
+                                    }
+
+                                  setLatestTransfers(latestTransfers)
+                                }
+                              }
+                            }
+                          }
+                        /> :
+                        <Image
+                          src={
+                            `/images/transfer-statuses/${
+                              latest_transfer?.transfer_id ||
+                              time_spent_seconds > 2 ?
+                                'Processing.gif' :
+                                'Start.gif'
+                            }`
+                          }
+                          width={526}
+                          height={295.875}
+                        />
+                        /*
+                        <CountdownCircleTimer
+                          isPlaying
+                          duration={estimated_time_seconds}
+                          colors={
+                            latest_transfer.force_slow ?
+                              '#facc15' :
+                              '#22c55e'
+                          }
+                          size={140}
+                        >
+                          {({ remainingTime }) => (
+                            time_spent_seconds > estimated_time_seconds ?
+                              <span className="text-sm font-semibold">
+                                Processing ...
+                              </span> :
+                              <div className="flex flex-col items-center space-y-1">
+                                <span className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                  Time left
+                                </span>
+                                <span className="text-lg font-semibold">
+                                  {total_time_string(
+                                    time_spent_seconds,
+                                    estimated_time_seconds,
+                                  )}
+                                </span>
+                              </div>
+                          )}
+                        </CountdownCircleTimer>
+                        */
+                    }
+                  </div>
+                  <div className="flex flex-col items-center space-y-2">
+                    <span className="text-slate-500 dark:text-slate-500 text-xs sm:text-sm font-medium">
+                      {latest_transfer.execute_transaction_hash ?
+                        <div className="flex flex-col items-center space-y-1">
+                          <span className="text-center">
+                            Transfer completed.
+                          </span>
+                        </div> :
+                        <div className="flex flex-col items-center space-y-1">
+                          {time_spent_seconds > estimated_time_seconds ?
+                            <span className="text-center">
+                              Your assets are on the way! We will keep you informed.
+                            </span> :
+                            <div className="flex flex-wrap items-center justify-center space-x-1">
+                              <span>
+                                Your funds will arrive at the destination in about
+                              </span>
+                              <TimeSpent
+                                from_time={time_spent_seconds}
+                                to_time={estimated_time_seconds}
+                                no_tooltip={true}
+                                className="text-black dark:text-white font-semibold"
+                              />
+                              .
+                            </div>
+                          }
+                          <span className="text-center">
+                            If you close this window, your transaction will still be processed.
+                          </span>
+                        </div>
+                      }
+                    </span>
+                  </div>
+                </div> :
                 <div className="space-y-3">
                   {
                     bridge._receiveLocal &&

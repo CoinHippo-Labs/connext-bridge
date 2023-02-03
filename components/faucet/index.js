@@ -42,6 +42,7 @@ export default (
 ) => {
   const dispatch = useDispatch()
   const {
+    preferences,
     chains,
     assets,
     rpc_providers,
@@ -50,6 +51,7 @@ export default (
   } = useSelector(state =>
     (
       {
+        preferences: state.preferences,
         chains: state.chains,
         assets: state.assets,
         rpc_providers: state.rpc_providers,
@@ -59,6 +61,9 @@ export default (
     ),
     shallowEqual,
   )
+  const {
+    page_visible,
+  } = { ...preferences }
   const {
     chains_data,
   } = { ...chains }
@@ -605,63 +610,65 @@ export default (
       }
     }
 
-    const {
-      chain_id,
-    } = {
-      ...(
-        (chains_data || [])
-          .find(c =>
-            c?.id === chain
+    if (page_visible) {
+      const {
+        chain_id,
+      } = {
+        ...(
+          (chains_data || [])
+            .find(c =>
+              c?.id === chain
+            )
+        ),
+      }
+
+      const contracts_data =
+        (assets_data || [])
+          .map(a => {
+            const {
+              contracts,
+            } = { ...a }
+
+            return {
+              ...a,
+              ...(
+                (contracts || [])
+                  .find(c =>
+                    c?.chain_id === chain_id
+                  )
+              ),
+            }
+          })
+          .filter(a => a?.contract_address)
+          .map(a => {
+            const {
+              next_asset,
+            } = { ...a };
+            let {
+              contract_address,
+            } = {  ...a }
+
+            contract_address = contract_address.toLowerCase()
+
+            if (next_asset?.contract_address) {
+              next_asset.contract_address = next_asset.contract_address.toLowerCase()
+            }
+
+            return {
+              ...a,
+              contract_address,
+              next_asset,
+            }
+          })
+
+      contracts_data
+        .forEach(c =>
+          getBalance(
+            chain_id,
+            c,
           )
-      ),
-    }
-
-    const contracts_data =
-      (assets_data || [])
-        .map(a => {
-          const {
-            contracts,
-          } = { ...a }
-
-          return {
-            ...a,
-            ...(
-              (contracts || [])
-                .find(c =>
-                  c?.chain_id === chain_id
-                )
-            ),
-          }
-        })
-        .filter(a => a?.contract_address)
-        .map(a => {
-          const {
-            next_asset,
-          } = { ...a };
-          let {
-            contract_address,
-          } = {  ...a }
-
-          contract_address = contract_address.toLowerCase()
-
-          if (next_asset?.contract_address) {
-            next_asset.contract_address = next_asset.contract_address.toLowerCase()
-          }
-
-          return {
-            ...a,
-            contract_address,
-            next_asset,
-          }
-        })
-
-    contracts_data
-      .forEach(c =>
-        getBalance(
-          chain_id,
-          c,
         )
-      )
+    }
   }
 
   const asset_data = (assets_data || [])

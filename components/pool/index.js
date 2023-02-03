@@ -50,6 +50,7 @@ export default () => {
   )
   const {
     theme,
+    page_visible,
   } = { ...preferences }
   const {
     chains_data,
@@ -344,7 +345,10 @@ export default () => {
   useEffect(
     () => {
       const getData = () => {
-        if (address) {
+        if (
+          page_visible &&
+          address
+        ) {
           const {
             chain,
           } = { ...pool }
@@ -356,8 +360,9 @@ export default () => {
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(),
+        setInterval(
+          () =>
+            getData(),
           0.25 * 60 * 1000,
         )
 
@@ -765,63 +770,65 @@ export default () => {
       }
     }
 
-    const {
-      chain_id,
-    } = {
-      ...(
-        (chains_data || [])
-          .find(c =>
-            c?.id === chain
+    if (page_visible) {
+      const {
+        chain_id,
+      } = {
+        ...(
+          (chains_data || [])
+            .find(c =>
+              c?.id === chain
+            )
+        ),
+      }
+
+      const contracts_data =
+        (pool_assets_data || [])
+          .map(a => {
+            const {
+              contracts,
+            } = { ...a }
+
+            return {
+              ...a,
+              ...(
+                (contracts || [])
+                  .find(c =>
+                    c?.chain_id === chain_id
+                  )
+              ),
+            }
+          })
+          .filter(a => a?.contract_address)
+          .map(a => {
+            const {
+              next_asset,
+            } = { ...a };
+            let {
+              contract_address,
+            } = {  ...a }
+
+            contract_address = contract_address.toLowerCase()
+
+            if (next_asset?.contract_address) {
+              next_asset.contract_address = next_asset.contract_address.toLowerCase()
+            }
+
+            return {
+              ...a,
+              contract_address,
+              next_asset,
+            }
+          })
+
+      contracts_data
+        .forEach(c =>
+          getBalance(
+            chain_id,
+            c,
           )
-      ),
-    }
-
-    const contracts_data =
-      (pool_assets_data || [])
-        .map(a => {
-          const {
-            contracts,
-          } = { ...a }
-
-          return {
-            ...a,
-            ...(
-              (contracts || [])
-                .find(c =>
-                  c?.chain_id === chain_id
-                )
-            ),
-          }
-        })
-        .filter(a => a?.contract_address)
-        .map(a => {
-          const {
-            next_asset,
-          } = { ...a };
-          let {
-            contract_address,
-          } = {  ...a }
-
-          contract_address = contract_address.toLowerCase()
-
-          if (next_asset?.contract_address) {
-            next_asset.contract_address = next_asset.contract_address.toLowerCase()
-          }
-
-          return {
-            ...a,
-            contract_address,
-            next_asset,
-          }
-        })
-
-    contracts_data
-      .forEach(c =>
-        getBalance(
-          chain_id,
-          c,
         )
-      )
+    }
   }
 
   const reset = async origin => {

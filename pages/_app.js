@@ -47,6 +47,7 @@ export default (
   const router = useRouter()
   const store = useStore(pageProps.initialReduxState)
 
+  const [rendered, setRendered] = useState(false)
   const [initiated, setInitiated] = useState(null)
 
   useEffect(
@@ -70,8 +71,16 @@ export default (
 
   useEffect(
     () => {
+      setRendered(true)
+    },
+    [],
+  )
+
+  useEffect(
+    () => {
       if (
         process.env.NEXT_PUBLIC_GTM_ID &&
+        rendered &&
         !initiated
       ) {
         TagManager.initialize(
@@ -83,7 +92,7 @@ export default (
         setInitiated(true)
       }
     },
-    [initiated],
+    [rendered, initiated],
   )
 
   return (
@@ -116,11 +125,10 @@ export default (
           name="theme-color"
           content="#050707"
         />
-        {
+        {/*
           process.env.NEXT_PUBLIC_GA_TRACKING_ID &&
           (
             <>
-              {/* Global Site Tag (gtag.js) - Google Analytics */}
               <script
                 async
                 src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_TRACKING_ID}`}
@@ -141,7 +149,7 @@ export default (
               />
             </>
           )
-        }
+        */}
       </Head>
       <Provider store={store}>
         <Layout>

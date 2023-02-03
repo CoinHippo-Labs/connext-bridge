@@ -1,7 +1,6 @@
 import { combineReducers } from 'redux'
 
 import preferences from './preferences'
-import announcement from './announcement'
 import chains from './chains'
 import assets from './assets'
 import pool_assets from './pool-assets'
@@ -18,7 +17,6 @@ import balances from './balances'
 export default combineReducers(
   {
     preferences,
-    announcement,
     chains,
     assets,
     pool_assets,

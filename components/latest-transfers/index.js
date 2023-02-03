@@ -17,17 +17,22 @@ export default (
   },
 ) => {
   const {
+    preferences,
     dev,
     wallet,
   } = useSelector(state =>
     (
       {
+        preferences: state.page_visible,
         dev: state.dev,
         wallet: state.wallet,
       }
     ),
     shallowEqual,
   )
+  const {
+    page_visible,
+  } = { ...preferences }
   const {
     sdk,
   } = { ...dev }
@@ -46,6 +51,7 @@ export default (
     () => {
       const getData = async () => {
         if (
+          page_visible &&
           sdk &&
           address
         ) {
@@ -107,14 +113,15 @@ export default (
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(),
+        setInterval(
+          () =>
+            getData(),
           10 * 1000,
         )
 
       return () => clearInterval(interval)
     },
-    [sdk, address, trigger],
+    [page_visible, sdk, address, trigger],
   )
 
   useEffect(

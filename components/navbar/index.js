@@ -16,11 +16,11 @@ import Wallet from '../wallet'
 import Chains from './chains'
 import Theme from './theme'
 import Copy from '../copy'
-import { announcement as getAnnouncement, chains as getChains, assets as getAssets } from '../../lib/api/config'
+import { chains as getChains, assets as getAssets } from '../../lib/api/config'
 import { assets_price } from '../../lib/api/assets'
 import { ens as getEns } from '../../lib/api/ens'
 import { ellipse, equals_ignore_case, sleep } from '../../lib/utils'
-import { ANNOUNCEMENT_DATA, CHAINS_DATA, ASSETS_DATA, POOL_ASSETS_DATA, ENS_DATA, ASSET_BALANCES_DATA, POOLS_DATA, USER_POOLS_DATA, SDK, RPCS } from '../../reducers/types'
+import { CHAINS_DATA, ASSETS_DATA, POOL_ASSETS_DATA, ENS_DATA, ASSET_BALANCES_DATA, POOLS_DATA, USER_POOLS_DATA, SDK, RPCS } from '../../reducers/types'
 
 const WRAPPED_PREFIX =
   process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
@@ -58,6 +58,7 @@ export default () => {
   )
   const {
     theme,
+    page_visible,
   } = { ...preferences }
   const {
     chains_data,
@@ -102,32 +103,6 @@ export default () => {
 
   const [hiddenStatus, setHiddenStatus] = useState(false)
   const [currentAddress, setCurrentAddress] = useState(null)
-
-  // annoncement
-  useEffect(
-    () => {
-      const getData = async () => {
-        dispatch(
-          {
-            type: ANNOUNCEMENT_DATA,
-            value: await getAnnouncement(),
-          }
-        )
-      }
-
-      getData()
-
-      const interval =
-        setInterval(
-          () =>
-            getData(),
-          1 * 60 * 1000,
-        )
-
-      return () => clearInterval(interval)
-    },
-    [],
-  )
 
   // chains
   useEffect(
@@ -175,7 +150,10 @@ export default () => {
   useEffect(
     () => {
       const getData = async is_interval => {
-        if (assets_data) {
+        if (
+          page_visible &&
+          assets_data
+        ) {
           let updated_ids =
             is_interval ?
               [] :
@@ -306,7 +284,7 @@ export default () => {
 
       return () => clearInterval(interval)
     },
-    [assets_data],
+    [page_visible, assets_data],
   )
 
   // rpcs
@@ -564,6 +542,7 @@ export default () => {
     () => {
       const getData = async () => {
         if (
+          page_visible &&
           sdk &&
           chains_data &&
           (assets_data || [])
@@ -655,7 +634,7 @@ export default () => {
 
       return () => clearInterval(interval)
     },
-    [sdk, chains_data, assets_data],
+    [page_visible, sdk, chains_data, assets_data],
   )
 
   // ens
@@ -1264,6 +1243,7 @@ export default () => {
 
       const getData = async () => {
         if (
+          page_visible &&
           sdk &&
           chains_data &&
           pool_assets_data
@@ -1286,7 +1266,7 @@ export default () => {
 
       return () => clearInterval(interval)
     },
-    [sdk, chains_data, pool_assets_data],
+    [page_visible, sdk, chains_data, pool_assets_data],
   )
 
   // user pools
@@ -1540,6 +1520,7 @@ export default () => {
 
       const getData = async () => {
         if (
+          page_visible &&
           sdk &&
           chains_data &&
           pool_assets_data
@@ -1572,12 +1553,16 @@ export default () => {
 
       return () => clearInterval(interval)
     },
-    [sdk, chains_data, pool_assets_data, address],
+    [page_visible, sdk, chains_data, pool_assets_data, address],
   )
 
   const is_staging =
     process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' ||
     process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
+
+  const status_message =
+    process.env.STATUS_MESSAGE ||
+    process.env.NEXT_PUBLIC_STATUS_MESSAGE
 
   return (
     <>
@@ -1654,19 +1639,24 @@ export default () => {
       </div>
       {
         !hiddenStatus &&
-        process.env.NEXT_PUBLIC_STATUS_MESSAGE &&
+        status_message &&
         (
           <div className="w-full bg-slate-100 dark:bg-slate-800 dark:bg-opacity-50 overflow-x-auto flex items-center py-2 sm:py-3 px-2 sm:px-4">
             <div className="flex flex-wrap items-centertext-blue-500 dark:text-white text-2xs xl:text-sm font-medium space-x-1.5 xl:space-x-2 mx-auto">
               <span>
                 <Linkify>
-                  {parse(
-                    process.env.NEXT_PUBLIC_STATUS_MESSAGE
-                  )}
+                  {
+                    parse(
+                      status_message
+                    )
+                  }
                 </Linkify>
               </span>
               <button
-                onClick={() => setHiddenStatus(true)}
+                onClick={
+                  () =>
+                    setHiddenStatus(true)
+                }
                 className="hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full mt-0.5 p-1 ml-auto"
               >
                 <MdClose

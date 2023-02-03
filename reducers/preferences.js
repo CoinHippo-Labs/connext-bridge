@@ -1,8 +1,9 @@
-import { THEME } from './types'
+import { THEME, PAGE_VISIBLE } from './types'
 
 export default (
   state = {
     [`${THEME}`]: 'dark',
+    [`${PAGE_VISIBLE}`]: true,
   },
   action,
 ) => {
@@ -17,6 +18,11 @@ export default (
       return {
         ...state,
         [`${THEME}`]: action.value,
+      }
+    case PAGE_VISIBLE:
+      return {
+        ...state,
+        [`${PAGE_VISIBLE}`]: action.value,
       }
     default:
       return state

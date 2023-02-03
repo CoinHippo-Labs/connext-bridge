@@ -1,8 +1,6 @@
 // preferences
 export const THEME = 'theme'
-
-// announcement
-export const ANNOUNCEMENT_DATA = 'announcement_data'
+export const PAGE_VISIBLE = 'page_visible'
 
 // chains
 export const CHAINS_DATA = 'chains_data'

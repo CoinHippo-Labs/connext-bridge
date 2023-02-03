@@ -1,4 +1,3 @@
-import { useSelector, shallowEqual } from 'react-redux'
 import Linkify from 'react-linkify'
 import parse from 'html-react-parser'
 import { HiSpeakerphone } from 'react-icons/hi'
@@ -6,22 +5,12 @@ import { HiSpeakerphone } from 'react-icons/hi'
 import Alert from '../alerts'
 
 export default () => {
-  const {
-    announcement,
-  } = useSelector(state =>
-    (
-      {
-        announcement: state.announcement,
-      }
-    ),
-    shallowEqual,
-  )
-  const {
-    announcement_data,
-  } = { ...announcement }
+  const announcement =
+    process.env.ANNOUNCEMENT ||
+    process.env.NEXT_PUBLIC_ANNOUNCEMENT
 
   return (
-    announcement_data &&
+    announcement &&
     (
       <Alert
         color="xl:max-w-lg bg-blue-600 text-white text-left mx-auto"
@@ -36,9 +25,11 @@ export default () => {
       >
         <div className="block leading-4 text-xs xl:text-base font-medium mr-1.5">
           <Linkify>
-            {parse(
-              announcement_data,
-            )}
+            {
+              parse(
+                announcement,
+              )
+            }
           </Linkify>
         </div>
       </Alert>
