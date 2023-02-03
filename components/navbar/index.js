@@ -175,10 +175,7 @@ export default () => {
   useEffect(
     () => {
       const getData = async is_interval => {
-        if (
-          chains_data &&
-          assets_data
-        ) {
+        if (assets_data) {
           let updated_ids =
             is_interval ?
               [] :
@@ -191,78 +188,57 @@ export default () => {
           if (updated_ids.length < assets_data.length) {
             let updated = false
 
-            for (const chain_data of chains_data) {
-              const {
-                chain_id,
-              } = { ...chain_data }
-
-              if (chain_id) {
-                const addresses =
-                  assets_data
-                    .filter(a =>
-                      !updated_ids.includes(a?.id) &&
-                      (a?.contracts || [])
-                        .findIndex(c =>
-                          c?.chain_id === chain_id &&
-                          c.contract_address
-                        ) > -1
+            const assets =
+              assets_data
+                .filter(a =>
+                  !updated_ids
+                    .includes(
+                      a.id
                     )
-                    .map(a =>
-                      a.contracts
-                        .find(c =>
-                          c?.chain_id === chain_id
-                        ).contract_address
-                    )
+                )
+                .map(a => a.id)
 
-                if (addresses.length > 0) {
-                  const response =
-                    await assets_price(
-                      {
-                        chain_id,
-                        addresses,
-                      },
-                    )
+            if (assets.length > 0) {
+              const response =
+                await assets_price(
+                  {
+                    assets,
+                  },
+                )
 
-                  if (Array.isArray(response)) {
-                    response
-                      .forEach(t => {
-                        const asset_index =
-                          assets_data
-                            .findIndex(a =>
-                              a?.id &&
-                              (a.contracts || [])
-                                .findIndex(c =>
-                                  c?.chain_id === t?.chain_id &&
-                                  equals_ignore_case(
-                                    c.contract_address,
-                                    t?.contract_address,
-                                  )
-                                ) > -1
-                            )
+              if (Array.isArray(response)) {
+                response
+                  .forEach(d => {
+                    const index =
+                      assets_data
+                        .findIndex(a =>
+                          equals_ignore_case(
+                            a.id,
+                            d?.asset_id,
+                          )
+                        )
 
-                        if (asset_index > -1) {
-                          const asset = assets_data[asset_index]
+                    if (index > -1) {
+                      const asset = assets_data[index]
 
-                          asset.price =
-                            t?.price ||
-                            asset.price ||
-                            0
+                      asset.price =
+                        d?.price ||
+                        asset.price ||
+                        0
 
-                          assets_data[asset_index] = asset
+                      assets_data[index] = asset
 
-                          updated_ids =
-                            _.uniq(
-                              _.concat(
-                                updated_ids,
-                                asset.id,
-                              )
-                            )
+                      updated_ids =
+                        _.uniq(
+                          _.concat(
+                            updated_ids,
+                            asset.id,
+                          )
+                        )
 
-                          updated = true
-                        }
-                      })
-                  }
-                }
+                      updated = true
+                    }
+                  })
               }
             }
 
@@ -270,7 +246,10 @@ export default () => {
               dispatch(
                 {
                   type: ASSETS_DATA,
-                  value: _.cloneDeep(assets_data),
+                  value:
+                    _.cloneDeep(
+                      assets_data
+                    ),
                 }
               )
             }
@@ -327,7 +306,7 @@ export default () => {
 
       return () => clearInterval(interval)
     },
-    [chains_data, assets_data],
+    [assets_data],
   )
 
   // rpcs
