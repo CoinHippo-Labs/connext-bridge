@@ -13,7 +13,7 @@ export default () => {
     announcement &&
     (
       <Alert
-        color="xl:max-w-lg bg-blue-600 text-white text-left mx-auto"
+        color="xl:max-w-md bg-blue-600 text-white text-left mx-auto"
         icon={
           <HiSpeakerphone
             className="w-4 xl:w-6 h-4 xl:h-6 stroke-current mr-3"

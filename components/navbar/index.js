@@ -1561,9 +1561,9 @@ export default () => {
     process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
 
   const status_message =
-    process.env.STATUS_MESSAGE ||
+    process.env.NEXT_PUBLIC_STATUS_MESSAGE_VERCEL ||
     process.env.NEXT_PUBLIC_STATUS_MESSAGE
-console.log('[env]', process.env)
+
   return (
     <>
       <div className="navbar">
