@@ -68,10 +68,12 @@ export default (
         type: 'text',
         placeholder: 'target recipient address',
       },
-      showInfiniteApproval &&
       {
         label: 'Infinite Approval',
-        tooltip: 'This allows you to only need to pay for approval on your first transfer.',
+        tooltip:
+          showInfiniteApproval ?
+            'This allows you to only need to pay for approval on your first transfer.' :
+            'Approval sufficient, revoke using other tools.',
         name: 'infiniteApprove',
         type: 'switch',
       },
@@ -251,16 +253,15 @@ export default (
                             </div>
                           }
                         </div> :
-                        name === 'receiveLocal' &&
-                        receiveLocalTooltip ?
+                        name === 'infiniteApprove' ?
                           <Tooltip
                             placement="right"
-                            content={receiveLocalTooltip}
+                            content={tooltip}
                             className="z-50 bg-dark text-white text-xs"
                           >
                             <div className="w-fit flex items-center">
                               <Switch
-                                disabled={true}
+                                disabled={!showInfiniteApproval}
                                 checked={
                                   (
                                     typeof data?.[name] === 'boolean' ?
@@ -269,6 +270,14 @@ export default (
                                   ) ||
                                   false
                                 }
+                                onChange={e => {
+                                  const _data = {
+                                    ...data,
+                                    [`${name}`]: !data?.[name],
+                                  }
+
+                                  setData(_data)
+                                }}
                                 checkedIcon={false}
                                 uncheckedIcon={false}
                                 onColor={switch_color(theme).on}
@@ -278,30 +287,65 @@ export default (
                               />
                             </div>
                           </Tooltip> :
-                          <Switch
-                            checked={
-                              (
-                                typeof data?.[name] === 'boolean' ?
-                                  data[name] :
-                                  false
-                              ) ||
-                              false
-                            }
-                            onChange={e => {
-                              const _data = {
-                                ...data,
-                                [`${name}`]: !data?.[name],
-                              }
+                          name === 'receiveLocal' &&
+                          receiveLocalTooltip ?
+                            <Tooltip
+                              placement="right"
+                              content={receiveLocalTooltip}
+                              className="z-50 bg-dark text-white text-xs"
+                            >
+                              <div className="w-fit flex items-center">
+                                <Switch
+                                  disabled={true}
+                                  checked={
+                                    (
+                                      typeof data?.[name] === 'boolean' ?
+                                        data[name] :
+                                        false
+                                    ) ||
+                                    false
+                                  }
+                                  onChange={e => {
+                                    const _data = {
+                                      ...data,
+                                      [`${name}`]: !data?.[name],
+                                    }
 
-                              setData(_data)
-                            }}
-                            checkedIcon={false}
-                            uncheckedIcon={false}
-                            onColor={switch_color(theme).on}
-                            onHandleColor="#f8fafc"
-                            offColor={switch_color(theme).off}
-                            offHandleColor="#f8fafc"
-                          /> :
+                                    setData(_data)
+                                  }}
+                                  checkedIcon={false}
+                                  uncheckedIcon={false}
+                                  onColor={switch_color(theme).on}
+                                  onHandleColor="#f8fafc"
+                                  offColor={switch_color(theme).off}
+                                  offHandleColor="#f8fafc"
+                                />
+                              </div>
+                            </Tooltip> :
+                            <Switch
+                              checked={
+                                (
+                                  typeof data?.[name] === 'boolean' ?
+                                    data[name] :
+                                    false
+                                ) ||
+                                false
+                              }
+                              onChange={e => {
+                                const _data = {
+                                  ...data,
+                                  [`${name}`]: !data?.[name],
+                                }
+
+                                setData(_data)
+                              }}
+                              checkedIcon={false}
+                              uncheckedIcon={false}
+                              onColor={switch_color(theme).on}
+                              onHandleColor="#f8fafc"
+                              offColor={switch_color(theme).off}
+                              offHandleColor="#f8fafc"
+                            /> :
                       type === 'textarea' ?
                         <textarea
                           type="text"

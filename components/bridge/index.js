@@ -287,7 +287,8 @@ export default () => {
               '',
               '0',
               '0.0',
-            ].includes(amount)
+            ]
+            .includes(amount)
           ) {
             setEstimatedValues(
               {
@@ -297,7 +298,8 @@ export default () => {
                   [
                     true,
                     'true',
-                  ].includes(receive_next),
+                  ]
+                  .includes(receive_next),
               }
             )
           }
@@ -311,7 +313,8 @@ export default () => {
         [
           true,
           'true',
-        ].includes(receive_next)
+        ]
+        .includes(receive_next)
       ) {
         bridge.receive_next = true
         updated = true
@@ -327,7 +330,8 @@ export default () => {
         [
           false,
           'false',
-        ].includes(receive_next)
+        ]
+        .includes(receive_next)
       ) {
         bridge.receive_next = false
         updated = true
@@ -803,7 +807,8 @@ export default () => {
         Object.keys(bridge).length > 0 ||
         [
           '/',
-        ].includes(asPath)
+        ]
+        .includes(asPath)
       ) {
         source_chain =
           source_chain ||
@@ -889,7 +894,8 @@ export default () => {
           !calling &&
           ![
             'pending',
-          ].includes(status)
+          ]
+          .includes(status)
         ) {
           const {
             source_chain,
@@ -1511,7 +1517,8 @@ export default () => {
       ![
         'address',
         'user_rejected',
-      ].includes(origin)
+      ]
+      .includes(origin)
 
     if (reset_bridge) {
       setBridge(
@@ -1530,7 +1537,8 @@ export default () => {
     if (
       ![
         'finish',
-      ].includes(origin) &&
+      ]
+      .includes(origin) &&
       reset_bridge
     ) {
       setOptions(DEFAULT_OPTIONS)
@@ -1790,7 +1798,8 @@ export default () => {
               [
                 source_chain_data?.id,
                 destination_chain_data?.id,
-              ].includes(p?.chain_data?.id) &&
+              ]
+              .includes(p?.chain_data?.id) &&
               !p?.tvl
             ) < 0
         ) {
@@ -1829,6 +1838,11 @@ export default () => {
             },
           )
 
+          const destination_contract_data = (destination_asset_data?.contracts || [])
+            .find(c =>
+              c?.chain_id === destination_chain_data?.chain_id
+            )
+
           setEstimatedValues(
             Object.fromEntries(
               Object.entries({ ...response })
@@ -1839,7 +1853,8 @@ export default () => {
                       v,
                       [
                         'amountReceived',
-                      ].includes(k) ?
+                      ]
+                      .includes(k) ?
                         (
                           isNextAsset &&
                           _destination_contract_data?.next_asset ?
@@ -1891,7 +1906,8 @@ export default () => {
           [
             'reverted',
             'invalid BigNumber value',
-          ].findIndex(s =>
+          ]
+          .findIndex(s =>
             message?.includes(s)
           ) > -1
         ) {
@@ -2299,7 +2315,8 @@ export default () => {
           ) &&
           [
             'ETH',
-          ].includes(source_asset_data?.symbol)
+          ]
+          .includes(source_asset_data?.symbol)
 
         try {
           if (is_wrap_eth) {
@@ -2793,7 +2810,8 @@ export default () => {
       [
         'string',
         'number',
-      ].includes(typeof t?.balance)
+      ]
+      .includes(typeof t?.balance)
     )
     .map(t =>
       Number(
@@ -3191,7 +3209,8 @@ export default () => {
                         {
                           ![
                             'pool',
-                          ].includes(source) &&
+                          ]
+                          .includes(source) &&
                           (
                             <Options
                               disabled={disabled}
@@ -3333,7 +3352,8 @@ export default () => {
                             fixed={
                               [
                                 'pool',
-                              ].includes(source)
+                              ]
+                              .includes(source)
                             }
                             value={source_chain}
                             onSelect={c => {
@@ -3396,7 +3416,8 @@ export default () => {
                               } ${
                                 [
                                   'pool',
-                                ].includes(source) ?
+                                ]
+                                .includes(source) ?
                                   'pointer-events-none dark:border-slate-800' :
                                   'dark:border-slate-700'
                               } rounded border flex items-center justify-center p-1 sm:p-1.5`
@@ -3418,7 +3439,8 @@ export default () => {
                             fixed={
                               [
                                 'pool',
-                              ].includes(source)
+                              ]
+                              .includes(source)
                             }
                             value={destination_chain}
                             onSelect={c => {
@@ -3546,7 +3568,8 @@ export default () => {
                             fixed={
                               [
                                 'pool',
-                              ].includes(source)
+                              ]
+                              .includes(source)
                             }
                             value={asset}
                             onSelect={(a, s) => {
@@ -3597,10 +3620,12 @@ export default () => {
                               [
                                 'string',
                                 'number',
-                              ].includes(typeof amount) &&
+                              ]
+                              .includes(typeof amount) &&
                               ![
                                 '',
-                              ].includes(amount) &&
+                              ]
+                              .includes(amount) &&
                               !isNaN(amount) ?
                                 amount :
                                 ''
@@ -3676,7 +3701,8 @@ export default () => {
                                 'e',
                                 'E',
                                 '-',
-                              ].includes(e.key) &&
+                              ]
+                              .includes(e.key) &&
                               e.preventDefault()
                             }
                             className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg font-semibold text-right py-1.5`}
@@ -3748,25 +3774,30 @@ export default () => {
                                         ![
                                           'string',
                                           'number',
-                                        ].includes(typeof amount) ||
+                                        ]
+                                        .includes(typeof amount) ||
                                         [
                                           '',
-                                        ].includes(amount) ||
+                                        ]
+                                        .includes(amount) ||
                                         [
                                           'string',
                                           'number',
-                                        ].includes(typeof estimatedValues?.amountReceived) ||
+                                        ]
+                                        .includes(typeof estimatedValues?.amountReceived) ||
                                         estimateResponse ?
                                           <span className="text-lg font-semibold">
                                             {
                                               [
                                                 'string',
                                                 'number',
-                                              ].includes(typeof amount) &&
+                                              ]
+                                              .includes(typeof amount) &&
                                               [
                                                 'string',
                                                 'number',
-                                              ].includes(typeof estimated_received) &&
+                                              ]
+                                              .includes(typeof estimated_received) &&
                                               !estimateResponse ?
                                                 <DecimalsFormat
                                                   value={
@@ -3783,7 +3814,8 @@ export default () => {
                                                       [
                                                         '',
                                                         undefined,
-                                                      ].includes(estimated_received) ?
+                                                      ]
+                                                      .includes(estimated_received) ?
                                                         'text-slate-500 dark:text-slate-500' :
                                                         ''
                                                     } text-lg font-semibold text-right py-1.5`
@@ -4010,7 +4042,8 @@ export default () => {
                                                               'e',
                                                               'E',
                                                               '-',
-                                                            ].includes(e.key) &&
+                                                            ]
+                                                            .includes(e.key) &&
                                                             e.preventDefault()
                                                           }
                                                           className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm font-semibold text-right py-1 px-2`}
@@ -4127,14 +4160,17 @@ export default () => {
                                             ![
                                               'string',
                                               'number',
-                                            ].includes(typeof amount) ||
+                                            ]
+                                            .includes(typeof amount) ||
                                             [
                                               '',
-                                            ].includes(amount) ||
+                                            ]
+                                            .includes(amount) ||
                                             [
                                               'string',
                                               'number',
-                                            ].includes(typeof estimatedValues?.routerFee) ||
+                                            ]
+                                            .includes(typeof estimatedValues?.routerFee) ||
                                             estimateResponse ?
                                               <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-semibold space-x-1.5">
                                                 <DecimalsFormat
