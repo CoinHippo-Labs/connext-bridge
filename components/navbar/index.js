@@ -177,6 +177,34 @@ export default () => {
               value: response,
             }
           )
+
+          const pool_assets_data =
+            response
+              .map(d => {
+                const {
+                  contracts,
+                } = { ...d }
+
+                return {
+                  ...d,
+                  contracts:
+                    (contracts || [])
+                      .filter(c =>
+                        c?.is_pool
+                      ),
+                }
+              })
+              .filter(d =>
+                d.contracts.length > 0 &&
+                !d.disabled
+              )
+
+          dispatch(
+            {
+              type: POOL_ASSETS_DATA,
+              value: pool_assets_data,
+            }
+          )
         }
       }
 
@@ -1285,7 +1313,11 @@ export default () => {
           page_visible &&
           sdk &&
           chains_data &&
+          pool_assets_data &&
           pool_assets_data
+            .findIndex(a =>
+              typeof a?.price !== 'number'
+            ) < 0
         ) {
           chains_data
             .forEach(c =>

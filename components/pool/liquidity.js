@@ -398,18 +398,23 @@ export default (
                   },
                 )
 
+                let _amounts
+
                 if (tokenIndex === 1) {
-                  amounts =
+                  _amounts =
                     _.reverse(
                       _.cloneDeep(amounts)
                     )
+                }
+                else {
+                  _amounts = _.cloneDeep(amounts)
                 }
 
                 calculateRemoveLiquidityPriceImpact(
                   domainId,
                   contract_address,
-                  _.head(amounts),
-                  _.last(amounts),
+                  _.head(_amounts),
+                  _.last(_amounts),
                 )
               }
 
@@ -426,7 +431,7 @@ export default (
                           adopted?.index === i ?
                             adopted :
                             local
-                        ).decimals ||
+                        )?.decimals ||
                         18,
                       )
                     )
@@ -481,7 +486,8 @@ export default (
       ![
         'address',
         'user_rejected',
-      ].includes(origin)
+      ]
+      .includes(origin)
 
     if (reset_pool) {
       setAmountX(null)
@@ -982,7 +988,8 @@ export default (
               '0',
               '0.0',
               0,
-            ].includes(amount)
+            ]
+            .includes(amount)
           ) {
             failed = true
 
@@ -1279,7 +1286,8 @@ export default (
       if (
         [
           chain_data?.id,
-        ].includes(pool_data?.chain_data?.id) &&
+        ]
+        .includes(pool_data?.chain_data?.id) &&
         pool_data?.tvl
       ) {
         console.log(
@@ -1390,7 +1398,8 @@ export default (
       if (
         [
           chain_data?.id,
-        ].includes(pool_data?.chain_data?.id) &&
+        ]
+        .includes(pool_data?.chain_data?.id) &&
         pool_data?.tvl
       ) {
         console.log(
@@ -1697,12 +1706,14 @@ export default (
             mintable:
               [
                 WRAPPED_PREFIX,
-              ].findIndex(s =>
+              ]
+              .findIndex(s =>
                 local.symbol?.startsWith(s)
               ) > -1 ||
               [
                 'TEST',
-              ].findIndex(s =>
+              ]
+              .findIndex(s =>
                 equals_ignore_case(
                   s,
                   local.symbol,
@@ -1711,7 +1722,8 @@ export default (
             wrapable:
               [
                 'WETH',
-              ].findIndex(s =>
+              ]
+              .findIndex(s =>
                 equals_ignore_case(
                   s,
                   local.symbol,
@@ -2051,7 +2063,8 @@ export default (
                                 [
                                   'string',
                                   'number',
-                                ].includes(typeof x_balance_amount)
+                                ]
+                                .includes(typeof x_balance_amount)
                               ) {
                                 setAmountX(
                                   x_balance_amount
@@ -2126,7 +2139,8 @@ export default (
                           [
                             'string',
                             'number',
-                          ].includes(typeof amountX) &&
+                          ]
+                          .includes(typeof amountX) &&
                           !isNaN(amountX) ?
                             amountX :
                             ''
@@ -2171,7 +2185,8 @@ export default (
                             'e',
                             'E',
                             '-',
-                          ].includes(e.key) &&
+                          ]
+                          .includes(e.key) &&
                           e.preventDefault()
                         }
                         className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
@@ -2182,7 +2197,8 @@ export default (
                       [
                         'string',
                         'number',
-                      ].includes(typeof x_balance_amount) &&
+                      ]
+                      .includes(typeof x_balance_amount) &&
                       utils.parseUnits(
                         amountX ||
                         '0',
@@ -2239,7 +2255,8 @@ export default (
                                 [
                                   'string',
                                   'number',
-                                ].includes(typeof y_balance_amount)
+                                ]
+                                .includes(typeof y_balance_amount)
                               ) {
                                 setAmountY(
                                   y_balance_amount
@@ -2314,7 +2331,8 @@ export default (
                           [
                             'string',
                             'number',
-                          ].includes(typeof amountY) &&
+                          ]
+                          .includes(typeof amountY) &&
                           !isNaN(amountY) ?
                             amountY :
                             ''
@@ -2359,7 +2377,8 @@ export default (
                             'e',
                             'E',
                             '-',
-                          ].includes(e.key) &&
+                          ]
+                          .includes(e.key) &&
                           e.preventDefault()
                         }
                         className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
@@ -2370,7 +2389,8 @@ export default (
                       [
                         'string',
                         'number',
-                      ].includes(typeof y_balance_amount) &&
+                      ]
+                      .includes(typeof y_balance_amount) &&
                       utils.parseUnits(
                         amountY ||
                         '0',
@@ -2745,7 +2765,15 @@ export default (
                         return (
                           <Alert
                             key={i}
-                            color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
+                            color={
+                              `${
+                                status === 'failed' ?
+                                  'bg-red-400 dark:bg-red-500' :
+                                  status === 'success' ?
+                                    'bg-green-400 dark:bg-green-500' :
+                                    'bg-blue-400 dark:bg-blue-500'
+                              } text-white`
+                            }
                             icon={
                               status === 'failed' ?
                                 <BiMessageError
@@ -2921,13 +2949,15 @@ export default (
                       </div>
                       {
                         web3_provider &&
+                        user_pool_data &&
                         (
                           <div className="flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs space-x-1">
                             {
                               [
                                 'string',
                                 'number',
-                              ].includes(typeof lpTokenBalance) ?
+                              ]
+                              .includes(typeof lpTokenBalance) ?
                                 <span className="font-semibold">
                                   {number_format(
                                     Number(lpTokenBalance),
@@ -2966,7 +2996,8 @@ export default (
                           [
                             'string',
                             'number',
-                          ].includes(typeof amount) &&
+                          ]
+                          .includes(typeof amount) &&
                           !isNaN(amount) ?
                             amount :
                             ''
@@ -3003,7 +3034,8 @@ export default (
                             'e',
                             'E',
                             '-',
-                          ].includes(e.key) &&
+                          ]
+                          .includes(e.key) &&
                           e.preventDefault()
                         }
                         className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
@@ -3014,7 +3046,8 @@ export default (
                       [
                         'string',
                         'number',
-                      ].includes(typeof lpTokenBalance) &&
+                      ]
+                      .includes(typeof lpTokenBalance) &&
                       utils.parseUnits(
                         amount ||
                         '0',
@@ -3047,7 +3080,8 @@ export default (
                     [
                       'string',
                       'number',
-                    ].includes(typeof lpTokenBalance) &&
+                    ]
+                    .includes(typeof lpTokenBalance) &&
                     utils.parseUnits(
                       (
                         lpTokenBalance ||
@@ -3163,7 +3197,8 @@ export default (
                       [
                         'string',
                         'number',
-                      ].includes(typeof x_remove_amount) &&
+                      ]
+                      .includes(typeof x_remove_amount) &&
                       !isNaN(x_remove_amount) ?
                         <span className="text-xs">
                           {number_format(
@@ -3211,7 +3246,8 @@ export default (
                       [
                         'string',
                         'number',
-                      ].includes(typeof y_remove_amount) &&
+                      ]
+                      .includes(typeof y_remove_amount) &&
                       !isNaN(y_remove_amount) ?
                         <span className="text-xs">
                           {number_format(
@@ -3240,63 +3276,65 @@ export default (
                   </div>
                 </div>
               </div>
-              <div className="flex items-center justify-between space-x-1">
-                <Tooltip
-                  placement="top"
-                  content="The adjusted amount you are paying for LP tokens above or below current market price."
-                  className="w-80 z-50 bg-dark text-white text-xs"
-                >
-                  <div className="flex items-center">
-                    <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
-                      Price impact
+              {/*
+                <div className="flex items-center justify-between space-x-1">
+                  <Tooltip
+                    placement="top"
+                    content="The adjusted amount you are paying for LP tokens above or below current market price."
+                    className="w-80 z-50 bg-dark text-white text-xs"
+                  >
+                    <div className="flex items-center">
+                      <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
+                        Price impact
+                      </div>
+                      <BiInfoCircle
+                        size={14}
+                        className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                      />
                     </div>
-                    <BiInfoCircle
-                      size={14}
-                      className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                    />
-                  </div>
-                </Tooltip>
-                <div className="flex items-center text-xs font-semibold space-x-1">
-                  {
-                    priceImpactRemove === true &&
-                    !priceImpactRemoveResponse ?
-                      <Oval
-                        color={loader_color(theme)}
-                        width="16"
-                        height="16"
-                      /> :
-                      <span
-                        className={
-                          `${
-                            typeof priceImpactRemove === 'number' ?
-                              priceImpactRemove < 0 ?
-                                'text-red-500 dark:text-red-500' :
-                                priceImpactRemove > 0 ?
-                                  'text-green-500 dark:text-green-500' :
-                                  '' :
-                              ''
-                          }`
-                        }
-                      >
-                        <span className="whitespace-nowrap">
-                          {
-                            typeof priceImpactRemove === 'number' ||
-                            priceImpactRemoveResponse ?
-                              number_format(
-                                priceImpactRemove,
-                                '0,0.000000',
-                                true,
-                              ) :
-                              '-'
+                  </Tooltip>
+                  <div className="flex items-center text-xs font-semibold space-x-1">
+                    {
+                      priceImpactRemove === true &&
+                      !priceImpactRemoveResponse ?
+                        <Oval
+                          color={loader_color(theme)}
+                          width="16"
+                          height="16"
+                        /> :
+                        <span
+                          className={
+                            `${
+                              typeof priceImpactRemove === 'number' ?
+                                priceImpactRemove < 0 ?
+                                  'text-red-500 dark:text-red-500' :
+                                  priceImpactRemove > 0 ?
+                                    'text-green-500 dark:text-green-500' :
+                                    '' :
+                                ''
+                            }`
                           }
+                        >
+                          <span className="whitespace-nowrap">
+                            {
+                              typeof priceImpactRemove === 'number' ||
+                              priceImpactRemoveResponse ?
+                                number_format(
+                                  priceImpactRemove,
+                                  '0,0.000000',
+                                  true,
+                                ) :
+                                '-'
+                            }
+                          </span>
+                          <span>
+                            %
+                          </span>
                         </span>
-                        <span>
-                          %
-                        </span>
-                      </span>
-                  }
+                    }
+                  </div>
                 </div>
-              </div>
+              */}
               <div className="flex items-end">
                 {
                   web3_provider &&
@@ -3346,7 +3384,15 @@ export default (
                         return (
                           <Alert
                             key={i}
-                            color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
+                            color={
+                              `${
+                                status === 'failed' ?
+                                  'bg-red-400 dark:bg-red-500' :
+                                  status === 'success' ?
+                                    'bg-green-400 dark:bg-green-500' :
+                                    'bg-blue-400 dark:bg-blue-500'
+                              } text-white`
+                            }
                             icon={
                               status === 'failed' ?
                                 <BiMessageError
@@ -3449,7 +3495,7 @@ export default (
                             !valid_amount
                           }
                           onClick={() => call(pool_data)}
-                          className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 cursor-pointer text-white'} rounded text-base text-center py-3 px-2 sm:px-3`}
+                          className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base text-center py-3 px-2 sm:px-3`}
                         >
                           <span className="flex items-center justify-center space-x-1.5">
                             {

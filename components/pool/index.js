@@ -218,7 +218,11 @@ export default () => {
         const {
           id,
           contracts,
-        } = { ..._.head(pool_assets_data) }
+        } = {
+          ...(
+            _.head(pool_assets_data)
+          ),
+        }
 
         params.chain =
           params.chain ||

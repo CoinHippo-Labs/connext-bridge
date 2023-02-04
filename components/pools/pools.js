@@ -1673,15 +1673,25 @@ export default (
                           -1,
                       Cell: props => {
                         const {
+                          value,
+                        } = { ...props }
+                        const {
+                          chain_data,
+                          asset_data,
                           symbol,
                           price,
                         } = { ...props.row.original }
-                        const {
-                          value,
-                        } = { ...props }
+
+                        const chain = chain_data?.id
+                        const asset = asset_data?.id
 
                         return (
-                          <div className="h-6 flex flex-col justify-center space-y-1">
+                          <Link
+                            href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                          >
+                          <a
+                            className="h-6 flex flex-col justify-center space-y-1"
+                          >
                             <div className="flex items-center text-sm font-medium text-right space-x-1">
                               <DecimalsFormat
                                 value={
@@ -1742,7 +1752,8 @@ export default (
                                 </div>
                               )
                             }
-                          </div>
+                          </a>
+                          </Link>
                         )
                       },
                       headerClassName: 'whitespace-nowrap',
@@ -1756,12 +1767,22 @@ export default (
                           -1,
                       Cell: props => {
                         const {
+                          chain_data,
+                          asset_data,
                           adopted,
                           local,
                         } = { ...props.row.original }
 
+                        const chain = chain_data?.id
+                        const asset = asset_data?.id
+
                         return (
-                          <div className="h-6 flex items-center justify-end space-x-1.5">
+                          <Link
+                            href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                          >
+                          <a
+                            className="h-6 flex items-center justify-end space-x-1.5"
+                          >
                             <div className="flex items-center text-sm font-medium space-x-1">
                               <DecimalsFormat
                                 value={
@@ -1827,7 +1848,8 @@ export default (
                                 )
                               }
                             </div>
-                          </div>
+                          </a>
+                          </Link>
                         )
                       },
                       headerClassName: 'whitespace-nowrap justify-end text-right',
@@ -1843,9 +1865,21 @@ export default (
                         const {
                           value,
                         } = { ...props }
+                        const {
+                          chain_data,
+                          asset_data,
+                        } = { ...props.row.original }
+
+                        const chain = chain_data?.id
+                        const asset = asset_data?.id
 
                         return (
-                          <div className="h-6 flex items-center justify-end text-right">
+                          <Link
+                            href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                          >
+                          <a
+                            className="h-6 flex items-center justify-end text-right"
+                          >
                             <DecimalsFormat
                               value={
                                 typeof value === 'number' ?
@@ -1868,7 +1902,8 @@ export default (
                               suffix="%"
                               className="text-sm font-medium"
                             />
-                          </div>
+                          </a>
+                          </Link>
                         )
                       },
                       headerClassName: 'whitespace-nowrap justify-end text-right',
