@@ -23,7 +23,7 @@ export default (
   } = useSelector(state =>
     (
       {
-        preferences: state.page_visible,
+        preferences: state.preferences,
         dev: state.dev,
         wallet: state.wallet,
       }
