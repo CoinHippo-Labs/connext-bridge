@@ -975,11 +975,14 @@ export default () => {
             ) {
               await sleep(1.5 * 1000)
 
+              const number_of_days = 7
+
               console.log(
                 '[getYieldData]',
                 {
                   domain_id,
                   contract_address,
+                  number_of_days,
                 },
               )
 
@@ -990,7 +993,7 @@ export default () => {
                       .getYieldData(
                         domain_id,
                         contract_address,
-                        7,
+                        number_of_days,
                       )
                   )
 

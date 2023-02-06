@@ -370,6 +370,8 @@ export default (
                 },
               )
 
+              let _amounts
+
               if (amounts?.length > 1) {
                 console.log(
                   '[getPoolTokenIndex]',
@@ -398,8 +400,6 @@ export default (
                   },
                 )
 
-                let _amounts
-
                 if (tokenIndex === 1) {
                   _amounts =
                     _.reverse(
@@ -413,13 +413,13 @@ export default (
                 calculateRemoveLiquidityPriceImpact(
                   domainId,
                   contract_address,
-                  _.head(_amounts),
-                  _.last(_amounts),
+                  _.head(amounts),
+                  _.last(amounts),
                 )
               }
 
               setRemoveAmounts(
-                (amounts || [])
+                (_amounts || [])
                   .map((a, i) =>
                     Number(
                       utils.formatUnits(
@@ -428,7 +428,7 @@ export default (
                           '0'
                         ),
                         (
-                          adopted?.index === i ?
+                          i === 0 ?
                             adopted :
                             local
                         )?.decimals ||
