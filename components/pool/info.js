@@ -308,7 +308,7 @@ export default (
             </div>
             <div className={metricClassName}>
               <span className={titleClassName}>
-                Volume (24h)
+                Volume (7d)
               </span>
               <div className="flex flex-col space-y-1">
                <span className={valueClassName}>

@@ -1305,7 +1305,7 @@ export default (
                       headerClassName: 'whitespace-nowrap justify-end text-right',
                     },
                     {
-                      Header: 'Volume (24h)',
+                      Header: 'Volume (7d)',
                       accessor: 'volume_value',
                       sortType: (a, b) =>
                         _.sumBy(
@@ -1417,7 +1417,7 @@ export default (
                       headerClassName: 'whitespace-nowrap justify-end text-right',
                     },
                     {
-                      Header: 'Fees (24h)',
+                      Header: 'Fees (7d)',
                       accessor: 'fees_value',
                       sortType: (a, b) =>
                         _.sumBy(

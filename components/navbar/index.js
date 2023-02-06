@@ -990,6 +990,7 @@ export default () => {
                       .getYieldData(
                         domain_id,
                         contract_address,
+                        7,
                       )
                   )
 
