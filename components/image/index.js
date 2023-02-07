@@ -55,7 +55,10 @@ export default (
     () => {
       if (
         src &&
-        timer === 0
+        (
+          !src_end ||
+          timer === 0
+        )
       ) {
         setImageSrc(src)
       }
