@@ -4,9 +4,10 @@ export const PageWithText = (
   {
     disabled = false,
     active,
+    size,
     onClick,
-    activeClassNames = 'btn btn-default bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 shadow rounded text-white',
-    inactiveClassNames = 'btn btn-default bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 shadow rounded text-slate-400 hover:text-slate-700 dark:text-slate-600 dark:hover:text-slate-200',
+    activeClassNames = 'btn btn-default bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 shadow rounded text-white',
+    inactiveClassNames = 'btn btn-default bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 shadow rounded text-slate-600 hover:text-slate-700 dark:text-slate-200 dark:hover:text-slate-100',
     children,
   },
 ) => (
@@ -18,6 +19,14 @@ export const PageWithText = (
         activeClassNames :
         inactiveClassNames
     }
+    style={
+      {
+        padding:
+          size === 'small' ?
+            '6px 4px' :
+            undefined
+      }
+    }
   >
     {children}
   </button>
@@ -28,8 +37,8 @@ export const Page = (
     disabled = false,
     active,
     onClick,
-    activeClassNames = 'btn btn-circle bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white',
-    inactiveClassNames = 'btn btn-circle bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:text-slate-600 dark:hover:text-slate-200',
+    activeClassNames = 'btn btn-circle bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 text-white',
+    inactiveClassNames = 'btn btn-circle bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-600 hover:text-slate-700 dark:text-slate-200 dark:hover:text-slate-100',
     children,
   },
 ) => (
@@ -74,27 +83,28 @@ export const Pages = (
 
   return (
     <>
-      {items
-        .map(i =>
-          hide(i) ?
-            <div
-              key={i}
-              className={`${hide(i - 1) ? 'hidden' : ''}`}
-            >
-              <BsThreeDots
-                size={20}
-                className="text-slate-300 dark:text-slate-700 mt-1.5"
-              />
-            </div> :
-            <Page
-              key={i}
-              disabled={disabled}
-              active={i + 1 === active}
-              onClick={() => onClick(i + 1)}
-            >
-              {i + 1}
-            </Page>
-        )
+      {
+        items
+          .map(i =>
+            hide(i) ?
+              <div
+                key={i}
+                className={`${hide(i - 1) ? 'hidden' : ''}`}
+              >
+                <BsThreeDots
+                  size={20}
+                  className="text-slate-300 dark:text-slate-700 mt-1.5"
+                />
+              </div> :
+              <Page
+                key={i}
+                disabled={disabled}
+                active={i + 1 === active}
+                onClick={() => onClick(i + 1)}
+              >
+                {i + 1}
+              </Page>
+          )
       }
     </>
   )

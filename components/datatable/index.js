@@ -41,6 +41,7 @@ const IndeterminateCheckbox =
 export default (
   {
     columns,
+    size,
     data,
     rowSelectEnable = false,
     defaultPageSize = 10,
@@ -91,11 +92,10 @@ export default (
         newState,
         action,
         prevState,
-      ) => (
+      ) =>
         action.type.startsWith('reset') ?
           prevState :
           newState,
-      )
     },
     useSortBy,
     usePagination,
@@ -111,7 +111,7 @@ export default (
                   Header: (
                     {
                       getToggleAllRowsSelectedProps,
-                    }
+                    },
                   ) => (
                     <IndeterminateCheckbox
                       { ...getToggleAllRowsSelectedProps() }
@@ -120,7 +120,7 @@ export default (
                   Cell: (
                     {
                       row,
-                    }
+                    },
                   ) => (
                     <IndeterminateCheckbox
                       { ...row.getToggleRowSelectedProps() }
@@ -144,11 +144,10 @@ export default (
     [pageIndex, pageCount],
   )
 
-  const loading =
-    (data || [])
-      .findIndex(d =>
-        d.skeleton
-      ) > -1
+  const loading = (data || [])
+    .findIndex(d =>
+      d.skeleton
+    ) > -1
 
   return (
     <>
@@ -156,91 +155,85 @@ export default (
         ref={tableRef}
         { ...getTableProps() }
         className={`table rounded ${className}`}
-        style={{ ...style }}
+        style={
+          {
+            ...style,
+          }
+        }
       >
         <thead>
-          {headerGroups
-            .map(hg => (
-              <tr
-                { ...hg.getHeaderGroupProps() }
-              >
-                {hg.headers
-                  .map((c, i) => (
-                    <th
-                      { ...c.getHeaderProps(c.getSortByToggleProps()) }
-                      className={`${c.className} ${i === 0 ? 'rounded-tl' : i === hg.headers.length - 1 ? 'rounded-tr' : ''}`}
-                    >
-                      <div
-                        className={
-                          `flex flex-row items-center ${
-                            c.headerClassName?.includes('justify-') ?
-                              '' :
-                              'justify-start'
-                          } ${
-                            c.headerClassName?.includes('text-slate-') ?
-                              '' :
-                              'text-slate-600 dark:text-slate-200'
-                          } ${
-                            c.headerClassName ||
-                            ''
-                          }`
-                        }
-                      >
-                        <span>
-                          {c.render('Header')}
-                        </span>
+          {
+            headerGroups
+              .map(hg => (
+                <tr
+                  { ...hg.getHeaderGroupProps() }
+                >
+                  {hg.headers
+                    .map((c, i) => (
+                      <th
                         {
-                          c.isSorted &&
-                          (
-                            <span className="ml-1.5">
-                              {c.isSortedDesc ?
-                                <BiChevronDown
-                                  className="stroke-current"
-                                /> :
-                                <BiChevronUp
-                                  className="stroke-current"
-                                />
-                              }
-                            </span>
+                          ...(
+                            c.getHeaderProps(
+                              c.getSortByToggleProps()
+                            )
                           )
                         }
-                      </div>
-                    </th>
-                  ))
-                }
-              </tr>
-            ))
+                        className={`${i === 0 ? 'rounded-tl' : i === hg.headers.length - 1 ? 'rounded-tr' : ''} ${c.className || ''}`}
+                      >
+                        <div className={`flex flex-row items-center ${c.headerClassName?.includes('justify-') ? '' : 'justify-start'} ${c.headerClassName || ''}`}>
+                          <span>
+                            {c.render('Header')}
+                          </span>
+                          {
+                            c.isSorted &&
+                            (
+                              <span className="ml-1.5">
+                                {c.isSortedDesc ?
+                                  <BiChevronDown
+                                    className="stroke-current"
+                                  /> :
+                                  <BiChevronUp
+                                    className="stroke-current"
+                                  />
+                                }
+                              </span>
+                            )
+                          }
+                        </div>
+                      </th>
+                    ))
+                  }
+                </tr>
+              ))
           }
         </thead>
         <tbody
           { ...getTableBodyProps() }
         >
-          {
-            (noPagination ?
-              rows :
-              page
-            )
-            .map((row, i) => {
-              prepareRow(row)
+          {(noPagination ?
+            rows :
+            page
+          ).map((row, i) => {
+            prepareRow(row)
 
-              return (
-                <tr
-                  { ...row.getRowProps() }
-                >
-                  {row.cells
+            return (
+              <tr
+                { ...row.getRowProps() }
+              >
+                {
+                  row.cells
                     .map((cell, j) => (
-                      <td
-                        { ...cell.getCellProps() }
-                        className={_.head(headerGroups)?.headers[j]?.className}
-                      >
-                        {cell.render('Cell')}
-                      </td>
-                    ))
-                  }
-                </tr>
-              )
-            })
-          }
+                    <td
+                      { ...cell.getCellProps() }
+                      className={_.head(headerGroups)?.headers[j]?.className}
+                    >
+                      {cell.render('Cell')}
+                    </td>
+                  ))
+                }
+              </tr>
+            )
+          })}
         </tbody>
       </table>
       {
@@ -254,19 +247,25 @@ export default (
                 <select
                   disabled={loading}
                   value={pageSize}
-                  onChange={e => setPageSize(Number(e.target.value))}
-                  className="w-24 form-select bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 outline-none border-slate-100 dark:border-slate-900 appearance-none shadow rounded cursor-pointer text-center py-2 px-3"
+                  onChange={
+                    e =>
+                      setPageSize(
+                        Number(e.target.value)
+                      )
+                  }
+                  className="w-24 form-select bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 outline-none border-zinc-100 dark:border-zinc-900 appearance-none shadow rounded cursor-pointer text-center py-2 px-3"
                 >
-                  {pageSizes
-                    .map((s, i) => (
-                      <option
-                        key={i}
-                        value={s}
-                        className="text-xs font-medium"
-                      >
-                        Show {s}
-                      </option>
-                    ))
+                  {
+                    pageSizes
+                      .map((s, i) => (
+                        <option
+                          key={i}
+                          value={s}
+                          className="text-xs font-medium"
+                        >
+                          Show {s}
+                        </option>
+                      ))
                   }
                 </select>
               )
@@ -298,20 +297,20 @@ export default (
                     items={[...Array(pageCount).keys()]}
                     disabled={loading}
                     active={pageIndex + 1}
-                    previous={(
+                    previous={
                       <BiLeftArrowAlt
                         size={16}
                       />
-                    )}
-                    next={(
+                    }
+                    next={
                       <BiRightArrowAlt
                         size={16}
                       />
-                    )}
+                    }
                     onClick={p => {
                       gotoPage(p - 1)
 
-                      tableRef.current.scrollIntoView() 
+                      // tableRef.current.scrollIntoView() 
                     }}
                     icons={true}
                     className="space-x-0.5"
@@ -322,6 +321,7 @@ export default (
                     pageIndex !== 0 &&
                     (
                       <PageWithText
+                        size={size}
                         disabled={loading}
                         onClick={() => {
                           gotoPage(0)
@@ -339,11 +339,12 @@ export default (
                     canPreviousPage &&
                     (
                       <PageWithText
+                        size={size}
                         disabled={loading}
                         onClick={() => {
                           previousPage()
 
-                          tableRef.current.scrollIntoView() 
+                          // tableRef.current.scrollIntoView() 
                         }}
                       >
                         Previous
@@ -354,6 +355,7 @@ export default (
                     canNextPage &&
                     (
                       <PageWithText
+                        size={size}
                         disabled={
                           !canNextPage ||
                           loading
@@ -361,7 +363,7 @@ export default (
                         onClick={() => {
                           nextPage()
 
-                          tableRef.current.scrollIntoView() 
+                          // tableRef.current.scrollIntoView() 
                         }}
                       >
                         Next
@@ -372,6 +374,7 @@ export default (
                     pageIndex !== pageCount - 1 &&
                     (
                       <PageWithText
+                        size={size}
                         disabled={
                           !canNextPage ||
                           loading
