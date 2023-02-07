@@ -38,6 +38,7 @@ const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE =
 
 export default (
   {
+    forceDisabled = false,
     initialHidden = true,
     transferData,
     buttonTitle,
@@ -1143,6 +1144,7 @@ export default (
     )
 
   const disabled =
+    forceDisabled ||
     updating
 
   const wrong_chain =

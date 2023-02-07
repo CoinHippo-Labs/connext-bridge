@@ -53,11 +53,14 @@ export default (
 
   useEffect(
     () => {
-      if (src) {
+      if (
+        src &&
+        timer === 0
+      ) {
         setImageSrc(src)
       }
     },
-    [src],
+    [src, timer],
   )
 
   useEffect(
@@ -70,6 +73,19 @@ export default (
       }
     },
     [src_end, timer],
+  )
+
+  useEffect(
+    () => {
+      if (
+        src &&
+        src_end &&
+        timer > 0
+      ) {
+        setTimer(0)
+      }
+    },
+    [src, src_end],
   )
 
   return (

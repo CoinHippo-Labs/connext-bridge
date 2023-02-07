@@ -80,7 +80,7 @@ export default
       title: 'Feedback',
       path: process.env.NEXT_PUBLIC_FEEDBACK_URL,
       external: true,
-      emphasize: true,
+      emphasize: false,
       icon: (
         <BiCommentDetail
           size={20}

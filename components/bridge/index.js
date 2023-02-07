@@ -979,7 +979,6 @@ export default () => {
     () => {
       const update = async () => {
         if (
-          page_visible &&
           sdk &&
           address &&
           xcall
@@ -1102,9 +1101,10 @@ export default () => {
                 )
 
               const {
-                relayerFee,
+                relayer_fee,
                 slippage,
                 status,
+                error_status,
               } = { ...transfer_data }
 
               if (
@@ -1116,10 +1116,10 @@ export default () => {
                 if (latest_transfer?.error_status === null) {
                   switch (error_status) {
                     case XTransferErrorStatus.LowSlippage:
-                      updated = latest_transfer?.slippage === slippage
+                      updated = slippage >= latest_transfer?.slippage
                       break
                     case XTransferErrorStatus.LowRelayerFee:
-                      updated = latest_transfer?.relayerFee === relayerFee
+                      updated = relayer_fee >= latest_transfer?.relayer_fee
                       break
                     default:
                       updated = true
@@ -1173,7 +1173,7 @@ export default () => {
 
       return () => clearInterval(interval)
     },
-    [page_visible, sdk, address, xcall, page_visible],
+    [sdk, address, xcall],
   )
 
   // trigger render latest transfer
@@ -2963,183 +2963,243 @@ export default () => {
                     </button>
                   </div>
                   <div className="flex items-center justify-center">
-                    {latest_transfer.execute_transaction_hash ?
-                      <a
-                        href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', latest_transfer.execute_transaction_hash)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
+                    <ActionRequired
+                      forceDisabled={
+                        latest_transfer.execute_transaction_hash ||
+                        !errored
+                      }
+                      transferData={latest_transfer}
+                      buttonTitle={
                         <Image
-                          src="/images/transfer-statuses/Success-End.gif"
-                          src_end="/images/transfer-statuses/Success-End.jpeg"
-                          duration_second={2}
-                          width={526}
-                          height={295.875}
-                        />
-                      </a> :
-                      errored ?
-                        <ActionRequired
-                          transferData={latest_transfer}
-                          buttonTitle={
-                            <Image
-                              src={
+                          src={
+                            latest_transfer.execute_transaction_hash ?
+                              '/images/transfer-statuses/Success-End.gif' :
+                              errored ?
                                 `/images/transfer-statuses/${
                                   latest_transfer.error_status === XTransferErrorStatus.LowSlippage ?
                                     'Error-Slippage.gif' :
                                     latest_transfer.error_status === XTransferErrorStatus.LowRelayerFee ?
                                       'Error-Gas.gif' :
                                       'Error-Generic.gif'
-                                }`
-                              }
-                              src_end={
+                                }` :
+                                '/images/transfer-statuses/Start.gif'
+                          }
+                          src_end={
+                            latest_transfer.execute_transaction_hash ?
+                              '/images/transfer-statuses/Success-End.jpeg' :
+                              errored ?
                                 `/images/transfer-statuses/${
                                   latest_transfer.error_status === XTransferErrorStatus.LowSlippage ?
                                     'Error-Slippage.jpeg' :
                                     latest_transfer.error_status === XTransferErrorStatus.LowRelayerFee ?
                                       'Error-Gas.jpeg' :
                                       'Error-Generic.jpeg'
-                                }`
-                              }
-                              duration_second={2}
-                              width={526}
-                              height={295.875}
-                            />
+                                }` :
+                                '/images/transfer-statuses/Processing.gif'
                           }
-                          onTransferBumped={
-                            relayer_fee => {
-                              if (latestTransfers) {
-                                const index = latestTransfers
-                                  .findIndex(t =>
-                                    (
-                                      t?.transfer_id &&
-                                      t.transfer_id === latest_transfer?.transfer_id
-                                    ) ||
-                                    (
-                                      t?.xcall_transaction_hash &&
-                                      t.xcall_transaction_hash === latest_transfer?.transaction_hash
-                                    )
-                                  )
-
-                                if (index > -1) {
-                                  latestTransfers[index] =
-                                    {
-                                      ...latestTransfers[index],
-                                      relayer_fee,
-                                      error_status: null,
-                                    }
-
-                                  setLatestTransfers(latestTransfers)
-                                }
-                              }
-                            }
-                          }
-                          onSlippageUpdated={
-                            slippage => {
-                              if (latestTransfers) {
-                                const index = latestTransfers
-                                  .findIndex(t =>
-                                    (
-                                      t?.transfer_id &&
-                                      t.transfer_id === latest_transfer?.transfer_id
-                                    ) ||
-                                    (
-                                      t?.xcall_transaction_hash &&
-                                      t.xcall_transaction_hash === latest_transfer?.transaction_hash
-                                    )
-                                  )
-
-                                if (index > -1) {
-                                  latestTransfers[index] =
-                                    {
-                                      ...latestTransfers[index],
-                                      slippage,
-                                      error_status: null,
-                                    }
-
-                                  setLatestTransfers(latestTransfers)
-                                }
-                              }
-                            }
-                          }
-                        /> :
-                        <Image
-                          src={
-                            `/images/transfer-statuses/${
-                              latest_transfer?.transfer_id ||
-                              time_spent_seconds > 2 ?
-                                'Processing.gif' :
-                                'Start.gif'
-                            }`
-                          }
+                          duration_second={2}
                           width={526}
                           height={295.875}
                         />
-                        /*
-                        <CountdownCircleTimer
-                          isPlaying
-                          duration={estimated_time_seconds}
-                          colors={
-                            (
-                              latest_transfer?.routers &&
-                              latest_transfer.routers.length < 1
-                            ) ||
-                            latest_transfer?.force_slow ?
-                              '#facc15' :
-                              '#22c55e'
+                      }
+                      onTransferBumped={
+                        relayer_fee => {
+                          if (latestTransfers) {
+                            const index = latestTransfers
+                              .findIndex(t =>
+                                (
+                                  t?.transfer_id &&
+                                  t.transfer_id === latest_transfer?.transfer_id
+                                ) ||
+                                (
+                                  t?.xcall_transaction_hash &&
+                                  t.xcall_transaction_hash === latest_transfer?.transaction_hash
+                                )
+                              )
+
+                            if (index > -1) {
+                              latestTransfers[index] =
+                                {
+                                  ...latestTransfers[index],
+                                  relayer_fee,
+                                  error_status: null,
+                                }
+
+                              setLatestTransfers(latestTransfers)
+                            }
                           }
-                          size={140}
-                        >
-                          {({ remainingTime }) => (
-                            time_spent_seconds > estimated_time_seconds ?
-                              <span className="text-sm font-semibold">
-                                Processing ...
-                              </span> :
-                              <div className="flex flex-col items-center space-y-1">
-                                <span className="text-slate-400 dark:text-slate-500 text-sm font-medium">
-                                  Time left
-                                </span>
-                                <span className="text-lg font-semibold">
-                                  {total_time_string(
-                                    time_spent_seconds,
-                                    estimated_time_seconds,
-                                  )}
-                                </span>
-                              </div>
-                          )}
-                        </CountdownCircleTimer>
-                        */
-                    }
+                        }
+                      }
+                      onSlippageUpdated={
+                        slippage => {
+                          if (latestTransfers) {
+                            const index = latestTransfers
+                              .findIndex(t =>
+                                (
+                                  t?.transfer_id &&
+                                  t.transfer_id === latest_transfer?.transfer_id
+                                ) ||
+                                (
+                                  t?.xcall_transaction_hash &&
+                                  t.xcall_transaction_hash === latest_transfer?.transaction_hash
+                                )
+                              )
+
+                            if (index > -1) {
+                              latestTransfers[index] =
+                                {
+                                  ...latestTransfers[index],
+                                  slippage,
+                                  error_status: null,
+                                }
+
+                              setLatestTransfers(latestTransfers)
+                            }
+                          }
+                        }
+                      }
+                    />
+                    {/*
+                      <CountdownCircleTimer
+                        isPlaying
+                        duration={estimated_time_seconds}
+                        colors={
+                          (
+                            latest_transfer?.routers &&
+                            latest_transfer.routers.length < 1
+                          ) ||
+                          latest_transfer?.force_slow ?
+                            '#facc15' :
+                            '#22c55e'
+                        }
+                        size={140}
+                      >
+                        {({ remainingTime }) => (
+                          time_spent_seconds > estimated_time_seconds ?
+                            <span className="text-sm font-semibold">
+                              Processing ...
+                            </span> :
+                            <div className="flex flex-col items-center space-y-1">
+                              <span className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                Time left
+                              </span>
+                              <span className="text-lg font-semibold">
+                                {total_time_string(
+                                  time_spent_seconds,
+                                  estimated_time_seconds,
+                                )}
+                              </span>
+                            </div>
+                        )}
+                      </CountdownCircleTimer>
+                    */}
                   </div>
                   <div className="flex flex-col items-center space-y-2">
                     <span className="text-slate-500 dark:text-slate-500 text-xs sm:text-sm font-medium">
                       {latest_transfer.execute_transaction_hash ?
                         <div className="flex flex-col items-center space-y-1">
-                          <span className="text-center">
+                          <a
+                            href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', latest_transfer.execute_transaction_hash)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-center"
+                          >
                             Transfer completed.
-                          </span>
+                          </a>
                         </div> :
-                        <div className="flex flex-col items-center space-y-1">
-                          {time_spent_seconds > estimated_time_seconds ?
+                        errored ?
+                          <div className="flex flex-col items-center space-y-1">
+                            <ActionRequired
+                              transferData={latest_transfer}
+                              buttonTitle={
+                                <span className="text-center">
+                                  Please click here to bump the {
+                                    latest_transfer?.error_status === XTransferErrorStatus.LowSlippage ?
+                                      'slippage' :
+                                      'gas amount'
+                                  } higher.
+                                </span>
+                              }
+                              onTransferBumped={
+                                relayer_fee => {
+                                  if (latestTransfers) {
+                                    const index = latestTransfers
+                                      .findIndex(t =>
+                                        (
+                                          t?.transfer_id &&
+                                          t.transfer_id === latest_transfer?.transfer_id
+                                        ) ||
+                                        (
+                                          t?.xcall_transaction_hash &&
+                                          t.xcall_transaction_hash === latest_transfer?.transaction_hash
+                                        )
+                                      )
+
+                                    if (index > -1) {
+                                      latestTransfers[index] =
+                                        {
+                                          ...latestTransfers[index],
+                                          relayer_fee,
+                                          error_status: null,
+                                        }
+
+                                      setLatestTransfers(latestTransfers)
+                                    }
+                                  }
+                                }
+                              }
+                              onSlippageUpdated={
+                                slippage => {
+                                  if (latestTransfers) {
+                                    const index = latestTransfers
+                                      .findIndex(t =>
+                                        (
+                                          t?.transfer_id &&
+                                          t.transfer_id === latest_transfer?.transfer_id
+                                        ) ||
+                                        (
+                                          t?.xcall_transaction_hash &&
+                                          t.xcall_transaction_hash === latest_transfer?.transaction_hash
+                                        )
+                                      )
+
+                                    if (index > -1) {
+                                      latestTransfers[index] =
+                                        {
+                                          ...latestTransfers[index],
+                                          slippage,
+                                          error_status: null,
+                                        }
+
+                                      setLatestTransfers(latestTransfers)
+                                    }
+                                  }
+                                }
+                              }
+                            />
+                          </div> :
+                          <div className="flex flex-col items-center space-y-1">
+                            {time_spent_seconds > estimated_time_seconds ?
+                              <span className="text-center">
+                                Your assets are on the way! We will keep you informed.
+                              </span> :
+                              <div className="flex flex-wrap items-center justify-center space-x-1">
+                                <span>
+                                  Your funds will arrive at the destination in about
+                                </span>
+                                <TimeSpent
+                                  from_time={time_spent_seconds}
+                                  to_time={estimated_time_seconds}
+                                  no_tooltip={true}
+                                  className="text-black dark:text-white font-semibold"
+                                />
+                                .
+                              </div>
+                            }
                             <span className="text-center">
-                              Your assets are on the way! We will keep you informed.
-                            </span> :
-                            <div className="flex flex-wrap items-center justify-center space-x-1">
-                              <span>
-                                Your funds will arrive at the destination in about
-                              </span>
-                              <TimeSpent
-                                from_time={time_spent_seconds}
-                                to_time={estimated_time_seconds}
-                                no_tooltip={true}
-                                className="text-black dark:text-white font-semibold"
-                              />
-                              .
-                            </div>
-                          }
-                          <span className="text-center">
-                            If you close this window, your transaction will still be processed.
-                          </span>
-                        </div>
+                              If you close this window, your transaction will still be processed.
+                            </span>
+                          </div>
                       }
                     </span>
                   </div>
