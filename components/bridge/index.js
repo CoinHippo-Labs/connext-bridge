@@ -1116,10 +1116,10 @@ export default () => {
                 if (latest_transfer?.error_status === null) {
                   switch (error_status) {
                     case XTransferErrorStatus.LowSlippage:
-                      updated = slippage >= latest_transfer?.slippage
+                      updated = slippage > latest_transfer?.slippage
                       break
                     case XTransferErrorStatus.LowRelayerFee:
-                      updated = relayer_fee >= latest_transfer?.relayer_fee
+                      updated = relayer_fee > latest_transfer?.relayer_fee
                       break
                     default:
                       updated = true
