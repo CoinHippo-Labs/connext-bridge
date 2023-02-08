@@ -2309,10 +2309,16 @@ export default () => {
 
       if (!failed) {
         const is_wrap_eth =
-          equals_ignore_case(
-            source_contract_data?.contract_address,
-            constants.AddressZero,
-          ) &&
+          (
+            equals_ignore_case(
+              source_contract_data?.contract_address,
+              constants.AddressZero,
+            ) ||
+            (
+              source_contract_data?.wrapable &&
+              !source_contract_data.symbol?.startsWith(WRAPPED_PREFIX)
+            )
+          )&&
           [
             'ETH',
           ]
@@ -2664,11 +2670,17 @@ export default () => {
     }
   }
   else if (
-    symbol &&
     destination_contract_data?.wrapable &&
-    equals_ignore_case(
-      destination_asset_data?.symbol,
-      symbol,
+    (
+      !symbol ||
+      equals_ignore_case(
+        destination_asset_data?.symbol,
+        symbol,
+      ) ||
+      equals_ignore_case(
+        destination_contract_data?.symbol,
+        symbol,
+      )
     )
   ) {
     destination_contract_data = {
