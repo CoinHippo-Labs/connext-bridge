@@ -12,6 +12,7 @@ export default (
     is_bridge = false,
     show_next_assets = false,
     show_native_assets = false,
+    show_only_wrapable = false,
     fixed = false,
     data,
   },
@@ -53,6 +54,7 @@ export default (
             is_bridge={is_bridge}
             show_next_assets={show_next_assets}
             show_native_assets={show_native_assets}
+            show_only_wrapable={show_only_wrapable}
             data={data}
           />
         </div>

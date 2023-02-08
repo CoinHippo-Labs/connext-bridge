@@ -2053,6 +2053,7 @@ export default () => {
         destination_chain,
         asset,
         amount,
+        receive_wrap,
       } = { ...bridge }
       let {
         symbol,
@@ -2331,7 +2332,8 @@ export default () => {
 
             if (_.head(destination_chain_data?.provider_params)?.nativeCurrency?.symbol?.endsWith('ETH')) {
               xcallParams.unwrapNativeOnDestination =
-                xcallParams.receiveLocal ?
+                xcallParams.receiveLocal ||
+                receive_wrap ?
                   false :
                   true
             }
@@ -2580,6 +2582,7 @@ export default () => {
     symbol,
     amount,
     receive_next,
+    receive_wrap,
   } = { ...bridge }
 
   const {
@@ -2657,6 +2660,8 @@ export default () => {
 
   const _destination_contract_data = _.cloneDeep(destination_contract_data)
 
+  let is_wrapable_asset = false
+
   if (
     (
       receiveLocal ||
@@ -2683,11 +2688,15 @@ export default () => {
       )
     )
   ) {
-    destination_contract_data = {
-      ...destination_contract_data,
-      contract_address: constants.AddressZero,
-      symbol: destination_asset_data.symbol,
-      image: destination_asset_data.image,
+    is_wrapable_asset = true
+
+    if (!receive_wrap) {
+      destination_contract_data = {
+        ...destination_contract_data,
+        contract_address: constants.AddressZero,
+        symbol: destination_asset_data.symbol,
+        image: destination_asset_data.image,
+      }
     }
   }
 
@@ -3827,13 +3836,44 @@ export default () => {
                                     <div className="flex items-center justify-between space-x-2">
                                       <SelectAsset
                                         disabled={disabled}
-                                        fixed={true}
+                                        fixed={
+                                          [
+                                            'pool',
+                                          ]
+                                          .includes(source) ||
+                                          !is_wrapable_asset
+                                        }
                                         value={asset}
+                                        onSelect={(a, s) => {
+                                          if (
+                                            !(
+                                              [
+                                                'pool',
+                                              ]
+                                              .includes(source) ||
+                                              !is_wrapable_asset
+                                            )
+                                          ) {
+                                            setBridge(
+                                              {
+                                                ...bridge,
+                                                asset: a,
+                                                receive_wrap: s?.startsWith('W'),
+                                              }
+                                            )
+
+                                            if (a !== asset) {
+                                              getBalances(source_chain)
+                                              getBalances(destination_chain)
+                                            }
+                                          }
+                                        }}
                                         chain={destination_chain}
                                         origin=""
                                         is_bridge={true}
-                                        show_next_assets={true}
+                                        show_next_assets={!is_wrapable_asset}
                                         show_native_assets={true}
+                                        show_only_wrapable={is_wrapable_asset}
                                         data={
                                           {
                                             ...destination_asset_data,

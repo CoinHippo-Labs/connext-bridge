@@ -19,6 +19,7 @@ export default (
     is_bridge = false,
     show_next_assets = false,
     show_native_assets = false,
+    show_only_wrapable = false,
     data,
   },
 ) => {
@@ -210,13 +211,20 @@ export default (
             _.concat(
               is_bridge &&
               wrapable &&
-              show_native_assets &&
+              (
+                show_native_assets ||
+                show_only_wrapable
+              ) &&
               {
                 ...contract_data,
                 contract_address: constants.AddressZero,
                 symbol,
                 image,
               },
+              (
+                !show_only_wrapable ||
+                wrapable
+              ) &&
               {
                 ...contract_data,
               },
@@ -354,6 +362,7 @@ export default (
     <div>
       {
         preset_assets_data.length > 0 &&
+        !show_only_wrapable &&
         (
           <div className="flex flex-wrap items-center mt-1 mb-4">
             {
