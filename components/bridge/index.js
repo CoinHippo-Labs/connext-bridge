@@ -2328,7 +2328,7 @@ export default () => {
         try {
           if (is_wrap_eth) {
             xcallParams.asset = _source_contract_data?.contract_address
-            xcallParams.wrapNativeOnOrigin = true
+            xcallParams.wrapNativeOnOrigin = source_contract_data?.contract_address === constants.AddressZero
 
             if (_.head(destination_chain_data?.provider_params)?.nativeCurrency?.symbol?.endsWith('ETH')) {
               xcallParams.unwrapNativeOnDestination =
