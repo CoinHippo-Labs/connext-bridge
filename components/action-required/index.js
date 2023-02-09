@@ -1585,32 +1585,18 @@ export default (
                       error_status === XTransferErrorStatus.LowRelayerFee &&
                       relayer_fee &&
                       newRelayerFee &&
-                      relayer_fee > newRelayerFee ?
+                      Number(relayer_fee) > Number(newRelayerFee) ?
                         <Alert
-                          color="bg-green-400 dark:bg-green-500 text-white text-base"
-                          icon={
-                            <BiMessageCheck
-                              className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                            />
-                          }
+                          color="bg-blue-400 dark:bg-blue-500 text-white text-base"
+                          icon={null}
                           closeDisabled={true}
                           rounded={true}
                           className="rounded p-4.5"
                         >
-                          <div className="flex items-center justify-between space-x-2">
-                            <span className="break-all text-sm font-medium">
+                          <div className="flex items-center justify-center space-x-2">
+                            <span className="break-all text-sm font-medium text-center">
                               Processing ...
                             </span>
-                            <div className="flex items-center space-x-1">
-                              <button
-                                onClick={() => reset()}
-                                className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
-                              >
-                                <MdClose
-                                  size={14}
-                                />
-                              </button>
-                            </div>
                           </div>
                         </Alert> :
                         <button
