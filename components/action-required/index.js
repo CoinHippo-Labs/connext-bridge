@@ -1582,41 +1582,72 @@ export default (
                     </Alert> :
                     !updateResponse &&
                     !estimateResponse ?
-                      <button
-                        disabled={disabled}
-                        onClick={() => {
-                          setSlippageEditing(false)
-                          update()
-                        }}
-                        className={
-                          `w-full ${
-                            disabled ?
-                              'bg-blue-400 dark:bg-blue-500' :
-                              'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
-                          } rounded flex items-center justify-center text-white text-base py-3 sm:py-4 px-2 sm:px-3`
-                        }
-                      >
-                        <span className={`flex items-center justify-center ${updating && updateProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
-                          {
-                            disabled &&
-                            (
-                              <TailSpin
-                                color="white"
-                                width="20"
-                                height="20"
-                              />
-                            )
+                      error_status === XTransferErrorStatus.LowRelayerFee &&
+                      relayer_fee &&
+                      newRelayerFee &&
+                      relayer_fee > newRelayerFee ?
+                        <Alert
+                          color="bg-green-400 dark:bg-green-500 text-white text-base"
+                          icon={
+                            <BiMessageCheck
+                              className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                            />
                           }
-                          <span>
-                            {updating ?
-                              updateProcessing ?
-                                'Update in progress ...' :
-                                'Please Confirm' :
-                              'Apply'
+                          closeDisabled={true}
+                          rounded={true}
+                          className="rounded p-4.5"
+                        >
+                          <div className="flex items-center justify-between space-x-2">
+                            <span className="break-all text-sm font-medium">
+                              Processing ...
+                            </span>
+                            <div className="flex items-center space-x-1">
+                              <button
+                                onClick={() => reset()}
+                                className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                              >
+                                <MdClose
+                                  size={14}
+                                />
+                              </button>
+                            </div>
+                          </div>
+                        </Alert> :
+                        <button
+                          disabled={disabled}
+                          onClick={() => {
+                            setSlippageEditing(false)
+                            update()
+                          }}
+                          className={
+                            `w-full ${
+                              disabled ?
+                                'bg-blue-400 dark:bg-blue-500' :
+                                'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
+                            } rounded flex items-center justify-center text-white text-base py-3 sm:py-4 px-2 sm:px-3`
+                          }
+                        >
+                          <span className={`flex items-center justify-center ${updating && updateProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
+                            {
+                              disabled &&
+                              (
+                                <TailSpin
+                                  color="white"
+                                  width="20"
+                                  height="20"
+                                />
+                              )
                             }
+                            <span>
+                              {updating ?
+                                updateProcessing ?
+                                  'Update in progress ...' :
+                                  'Please Confirm' :
+                                'Apply'
+                              }
+                            </span>
                           </span>
-                        </span>
-                      </button> :
+                        </button> :
                       (
                         updateResponse ||
                         estimateResponse
