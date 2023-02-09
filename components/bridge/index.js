@@ -2446,7 +2446,6 @@ export default () => {
                         origin_chain: source_chain_data?.chain_id,
                         origin_domain: xcallParams.origin,
                         origin_transacting_asset: xcallParams.asset,
-                        origin_bridged_asset: xcallParams.asset,
                         origin_transacting_amount:
                           Number(
                             utils.parseUnits(
