@@ -1445,7 +1445,7 @@ export default (
                       </div>
                       <div className="flex items-center justify-between space-x-1">
                         <div className="whitespace-nowrap text-slate-800 dark:text-slate-200 text-sm font-medium">
-                          New relayer fee
+                          Additional required relayer fee
                         </div>
                         {
                           !newRelayerFee &&
