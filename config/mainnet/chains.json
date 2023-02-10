@@ -122,8 +122,7 @@
     },
     "image": "/logos/chains/polygon.png",
     "color": "#8247e5",
-    "group" : "evm",
-    "disabled": true
+    "group" : "evm"
   },
   {
     "id": "optimism",
