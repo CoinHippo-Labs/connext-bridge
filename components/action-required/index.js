@@ -644,13 +644,22 @@ export default (
           break
         case XTransferErrorStatus.LowRelayerFee:
           try {
+            const relayer_fee_to_bump =
+              relayer_fee &&
+              newRelayerFee ?
+                (
+                  Number(newRelayerFee) - Number(relayer_fee)
+                )
+                .toFixed(18) :
+                null
+
             params = {
               domainId: origin_domain,
               transferId: transfer_id,
               relayerFee:
                 utils.parseUnits(
                   (
-                    newRelayerFee ||
+                    relayer_fee_to_bump ||
                     0
                   )
                   .toString(),
@@ -1143,6 +1152,12 @@ export default (
       18,
     )
 
+  const relayer_fee_to_bump =
+    relayer_fee &&
+    newRelayerFee ?
+      Number(newRelayerFee) - Number(relayer_fee) :
+      null
+
   const disabled =
     forceDisabled ||
     updating
@@ -1443,15 +1458,15 @@ export default (
                             <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
                               <DecimalsFormat
                                 value={
-                                  Number(newRelayerFee) >= 1000 ?
+                                  relayer_fee_to_bump >= 1000 ?
                                     number_format(
-                                      newRelayerFee,
+                                      relayer_fee_to_bump,
                                       '0,0.000000000000',
                                       true,
                                     ) :
-                                    Number(newRelayerFee) <= 0 ?
+                                    relayer_fee_to_bump <= 0 ?
                                       '0' :
-                                      newRelayerFee
+                                      relayer_fee_to_bump
                                 }
                                 className="text-sm"
                               />
@@ -1585,7 +1600,7 @@ export default (
                       error_status === XTransferErrorStatus.LowRelayerFee &&
                       relayer_fee &&
                       newRelayerFee &&
-                      Number(relayer_fee) > Number(newRelayerFee) ?
+                      relayer_fee_to_bump <= 0 ?
                         <Alert
                           color="bg-blue-400 dark:bg-blue-500 text-white text-base"
                           icon={null}
