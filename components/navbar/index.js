@@ -1723,17 +1723,19 @@ export default () => {
                   }
                 </Linkify>
               </span>
-              <button
-                onClick={
-                  () =>
-                    setHiddenStatus(true)
-                }
-                className="hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full mt-0.5 p-1 ml-auto"
-              >
-                <MdClose
-                  size={12}
-                />
-              </button>
+              {/*
+                <button
+                  onClick={
+                    () =>
+                      setHiddenStatus(true)
+                  }
+                  className="hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full mt-0.5 p-1 ml-auto"
+                >
+                  <MdClose
+                    size={12}
+                  />
+                </button>
+              */}
             </div>
           </div>
         )
