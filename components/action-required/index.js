@@ -503,7 +503,7 @@ export default (
             const newSlippageInBps = newSlippage * 100
 
             params = {
-              domainId: origin_domain,
+              domainId: destination_domain,
               transferId: transfer_id,
               slippage: newSlippageInBps.toString(),
             }
