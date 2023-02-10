@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { TailSpin } from 'react-loader-spinner'
 import { BigNumber, Contract, constants, utils } from 'ethers'
+import { TailSpin } from 'react-loader-spinner'
+import { Tooltip } from '@material-tailwind/react'
 import { TiArrowLeft } from 'react-icons/ti'
 
 import Info from './info'
@@ -963,118 +964,124 @@ export default () => {
                     </span>
                   </div>
                 </div>
-                <div>
-                  <span className="text-slate-400 dark:text-slate-200 text-base font-medium">
-                    Reward APR
-                  </span>
-                  <div className="flex flex-col items-end space-y-1">
-                    {
-                      pool_data &&
-                      (
-                        [
-                          // 'optimism',
-                        ]
-                        .includes(chain) ?
-                          <div className="flex items-center space-x-2">
-                            {
-                              chain_data?.image &&
-                              (
-                                <Image
-                                  src={chain_data.image}
-                                  width={16}
-                                  height={16}
-                                  className="rounded-full"
-                                />
-                              )
-                            }
-                            <span className="uppercase text-xs font-medium">
-                              {
-                                [
-                                  // 'optimism',
-                                ]
-                                .includes(chain) ?
-                                  chain
-                                    .slice(
-                                      0,
-                                      2,
-                                    ) :
-                                  chain_data?.short_name
-                              }
-                            </span>
-                          </div> :
-                          <div className="h-0" />
-                      )
-                    }
-                    <span className="text-lg sm:text-3xl font-semibold">
+                <Tooltip
+                  placement="top"
+                  content="Returns from 0.04% user swap fees"
+                  className="z-50 bg-dark text-white text-xs"
+                >
+                  <div>
+                    <span className="text-slate-400 dark:text-slate-200 text-base font-medium">
+                      Reward APR
+                    </span>
+                    <div className="flex flex-col items-end space-y-1">
                       {
                         pool_data &&
-                        !error ?
+                        (
                           [
                             // 'optimism',
                           ]
                           .includes(chain) ?
-                            !isNaN(apr) ?
-                              <DecimalsFormat
-                                value={
-                                  number_format(
-                                    apr * 100,
-                                    apr * 100 > 1 ?
-                                      '0,0.00' :
-                                      '0,0.000',
-                                    true,
-                                  )
+                            <div className="flex items-center space-x-2">
+                              {
+                                chain_data?.image &&
+                                (
+                                  <Image
+                                    src={chain_data.image}
+                                    width={16}
+                                    height={16}
+                                    className="rounded-full"
+                                  />
+                                )
+                              }
+                              <span className="uppercase text-xs font-medium">
+                                {
+                                  [
+                                    // 'optimism',
+                                  ]
+                                  .includes(chain) ?
+                                    chain
+                                      .slice(
+                                        0,
+                                        2,
+                                      ) :
+                                    chain_data?.short_name
                                 }
-                                max_decimals={
-                                  apr * 100 > 100 ?
-                                    0 :
-                                    apr * 100 > 1 ?
-                                      2 :
-                                      6
-                                }
-                                suffix="%"
-                                className="uppercase"
-                              /> :
-                              'TBD' :
-                            !isNaN(apr) ?
-                              <DecimalsFormat
-                                value={
-                                  number_format(
-                                    apr * 100,
-                                    apr * 100 > 1 ?
-                                      '0,0.00' :
-                                      '0,0.000',
-                                    true,
-                                  )
-                                }
-                                max_decimals={
-                                  apr * 100 > 100 ?
-                                    0 :
-                                    apr * 100 > 1 ?
-                                      2 :
-                                      6
-                                }
-                                suffix="%"
-                                className="uppercase"
-                              /> :
-                              'TBD' :
-                          selected &&
-                          !no_pool &&
-                          !error &&
-                          (
-                            pool_loading ?
-                              <div className="mt-1">
-                                <TailSpin
-                                  color={loader_color(theme)}
-                                  width="24"
-                                  height="24"
-                                />
-                              </div> :
-                              '-'
-                          )
+                              </span>
+                            </div> :
+                            <div className="h-0" />
+                        )
                       }
-                    </span>
+                      <span className="text-lg sm:text-3xl font-semibold">
+                        {
+                          pool_data &&
+                          !error ?
+                            [
+                              // 'optimism',
+                            ]
+                            .includes(chain) ?
+                              !isNaN(apr) ?
+                                <DecimalsFormat
+                                  value={
+                                    number_format(
+                                      apr * 100,
+                                      apr * 100 > 1 ?
+                                        '0,0.00' :
+                                        '0,0.000',
+                                      true,
+                                    )
+                                  }
+                                  max_decimals={
+                                    apr * 100 > 100 ?
+                                      0 :
+                                      apr * 100 > 1 ?
+                                        2 :
+                                        6
+                                  }
+                                  suffix="%"
+                                  className="uppercase"
+                                /> :
+                                'TBD' :
+                              !isNaN(apr) ?
+                                <DecimalsFormat
+                                  value={
+                                    number_format(
+                                      apr * 100,
+                                      apr * 100 > 1 ?
+                                        '0,0.00' :
+                                        '0,0.000',
+                                      true,
+                                    )
+                                  }
+                                  max_decimals={
+                                    apr * 100 > 100 ?
+                                      0 :
+                                      apr * 100 > 1 ?
+                                        2 :
+                                        6
+                                  }
+                                  suffix="%"
+                                  className="uppercase"
+                                /> :
+                                'TBD' :
+                            selected &&
+                            !no_pool &&
+                            !error &&
+                            (
+                              pool_loading ?
+                                <div className="mt-1">
+                                  <TailSpin
+                                    color={loader_color(theme)}
+                                    width="24"
+                                    height="24"
+                                  />
+                                </div> :
+                                '-'
+                            )
+                        }
+                      </span>
+                    </div>
                   </div>
-                </div>
+                </Tooltip>
               </div>
               {
                 error &&

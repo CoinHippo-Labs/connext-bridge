@@ -1529,7 +1529,18 @@ export default (
                       headerClassName: 'whitespace-nowrap justify-end text-right',
                     },
                     {
-                      Header: 'APR',
+                      Header:
+                        (
+                          <Tooltip
+                            placement="top"
+                            content="Returns from 0.04% user swap fees"
+                            className="z-50 bg-dark text-white text-xs"
+                          >
+                            <div>
+                              APR
+                            </div>
+                          </Tooltip>
+                        ),
                       accessor: 'apr',
                       sortType: (a, b) =>
                         _.meanBy(
