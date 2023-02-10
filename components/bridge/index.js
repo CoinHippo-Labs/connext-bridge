@@ -28,6 +28,7 @@ import Wallet from '../wallet'
 import Alert from '../alerts'
 import Copy from '../copy'
 import DecimalsFormat from '../decimals-format'
+import { currency_symbol } from '../../lib/object/currency'
 import { params_to_obj, number_format, number_to_fixed, ellipse, equals_ignore_case, total_time_string, loader_color, sleep, error_patterns } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
@@ -3688,106 +3689,132 @@ export default () => {
                             }
                             className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
                           />
-                          <DebounceInput
-                            debounceTimeout={750}
-                            size="small"
-                            type="number"
-                            placeholder="0.00"
-                            disabled={
-                              disabled ||
-                              !asset
-                            }
-                            value={
-                              [
-                                'string',
-                                'number',
-                              ]
-                              .includes(typeof amount) &&
-                              ![
-                                '',
-                              ]
-                              .includes(amount) &&
-                              !isNaN(amount) ?
-                                amount :
-                                ''
-                            }
-                            onChange={e => {
-                              const regex = /^[0-9.\b]+$/
-
-                              let value
-
-                              if (
-                                e.target.value === '' ||
-                                regex.test(e.target.value)
-                              ) {
-                                value = e.target.value
+                          <div className="space-y-0">
+                            <DebounceInput
+                              debounceTimeout={750}
+                              size="small"
+                              type="number"
+                              placeholder="0.00"
+                              disabled={
+                                disabled ||
+                                !asset
                               }
-
-                              if (typeof value === 'string') {
-                                if (value.startsWith('.')) {
-                                  value = `0${value}`
-                                }
-
-                                value =
-                                  number_to_fixed(
-                                    value,
-                                    source_decimals ||
-                                    18,
-                                  )
-                              }
-
-                              setBridge(
-                                {
-                                  ...bridge,
-                                  amount: value,
-                                }
-                              )
-
-                              if (
+                              value={
                                 [
                                   'string',
                                   'number',
                                 ]
-                                .includes(typeof value)
-                              ) {
-                                if (
-                                  value &&
-                                  ![
-                                    '',
-                                    '0',
-                                    '0.0',
-                                  ]
-                                  .includes(value)
-                                ) {
-                                  calculateAmountReceived(value)
-
-                                  checkApprovedNeeded(value)
-                                }
-                                else {
-                                  setEstimatedValues(
-                                    {
-                                      amountReceived: '0',
-                                      routerFee: '0',
-                                      isNextAsset: receiveLocal,
-                                    }
-                                  )
-
-                                  setIsApproveNeeded(false)
-                                }
+                                .includes(typeof amount) &&
+                                ![
+                                  '',
+                                ]
+                                .includes(amount) &&
+                                !isNaN(amount) ?
+                                  amount :
+                                  ''
                               }
-                            }}
-                            onWheel={e => e.target.blur()}
-                            onKeyDown={e =>
-                              [
-                                'e',
-                                'E',
-                                '-',
-                              ]
-                              .includes(e.key) &&
-                              e.preventDefault()
+                              onChange={e => {
+                                const regex = /^[0-9.\b]+$/
+
+                                let value
+
+                                if (
+                                  e.target.value === '' ||
+                                  regex.test(e.target.value)
+                                ) {
+                                  value = e.target.value
+                                }
+
+                                if (typeof value === 'string') {
+                                  if (value.startsWith('.')) {
+                                    value = `0${value}`
+                                  }
+
+                                  value =
+                                    number_to_fixed(
+                                      value,
+                                      source_decimals ||
+                                      18,
+                                    )
+                                }
+
+                                setBridge(
+                                  {
+                                    ...bridge,
+                                    amount: value,
+                                  }
+                                )
+
+                                if (
+                                  [
+                                    'string',
+                                    'number',
+                                  ]
+                                  .includes(typeof value)
+                                ) {
+                                  if (
+                                    value &&
+                                    ![
+                                      '',
+                                      '0',
+                                      '0.0',
+                                    ]
+                                    .includes(value)
+                                  ) {
+                                    calculateAmountReceived(value)
+
+                                    checkApprovedNeeded(value)
+                                  }
+                                  else {
+                                    setEstimatedValues(
+                                      {
+                                        amountReceived: '0',
+                                        routerFee: '0',
+                                        isNextAsset: receiveLocal,
+                                      }
+                                    )
+
+                                    setIsApproveNeeded(false)
+                                  }
+                                }
+                              }}
+                              onWheel={e => e.target.blur()}
+                              onKeyDown={e =>
+                                [
+                                  'e',
+                                  'E',
+                                  '-',
+                                ]
+                                .includes(e.key) &&
+                                e.preventDefault()
+                              }
+                              className={
+                                `w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg font-semibold text-right ${
+                                  amount &&
+                                  typeof source_asset_data?.price === 'number' &&
+                                  !source_asset_data.is_stablecoin ?
+                                    'py-0' :
+                                    'py-1.5'
+                                }`
+                              }
+                            />
+                            {
+                              amount &&
+                              typeof source_asset_data?.price === 'number' &&
+                              !source_asset_data.is_stablecoin &&
+                              (
+                                <div className="text-slate-400 dark:text-slate-500 font-medium text-xs text-right">
+                                  {currency_symbol}
+                                  {
+                                    number_format(
+                                      Number(amount) * source_asset_data.price,
+                                      '0,0.00',
+                                    )
+                                  }
+                                </div>
+                              )
                             }
-                            className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg font-semibold text-right py-1.5`}
-                          />
+                          </div>
                         </div>
                       </div>
                     </div>
