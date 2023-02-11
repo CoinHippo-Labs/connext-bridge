@@ -750,7 +750,7 @@ export default (
                                 >
                                   <ProgressBar
                                     width={native_amount * 100 / total_amount}
-                                    className="w-full h-1.5 rounded-lg"
+                                    className="w-full rounded-lg"
                                     backgroundClassName="rounded-lg"
                                     style={
                                       {
@@ -997,7 +997,7 @@ export default (
                                             >
                                               <ProgressBar
                                                 width={native_amount * 100 / total_amount}
-                                                className="w-full h-1.5 rounded-lg"
+                                                className="w-full rounded-lg"
                                                 backgroundClassName="rounded-lg"
                                                 style={
                                                   {

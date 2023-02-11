@@ -1136,10 +1136,15 @@ export default (
   const estimated_slippage =
     estimatedValues?.destinationSlippage &&
     estimatedValues?.originSlippage ?
-      (
-        Number(estimatedValues.destinationSlippage) +
-        Number(estimatedValues.originSlippage)
-      ) * 100 :
+      Number(
+        (
+          (
+            Number(estimatedValues.destinationSlippage) +
+            Number(estimatedValues.originSlippage)
+          ) * 100
+        )
+        .toFixed(2)
+      ) :
       null
 
   relayer_fee =
