@@ -1163,8 +1163,13 @@ export default (
     updating
 
   const wrong_chain =
-    source_chain_data &&
-    chain_id !== source_chain_data.chain_id &&
+    (
+      error_status === XTransferErrorStatus.LowSlippage ?
+        destination_chain_data &&
+        chain_id !== destination_chain_data.chain_id :
+        source_chain_data &&
+        chain_id !== source_chain_data.chain_id
+    ) &&
     !updateResponse
 
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
@@ -1516,20 +1521,38 @@ export default (
                 web3_provider &&
                 wrong_chain ?
                   <Wallet
-                    connectChainId={source_chain_data?.chain_id}
+                    connectChainId={
+                      (
+                        error_status === XTransferErrorStatus.LowSlippage ?
+                          destination_chain_data :
+                          source_chain_data
+                      )?.chain_id
+                    }
                     className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                   >
                     <span className="mr-1.5 sm:mr-2">
-                      {is_walletconnect ?
-                        'Reconnect' :
-                        'Switch'
+                      {
+                        is_walletconnect ?
+                          'Reconnect' :
+                          'Switch'
                       } to
                     </span>
                     {
-                      source_chain_data?.image &&
+                      (
+                        error_status === XTransferErrorStatus.LowSlippage ?
+                          destination_chain_data :
+                          source_chain_data
+                      )?.image &&
                       (
                         <Image
-                          src={source_chain_data.image}
+                          src={
+                            (
+                              error_status === XTransferErrorStatus.LowSlippage ?
+                                destination_chain_data :
+                                source_chain_data
+                            )
+                            .image
+                          }
                           width={28}
                           height={28}
                           className="rounded-full"
@@ -1537,7 +1560,13 @@ export default (
                       )
                     }
                     <span className="font-semibold">
-                      {source_chain_data?.name}
+                      {
+                        (
+                          error_status === XTransferErrorStatus.LowSlippage ?
+                            destination_chain_data :
+                            source_chain_data
+                        )?.name
+                      }
                     </span>
                   </Wallet> :
                   !updateResponse &&
@@ -1768,7 +1797,13 @@ export default (
                     Apply
                   </button> :
                   <Wallet
-                    connectChainId={source_chain_data?.chain_id}
+                    connectChainId={
+                      (
+                        error_status === XTransferErrorStatus.LowSlippage ?
+                          destination_chain_data :
+                          source_chain_data
+                      )?.chain_id
+                    }
                     buttonConnectTitle="Connect Wallet"
                     className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                   >
