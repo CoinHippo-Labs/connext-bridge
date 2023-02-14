@@ -1533,7 +1533,7 @@ export default (
                         (
                           <Tooltip
                             placement="top"
-                            content="Returns from 0.04% user swap fees"
+                            content="Yield from 0.04% user swap fees"
                             className="z-50 bg-dark text-white text-xs"
                           >
                             <div>
