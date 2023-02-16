@@ -905,7 +905,7 @@ export default () => {
     contract_data,
     name,
     lpTokenAddress,
-    apy,
+    apr,
     error,
   } = { ...pool_data }
 
@@ -971,7 +971,7 @@ export default () => {
                 >
                   <div>
                     <span className="text-slate-400 dark:text-slate-200 text-base font-medium">
-                      Reward APY
+                      Reward APR
                     </span>
                     <div className="flex flex-col items-end space-y-1">
                       {
@@ -1019,21 +1019,21 @@ export default () => {
                               // 'optimism',
                             ]
                             .includes(chain) ?
-                              !isNaN(apy) ?
+                              !isNaN(apr) ?
                                 <DecimalsFormat
                                   value={
                                     number_format(
-                                      apy * 100,
-                                      apy * 100 > 1 ?
+                                      apr * 100,
+                                      apr * 100 > 1 ?
                                         '0,0.00' :
                                         '0,0.000',
                                       true,
                                     )
                                   }
                                   max_decimals={
-                                    apy * 100 > 100 ?
+                                    apr * 100 > 100 ?
                                       0 :
-                                      apy * 100 > 1 ?
+                                      apr * 100 > 1 ?
                                         2 :
                                         6
                                   }
@@ -1041,21 +1041,21 @@ export default () => {
                                   className="uppercase"
                                 /> :
                                 'TBD' :
-                              !isNaN(apy) ?
+                              !isNaN(apr) ?
                                 <DecimalsFormat
                                   value={
                                     number_format(
-                                      apy * 100,
-                                      apy * 100 > 1 ?
+                                      apr * 100,
+                                      apr * 100 > 1 ?
                                         '0,0.00' :
                                         '0,0.000',
                                       true,
                                     )
                                   }
                                   max_decimals={
-                                    apy * 100 > 100 ?
+                                    apr * 100 > 100 ?
                                       0 :
-                                      apy * 100 > 1 ?
+                                      apr * 100 > 1 ?
                                         2 :
                                         6
                                   }
