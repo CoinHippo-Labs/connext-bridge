@@ -69,7 +69,6 @@ export default (
 ) => {
   const dispatch = useDispatch()
   const {
-    preferences,
     chains,
     assets,
     rpc_providers,
@@ -78,7 +77,6 @@ export default (
   } = useSelector(
     state => (
       {
-        preferences: state.preferences,
         chains: state.chains,
         assets: state.assets,
         rpc_providers: state.rpc_providers,
@@ -88,9 +86,6 @@ export default (
     ),
     shallowEqual,
   )
-  const {
-    page_visible,
-  } = { ...preferences }
   const {
     chains_data,
   } = { ...chains }
@@ -547,7 +542,7 @@ export default (
                                 setData(
                                   {
                                     ...data,
-                                    [`${name}`]: c,
+                                    [name]: c,
                                   }
                                 )
                             }

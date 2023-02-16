@@ -163,7 +163,7 @@ export default () => {
         dispatch(
           {
             type: POOL_ASSETS_DATA,
-            value: getAsset(null, response, null, undefined, true, false, true, true),
+            value: getAsset(null, response, null, undefined, undefined, true, false, true, true),
           }
         )
       }
@@ -226,7 +226,7 @@ export default () => {
             }
           }
 
-          const pool_assets_data = getAsset(null, assets_data, null, undefined, true, false, true, true)
+          const pool_assets_data = getAsset(null, assets_data, null, undefined, undefined, true, false, true, true)
 
           if (pool_assets_data.findIndex(d => !updated_ids.includes(d?.id)) < 0) {
             dispatch(
@@ -353,7 +353,7 @@ export default () => {
               chains[domain_id] = {
                 providers: rpc_urls,
                 assets:
-                  getAsset(null, assets_data, chain_id, undefined, true, false, false, true)
+                  getAsset(null, assets_data, chain_id, undefined, undefined, true, false, false, true)
                     .map(a => {
                       const {
                         contracts,
@@ -485,7 +485,7 @@ export default () => {
                     } = { ...chain_data }
 
                     const asset_data =
-                      getAsset(null, assets_data, chain_id, undefined, false, false, false, true)
+                      getAsset(null, assets_data, chain_id, undefined, undefined, false, false, false, true)
                         .find(a =>
                           getContract(adopted, toArray(a?.contracts), chain_id) ||
                           getContract(local, toArray(a?.contracts), chain_id)
@@ -752,7 +752,7 @@ export default () => {
                     )
                     .map(a => Number(a.balance))
                   )
-                ) * price 
+                ) * price
             }
 
             if (
@@ -932,7 +932,7 @@ export default () => {
 
                         const symbols = split(symbol, 'normal', '-')
 
-                        const asset_data = getAsset(null, pool_assets_data, chain_id, symbols)
+                        const asset_data = getAsset(null, pool_assets_data, chain_id, undefined, symbols)
 
                         return {
                           ...p,

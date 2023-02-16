@@ -6,9 +6,7 @@ import { BigNumber, utils } from 'ethers'
 import Pools from './pools'
 import { equalsIgnoreCase } from '../../lib/utils'
 
-const WRAPPED_PREFIX =
-  process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
-  'next'
+const WRAPPED_PREFIX = process.env.NEXT_PUBLIC_WRAPPED_PREFIX
 
 const VIEWS =
   [

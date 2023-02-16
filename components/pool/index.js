@@ -4,22 +4,19 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { BigNumber, Contract, constants, utils } from 'ethers'
+import { formatEther, formatUnits } from 'ethers'
 import { TailSpin } from 'react-loader-spinner'
 import { Tooltip } from '@material-tailwind/react'
 import { TiArrowLeft } from 'react-icons/ti'
 
 import Info from './info'
 import Liquidity from './liquidity'
-import Image from '../image'
 import DecimalsFormat from '../decimals-format'
-import { chainName } from '../../lib/object/chain'
-import { numberFormat, paramsToObj, equalsIgnoreCase, loaderColor } from '../../lib/utils'
-import { BALANCES_DATA } from '../../reducers/types'
-
-const WRAPPED_PREFIX =
-  process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
-  'next'
+import Image from '../image'
+import { getChain, chainName } from '../../lib/object/chain'
+import { getAsset } from '../../lib/object/asset'
+import { split, toArray, paramsToObj, loaderColor } from '../../lib/utils'
+import { BALANCES_DATA, GET_BALANCES_DATA } from '../../reducers/types'
 
 export default () => {
   const dispatch = useDispatch()
@@ -33,8 +30,8 @@ export default () => {
     dev,
     wallet,
     balances,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
         chains: state.chains,
@@ -51,7 +48,6 @@ export default () => {
   )
   const {
     theme,
-    page_visible,
   } = { ...preferences }
   const {
     chains_data,
@@ -96,55 +92,19 @@ export default () => {
     () => {
       let updated = false
 
-      const params =
-        paramsToObj(
-          asPath?.indexOf('?') > -1 &&
-          asPath.substring(
-            asPath.indexOf('?') + 1,
-          )
-        )
+      const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(sPath.indexOf('?') + 1))
 
-      let path =
-        !asPath ?
-          '/' :
-          asPath.toLowerCase()
-
-      path =
-        path.includes('?') ?
-          path.substring(
-            0,
-            path.indexOf('?'),
-          ) :
-          path
+      let path = !asPath ? '/' : asPath.toLowerCase()
+      path = path.includes('?') ? path.substring(0, path.indexOf('?')) : path
 
       if (path.includes('on-')) {
-        const paths =
-          path
-            .replace(
-              '/pool/',
-              '',
-            )
-            .split('-')
+        const paths = path.replace('/pool/', '').split('-')
 
         const chain = paths[paths.indexOf('on') + 1]
-        const asset =
-          _.head(paths) !== 'on' ?
-            _.head(paths) :
-            null
+        const asset = _.head(paths) !== 'on' ? _.head(paths) : null
 
-        const chain_data = (chains_data || [])
-          .find(c =>
-            c?.id === chain
-          )
-
-        const asset_data = (pool_assets_data || [])
-          .find(a =>
-            a?.id === asset ||
-            equalsIgnoreCase(
-              a?.symbol,
-              asset,
-            )
-          )
+        const chain_data = getChain(chain, chains_data)
+        const asset_data = getAsset(asset, pool_assets_data)
 
         if (chain_data) {
           pool.chain = chain
@@ -159,10 +119,7 @@ export default () => {
 
       if (updated) {
         setPool(pool)
-        setPoolsTrigger(
-          moment()
-            .valueOf()
-        )
+        setPoolsTrigger(moment().valueOf())
       }
     },
     [asPath, chains_data, pool_assets_data],
@@ -179,62 +136,30 @@ export default () => {
           asset,
         } = { ...pool }
 
-        if (
-          (chains_data || [])
-            .findIndex(c =>
-              !c?.disabled &&
-              !c?.no_pool &&
-              c?.id === chain
-            ) > -1
-        ) {
+        const chain_data = getChain(chain, chains_data, true)
+
+        const {
+          chain_id,
+          no_pool,
+        } = { ...chain_data }
+
+        if (chain_data && !no_pool) {
           params.chain = chain
 
-          if (
-            asset &&
-            (pool_assets_data || [])
-              .findIndex(a =>
-                a?.id === asset &&
-                (a.contracts || [])
-                  .findIndex(c =>
-                    c?.chain_id ===
-                    chains_data
-                      .find(_c =>
-                        _c?.id === chain
-                      )?.chain_id
-                  ) > -1
-              ) > -1
-          ) {
+          if (asset && getAsset(asset, pool_assets_data, chain_id)) {
             params.asset = asset
           }
         }
       }
 
-      if (
-        !(
-          params.chain &&
-          params.asset
-        ) &&
-        pool_assets_data?.length > 0
-      ) {
+      if (!(params.chain && params.asset) && pool_assets_data?.length > 0) {
         const {
           id,
           contracts,
-        } = {
-          ...(
-            _.head(pool_assets_data)
-          ),
-        }
+        } = { ..._.head(pool_assets_data) }
 
-        params.chain =
-          params.chain ||
-          (chains_data || [])
-            .find(c =>
-              c?.chain_id === _.head(contracts)?.chain_id
-            )?.id
-
-        params.asset =
-          params.asset ||
-          id
+        params.chain = params.chain || getChain(_.head(contracts)?.chain_id, chains_data)?.id
+        params.asset = params.asset || id
       }
 
       if (Object.keys(params).length > 0) {
@@ -246,26 +171,17 @@ export default () => {
         delete params.chain
         delete params.asset
 
-        router
-          .push(
-            `/pool/${
-              chain ?
-                `${
-                  asset ?
-                    `${asset.toUpperCase()}-` :
-                    ''
-                }on-${chain}` :
-                ''
-            }${
-              Object.keys(params).length > 0 ?
-                `?${new URLSearchParams(params).toString()}` :
-                ''
-            }`,
-            undefined,
-            {
-              shallow: true,
-            },
-          )
+        router.push(
+          `/pool/${
+            chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''
+          }${
+            Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''
+          }`,
+          undefined,
+          {
+            shallow: true,
+          },
+        )
       }
     },
     [address, pool],
@@ -275,39 +191,13 @@ export default () => {
   useEffect(
     () => {
       const {
-        chain,
-      } = { ...pool }
-
-      const chain_data = (chains_data || [])
-        .find(c =>
-          c?.chain_id === chain_id
-        )
-
-      const {
         id,
-      } = { ...chain_data }
+      } = { ...getChain(chain_id, chains_data) }
 
-      if (
-        asPath &&
-        id
-      ) {
-        const params =
-          paramsToObj(
-            asPath.indexOf('?') > -1 &&
-            asPath.substring(
-              asPath.indexOf('?') + 1,
-            )
-          )
+      if (asPath && id) {
+        const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(sPath.indexOf('?') + 1))
 
-        if (
-          !params?.chain &&
-          !asPath.includes('on-') &&
-          (chains_data || [])
-            .findIndex(c =>
-              !c?.disabled &&
-              c?.id === id
-            ) > -1
-        ) {
+        if (!params?.chain && !asPath.includes('on-') && getChain(id, chains_data, true)) {
           setPool(
             {
               ...pool,
@@ -350,10 +240,7 @@ export default () => {
   useEffect(
     () => {
       const getData = () => {
-        if (
-          page_visible &&
-          address
-        ) {
+        if (address) {
           const {
             chain,
           } = { ...pool }
@@ -366,8 +253,7 @@ export default () => {
 
       const interval =
         setInterval(
-          () =>
-            getData(),
+          () => getData(),
           0.25 * 60 * 1000,
         )
 
@@ -380,17 +266,12 @@ export default () => {
   useEffect(
     () => {
       if (pools_data) {
-        const chains =
-          _.uniq(
-            pools_data
-              .map(p => p?.chain_data?.id)
-              .filter(c => c)
+        _.uniq(
+          toArray(
+            pools_data.map(p => p?.chain_data?.id)
           )
-
-        chains
-          .forEach(c =>
-            getBalances(c)
-          )
+        )
+        .forEach(c => getBalances(c))
       }
     },
     [pools_data],
@@ -410,10 +291,7 @@ export default () => {
           chain &&
           poolsTrigger
         ) {
-          const chain_data = (chains_data || [])
-            .find(c =>
-              c?.id === chain
-            )
+          const chain_data = getChain(chain, chains_data)
 
           const {
             chain_id,
@@ -429,14 +307,7 @@ export default () => {
               },
             )
 
-            const response =
-              _.cloneDeep(
-                await sdk.sdkPool
-                  .getUserPools(
-                    domain_id,
-                    address,
-                  )
-              )
+            const response = _.cloneDeep(await sdk.sdkPool.getUserPools(domain_id, address))
 
             console.log(
               '[UserPools]',
@@ -460,64 +331,8 @@ export default () => {
                     const {
                       adopted,
                       local,
-                    } = { ...info }
-                    let {
-                      name,
                       symbol,
                     } = { ...info }
-
-                    if (symbol?.includes(`${WRAPPED_PREFIX}${WRAPPED_PREFIX}`)) {
-                      name =
-                        (name || '')
-                          .replace(
-                            WRAPPED_PREFIX,
-                            '',
-                          )
-
-                      symbol =
-                        symbol
-                          .split('-')
-                          .map(s =>
-                            s
-                              .replace(
-                                WRAPPED_PREFIX,
-                                '',
-                              )
-                          )
-                          .join('-')
-
-                      info.name = name
-                      info.symbol = symbol
-                    }
-
-                    if (symbol?.includes('-')) {
-                      const symbols =
-                        symbol
-                          .split('-')
-
-                      if (
-                        equalsIgnoreCase(
-                          _.head(symbols),
-                          _.last(symbols),
-                        ) &&
-                        adopted?.symbol &&
-                        local?.symbol
-                      ) {
-                        symbol =
-                          [
-                            adopted.symbol,
-                            local.symbol,
-                          ]
-                          .join('-')
-
-                        info.symbol = symbol
-                      }
-                    }
-
-                    const symbols =
-                      (symbol || '')
-                        .split('-')
-                        .filter(s => s)
 
                     if (adopted) {
                       const {
@@ -526,13 +341,9 @@ export default () => {
                       } = { ...adopted }
 
                       adopted.balance =
-                        utils.formatUnits(
-                          BigNumber.from(
-                            balance ||
-                            '0'
-                          ),
-                          decimals ||
-                          18,
+                        formatUnits(
+                          BigInt(balance || '0'),
+                          decimals || 18,
                         )
 
                       info.adopted = adopted
@@ -545,74 +356,37 @@ export default () => {
                       } = { ...local }
 
                       local.balance =
-                        utils.formatUnits(
-                          BigNumber.from(
-                            balance ||
-                            '0'
-                          ),
-                          decimals ||
-                          18,
+                        formatUnits(
+                          BigInt(balance || '0'),
+                          decimals || 18,
                         )
 
                       info.local = local
                     }
 
-                    const asset_data = (pool_assets_data || [])
-                      .find(a =>
-                        symbols
-                          .findIndex(s =>
-                            equalsIgnoreCase(
-                              s,
-                              a?.symbol,
-                            )
-                          ) > -1 ||
-                        (a?.contracts || [])
-                          .findIndex(c =>
-                            c?.chain_id === chain_id &&
-                            symbols
-                              .findIndex(s =>
-                                equalsIgnoreCase(
-                                  s,
-                                  c?.symbol,
-                                )
-                              ) > -1
-                          ) > -1
-                      )
+                    const symbols = split(symbol, 'normal', '-')
 
-                    const id = `${chain_data.id}_${asset_data?.id}`
+                    const asset_data = getAsset(null, pool_assets_data, chain_id, undefined, symbols)
 
                     return {
                       ...p,
-                      id,
+                      id: `${chain_data.id}_${asset_data?.id}`,
                       chain_data,
                       asset_data,
                       ...info,
                       symbols,
-                      lpTokenBalance:
-                        utils.formatUnits(
-                          BigNumber.from(
-                            lpTokenBalance ||
-                            '0',
-                          ),
-                          18,
-                        ),
+                      lpTokenBalance: formatEther(BigInt(lpTokenBalance || '0')),
                       poolTokenBalances:
-                        (poolTokenBalances || [])
+                        toArray(poolTokenBalances)
                           .map((b, i) =>
                             Number(
-                              utils.formatUnits(
-                                BigNumber.from(
-                                  b ||
-                                  '0',
-                                ),
-                                (
-                                  adopted?.index === i ?
-                                    adopted.decimals :
-                                    local?.index === i ?
-                                      local.decimals :
-                                      18
-                                ) ||
-                                18,
+                              formatUnits(
+                                BigInt(b || '0'),
+                                adopted?.index === i ?
+                                  adopted.decimals :
+                                  local?.index === i ?
+                                    local.decimals :
+                                    18,
                               )
                             )
                           ),
@@ -621,10 +395,7 @@ export default () => {
               )
             }
             else {
-              setPools(
-                pools ||
-                []
-              )
+              setPools(toArray(pools))
             }
           } catch (error) {
             console.log(
@@ -632,8 +403,8 @@ export default () => {
               {
                 domain_id,
                 address,
+                error,
               },
-              error,
             )
           }
         }
@@ -643,198 +414,6 @@ export default () => {
     },
     [sdk, address, poolsTrigger],
   )
-
-  const getBalances = chain => {
-    const getBalance = async (
-      chain_id,
-      contract_data,
-    ) => {
-      const {
-        contract_address,
-        next_asset,
-        wrapable,
-      } = { ...contract_data }
-
-      const provider = rpcs?.[chain_id]
-
-      if (
-        address &&
-        provider
-      ) {
-        const {
-          symbol,
-          image,
-        } = {
-          ...(
-            assets_data
-              .find(a =>
-                (a?.contracts || [])
-                  .findIndex(c =>
-                    c?.chain_id === chain_id &&
-                    equalsIgnoreCase(
-                      c?.contract_address,
-                      contract_address,
-                    )
-                  ) > -1
-              )
-          ),
-        }
-
-        const contracts =
-          _.concat(
-            wrapable &&
-            {
-              ...contract_data,
-              contract_address: constants.AddressZero,
-              symbol,
-              image,
-            },
-            {
-              ...contract_data,
-            },
-            next_asset &&
-            {
-              ...contract_data,
-              ...next_asset,
-            },
-          )
-          .filter(c => c?.contract_address)
-
-        const balances = []
-
-        for (const contract of contracts) {
-          const {
-            contract_address,
-            decimals,
-          } = { ...contract }
-
-          let balance
-
-          if (contract_address === constants.AddressZero) {
-            balance =
-              await provider
-                .getBalance(
-                  address,
-                )
-          }
-          else {
-            const contract =
-              new Contract(
-                contract_address,
-                [
-                  'function balanceOf(address owner) view returns (uint256)',
-                ],
-                provider,
-              )
-
-            balance =
-              await contract
-                .balanceOf(
-                  address,
-                )
-          }
-
-          if (
-            balance ||
-            !(
-              (balances_data?.[`${chain_id}`] || [])
-                .findIndex(c =>
-                  equalsIgnoreCase(
-                    c?.contract_address,
-                    contract_address,
-                  )
-                ) > -1
-            )
-          ) {
-            balances
-              .push(
-                {
-                  ...contract,
-                  amount:
-                    balance &&
-                    utils.formatUnits(
-                      balance,
-                      decimals ||
-                      18,
-                    ),
-                }
-              )
-          }
-        }
-
-        if (balances.length > 0) {
-          dispatch(
-            {
-              type: BALANCES_DATA,
-              value: {
-                [`${chain_id}`]: balances,
-              },
-            }
-          )
-        }
-      }
-    }
-
-    if (page_visible) {
-      const {
-        chain_id,
-      } = {
-        ...(
-          (chains_data || [])
-            .find(c =>
-              c?.id === chain
-            )
-        ),
-      }
-
-      const contracts_data =
-        (pool_assets_data || [])
-          .map(a => {
-            const {
-              contracts,
-            } = { ...a }
-
-            return {
-              ...a,
-              ...(
-                (contracts || [])
-                  .find(c =>
-                    c?.chain_id === chain_id
-                  )
-              ),
-            }
-          })
-          .filter(a => a?.contract_address)
-          .map(a => {
-            const {
-              next_asset,
-            } = { ...a }
-            let {
-              contract_address,
-            } = { ...a }
-
-            contract_address = contract_address.toLowerCase()
-
-            if (next_asset?.contract_address) {
-              next_asset.contract_address = next_asset.contract_address.toLowerCase()
-            }
-
-            return {
-              ...a,
-              contract_address,
-              next_asset,
-            }
-          })
-
-      contracts_data
-        .forEach(c =>
-          getBalance(
-            chain_id,
-            c,
-          )
-        )
-    }
-  }
 
   const reset = async origin => {
     const reset_pool = origin !== 'address'
@@ -847,10 +426,7 @@ export default () => {
       )
     }
 
-    setPoolsTrigger(
-      moment()
-        .valueOf()
-    )
+    setPoolsTrigger(moment().valueOf())
 
     const {
       chain,
@@ -859,61 +435,43 @@ export default () => {
     getBalances(chain)
   }
 
+  const getBalances = chain => {
+    dispatch(
+      {
+        type: GET_BALANCES_DATA,
+        value: { chain },
+      }
+    )
+  }
+
   const {
     chain,
     asset,
   } = { ...pool }
 
-  const chain_data = (chains_data || [])
-    .find(c =>
-      c?.id === chain
-    )
+  const chain_data = getChain(chain, chains_data)
 
   const {
     explorer,
   } = { ...chain_data }
+
   const {
     url,
     contract_path,
   } = { ...explorer }
 
-  const selected =
-    !!(
-      chain &&
-      asset
-    )
+  const selected = !!(chain && asset)
 
-  const no_pool =
-    selected &&
-    (pool_assets_data || [])
-      .findIndex(a =>
-        a?.id === asset &&
-        (a.contracts || [])
-          .findIndex(a =>
-            a?.chain_id === chain_data?.chain_id
-          ) > -1
-      ) < 0
+  const no_pool = selected && !getAsset(asset, pool_assets_data, chain_data?.chain_id)
 
-  const pool_data = (pools_data || [])
-    .find(p =>
-      p?.chain_data?.id === chain &&
-      p.asset_data?.id === asset
-    )
+  const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
 
   const {
-    asset_data,
-    contract_data,
-    name,
-    lpTokenAddress,
     apr,
     error,
   } = { ...pool_data }
 
-  const pool_loading =
-    selected &&
-    !no_pool &&
-    !error &&
-    !pool_data
+  const pool_loading = selected && !no_pool && !error && !pool_data
 
   return (
     <div className="mb-4">
@@ -921,8 +479,6 @@ export default () => {
         <div className="w-full flex flex-col space-y-3.5 my-4 sm:my-12 mx-1 sm:mx-4">
           <Link
             href="/pools"
-          >
-          <a
             className="w-fit rounded border dark:border-slate-800 flex items-center text-slate-600 dark:text-slate-500 font-semibold space-x-1 py-0.5 px-2.5"
           >
             <TiArrowLeft
@@ -932,7 +488,6 @@ export default () => {
             <span className="text-base">
               Back to pools
             </span>
-          </a>
           </Link>
           <div className="space-y-6 sm:space-y-16">
             <div className="space-y-2">
@@ -955,11 +510,7 @@ export default () => {
                         {chainName(chain_data)}
                       </span>
                       <span className="whitespace-nowrap">
-                        {
-                          (name || '')
-                            .split('-')
-                            .join(' ')
-                        }
+                        {split(name, 'normal', '-').join(' ')}
                       </span>
                     </span>
                   </div>
@@ -974,108 +525,25 @@ export default () => {
                       Reward APR
                     </span>
                     <div className="flex flex-col items-end space-y-1">
-                      {
-                        pool_data &&
-                        (
-                          [
-                            // 'optimism',
-                          ]
-                          .includes(chain) ?
-                            <div className="flex items-center space-x-2">
-                              {
-                                chain_data?.image &&
-                                (
-                                  <Image
-                                    src={chain_data.image}
-                                    width={16}
-                                    height={16}
-                                    className="rounded-full"
-                                  />
-                                )
-                              }
-                              <span className="uppercase text-xs font-medium">
-                                {
-                                  [
-                                    // 'optimism',
-                                  ]
-                                  .includes(chain) ?
-                                    chain
-                                      .slice(
-                                        0,
-                                        2,
-                                      ) :
-                                    chain_data?.short_name
-                                }
-                              </span>
-                            </div> :
-                            <div className="h-0" />
-                        )
-                      }
                       <span className="text-lg sm:text-3xl font-semibold">
-                        {
-                          pool_data &&
-                          !error ?
-                            [
-                              // 'optimism',
-                            ]
-                            .includes(chain) ?
-                              !isNaN(apr) ?
-                                <DecimalsFormat
-                                  value={
-                                    numberFormat(
-                                      apr * 100,
-                                      apr * 100 > 1 ?
-                                        '0,0.00' :
-                                        '0,0.000',
-                                      true,
-                                    )
-                                  }
-                                  maxDecimals={
-                                    apr * 100 > 100 ?
-                                      0 :
-                                      apr * 100 > 1 ?
-                                        2 :
-                                        6
-                                  }
-                                  suffix="%"
-                                  className="uppercase"
-                                /> :
-                                'TBD' :
-                              !isNaN(apr) ?
-                                <DecimalsFormat
-                                  value={
-                                    numberFormat(
-                                      apr * 100,
-                                      apr * 100 > 1 ?
-                                        '0,0.00' :
-                                        '0,0.000',
-                                      true,
-                                    )
-                                  }
-                                  maxDecimals={
-                                    apr * 100 > 100 ?
-                                      0 :
-                                      apr * 100 > 1 ?
-                                        2 :
-                                        6
-                                  }
-                                  suffix="%"
-                                  className="uppercase"
-                                /> :
-                                'TBD' :
-                            selected &&
-                            !no_pool &&
-                            !error &&
-                            (
-                              pool_loading ?
-                                <div className="mt-1">
-                                  <TailSpin
-                                    color={loaderColor(theme)}
-                                    width="24"
-                                    height="24"
-                                  />
-                                </div> :
-                                '-'
+                        {pool_data && !error ?
+                          !isNaN(apr) ?
+                            <DecimalsFormat
+                              value={apr * 100}
+                              suffix="%"
+                              className="uppercase"
+                            /> :
+                            'TBD' :
+                            selected && !no_pool && !error &&
+                            (pool_loading ?
+                              <div className="mt-1">
+                                <TailSpin
+                                  width="24"
+                                  height="24"
+                                  color={loaderColor(theme)}
+                                />
+                              </div> :
+                              '-'
                             )
                         }
                       </span>
@@ -1096,21 +564,19 @@ export default () => {
               <div className="order-2 lg:order-1 lg:col-span-2">
                 <Info
                   pool={pool}
-                  user_pools_data={pools}
+                  userPoolsData={pools}
                   onSelect={p => setPool(p)}
                 />
               </div>
               <Liquidity
                 pool={pool}
-                user_pools_data={pools}
-                onFinish={() => {
-                  setPoolsTrigger(
-                    moment()
-                      .valueOf()
-                  )
-
-                  getBalances(chain)
-                }}
+                userPoolsData={pools}
+                onFinish={
+                  () => {
+                    setPoolsTrigger(moment().valueOf())
+                    getBalances(chain)
+                  }
+                }
               />
             </div>
           </div>

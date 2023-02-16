@@ -87,7 +87,7 @@ export default (
 
                   const chain_ids = [source_chain_data?.chain_id, destination_chain_data?.chain_id]
 
-                  const asset_data = getAsset(null, assets_data, chain_ids, undefined, true, true)
+                  const asset_data = getAsset(null, assets_data, chain_ids, undefined, undefined, true, true)
                   asset = asset_data?.id
                 }
 
@@ -108,12 +108,12 @@ export default (
                   const chains_data =
                     getChain(chain_id, chains_data, true, false, undefined, true)
                       .filter(c =>
-                        getAsset(null, assets_data, c?.chain_id, undefined, true, true, true)
+                        getAsset(null, assets_data, c?.chain_id, undefined, undefined, true, true, true)
                       )
                   const chain_data = _.head(chains_data)
                   chain = chain_data?.id
 
-                  const asset_data = getAsset(null, assets_data, chain_data?.chain_id, undefined, true, true, true)
+                  const asset_data = getAsset(null, assets_data, chain_data?.chain_id, undefined, undefined, true, true, true)
                   asset = asset_data?.id
                 }
 

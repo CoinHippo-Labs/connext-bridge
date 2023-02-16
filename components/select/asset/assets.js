@@ -185,7 +185,7 @@ export default (
                 {
                   ...contract_data,
                 },
-                next_asset && isBridge && showNextAssets && 
+                next_asset && isBridge && showNextAssets &&
                 {
                   ...contract_data,
                   ...next_asset,

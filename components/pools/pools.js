@@ -13,9 +13,7 @@ import DecimalsFormat from '../decimals-format'
 import { currency_symbol } from '../../lib/object/currency'
 import { numberFormat, equalsIgnoreCase, loaderColor } from '../../lib/utils'
 
-const WRAPPED_PREFIX =
-  process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
-  'next'
+const WRAPPED_PREFIX = process.env.NEXT_PUBLIC_WRAPPED_PREFIX
 
 export default (
   {

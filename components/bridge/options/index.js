@@ -8,13 +8,9 @@ import { RiSettings3Line } from 'react-icons/ri'
 import { BiInfoCircle } from 'react-icons/bi'
 
 import Modal from '../../modals'
-import { switchColor } from '../../../lib/utils'
+import { toArray, switchColor } from '../../../lib/utils'
 
-const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE =
-  Number(
-    process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE
-  ) ||
-  3
+const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)
 
 export default (
   {
@@ -29,8 +25,8 @@ export default (
 ) => {
   const {
     preferences,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
       }
@@ -52,12 +48,7 @@ export default (
 
   const reset = () => setData(initialData)
 
-  const receiveLocalTooltip =
-    !hasNextAsset &&
-    `Unavailable on ${
-      chainData?.name ||
-      'Ethereum'
-    }`
+  const receiveLocalTooltip = !hasNextAsset && `Unavailable on ${chainData?.name || 'Ethereum'}`
 
   const fields =
     [
@@ -77,22 +68,6 @@ export default (
         name: 'infiniteApprove',
         type: 'switch',
       },
-      /*
-      {
-        label: 'Slippage Tolerance',
-        tooltip: 'The maximum percentage you are willing to lose due to market changes.',
-        name: 'slippage',
-        type: 'number',
-        placeholder: '0.00',
-        presets:
-          [
-            3.0,
-            1.0,
-            0.5,
-          ],
-        postfix: '%',
-      },
-      */
       {
         label: 'Receive NextAsset',
         tooltip: receiveLocalTooltip,
@@ -105,17 +80,8 @@ export default (
         type: 'switch',
       },
     ]
-    .filter(f => f)
 
-  const changed =
-    !_.isEqual(
-      data,
-      initialData,
-    )
-
-  const {
-    forceSlow,
-  } = { ...data }
+  const changed = !_.isEqual(data, initialData)
 
   return (
     <Modal
@@ -181,17 +147,19 @@ export default (
                     <select
                       placeholder={placeholder}
                       value={data?.[name]}
-                      onChange={e => {
-                        const _data = {
-                          ...data,
-                          [`${name}`]: e.target.value,
+                      onChange={
+                        e => {
+                          setData(
+                            {
+                              ...data,
+                              [name]: e.target.value,
+                            }
+                          )
                         }
-
-                        setData(_data)
-                      }}
+                      }
                       className="form-select bg-slate-50 rounded border-0 focus:ring-0"
                     >
-                      {(options || [])
+                      {toArray(options)
                         .map((o, j) => {
                           const {
                             title,
@@ -212,72 +180,55 @@ export default (
                       }
                     </select> :
                     type === 'switch' ?
-                      name === 'forceSlow' ?
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={
-                              !(
-                                (
-                                  typeof data?.[name] === 'boolean' ?
-                                    data[name] :
-                                    false
-                                ) ||
-                                false
-                              )
-                            }
-                            onChange={e => {
-                              const _data = {
-                                ...data,
-                                [`${name}`]: !data?.[name],
+                      name === 'infiniteApprove' ?
+                        <Tooltip
+                          placement="right"
+                          content={tooltip}
+                          className="z-50 bg-dark text-white text-xs"
+                        >
+                          <div className="w-fit flex items-center">
+                            <Switch
+                              disabled={!showInfiniteApproval}
+                              checked={typeof data?.[name] === 'boolean' ? data[name] : false}
+                              onChange={
+                                e => {
+                                  setData(
+                                    {
+                                      ...data,
+                                      [name]: !data?.[name],
+                                    }
+                                  )
+                                }
                               }
-
-                              setData(_data)
-                            }}
-                            checkedIcon={false}
-                            uncheckedIcon={false}
-                            onColor={switchColor(theme).on}
-                            onHandleColor="#f8fafc"
-                            offColor={switchColor(theme).off}
-                            offHandleColor="#f8fafc"
-                          />
-                          {forceSlow ?
-                            <div>
-                              <span className="uppercase font-bold">
-                                Slow
-                              </span>
-                            </div> :
-                            <div>
-                              <span className="uppercase font-bold">
-                                Fast
-                              </span>
-                            </div>
-                          }
-                        </div> :
-                        name === 'infiniteApprove' ?
+                              checkedIcon={false}
+                              uncheckedIcon={false}
+                              onColor={switchColor(theme).on}
+                              onHandleColor="#f8fafc"
+                              offColor={switchColor(theme).off}
+                              offHandleColor="#f8fafc"
+                            />
+                          </div>
+                        </Tooltip> :
+                        name === 'receiveLocal' && receiveLocalTooltip ?
                           <Tooltip
                             placement="right"
-                            content={tooltip}
+                            content={receiveLocalTooltip}
                             className="z-50 bg-dark text-white text-xs"
                           >
                             <div className="w-fit flex items-center">
                               <Switch
-                                disabled={!showInfiniteApproval}
-                                checked={
-                                  (
-                                    typeof data?.[name] === 'boolean' ?
-                                      data[name] :
-                                      false
-                                  ) ||
-                                  false
-                                }
-                                onChange={e => {
-                                  const _data = {
-                                    ...data,
-                                    [`${name}`]: !data?.[name],
+                                disabled={true}
+                                checked={typeof data?.[name] === 'boolean' ? data[name] : false}
+                                onChange={
+                                  e => {
+                                    setData(
+                                      {
+                                        ...data,
+                                        [name]: !data?.[name],
+                                      }
+                                    )
                                   }
-
-                                  setData(_data)
-                                }}
+                                }
                                 checkedIcon={false}
                                 uncheckedIcon={false}
                                 onColor={switchColor(theme).on}
@@ -287,154 +238,90 @@ export default (
                               />
                             </div>
                           </Tooltip> :
-                          name === 'receiveLocal' &&
-                          receiveLocalTooltip ?
-                            <Tooltip
-                              placement="right"
-                              content={receiveLocalTooltip}
-                              className="z-50 bg-dark text-white text-xs"
-                            >
-                              <div className="w-fit flex items-center">
-                                <Switch
-                                  disabled={true}
-                                  checked={
-                                    (
-                                      typeof data?.[name] === 'boolean' ?
-                                        data[name] :
-                                        false
-                                    ) ||
-                                    false
+                          <Switch
+                            checked={typeof data?.[name] === 'boolean' ? data[name] : false}
+                            onChange={
+                              e => {
+                                setData(
+                                  {
+                                    ...data,
+                                    [name]: !data?.[name],
                                   }
-                                  onChange={e => {
-                                    const _data = {
-                                      ...data,
-                                      [`${name}`]: !data?.[name],
-                                    }
-
-                                    setData(_data)
-                                  }}
-                                  checkedIcon={false}
-                                  uncheckedIcon={false}
-                                  onColor={switchColor(theme).on}
-                                  onHandleColor="#f8fafc"
-                                  offColor={switchColor(theme).off}
-                                  offHandleColor="#f8fafc"
-                                />
-                              </div>
-                            </Tooltip> :
-                            <Switch
-                              checked={
-                                (
-                                  typeof data?.[name] === 'boolean' ?
-                                    data[name] :
-                                    false
-                                ) ||
-                                false
+                                )
                               }
-                              onChange={e => {
-                                const _data = {
-                                  ...data,
-                                  [`${name}`]: !data?.[name],
-                                }
-
-                                setData(_data)
-                              }}
-                              checkedIcon={false}
-                              uncheckedIcon={false}
-                              onColor={switchColor(theme).on}
-                              onHandleColor="#f8fafc"
-                              offColor={switchColor(theme).off}
-                              offHandleColor="#f8fafc"
-                            /> :
+                            }
+                            checkedIcon={false}
+                            uncheckedIcon={false}
+                            onColor={switchColor(theme).on}
+                            onHandleColor="#f8fafc"
+                            offColor={switchColor(theme).off}
+                            offHandleColor="#f8fafc"
+                          /> :
                       type === 'textarea' ?
                         <textarea
                           type="text"
                           rows="5"
                           placeholder={placeholder}
                           value={data?.[name]}
-                          onChange={e => {
-                            const _data = {
-                              ...data,
-                              [`${name}`]: e.target.value,
+                          onChange={
+                            e => {
+                              setData(
+                                {
+                                  ...data,
+                                  [name]: e.target.value,
+                                }
+                              )
                             }
-
-                            setData(_data)
-                          }}
+                          }
                           className="form-textarea rounded border-0 focus:ring-0"
                         /> :
                         type === 'number' ?
                           <div className="flex items-center space-x-3">
                             <DebounceInput
                               debounceTimeout={750}
-                              size={
-                                size ||
-                                'small'
-                              }
+                              size={size || 'small'}
                               type={type}
                               placeholder={placeholder}
-                              value={
-                                typeof data?.[name] === 'number' &&
-                                data[name] >= 0 ?
-                                  data[name] :
-                                  ''
+                              value={typeof data?.[name] === 'number' && data[name] >= 0 ? data[name] : ''}
+                              onChange={
+                                e => {
+                                  const regex = /^[0-9.\b]+$/
+
+                                  let value
+
+                                  if (e.target.value === '' || regex.test(e.target.value)) {
+                                    value = e.target.value
+                                  }
+
+                                  if (typeof value === 'string') {
+                                    if (value.startsWith('.')) {
+                                      value = `0${value}`
+                                    }
+
+                                    if (!isNaN(value)) {
+                                      value = Number(value)
+                                    }
+                                  }
+
+                                  value =
+                                    ['slippage'].includes(name) && (value <= 0 || value > 100) ?
+                                      DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
+                                      value
+
+                                  setData(
+                                    {
+                                      ...data,
+                                      [name]:
+                                        value && !isNaN(value) ?
+                                          parseFloat(Number(value).toFixed(6)) :
+                                          value,
+                                    }
+                                  )
+                                }
                               }
-                              onChange={e => {
-                                const regex = /^[0-9.\b]+$/
-
-                                let value
-
-                                if (
-                                  e.target.value === '' ||
-                                  regex.test(e.target.value)
-                                ) {
-                                  value = e.target.value
-                                }
-
-                                if (typeof value === 'string') {
-                                  if (value.startsWith('.')) {
-                                    value = `0${value}`
-                                  }
-
-                                  if (!isNaN(value)) {
-                                    value = Number(value)
-                                  }
-                                }
-
-                                value =
-                                  [
-                                    'slippage',
-                                  ].includes(name) &&
-                                  (
-                                    value <= 0 ||
-                                    value > 100
-                                  ) ?
-                                    DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
-                                    value
-
-                                const _data = {
-                                  ...data,
-                                  [`${name}`]:
-                                    value &&
-                                    !isNaN(value) ?
-                                      parseFloat(
-                                        Number(value)
-                                          .toFixed(6)
-                                      ) :
-                                      value,
-                                }
-
-                                setData(_data)
-                              }}
                               onWheel={e => e.target.blur()}
-                              onKeyDown={e =>
-                                [
-                                  'e',
-                                  'E',
-                                  '-',
-                                ].includes(e.key) &&
-                                e.preventDefault()
-                              }
-                              className={`w-20 bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0 font-semibold py-1.5 px-2.5`}
+                              onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                              className="w-20 bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0 font-semibold py-1.5 px-2.5"
                             />
                             {
                               presets?.length > 0 &&
@@ -444,14 +331,16 @@ export default (
                                     .map((p, j) => (
                                       <div
                                         key={j}
-                                        onClick={() => {
-                                          const _data = {
-                                            ...data,
-                                            [`${name}`]: p,
+                                        onClick={
+                                          () => {
+                                            setData(
+                                              {
+                                                ...data,
+                                                [name]: p,
+                                              }
+                                            )
                                           }
-
-                                          setData(_data)
-                                        }}
+                                        }
                                         className={`${data?.[name] === p ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer py-1 px-2`}
                                       >
                                         {p} {postfix}
@@ -466,14 +355,16 @@ export default (
                             type={type}
                             placeholder={placeholder}
                             value={data?.[name]}
-                            onChange={e => {
-                              const _data = {
-                                ...data,
-                                [`${name}`]: e.target.value,
+                            onChange={
+                              e => {
+                                setData(
+                                  {
+                                    ...data,
+                                    [name]: e.target.value,
+                                  }
+                                )
                               }
-
-                              setData(_data)
-                            }}
+                            }
                             className="form-input rounded border-0 focus:ring-0"
                           />
                   }
@@ -485,11 +376,13 @@ export default (
       }
       onCancel={() => reset()}
       confirmDisabled={!changed}
-      onConfirm={() => {
-        if (onChange) {
-          onChange(data)
+      onConfirm={
+        () => {
+          if (onChange) {
+            onChange(data)
+          }
         }
-      }}
+      }
       confirmButtonTitle="Apply"
       onClose={() => reset()}
     />

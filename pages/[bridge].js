@@ -3,23 +3,11 @@ import _ from 'lodash'
 
 import Bridge from '../components/bridge'
 import meta from '../lib/meta'
-import { chains as getChains, assets as getAssets } from '../lib/api/config'
+import { getChains, getAssets } from '../lib/api/config'
 
 export async function getStaticPaths() {
-  const chains =
-    getChains()
-      .map(c =>
-        c?.id
-      )
-
-  const assets =
-    _.concat(
-      getAssets()
-        .map(a =>
-          a?.id
-        ),
-      '',
-    )
+  const chains = getChains().map(c => c?.id)
+  const assets = _.concat(getAssets().map(a => a?.id), '')
 
   return {
     paths:
@@ -28,16 +16,8 @@ export async function getStaticPaths() {
           chains
             .flatMap(c =>
               chains
-                .filter(_c =>
-                  _c !== c
-                )
-                .map(_c =>
-                  `/${
-                    a ?
-                      `${a.toUpperCase()}-` :
-                      ''
-                  }from-${c}-to-${_c}`
-                )
+                .filter(_c => _c !== c)
+                .map(_c => `/${a ? `${a.toUpperCase()}-` : ''}from-${c}-to-${_c}`)
             )
         ),
     fallback: false,

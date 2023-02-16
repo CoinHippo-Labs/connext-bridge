@@ -11,14 +11,7 @@ export default () => {
     asPath,
   } = { ...router }
 
-  const _asPath =
-    asPath.includes('?') ?
-      asPath
-        .substring(
-          0,
-          asPath.indexOf('?'),
-        ) :
-      asPath
+  const _asPath = asPath.includes('?') ? asPath.substring(0, asPath.indexOf('?')) : asPath
 
   const [ssr, setSsr] = useState(true)
 
@@ -29,24 +22,13 @@ export default () => {
     [],
   )
 
-  if (
-    !ssr &&
-    typeof window !== 'undefined' &&
-    pathname !== _asPath
-  ) {
-    router
-      .push(
-        isRouteExist(_asPath) ?
-          asPath :
-          '/'
-      )
+  if (!ssr && typeof window !== 'undefined' && pathname !== _asPath) {
+    router.push(isRouteExist(_asPath) ? asPath : '/')
   }
 
   return (
     !ssr &&
-    [
-      '/',
-    ].includes(_asPath) &&
+    ['/'].includes(_asPath) &&
     (
       <Bridge />
     )
