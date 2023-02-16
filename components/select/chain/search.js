@@ -9,8 +9,7 @@ export default (
     onSelect,
     source,
     destination,
-    is_pool = false,
-    fixed = false,
+    isPool = false,
   },
 ) => {
   const [inputSearch, setInputSearch] = useState('')
@@ -20,10 +19,7 @@ export default (
       <div className="relative">
         <input
           value={inputSearch}
-          onChange={
-            e =>
-              setInputSearch(e.target.value)
-          }
+          onChange={e => setInputSearch(e.target.value)}
           type="search"
           placeholder="Search"
           className="w-full h-10 bg-transparent appearance-none rounded border border-slate-200 dark:border-slate-800 text-sm pl-10 pr-5"
@@ -37,14 +33,16 @@ export default (
           <Chains
             value={value}
             inputSearch={inputSearch}
-            onSelect={c => {
-              if (onSelect) {
-                onSelect(c)
+            onSelect={
+              c => {
+                if (onSelect) {
+                  onSelect(c)
+                }
               }
-            }}
+            }
             source={source}
             destination={destination}
-            is_pool={is_pool}
+            isPool={isPool}
           />
         </div>
       </div>

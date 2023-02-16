@@ -10,9 +10,7 @@ const initStore = preloadedState =>
   createStore(
     reducers,
     preloadedState,
-    composeWithDevTools(
-      applyMiddleware()
-    ),
+    composeWithDevTools(applyMiddleware()),
   )
 
 export const initializeStore = preloadedState => {
@@ -49,8 +47,8 @@ export const initializeStore = preloadedState => {
 
 export const useStore = initialState => {
   const store =
-    useMemo(() =>
-      initializeStore(initialState),
+    useMemo(
+      () => initializeStore(initialState),
       [initialState],
     )
 

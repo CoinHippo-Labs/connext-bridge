@@ -3,25 +3,27 @@ import { useSelector, shallowEqual } from 'react-redux'
 import { Puff } from 'react-loader-spinner'
 import { BiChevronDown } from 'react-icons/bi'
 
-import Image from '../../image'
 import Search from './search'
+import Image from '../../image'
 import Modal from '../../modals'
-import { chainName } from '../../../lib/object/chain'
-import { loader_color } from '../../../lib/utils'
+import { getChain, chainName } from '../../../lib/object/chain'
+import { getAsset } from '../../../lib/object/asset'
+import { getContract } from '../../../lib/object/contract'
+import { loaderColor } from '../../../lib/utils'
 
 export default (
   {
     disabled = false,
-    fixed = false,
     value,
     onSelect,
     chain,
-    origin = 'from',
-    is_pool = false,
-    is_bridge = false,
-    show_next_assets = false,
-    show_native_assets = false,
-    show_only_wrapable = false,
+    origin = '',
+    isBridge = false,
+    isPool = false,
+    showNextAssets = false,
+    showNativeAssets = false,
+    showOnlyWrapable = false,
+    fixed = false,
     data,
     className = '',
   },
@@ -31,8 +33,8 @@ export default (
     chains,
     assets,
     pool_assets,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
         chains: state.chains,
@@ -62,80 +64,51 @@ export default (
     address,
   ) => {
     if (onSelect) {
-      onSelect(
-        id,
-        address,
-      )
+      onSelect(id, address)
     }
-
     setHidden(!hidden)
   }
 
-  const chain_data = (chains_data || [])
-    .find(c =>
-      c?.id === chain
-    )
+  const chain_data = getChain(chain, chains_data)
+
   const {
     chain_id,
   } = { ...chain_data }
 
-  const _assets_data =
-    is_pool ?
-      pool_assets_data :
-      assets_data
+  const _assets_data = isPool ? pool_assets_data : assets_data
 
-  const asset_data =
-    data ||
-    (_assets_data || [])
-      .find(c =>
-        c?.id === value
-      )
+  const asset_data = data || getAsset(value, _assets_data)
+
   const {
     contracts,
   } = { ...asset_data }
 
-  const contract_data = (contracts || [])
-    .find(c =>
-      c?.chain_id === chain_id
-    )
+  const contract_data = getContract(chain_id, contracts)
+
   let {
     symbol,
     image,
   } = { ...contract_data }
 
   symbol =
-    is_pool ?
-      data?.symbol ||
-      asset_data?.symbol ||
-      'Select token' :
-      data?.symbol ||
-      symbol ||
-      asset_data?.symbol ||
-      'Token'
+    isPool ?
+      data?.symbol || asset_data?.symbol || 'Select token' :
+      data?.symbol || symbol || asset_data?.symbol || 'Token'
+
   image =
-    is_pool &&
-    !data ?
-      asset_data?.image ||
-      image :
+    isPool && !data ?
+      asset_data?.image || image :
       data ?
-        asset_data?.image ||
-        image :
-        image ||
-        asset_data?.image
+        asset_data?.image || image :
+        image || asset_data?.image
 
   return (
     <Modal
       id="modal-assets"
       noButtons={true}
       hidden={hidden}
-      disabled={
-        disabled ||
-        fixed
-      }
-      onClick={
-        open =>
-          setHidden(!open)
-      }
+      disabled={disabled || fixed}
+      onClick={open => setHidden(!open)}
       buttonTitle={
         _assets_data ?
           <div
@@ -183,9 +156,9 @@ export default (
             }
           </div> :
           <Puff
-            color={loader_color(theme)}
             width="24"
             height="24"
+            color={loaderColor(theme)}
           />
       }
       buttonClassName={
@@ -196,10 +169,7 @@ export default (
         <div className="flex items-center justify-between space-x-2 pt-1 pb-2">
           <span className="flex items-center space-x-1">
             <span className="capitalize">
-              {
-                origin ||
-                'select'
-              }
+              {origin || 'select'}
             </span>
             <span className="normal-case">
               token
@@ -231,19 +201,13 @@ export default (
       body={
         <Search
           value={value}
-          onSelect={(a, c) =>
-            onClick(
-              a,
-              c,
-            )
-          }
+          onSelect={(a, c) => onClick(a, c)}
           chain={chain}
-          is_pool={is_pool}
-          is_bridge={is_bridge}
-          show_next_assets={show_next_assets}
-          show_native_assets={show_native_assets}
-          show_only_wrapable={show_only_wrapable}
-          fixed={fixed}
+          isBridge={isBridge}
+          isPool={isPool}
+          showNextAssets={showNextAssets}
+          showNativeAssets={showNativeAssets}
+          showOnlyWrapable={showOnlyWrapable}
           data={data}
         />
       }

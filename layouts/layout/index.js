@@ -7,7 +7,7 @@ import PageVisibility from 'react-page-visibility'
 import Navbar from '../../components/navbar'
 import Footer from '../../components/footer'
 import meta from '../../lib/meta'
-import { equals_ignore_case } from '../../lib/utils'
+import { equalsIgnoreCase } from '../../lib/utils'
 import { THEME, PAGE_VISIBLE } from '../../reducers/types'
 
 export default (
@@ -184,12 +184,7 @@ export default (
           data-layout="layout"
           data-background={theme}
           data-navbar={theme}
-          className={
-            `antialiased ${
-              // 'overflow-y-scroll' ||
-              'disable-scrollbars'
-            } text-sm ${theme}`
-          }
+          className={`antialiased ${/*'overflow-y-scroll'*/'disable-scrollbars'} text-sm ${theme}`}
         >
           <div className="wrapper">
             <div
@@ -197,10 +192,7 @@ export default (
               style={
                 {
                   minHeight: 'calc(100vh - 44px)',
-                  backgroundColor:
-                    theme === 'light' ?
-                      '#ececec' :
-                      '#1a1919',
+                  backgroundColor: theme === 'light' ? '#ececec' : '#1a1919',
                   // backgroundImage: `url("/images/background${theme === 'light' ? '_white' : ''}.png")`,
                   // backgroundSize: 'cover',
                 }

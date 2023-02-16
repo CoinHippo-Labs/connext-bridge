@@ -8,13 +8,11 @@ import { BigNumber, Contract, FixedNumber, constants, utils } from 'ethers'
 import { TailSpin, Oval } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { Tooltip, Alert as AlertNotification } from '@material-tailwind/react'
-import { CountdownCircleTimer } from 'react-countdown-circle-timer'
 import { MdClose } from 'react-icons/md'
 import { HiArrowRight, HiOutlineCheckCircle } from 'react-icons/hi'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiEditAlt, BiCheckCircle, BiInfoCircle } from 'react-icons/bi'
 import { IoInformationCircleOutline, IoWarning } from 'react-icons/io5'
 
-import Announcement from '../announcement'
 import Options from './options'
 import SelectChain from '../select/chain'
 import SelectAsset from '../select/asset'
@@ -29,7 +27,7 @@ import Alert from '../alerts'
 import Copy from '../copy'
 import DecimalsFormat from '../decimals-format'
 import { currency_symbol } from '../../lib/object/currency'
-import { params_to_obj, number_format, number_to_fixed, ellipse, equals_ignore_case, total_time_string, loader_color, sleep, error_patterns } from '../../lib/utils'
+import { paramsToObj, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, totalTimeString, loaderColor, sleep, errorPatterns } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
 const WRAPPED_PREFIX =
@@ -70,7 +68,7 @@ export default () => {
     preferences,
     chains,
     assets,
-    asset_balances,
+    router_asset_balances,
     pools,
     rpc_providers,
     dev,
@@ -82,7 +80,7 @@ export default () => {
         preferences: state.preferences,
         chains: state.chains,
         assets: state.assets,
-        asset_balances: state.asset_balances,
+        router_asset_balances: state.router_asset_balances,
         pools: state.pools,
         rpc_providers: state.rpc_providers,
         dev: state.dev,
@@ -103,8 +101,8 @@ export default () => {
     assets_data,
   } = { ...assets }
   const {
-    asset_balances_data,
-  } = { ...asset_balances }
+    router_asset_balances_data,
+  } = { ...router_asset_balances }
   const {
     pools_data,
   } = { ...pools }
@@ -120,9 +118,9 @@ export default () => {
   const {
     chain_id,
     provider,
-    web3_provider,
-    address,
+    browser_provider,
     signer,
+    address,
   } = { ...wallet_data }
   const {
     balances_data,
@@ -178,7 +176,7 @@ export default () => {
       let updated = false
 
       const params =
-        params_to_obj(
+        paramsToObj(
           asPath?.indexOf('?') > -1 &&
           asPath.substring(
             asPath.indexOf('?') + 1,
@@ -238,7 +236,7 @@ export default () => {
         const asset_data = (assets_data || [])
           .find(a =>
             a?.id === asset ||
-            equals_ignore_case(
+            equalsIgnoreCase(
               a?.symbol,
               asset,
             )
@@ -436,7 +434,7 @@ export default () => {
               .findIndex(a =>
                 a?.id === asset &&
                 (
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     a?.symbol,
                     symbol,
                   ) ||
@@ -567,7 +565,7 @@ export default () => {
 
       const liquidity_amount =
         _.sum(
-          (asset_balances_data?.[chain_id] || [])
+          (router_asset_balances_data?.[chain_id] || [])
             .filter(a =>
               [
                 contract_address,
@@ -575,7 +573,7 @@ export default () => {
               ]
               .filter(_a => _a)
               .findIndex(_a =>
-                equals_ignore_case(
+                equalsIgnoreCase(
                   a?.contract_address,
                   _a,
                 )
@@ -588,7 +586,7 @@ export default () => {
                     a?.amount ||
                     '0'
                   ),
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     a?.contract_address,
                     next_asset?.contract_address,
                   ) &&
@@ -607,7 +605,7 @@ export default () => {
           slippage,
           forceSlow:
             destination_chain_data &&
-            asset_balances_data ?
+            router_asset_balances_data ?
               Number(amount) > liquidity_amount :
               false,
           receiveLocal,
@@ -652,13 +650,13 @@ export default () => {
             source_chain &&
             destination_chain
           ) &&
-          !equals_ignore_case(
+          !equalsIgnoreCase(
             id,
             destination_chain,
           )
         ) {
           const params =
-            params_to_obj(
+            paramsToObj(
               asPath.indexOf('?') > -1 &&
               asPath.substring(
                 asPath.indexOf('?') + 1,
@@ -679,7 +677,7 @@ export default () => {
         }
         else if (
           !asPath.includes('from-') &&
-          !equals_ignore_case(
+          !equalsIgnoreCase(
             id,
             source_chain,
           )
@@ -709,13 +707,13 @@ export default () => {
 
         destination_chain =
           destination_chain &&
-          !equals_ignore_case(
+          !equalsIgnoreCase(
             destination_chain,
             source_chain,
           ) ?
             destination_chain :
             bridge.source_chain &&
-            !equals_ignore_case(
+            !equalsIgnoreCase(
               bridge.source_chain,
               source_chain,
             ) ?
@@ -766,13 +764,13 @@ export default () => {
             source_chain &&
             destination_chain
           ) &&
-          !equals_ignore_case(
+          !equalsIgnoreCase(
             id,
             destination_chain,
           )
         ) {
           const params =
-            params_to_obj(
+            paramsToObj(
               asPath.indexOf('?') > -1 &&
               asPath.substring(
                 asPath.indexOf('?') + 1,
@@ -793,7 +791,7 @@ export default () => {
         }
         else if (
           !asPath.includes('from-') &&
-          !equals_ignore_case(
+          !equalsIgnoreCase(
             id,
             source_chain,
           )
@@ -823,13 +821,13 @@ export default () => {
 
         destination_chain =
           destination_chain &&
-          !equals_ignore_case(
+          !equalsIgnoreCase(
             destination_chain,
             source_chain,
           ) ?
             destination_chain :
             bridge.source_chain &&
-            !equals_ignore_case(
+            !equalsIgnoreCase(
               bridge.source_chain,
               source_chain,
             ) ?
@@ -1007,7 +1005,7 @@ export default () => {
               if (Array.isArray(response)) {
                 transfer_data = response
                   .find(t =>
-                    equals_ignore_case(
+                    equalsIgnoreCase(
                       t?.xcall_transaction_hash,
                       transactionHash,
                     )
@@ -1031,7 +1029,7 @@ export default () => {
                 if (Array.isArray(response)) {
                   transfer_data = response
                     .find(t =>
-                      equals_ignore_case(
+                      equalsIgnoreCase(
                         t?.xcall_transaction_hash,
                         transactionHash,
                       )
@@ -1095,7 +1093,7 @@ export default () => {
             if (Array.isArray(response)) {
               const transfer_data = response
                 .find(t =>
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     t?.transfer_id,
                     transfer_id,
                   )
@@ -1276,7 +1274,7 @@ export default () => {
                 (a?.contracts || [])
                   .findIndex(c =>
                     c?.chain_id === chain_id &&
-                    equals_ignore_case(
+                    equalsIgnoreCase(
                       c?.contract_address,
                       contract_address,
                     )
@@ -1344,7 +1342,7 @@ export default () => {
             !(
               (balances_data?.[`${chain_id}`] || [])
                 .findIndex(c =>
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     c?.contract_address,
                     contract_address,
                   )
@@ -1424,10 +1422,10 @@ export default () => {
           .map(a => {
             const {
               next_asset,
-            } = { ...a };
+            } = { ...a }
             let {
               contract_address,
-            } = {  ...a }
+            } = { ...a }
 
             contract_address = contract_address.toLowerCase()
 
@@ -1746,7 +1744,7 @@ export default () => {
 
       const originTokenAddress =
         (
-          equals_ignore_case(
+          equalsIgnoreCase(
             source_contract_data?.contract_address,
             constants.AddressZero,
           ) ?
@@ -1770,7 +1768,7 @@ export default () => {
         typeof receive_local === 'boolean' ?
           receive_local :
           receiveLocal ||
-          equals_ignore_case(
+          equalsIgnoreCase(
             destination_contract_data?.contract_address,
             _destination_contract_data?.next_asset?.contract_address,
           )
@@ -2086,7 +2084,7 @@ export default () => {
 
       if (symbol) {
         if (
-          equals_ignore_case(
+          equalsIgnoreCase(
             source_contract_data?.next_asset?.symbol,
             symbol,
           )
@@ -2098,7 +2096,7 @@ export default () => {
         }
         else if (
           source_contract_data?.wrapable &&
-          equals_ignore_case(
+          equalsIgnoreCase(
             source_asset_data?.symbol,
             symbol,
           )
@@ -2312,7 +2310,7 @@ export default () => {
       if (!failed) {
         const is_wrap_eth =
           (
-            equals_ignore_case(
+            equalsIgnoreCase(
               source_contract_data?.contract_address,
               constants.AddressZero,
             ) ||
@@ -2472,7 +2470,7 @@ export default () => {
                               )
                               .toString(),
                               (
-                                equals_ignore_case(
+                                equalsIgnoreCase(
                                   destination_transacting_asset,
                                   destination_contract_data?.next_asset?.contract_address,
                                 ) &&
@@ -2503,7 +2501,7 @@ export default () => {
             }
           }
         } catch (error) {
-          let message = 
+          let message =
             error?.reason ||
             error?.data?.message ||
             error?.message
@@ -2618,7 +2616,7 @@ export default () => {
 
   if (symbol) {
     if (
-      equals_ignore_case(
+      equalsIgnoreCase(
         source_contract_data?.next_asset?.symbol,
         symbol,
       )
@@ -2630,7 +2628,7 @@ export default () => {
     }
     else if (
       source_contract_data?.wrapable &&
-      equals_ignore_case(
+      equalsIgnoreCase(
         source_asset_data?.symbol,
         symbol,
       )
@@ -2657,7 +2655,7 @@ export default () => {
   let destination_contract_data = (destination_asset_data?.contracts || [])
     .find(c =>
       c?.chain_id === destination_chain_data?.chain_id
-    )  
+    )
 
   const _destination_contract_data = _.cloneDeep(destination_contract_data)
 
@@ -2679,11 +2677,11 @@ export default () => {
     destination_contract_data?.wrapable &&
     (
       !symbol ||
-      equals_ignore_case(
+      equalsIgnoreCase(
         destination_asset_data?.symbol,
         symbol,
       ) ||
-      equals_ignore_case(
+      equalsIgnoreCase(
         destination_contract_data?.symbol,
         symbol,
       )
@@ -2707,7 +2705,7 @@ export default () => {
 
   const source_balance = (balances_data?.[source_chain_data?.chain_id] || [])
     .find(b =>
-      equals_ignore_case(
+      equalsIgnoreCase(
         b?.contract_address,
         source_contract_data?.contract_address,
       )
@@ -2727,7 +2725,7 @@ export default () => {
 
   const destination_balance = (balances_data?.[destination_chain_data?.chain_id] || [])
     .find(b =>
-      equals_ignore_case(
+      equalsIgnoreCase(
         b?.contract_address,
         destination_contract_data?.contract_address,
       )
@@ -2741,7 +2739,7 @@ export default () => {
 
   const source_gas_balance = (balances_data?.[source_chain_data?.chain_id] || [])
     .find(b =>
-      equals_ignore_case(
+      equalsIgnoreCase(
         b?.contract_address,
         constants.AddressZero,
       )
@@ -2771,7 +2769,7 @@ export default () => {
 
   const liquidity_amount =
     _.sum(
-      (asset_balances_data?.[destination_chain_data?.chain_id] || [])
+      (router_asset_balances_data?.[destination_chain_data?.chain_id] || [])
         .filter(a =>
           [
             destination_contract_data?.contract_address,
@@ -2779,7 +2777,7 @@ export default () => {
           ]
           .filter(_a => _a)
           .findIndex(_a =>
-            equals_ignore_case(
+            equalsIgnoreCase(
               a?.contract_address,
               _a,
             )
@@ -2792,7 +2790,7 @@ export default () => {
                 a?.amount ||
                 '0'
               ),
-              equals_ignore_case(
+              equalsIgnoreCase(
                 a?.contract_address,
                 destination_contract_data?.next_asset?.contract_address,
               ) &&
@@ -2949,9 +2947,6 @@ export default () => {
     <div className={`grid grid-cols-1 ${has_latest_transfers ? 'lg:grid-cols-8' : ''} items-start gap-4 my-4 sm:my-0 xl:my-4`}>
       <div className="hidden xl:block col-span-0 xl:col-span-2" />
       <div className={`col-span-1 ${has_latest_transfers ? 'lg:col-span-5' : ''} xl:col-span-4`}>
-        <div className="mt-4 sm:mt-0 xl:mt-8">
-          <Announcement />
-        </div>
         <div className="flex flex-col items-center justify-center space-y-6 sm:space-y-6 my-4 sm:my-0 xl:my-6 mx-1 sm:mx-4">
           <div
             className={
@@ -3006,7 +3001,7 @@ export default () => {
                                 }` :
                                 '/images/transfer-statuses/Start.gif'
                           }
-                          src_end={
+                          srcEnd={
                             latest_transfer.execute_transaction_hash ?
                               '/images/transfer-statuses/Success-End.jpeg' :
                               errored ?
@@ -3019,7 +3014,7 @@ export default () => {
                                 }` :
                                 '/images/transfer-statuses/Processing.gif'
                           }
-                          duration_second={2}
+                          duration={2}
                           width={526}
                           height={295.875}
                         />
@@ -3081,40 +3076,6 @@ export default () => {
                         }
                       }
                     />
-                    {/*
-                      <CountdownCircleTimer
-                        isPlaying
-                        duration={estimated_time_seconds}
-                        colors={
-                          (
-                            latest_transfer?.routers &&
-                            latest_transfer.routers.length < 1
-                          ) ||
-                          latest_transfer?.force_slow ?
-                            '#facc15' :
-                            '#22c55e'
-                        }
-                        size={140}
-                      >
-                        {({ remainingTime }) => (
-                          time_spent_seconds > estimated_time_seconds ?
-                            <span className="text-sm font-semibold">
-                              Processing ...
-                            </span> :
-                            <div className="flex flex-col items-center space-y-1">
-                              <span className="text-slate-400 dark:text-slate-500 text-sm font-medium">
-                                Time left
-                              </span>
-                              <span className="text-lg font-semibold">
-                                {total_time_string(
-                                  time_spent_seconds,
-                                  estimated_time_seconds,
-                                )}
-                              </span>
-                            </div>
-                        )}
-                      </CountdownCircleTimer>
-                    */}
                   </div>
                   <div className="flex flex-col items-center space-y-2">
                     <span className="text-slate-500 dark:text-slate-500 text-xs sm:text-sm font-medium">
@@ -3210,9 +3171,9 @@ export default () => {
                                   Your funds will arrive at the destination in about
                                 </span>
                                 <TimeSpent
-                                  from_time={time_spent_seconds}
-                                  to_time={estimated_time_seconds}
-                                  no_tooltip={true}
+                                  fromTime={time_spent_seconds}
+                                  toTime={estimated_time_seconds}
+                                  noTooltip={true}
                                   className="text-black dark:text-white font-semibold"
                                 />
                                 .
@@ -3431,12 +3392,6 @@ export default () => {
                           </div>
                           <SelectChain
                             disabled={disabled}
-                            fixed={
-                              [
-                                'pool',
-                              ]
-                              .includes(source)
-                            }
                             value={source_chain}
                             onSelect={c => {
                               const _source_chain = c
@@ -3451,7 +3406,7 @@ export default () => {
                                   source_chain: _source_chain,
                                   destination_chain: _destination_chain,
                                   symbol:
-                                    equals_ignore_case(
+                                    equalsIgnoreCase(
                                       _source_chain,
                                       source_chain,
                                     ) ?
@@ -3466,6 +3421,7 @@ export default () => {
                             source={source_chain}
                             destination={destination_chain}
                             origin="from"
+                            fixed={['pool'].includes(source)}
                           />
                         </div>
                         <div className="flex items-center justify-center mt-5.5 sm:mt-7">
@@ -3518,12 +3474,6 @@ export default () => {
                           </div>
                           <SelectChain
                             disabled={disabled}
-                            fixed={
-                              [
-                                'pool',
-                              ]
-                              .includes(source)
-                            }
                             value={destination_chain}
                             onSelect={c => {
                               const _source_chain =
@@ -3546,6 +3496,7 @@ export default () => {
                             source={source_chain}
                             destination={destination_chain}
                             origin="to"
+                            fixed={['pool'].includes(source)}
                           />
                         </div>
                       </div>
@@ -3647,12 +3598,6 @@ export default () => {
                         <div className="flex items-center justify-between space-x-2">
                           <SelectAsset
                             disabled={disabled}
-                            fixed={
-                              [
-                                'pool',
-                              ]
-                              .includes(source)
-                            }
                             value={asset}
                             onSelect={(a, s) => {
                               setBridge(
@@ -3662,7 +3607,7 @@ export default () => {
                                   symbol: s,
                                   amount:
                                     a !== asset ||
-                                    !equals_ignore_case(
+                                    !equalsIgnoreCase(
                                       s,
                                       symbol,
                                     ) ?
@@ -3677,10 +3622,10 @@ export default () => {
                               }
                             }}
                             chain={source_chain}
-                            origin=""
-                            is_bridge={true}
-                            show_next_assets={showNextAssets}
-                            show_native_assets={true}
+                            isBridge={true}
+                            showNextAssets={showNextAssets}
+                            showNativeAssets={true}
+                            fixed={['pool'].includes(source)}
                             data={
                               {
                                 ...source_asset_data,
@@ -3731,7 +3676,7 @@ export default () => {
                                   }
 
                                   value =
-                                    number_to_fixed(
+                                    numberToFixed(
                                       value,
                                       source_decimals ||
                                       18,
@@ -3806,7 +3751,7 @@ export default () => {
                                 <div className="text-slate-400 dark:text-slate-500 font-medium text-xs text-right">
                                   {currency_symbol}
                                   {
-                                    number_format(
+                                    numberFormat(
                                       Number(amount) * source_asset_data.price,
                                       '0,0.00',
                                     )
@@ -3863,13 +3808,6 @@ export default () => {
                                     <div className="flex items-center justify-between space-x-2">
                                       <SelectAsset
                                         disabled={disabled}
-                                        fixed={
-                                          [
-                                            'pool',
-                                          ]
-                                          .includes(source) ||
-                                          !is_wrapable_asset
-                                        }
                                         value={asset}
                                         onSelect={(a, s) => {
                                           if (
@@ -3896,11 +3834,11 @@ export default () => {
                                           }
                                         }}
                                         chain={destination_chain}
-                                        origin=""
-                                        is_bridge={true}
-                                        show_next_assets={!is_wrapable_asset}
-                                        show_native_assets={true}
-                                        show_only_wrapable={is_wrapable_asset}
+                                        isBridge={true}
+                                        showNextAssets={!is_wrapable_asset}
+                                        showNativeAssets={true}
+                                        showOnlyWrapable={is_wrapable_asset}
+                                        fixed={['pool'].includes(source) || !is_wrapable_asset}
                                         data={
                                           {
                                             ...destination_asset_data,
@@ -3941,7 +3879,7 @@ export default () => {
                                                 <DecimalsFormat
                                                   value={
                                                     Number(estimated_received) >= 1000 ?
-                                                      number_format(
+                                                      numberFormat(
                                                         estimated_received,
                                                         '0,0.000000000000',
                                                         true,
@@ -3964,7 +3902,7 @@ export default () => {
                                             }
                                           </span> :
                                           <Oval
-                                            color={loader_color(theme)}
+                                            color={loaderColor(theme)}
                                             width="20"
                                             height="20"
                                           />
@@ -4026,7 +3964,7 @@ export default () => {
                                                           let value = e.target.value
 
                                                           try {
-                                                            value = 
+                                                            value =
                                                               value
                                                                 .trim()
                                                                 .split(' ')
@@ -4225,7 +4163,7 @@ export default () => {
                                                     </> :
                                                     <div className="flex items-center space-x-1.5">
                                                       <span className="text-sm font-semibold">
-                                                        {number_format(
+                                                        {numberFormat(
                                                           slippage,
                                                           '0,0.00',
                                                         )}%
@@ -4315,7 +4253,7 @@ export default () => {
                                                 <DecimalsFormat
                                                   value={
                                                     Number(router_fee) >= 1000 ?
-                                                      number_format(
+                                                      numberFormat(
                                                         router_fee,
                                                         '0,0.000000000000',
                                                         true,
@@ -4331,7 +4269,7 @@ export default () => {
                                                 </span>
                                               </span> :
                                               <Oval
-                                                color={loader_color(theme)}
+                                                color={loaderColor(theme)}
                                                 width="16"
                                                 height="16"
                                               />
@@ -4357,7 +4295,7 @@ export default () => {
                                             <DecimalsFormat
                                               value={
                                                 Number(relayer_fee) >= 1000 ?
-                                                  number_format(
+                                                  numberFormat(
                                                     relayer_fee,
                                                     '0,0.000000000000',
                                                     true,
@@ -4394,7 +4332,7 @@ export default () => {
                                               </Tooltip>
                                               <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-semibold space-x-1.5">
                                                 <span>
-                                                  {number_format(
+                                                  {numberFormat(
                                                     price_impact,
                                                     '0,0.000000',
                                                     true,
@@ -4418,7 +4356,7 @@ export default () => {
                                     ) &&
                                     (
                                       Number(amount) < liquidity_amount ||
-                                      asset_balances_data
+                                      router_asset_balances_data
                                     ) &&
                                     (
                                       <div className="flex items-center justify-between space-x-1">
@@ -4469,7 +4407,7 @@ export default () => {
                         xcall ||
                         source_balance
                       ) &&
-                      web3_provider &&
+                      browser_provider &&
                       (
                         (
                           [
@@ -4483,11 +4421,11 @@ export default () => {
                           .includes(amount)
                         ) ||
                         (
-                          web3_provider &&
+                          browser_provider &&
                           wrong_chain
                         )
                       ) ?
-                        web3_provider &&
+                        browser_provider &&
                         wrong_chain ?
                           <Wallet
                             connectChainId={source_chain_data?.chain_id}
@@ -4620,7 +4558,7 @@ export default () => {
                                         Number(amount) > pool_amount ?
                                           `Exceed Pool Balances: ${
                                             pool_amount >= 1000 ?
-                                              number_format(
+                                              numberFormat(
                                                 pool_amount,
                                                 '0,0.00',
                                               ) :
@@ -4792,12 +4730,12 @@ export default () => {
                                               .substring(
                                                 0,
                                                 status === 'failed' &&
-                                                error_patterns
+                                                errorPatterns
                                                   .findIndex(c =>
                                                     message?.indexOf(c) > -1
                                                   ) > -1 ?
                                                   message.indexOf(
-                                                    error_patterns
+                                                    errorPatterns
                                                       .find(c =>
                                                         message.indexOf(c) > -1
                                                       )
@@ -4846,7 +4784,7 @@ export default () => {
                                   )
                                 })
                               ) :
-                        web3_provider ?
+                        browser_provider ?
                           <button
                             disabled={true}
                             className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base text-center py-3 sm:py-4 px-2 sm:px-3"
@@ -4872,8 +4810,8 @@ export default () => {
             _source_contract_data?.mintable &&
             (
               <Faucet
-                token_id={asset}
-                contract_data={_source_contract_data}
+                tokenId={asset}
+                contractData={_source_contract_data}
               />
             )
           }
@@ -4881,11 +4819,9 @@ export default () => {
       </div>
       <div className={`col-span-1 ${has_latest_transfers ? 'lg:col-span-3' : ''} xl:col-span-2`}>
         <LatestTransfers
-          trigger={transfersTrigger}
           data={latestTransfers}
-          onUpdateSize={size =>
-            setLatestTransfersSize(size)
-          }
+          trigger={transfersTrigger}
+          onUpdateSize={size => setLatestTransfersSize(size)}
         />
       </div>
     </div>

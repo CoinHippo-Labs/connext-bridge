@@ -2,7 +2,7 @@ import { SDK } from './types'
 
 export default (
   state = {
-    [`${SDK}`]: null,
+    [SDK]: null,
   },
   action,
 ) => {
@@ -10,7 +10,7 @@ export default (
     case SDK:
       return {
         ...state,
-        [`${SDK}`]: action.value,
+        [SDK]: action.value,
       }
     default:
       return state

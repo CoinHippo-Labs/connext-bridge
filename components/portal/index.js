@@ -14,7 +14,6 @@ export default (
   useEffect(
     () => {
       ref.current = document.querySelector(selector)
-
       setMounted(true)
     },
     [selector],

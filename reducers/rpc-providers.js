@@ -2,7 +2,7 @@ import { RPCS } from './types'
 
 export default (
   state = {
-    [`${RPCS}`]: null,
+    [RPCS]: null,
   },
   action,
 ) => {
@@ -10,7 +10,7 @@ export default (
     case RPCS:
       return {
         ...state,
-        [`${RPCS}`]: action.value,
+        [RPCS]: action.value,
       }
     default:
       return state

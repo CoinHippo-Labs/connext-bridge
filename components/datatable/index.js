@@ -4,6 +4,7 @@ import { useTable, useSortBy, usePagination, useRowSelect } from 'react-table'
 import { BiChevronDown, BiChevronUp, BiLeftArrowAlt, BiRightArrowAlt } from 'react-icons/bi'
 
 import { PageWithText, Pagination } from '../paginations'
+import { toArray } from '../../lib/utils'
 
 const IndeterminateCheckbox =
   forwardRef(
@@ -16,9 +17,7 @@ const IndeterminateCheckbox =
     ) => {
       const defaultRef = useRef()
 
-      const resolvedRef =
-        ref ||
-        defaultRef
+      const resolvedRef = ref || defaultRef
 
       useEffect(
         () => {
@@ -45,13 +44,7 @@ export default (
     data,
     rowSelectEnable = false,
     defaultPageSize = 10,
-    pageSizes =
-      [
-        10,
-        25,
-        50,
-        100,
-      ],
+    pageSizes = [10, 25, 50, 100],
     noPagination = false,
     noRecordPerPage = false,
     className = '',
@@ -101,37 +94,36 @@ export default (
     usePagination,
     useRowSelect,
     hooks => {
-      hooks.visibleColumns
-        .push(
-          columns =>
-            [
-              rowSelectEnable ?
-                {
-                  id: 'selection',
-                  Header: (
-                    {
-                      getToggleAllRowsSelectedProps,
-                    },
-                  ) => (
-                    <IndeterminateCheckbox
-                      { ...getToggleAllRowsSelectedProps() }
-                    />
-                  ),
-                  Cell: (
-                    {
-                      row,
-                    },
-                  ) => (
-                    <IndeterminateCheckbox
-                      { ...row.getToggleRowSelectedProps() }
-                    />
-                  )
-                } :
-                undefined,
-              ...columns,
-            ]
-            .filter(c => c)
-        )
+      hooks.visibleColumns.push(
+        columns =>
+          [
+            rowSelectEnable ?
+              {
+                id: 'selection',
+                Header: (
+                  {
+                    getToggleAllRowsSelectedProps,
+                  },
+                ) => (
+                  <IndeterminateCheckbox
+                    { ...getToggleAllRowsSelectedProps() }
+                  />
+                ),
+                Cell: (
+                  {
+                    row,
+                  },
+                ) => (
+                  <IndeterminateCheckbox
+                    { ...row.getToggleRowSelectedProps() }
+                  />
+                )
+              } :
+              undefined,
+            ...columns,
+          ]
+          .filter(c => c)
+      )
     }
   )
 
@@ -144,10 +136,7 @@ export default (
     [pageIndex, pageCount],
   )
 
-  const loading = (data || [])
-    .findIndex(d =>
-      d.skeleton
-    ) > -1
+  const loading = toArray(data).findIndex(d => d.skeleton) > -1
 
   return (
     <>
@@ -162,83 +151,67 @@ export default (
         }
       >
         <thead>
-          {
-            headerGroups
-              .map(hg => (
-                <tr
-                  { ...hg.getHeaderGroupProps() }
-                >
-                  {hg.headers
-                    .map((c, i) => (
-                      <th
+          {headerGroups
+            .map(hg =>
+              <tr { ...hg.getHeaderGroupProps() }>
+                {hg.headers
+                  .map((c, i) =>
+                    <th
+                      { ...(c.getHeaderProps(c.getSortByToggleProps())) }
+                      className={`${i === 0 ? 'rounded-tl' : i === hg.headers.length - 1 ? 'rounded-tr' : ''} ${c.className || ''}`}
+                    >
+                      <div className={`flex flex-row items-center ${c.headerClassName?.includes('justify-') ? '' : 'justify-start'} ${c.headerClassName || ''}`}>
+                        <span>
+                          {c.render('Header')}
+                        </span>
                         {
-                          ...(
-                            c.getHeaderProps(
-                              c.getSortByToggleProps()
-                            )
+                          c.isSorted &&
+                          (
+                            <span className="ml-1.5">
+                              {c.isSortedDesc ?
+                                <BiChevronDown
+                                  className="stroke-current"
+                                /> :
+                                <BiChevronUp
+                                  className="stroke-current"
+                                />
+                              }
+                            </span>
                           )
                         }
-                        className={`${i === 0 ? 'rounded-tl' : i === hg.headers.length - 1 ? 'rounded-tr' : ''} ${c.className || ''}`}
-                      >
-                        <div className={`flex flex-row items-center ${c.headerClassName?.includes('justify-') ? '' : 'justify-start'} ${c.headerClassName || ''}`}>
-                          <span>
-                            {c.render('Header')}
-                          </span>
-                          {
-                            c.isSorted &&
-                            (
-                              <span className="ml-1.5">
-                                {c.isSortedDesc ?
-                                  <BiChevronDown
-                                    className="stroke-current"
-                                  /> :
-                                  <BiChevronUp
-                                    className="stroke-current"
-                                  />
-                                }
-                              </span>
-                            )
-                          }
-                        </div>
-                      </th>
-                    ))
-                  }
-                </tr>
-              ))
-          }
-        </thead>
-        <tbody
-          { ...getTableBodyProps() }
-        >
-          {(noPagination ?
-            rows :
-            page
-          ).map((row, i) => {
-            prepareRow(row)
-
-            return (
-              <tr
-                { ...row.getRowProps() }
-              >
-                {
-                  row.cells
-                    .map((cell, j) => (
-                    <td
-                      { ...cell.getCellProps() }
-                      className={_.head(headerGroups)?.headers[j]?.className}
-                    >
-                      {cell.render('Cell')}
-                    </td>
-                  ))
+                      </div>
+                    </th>
+                  )
                 }
               </tr>
             )
-          })}
+          }
+        </thead>
+        <tbody { ...getTableBodyProps() }>
+          {(noPagination ? rows : page)
+            .map((row, i) => {
+              prepareRow(row)
+
+              return (
+                <tr { ...row.getRowProps() }>
+                  {row.cells
+                    .map((cell, j) =>
+                      <td
+                        { ...cell.getCellProps() }
+                        className={_.head(headerGroups)?.headers[j]?.className}
+                      >
+                        {cell.render('Cell')}
+                      </td>
+                    )
+                  }
+                </tr>
+              )
+            })
+          }
         </tbody>
       </table>
       {
-        !noPagination &&
-        data?.length > 0 &&
+        !noPagination && data?.length > 0 &&
         (
           <div className={`flex flex-col items-center ${noRecordPerPage || pageCount > 4 ? 'sm:flex-row justify-center' : 'sm:grid sm:grid-cols-3 justify-between'} gap-4 my-0.5`}>
             {
@@ -247,32 +220,25 @@ export default (
                 <select
                   disabled={loading}
                   value={pageSize}
-                  onChange={
-                    e =>
-                      setPageSize(
-                        Number(e.target.value)
-                      )
-                  }
+                  onChange={e => setPageSize(Number(e.target.value))}
                   className="w-24 form-select bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 outline-none border-zinc-100 dark:border-zinc-900 appearance-none shadow rounded cursor-pointer text-center py-2 px-3"
                 >
-                  {
-                    pageSizes
-                      .map((s, i) => (
-                        <option
-                          key={i}
-                          value={s}
-                          className="text-xs font-medium"
-                        >
-                          Show {s}
-                        </option>
-                      ))
+                  {pageSizes
+                    .map((s, i) =>
+                      <option
+                        key={i}
+                        value={s}
+                        className="text-xs font-medium"
+                      >
+                        Show {s}
+                      </option>
+                    )
                   }
                 </select>
               )
             }
             {
-              pageCount > 1 &&
-              pageCount <= 4 &&
+              pageCount > 1 && pageCount <= 4 &&
               (
                 <div className="space-x-1 my-2.5 sm:my-0 mx-auto">
                   <span>
@@ -307,11 +273,12 @@ export default (
                         size={16}
                       />
                     }
-                    onClick={p => {
-                      gotoPage(p - 1)
-
-                      // tableRef.current.scrollIntoView() 
-                    }}
+                    onClick={
+                      p => {
+                        gotoPage(p - 1)
+                        // tableRef.current.scrollIntoView()
+                      }
+                    }
                     icons={true}
                     className="space-x-0.5"
                   />
@@ -323,11 +290,12 @@ export default (
                       <PageWithText
                         size={size}
                         disabled={loading}
-                        onClick={() => {
-                          gotoPage(0)
-
-                          tableRef.current.scrollIntoView() 
-                        }}
+                        onClick={
+                          () => {
+                            gotoPage(0)
+                            tableRef.current.scrollIntoView()
+                          }
+                        }
                       >
                         <span className="text-black dark:text-white font-bold">
                           First
@@ -341,11 +309,12 @@ export default (
                       <PageWithText
                         size={size}
                         disabled={loading}
-                        onClick={() => {
-                          previousPage()
-
-                          // tableRef.current.scrollIntoView() 
-                        }}
+                        onClick={
+                          () => {
+                            previousPage()
+                            // tableRef.current.scrollIntoView()
+                          }
+                        }
                       >
                         Previous
                       </PageWithText>
@@ -356,15 +325,13 @@ export default (
                     (
                       <PageWithText
                         size={size}
-                        disabled={
-                          !canNextPage ||
-                          loading
+                        disabled={!canNextPage || loading}
+                        onClick={
+                          () => {
+                            nextPage()
+                            // tableRef.current.scrollIntoView()
+                          }
                         }
-                        onClick={() => {
-                          nextPage()
-
-                          // tableRef.current.scrollIntoView() 
-                        }}
                       >
                         Next
                       </PageWithText>
@@ -375,15 +342,13 @@ export default (
                     (
                       <PageWithText
                         size={size}
-                        disabled={
-                          !canNextPage ||
-                          loading
+                        disabled={!canNextPage || loading}
+                        onClick={
+                          () => {
+                            gotoPage(pageCount - 1)
+                            tableRef.current.scrollIntoView()
+                          }
                         }
-                        onClick={() => {
-                          gotoPage(pageCount - 1)
-
-                          tableRef.current.scrollIntoView() 
-                        }}
                       >
                         <span className="text-black dark:text-white font-bold">
                           Last

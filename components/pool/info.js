@@ -5,7 +5,7 @@ import { TailSpin } from 'react-loader-spinner'
 import Image from '../image'
 import DecimalsFormat from '../decimals-format'
 import { currency_symbol } from '../../lib/object/currency'
-import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
+import { numberFormat, equalsIgnoreCase, loaderColor } from '../../lib/utils'
 
 export default (
   {
@@ -178,12 +178,12 @@ export default (
         decimals,
         image:
           (
-            equals_ignore_case(
+            equalsIgnoreCase(
               address,
               contract_address,
             ) ?
               contract_data?.image :
-              equals_ignore_case(
+              equalsIgnoreCase(
                 address,
                 next_asset?.contract_address,
               ) ?
@@ -282,7 +282,7 @@ export default (
                     !error ?
                       <span className="uppercase">
                         {currency_symbol}
-                        {number_format(
+                        {numberFormat(
                           tvl,
                           '0,0.00',
                           true,
@@ -295,7 +295,7 @@ export default (
                         pool_loading ?
                           <div className="mt-1">
                             <TailSpin
-                              color={loader_color(theme)}
+                              color={loaderColor(theme)}
                               width="24"
                               height="24"
                             />
@@ -318,7 +318,7 @@ export default (
                       !isNaN(volume_value) ?
                         <span className="uppercase">
                           {currency_symbol}
-                          {number_format(
+                          {numberFormat(
                             volume_value,
                             '0,0.00',
                             true,
@@ -332,7 +332,7 @@ export default (
                         pool_loading ?
                           <div className="mt-1">
                             <TailSpin
-                              color={loader_color(theme)}
+                              color={loaderColor(theme)}
                               width="24"
                               height="24"
                             />
@@ -354,7 +354,7 @@ export default (
                     <div>
                       <div className="mt-1">
                         <TailSpin
-                          color={loader_color(theme)}
+                          color={loaderColor(theme)}
                           width="24"
                           height="24"
                         />
@@ -406,7 +406,7 @@ export default (
                                 !error ?
                                   <span className="uppercase">
                                     {balance > -1 ?
-                                      number_format(
+                                      numberFormat(
                                         balance,
                                         balance > 1000 ?
                                           '0,0.00' :
@@ -423,7 +423,7 @@ export default (
                                     pool_loading ?
                                       <div className="mt-1">
                                         <TailSpin
-                                          color={loader_color(theme)}
+                                          color={loaderColor(theme)}
                                           width="24"
                                           height="24"
                                         />
@@ -449,7 +449,7 @@ export default (
                     <div>
                       <div className="mt-1">
                         <TailSpin
-                          color={loader_color(theme)}
+                          color={loaderColor(theme)}
                           width="24"
                           height="24"
                         />
@@ -483,7 +483,7 @@ export default (
                             >
                               <DecimalsFormat
                                 value={
-                                  number_format(
+                                  numberFormat(
                                     Number(
                                       lpTokenBalance ||
                                       0
@@ -497,7 +497,7 @@ export default (
                             </a> :
                             <DecimalsFormat
                               value={
-                                number_format(
+                                numberFormat(
                                   Number(
                                     lpTokenBalance ||
                                     0
@@ -516,7 +516,7 @@ export default (
                         </span>
                         <DecimalsFormat
                           value={
-                            number_format(
+                            numberFormat(
                               share ||
                               0,
                               share > 1 ?
@@ -525,7 +525,7 @@ export default (
                               true,
                             )
                           }
-                          max_decimals={
+                          maxDecimals={
                             share > 100 ?
                               0 :
                               share > 1 ?

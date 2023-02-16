@@ -21,7 +21,7 @@ import DecimalsFormat from '../decimals-format'
 import Wallet from '../wallet'
 import Alert from '../alerts'
 import Copy from '../copy'
-import { number_format, number_to_fixed, ellipse, equals_ignore_case, loader_color, sleep, error_patterns } from '../../lib/utils'
+import { numberFormat, numberToFixed, ellipse, equalsIgnoreCase, loaderColor, sleep, errorPatterns } from '../../lib/utils'
 
 const WRAPPED_PREFIX =
   process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
@@ -39,11 +39,7 @@ const DEFAULT_POOL_SLIPPAGE_PERCENTAGE =
   ) ||
   3
 
-const DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES =
-  Number(
-    process.env.NEXT_PUBLIC_DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES
-  ) ||
-  60
+const DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES = 60
 
 const ACTIONS =
   [
@@ -106,9 +102,9 @@ export default (
   } = { ...wallet }
   const {
     provider,
-    web3_provider,
-    address,
+    browser_provider,
     signer,
+    address,
   } = { ...wallet_data }
   const {
     balances_data,
@@ -547,7 +543,7 @@ export default (
             )
           ),
           ...(
-            equals_ignore_case(
+            equalsIgnoreCase(
               adopted.address,
               contract_address,
             ) ?
@@ -573,7 +569,7 @@ export default (
             )
           ),
           ...(
-            equals_ignore_case(
+            equalsIgnoreCase(
               local.address,
               contract_address,
             ) ?
@@ -1352,7 +1348,7 @@ export default (
           error,
         },
       )
-      
+
       const code =
         _.slice(
           (message || '')
@@ -1464,7 +1460,7 @@ export default (
           error,
         },
       )
-      
+
       const code =
         _.slice(
           (message || '')
@@ -1587,7 +1583,7 @@ export default (
         )
       ),
       ...(
-        equals_ignore_case(
+        equalsIgnoreCase(
           adopted.address,
           contract_address,
         ) ?
@@ -1646,12 +1642,12 @@ export default (
     x_asset_data &&
     (balances_data?.[chain_id] || [])
       .find(b =>
-        equals_ignore_case(
+        equalsIgnoreCase(
           b?.contract_address,
           x_asset_data.contract_address,
         )
       )
-  
+
   const x_balance_amount = x_balance?.amount
 
   const y_asset_data =
@@ -1666,7 +1662,7 @@ export default (
         )
       ),
       ...(
-        equals_ignore_case(
+        equalsIgnoreCase(
           local.address,
           contract_address,
         ) ?
@@ -1714,7 +1710,7 @@ export default (
                 'TEST',
               ]
               .findIndex(s =>
-                equals_ignore_case(
+                equalsIgnoreCase(
                   s,
                   local.symbol,
                 )
@@ -1724,7 +1720,7 @@ export default (
                 'WETH',
               ]
               .findIndex(s =>
-                equals_ignore_case(
+                equalsIgnoreCase(
                   s,
                   local.symbol,
                 )
@@ -1737,12 +1733,12 @@ export default (
     y_asset_data &&
     (balances_data?.[chain_id] || [])
       .find(b =>
-        equals_ignore_case(
+        equalsIgnoreCase(
           b?.contract_address,
           y_asset_data.contract_address,
         )
       )
-  
+
   const y_balance_amount = y_balance?.amount
 
   const pool_loading =
@@ -1764,7 +1760,7 @@ export default (
   } = { ...user_pool_data }
 
   const x_remove_amount =
-    equals_ignore_case(
+    equalsIgnoreCase(
       adopted?.address,
       contract_address,
     ) ?
@@ -1772,7 +1768,7 @@ export default (
       _.last(removeAmounts)
 
   const y_remove_amount =
-    equals_ignore_case(
+    equalsIgnoreCase(
       adopted?.address,
       contract_address,
     ) ?
@@ -1808,12 +1804,12 @@ export default (
         decimals,
         image:
           (
-            equals_ignore_case(
+            equalsIgnoreCase(
               address,
               contract_address,
             ) ?
               contract_data?.image :
-              equals_ignore_case(
+              equalsIgnoreCase(
                 address,
                 next_asset?.contract_address,
               ) ?
@@ -1987,7 +1983,7 @@ export default (
       Number(amountX) +
       Number(
         (
-          equals_ignore_case(
+          equalsIgnoreCase(
             adopted.address,
             x_asset_data?.contract_address,
           ) ?
@@ -2001,7 +1997,7 @@ export default (
       Number(amountY) +
       Number(
         (
-          equals_ignore_case(
+          equalsIgnoreCase(
             adopted.address,
             y_asset_data?.contract_address,
           ) ?
@@ -2163,7 +2159,7 @@ export default (
                             }
 
                             value =
-                              number_to_fixed(
+                              numberToFixed(
                                 value,
                                 x_asset_data?.decimals ||
                                 18,
@@ -2355,7 +2351,7 @@ export default (
                             }
 
                             value =
-                              number_to_fixed(
+                              numberToFixed(
                                 value,
                                 y_asset_data?.decimals ||
                                 18,
@@ -2465,7 +2461,7 @@ export default (
                               }
                               <DecimalsFormat
                                 value={
-                                  number_format(
+                                  numberFormat(
                                     native_amount * 100 / total_amount,
                                     native_amount * 100 / total_amount > 100 ?
                                       '0,0' :
@@ -2475,7 +2471,7 @@ export default (
                                     true,
                                   )
                                 }
-                                max_decimals={
+                                maxDecimals={
                                   native_amount * 100 / total_amount > 100 ?
                                     0 :
                                     native_amount * 100 / total_amount > 1 ?
@@ -2508,7 +2504,7 @@ export default (
                               }
                               <DecimalsFormat
                                 value={
-                                  number_format(
+                                  numberFormat(
                                     100 - (native_amount * 100 / total_amount),
                                     100 - (native_amount * 100 / total_amount) > 100 ?
                                       '0,0' :
@@ -2518,7 +2514,7 @@ export default (
                                     true,
                                   )
                                 }
-                                max_decimals={
+                                maxDecimals={
                                   100 - (native_amount * 100 / total_amount) > 100 ?
                                     0 :
                                     100 - (native_amount * 100 / total_amount) > 1 ?
@@ -2563,7 +2559,7 @@ export default (
                         priceImpactAdd === true &&
                         !priceImpactAddResponse ?
                           <Oval
-                            color={loader_color(theme)}
+                            color={loaderColor(theme)}
                             width="16"
                             height="16"
                           /> :
@@ -2584,7 +2580,7 @@ export default (
                               {
                                 typeof priceImpactAdd === 'number' ||
                                 priceImpactAddResponse ?
-                                  number_format(
+                                  numberFormat(
                                     priceImpactAdd,
                                     '0,0.000000',
                                     true,
@@ -2621,7 +2617,7 @@ export default (
                               </span>
                               <span className="font-bold mr-1">
                                 {
-                                  number_format(
+                                  numberFormat(
                                     priceImpactAdd,
                                     '0,0.000000',
                                     true,
@@ -2718,7 +2714,7 @@ export default (
               <div className="flex items-end">
                 {
                   chain &&
-                  web3_provider &&
+                  browser_provider &&
                   wrong_chain ?
                     <Wallet
                       connectChainId={chain_id}
@@ -2806,12 +2802,12 @@ export default (
                                     .substring(
                                       0,
                                       status === 'failed' &&
-                                      error_patterns
+                                      errorPatterns
                                         .findIndex(c =>
                                           message?.indexOf(c) > -1
                                         ) > -1 ?
                                         message.indexOf(
-                                          error_patterns
+                                          errorPatterns
                                             .find(c =>
                                               message.indexOf(c) > -1
                                             )
@@ -2871,7 +2867,7 @@ export default (
                           </Alert>
                         )
                       }) :
-                      web3_provider ?
+                      browser_provider ?
                         <button
                           disabled={
                             disabled ||
@@ -2948,7 +2944,7 @@ export default (
                         Balance:
                       </div>
                       {
-                        web3_provider &&
+                        browser_provider &&
                         user_pool_data &&
                         (
                           <div className="flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs space-x-1">
@@ -2959,7 +2955,7 @@ export default (
                               ]
                               .includes(typeof lpTokenBalance) ?
                                 <span className="font-semibold">
-                                  {number_format(
+                                  {numberFormat(
                                     Number(lpTokenBalance),
                                     Number(lpTokenBalance) > 1000000 ?
                                       '0,0' :
@@ -2974,7 +2970,7 @@ export default (
                                     n/a
                                   </span> :
                                   <RotatingSquare
-                                    color={loader_color(theme)}
+                                    color={loaderColor(theme)}
                                     width="16"
                                     height="16"
                                   />
@@ -3020,7 +3016,7 @@ export default (
                             }
 
                             value =
-                              number_to_fixed(
+                              numberToFixed(
                                 value,
                                 18,
                               )
@@ -3193,7 +3189,7 @@ export default (
                           {x_asset_data?.symbol}
                         </div>
                     }
-                    {web3_provider ?
+                    {browser_provider ?
                       [
                         'string',
                         'number',
@@ -3201,7 +3197,7 @@ export default (
                       .includes(typeof x_remove_amount) &&
                       !isNaN(x_remove_amount) ?
                         <span className="text-xs">
-                          {number_format(
+                          {numberFormat(
                             x_remove_amount ||
                             0,
                             '0,0.000000',
@@ -3214,7 +3210,7 @@ export default (
                         (
                           position_loading ?
                             <TailSpin
-                              color={loader_color(theme)}
+                              color={loaderColor(theme)}
                               width="24"
                               height="24"
                             /> :
@@ -3242,7 +3238,7 @@ export default (
                           {y_asset_data?.symbol}
                         </div>
                     }
-                    {web3_provider ?
+                    {browser_provider ?
                       [
                         'string',
                         'number',
@@ -3250,7 +3246,7 @@ export default (
                       .includes(typeof y_remove_amount) &&
                       !isNaN(y_remove_amount) ?
                         <span className="text-xs">
-                          {number_format(
+                          {numberFormat(
                             y_remove_amount ||
                             0,
                             '0,0.000000',
@@ -3263,7 +3259,7 @@ export default (
                         (
                           position_loading ?
                             <TailSpin
-                              color={loader_color(theme)}
+                              color={loaderColor(theme)}
                               width="24"
                               height="24"
                             /> :
@@ -3298,7 +3294,7 @@ export default (
                       priceImpactRemove === true &&
                       !priceImpactRemoveResponse ?
                         <Oval
-                          color={loader_color(theme)}
+                          color={loaderColor(theme)}
                           width="16"
                           height="16"
                         /> :
@@ -3319,7 +3315,7 @@ export default (
                             {
                               typeof priceImpactRemove === 'number' ||
                               priceImpactRemoveResponse ?
-                                number_format(
+                                numberFormat(
                                   priceImpactRemove,
                                   '0,0.000000',
                                   true,
@@ -3337,7 +3333,7 @@ export default (
               */}
               <div className="flex items-end">
                 {
-                  web3_provider &&
+                  browser_provider &&
                   wrong_chain ?
                     <Wallet
                       connectChainId={chain_id}
@@ -3425,11 +3421,11 @@ export default (
                                     .substring(
                                       0,
                                       status === 'failed' &&
-                                      error_patterns.findIndex(c =>
+                                      errorPatterns.findIndex(c =>
                                         message?.indexOf(c) > -1
                                       ) > -1 ?
                                         message.indexOf(
-                                          error_patterns.find(c =>
+                                          errorPatterns.find(c =>
                                             message.indexOf(c) > -1
                                           )
                                         ) :
@@ -3488,7 +3484,7 @@ export default (
                           </Alert>
                         )
                       }) :
-                      web3_provider ?
+                      browser_provider ?
                         <button
                           disabled={
                             disabled ||
@@ -3550,8 +3546,8 @@ export default (
             ) &&
             (
               <Faucet
-                token_id={asset}
-                contract_data={_x_asset_data}
+                tokenId={asset}
+                contractData={_x_asset_data}
                 className="w-full max-w-lg bg-transparent flex flex-col items-center justify-center space-y-2 mx-auto"
                 titleClassName={
                   wrong_chain ?

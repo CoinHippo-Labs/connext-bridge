@@ -1,22 +1,19 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useSelector, shallowEqual } from 'react-redux'
-import HeadShake from 'react-reveal/HeadShake'
-import { FaHandPointLeft } from 'react-icons/fa'
 
 import menus from './menus'
+import { getChain } from '../../../lib/object/chain'
+import { getAsset } from '../../../lib/object/asset'
+import { toArray } from '../../../lib/utils'
 
-export default (
-  {
-    address,
-  },
-) => {
+export default () => {
   const {
     chains,
     assets,
     wallet,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         chains: state.chains,
         assets: state.assets,
@@ -50,282 +47,125 @@ export default (
   } = { ...query }
 
   return (
-    <div className="hidden xl:flex items-center space-x-0 xl:space-x-2 mx-auto">
-      {
-        menus
-          .filter(m =>
-            m?.path &&
-            (
-              ![
-                'pool',
-              ]
-              .includes(source)
-            )
+    <div className="hidden lg:flex items-center space-x-0 xl:space-x-2 mx-auto">
+      {menus
+        .filter(m =>
+          m?.path &&
+          !['pool'].includes(source)
+        )
+        .map(m => {
+          const {
+            id,
+            disabled,
+            others_paths,
+            external,
+            icon,
+          } = { ...m }
+          let {
+            title,
+            path,
+          } = { ...m }
+
+          switch (id) {
+            case 'bridge':
+              if (pathname === '/[bridge]' && bridge) {
+                path = pathname.replace('[bridge]', bridge)
+              }
+              else {
+                let source_chain, destination_chain, asset
+
+                if (chains_data && assets_data) {
+                  const source_chain_data = getChain(chain_id, chains_data, true, true)
+                  source_chain = source_chain_data?.id
+
+                  const destination_chain_data = getChain(chain_id, chains_data, true, true, source_chain)
+                  destination_chain = destination_chain_data?.id
+
+                  const chain_ids = [source_chain_data?.chain_id, destination_chain_data?.chain_id]
+
+                  const asset_data = getAsset(null, assets_data, chain_ids, undefined, true, true)
+                  asset = asset_data?.id
+                }
+
+                path = `/${source_chain && destination_chain ? `${asset ? `${asset.toUpperCase()}-` : ''}from-${source_chain}-to-${destination_chain}` : ''}`
+              }
+              break
+            case 'pools':
+              path = '/pools'
+              break
+            case 'swap':
+              if (pathname === '/swap/[swap]' && swap) {
+                path = pathname.replace('[swap]', swap)
+              }
+              else {
+                let chain, asset
+
+                if (chains_data && assets_data) {
+                  const chains_data =
+                    getChain(chain_id, chains_data, true, false, undefined, true)
+                      .filter(c =>
+                        getAsset(null, assets_data, c?.chain_id, undefined, true, true, true)
+                      )
+                  const chain_data = _.head(chains_data)
+                  chain = chain_data?.id
+
+                  const asset_data = getAsset(null, assets_data, chain_data?.chain_id, undefined, true, true, true)
+                  asset = asset_data?.id
+                }
+
+                path = `/swap/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`
+              }
+              break
+            case 'explorer':
+              title = 'Explorer'
+              path = process.env.NEXT_PUBLIC_EXPLORER_URL
+              break
+            default:
+              break
+          }
+
+          const selected = !external && (pathname === path || toArray(others_paths).includes(pathname))
+
+          const item = (
+            <>
+              {icon}
+              <span className="whitespace-nowrap">
+                {title}
+              </span>
+            </>
           )
-          .map(m => {
-            const {
-              id,
-              disabled,
-              emphasize,
-              others_paths,
-              external,
-              icon,
-            } = { ...m }
-            let {
-              title,
-              path,
-            } = { ...m }
 
-            switch (id) {
-              case 'bridge':
-                if (
-                  pathname === '/[bridge]' &&
-                  bridge
-                ) {
-                  path =
-                    `${
-                      pathname
-                        .replace(
-                          '[bridge]',
-                          bridge,
-                        )
-                    }`
-                }
-                else {
-                  let source_chain,
-                    destination_chain,
-                    asset
+          const className =
+            `bg-transparent hover:bg-blue-50 dark:hover:bg-slate-800 rounded ${
+              disabled ?
+                'cursor-not-allowed' :
+                ''
+            } flex items-center uppercase ${
+              selected ?
+                'text-blue-600 dark:text-white text-sm font-extrabold' :
+                'text-slate-600 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200 text-sm font-semibold hover:font-bold'
+            } space-x-1.5 py-2 px-2.5`
 
-                  if (
-                    chains_data &&
-                    assets_data
-                  ) {
-                    const source_chain_data =
-                      _.head(
-                        chains_data
-                          .filter(c =>
-                            !c?.disabled &&
-                            (
-                              c?.chain_id === chain_id ||
-                              chains_data
-                                .findIndex(_c =>
-                                  !_c?.disabled &&
-                                  _c?.chain_id === chain_id
-                                ) < 0
-                            )
-                          )
-                      )
-
-                    source_chain = source_chain_data?.id
-
-                    const destination_chain_data =
-                      _.head(
-                        chains_data
-                          .filter(c =>
-                            !c?.disabled &&
-                            c?.id !== source_chain
-                          )
-                      )
-
-                    destination_chain = destination_chain_data?.id
-
-                    const asset_data =
-                      _.head(
-                        assets_data
-                          .filter(a =>
-                            [
-                              source_chain_data?.chain_id,
-                              destination_chain_data?.chain_id,
-                            ]
-                            .findIndex(i =>
-                              (a?.contracts || [])
-                                .findIndex(c =>
-                                  c?.chain_id === i
-                                ) < 0
-                            ) < 0
-                          )
-                      )
-
-                    asset = asset_data?.id
-                  }
-
-                  path =
-                    `/${
-                      source_chain &&
-                      destination_chain ?
-                        `${
-                          asset ?
-                            `${asset.toUpperCase()}-` :
-                            ''
-                        }from-${source_chain}-to-${destination_chain}` :
-                        ''
-                    }`
-                }
-                break
-              case 'pools':
-                path = '/pools'
-                break
-              case 'swap':
-                if (
-                  pathname === '/swap/[swap]' &&
-                  swap
-                ) {
-                  path =
-                    `${
-                      pathname
-                        .replace(
-                          '[swap]',
-                          swap,
-                        )
-                    }`
-                }
-                else {
-                  let chain,
-                    asset
-
-                  if (
-                    chains_data &&
-                    assets_data
-                  ) {
-                    const chain_data =
-                      _.head(
-                        chains_data
-                          .filter(c =>
-                            !c?.disabled &&
-                            (
-                              c?.chain_id === chain_id ||
-                              chains_data
-                                .findIndex(_c =>
-                                  !_c?.disabled &&
-                                  _c?.chain_id === chain_id &&
-                                  assets_data
-                                    .findIndex(a =>
-                                      (a?.contracts || [])
-                                        .findIndex(__c =>
-                                          __c?.chain_id === _c?.chain_id &&
-                                          __c?.is_pool
-                                        ) > -1
-                                    ) > -1
-                                ) < 0
-                            ) &&
-                            assets_data
-                              .findIndex(a =>
-                                (a?.contracts || [])
-                                  .findIndex(_c =>
-                                    _c?.chain_id === c?.chain_id &&
-                                    _c?.is_pool
-                                  ) > -1
-                              ) > -1
-                          )
-                      )
-
-                    chain = chain_data?.id
-
-                    const asset_data =
-                      _.head(
-                        assets_data
-                          .filter(a =>
-                            [
-                              chain_data?.chain_id,
-                            ]
-                            .findIndex(i =>
-                              (a?.contracts || [])
-                                .findIndex(c =>
-                                  c?.chain_id === i &&
-                                  c?.is_pool
-                                ) < 0
-                            ) < 0
-                          )
-                      )
-
-                    asset = asset_data?.id
-                  }
-
-                  path =
-                    `/swap/${
-                      chain ?
-                        `${
-                          asset ?
-                            `${asset.toUpperCase()}-` :
-                            ''
-                        }on-${chain}` :
-                        ''
-                    }`
-                }
-                break
-              case 'explorer':
-                title = 'Explorer'
-                path = process.env.NEXT_PUBLIC_EXPLORER_URL
-                break
-              default:
-                break
-            }
-
-            const selected =
-              !external &&
-              (
-                pathname === path ||
-                others_paths?.includes(pathname)
-              )
-
-            const item =
-              (
-                <>
-                  {icon}
-                  <span className="whitespace-nowrap">
-                    {title}
-                  </span>
-                </>
-              )
-
-            const right_icon =
-              emphasize ?
-                <HeadShake
-                  duration={1500}
-                  forever
-                >
-                  <FaHandPointLeft
-                    size={18}
-                  />
-                </HeadShake> :
-                undefined
-
-            const className =
-              `bg-transparent hover:bg-blue-50 dark:hover:bg-slate-800 rounded ${
-                disabled ?
-                  'cursor-not-allowed' :
-                  ''
-              } flex items-center uppercase ${
-                selected ?
-                  'text-blue-600 dark:text-white text-sm font-extrabold' :
-                  'text-slate-600 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200 text-sm font-semibold hover:font-bold'
-              } space-x-1.5 py-2 px-2.5`
-
-            return (
-              external ?
-                <a
-                  key={id}
-                  href={path}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={className}
-                >
-                  {item}
-                  {right_icon}
-                </a> :
-                <Link
-                  key={id}
-                  href={path}
-                >
-                <a
-                  className={className}
-                >
-                  {item}
-                  {right_icon}
-                </a>
-                </Link>
-            )
-          })
+          return (
+            external ?
+              <a
+                key={id}
+                href={path}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={className}
+              >
+                {item}
+              </a> :
+              <Link
+                key={id}
+                href={path}
+                className={className}
+              >
+                {item}
+              </Link>
+          )
+        })
       }
     </div>
   )

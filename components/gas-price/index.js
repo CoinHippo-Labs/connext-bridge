@@ -1,24 +1,25 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
-import { utils } from 'ethers'
+import { formatUnits } from 'ethers'
 import { RotatingSquare } from 'react-loader-spinner'
 import { MdLocalGasStation } from 'react-icons/md'
 
-import { number_format, loader_color } from '../../lib/utils'
+import DecimalsFormat from '../decimals-format'
+import { loaderColor } from '../../lib/utils'
 
 export default (
   {
     chainId,
     dummy,
     iconSize = 20,
-    minGasPrice = 0.00000001,
     className = '',
   },
 ) => {
   const {
     preferences,
     rpc_providers,
-  } = useSelector(state =>
+  } = useSelector(
+    state =>
     (
       {
         preferences: state.preferences,
@@ -28,11 +29,11 @@ export default (
     shallowEqual,
   )
   const {
-    rpcs,
-  } = { ...rpc_providers }
-  const {
     theme,
   } = { ...preferences }
+  const {
+    rpcs,
+  } = { ...rpc_providers }
 
   const [gasPrice, setGasPrice] = useState(null)
 
@@ -47,15 +48,13 @@ export default (
           const provider = rpcs[chainId]
 
           try {
-            setGasPrice(
-              Number(
-                utils.formatUnits(
-                  await provider
-                    .getGasPrice(),
-                  'gwei',
-                )
-              )
-            )
+            const fee_data = await provider.getFeeData()
+
+            const {
+              gasPrice,
+            } = { ...fee_data }
+
+            setGasPrice(Number(formatUnits(gasPrice, 'gwei')))
           } catch (error) {
             if (!gasPrice) {
               setGasPrice('')
@@ -67,8 +66,8 @@ export default (
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(true),
+        setInterval(
+          () => getData(true),
           0.5 * 60 * 1000,
         )
 
@@ -85,22 +84,10 @@ export default (
         />
         {typeof gasPrice === 'number' ?
           <>
-            <span className="whitespace-nowrap font-semibold">
-              {gasPrice < minGasPrice ?
-                `< ${
-                  number_format(
-                    minGasPrice,
-                    '0,0.00000000',
-                    true,
-                  )
-                }` :
-                number_format(
-                  gasPrice,
-                  '0,0',
-                  true,
-                )
-              }
-            </span>
+            <DecimalsFormat
+              value={gasPrice}
+              className="whitespace-nowrap font-semibold"
+            />
             <span className="font-medium">
               Gwei
             </span>
@@ -110,13 +97,9 @@ export default (
               -
             </span> :
             <RotatingSquare
-              color={
-                theme === 'light' ?
-                  '#b0b0b0' :
-                  '#808080'
-              }
               width="16"
               height="16"
+              color={theme === 'light' ? '#b0b0b0' : '#808080'}
             />
         }
       </div> :

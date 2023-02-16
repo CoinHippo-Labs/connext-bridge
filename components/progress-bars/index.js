@@ -8,12 +8,7 @@ export const ProgressBar = (
     backgroundStyle,
   },
 ) => {
-  width =
-    width < 0 ?
-      0 :
-      width > 100 ?
-        100 :
-        width
+  width = width < 0 ? 0 : width > 100 ? 100 : width
 
   return (
     <div
@@ -46,12 +41,7 @@ export const ProgressBarWithText = (
     backgroundClassName = '',
   },
 ) => {
-   width =
-     width < 0 ?
-      0 :
-      width > 100 ?
-        100 :
-        width
+  width = width < 0 ? 0 : width > 100 ? 100 : width
 
   return (
     <div className={`w-full ${backgroundClassName.includes('h-') ? '' : 'h-4'} ${backgroundClassName.includes('bg-') ? '' : 'bg-slate-50 dark:bg-slate-800'} relative flex flex-row items-center text-xs text-center ${backgroundClassName}`}>
@@ -63,11 +53,7 @@ export const ProgressBarWithText = (
           }
         }
       >
-        {
-          typeof text !== 'undefined' ?
-            text :
-            `${width}%`
-        }
+        {typeof text !== 'undefined' ? text : `${width}%`}
       </div>
     </div>
   )

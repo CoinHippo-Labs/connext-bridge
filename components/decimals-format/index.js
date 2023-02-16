@@ -1,11 +1,13 @@
 import _ from 'lodash'
 import { Tooltip } from '@material-tailwind/react'
 
+import { split, numberFormat } from '../../lib/utils'
+
 export default (
   {
     value,
     delimiter = '.',
-    max_decimals = 6,
+    maxDecimals,
     prefix = '',
     suffix = '',
     placement = 'top',
@@ -16,8 +18,7 @@ export default (
     typeof value === 'string' ?
       value :
       typeof value === 'number' ?
-        value
-          .toString() :
+        value.toString() :
         undefined
 
   if (
@@ -25,42 +26,36 @@ export default (
     _value.includes(delimiter) &&
     !_value.endsWith(delimiter)
   ) {
-    const decimals =
-      _.last(
-        _value
-          .split(delimiter)
-      )
+    const decimals = _.last(_value.split(delimiter))
+    const value_number = Number(split(_value).join(''))
 
-    const value_number =
-      Number(
-        _value
-          .split(',')
-          .join('')
-      )
+    if (typeof maxDecimals !== 'number') {
+      if (value_number >= 1000) {
+        maxDecimals = 0
+      }
+      else if (value_number >= 1) {
+        maxDecimals = 2
+      }
+      else {
+        maxDecimals = 6
+      }
+    }
 
-    if (
-      value_number >=
-      Math.pow(
-        10,
-        -max_decimals,
-      )
-    ) {
-      if (decimals.length > max_decimals) {
-        _value =
-          value_number
-            .toFixed(max_decimals)
+    if (value_number >= Math.pow(10, -maxDecimals)) {
+      if (decimals.length > maxDecimals) {
+        _value = value_number.toFixed(maxDecimals)
       }
       else {
         _value = undefined
       }
     }
     else {
-      if (decimals.length > max_decimals) {
+      if (decimals.length > maxDecimals) {
         _value =
           `<${
-            max_decimals > 0 ?
+            maxDecimals > 0 ?
               `0${delimiter}${
-                _.range(max_decimals - 1)
+                _.range(maxDecimals - 1)
                   .map(i => '0')
                   .join('')
               }` :
@@ -77,20 +72,11 @@ export default (
       _value.endsWith('0') &&
       !_value.endsWith(`${delimiter}00`)
     ) {
-      _value =
-        _value
-          .substring(
-            0,
-            _value.length - 1,
-          )
+      _value = _value.substring(0, _value.length - 1)
     }
 
     if (_value?.endsWith(`${delimiter}0`)) {
-      _value =
-        _.head(
-          _value
-            .split(delimiter)
-        )
+      _value = _.head(_value.split(delimiter))
     }
   }
   else {
@@ -101,23 +87,14 @@ export default (
     typeof value === 'string' &&
     value.endsWith(`${delimiter}0`)
   ) {
-    value =
-      _.head(
-        value
-          .split(delimiter)
-      )
+    value = _.head(value.split(delimiter))
   }
 
   return (
     typeof _value === 'string' ?
       <Tooltip
         placement={placement}
-        content={
-          `${prefix}${
-            value
-              .toString()
-          }${suffix}`
-        }
+        content={`${prefix}${value.toString()}${suffix}`}
         className="z-50 bg-dark text-white text-xs"
       >
         <span className={className}>

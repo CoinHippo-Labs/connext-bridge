@@ -3,14 +3,14 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import Copy from '../copy'
 import { ens as getEns } from '../../lib/api/ens'
-import { ellipse } from '../../lib/utils'
+import { toArray, ellipse } from '../../lib/utils'
 import { ENS_DATA } from '../../reducers/types'
 
 export default (
   {
     address,
-    no_copy = false,
-    no_image = false,
+    noCopy = false,
+    noImage = false,
     fallback,
     className = '',
   },
@@ -18,8 +18,8 @@ export default (
   const dispatch = useDispatch()
   const {
     ens,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         ens: state.ens,
       }
@@ -30,18 +30,13 @@ export default (
     ens_data,
   } = { ...ens }
 
-  const [noImage, setNoImage] = useState(no_image)
+  const [imageUnavailable, setImageUnavailable] = useState(noImage)
 
   useEffect(
     () => {
       const getData = async () => {
         if (address) {
-          const addresses =
-            [address.toLowerCase()]
-              .filter(a =>
-                a &&
-                !ens_data?.[a]
-              )
+          const addresses = toArray(address, 'lower').filter(a => !ens_data?.[a])
 
           if (addresses.length > 0) {
             let _ens_data
@@ -51,7 +46,7 @@ export default (
                 if (!_ens_data?.[a]) {
                   _ens_data = {
                     ..._ens_data,
-                    [`${a}`]: {},
+                    [a]: {},
                   }
                 }
               })
@@ -59,9 +54,7 @@ export default (
             dispatch(
               {
                 type: ENS_DATA,
-                value: {
-                  ..._ens_data,
-                },
+                value: { ..._ens_data },
               }
             )
 
@@ -72,7 +65,7 @@ export default (
                 if (!_ens_data?.[a]) {
                   _ens_data = {
                     ..._ens_data,
-                    [`${a}`]: {},
+                    [a]: {},
                   }
                 }
               })
@@ -80,9 +73,7 @@ export default (
             dispatch(
               {
                 type: ENS_DATA,
-                value: {
-                  ..._ens_data,
-                },
+                value: { ..._ens_data },
               }
             )
           }
@@ -94,11 +85,9 @@ export default (
     [address, ens_data],
   )
 
-  address = address?.toLowerCase()
-
   const {
     name,
-  } = { ...ens_data?.[address] }
+  } = { ...ens_data?.[address?.toLowerCase()] }
 
   const ens_name =
     name &&
@@ -129,17 +118,17 @@ export default (
     ens_name ?
       <div className="flex items-center space-x-2">
         {
-          !noImage &&
+          !imageUnavailable &&
           (
             <img
-              src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${name}`}
+              src={`https://metadata.ens.domains/mainnet/avatar/${name}`}
               alt=""
-              onError={() => setNoImage(true)}
+              onError={() => setImageUnavailable(true)}
               className="w-6 h-6 rounded-full"
             />
           )
         }
-        {no_copy ?
+        {noCopy ?
           ens_name :
           <Copy
             value={name}

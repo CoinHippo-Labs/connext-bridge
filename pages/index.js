@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 
 import Bridge from '../components/bridge'
-import { is_route_exist } from '../lib/routes'
+import { isRouteExist } from '../lib/routes'
 
 export default () => {
   const router = useRouter()
@@ -36,7 +36,7 @@ export default () => {
   ) {
     router
       .push(
-        is_route_exist(_asPath) ?
+        isRouteExist(_asPath) ?
           asPath :
           '/'
       )

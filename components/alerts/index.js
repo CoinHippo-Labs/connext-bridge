@@ -40,8 +40,7 @@ export default (
   if (className)
     css.push(className)
 
-  css = css
-    .join(' ')
+  css = css.join(' ')
 
   return (
     <div className={`w-full flex ${css.includes('items-') ? '' : 'items-center'} justify-start p-4 ${css}`}>

@@ -11,7 +11,7 @@ import Image from '../image'
 import { ProgressBar } from '../progress-bars'
 import DecimalsFormat from '../decimals-format'
 import { currency_symbol } from '../../lib/object/currency'
-import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
+import { numberFormat, equalsIgnoreCase, loaderColor } from '../../lib/utils'
 
 const WRAPPED_PREFIX =
   process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
@@ -193,7 +193,7 @@ export default (
               i:
                 (pool_assets_data || [])
                   .findIndex(a =>
-                    equals_ignore_case(
+                    equalsIgnoreCase(
                       a?.id,
                       k,
                     )
@@ -204,7 +204,7 @@ export default (
                     v,
                     (pool_assets_data || [])
                       .filter(a =>
-                        equals_ignore_case(
+                        equalsIgnoreCase(
                           a?.id,
                           k,
                         )
@@ -225,7 +225,7 @@ export default (
 
                         const asset_data = (pool_assets_data || [])
                           .find(a =>
-                            equals_ignore_case(
+                            equalsIgnoreCase(
                               a?.id,
                               k,
                             )
@@ -264,7 +264,7 @@ export default (
                     const {
                       chain_data,
                       tvl,
-                      apy,
+                      apr,
                     } = { ...d }
 
                     return {
@@ -272,7 +272,7 @@ export default (
                       i:
                         (chains_data || [])
                           .findIndex(c =>
-                            equals_ignore_case(
+                            equalsIgnoreCase(
                               c?.id,
                               chain_data?.id,
                             )
@@ -281,16 +281,16 @@ export default (
                         !isNaN(tvl) ?
                           tvl :
                           -1,
-                      _apy:
-                        !isNaN(apy) ?
-                          apy :
+                      _apr:
+                        !isNaN(apr) ?
+                          apr :
                           -1,
                     }
                   }),
                   [
                     'i',
                     '_tvl',
-                    '_apy',
+                    '_apr',
                   ],
                   [
                     'asc',
@@ -790,7 +790,7 @@ export default (
                                             </div>
                                             <DecimalsFormat
                                               value={
-                                                number_format(
+                                                numberFormat(
                                                   native_amount * 100 / total_amount,
                                                   native_amount * 100 / total_amount > 100 ?
                                                     '0,0' :
@@ -800,7 +800,7 @@ export default (
                                                   true,
                                                 )
                                               }
-                                              max_decimals={
+                                              maxDecimals={
                                                 native_amount * 100 / total_amount > 100 ?
                                                   0 :
                                                   native_amount * 100 / total_amount > 1 ?
@@ -817,7 +817,7 @@ export default (
                                         <div>
                                           <DecimalsFormat
                                             value={
-                                              number_format(
+                                              numberFormat(
                                                 native_amount,
                                                 native_amount > 100 ?
                                                   '0,0' :
@@ -827,7 +827,7 @@ export default (
                                                 true,
                                               )
                                             }
-                                            max_decimals={
+                                            maxDecimals={
                                               native_amount > 100 ?
                                                 0 :
                                                 native_amount > 1 ?
@@ -871,7 +871,7 @@ export default (
                                             </div>
                                             <DecimalsFormat
                                               value={
-                                                number_format(
+                                                numberFormat(
                                                   100 - (native_amount * 100 / total_amount),
                                                   100 - (native_amount * 100 / total_amount) > 100 ?
                                                     '0,0' :
@@ -881,7 +881,7 @@ export default (
                                                   true,
                                                 )
                                               }
-                                              max_decimals={
+                                              maxDecimals={
                                                 100 - (native_amount * 100 / total_amount) > 100 ?
                                                   0 :
                                                   100 - (native_amount * 100 / total_amount) > 1 ?
@@ -898,7 +898,7 @@ export default (
                                         <div>
                                           <DecimalsFormat
                                             value={
-                                              number_format(
+                                              numberFormat(
                                                 wrapped_amount,
                                                 wrapped_amount > 100 ?
                                                   '0,0' :
@@ -908,7 +908,7 @@ export default (
                                                 true,
                                               )
                                             }
-                                            max_decimals={
+                                            maxDecimals={
                                               wrapped_amount > 100 ?
                                                 0 :
                                                 wrapped_amount > 1 ?
@@ -986,7 +986,7 @@ export default (
                                         !error ?
                                           <div className="flex items-center justify-end">
                                             <TailSpin
-                                              color={loader_color(theme)}
+                                              color={loaderColor(theme)}
                                               width="18"
                                               height="18"
                                             />
@@ -1037,7 +1037,7 @@ export default (
                                                         </div>
                                                         <DecimalsFormat
                                                           value={
-                                                            number_format(
+                                                            numberFormat(
                                                               native_amount * 100 / total_amount,
                                                               native_amount * 100 / total_amount > 100 ?
                                                                 '0,0' :
@@ -1047,7 +1047,7 @@ export default (
                                                               true,
                                                             )
                                                           }
-                                                          max_decimals={
+                                                          maxDecimals={
                                                             native_amount * 100 / total_amount > 100 ?
                                                               0 :
                                                               native_amount * 100 / total_amount > 1 ?
@@ -1064,7 +1064,7 @@ export default (
                                                     <div>
                                                       <DecimalsFormat
                                                         value={
-                                                          number_format(
+                                                          numberFormat(
                                                             native_amount,
                                                             native_amount > 100 ?
                                                               '0,0' :
@@ -1074,7 +1074,7 @@ export default (
                                                             true,
                                                           )
                                                         }
-                                                        max_decimals={
+                                                        maxDecimals={
                                                           native_amount > 100 ?
                                                             0 :
                                                             native_amount > 1 ?
@@ -1118,7 +1118,7 @@ export default (
                                                         </div>
                                                         <DecimalsFormat
                                                           value={
-                                                            number_format(
+                                                            numberFormat(
                                                               100 - (native_amount * 100 / total_amount),
                                                               100 - (native_amount * 100 / total_amount) > 100 ?
                                                                 '0,0' :
@@ -1128,7 +1128,7 @@ export default (
                                                               true,
                                                             )
                                                           }
-                                                          max_decimals={
+                                                          maxDecimals={
                                                             100 - (native_amount * 100 / total_amount) > 100 ?
                                                               0 :
                                                               100 - (native_amount * 100 / total_amount) > 1 ?
@@ -1145,7 +1145,7 @@ export default (
                                                     <div>
                                                       <DecimalsFormat
                                                         value={
-                                                          number_format(
+                                                          numberFormat(
                                                             wrapped_amount,
                                                             wrapped_amount > 100 ?
                                                               '0,0' :
@@ -1155,7 +1155,7 @@ export default (
                                                             true,
                                                           )
                                                         }
-                                                        max_decimals={
+                                                        maxDecimals={
                                                           wrapped_amount > 100 ?
                                                             0 :
                                                             wrapped_amount > 1 ?
@@ -1216,7 +1216,7 @@ export default (
                             <div className="h-6 flex items-center justify-end text-right">
                               <DecimalsFormat
                                 value={
-                                  number_format(
+                                  numberFormat(
                                     value,
                                     value > 100 ?
                                       '0,0' :
@@ -1226,7 +1226,7 @@ export default (
                                     true,
                                   )
                                 }
-                                max_decimals={
+                                maxDecimals={
                                   value > 100 ?
                                     0 :
                                     value > 1 ?
@@ -1266,14 +1266,14 @@ export default (
                                         !error ?
                                           <div className="flex items-center justify-end">
                                             <TailSpin
-                                              color={loader_color(theme)}
+                                              color={loaderColor(theme)}
                                               width="18"
                                               height="18"
                                             />
                                           </div> :
                                           <DecimalsFormat
                                             value={
-                                              number_format(
+                                              numberFormat(
                                                 value,
                                                 value > 100 ?
                                                   '0,0' :
@@ -1283,7 +1283,7 @@ export default (
                                                 true,
                                               )
                                             }
-                                            max_decimals={
+                                            maxDecimals={
                                               value > 100 ?
                                                 0 :
                                                 value > 1 ?
@@ -1336,7 +1336,7 @@ export default (
                               {!isNaN(value) ?
                                 <DecimalsFormat
                                   value={
-                                    number_format(
+                                    numberFormat(
                                       value,
                                       value > 100 ?
                                         '0,0' :
@@ -1346,7 +1346,7 @@ export default (
                                       true,
                                     )
                                   }
-                                  max_decimals={
+                                  maxDecimals={
                                     value > 100 ?
                                       0 :
                                       value > 1 ?
@@ -1384,7 +1384,7 @@ export default (
                                       {!isNaN(value) ?
                                         <DecimalsFormat
                                           value={
-                                            number_format(
+                                            numberFormat(
                                               value,
                                               value > 100 ?
                                                 '0,0' :
@@ -1394,7 +1394,7 @@ export default (
                                               true,
                                             )
                                           }
-                                          max_decimals={
+                                          maxDecimals={
                                             value > 100 ?
                                               0 :
                                               value > 1 ?
@@ -1448,7 +1448,7 @@ export default (
                               {!isNaN(value) ?
                                 <DecimalsFormat
                                   value={
-                                    number_format(
+                                    numberFormat(
                                       value,
                                       value > 100 ?
                                         '0,0' :
@@ -1458,7 +1458,7 @@ export default (
                                       true,
                                     )
                                   }
-                                  max_decimals={
+                                  maxDecimals={
                                     value > 100 ?
                                       0 :
                                       value > 1 ?
@@ -1496,7 +1496,7 @@ export default (
                                       {!isNaN(value) ?
                                         <DecimalsFormat
                                           value={
-                                            number_format(
+                                            numberFormat(
                                               value,
                                               value > 100 ?
                                                 '0,0' :
@@ -1506,7 +1506,7 @@ export default (
                                               true,
                                             )
                                           }
-                                          max_decimals={
+                                          maxDecimals={
                                             value > 100 ?
                                               0 :
                                               value > 1 ?
@@ -1537,19 +1537,19 @@ export default (
                             className="z-50 bg-dark text-white text-xs"
                           >
                             <div>
-                              APY
+                              APR
                             </div>
                           </Tooltip>
                         ),
-                      accessor: 'apy',
+                      accessor: 'apr',
                       sortType: (a, b) =>
                         _.meanBy(
                           a.original.pools,
-                          'apy',
+                          'apr',
                         ) >
                         _.sumBy(
                           b.original.pools,
-                          'apy',
+                          'apr',
                         ) ?
                           1 :
                           -1,
@@ -1564,16 +1564,16 @@ export default (
                             pools
                               .map(p => {
                                 const {
-                                  apy,
+                                  apr,
                                   tvl,
                                 } = { ...p }
 
                                 return {
                                   ...p,
-                                  weighted_apy:
+                                  weighted_apr:
                                     (
                                       (
-                                        apy ||
+                                        apr ||
                                         0
                                       ) *
                                       (
@@ -1583,7 +1583,7 @@ export default (
                                     ),
                                 }
                               }),
-                            'weighted_apy',
+                            'weighted_apr',
                           ) /
                           _.sumBy(
                             pools,
@@ -1596,7 +1596,7 @@ export default (
                               {/*!isNaN(value) ?
                                 <DecimalsFormat
                                   value={
-                                    number_format(
+                                    numberFormat(
                                       value * 100,
                                       value * 100 > 1 ?
                                         '0,0.00' :
@@ -1604,7 +1604,7 @@ export default (
                                       true,
                                     )
                                   }
-                                  max_decimals={
+                                  maxDecimals={
                                     value * 100 > 100 ?
                                       0 :
                                       value * 100 > 1 ?
@@ -1624,12 +1624,12 @@ export default (
                                   const {
                                     chain_data,
                                     asset_data,
-                                    apy,
+                                    apr,
                                   } = { ...p }
 
                                   const chain = chain_data?.id
                                   const asset = asset_data?.id
-                                  const value = apy
+                                  const value = apr
 
                                   return (
                                     <Link
@@ -1642,7 +1642,7 @@ export default (
                                       {!isNaN(value) ?
                                         <DecimalsFormat
                                           value={
-                                            number_format(
+                                            numberFormat(
                                               value * 100,
                                               value * 100 > 1 ?
                                                 '0,0.00' :
@@ -1650,7 +1650,7 @@ export default (
                                               true,
                                             )
                                           }
-                                          max_decimals={
+                                          maxDecimals={
                                             value * 100 > 100 ?
                                               0 :
                                               value * 100 > 1 ?
@@ -1706,7 +1706,7 @@ export default (
                             <div className="flex items-center text-sm font-medium text-right space-x-1">
                               <DecimalsFormat
                                 value={
-                                  number_format(
+                                  numberFormat(
                                     value,
                                     value > 100 ?
                                       '0,0' :
@@ -1716,7 +1716,7 @@ export default (
                                     true,
                                   )
                                 }
-                                max_decimals={
+                                maxDecimals={
                                   value > 100 ?
                                     0 :
                                     value > 1 ?
@@ -1740,7 +1740,7 @@ export default (
                                 <div className="text-slate-800 dark:text-slate-200 text-sm text-right">
                                   <DecimalsFormat
                                     value={
-                                      number_format(
+                                      numberFormat(
                                         value * price,
                                         value * price > 100 ?
                                           '0,0' :
@@ -1750,7 +1750,7 @@ export default (
                                         true,
                                       )
                                     }
-                                    max_decimals={
+                                    maxDecimals={
                                       value * price > 100 ?
                                         0 :
                                         value * price > 1 ?
@@ -1797,7 +1797,7 @@ export default (
                             <div className="flex items-center text-sm font-medium space-x-1">
                               <DecimalsFormat
                                 value={
-                                  number_format(
+                                  numberFormat(
                                     adopted?.balance,
                                     adopted?.balance > 100 ?
                                       '0.0' :
@@ -1807,7 +1807,7 @@ export default (
                                     true,
                                   )
                                 }
-                                max_decimals={
+                                maxDecimals={
                                   adopted?.balance > 100 ?
                                     0 :
                                     adopted?.balance > 1 ?
@@ -1831,7 +1831,7 @@ export default (
                             <div className="flex items-center text-sm font-medium space-x-1">
                               <DecimalsFormat
                                 value={
-                                  number_format(
+                                  numberFormat(
                                     local?.balance,
                                     local?.balance > 100 ?
                                       '0.0' :
@@ -1841,7 +1841,7 @@ export default (
                                     true,
                                   )
                                 }
-                                max_decimals={
+                                maxDecimals={
                                   local?.balance > 100 ?
                                     0 :
                                     local?.balance > 1 ?
@@ -1894,7 +1894,7 @@ export default (
                             <DecimalsFormat
                               value={
                                 typeof value === 'number' ?
-                                  number_format(
+                                  numberFormat(
                                     value,
                                     value > 1 ?
                                       '0,0.00' :
@@ -1903,7 +1903,7 @@ export default (
                                   ) :
                                   '-'
                               }
-                              max_decimals={
+                              maxDecimals={
                                 value > 100 ?
                                   0 :
                                   value > 1 ?
@@ -1928,7 +1928,7 @@ export default (
                           'tvl',
                           'volume_value',
                           'fees_value',
-                          'apy',
+                          'apr',
                         ] :
                         [
                           'lpTokenBalance',
@@ -1948,7 +1948,7 @@ export default (
       </div> :
       <div className="my-4 sm:my-6 ml-2">
         <TailSpin
-          color={loader_color(theme)}
+          color={loaderColor(theme)}
           width="32"
           height="32"
         />

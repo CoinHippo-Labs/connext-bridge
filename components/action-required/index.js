@@ -16,7 +16,7 @@ import Wallet from '../wallet'
 import Alert from '../alerts'
 import Copy from '../copy'
 import DecimalsFormat from '../decimals-format'
-import { number_format, ellipse, equals_ignore_case, loader_color, error_patterns } from '../../lib/utils'
+import { numberFormat, ellipse, equalsIgnoreCase, loaderColor, errorPatterns } from '../../lib/utils'
 
 const ROUTER_FEE_PERCENT =
   Number(
@@ -82,9 +82,9 @@ export default (
   const {
     chain_id,
     provider,
-    web3_provider,
-    address,
+    browser_provider,
     signer,
+    address,
   } = { ...wallet_data }
 
   const [hidden, setHidden] = useState(initialHidden)
@@ -270,7 +270,7 @@ export default (
 
       const originTokenAddress =
         (
-          equals_ignore_case(
+          equalsIgnoreCase(
             source_contract_data?.contract_address,
             constants.AddressZero,
           ) ?
@@ -293,7 +293,7 @@ export default (
       const isNextAsset =
         typeof receive_local === 'boolean' ?
           receive_local :
-          equals_ignore_case(
+          equalsIgnoreCase(
             destination_contract_data?.contract_address,
             _destination_contract_data?.next_asset?.contract_address,
           )
@@ -601,7 +601,7 @@ export default (
               }
             }
           } catch (error) {
-            let message = 
+            let message =
               error?.reason ||
               error?.data?.message ||
               error?.message
@@ -761,7 +761,7 @@ export default (
               }
             }
           } catch (error) {
-            let message = 
+            let message =
               error?.reason ||
               error?.data?.message ||
               error?.message
@@ -867,7 +867,7 @@ export default (
             ]
             .filter(__a => __a)
             .findIndex(__a =>
-              equals_ignore_case(
+              equalsIgnoreCase(
                 __a,
                 _a,
               )
@@ -885,7 +885,7 @@ export default (
 
   if (
     source_contract_data?.next_asset &&
-    equals_ignore_case(
+    equalsIgnoreCase(
       source_contract_data.next_asset.contract_address,
       origin_transacting_asset,
     )
@@ -900,7 +900,7 @@ export default (
 
   if (
     !source_contract_data &&
-    equals_ignore_case(
+    equalsIgnoreCase(
       origin_transacting_asset,
       constants.AddressZero,
     )
@@ -922,7 +922,7 @@ export default (
           a?.id,
           a?.symbol,
         ].findIndex(s =>
-          equals_ignore_case(
+          equalsIgnoreCase(
             s,
             symbol,
           )
@@ -994,7 +994,7 @@ export default (
           c?.chain_id === destination_chain_data?.chain_id &&
           [
             destination_transacting_asset,
-            equals_ignore_case(
+            equalsIgnoreCase(
               source_asset_data?.id,
               a?.id,
             ) ?
@@ -1009,7 +1009,7 @@ export default (
             ]
             .filter(__a => __a)
             .findIndex(__a =>
-              equals_ignore_case(
+              equalsIgnoreCase(
                 __a,
                 _a,
               )
@@ -1028,7 +1028,7 @@ export default (
   if (
     destination_contract_data?.next_asset &&
     (
-      equals_ignore_case(
+      equalsIgnoreCase(
         destination_contract_data.next_asset.contract_address,
         destination_transacting_asset,
       ) ||
@@ -1045,7 +1045,7 @@ export default (
 
   if (
     !destination_contract_data &&
-    equals_ignore_case(
+    equalsIgnoreCase(
       destination_transacting_asset,
       constants.AddressZero,
     )
@@ -1067,7 +1067,7 @@ export default (
           a?.id,
           a?.symbol,
         ].findIndex(s =>
-          equals_ignore_case(
+          equalsIgnoreCase(
             s,
             symbol,
           )
@@ -1233,7 +1233,7 @@ export default (
                           <DecimalsFormat
                             value={
                               Number(_slippage) >= 1000 ?
-                                number_format(
+                                numberFormat(
                                   _slippage,
                                   '0,0.000000000000',
                                   true,
@@ -1354,13 +1354,13 @@ export default (
                                 !newSlippage &&
                                 !estimateResponse ?
                                   <Oval
-                                    color={loader_color(theme)}
+                                    color={loaderColor(theme)}
                                     width="20"
                                     height="20"
                                   /> :
                                   <>
                                     <span className="text-sm font-semibold">
-                                      {number_format(
+                                      {numberFormat(
                                         newSlippage,
                                         '0,0.00',
                                       )}%
@@ -1436,7 +1436,7 @@ export default (
                             <DecimalsFormat
                               value={
                                 Number(relayer_fee) >= 1000 ?
-                                  number_format(
+                                  numberFormat(
                                     relayer_fee,
                                     '0,0.000000000000',
                                     true,
@@ -1461,7 +1461,7 @@ export default (
                           !newRelayerFee &&
                           !estimateResponse ?
                             <Oval
-                              color={loader_color(theme)}
+                              color={loaderColor(theme)}
                               width="20"
                               height="20"
                             /> :
@@ -1469,7 +1469,7 @@ export default (
                               <DecimalsFormat
                                 value={
                                   relayer_fee_to_bump >= 1000 ?
-                                    number_format(
+                                    numberFormat(
                                       relayer_fee_to_bump,
                                       '0,0.000000000000',
                                       true,
@@ -1491,7 +1491,7 @@ export default (
                   null
             }
             {
-              web3_provider &&
+              browser_provider &&
               (
                 (
                   [
@@ -1519,11 +1519,11 @@ export default (
                   )
                 ) ||
                 (
-                  web3_provider &&
+                  browser_provider &&
                   wrong_chain
                 )
               ) ?
-                web3_provider &&
+                browser_provider &&
                 wrong_chain ?
                   <Wallet
                     connectChainId={
@@ -1728,12 +1728,12 @@ export default (
                                       .substring(
                                         0,
                                         status === 'failed' &&
-                                        error_patterns
+                                        errorPatterns
                                           .findIndex(c =>
                                             message?.indexOf(c) > -1
                                           ) > -1 ?
                                           message.indexOf(
-                                            error_patterns
+                                            errorPatterns
                                               .find(c =>
                                                 message.indexOf(c) > -1
                                               )
@@ -1794,7 +1794,7 @@ export default (
                           )
                         })
                       ) :
-                web3_provider ?
+                browser_provider ?
                   <button
                     disabled={true}
                     className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base text-center py-3 sm:py-4 px-2 sm:px-3"

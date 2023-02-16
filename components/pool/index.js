@@ -14,7 +14,7 @@ import Liquidity from './liquidity'
 import Image from '../image'
 import DecimalsFormat from '../decimals-format'
 import { chainName } from '../../lib/object/chain'
-import { number_format, params_to_obj, equals_ignore_case, loader_color } from '../../lib/utils'
+import { numberFormat, paramsToObj, equalsIgnoreCase, loaderColor } from '../../lib/utils'
 import { BALANCES_DATA } from '../../reducers/types'
 
 const WRAPPED_PREFIX =
@@ -97,7 +97,7 @@ export default () => {
       let updated = false
 
       const params =
-        params_to_obj(
+        paramsToObj(
           asPath?.indexOf('?') > -1 &&
           asPath.substring(
             asPath.indexOf('?') + 1,
@@ -136,11 +136,11 @@ export default () => {
           .find(c =>
             c?.id === chain
           )
-    
+
         const asset_data = (pool_assets_data || [])
           .find(a =>
             a?.id === asset ||
-            equals_ignore_case(
+            equalsIgnoreCase(
               a?.symbol,
               asset,
             )
@@ -292,7 +292,7 @@ export default () => {
         id
       ) {
         const params =
-          params_to_obj(
+          paramsToObj(
             asPath.indexOf('?') > -1 &&
             asPath.substring(
               asPath.indexOf('?') + 1,
@@ -496,7 +496,7 @@ export default () => {
                           .split('-')
 
                       if (
-                        equals_ignore_case(
+                        equalsIgnoreCase(
                           _.head(symbols),
                           _.last(symbols),
                         ) &&
@@ -561,7 +561,7 @@ export default () => {
                       .find(a =>
                         symbols
                           .findIndex(s =>
-                            equals_ignore_case(
+                            equalsIgnoreCase(
                               s,
                               a?.symbol,
                             )
@@ -571,7 +571,7 @@ export default () => {
                             c?.chain_id === chain_id &&
                             symbols
                               .findIndex(s =>
-                                equals_ignore_case(
+                                equalsIgnoreCase(
                                   s,
                                   c?.symbol,
                                 )
@@ -671,7 +671,7 @@ export default () => {
                 (a?.contracts || [])
                   .findIndex(c =>
                     c?.chain_id === chain_id &&
-                    equals_ignore_case(
+                    equalsIgnoreCase(
                       c?.contract_address,
                       contract_address,
                     )
@@ -739,7 +739,7 @@ export default () => {
             !(
               (balances_data?.[`${chain_id}`] || [])
                 .findIndex(c =>
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     c?.contract_address,
                     contract_address,
                   )
@@ -808,10 +808,10 @@ export default () => {
           .map(a => {
             const {
               next_asset,
-            } = { ...a };
+            } = { ...a }
             let {
               contract_address,
-            } = {  ...a }
+            } = { ...a }
 
             contract_address = contract_address.toLowerCase()
 
@@ -905,7 +905,7 @@ export default () => {
     contract_data,
     name,
     lpTokenAddress,
-    apy,
+    apr,
     error,
   } = { ...pool_data }
 
@@ -971,7 +971,7 @@ export default () => {
                 >
                   <div>
                     <span className="text-slate-400 dark:text-slate-200 text-base font-medium">
-                      Reward APY
+                      Reward APR
                     </span>
                     <div className="flex flex-col items-end space-y-1">
                       {
@@ -1019,21 +1019,21 @@ export default () => {
                               // 'optimism',
                             ]
                             .includes(chain) ?
-                              !isNaN(apy) ?
+                              !isNaN(apr) ?
                                 <DecimalsFormat
                                   value={
-                                    number_format(
-                                      apy * 100,
-                                      apy * 100 > 1 ?
+                                    numberFormat(
+                                      apr * 100,
+                                      apr * 100 > 1 ?
                                         '0,0.00' :
                                         '0,0.000',
                                       true,
                                     )
                                   }
-                                  max_decimals={
-                                    apy * 100 > 100 ?
+                                  maxDecimals={
+                                    apr * 100 > 100 ?
                                       0 :
-                                      apy * 100 > 1 ?
+                                      apr * 100 > 1 ?
                                         2 :
                                         6
                                   }
@@ -1041,21 +1041,21 @@ export default () => {
                                   className="uppercase"
                                 /> :
                                 'TBD' :
-                              !isNaN(apy) ?
+                              !isNaN(apr) ?
                                 <DecimalsFormat
                                   value={
-                                    number_format(
-                                      apy * 100,
-                                      apy * 100 > 1 ?
+                                    numberFormat(
+                                      apr * 100,
+                                      apr * 100 > 1 ?
                                         '0,0.00' :
                                         '0,0.000',
                                       true,
                                     )
                                   }
-                                  max_decimals={
-                                    apy * 100 > 100 ?
+                                  maxDecimals={
+                                    apr * 100 > 100 ?
                                       0 :
-                                      apy * 100 > 1 ?
+                                      apr * 100 > 1 ?
                                         2 :
                                         6
                                   }
@@ -1070,7 +1070,7 @@ export default () => {
                               pool_loading ?
                                 <div className="mt-1">
                                   <TailSpin
-                                    color={loader_color(theme)}
+                                    color={loaderColor(theme)}
                                     width="24"
                                     height="24"
                                   />

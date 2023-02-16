@@ -22,7 +22,7 @@ import Wallet from '../wallet'
 import Alert from '../alerts'
 import Copy from '../copy'
 import DecimalsFormat from '../decimals-format'
-import { params_to_obj, number_format, number_to_fixed, ellipse, equals_ignore_case, loader_color, sleep, error_patterns } from '../../lib/utils'
+import { paramsToObj, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, loaderColor, sleep, errorPatterns } from '../../lib/utils'
 import { POOLS_DATA, BALANCES_DATA } from '../../reducers/types'
 
 const WRAPPED_PREFIX =
@@ -101,9 +101,9 @@ export default () => {
   } = { ...wallet }
   const {
     provider,
-    web3_provider,
-    address,
+    browser_provider,
     signer,
+    address,
   } = { ...wallet_data }
   const {
     balances_data,
@@ -143,7 +143,7 @@ export default () => {
       let updated = false
 
       const params =
-        params_to_obj(
+        paramsToObj(
           asPath?.indexOf('?') > -1 &&
           asPath.substring(
             asPath.indexOf('?') + 1,
@@ -194,7 +194,7 @@ export default () => {
         const asset_data = (pool_assets_data || [])
           .find(a =>
             a?.id === asset ||
-            equals_ignore_case(
+            equalsIgnoreCase(
               a?.symbol,
               asset,
             )
@@ -339,7 +339,7 @@ export default () => {
                       c?.next_asset?.symbol,
                     ]
                     .findIndex(s =>
-                      equals_ignore_case(
+                      equalsIgnoreCase(
                         s,
                         local.symbol,
                       )
@@ -418,7 +418,7 @@ export default () => {
         id
       ) {
         const params =
-          params_to_obj(
+          paramsToObj(
             asPath.indexOf('?') > -1 &&
             asPath.substring(
               asPath.indexOf('?') + 1,
@@ -596,13 +596,13 @@ export default () => {
           }
 
           const chain_changed =
-            !equals_ignore_case(
+            !equalsIgnoreCase(
               chain,
               pair?.chain_data?.id,
             )
 
           const asset_changed =
-            !equals_ignore_case(
+            !equalsIgnoreCase(
               asset,
               pair?.asset_data?.id,
             )
@@ -633,7 +633,7 @@ export default () => {
                 setPair(
                   (pools_data || [])
                     .find(p =>
-                      equals_ignore_case(
+                      equalsIgnoreCase(
                         p?.id,
                         `${chain}_${asset}`,
                       )
@@ -923,7 +923,7 @@ export default () => {
                             .split('-')
 
                         if (
-                          equals_ignore_case(
+                          equalsIgnoreCase(
                             _.head(symbols),
                             _.last(symbols),
                           ) &&
@@ -950,7 +950,7 @@ export default () => {
                         .find(a =>
                           symbols
                             .findIndex(s =>
-                              equals_ignore_case(
+                              equalsIgnoreCase(
                                 s,
                                 a?.symbol,
                               )
@@ -960,7 +960,7 @@ export default () => {
                               c?.chain_id === chain_id &&
                               symbols
                                 .findIndex(s =>
-                                  equals_ignore_case(
+                                  equalsIgnoreCase(
                                     s,
                                     c?.symbol,
                                   )
@@ -980,11 +980,11 @@ export default () => {
                     ]
                 )
                 .find(p =>
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     p?.domainId,
                     domain_id,
                   ) &&
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     p?.asset_data?.id,
                     asset,
                   )
@@ -1083,7 +1083,7 @@ export default () => {
                 (a?.contracts || [])
                   .findIndex(c =>
                     c?.chain_id === chain_id &&
-                    equals_ignore_case(
+                    equalsIgnoreCase(
                       c?.contract_address,
                       contract_address,
                     )
@@ -1151,7 +1151,7 @@ export default () => {
             !(
               (balances_data?.[`${chain_id}`] || [])
                 .findIndex(c =>
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     c?.contract_address,
                     contract_address,
                   )
@@ -1220,10 +1220,10 @@ export default () => {
           .map(a => {
             const {
               next_asset,
-            } = { ...a };
+            } = { ...a }
             let {
               contract_address,
-            } = {  ...a }
+            } = { ...a }
 
             contract_address = contract_address.toLowerCase()
 
@@ -1335,7 +1335,7 @@ export default () => {
             )
           ),
           ...(
-            equals_ignore_case(
+            equalsIgnoreCase(
               adopted.address,
               contract_address
             ) ?
@@ -1361,7 +1361,7 @@ export default () => {
             )
           ),
           ...(
-            equals_ignore_case(
+            equalsIgnoreCase(
               local.address,
               contract_address,
             ) ?
@@ -1704,7 +1704,7 @@ export default () => {
             success = true
           }
         } catch (error) {
-          let message = 
+          let message =
             error?.reason ||
             error?.data?.message ||
             error?.message
@@ -1820,7 +1820,7 @@ export default () => {
             )
           ),
           ...(
-            equals_ignore_case(
+            equalsIgnoreCase(
               adopted.address,
               contract_address,
             ) ?
@@ -1846,7 +1846,7 @@ export default () => {
             )
           ),
           ...(
-            equals_ignore_case(
+            equalsIgnoreCase(
               local.address,
               contract_address,
             ) ?
@@ -1866,11 +1866,11 @@ export default () => {
       else {
         if (
           !(
-            equals_ignore_case(
+            equalsIgnoreCase(
               domainId,
               pair?.domainId,
             ) &&
-            equals_ignore_case(
+            equalsIgnoreCase(
               lpTokenAddress,
               pair?.lpTokenAddress,
             )
@@ -2164,7 +2164,7 @@ export default () => {
         )
       ),
       ...(
-        equals_ignore_case(
+        equalsIgnoreCase(
           adopted.address,
           contract_address,
         ) ?
@@ -2209,7 +2209,7 @@ export default () => {
     x_asset_data &&
     (balances_data?.[chain_id] || [])
       .find(b =>
-        equals_ignore_case(
+        equalsIgnoreCase(
           b?.contract_address,
           x_asset_data.contract_address,
         )
@@ -2229,7 +2229,7 @@ export default () => {
         )
       ),
       ...(
-        equals_ignore_case(
+        equalsIgnoreCase(
           local.address,
           contract_address,
         ) ?
@@ -2274,7 +2274,7 @@ export default () => {
     y_asset_data &&
     (balances_data?.[chain_id] || [])
       .find(b =>
-        equals_ignore_case(
+        equalsIgnoreCase(
           b?.contract_address,
           y_asset_data.contract_address,
         )
@@ -2396,9 +2396,8 @@ export default () => {
                         }
                       )
                     }}
-                    origin=""
-                    is_pool={true}
-                    no_shadow={true}
+                    isPool={true}
+                    noShadow={true}
                     className="w-fit flex items-center justify-center space-x-1.5 sm:space-x-2 mt-0.25"
                   />
                 </div>
@@ -2526,19 +2525,19 @@ export default () => {
                                   y_asset_data?.contract_address,
                                 ]
                                 .findIndex(_c =>
-                                  equals_ignore_case(
+                                  equalsIgnoreCase(
                                     _c,
                                     c,
                                   )
                                 ) > -1 ?
                                   origin === 'x' ?
-                                    equals_ignore_case(
+                                    equalsIgnoreCase(
                                       c,
                                       y_asset_data?.contract_address,
                                     ) ?
                                       'y' :
                                       origin :
-                                    equals_ignore_case(
+                                    equalsIgnoreCase(
                                       c,
                                       x_asset_data?.contract_address,
                                     ) ?
@@ -2551,8 +2550,7 @@ export default () => {
                           getBalances(chain)
                         }}
                         chain={chain}
-                        origin=""
-                        is_pool={true}
+                        isPool={true}
                         data={
                           origin === 'x' ?
                             x_asset_data :
@@ -2605,7 +2603,7 @@ export default () => {
                             }
 
                             value =
-                              number_to_fixed(
+                              numberToFixed(
                                 value,
                                 (origin === 'x' ?
                                   x_asset_data :
@@ -2750,19 +2748,19 @@ export default () => {
                                   y_asset_data?.contract_address,
                                 ]
                                 .findIndex(_c =>
-                                  equals_ignore_case(
+                                  equalsIgnoreCase(
                                     _c,
                                     c,
                                   )
                                 ) > -1 ?
                                   origin === 'x' ?
-                                    equals_ignore_case(
+                                    equalsIgnoreCase(
                                       c,
                                       x_asset_data?.contract_address,
                                     ) ?
                                       'y' :
                                       origin :
-                                    equals_ignore_case(
+                                    equalsIgnoreCase(
                                       c,
                                       y_asset_data?.contract_address,
                                     ) ?
@@ -2775,8 +2773,7 @@ export default () => {
                           getBalances(chain)
                         }}
                         chain={chain}
-                        origin=""
-                        is_pool={true}
+                        isPool={true}
                         data={
                           origin === 'x' ?
                             y_asset_data :
@@ -2789,7 +2786,7 @@ export default () => {
                           <div className="w-36 sm:w-48 flex items-center justify-end py-1.5">
                             <div>
                               <Oval
-                                color={loader_color(theme)}
+                                color={loaderColor(theme)}
                                 width="20"
                                 height="20"
                               />
@@ -2852,7 +2849,7 @@ export default () => {
                       <span className="whitespace-nowrap text-sm font-semibold space-x-1.5">
                         <DecimalsFormat
                           value={
-                            number_format(
+                            numberFormat(
                               rate,
                               '0,0.000000000000',
                               true,
@@ -2986,7 +2983,7 @@ export default () => {
                             </> :
                             <div className="flex items-center space-x-1.5">
                               <span className="text-sm font-semibold">
-                                {number_format(
+                                {numberFormat(
                                   slippage,
                                   '0,0.000000',
                                 )}%
@@ -3051,7 +3048,7 @@ export default () => {
                           </Tooltip>
                           <span className="whitespace-nowrap text-sm font-semibold space-x-1.5">
                             <span>
-                              {number_format(
+                              {numberFormat(
                                 priceImpact,
                                 '0,0.000000',
                                 true,
@@ -3066,7 +3063,7 @@ export default () => {
                 )
               }
               {
-                web3_provider &&
+                browser_provider &&
                 wrong_chain ?
                   <Wallet
                     connectChainId={chain_id}
@@ -3111,7 +3108,7 @@ export default () => {
                         ]
                         .includes(amount)
                       ) ||
-                      web3_provider
+                      browser_provider
                     ) ?
                       !callResponse &&
                       !calling &&
@@ -3367,12 +3364,12 @@ export default () => {
                                           .substring(
                                             0,
                                             status === 'failed' &&
-                                            error_patterns
+                                            errorPatterns
                                               .findIndex(c =>
                                                 message?.indexOf(c) > -1
                                               ) > -1 ?
                                               message.indexOf(
-                                                error_patterns
+                                                errorPatterns
                                                   .find(c =>
                                                     message.indexOf(c) > -1
                                                   )
@@ -3438,7 +3435,7 @@ export default () => {
                               )
                             })
                           ) :
-                    web3_provider ?
+                    browser_provider ?
                       <button
                         disabled={true}
                         onClick={() => call()}
@@ -3458,7 +3455,7 @@ export default () => {
                                 <div className="flex items-center justify-center space-x-2">
                                   <div>
                                     <TailSpin
-                                      color={loader_color(theme)}
+                                      color={loaderColor(theme)}
                                       width="20"
                                       height="20"
                                     />

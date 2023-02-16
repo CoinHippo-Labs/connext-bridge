@@ -23,18 +23,8 @@ export default () => {
         setHidden(!hidden)
       }
 
-      document
-        .addEventListener(
-          'mousedown',
-          handleClickOutside,
-        )
-
-      return () =>
-        document
-          .removeEventListener(
-            'mousedown',
-            handleClickOutside,
-          )
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
     },
     [hidden, buttonRef, dropdownRef],
   )
@@ -42,7 +32,7 @@ export default () => {
   const onClick = () => setHidden(!hidden)
 
   return (
-    <div className="block xl:hidden relative">
+    <div className="block lg:hidden relative">
       <button
         ref={buttonRef}
         onClick={onClick}
@@ -53,7 +43,7 @@ export default () => {
         />
       </button>
       <div
-        ref={dropdownRef} 
+        ref={dropdownRef}
         className={`dropdown ${hidden ? '' : 'open'} absolute top-0 left-3 mt-12`}
       >
         <div className="dropdown-content w-40 bottom-start">

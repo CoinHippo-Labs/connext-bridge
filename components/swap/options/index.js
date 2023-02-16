@@ -8,7 +8,7 @@ import { RiSettings3Line } from 'react-icons/ri'
 import { BiInfoCircle } from 'react-icons/bi'
 
 import Modal from '../../modals'
-import { switch_color } from '../../../lib/utils'
+import { switchColor } from '../../../lib/utils'
 
 const DEFAULT_SWAP_SLIPPAGE_PERCENTAGE =
   Number(
@@ -204,9 +204,9 @@ export default (
                         }}
                         checkedIcon={false}
                         uncheckedIcon={false}
-                        onColor={switch_color(theme).on}
+                        onColor={switchColor(theme).on}
                         onHandleColor="#f8fafc"
-                        offColor={switch_color(theme).off}
+                        offColor={switchColor(theme).off}
                         offHandleColor="#f8fafc"
                       /> :
                       type === 'textarea' ?

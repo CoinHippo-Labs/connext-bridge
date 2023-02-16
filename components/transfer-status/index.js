@@ -18,13 +18,9 @@ import EnsProfile from '../ens-profile'
 import Copy from '../copy'
 import DecimalsFormat from '../decimals-format'
 import { chainName } from '../../lib/object/chain'
-import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
+import { numberFormat, ellipse, equalsIgnoreCase, loaderColor } from '../../lib/utils'
 
-const ROUTER_FEE_PERCENT =
-  Number(
-    process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT
-  ) ||
-  0.05
+const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT)
 
 export default (
   {
@@ -36,8 +32,8 @@ export default (
     chains,
     assets,
     wallet,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
         chains: state.chains,
@@ -119,7 +115,7 @@ export default (
             ]
             .filter(__a => __a)
             .findIndex(__a =>
-              equals_ignore_case(
+              equalsIgnoreCase(
                 __a,
                 _a,
               )
@@ -135,7 +131,7 @@ export default (
 
   if (
     source_contract_data?.next_asset &&
-    equals_ignore_case(
+    equalsIgnoreCase(
       source_contract_data.next_asset.contract_address,
       origin_transacting_asset,
     )
@@ -150,7 +146,7 @@ export default (
 
   if (
     !source_contract_data &&
-    equals_ignore_case(
+    equalsIgnoreCase(
       origin_transacting_asset,
       constants.AddressZero,
     )
@@ -172,7 +168,7 @@ export default (
           a?.id,
           a?.symbol,
         ].findIndex(s =>
-          equals_ignore_case(
+          equalsIgnoreCase(
             s,
             symbol,
           )
@@ -241,7 +237,7 @@ export default (
           c?.chain_id === destination_chain_data?.chain_id &&
           [
             destination_transacting_asset,
-            equals_ignore_case(
+            equalsIgnoreCase(
               source_asset_data?.id,
               a?.id,
             ) ?
@@ -256,7 +252,7 @@ export default (
             ]
             .filter(__a => __a)
             .findIndex(__a =>
-              equals_ignore_case(
+              equalsIgnoreCase(
                 __a,
                 _a,
               )
@@ -273,7 +269,7 @@ export default (
   if (
     destination_contract_data?.next_asset &&
     (
-      equals_ignore_case(
+      equalsIgnoreCase(
         destination_contract_data.next_asset.contract_address,
         destination_transacting_asset,
       ) ||
@@ -290,7 +286,7 @@ export default (
 
   if (
     !destination_contract_data &&
-    equals_ignore_case(
+    equalsIgnoreCase(
       destination_transacting_asset,
       constants.AddressZero,
     )
@@ -312,7 +308,7 @@ export default (
           a?.id,
           a?.symbol,
         ].findIndex(s =>
-          equals_ignore_case(
+          equalsIgnoreCase(
             s,
             symbol,
           )
@@ -433,7 +429,7 @@ export default (
                       {
                         background:
                           `${source_asset_data?.color ||
-                          loader_color(theme)}aa`,
+                          loaderColor(theme)}aa`,
                       }
                     }
                   />
@@ -465,7 +461,7 @@ export default (
               (
                 <DecimalsFormat
                   value={
-                    number_format(
+                    numberFormat(
                       source_amount,
                       '0,0.000000',
                       true,
@@ -564,7 +560,7 @@ export default (
               (
                 <DecimalsFormat
                   value={
-                    number_format(
+                    numberFormat(
                       destination_amount,
                       '0,0.000000',
                       true,
@@ -593,7 +589,7 @@ export default (
         </div>
         {
           to &&
-          !equals_ignore_case(
+          !equalsIgnoreCase(
             to,
             address,
           ) &&

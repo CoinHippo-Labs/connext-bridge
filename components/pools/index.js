@@ -4,7 +4,7 @@ import _ from 'lodash'
 import { BigNumber, utils } from 'ethers'
 
 import Pools from './pools'
-import { equals_ignore_case } from '../../lib/utils'
+import { equalsIgnoreCase } from '../../lib/utils'
 
 const WRAPPED_PREFIX =
   process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
@@ -185,7 +185,7 @@ export default () => {
                                 .split('-')
 
                             if (
-                              equals_ignore_case(
+                              equalsIgnoreCase(
                                 _.head(symbols),
                                 _.last(symbols),
                               ) &&
@@ -261,7 +261,7 @@ export default () => {
                             .find(a =>
                               symbols
                                 .findIndex(s =>
-                                  equals_ignore_case(
+                                  equalsIgnoreCase(
                                     s,
                                     a?.symbol,
                                   )
@@ -271,7 +271,7 @@ export default () => {
                                   c?.chain_id === chain_id &&
                                   symbols
                                     .findIndex(s =>
-                                      equals_ignore_case(
+                                      equalsIgnoreCase(
                                         s,
                                         c?.symbol,
                                       )
