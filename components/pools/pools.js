@@ -264,7 +264,7 @@ export default (
                     const {
                       chain_data,
                       tvl,
-                      apr,
+                      apy,
                     } = { ...d }
 
                     return {
@@ -281,16 +281,16 @@ export default (
                         !isNaN(tvl) ?
                           tvl :
                           -1,
-                      _apr:
-                        !isNaN(apr) ?
-                          apr :
+                      _apy:
+                        !isNaN(apy) ?
+                          apy :
                           -1,
                     }
                   }),
                   [
                     'i',
                     '_tvl',
-                    '_apr',
+                    '_apy',
                   ],
                   [
                     'asc',
@@ -1537,19 +1537,19 @@ export default (
                             className="z-50 bg-dark text-white text-xs"
                           >
                             <div>
-                              APR
+                              APY
                             </div>
                           </Tooltip>
                         ),
-                      accessor: 'apr',
+                      accessor: 'apy',
                       sortType: (a, b) =>
                         _.meanBy(
                           a.original.pools,
-                          'apr',
+                          'apy',
                         ) >
                         _.sumBy(
                           b.original.pools,
-                          'apr',
+                          'apy',
                         ) ?
                           1 :
                           -1,
@@ -1564,16 +1564,16 @@ export default (
                             pools
                               .map(p => {
                                 const {
-                                  apr,
+                                  apy,
                                   tvl,
                                 } = { ...p }
 
                                 return {
                                   ...p,
-                                  weighted_apr:
+                                  weighted_apy:
                                     (
                                       (
-                                        apr ||
+                                        apy ||
                                         0
                                       ) *
                                       (
@@ -1583,7 +1583,7 @@ export default (
                                     ),
                                 }
                               }),
-                            'weighted_apr',
+                            'weighted_apy',
                           ) /
                           _.sumBy(
                             pools,
@@ -1624,12 +1624,12 @@ export default (
                                   const {
                                     chain_data,
                                     asset_data,
-                                    apr,
+                                    apy,
                                   } = { ...p }
 
                                   const chain = chain_data?.id
                                   const asset = asset_data?.id
-                                  const value = apr
+                                  const value = apy
 
                                   return (
                                     <Link
@@ -1928,7 +1928,7 @@ export default (
                           'tvl',
                           'volume_value',
                           'fees_value',
-                          'apr',
+                          'apy',
                         ] :
                         [
                           'lpTokenBalance',
