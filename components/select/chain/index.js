@@ -3,36 +3,34 @@ import { useSelector, shallowEqual } from 'react-redux'
 import { Puff } from 'react-loader-spinner'
 import { BiChevronDown } from 'react-icons/bi'
 
-import Image from '../../image'
 import Search from './search'
+import Image from '../../image'
 import Modal from '../../modals'
-import { chainName } from '../../../lib/object/chain'
-import { loader_color } from '../../../lib/utils'
+import { getChain, chainName } from '../../../lib/object/chain'
+import { loaderColor } from '../../../lib/utils'
 
 export default (
   {
     disabled = false,
-    fixed = false,
     value,
     onSelect,
     source,
     destination,
-    origin = 'from',
-    is_pool = false,
-    no_shadow = true,
+    origin = '',
+    isPool = false,
+    noShadow = true,
+    fixed = false,
     className = '',
   },
 ) => {
   const {
     preferences,
     chains,
-    wallet,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
         chains: state.chains,
-        wallet: state.wallet,
       }
     ),
     shallowEqual,
@@ -43,12 +41,6 @@ export default (
   const {
     chains_data,
   } = { ...chains }
-  const {
-    wallet_data,
-  } = { ...wallet }
-  const {
-    address,
-  } = { ...wallet_data }
 
   const [hidden, setHidden] = useState(true)
 
@@ -56,41 +48,25 @@ export default (
     if (onSelect) {
       onSelect(id)
     }
-
     setHidden(!hidden)
   }
 
-  const chain_data = (chains_data || [])
-    .find(c =>
-      c?.id === value
-    )
+  const chain_data = getChain(value, chains_data)
+
   const {
     image,
     color,
   } = { ...chain_data }
 
-  const boxShadow =
-    color &&
-    !no_shadow &&
-    `${color}${
-      theme === 'light' ?
-        '44' :
-        '33'
-    } 0px 4px 16px 8px`
+  const boxShadow = color && !noShadow && `${color}${theme === 'light' ? '44' : '33'} 0px 4px 16px 8px`
 
   return (
     <Modal
       id="modal-chains"
       noButtons={true}
       hidden={hidden}
-      disabled={
-        disabled ||
-        fixed
-      }
-      onClick={
-        open =>
-          setHidden(!open)
-      }
+      disabled={disabled || fixed}
+      onClick={open => setHidden(!open)}
       buttonTitle={
         chains_data ?
           <div
@@ -126,13 +102,7 @@ export default (
                 )
               }
               <span className="whitespace-nowrap sm:text-lg font-semibold">
-                {
-                  chainName(chain_data) ||
-                  (origin ?
-                    'Chain' :
-                    'Select chain'
-                  )
-                }
+                {chainName(chain_data) || (origin ? 'Chain' : 'Select chain')}
               </span>
             </div>
             {
@@ -146,9 +116,9 @@ export default (
             }
           </div> :
           <Puff
-            color={loader_color(theme)}
             width="24"
             height="24"
+            color={loaderColor(theme)}
           />
       }
       buttonClassName={
@@ -165,10 +135,7 @@ export default (
       title={
         <span className="flex items-center space-x-1 pt-1 pb-2">
           <span className="capitalize">
-            {
-              origin ||
-              'select'
-            }
+            {origin || 'select'}
           </span>
           <span className="normal-case">
             chain
@@ -181,8 +148,7 @@ export default (
           onSelect={id => onClick(id)}
           source={source}
           destination={destination}
-          is_pool={is_pool}
-          fixed={fixed}
+          isPool={isPool}
         />
       }
     />

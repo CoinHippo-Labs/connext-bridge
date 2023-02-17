@@ -6,13 +6,14 @@ import { TiArrowRight } from 'react-icons/ti'
 import { BiChevronDown, BiChevronUp } from 'react-icons/bi'
 
 import TransferStatus from '../transfer-status'
+import { toArray } from '../../lib/utils'
 
 const NUM_TRANSFER_DISPLAY = 3
 
 export default (
   {
-    trigger,
     data = [],
+    trigger,
     onUpdateSize,
   },
 ) => {
@@ -20,8 +21,8 @@ export default (
     preferences,
     dev,
     wallet,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
         dev: state.dev,
@@ -56,26 +57,14 @@ export default (
           address
         ) {
           try {
-            let response =
-              await sdk.sdkUtils
-                .getTransfers(
-                  {
-                    userAddress: address,
-                  },
-                )
-
-            if (!Array.isArray(response)) {
-              response = []
-            }
+            let response = toArray(await sdk.sdkUtils.getTransfers({ userAddress: address }))
 
             response =
               _.orderBy(
                 _.uniqBy(
-                  _.concat(
-                    response,
-                    data,
-                  )
-                  .filter(d => d),
+                  toArray(
+                    _.concat(response, data)
+                  ),
                   'xcall_transaction_hash',
                 ),
                 ['xcall_timestamp'],
@@ -85,10 +74,7 @@ export default (
             if (
               response
                 .findIndex(t =>
-                  (transfers || [])
-                    .findIndex(_t =>
-                      _t?.transfer_id
-                    ) < 0 &&
+                  toArray(transfers).findIndex(_t => _t?.transfer_id) < 0 &&
                   ![
                     XTransferStatus.Executed,
                     XTransferStatus.CompletedFast,
@@ -114,8 +100,7 @@ export default (
 
       const interval =
         setInterval(
-          () =>
-            getData(),
+          () => getData(),
           10 * 1000,
         )
 
@@ -127,10 +112,7 @@ export default (
   useEffect(
     () => {
       if (onUpdateSize) {
-        onUpdateSize(
-          (transfers || [])
-            .length
-        )
+        onUpdateSize(toArray(transfers).length)
       }
     },
     [onUpdateSize, transfers],
@@ -138,7 +120,7 @@ export default (
 
   const transfersComponent =
     _.slice(
-      (transfers || [])
+      toArray(transfers)
         .map((t, i) => {
           return (
             <div
@@ -160,10 +142,7 @@ export default (
     (
       <div className="lg:max-w-xs xl:ml-auto">
         <button
-          onClick={
-            () =>
-              setCollapse(!collapse)
-          }
+          onClick={() => setCollapse(!collapse)}
           className={`w-full flex items-center justify-center ${collapse ? 'text-slate-300 hover:text-slate-800 dark:text-slate-700 dark:hover:text-slate-200 font-medium' : 'font-semibold'} space-x-1 mb-3`}
         >
           <span className="capitalize text-sm">
@@ -186,8 +165,7 @@ export default (
                 {transfersComponent}
               </div>
               {
-                address &&
-                transfers.length > NUM_TRANSFER_DISPLAY &&
+                address && transfers.length > NUM_TRANSFER_DISPLAY &&
                 (
                   <a
                     href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${address}`}

@@ -9,8 +9,8 @@ import _package from '../../package.json'
 export default () => {
   const {
     preferences,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
       }
@@ -90,14 +90,7 @@ export default () => {
                 rel="noopener noreferrer"
                 className="text-blue-600 dark:text-white font-medium"
               >
-                SDK v
-                {
-                  dependencies['@connext/sdk']
-                    .replace(
-                      '^',
-                      '',
-                    )
-                }
+                SDK v{dependencies['@connext/sdk'].replace('^', '')}
               </a>
             )
           }
@@ -163,40 +156,10 @@ export default () => {
               </a>
             )
           }
-          {
-            process.env.NEXT_PUBLIC_ENS_NAME &&
-            (
-              <a
-                href={`https://app.ens.domains/name/${process.env.NEXT_PUBLIC_ENS_NAME}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <div className="min-w-max">
-                  <div className="flex dark:hidden items-center">
-                    <Image
-                      src="/logos/externals/ens/logo.png"
-                      width={20}
-                      height={20}
-                    />
-                  </div>
-                  <div className="hidden dark:flex items-center">
-                    <Image
-                      src="/logos/externals/ens/logo_white.png"
-                      width={20}
-                      height={20}
-                    />
-                  </div>
-                </div>
-              </a>
-            )
-          }
         </div>
         <div className="w-full md:w-1/2 lg:w-1/3 min-w-max flex items-center justify-center md:justify-end text-slate-400 dark:text-white space-x-1">
           <span>
-            © {
-              moment()
-                .format('YYYY')
-            } made with
+            © {moment().format('YYYY')} made with
           </span>
           <FaHeart
             className="text-red-400 text-xl pr-0.5"
@@ -204,12 +167,12 @@ export default () => {
           <span>
             {"by "}
             <a
-              href={process.env.NEXT_PUBLIC_TEAM_URL}
+              href={process.env.NEXT_PUBLIC_BUILD_BY_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 dark:text-white font-semibold"
             >
-              {process.env.NEXT_PUBLIC_TEAM_NAME}
+              {process.env.NEXT_PUBLIC_BUILD_BY}
             </a>
             {" team."}
           </span>

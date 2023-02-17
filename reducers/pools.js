@@ -1,10 +1,11 @@
 import _ from 'lodash'
 
 import { POOLS_DATA } from './types'
+import { toArray } from '../lib/utils'
 
 export default (
   state = {
-    [`${POOLS_DATA}`]: null,
+    [POOLS_DATA]: null,
   },
   action,
 ) => {
@@ -12,13 +13,11 @@ export default (
     case POOLS_DATA:
       return {
         ...state,
-        [`${POOLS_DATA}`]:
+        [POOLS_DATA]:
           _.uniqBy(
-            _.concat(
-              action.value,
-              state[`${POOLS_DATA}`],
-            )
-            .filter(d => d),
+            toArray(
+              _.concat(action.value, state[POOLS_DATA])
+            ),
             'id',
           ),
       }

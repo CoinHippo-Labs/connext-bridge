@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 
 import Bridge from '../components/bridge'
-import { is_route_exist } from '../lib/routes'
+import { isRouteExist } from '../lib/routes'
 
 export default () => {
   const router = useRouter()
@@ -11,14 +11,7 @@ export default () => {
     asPath,
   } = { ...router }
 
-  const _asPath =
-    asPath.includes('?') ?
-      asPath
-        .substring(
-          0,
-          asPath.indexOf('?'),
-        ) :
-      asPath
+  const _asPath = asPath.includes('?') ? asPath.substring(0, asPath.indexOf('?')) : asPath
 
   const [ssr, setSsr] = useState(true)
 
@@ -29,24 +22,13 @@ export default () => {
     [],
   )
 
-  if (
-    !ssr &&
-    typeof window !== 'undefined' &&
-    pathname !== _asPath
-  ) {
-    router
-      .push(
-        is_route_exist(_asPath) ?
-          asPath :
-          '/'
-      )
+  if (!ssr && typeof window !== 'undefined' && pathname !== _asPath) {
+    router.push(isRouteExist(_asPath) ? asPath : '/')
   }
 
   return (
     !ssr &&
-    [
-      '/',
-    ].includes(_asPath) &&
+    ['/'].includes(_asPath) &&
     (
       <Bridge />
     )

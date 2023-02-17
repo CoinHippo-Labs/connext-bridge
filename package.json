@@ -24,25 +24,24 @@
   "dependencies": {
     "@coinbase/wallet-sdk": "^3.6.3",
     "@connext/sdk": "^0.2.6",
-    "@material-tailwind/react": "^1.2.5",
+    "@material-tailwind/react": "^1.4.2",
     "@portis/web3": "^4.0.7",
     "@redux-devtools/extension": "^3.2.5",
     "@walletconnect/web3-provider": "^1.8.0",
     "env-cmd": "^10.1.0",
     "ethers": "^5.7.2",
-    "html-react-parser": "^3.0.4",
+    "html-react-parser": "^3.0.9",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
-    "next": "^12.3.1",
+    "next": "^13.1.6",
     "next-secure-headers": "^2.2.0",
     "nprogress": "^0.2.0",
     "numeral": "^2.0.6",
     "postcss-flexbugs-fixes": "^5.0.2",
     "postcss-import": "^15.1.0",
-    "postcss-preset-env": "^8.0.0",
+    "postcss-preset-env": "^8.0.1",
     "react": "18.2.0",
     "react-copy-to-clipboard": "^5.1.0",
-    "react-countdown-circle-timer": "^3.1.0",
     "react-debounce-input": "^3.3.0",
     "react-dom": "18.2.0",
     "react-gtm-module": "^2.0.11",
@@ -50,16 +49,16 @@
     "react-linkify": "^1.0.0-alpha",
     "react-loader-spinner": "^5.3.4",
     "react-page-visibility": "^7.0.0",
-    "react-redux": "^8.0.4",
+    "react-redux": "^8.0.5",
     "react-reveal": "^1.2.2",
     "react-switch": "^7.0.0",
     "react-table": "^7.8.0",
-    "redux": "^4.2.0",
-    "web3": "1.7.4",
-    "web3modal": "1.9.7"
+    "redux": "^4.2.1",
+    "web3modal": "^1.9.12"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.13",
+    "crypto-browserify": "^3.12.0",
     "events": "^3.3.0",
     "https-browserify": "^1.0.0",
     "os-browserify": "^0.3.0",
@@ -67,6 +66,6 @@
     "postcss-color-function": "^4.1.0",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
-    "tailwindcss": "^3.2.4"
+    "tailwindcss": "^3.2.6"
   }
 }

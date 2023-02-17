@@ -5,7 +5,8 @@ import { RiRefreshFill } from 'react-icons/ri'
 
 import Image from '../../image'
 import Items from './items'
-import { loader_color } from '../../../lib/utils'
+import { getChain } from '../../../lib/object/chain'
+import { loaderColor } from '../../../lib/utils'
 
 export default (
   {
@@ -15,8 +16,8 @@ export default (
   const {
     preferences,
     chains,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
         chains: state.chains,
@@ -50,28 +51,15 @@ export default (
         setHidden(!hidden)
       }
 
-      document
-        .addEventListener(
-          'mousedown',
-          handleClickOutside,
-        )
-
-      return () =>
-        document
-          .removeEventListener(
-            'mousedown',
-            handleClickOutside,
-          )
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
     },
     [hidden, buttonRef, dropdownRef],
   )
 
   const onClick = () => setHidden(!hidden)
 
-  const chain_data = (chains_data || [])
-    .find(c =>
-      c?.chain_id === chain_id
-    )
+  const chain_data = getChain(chain_id, chains_data)
 
   const {
     short_name,
@@ -102,14 +90,14 @@ export default (
               className="transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out"
             /> :
             <Puff
-              color={loader_color(theme)}
               width="24"
               height="24"
+              color={loaderColor(theme)}
             />
         }
       </button>
       <div
-        ref={dropdownRef} 
+        ref={dropdownRef}
         className={`dropdown ${hidden ? '' : 'open'} absolute top-0 left-3 mt-12`}
       >
         <div className="dropdown-content w-36 bottom-start">

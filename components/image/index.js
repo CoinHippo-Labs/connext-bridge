@@ -1,6 +1,8 @@
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 
+const IMAGE_OPTIMIZER_URL = ''
+
 const loader = (
   {
     src,
@@ -9,28 +11,19 @@ const loader = (
   },
 ) =>
   `${
-    process.env.NEXT_PUBLIC_IMAGE_OPTIMIZER_URL ?
-      `${process.env.NEXT_PUBLIC_IMAGE_OPTIMIZER_URL}/_next` :
-      ''
+    IMAGE_OPTIMIZER_URL ? `${IMAGE_OPTIMIZER_URL}/_next` : ''
   }${
-    src?.startsWith('/') ?
-      '' :
-      '/'
+    src?.startsWith('/') ? '' : '/'
   }${src}${
-    process.env.NEXT_PUBLIC_IMAGE_OPTIMIZER_URL ?
-      `?url=${
-        src?.startsWith('/') ?
-          process.env.NEXT_PUBLIC_SITE_URL :
-          ''
-      }${src}&w=${width}&q=${quality}` :
-      ''
+    IMAGE_OPTIMIZER_URL ? `?url=${src?.startsWith('/') ? process.env.NEXT_PUBLIC_APP_URL : ''}${src}&w=${width}&q=${quality}` : ''
   }`
 
 export default (
   {
     src,
-    src_end,
-    duration_second = 2,
+    srcEnd,
+    duration = 2,
+    alt = '',
     ...rest
   }
 ) => {
@@ -41,8 +34,7 @@ export default (
     () => {
       const timeout =
         setTimeout(
-          () =>
-            setTimer(timer + 1),
+          () => setTimer(timer + 1),
           1 * 1000,
         )
 
@@ -53,13 +45,7 @@ export default (
 
   useEffect(
     () => {
-      if (
-        src &&
-        (
-          !src_end ||
-          timer === 0
-        )
-      ) {
+      if (src && (!srcEnd || timer === 0)) {
         setImageSrc(src)
       }
     },
@@ -68,31 +54,25 @@ export default (
 
   useEffect(
     () => {
-      if (
-        src_end &&
-        timer > duration_second
-      ) {
-        setImageSrc(src_end)
+      if (srcEnd && timer > duration) {
+        setImageSrc(srcEnd)
       }
     },
-    [src_end, timer],
+    [srcEnd, timer],
   )
 
   useEffect(
     () => {
-      if (
-        src &&
-        src_end &&
-        timer > 0
-      ) {
+      if (src && srcEnd && timer > 0) {
         setTimer(0)
       }
     },
-    [src, src_end],
+    [src, srcEnd],
   )
 
   return (
     <Image
+      alt={alt}
       { ...rest }
       src={imageSrc}
       loader={

@@ -2,7 +2,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import { useState, useEffect } from 'react'
 import _ from 'lodash'
 import moment from 'moment'
-import { BigNumber, constants, utils } from 'ethers'
+import { constants, utils } from 'ethers'
 import { XTransferStatus } from '@connext/nxtp-utils'
 import { Tooltip } from '@material-tailwind/react'
 import Fade from 'react-reveal/Fade'
@@ -13,18 +13,16 @@ import { BsLightningChargeFill } from 'react-icons/bs'
 import { BiInfoCircle } from 'react-icons/bi'
 
 import ActionRequired from '../action-required'
-import Image from '../image'
-import EnsProfile from '../ens-profile'
 import Copy from '../copy'
 import DecimalsFormat from '../decimals-format'
-import { chainName } from '../../lib/object/chain'
-import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
+import EnsProfile from '../ens-profile'
+import Image from '../image'
+import { getChain, chainName } from '../../lib/object/chain'
+import { getAsset } from '../../lib/object/asset'
+import { getContract } from '../../lib/object/contract'
+import { ellipse, equalsIgnoreCase, loaderColor } from '../../lib/utils'
 
-const ROUTER_FEE_PERCENT =
-  Number(
-    process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT
-  ) ||
-  0.05
+const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT)
 
 export default (
   {
@@ -36,8 +34,8 @@ export default (
     chains,
     assets,
     wallet,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
         chains: state.chains,
@@ -78,18 +76,13 @@ export default (
     transfer_id,
     status,
     error_status,
-    origin_chain,
     origin_domain,
     origin_transacting_asset,
     origin_transacting_amount,
-    origin_bridged_asset,
-    origin_bridged_amount,
-    destination_chain,
     destination_domain,
     destination_transacting_asset,
     destination_transacting_amount,
     destination_local_asset,
-    destination_local_amount,
     receive_local,
     to,
     xcall_timestamp,
@@ -98,48 +91,12 @@ export default (
     call_data,
   } = { ...transferData }
 
-  const source_chain_data = (chains_data || [])
-    .find(c =>
-      c?.chain_id === Number(origin_chain) ||
-      c?.domain_id === origin_domain
-    )
+  const source_chain_data = getChain(origin_domain, chains_data)
+  const source_asset_data = getAsset(null, assets_data, source_chain_data?.chain_id, origin_transacting_asset)
 
-  const source_asset_data = (assets_data || [])
-    .find(a =>
-      (a?.contracts || [])
-        .findIndex(c =>
-          c?.chain_id === source_chain_data?.chain_id &&
-          [
-            origin_transacting_asset,
-            origin_bridged_asset,
-          ].findIndex(_a =>
-            [
-              c?.next_asset?.contract_address,
-              c?.contract_address,
-            ]
-            .filter(__a => __a)
-            .findIndex(__a =>
-              equals_ignore_case(
-                __a,
-                _a,
-              )
-            ) > -1
-          ) > -1
-        ) > -1
-    )
-
-  let source_contract_data = (source_asset_data?.contracts || [])
-    .find(c =>
-      c?.chain_id === source_chain_data?.chain_id
-    )
-
-  if (
-    source_contract_data?.next_asset &&
-    equals_ignore_case(
-      source_contract_data.next_asset.contract_address,
-      origin_transacting_asset,
-    )
-  ) {
+  let source_contract_data = getContract(source_chain_data?.chain_id, source_asset_data?.contracts)
+  // next asset
+  if (source_contract_data?.next_asset && equalsIgnoreCase(source_contract_data.next_asset.contract_address, origin_transacting_asset)) {
     source_contract_data = {
       ...source_contract_data,
       ...source_contract_data.next_asset,
@@ -147,139 +104,45 @@ export default (
 
     delete source_contract_data.next_asset
   }
-
-  if (
-    !source_contract_data &&
-    equals_ignore_case(
-      origin_transacting_asset,
-      constants.AddressZero,
-    )
-  ) {
+  // native asset
+  if (!source_contract_data && equalsIgnoreCase(constants.AddressZero, origin_transacting_asset)) {
     const {
       nativeCurrency,
-    } = {
-      ...(
-        _.head(source_chain_data?.provider_params)
-      ),
-    }
+    } = { ..._.head(source_chain_data?.provider_params) }
+
     const {
       symbol,
     } = { ...nativeCurrency }
 
-    const _source_asset_data = (assets_data || [])
-      .find(a =>
-        [
-          a?.id,
-          a?.symbol,
-        ].findIndex(s =>
-          equals_ignore_case(
-            s,
-            symbol,
-          )
-        ) > -1
-      )
+    const _source_asset_data = getAsset(symbol, assets_data)
 
     source_contract_data = {
-      ...(
-        (_source_asset_data?.contracts || [])
-          .find(c =>
-            c?.chain_id === source_chain_data?.chain_id,
-          )
-      ),
-      contract_address: origin_transacting_asset,
+      ...getContract(source_chain_data?.chain_id, _source_asset_data?.contracts),
       ...nativeCurrency,
+      contract_address: origin_transacting_asset,
     }
   }
 
-  const source_symbol =
-    source_contract_data?.symbol ||
-    source_asset_data?.symbol
-
-  const source_decimals =
-    source_contract_data?.decimals ||
-    18
-
-  const source_asset_image =
-    source_contract_data?.image ||
-    source_asset_data?.image
-
+  const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
+  const source_decimals = source_contract_data?.decimals || 18
+  const source_asset_image = source_contract_data?.image || source_asset_data?.image
   const source_amount =
-    _.head(
-      [
-        origin_transacting_amount,
-      ]
-      .map(a =>
-        [
-          'number',
-          'string',
-        ].includes(typeof a) &&
-        Number(
-          utils.formatUnits(
-            BigNumber.from(
-              BigInt(a)
-                .toString()
-            ),
-            source_decimals,
-          )
-        )
-      )
-      .filter(a =>
-        typeof a === 'number'
+    origin_transacting_amount &&
+    Number(
+      utils.formatUnits(
+        BigInt(origin_transacting_amount).toString(),
+        source_decimals,
       )
     )
 
-  const destination_chain_data = (chains_data || [])
-    .find(c =>
-      c?.chain_id === Number(destination_chain) ||
-      c?.domain_id === destination_domain
-    )
+  const destination_chain_data = getChain(destination_domain, chains_data)
+  const _asset_data = getAsset(source_asset_data?.id, assets_data, destination_chain_data?.chain_id)
+  const _contract_data = getContract(destination_chain_data?.chain_id, _asset_data?.contracts)
+  const destination_asset_data = getAsset(null, assets_data, destination_chain_data?.chain_id, [destination_transacting_asset, _asset_data ? receive_local ? _contract_data?.next_asset?.contract_address : _contract_data?.contract_address : destination_local_asset])
 
-  const destination_asset_data = (assets_data || [])
-    .find(a =>
-      (a?.contracts || [])
-        .findIndex(c =>
-          c?.chain_id === destination_chain_data?.chain_id &&
-          [
-            destination_transacting_asset,
-            equals_ignore_case(
-              source_asset_data?.id,
-              a?.id,
-            ) ?
-              receive_local ?
-                c?.next_asset?.contract_address :
-                c?.contract_address :
-              destination_local_asset,
-          ].findIndex(_a =>
-            [
-              c?.next_asset?.contract_address,
-              c?.contract_address,
-            ]
-            .filter(__a => __a)
-            .findIndex(__a =>
-              equals_ignore_case(
-                __a,
-                _a,
-              )
-            ) > -1
-          ) > -1
-        ) > -1
-    )
-
-  let destination_contract_data = (destination_asset_data?.contracts || [])
-    .find(c =>
-      c?.chain_id === destination_chain_data?.chain_id
-    )
-
-  if (
-    destination_contract_data?.next_asset &&
-    (
-      equals_ignore_case(
-        destination_contract_data.next_asset.contract_address,
-        destination_transacting_asset,
-      ) ||
-      receive_local
-    )
-  ) {
+  let destination_contract_data = getContract(destination_chain_data?.chain_id, destination_asset_data?.contracts)
+  // next asset
+  if (destination_contract_data?.next_asset && (equalsIgnoreCase(destination_contract_data.next_asset.contract_address, destination_transacting_asset) || receive_local)) {
     destination_contract_data = {
       ...destination_contract_data,
       ...destination_contract_data.next_asset,
@@ -287,110 +150,40 @@ export default (
 
     delete destination_contract_data.next_asset
   }
-
-  if (
-    !destination_contract_data &&
-    equals_ignore_case(
-      destination_transacting_asset,
-      constants.AddressZero,
-    )
-  ) {
+  // native asset
+  if (!destination_contract_data && equalsIgnoreCase(constants.AddressZero, destination_transacting_asset)) {
     const {
       nativeCurrency,
-    } = {
-      ...(
-        _.head(destination_chain_data?.provider_params)
-      ),
-    }
+    } = { ..._.head(destination_chain_data?.provider_params) }
+
     const {
       symbol,
     } = { ...nativeCurrency }
 
-    const _destination_asset_data = (assets_data || [])
-      .find(a =>
-        [
-          a?.id,
-          a?.symbol,
-        ].findIndex(s =>
-          equals_ignore_case(
-            s,
-            symbol,
-          )
-        ) > -1
-      )
+    const _destination_asset_data = getAsset(symbol, assets_data)
 
     destination_contract_data = {
-      ...(
-        (_destination_asset_data?.contracts || [])
-          .find(c =>
-            c?.chain_id === destination_chain_data?.chain_id,
-          )
-      ),
-      contract_address: destination_transacting_asset,
+      ...getContract(destination_chain_data?.chain_id, _destination_asset_data?.contracts),
       ...nativeCurrency,
+      contract_address: destination_transacting_asset,
     }
   }
 
-  const destination_symbol =
-    destination_contract_data?.symbol ||
-    destination_asset_data?.symbol
-
-  const destination_decimals =
-    destination_contract_data?.decimals ||
-    18
-
-  const destination_asset_image =
-    destination_contract_data?.image ||
-    destination_asset_data?.image
-
+  const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol
+  const destination_decimals = destination_contract_data?.decimals || 18
+  const destination_asset_image = destination_contract_data?.image || destination_asset_data?.image
   const destination_amount =
-    _.head(
-      [
-        destination_transacting_amount,
-      ]
-      .map(a =>
-        [
-          'number',
-          'string',
-        ].includes(typeof a) &&
-        Number(
-          utils.formatUnits(
-            BigNumber.from(
-              BigInt(a)
-                .toString()
-            ),
-            destination_decimals,
-          )
+    destination_transacting_amount ?
+      Number(
+        utils.formatUnits(
+          BigInt(destination_transacting_amount).toString(),
+          destination_decimals,
         )
-      )
-      .filter(a =>
-        typeof a === 'number'
-      )
-    ) ||
-    (
-      source_amount *
-      (
-        1 -
-        ROUTER_FEE_PERCENT / 100
-      )
-    )
+      ) :
+      source_amount * (1 - ROUTER_FEE_PERCENT / 100)
 
-  const pending =
-    ![
-      XTransferStatus.Executed,
-      XTransferStatus.CompletedFast,
-      XTransferStatus.CompletedSlow,
-    ]
-    .includes(status)
-
-  const errored =
-    error_status &&
-    ![
-      XTransferStatus.CompletedFast,
-      XTransferStatus.CompletedSlow,
-    ]
-    .includes(status) &&
-    !execute_transaction_hash
+  const pending = ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(status)
+  const errored = error_status && !execute_transaction_hash && ![XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(status)
 
   return (
     transferData &&
@@ -414,8 +207,7 @@ export default (
             </span>
           </div>
           {
-            pending &&
-            !errored &&
+            pending && !errored &&
             (
               <div className="flex items-center justify-center">
                 <div
@@ -431,9 +223,7 @@ export default (
                     className="w-2 h-2 rounded-full"
                     style={
                       {
-                        background:
-                          `${source_asset_data?.color ||
-                          loader_color(theme)}aa`,
+                        background: `${source_asset_data?.color || loaderColor(theme)}aa`,
                       }
                     }
                   />
@@ -464,13 +254,7 @@ export default (
               typeof source_amount === 'number' &&
               (
                 <DecimalsFormat
-                  value={
-                    number_format(
-                      source_amount,
-                      '0,0.000000',
-                      true,
-                    )
-                  }
+                  value={source_amount}
                 />
               )
             }
@@ -492,63 +276,62 @@ export default (
             </div>
           </div>
           <div className="flex flex-col items-center">
-            {
-              errored ?
-                <ActionRequired
-                  transferData={transferData}
-                  buttonTitle={
-                    <Tooltip
-                      placement="top"
-                      content={error_status}
-                      className="z-50 bg-dark text-white text-xs"
-                    >
-                      <div>
-                        <IoWarning
-                          size={24}
-                          className="text-red-600 dark:text-red-500"
-                        />
-                      </div>
-                    </Tooltip>
-                  }
-                  onTransferBumped={
-                    relayer_fee => {
-                      if (data) {
-                        setTransferData(
-                          {
-                            ...data,
-                            relayer_fee,
-                            error_status: null,
-                          }
-                        )
-                      }
-                    }
-                  }
-                  onSlippageUpdated={
-                    slippage => {
-                      if (data) {
-                        setTransferData(
-                          {
-                            ...data,
-                            slippage,
-                            error_status: null,
-                          }
-                        )
-                      }
-                    }
-                  }
-                /> :
-                pending ?
-                  null :
-                  <a
-                    href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', execute_transaction_hash)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+            {errored ?
+              <ActionRequired
+                transferData={transferData}
+                buttonTitle={
+                  <Tooltip
+                    placement="top"
+                    content={error_status}
+                    className="z-50 bg-dark text-white text-xs"
                   >
-                    <HiOutlineCheckCircle
-                      size={32}
-                      className="text-green-500 dark:text-green-400"
-                    />
-                  </a>
+                    <div>
+                      <IoWarning
+                        size={24}
+                        className="text-red-600 dark:text-red-500"
+                      />
+                    </div>
+                  </Tooltip>
+                }
+                onTransferBumped={
+                  relayer_fee => {
+                    if (data) {
+                      setTransferData(
+                        {
+                          ...data,
+                          relayer_fee,
+                          error_status: null,
+                        }
+                      )
+                    }
+                  }
+                }
+                onSlippageUpdated={
+                  slippage => {
+                    if (data) {
+                      setTransferData(
+                        {
+                          ...data,
+                          slippage,
+                          error_status: null,
+                        }
+                      )
+                    }
+                  }
+                }
+              /> :
+              pending ?
+                null :
+                <a
+                  href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.transaction_path?.replace('{tx}', execute_transaction_hash)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <HiOutlineCheckCircle
+                    size={32}
+                    className="text-green-500 dark:text-green-400"
+                  />
+                </a>
             }
           </div>
           <div
@@ -563,13 +346,7 @@ export default (
               typeof destination_amount === 'number' &&
               (
                 <DecimalsFormat
-                  value={
-                    number_format(
-                      destination_amount,
-                      '0,0.000000',
-                      true,
-                    )
-                  }
+                  value={destination_amount}
                 />
               )
             }
@@ -592,11 +369,7 @@ export default (
           </div>
         </div>
         {
-          to &&
-          !equals_ignore_case(
-            to,
-            address,
-          ) &&
+          to && !equalsIgnoreCase(to, address) &&
           (
             <div className="flex items-center justify-between space-x-2">
               <span className="text-sm font-medium">
@@ -633,82 +406,76 @@ export default (
           xcall_timestamp &&
           (
             <div className="flex items-center justify-between mt-0.5">
-              {
-                pending &&
-                !errored ?
-                  <div /> :
-                  errored ?
-                    <ActionRequired
-                      transferData={transferData}
-                      buttonTitle={
+              {pending && !errored ?
+                <div /> :
+                errored ?
+                  <ActionRequired
+                    transferData={transferData}
+                    buttonTitle={
+                      <Tooltip
+                        placement="top"
+                        content={error_status}
+                        className="z-50 bg-dark text-white text-xs"
+                      >
+                        <span className="whitespace-nowrap text-red-600 dark:text-red-500 text-xs font-semibold">
+                          Action required
+                        </span>
+                      </Tooltip>
+                    }
+                    onTransferBumped={
+                      relayer_fee => {
+                        if (data) {
+                          setTransferData(
+                            {
+                              ...data,
+                              relayer_fee,
+                              error_status: null,
+                            }
+                          )
+                        }
+                      }
+                    }
+                    onSlippageUpdated={
+                      slippage => {
+                        if (data) {
+                          setTransferData(
+                            {
+                              ...data,
+                              slippage,
+                              error_status: null,
+                            }
+                          )
+                        }
+                      }
+                    }
+                  /> :
+                  <span>
+                    {
+                      call_data === '0x' &&
+                      (
                         <Tooltip
-                          placement="top"
-                          content={error_status}
+                          placement="bottom"
+                          content={routers?.length > 0 ? 'Boosted by routers.' : 'Pending router boost.'}
                           className="z-50 bg-dark text-white text-xs"
                         >
-                          <span className="whitespace-nowrap text-red-600 dark:text-red-500 text-xs font-semibold">
-                            Action required
-                          </span>
+                          <div className="flex items-center">
+                            <BsLightningChargeFill
+                              size={16}
+                              className={
+                                routers?.length > 0 ?
+                                  'text-yellow-500 dark:text-yellow-400' :
+                                  'text-blue-300 dark:text-blue-200'
+                              }
+                            />
+                            <BiInfoCircle
+                              size={14}
+                              className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                            />
+                          </div>
                         </Tooltip>
-                      }
-                      onTransferBumped={
-                        relayer_fee => {
-                          if (data) {
-                            setTransferData(
-                              {
-                                ...data,
-                                relayer_fee,
-                                error_status: null,
-                              }
-                            )
-                          }
-                        }
-                      }
-                      onSlippageUpdated={
-                        slippage => {
-                          if (data) {
-                            setTransferData(
-                              {
-                                ...data,
-                                slippage,
-                                error_status: null,
-                              }
-                            )
-                          }
-                        }
-                      }
-                    /> :
-                    <span>
-                      {
-                        call_data === '0x' &&
-                        (
-                          <Tooltip
-                            placement="bottom"
-                            content={
-                              routers?.length > 0 ?
-                                'Boosted by routers.' :
-                                'Pending router boost.'
-                            }
-                            className="z-50 bg-dark text-white text-xs"
-                          >
-                            <div className="flex items-center">
-                              <BsLightningChargeFill
-                                size={16}
-                                className={
-                                  routers?.length > 0 ?
-                                    'text-yellow-500 dark:text-yellow-400' :
-                                    'text-blue-300 dark:text-blue-200'
-                                }
-                              />
-                              <BiInfoCircle
-                                size={14}
-                                className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                              />
-                            </div>
-                          </Tooltip>
-                        )
-                      }
-                    </span>
+                      )
+                    }
+                  </span>
               }
               <Tooltip
                 placement="top"
@@ -717,12 +484,7 @@ export default (
               >
                 <div className="flex items-center">
                   <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
-                    {
-                      moment(
-                        xcall_timestamp * 1000
-                      )
-                      .format('MMM D, YYYY h:mm:ss A')
-                    }
+                    {moment(xcall_timestamp * 1000).format('MMM D, YYYY h:mm:ss A')}
                   </span>
                 </div>
               </Tooltip>

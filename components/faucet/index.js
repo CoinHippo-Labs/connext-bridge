@@ -6,13 +6,19 @@ import { Contract, constants, utils } from 'ethers'
 import { TailSpin } from 'react-loader-spinner'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiChevronDown, BiChevronUp } from 'react-icons/bi'
 
-import SelectChain from '../select/chain'
-import Wallet from '../wallet'
+import Alert from '../alerts'
 import Balance from '../balance'
 import Image from '../image'
-import Alert from '../alerts'
-import { number_format, equals_ignore_case } from '../../lib/utils'
-import { BALANCES_DATA } from '../../reducers/types'
+import SelectChain from '../select/chain'
+import Wallet from '../wallet'
+import { getChain } from '../../lib/object/chain'
+import { getAsset } from '../../lib/object/asset'
+import { getContract } from '../../lib/object/contract'
+import { getBalance } from '../../lib/object/balance'
+import { parseError } from '../../lib/utils'
+import { GET_BALANCES_DATA } from '../../reducers/types'
+
+const GAS_LIMIT = 500000
 
 const ABI =
   [
@@ -27,31 +33,50 @@ const ABI =
     'function withdraw(uint256 amount)',
   ]
 
+const getInputFields = is_wrapped =>
+  is_wrapped ?
+    [
+      {
+        label: 'Amount',
+        name: 'amount',
+        type: 'number',
+        placeholder: 'Amount to wrap / unwrap',
+      },
+    ] :
+    [
+      {
+        label: 'Chain',
+        name: 'chain',
+        type: 'select-chain',
+        placeholder: 'Select chain to faucet',
+      },
+      {
+        label: 'Recipient Address',
+        name: 'address',
+        type: 'text',
+        placeholder: 'Faucet token to an address',
+      },
+    ]
+
 export default (
   {
-    token_id = 'test',
-    faucet_amount =
-      Number(
-        process.env.NEXT_PUBLIC_FAUCET_AMOUNT
-      ) ||
-      1000,
-    contract_data,
-    className = '',
+    tokenId = 'test',
+    faucetAmount = 1000,
+    contractData,
     titleClassName = '',
+    className = '',
   },
 ) => {
   const dispatch = useDispatch()
   const {
-    preferences,
     chains,
     assets,
     rpc_providers,
     wallet,
     balances,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
-        preferences: state.preferences,
         chains: state.chains,
         assets: state.assets,
         rpc_providers: state.rpc_providers,
@@ -61,9 +86,6 @@ export default (
     ),
     shallowEqual,
   )
-  const {
-    page_visible,
-  } = { ...preferences }
   const {
     chains_data,
   } = { ...chains }
@@ -79,57 +101,37 @@ export default (
   const {
     chain_id,
     provider,
-    address,
     signer,
+    address,
   } = { ...wallet_data }
   const {
     balances_data,
   } = { ...balances }
 
-  const [collapse, setCollapse] = useState(true)
   const [data, setData] = useState(null)
+  const [collapse, setCollapse] = useState(true)
   const [minting, setMinting] = useState(null)
   const [mintResponse, setMintResponse] = useState(null)
   const [withdrawing, setWithdrawing] = useState(null)
   const [withdrawResponse, setWithdrawResponse] = useState(null)
-  const [trigger, setTrigger] =
-    useState(
-      moment()
-        .valueOf()
-    )
+  const [trigger, setTrigger] = useState(moment().valueOf())
 
   useEffect(
     () => {
-      if (
-        chain_id &&
-        address
-      ) {
-        let {
+      if (chain_id && address) {
+        const {
           chain,
         } = { ...data }
+
         const {
           id,
-        } = {
-          ...(
-            (chains_data || [])
-              .find(c =>
-                c?.chain_id === chain_id
-              )
-          ),
-        }
-
-        chain =
-          id ||
-          chain
+        } = { ...getChain(chain_id, chains_data) }
 
         setData(
           {
             ...data,
-            address:
-              data ?
-                data.address :
-                address,
-            chain,
+            chain: id || chain,
+            address: data ? data.address : address,
           }
         )
       }
@@ -145,6 +147,45 @@ export default (
     [data],
   )
 
+  const {
+    chain,
+  } = { ...data }
+
+  const asset_data = getAsset(tokenId, assets_data)
+
+  const {
+    contracts,
+  } = { ...asset_data }
+  let {
+    symbol,
+  } = { ...asset_data }
+
+  const {
+    wrapped,
+    wrapable,
+  } = { ...contractData }
+
+  symbol = wrapped?.symbol || symbol
+
+  const is_wrapped = wrapped || wrapable
+
+  const chain_data = getChain(is_wrapped ? contractData?.chain_id : chain, chains_data)
+
+  const {
+    provider_params,
+    image,
+    explorer,
+  } = { ...chain_data }
+
+  const {
+    nativeCurrency,
+  } = { ..._.head(provider_params) }
+
+  const {
+    url,
+    transaction_path,
+  } = { ...explorer }
+
   const mint = async () => {
     setMinting(true)
     setMintResponse(null)
@@ -155,59 +196,29 @@ export default (
     }
 
     try {
-      const asset_data = (assets_data || [])
-        .find(a =>
-          a?.id === token_id
-        )
-      const {
-        contracts,
-      } = { ...asset_data }
+      const contract_data = contractData || getContract(chain_id, contracts)
 
-      const _contract_data =
-        contract_data ||
-        (contracts || [])
-          .find(c =>
-            c?.chain_id === chain_id
-          )
       const {
         contract_address,
         decimals,
         wrapped,
-      } = { ..._contract_data }
+      } = { ...contract_data }
 
-      const contract =
-        new Contract(
-          contract_address,
-          ABI,
-          signer,
-        )
+      const contract = new Contract(contract_address, ABI, signer)
 
       const _address =
         is_wrapped ?
-          wrapped?.contract_address ||
-          contract_address :
-          data?.address ||
-          address
+          wrapped?.contract_address || contract_address :
+          data?.address || address
 
       const _amount =
         utils.parseUnits(
-          (is_wrapped ?
-            data?.amount :
-            faucet_amount
-          )
-          .toString(),
-          is_wrapped ?
-            'ether' :
-            decimals ||
-            18,
+          (is_wrapped ? data?.amount : faucetAmount).toString(),
+          is_wrapped ? 'ether' : decimals || 18,
         )
 
-      const gasLimit = 500000
-
       console.log(
-        is_wrapped ?
-          '[wrap]' :
-          '[mint]',
+        is_wrapped ? '[wrap]' : '[mint]',
         is_wrapped ?
           {
             value: _amount,
@@ -220,28 +231,14 @@ export default (
 
       const response =
         is_wrapped ?
-          await contract
-            .deposit(
-              {
-                value: _amount,
-                gasLimit,
-              },
-            ) :
-          await contract
-            .mint(
-              _address,
-              _amount,
-            )
+          await contract.deposit({ value: _amount, gasLimit: GAS_LIMIT }) :
+          await contract.mint(_address, _amount)
 
       const {
         hash,
       } = { ...response }
 
-      const receipt =
-        await signer.provider
-          .waitForTransaction(
-            hash,
-          )
+      const receipt = await signer.provider.waitForTransaction(hash)
 
       const {
         status,
@@ -249,22 +246,11 @@ export default (
 
       setMintResponse(
         {
-          status:
-            !status ?
-              'failed' :
-              'success',
+          status: !status ? 'failed' : 'success',
           message:
             !status ?
-              `Failed to ${
-                is_wrapped ?
-                  'wrap' :
-                  'faucet'
-              }` :
-              `${
-                is_wrapped ?
-                  'Wrap' :
-                  'Faucet'
-              } Successful`,
+              `Failed to ${is_wrapped ? 'wrap' : 'faucet'}` :
+              `${is_wrapped ? 'Wrap' : 'Faucet'} Successful`,
           ...response,
         }
       )
@@ -273,46 +259,32 @@ export default (
         getBalances(chain)
       }
     } catch (error) {
-      let message = 
-        error?.reason ||
-        error?.data?.message ||
-        error?.message
+      const response = parseError(error)
 
       console.log(
-        `[${
-          is_wrapped ?
-            'wrap' :
-            'mint'
-        } error]`,
+        `[${is_wrapped ? 'wrap' : 'mint'} error]`,
         {
           error,
         },
       )
 
-      const code =
-        _.slice(
-          (message || '')
-            .toLowerCase()
-            .split(' ')
-            .filter(s => s),
-          0,
-          2,
-        )
-        .join('_')
+      let {
+        message,
+      } = { ...response }
 
       if (message?.includes('gas required exceeds')) {
         message = 'Insufficient balance when trying to wrap.'
       }
 
-      switch (code) {
+      switch (response.code) {
         case 'user_rejected':
           break
         default:
           setMintResponse(
             {
               status: 'failed',
+              ...response,
               message,
-              code,
             }
           )
           break
@@ -322,10 +294,7 @@ export default (
     setMinting(false)
 
     if (is_wrapped) {
-      setTrigger(
-        moment()
-          .valueOf()
-      )
+      setTrigger(moment().valueOf())
     }
   }
 
@@ -336,55 +305,27 @@ export default (
     setMintResponse(null)
 
     try {
-      const asset_data = (assets_data || [])
-        .find(a =>
-          a?.id === token_id
-        )
-      const {
-        contracts,
-      } = { ...asset_data }
+      const contract_data = contractData || getContract(chain_id, contracts)
 
-      const _contract_data =
-        contract_data ||
-        (contracts || [])
-          .find(c =>
-            c?.chain_id === chain_id
-          )
       const {
         wrapped,
-      } = { ..._contract_data }
+      } = { ...contract_data }
+
       let {
         contract_address,
         decimals,
       } = { ...wrapped }
 
-      contract_address =
-        contract_address ||
-        _contract_data?.contract_address
+      contract_address = contract_address || contract_data?.contract_address
+      decimals = decimals || contract_data?.decimals || 18
 
-      decimals =
-        decimals ||
-        _contract_data?.decimals ||
-        18
-
-      const contract =
-        new Contract(
-          contract_address,
-          ABI,
-          signer,
-        )
+      const contract = new Contract(contract_address, ABI, signer)
 
       const _amount =
-        utils.parseUnits(
-          (
-            data?.amount ||
-            0
-          )
-          .toString(),
+        parseUnits(
+          (data?.amount || 0).toString(),
           'ether',
         )
-
-      const gasLimit = 500000
 
       console.log(
         '[unwrap]',
@@ -393,21 +334,13 @@ export default (
         },
       )
 
-      const response =
-        await contract
-          .withdraw(
-            _amount,
-          )
+      const response = await contract.withdraw(_amount)
 
       const {
         hash,
       } = { ...response }
 
-      const receipt =
-        await signer.provider
-          .waitForTransaction(
-            hash,
-          )
+      const receipt = await signer.provider.waitForTransaction(hash)
 
       const {
         status,
@@ -415,10 +348,7 @@ export default (
 
       setWithdrawResponse(
         {
-          status:
-            !status ?
-              'failed' :
-              'success',
+          status: !status ? 'failed' : 'success',
           message:
             !status ?
               'Failed to unwrap' :
@@ -431,10 +361,7 @@ export default (
         getBalances(chain)
       }
     } catch (error) {
-      let message = 
-        error?.reason ||
-        error?.data?.message ||
-        error?.message
+      const response = parseError(error)
 
       console.log(
         '[unwrap error]',
@@ -443,30 +370,23 @@ export default (
         },
       )
 
-      const code =
-        _.slice(
-          (message || '')
-            .toLowerCase()
-            .split(' ')
-            .filter(s => s),
-          0,
-          2,
-        )
-        .join('_')
+      let {
+        message,
+      } = { ...response }
 
       if (message?.includes('gas required exceeds')) {
         message = 'Insufficient balance when trying to unwrap.'
       }
 
-      switch (code) {
+      switch (response.code) {
         case 'user_rejected':
           break
         default:
           setWithdrawResponse(
             {
               status: 'failed',
+              ...response,
               message,
-              code,
             }
           )
           break
@@ -474,297 +394,39 @@ export default (
     }
 
     setWithdrawing(false)
-    setTrigger(
-      moment()
-        .valueOf()
-    )
+    setTrigger(moment().valueOf())
   }
 
   const getBalances = chain => {
-    const getBalance = async (
-      chain_id,
-      contract_data,
-    ) => {
-      const {
-        contract_address,
-        next_asset,
-        wrapable,
-      } = { ...contract_data }
-
-      const provider = rpcs?.[chain_id]
-
-      if (
-        address &&
-        provider
-      ) {
-        const {
-          symbol,
-          image,
-        } = {
-          ...(
-            assets_data
-              .find(a =>
-                (a?.contracts || [])
-                  .findIndex(c =>
-                    c?.chain_id === chain_id &&
-                    equals_ignore_case(
-                      c?.contract_address,
-                      contract_address,
-                    )
-                  ) > -1
-              )
-          ),
-        }
-
-        const contracts =
-          _.concat(
-            {
-              ...contract_data,
-              contract_address: constants.AddressZero,
-              symbol,
-              image,
-            },
-            {
-              ...contract_data,
-            },
-            next_asset &&
-            {
-              ...contract_data,
-              ...next_asset,
-            },
-          )
-          .filter(c => c?.contract_address)
-
-        const balances = []
-
-        for (const contract of contracts) {
-          const {
-            contract_address,
-            decimals,
-          } = { ...contract }
-
-          let balance
-
-          if (contract_address === constants.AddressZero) {
-            balance =
-              await provider
-                .getBalance(
-                  address,
-                )
-          }
-          else {
-            const contract =
-              new Contract(
-                contract_address,
-                [
-                  'function balanceOf(address owner) view returns (uint256)',
-                ],
-                provider,
-              )
-
-            balance =
-              await contract
-                .balanceOf(
-                  address,
-                )
-          }
-
-          if (
-            balance ||
-            !(
-              (balances_data?.[`${chain_id}`] || [])
-                .findIndex(c =>
-                  equals_ignore_case(
-                    c?.contract_address,
-                    contract_address,
-                  )
-                ) > -1
-            )
-          ) {
-            balances
-              .push(
-                {
-                  ...contract,
-                  amount:
-                    balance &&
-                    utils.formatUnits(
-                      balance,
-                      decimals ||
-                      18,
-                    ),
-                }
-              )
-          }
-        }
-
-        if (balances.length > 0) {
-          dispatch(
-            {
-              type: BALANCES_DATA,
-              value: {
-                [`${chain_id}`]: balances,
-              },
-            }
-          )
-        }
+    dispatch(
+      {
+        type: GET_BALANCES_DATA,
+        value: { chain },
       }
-    }
-
-    if (page_visible) {
-      const {
-        chain_id,
-      } = {
-        ...(
-          (chains_data || [])
-            .find(c =>
-              c?.id === chain
-            )
-        ),
-      }
-
-      const contracts_data =
-        (assets_data || [])
-          .map(a => {
-            const {
-              contracts,
-            } = { ...a }
-
-            return {
-              ...a,
-              ...(
-                (contracts || [])
-                  .find(c =>
-                    c?.chain_id === chain_id
-                  )
-              ),
-            }
-          })
-          .filter(a => a?.contract_address)
-          .map(a => {
-            const {
-              next_asset,
-            } = { ...a };
-            let {
-              contract_address,
-            } = {  ...a }
-
-            contract_address = contract_address.toLowerCase()
-
-            if (next_asset?.contract_address) {
-              next_asset.contract_address = next_asset.contract_address.toLowerCase()
-            }
-
-            return {
-              ...a,
-              contract_address,
-              next_asset,
-            }
-          })
-
-      contracts_data
-        .forEach(c =>
-          getBalance(
-            chain_id,
-            c,
-          )
-        )
-    }
+    )
   }
 
-  const asset_data = (assets_data || [])
-    .find(a =>
-      a?.id === token_id
+  const fields = getInputFields(is_wrapped)
+
+  const has_all_fields = fields.length === fields.filter(f => data?.[f.name]).length
+
+  const native_amount = getBalance(chain_data?.chain_id, constants.AddressZero, balances_data)?.amount
+
+  const wrapped_amount = getBalance(chain_data?.chain_id, wrapped?.contract_address || contractData?.contract_address, balances_data)?.amount
+
+  const wrap_disabled =
+    !!(
+      is_wrapped && native_amount && data?.amount &&
+      (Number(native_amount) < Number(data.amount) || Number(data.amount) <= 0)
     )
 
-  let {
-    symbol,
-  } = { ...asset_data }
-
-  const {
-    wrapped,
-    wrapable,
-  } = { ...contract_data }
-
-  symbol =
-    wrapped?.symbol ||
-    symbol
-
-  const is_wrapped =
-    wrapped ||
-    wrapable
-
-  const fields =
-    is_wrapped ?
-      [
-        {
-          label: 'Amount',
-          name: 'amount',
-          type: 'number',
-          placeholder: 'Amount to wrap / unwrap',
-        },
-      ] :
-      [
-        {
-          label: 'Chain',
-          name: 'chain',
-          type: 'select-chain',
-          placeholder: 'Select chain to faucet',
-        },
-        {
-          label: 'Recipient Address',
-          name: 'address',
-          type: 'text',
-          placeholder: 'Faucet token to an address',
-        },
-      ]
-
-  const {
-    chain,
-  } = { ...data }
-
-  const chain_data = (chains_data || [])
-    .find(c =>
-      is_wrapped ?
-        c?.chain_id === contract_data?.chain_id :
-        c?.id === chain
-    )
-  const {
-    provider_params,
-    image,
-    explorer,
-  } = { ...chain_data }
-  const {
-    nativeCurrency,
-  } = { ..._.head(provider_params) }
-  const {
-    url,
-    transaction_path,
-  } = { ...explorer }
-
-  const native_balance = (balances_data?.[chain_data?.chain_id] || [])
-    .find(b =>
-      equals_ignore_case(
-        b?.contract_address,
-        constants.AddressZero,
-      )
+  const unwrap_disabled =
+    !!(
+      is_wrapped && wrapped_amount && data?.amount &&
+      (Number(wrapped_amount) < Number(data.amount) || Number(data.amount) <= 0)
     )
 
-  const native_amount = native_balance?.amount
-
-  const wrapped_balance = (balances_data?.[chain_data?.chain_id] || [])
-    .find(b =>
-      equals_ignore_case(
-        b?.contract_address,
-        wrapped?.contract_address ||
-        contract_data?.contract_address,
-      )
-    )
-
-  const wrapped_amount = wrapped_balance?.amount
-
-  const callResponse =
-    mintResponse ||
-    withdrawResponse
+  const callResponse = mintResponse || withdrawResponse
 
   const {
     status,
@@ -772,41 +434,9 @@ export default (
     hash,
   } = { ...callResponse }
 
-  const hasAllFields =
-    fields.length ===
-    fields
-      .filter(f =>
-        data?.[f.name]
-      )
-      .length
+  const disabled = minting || withdrawing
 
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
-
-  const disabled =
-    minting ||
-    withdrawing
-
-  const wrap_disabled =
-    !!(
-      is_wrapped &&
-      native_amount &&
-      data?.amount &&
-      (
-        Number(native_amount) < Number(data.amount) ||
-        Number(data.amount) <= 0
-      )
-    )
-
-  const unwrap_disabled =
-    !!(
-      is_wrapped &&
-      wrapped_amount &&
-      data?.amount &&
-      (
-        Number(wrapped_amount) < Number(data.amount) ||
-        Number(data.amount) <= 0
-      )
-    )
 
   return (
     asset_data &&
@@ -829,11 +459,9 @@ export default (
               </span>
             )
           }
-          <span className="tracking-wider whitespace-nowrap text-xs sm:text-base font-medium">
+          <span className="whitespace-nowrap text-xs sm:text-base font-medium">
             {is_wrapped ?
-              <>
-                Wrap or unwrap {symbol}
-              </> :
+              `Wrap or unwrap ${symbol}` :
               'Faucet'
             }
           </span>
@@ -851,8 +479,7 @@ export default (
           (
             <div className="w-full">
               {
-                is_wrapped &&
-                signer &&
+                is_wrapped && signer &&
                 (
                   <div className="form-element mt-2">
                     <div className="form-label text-slate-600 dark:text-slate-200 font-medium">
@@ -860,42 +487,20 @@ export default (
                     </div>
                     <div className="flex items-center justify-between space-x-2">
                       <Balance
-                        chainId={
-                          contract_data?.chain_id ||
-                          chain_id
-                        }
-                        asset={token_id}
+                        chainId={contractData?.chain_id || chain_id}
+                        asset={tokenId}
                         contractAddress={constants.AddressZero}
-                        decimals={
-                          nativeCurrency?.decimals ||
-                          18
-                        }
-                        symbol={
-                          nativeCurrency?.symbol ||
-                          asset_data?.symbol
-                        }
+                        decimals={nativeCurrency?.decimals || 18}
+                        symbol={nativeCurrency?.symbol || asset_data.symbol}
                         trigger={trigger}
                         className="bg-slate-100 dark:bg-slate-800 rounded py-1.5 px-2.5"
                       />
                       <Balance
-                        chainId={
-                          contract_data?.chain_id ||
-                          chain_id
-                        }
-                        asset={token_id}
-                        contractAddress={
-                          wrapped?.contract_address ||
-                          contract_data?.contract_address
-                        }
-                        decimals={
-                          wrapped?.decimals ||
-                          contract_data?.decimals ||
-                          18
-                        }
-                        symbol={
-                          wrapped?.symbol ||
-                          contract_data?.symbol
-                        }
+                        chainId={contractData?.chain_id || chain_id}
+                        asset={tokenId}
+                        contractAddress={wrapped?.contract_address || contractData?.contract_address}
+                        decimals={wrapped?.decimals || contractData?.decimals || 18}
+                        symbol={wrapped?.symbol || contractData?.symbol}
                         trigger={trigger}
                         className="bg-slate-100 dark:bg-slate-800 rounded py-1.5 px-2.5"
                       />
@@ -930,13 +535,14 @@ export default (
                           <SelectChain
                             disabled={disabled}
                             value={data?.[name]}
-                            onSelect={c =>
-                              setData(
-                                {
-                                  ...data,
-                                  [`${name}`]: c,
-                                }
-                              )
+                            onSelect={
+                              c =>
+                                setData(
+                                  {
+                                    ...data,
+                                    [name]: c,
+                                  }
+                                )
                             }
                           />
                         </div> :
@@ -945,13 +551,14 @@ export default (
                           disabled={disabled}
                           placeholder={placeholder}
                           value={data?.[name]}
-                          onChange={e =>
-                            setData(
-                              {
-                                ...data,
-                                [`${f.name}`]: e.target.value,
-                              }
-                            )
+                          onChange={
+                            e =>
+                              setData(
+                                {
+                                  ...data,
+                                  [`${f.name}`]: e.target.value,
+                                }
+                              )
                           }
                           className="form-input rounded border-0 focus:ring-0"
                         />
@@ -962,29 +569,27 @@ export default (
               }
               {
                 signer &&
-                hasAllFields &&
+                has_all_fields &&
                 (
                   <div className="flex justify-end space-x-2 mb-2">
                     <button
                       disabled={disabled}
-                      onClick={() => {
-                        const {
-                          id,
-                        } = {
-                          ...chains_data?.find(c =>
-                            c?.chain_id === chain_id
-                          ),
-                        }
+                      onClick={
+                        () => {
+                          const {
+                            id,
+                          } = { ...getChain(chain_id, chains_data) }
 
-                        setCollapse(!collapse)
-                        setData(
-                          {
-                            ...data,
-                            address,
-                            chain: id,
-                          }
-                        )
-                      }}
+                          setData(
+                            {
+                              ...data,
+                              chain: id,
+                              address,
+                            }
+                          )
+                          setCollapse(!collapse)
+                        }
+                      }
                       className={`bg-transparent hover:bg-slate-100 dark:hover:bg-slate-900 ${disabled ? 'cursor-not-allowed' : ''} rounded font-medium py-2 px-3`}
                     >
                       Cancel
@@ -1020,15 +625,11 @@ export default (
                       ) :
                       <>
                         <button
-                          disabled={
-                            disabled ||
-                            wrap_disabled
-                          }
+                          disabled={disabled || wrap_disabled}
                           onClick={() => mint()}
                           className={
                             `${
-                              disabled ||
-                              wrap_disabled ?
+                              disabled || wrap_disabled ?
                                 'bg-blue-400 dark:bg-blue-500 cursor-not-allowed' :
                                 'bg-blue-600 hover:bg-blue-700'
                             } rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`
@@ -1038,9 +639,9 @@ export default (
                             minting &&
                             (
                               <TailSpin
-                                color="white"
                                 width="18"
                                 height="18"
+                                color="white"
                               />
                             )
                           }
@@ -1053,10 +654,7 @@ export default (
                                 Faucet
                               </span>
                               <span className="font-semibold">
-                                {number_format(
-                                  faucet_amount,
-                                  '0,0.00',
-                                )}
+                                {faucetAmount}
                               </span>
                             </>
                           }
@@ -1064,10 +662,7 @@ export default (
                             !is_wrapped &&
                             (
                               <span>
-                                {
-                                  contract_data?.symbol ||
-                                  symbol
-                                }
+                                {contractData?.symbol || symbol}
                               </span>
                             )
                           }
@@ -1076,15 +671,11 @@ export default (
                           is_wrapped &&
                           (
                             <button
-                              disabled={
-                                disabled ||
-                                unwrap_disabled
-                              }
+                              disabled={disabled || unwrap_disabled}
                               onClick={() => withdraw()}
                               className={
                                 `${
-                                  disabled ||
-                                  unwrap_disabled ?
+                                  disabled || unwrap_disabled ?
                                     'bg-red-400 dark:bg-red-500 cursor-not-allowed' :
                                     'bg-red-600 hover:bg-red-700'
                                 } rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`
@@ -1094,9 +685,9 @@ export default (
                                 withdrawing &&
                                 (
                                   <TailSpin
-                                    color="white"
                                     width="18"
                                     height="18"
+                                    color="white"
                                   />
                                 )
                               }
@@ -1149,9 +740,7 @@ export default (
                     {message}
                   </span>
                   {
-                    ['success'].includes(status) &&
-                    hash &&
-                    url &&
+                    ['success'].includes(status) && hash && url &&
                     (
                       <a
                         href={`${url}${transaction_path?.replace('{tx}', hash)}`}

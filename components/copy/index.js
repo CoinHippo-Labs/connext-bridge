@@ -18,8 +18,8 @@ export default (
     () => {
       const timeout =
         copied ?
-          setTimeout(() =>
-            setCopied(false),
+          setTimeout(
+            () => setCopied(false),
             1 * 1000,
           ) :
           undefined
@@ -50,13 +50,15 @@ export default (
       </div> :
       <CopyToClipboard
         text={value}
-        onCopy={() => {
-          setCopied(true)
+        onCopy={
+          () => {
+            setCopied(true)
 
-          if (onCopy) {
-            onCopy()
+            if (onCopy) {
+              onCopy()
+            }
           }
-        }}
+        }
       >
         <div className={`${title ? 'min-w-max' : ''} flex items-center space-x-1`}>
           {

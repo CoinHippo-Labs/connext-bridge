@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { BigNumber, utils } from 'ethers'
+import { utils } from 'ethers'
 
 import Pools from './pools'
-import { equals_ignore_case } from '../../lib/utils'
-
-const WRAPPED_PREFIX =
-  process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
-  'next'
+import { getChain } from '../../lib/object/chain'
+import { getAsset } from '../../lib/object/asset'
+import { split, toArray } from '../../lib/utils'
 
 const VIEWS =
   [
@@ -30,8 +28,8 @@ export default () => {
     user_pools,
     dev,
     wallet,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         chains: state.chains,
         pool_assets: state.pool_assets,
@@ -64,10 +62,7 @@ export default () => {
     address,
   } = { ...wallet_data }
 
-  const [view, setView] =
-    useState(
-      _.head(VIEWS)?.id
-    )
+  const [view, setView] = useState(_.head(VIEWS)?.id)
   const [pools, setPools] = useState(null)
   const [poolsTrigger, setPoolsTrigger] = useState(null)
 
@@ -78,21 +73,8 @@ export default () => {
         chains_data &&
         user_pools_data &&
         (
-          chains_data
-            .filter(c =>
-              c?.id &&
-              !c.disabled
-            )
-            .length <=
-          Object.keys(user_pools_data)
-            .length ||
-          Object.values(user_pools_data)
-            .flatMap(d => d)
-            .filter(d =>
-              Number(d?.lpTokenBalance) > 0
-            )
-            .length >
-            0
+          getChain(null, chains_data, true, false, false, undefined, true).length <= Object.keys(user_pools_data).length ||
+          Object.values(user_pools_data).flatMap(d => d).filter(d => Number(d?.lpTokenBalance) > 0).length > 0
         )
       ) {
         setPools(
@@ -111,9 +93,7 @@ export default () => {
         if (
           sdk &&
           user_pools_data &&
-          [
-            'my_positions',
-          ].includes(view)
+          ['my_positions'].includes(view)
         ) {
           if (address) {
             let data
@@ -125,17 +105,10 @@ export default () => {
                   domain_id,
                 } = { ...chain_data }
 
-                const response =
-                  _.cloneDeep(
-                    await sdk.sdkPool
-                      .getUserPools(
-                        domain_id,
-                        address,
-                      )
-                  )
+                const response = toArray(_.cloneDeep(await sdk.sdkPool.getUserPools(domain_id, address)))
 
-                if (Array.isArray(response)) {
-                  data =
+                data =
+                  toArray(
                     _.concat(
                       data,
                       response
@@ -149,75 +122,8 @@ export default () => {
                           const {
                             adopted,
                             local,
-                          } = { ...info }
-                          let {
-                            name,
                             symbol,
                           } = { ...info }
-
-                          if (symbol?.includes(`${WRAPPED_PREFIX}${WRAPPED_PREFIX}`)) {
-                            name =
-                              (name || '')
-                                .replace(
-                                  WRAPPED_PREFIX,
-                                  '',
-                                )
-
-                            symbol =
-                              symbol
-                                .split('-')
-                                .map(s =>
-                                  s
-                                    .replace(
-                                      WRAPPED_PREFIX,
-                                      '',
-                                    )
-                                )
-                                .join('-')
-
-                            info.name = name
-                            info.symbol = symbol
-                          }
-
-                          if (symbol?.includes('-')) {
-                            const symbols =
-                              symbol
-                                .split('-')
-
-                            if (
-                              equals_ignore_case(
-                                _.head(symbols),
-                                _.last(symbols),
-                              ) &&
-                              adopted?.symbol &&
-                              local?.symbol
-                            ) {
-                              symbol =
-                                [
-                                  adopted.symbol,
-                                  local.symbol,
-                                ]
-                                .join('-')
-
-                              info.symbol = symbol
-                            }
-                          }
-
-                          if (name?.startsWith(WRAPPED_PREFIX)) {
-                            name =
-                              name
-                                .replace(
-                                  WRAPPED_PREFIX,
-                                  '',
-                                )
-
-                            info.name = name
-                          }
-
-                          const symbols =
-                            (symbol || '')
-                              .split('-')
-                              .filter(s => s)
 
                           if (adopted) {
                             const {
@@ -227,12 +133,8 @@ export default () => {
 
                             adopted.balance =
                               utils.formatUnits(
-                                BigNumber.from(
-                                  balance ||
-                                  '0'
-                                ),
-                                decimals ||
-                                18,
+                                BigInt(balance || '0'),
+                                decimals || 18,
                               )
 
                             info.adopted = adopted
@@ -246,89 +148,47 @@ export default () => {
 
                             local.balance =
                               utils.formatUnits(
-                                BigNumber.from(
-                                  balance ||
-                                  '0'
-                                ),
-                                decimals ||
-                                18,
+                                BigInt(balance || '0'),
+                                decimals || 18,
                               )
 
                             info.local = local
                           }
 
-                          const asset_data = pool_assets_data
-                            .find(a =>
-                              symbols
-                                .findIndex(s =>
-                                  equals_ignore_case(
-                                    s,
-                                    a?.symbol,
-                                  )
-                                ) > -1 ||
-                              (a?.contracts || [])
-                                .findIndex(c =>
-                                  c?.chain_id === chain_id &&
-                                  symbols
-                                    .findIndex(s =>
-                                      equals_ignore_case(
-                                        s,
-                                        c?.symbol,
-                                      )
-                                    ) > -1
-                                ) > -1
-                            )
+                          const symbols = split(symbol, 'normal', '-')
 
-                          const id = `${chain_data.id}_${asset_data?.id}`
+                          const asset_data = getAsset(null, pool_assets_data, chain_id, undefined, symbols)
 
                           return {
                             ...p,
-                            id,
+                            id: `${chain_data.id}_${asset_data?.id}`,
                             chain_data,
                             asset_data,
                             ...info,
                             symbols,
-                            lpTokenBalance:
-                              utils.formatUnits(
-                                BigNumber.from(
-                                  lpTokenBalance ||
-                                  '0',
-                                ),
-                                18,
-                              ),
+                            lpTokenBalance: utils.formatEther(BigInt(lpTokenBalance || '0')),
                             poolTokenBalances:
-                              (poolTokenBalances || [])
+                              toArray(poolTokenBalances)
                                 .map((b, i) =>
                                   Number(
                                     utils.formatUnits(
-                                      BigNumber.from(
-                                        b ||
-                                        '0',
-                                      ),
-                                      (
-                                        adopted?.index === i ?
-                                          adopted.decimals :
-                                          local?.index === i ?
-                                            local.decimals :
-                                            18
-                                      ) ||
-                                      18,
+                                      BigInt(b || '0'),
+                                      adopted?.index === i ?
+                                        adopted.decimals :
+                                        local?.index === i ?
+                                          local.decimals :
+                                          18,
                                     )
                                   )
                                 ),
                           }
                         }),
                     )
-                    .filter(d => d)
-                }
+                  )
               } catch (error) {}
             }
 
-            setPools(
-              data ||
-              pools ||
-              []
-            )
+            setPools(toArray(data || pools))
           }
           else {
             setPools([])
@@ -367,7 +227,7 @@ export default () => {
           </div>
           <Pools
             view={view}
-            user_pools_data={pools}
+            userPoolsData={pools}
           />
         </div>
       </div>

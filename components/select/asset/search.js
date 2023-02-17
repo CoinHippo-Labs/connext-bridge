@@ -8,12 +8,11 @@ export default (
     value,
     onSelect,
     chain,
-    is_pool = false,
-    is_bridge = false,
-    show_next_assets = false,
-    show_native_assets = false,
-    show_only_wrapable = false,
-    fixed = false,
+    isBridge = false,
+    isPool = false,
+    showNextAssets = false,
+    showNativeAssets = false,
+    showOnlyWrapable = false,
     data,
   },
 ) => {
@@ -24,10 +23,7 @@ export default (
       <div className="relative">
         <input
           value={inputSearch}
-          onChange={
-            e =>
-              setInputSearch(e.target.value)
-          }
+          onChange={e => setInputSearch(e.target.value)}
           type="search"
           placeholder="Search"
           className="w-full h-10 bg-transparent appearance-none rounded border border-slate-200 dark:border-slate-800 text-sm pl-10 pr-5"
@@ -41,20 +37,19 @@ export default (
           <Assets
             value={value}
             inputSearch={inputSearch}
-            onSelect={(a, c) => {
-              if (onSelect) {
-                onSelect(
-                  a,
-                  c,
-                )
+            onSelect={
+              (a, c) => {
+                if (onSelect) {
+                  onSelect(a, c)
+                }
               }
-            }}
+            }
             chain={chain}
-            is_pool={is_pool}
-            is_bridge={is_bridge}
-            show_next_assets={show_next_assets}
-            show_native_assets={show_native_assets}
-            show_only_wrapable={show_only_wrapable}
+            isBridge={isBridge}
+            isPool={isPool}
+            showNextAssets={showNextAssets}
+            showNativeAssets={showNativeAssets}
+            showOnlyWrapable={showOnlyWrapable}
             data={data}
           />
         </div>

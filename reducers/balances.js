@@ -1,10 +1,12 @@
 import _ from 'lodash'
 
-import { BALANCES_DATA } from './types'
+import { BALANCES_DATA, GET_BALANCES_DATA } from './types'
+import { toArray } from '../lib/utils'
 
 export default (
   state = {
-    [`${BALANCES_DATA}`]: null,
+    [BALANCES_DATA]: null,
+    [GET_BALANCES_DATA]: null,
   },
   action,
 ) => {
@@ -14,41 +16,40 @@ export default (
         key,
         value,
       ] = (
-        _.head(
-          Object.entries({ ...action.value })
-        ) ||
-        []
+        toArray(
+          _.head(
+            Object.entries({ ...action.value })
+          )
+        )
       )
 
-      if (
-        key &&
-        value
-      ) {
-        let values = state?.[`${BALANCES_DATA}`]?.[key]
+      if (key && value) {
+        let values = state?.[BALANCES_DATA]?.[key]
 
         values =
           _.uniqBy(
-            _.concat(
-              value,
-              values,
-            )
-            .filter(v => v),
+            toArray(
+              _.concat(value, values)
+            ),
             'contract_address',
           )
 
-        action.value = {
-          [key]: values,
-        }
+        action.value = { [key]: values }
       }
 
       return {
         ...state,
-        [`${BALANCES_DATA}`]:
+        [BALANCES_DATA]:
           action.value &&
           {
-            ...state?.[`${BALANCES_DATA}`], 
+            ...state?.[BALANCES_DATA],
             ...action.value,
           },
+      }
+    case GET_BALANCES_DATA:
+      return {
+        ...state,
+        [GET_BALANCES_DATA]: action.value,
       }
     default:
       return state

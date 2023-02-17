@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { BigNumber, FixedNumber, utils } from 'ethers'
+import { FixedNumber, utils } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
 import { TailSpin, Watch, RotatingSquare, Oval } from 'react-loader-spinner'
 import { Tooltip } from '@material-tailwind/react'
@@ -12,44 +12,26 @@ import { BiPlus, BiMessageError, BiMessageCheck, BiMessageDetail, BiInfoCircle }
 import { IoWarning } from 'react-icons/io5'
 import { BsArrowRight } from 'react-icons/bs'
 
-import GasPrice from '../gas-price'
+import Alert from '../alerts'
 import Balance from '../balance'
+import Copy from '../copy'
+import DecimalsFormat from '../decimals-format'
 import Faucet from '../faucet'
+import GasPrice from '../gas-price'
 import Image from '../image'
 import { ProgressBar } from '../progress-bars'
-import DecimalsFormat from '../decimals-format'
 import Wallet from '../wallet'
-import Alert from '../alerts'
-import Copy from '../copy'
-import { number_format, number_to_fixed, ellipse, equals_ignore_case, loader_color, sleep, error_patterns } from '../../lib/utils'
+import { getChain } from '../../lib/object/chain'
+import { getAsset } from '../../lib/object/asset'
+import { getBalance } from '../../lib/object/balance'
+import { split, toArray, numberToFixed, ellipse, equalsIgnoreCase, loaderColor, sleep, errorPatterns, parseError } from '../../lib/utils'
 
-const WRAPPED_PREFIX =
-  process.env.NEXT_PUBLIC_WRAPPED_PREFIX ||
-  'next'
+const WRAPPED_PREFIX = process.env.NEXT_PUBLIC_WRAPPED_PREFIX
+const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT)
+const DEFAULT_POOL_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_POOL_SLIPPAGE_PERCENTAGE)
+const DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES = 60
 
-const GAS_LIMIT_ADJUSTMENT =
-  Number(
-    process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT
-  ) ||
-  1
-
-const DEFAULT_POOL_SLIPPAGE_PERCENTAGE =
-  Number(
-    process.env.NEXT_PUBLIC_DEFAULT_POOL_SLIPPAGE_PERCENTAGE
-  ) ||
-  3
-
-const DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES =
-  Number(
-    process.env.NEXT_PUBLIC_DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES
-  ) ||
-  60
-
-const ACTIONS =
-  [
-    'deposit',
-    'withdraw',
-  ]
+const ACTIONS = ['deposit', 'withdraw']
 
 const DEFAULT_OPTIONS = {
   infiniteApprove: true,
@@ -60,7 +42,7 @@ const DEFAULT_OPTIONS = {
 export default (
   {
     pool,
-    user_pools_data,
+    userPoolsData,
     onFinish,
   },
 ) => {
@@ -72,8 +54,8 @@ export default (
     dev,
     wallet,
     balances,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
         chains: state.chains,
@@ -106,9 +88,9 @@ export default (
   } = { ...wallet }
   const {
     provider,
-    web3_provider,
-    address,
+    browser_provider,
     signer,
+    address,
   } = { ...wallet_data }
   const {
     balances_data,
@@ -116,10 +98,7 @@ export default (
 
   const wallet_chain_id = wallet_data?.chain_id
 
-  const [action, setAction] =
-    useState(
-      _.head(ACTIONS)
-    )
+  const [action, setAction] = useState(_.head(ACTIONS))
   const [amountX, setAmountX] = useState(null)
   const [amountY, setAmountY] = useState(null)
   const [amount, setAmount] = useState(null)
@@ -159,16 +138,9 @@ export default (
           asset,
         } = { ...pool }
 
-        const chain_data = (chains_data || [])
-          .find(c =>
-            c?.id === chain
-          )
+        const chain_data = getChain(chain, chains_data)
 
-        const pool_data = (pools_data || [])
-          .find(p =>
-            p?.chain_data?.id === chain &&
-            p.asset_data?.id === asset
-          )
+        const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
 
         const {
           contract_data,
@@ -176,67 +148,41 @@ export default (
           adopted,
           local,
         } = { ...pool_data }
+
         const {
           contract_address,
         } = { ...contract_data }
 
-        if (
-          domainId &&
-          contract_address &&
-          typeof amountX === 'string' &&
-          !isNaN(amountX) &&
-          typeof amountY === 'string' &&
-          !isNaN(amountY)
-        ) {
+        if (domainId && contract_address && typeof amountX === 'string' && !isNaN(amountX) && typeof amountY === 'string' && !isNaN(amountY)) {
           setPriceImpactAdd(true)
           setCallResponse(null)
 
-          let _amountX,
-            _amountY
+          let _amountX, _amountY
 
           try {
             _amountX =
               utils.parseUnits(
-                (
-                  amountX ||
-                  0
-                )
-                .toString(),
-                adopted?.decimals ||
-                18,
+                (amountX || 0).toString(),
+                adopted?.decimals || 18,
               )
               .toString()
 
             _amountY =
               utils.parseUnits(
-                (
-                  amountY ||
-                  0
-                )
-                .toString(),
-                local?.decimals ||
-                18,
+                (amountY || 0).toString(),
+                local?.decimals || 18,
               )
               .toString()
 
             if (adopted?.index === 1) {
               const _amount = _amountX
-
               _amountX = _amountY
               _amountY = _amount
             }
 
-            calculateAddLiquidityPriceImpact(
-              domainId,
-              contract_address,
-              _amountX,
-              _amountY,
-            )
+            calculateAddLiquidityPriceImpact(domainId, contract_address, _amountX, _amountY)
           } catch (error) {
-            const message =
-              error?.reason ||
-              error?.data?.message ||
-              error?.message
+            const response = parseError(error)
 
             console.log(
               '[calculateAddLiquidityPriceImpact error]',
@@ -249,23 +195,11 @@ export default (
               },
             )
 
-            const code =
-              _.slice(
-                (message || '')
-                  .toLowerCase()
-                  .split(' ')
-                  .filter(s => s),
-                0,
-                2,
-              )
-              .join('_')
-
             setPriceImpactAdd(0)
             setPriceImpactAddResponse(
               {
                 status: 'failed',
-                message,
-                code,
+                ...response,
               }
             )
           }
@@ -283,24 +217,8 @@ export default (
         setPriceImpactRemove(null)
 
         if (typeof amount === 'string') {
-          if (
-            utils.parseUnits(
-              amount ||
-              '0',
-              18,
-            )
-            .lte(
-              BigNumber.from(
-                '0'
-              )
-            )
-          ) {
-            setRemoveAmounts(
-              [
-                '0',
-                '0',
-              ]
-            )
+          if (utils.parseUnits(amount || '0', 18).toBigInt() <= 0) {
+            setRemoveAmounts(['0', '0'])
           }
           else {
             const {
@@ -308,16 +226,9 @@ export default (
               asset,
             } = { ...pool }
 
-            const chain_data = (chains_data || [])
-              .find(c =>
-                c?.id === chain
-              )
+            const chain_data = getChain(chain, chains_data)
 
-            const pool_data = (pools_data || [])
-              .find(p =>
-                p?.chain_data?.id === chain &&
-                p.asset_data?.id === asset
-              )
+            const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
 
             const {
               contract_data,
@@ -325,20 +236,12 @@ export default (
               adopted,
               local,
             } = { ...pool_data }
+
             const {
               contract_address,
             } = { ...contract_data }
 
-            const _amount =
-              utils.parseUnits(
-                (
-                  amount ||
-                  0
-                )
-                .toString(),
-                18,
-              )
-              .toString()
+            const _amount = utils.parseUnits((amount || 0).toString(), 18).toString()
 
             try {
               setPriceImpactRemove(true)
@@ -352,13 +255,7 @@ export default (
                 },
               )
 
-              let amounts =
-                await sdk.sdkPool
-                  .calculateRemoveSwapLiquidity(
-                    domainId,
-                    contract_address,
-                    _amount,
-                  )
+              let amounts = await sdk.sdkPool.calculateRemoveSwapLiquidity(domainId, contract_address, _amount)
 
               console.log(
                 '[amountsRemoveSwapLiquidity]',
@@ -382,13 +279,7 @@ export default (
                   },
                 )
 
-                const tokenIndex =
-                  await sdk.sdkPool
-                    .getPoolTokenIndex(
-                      domainId,
-                      contract_address,
-                      contract_address,
-                    )
+                const tokenIndex = await sdk.sdkPool.getPoolTokenIndex(domainId, contract_address, contract_address)
 
                 console.log(
                   '[poolTokenIndex]',
@@ -401,48 +292,29 @@ export default (
                 )
 
                 if (tokenIndex === 1) {
-                  _amounts =
-                    _.reverse(
-                      _.cloneDeep(amounts)
-                    )
+                  _amounts = _.reverse(_.cloneDeep(amounts))
                 }
                 else {
                   _amounts = _.cloneDeep(amounts)
                 }
 
-                calculateRemoveLiquidityPriceImpact(
-                  domainId,
-                  contract_address,
-                  _.head(amounts),
-                  _.last(amounts),
-                )
+                calculateRemoveLiquidityPriceImpact(domainId, contract_address, _.head(amounts), _.last(amounts))
               }
 
               setRemoveAmounts(
-                (_amounts || [])
+                toArray(_amounts)
                   .map((a, i) =>
                     Number(
                       utils.formatUnits(
-                        BigNumber.from(
-                          a ||
-                          '0'
-                        ),
-                        (
-                          i === 0 ?
-                            adopted :
-                            local
-                        )?.decimals ||
-                        18,
+                        BigInt(a || '0'),
+                        (i === 0 ? adopted : local)?.decimals || 18,
                       )
                     )
                   )
               )
               setCallResponse(null)
             } catch (error) {
-              let message =
-                error?.reason ||
-                error?.data?.message ||
-                error?.message
+              const response = parseError(error)
 
               console.log(
                 '[calculateRemoveSwapLiquidity error]',
@@ -454,6 +326,10 @@ export default (
                 },
               )
 
+              let {
+                message,
+              } = { ...response }
+
               if (message?.includes('exceed total supply')) {
                 message = 'Exceed Total Supply'
               }
@@ -461,6 +337,7 @@ export default (
               setCallResponse(
                 {
                   status: 'failed',
+                  ...response,
                   message,
                 }
               )
@@ -482,12 +359,7 @@ export default (
   )
 
   const reset = async origin => {
-    const reset_pool =
-      ![
-        'address',
-        'user_rejected',
-      ]
-      .includes(origin)
+    const reset_pool = !['address', 'user_rejected'].includes(origin)
 
     if (reset_pool) {
       setAmountX(null)
@@ -531,6 +403,7 @@ export default (
         adopted,
         local,
       } = { ...pool_data }
+
       const {
         contract_address,
       } = { ...contract_data }
@@ -541,13 +414,11 @@ export default (
           ...(
             Object.fromEntries(
               Object.entries({ ...asset_data })
-                .filter(([k, v]) =>
-                  !['contracts'].includes(k)
-                )
+                .filter(([k, v]) => !['contracts'].includes(k))
             )
           ),
           ...(
-            equals_ignore_case(
+            equalsIgnoreCase(
               adopted.address,
               contract_address,
             ) ?
@@ -567,13 +438,11 @@ export default (
           ...(
             Object.fromEntries(
               Object.entries({ ...asset_data })
-                .filter(([k, v]) =>
-                  !['contracts'].includes(k)
-                )
+                .filter(([k, v]) => !['contracts'].includes(k))
             )
           ),
           ...(
-            equals_ignore_case(
+            equalsIgnoreCase(
               local.address,
               contract_address,
             ) ?
@@ -594,31 +463,15 @@ export default (
         deadline,
       } = { ...options }
 
-      deadline =
-        deadline &&
-        moment()
-          .add(
-            deadline,
-            'minutes',
-          )
-          .valueOf()
+      deadline = deadline && moment().add(deadline, 'minutes').valueOf()
 
       switch (action) {
         case 'deposit':
           if (
-            !(
-              typeof amountX === 'string' &&
-              !isNaN(amountX) &&
-              typeof amountY === 'string' &&
-              !isNaN(amountY)
-            ) ||
-            !(
-              amountX ||
-              amountY
-            )
+            !(typeof amountX === 'string' && !isNaN(amountX) && typeof amountY === 'string' && !isNaN(amountY)) ||
+            !(amountX || amountY)
           ) {
             failed = true
-
             setApproving(false)
             break
           }
@@ -626,23 +479,13 @@ export default (
           let amounts =
             [
               utils.parseUnits(
-                (
-                  amountX ||
-                  0
-                )
-                .toString(),
-                x_asset_data?.decimals ||
-                18,
+                (amountX || 0).toString(),
+                x_asset_data?.decimals || 18,
               )
               .toString(),
               utils.parseUnits(
-                (
-                  amountY ||
-                  0
-                )
-                .toString(),
-                y_asset_data?.decimals ||
-                18,
+                (amountY || 0).toString(),
+                y_asset_data?.decimals || 18,
               )
               .toString(),
             ]
@@ -651,23 +494,12 @@ export default (
 
           if (!failed) {
             try {
-              const approve_request =
-                await sdk.sdkBase
-                  .approveIfNeeded(
-                    domainId,
-                    x_asset_data?.contract_address,
-                    _.head(amounts),
-                    infiniteApprove,
-                  )
+              const approve_request = await sdk.sdkBase.approveIfNeeded(domainId, x_asset_data?.contract_address, _.head(amounts), infiniteApprove)
 
               if (approve_request) {
                 setApproving(true)
 
-                const approve_response =
-                  await signer
-                    .sendTransaction(
-                      approve_request,
-                    )
+                const approve_response = await signer.sendTransaction(approve_request)
 
                 const {
                   hash,
@@ -683,11 +515,7 @@ export default (
 
                 setApproveProcessing(true)
 
-                const approve_receipt =
-                  await signer.provider
-                    .waitForTransaction(
-                      hash,
-                    )
+                const approve_receipt = await signer.provider.waitForTransaction(hash)
 
                 const {
                   status,
@@ -712,12 +540,12 @@ export default (
                 setApproving(false)
               }
             } catch (error) {
+              const response = parseError(error)
+
               setApproveResponse(
                 {
                   status: 'failed',
-                  message:
-                    error?.data?.message ||
-                    error?.message,
+                  ...response,
                 }
               )
 
@@ -729,23 +557,12 @@ export default (
 
             if (!failed) {
               try {
-                const approve_request =
-                  await sdk.sdkBase
-                    .approveIfNeeded(
-                      domainId,
-                      y_asset_data?.contract_address,
-                      _.last(amounts),
-                      infiniteApprove,
-                    )
+                const approve_request = await sdk.sdkBase.approveIfNeeded(domainId, y_asset_data?.contract_address, _.last(amounts), infiniteApprove)
 
                 if (approve_request) {
                   setApproving(true)
 
-                  const approve_response =
-                    await signer
-                      .sendTransaction(
-                        approve_request,
-                      )
+                  const approve_response = await signer.sendTransaction(approve_request)
 
                   const {
                     hash,
@@ -761,11 +578,7 @@ export default (
 
                   setApproveProcessing(true)
 
-                  const approve_receipt =
-                    await signer.provider
-                      .waitForTransaction(
-                        hash,
-                      )
+                  const approve_receipt = await signer.provider.waitForTransaction(hash)
 
                   const {
                     status,
@@ -790,12 +603,12 @@ export default (
                   setApproving(false)
                 }
               } catch (error) {
+                const response = parseError(error)
+
                 setApproveResponse(
                   {
                     status: 'failed',
-                    message:
-                      error?.data?.message ||
-                      error?.message,
+                    ...response,
                   }
                 )
 
@@ -818,13 +631,7 @@ export default (
                 },
               )
 
-              const tokenIndex =
-                await sdk.sdkPool
-                  .getPoolTokenIndex(
-                    domainId,
-                    contract_address,
-                    contract_address,
-                  )
+              const tokenIndex = await sdk.sdkPool.getPoolTokenIndex(domainId, contract_address, contract_address)
 
               console.log(
                 '[poolTokenIndex]',
@@ -837,10 +644,7 @@ export default (
               )
 
               if (tokenIndex === 1) {
-                amounts =
-                  _.reverse(
-                    _.cloneDeep(amounts)
-                  )
+                amounts = _.reverse(_.cloneDeep(amounts))
               }
 
               console.log(
@@ -854,50 +658,31 @@ export default (
                 },
               )
 
-              const add_request =
-                await sdk.sdkPool
-                  .addLiquidity(
-                    domainId,
-                    contract_address,
-                    amounts,
-                    minToMint,
-                    deadline,
-                  )
+              const add_request = await sdk.sdkPool.addLiquidity(domainId, contract_address, amounts, minToMint, deadline)
 
               if (add_request) {
-                let gasLimit =
-                  await signer
-                    .estimateGas(
-                      add_request,
-                    )
+                let gasLimit = await signer.estimateGas(add_request)
 
                 if (gasLimit) {
                   gasLimit =
-                    FixedNumber.fromString(
-                      gasLimit
-                        .toString()
-                    )
-                    .mulUnsafe(
-                      FixedNumber.fromString(
-                        GAS_LIMIT_ADJUSTMENT
-                          .toString()
+                    FixedNumber
+                      .fromString(
+                        gasLimit.toString()
                       )
-                    )
-                    .round(0)
-                    .toString()
-                    .replace(
-                      '.0',
-                      '',
-                    )
+                      .mulUnsafe(
+                        FixedNumber
+                          .fromString(
+                            GAS_LIMIT_ADJUSTMENT.toString()
+                          )
+                      )
+                      .round(0)
+                      .toString()
+                      .replace('.0', '')
 
                   add_request.gasLimit = gasLimit
                 }
 
-                const add_response =
-                  await signer
-                    .sendTransaction(
-                      add_request,
-                    )
+                const add_response = await signer.sendTransaction(add_request)
 
                 const {
                   hash,
@@ -905,11 +690,7 @@ export default (
 
                 setCallProcessing(true)
 
-                const add_receipt =
-                  await signer.provider
-                    .waitForTransaction(
-                      hash,
-                    )
+                const add_receipt = await signer.provider.waitForTransaction(hash)
 
                 const {
                   status,
@@ -919,14 +700,8 @@ export default (
 
                 setCallResponse(
                   {
-                    status:
-                      failed ?
-                        'failed' :
-                        'success',
-                    message:
-                      failed ?
-                        `Failed to add ${symbol} liquidity` :
-                        `Add ${symbol} liquidity successful`,
+                    status: failed ? 'failed' : 'success',
+                    message: failed ? `Failed to add ${symbol} liquidity` : `Add ${symbol} liquidity successful`,
                     tx_hash: hash,
                   }
                 )
@@ -934,10 +709,7 @@ export default (
                 success = true
               }
             } catch (error) {
-              const message =
-                error?.reason ||
-                error?.data?.message ||
-                error?.message
+              const response = parseError(error)
 
               console.log(
                 '[addLiquidity error]',
@@ -951,18 +723,7 @@ export default (
                 },
               )
 
-              const code =
-                _.slice(
-                  (message || '')
-                    .toLowerCase()
-                    .split(' ')
-                    .filter(s => s),
-                  0,
-                  2,
-                )
-                .join('_')
-
-              switch (code) {
+              switch (response.code) {
                 case 'user_rejected':
                   reset(code)
                   break
@@ -970,8 +731,7 @@ export default (
                   setCallResponse(
                     {
                       status: 'failed',
-                      message,
-                      code,
+                      ...response
                     }
                   )
                   break
@@ -982,57 +742,24 @@ export default (
           }
           break
         case 'withdraw':
-          if (
-            !amount ||
-            [
-              '0',
-              '0.0',
-              0,
-            ]
-            .includes(amount)
-          ) {
+          if (!amount || ['0', '0.0'].includes(amount)) {
             failed = true
-
             setApproving(false)
             break
           }
 
-          const _amount =
-            utils.parseUnits(
-              (
-                amount ||
-                0
-              )
-              .toString(),
-              18,
-            )
-            .toString()
+          const _amount = utils.parseUnits((amount || 0).toString(), 18).toString()
 
-          const minAmounts =
-            [
-              '0',
-              '0',
-            ]
+          const minAmounts = ['0', '0']
 
           if (!failed) {
             try {
-              const approve_request =
-                await sdk.sdkBase
-                  .approveIfNeeded(
-                    domainId,
-                    lpTokenAddress,
-                    _amount,
-                    infiniteApprove,
-                  )
+              const approve_request = await sdk.sdkBase.approveIfNeeded(domainId, lpTokenAddress, _amount, infiniteApprove)
 
               if (approve_request) {
                 setApproving(true)
 
-                const approve_response =
-                  await signer
-                    .sendTransaction(
-                      approve_request,
-                    )
+                const approve_response = await signer.sendTransaction(approve_request)
 
                 const {
                   hash,
@@ -1048,11 +775,7 @@ export default (
 
                 setApproveProcessing(true)
 
-                const approve_receipt =
-                  await signer.provider
-                    .waitForTransaction(
-                      hash,
-                    )
+                const approve_receipt = await signer.provider.waitForTransaction(hash)
 
                 const {
                   status,
@@ -1077,12 +800,12 @@ export default (
                 setApproving(false)
               }
             } catch (error) {
+              const response = parseError(error)
+
               setApproveResponse(
                 {
                   status: 'failed',
-                  message:
-                    error?.data?.message ||
-                    error?.message,
+                  ...response,
                 }
               )
 
@@ -1106,50 +829,31 @@ export default (
                 },
               )
 
-              const remove_request =
-                await sdk.sdkPool
-                  .removeLiquidity(
-                    domainId,
-                    contract_address,
-                    _amount,
-                    minAmounts,
-                    deadline,
-                  )
+              const remove_request = await sdk.sdkPool.removeLiquidity(domainId, contract_address, _amount, minAmounts, deadline)
 
               if (remove_request) {
-                let gasLimit =
-                  await signer
-                    .estimateGas(
-                      remove_request,
-                    )
+                let gasLimit = await signer.estimateGas(remove_request)
 
                 if (gasLimit) {
                   gasLimit =
-                    FixedNumber.fromString(
-                      gasLimit
-                        .toString()
-                    )
-                    .mulUnsafe(
-                      FixedNumber.fromString(
-                        GAS_LIMIT_ADJUSTMENT
-                          .toString()
+                    FixedNumber
+                      .fromString(
+                        gasLimit.toString()
                       )
-                    )
-                    .round(0)
-                    .toString()
-                    .replace(
-                      '.0',
-                      '',
-                    )
+                      .mulUnsafe(
+                        FixedNumber
+                          .fromString(
+                            GAS_LIMIT_ADJUSTMENT.toString()
+                          )
+                      )
+                      .round(0)
+                      .toString()
+                      .replace('.0', '')
 
                   remove_request.gasLimit = gasLimit
                 }
 
-                const remove_response =
-                  await signer
-                    .sendTransaction(
-                      remove_request,
-                    )
+                const remove_response = await signer.sendTransaction(remove_request)
 
                 const {
                   hash,
@@ -1157,11 +861,7 @@ export default (
 
                 setCallProcessing(true)
 
-                const remove_receipt =
-                  await signer.provider
-                    .waitForTransaction(
-                      hash,
-                    )
+                const remove_receipt = await signer.provider.waitForTransaction(hash)
 
                 const {
                   status,
@@ -1171,14 +871,8 @@ export default (
 
                 setCallResponse(
                   {
-                    status:
-                      failed ?
-                        'failed' :
-                        'success',
-                    message:
-                      failed ?
-                        `Failed to remove ${symbol} liquidity` :
-                        `Remove ${symbol} liquidity successful`,
+                    status: failed ? 'failed' : 'success',
+                    message: failed ? `Failed to remove ${symbol} liquidity` : `Remove ${symbol} liquidity successful`,
                     tx_hash: hash,
                   }
                 )
@@ -1186,10 +880,7 @@ export default (
                 success = true
               }
             } catch (error) {
-              let message =
-                error?.reason ||
-                error?.data?.message ||
-                error?.message
+              const response = parseError(error)
 
               console.log(
                 '[removeLiquidity error]',
@@ -1203,22 +894,15 @@ export default (
                 },
               )
 
-              const code =
-                _.slice(
-                  (message || '')
-                    .toLowerCase()
-                    .split(' ')
-                    .filter(s => s),
-                  0,
-                  2,
-                )
-                .join('_')
+              let {
+                message,
+              } = { ...response }
 
               if (message?.includes('exceed total supply')) {
                 message = 'Exceed Total Supply'
               }
 
-              switch (code) {
+              switch (response.code) {
                 case 'user_rejected':
                   reset(code)
                   break
@@ -1227,7 +911,7 @@ export default (
                     {
                       status: 'failed',
                       message,
-                      code,
+                      ...response,
                     }
                   )
                   break
@@ -1245,11 +929,7 @@ export default (
     setCallProcessing(false)
     setCalling(false)
 
-    if (
-      sdk &&
-      address &&
-      success
-    ) {
+    if (sdk && address && success) {
       await sleep(1 * 1000)
 
       if (onFinish) {
@@ -1274,7 +954,7 @@ export default (
 
   const calculateAddLiquidityPriceImpact = async (
     domainId,
-    contract_address,
+    contractAddress,
     amountX,
     amountY,
   ) => {
@@ -1283,37 +963,24 @@ export default (
     try {
       setPriceImpactAdd(true)
 
-      if (
-        [
-          chain_data?.id,
-        ]
-        .includes(pool_data?.chain_data?.id) &&
-        pool_data?.tvl
-      ) {
+      if ([chain_data?.id].includes(pool_data?.chain_data?.id) && pool_data?.tvl) {
         console.log(
           '[calculateAddLiquidityPriceImpact]',
           {
             domainId,
-            contract_address,
+            contractAddress,
             amountX,
             amountY,
           },
         )
 
-        const price_impact =
-          await sdk.sdkPool
-            .calculateAddLiquidityPriceImpact(
-              domainId,
-              contract_address,
-              amountX,
-              amountY,
-            )
+        const price_impact = await sdk.sdkPool.calculateAddLiquidityPriceImpact(domainId, contractAddress, amountX, amountY)
 
         console.log(
           '[addLiquidityPriceImpact]',
           {
             domainId,
-            contract_address,
+            contractAddress,
             amountX,
             amountY,
             price_impact,
@@ -1323,46 +990,32 @@ export default (
         setPriceImpactAdd(
           Number(
             utils.formatUnits(
-              BigNumber.from(
-                price_impact ||
-                '0'
-              ),
+              BigInt(price_impact || '0'),
               18,
             )
-          ) *
-          100
+          ) * 100
         )
       }
       else {
         manual = true
       }
     } catch (error) {
-      const message =
-        error?.reason ||
-        error?.data?.message ||
-        error?.message
+      const response = parseError(error)
 
       console.log(
         '[calculateAddLiquidityPriceImpact error]',
         {
           domainId,
-          contract_address,
+          contractAddress,
           amountX,
           amountY,
           error,
         },
       )
-      
-      const code =
-        _.slice(
-          (message || '')
-            .toLowerCase()
-            .split(' ')
-            .filter(s => s),
-          0,
-          2,
-        )
-        .join('_')
+
+      const {
+        message,
+      } = { ...response }
 
       if (message?.includes('reverted')) {
         manual = true
@@ -1372,8 +1025,7 @@ export default (
         setPriceImpactAddResponse(
           {
             status: 'failed',
-            message,
-            code,
+            ...response,
           }
         )
       }
@@ -1386,7 +1038,7 @@ export default (
 
   const calculateRemoveLiquidityPriceImpact = async (
     domainId,
-    contract_address,
+    contractAddress,
     amountX,
     amountY,
   ) => {
@@ -1395,37 +1047,24 @@ export default (
     try {
       setPriceImpactRemove(true)
 
-      if (
-        [
-          chain_data?.id,
-        ]
-        .includes(pool_data?.chain_data?.id) &&
-        pool_data?.tvl
-      ) {
+      if ([chain_data?.id].includes(pool_data?.chain_data?.id) && pool_data?.tvl) {
         console.log(
           '[calculateRemoveLiquidityPriceImpact]',
           {
             domainId,
-            contract_address,
+            contractAddress,
             amountX,
             amountY,
           },
         )
 
-        const price_impact =
-          await sdk.sdkPool
-            .calculateRemoveLiquidityPriceImpact(
-              domainId,
-              contract_address,
-              amountX,
-              amountY,
-            )
+        const price_impact = await sdk.sdkPool.calculateRemoveLiquidityPriceImpact(domainId, contractAddress, amountX, amountY)
 
         console.log(
           '[removeLiquidityPriceImpact]',
           {
             domainId,
-            contract_address,
+            contractAddress,
             amountX,
             amountY,
             price_impact,
@@ -1435,46 +1074,32 @@ export default (
         setPriceImpactRemove(
           Number(
             utils.formatUnits(
-              BigNumber.from(
-                price_impact ||
-                '0'
-              ),
+              BigInt(price_impact || '0'),
               18,
             )
-          ) *
-          100
+          ) * 100
         )
       }
       else {
         manual = true
       }
     } catch (error) {
-      const message =
-        error?.reason ||
-        error?.data?.message ||
-        error?.message
+      const response = parseError(error)
 
       console.log(
         '[calculateRemoveLiquidityPriceImpact error]',
         {
           domainId,
-          contract_address,
+          contractAddress,
           amountX,
           amountY,
           error,
         },
       )
-      
-      const code =
-        _.slice(
-          (message || '')
-            .toLowerCase()
-            .split(' ')
-            .filter(s => s),
-          0,
-          2,
-        )
-        .join('_')
+
+      const {
+        message,
+      } = { ...response }
 
       if (message?.includes('reverted')) {
         manual = true
@@ -1484,8 +1109,7 @@ export default (
         setPriceImpactRemoveResponse(
           {
             status: 'failed',
-            message,
-            code,
+            ...response,
           }
         )
       }
@@ -1501,16 +1125,15 @@ export default (
     asset,
   } = { ...pool }
 
-  const chain_data = (chains_data || [])
-    .find(c =>
-      c?.id === chain
-    )
+  const chain_data = getChain(chain, chains_data)
+
   const {
     chain_id,
     name,
     image,
     explorer,
   } = { ...chain_data }
+
   const {
     url,
     contract_path,
@@ -1522,28 +1145,11 @@ export default (
     slippage,
   } = { ...options }
 
-  const selected =
-    !!(
-      chain &&
-      asset
-    )
+  const selected = !!(chain && asset)
 
-  const no_pool =
-    selected &&
-    (pool_assets_data || [])
-      .findIndex(a =>
-        a?.id === asset &&
-        (a.contracts || [])
-          .findIndex(a =>
-            a?.chain_id === chain_id
-          ) > -1
-      ) < 0
+  const no_pool = selected && !getAsset(asset, pool_assets_data, chain_id)
 
-  const pool_data = (pools_data || [])
-    .find(p =>
-      p?.chain_data?.id === chain &&
-      p.asset_data?.id === asset
-    )
+  const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
 
   const {
     asset_data,
@@ -1555,7 +1161,6 @@ export default (
   let {
     adopted,
     local,
-    rate,
   } = { ...pool_data }
 
   const {
@@ -1563,16 +1168,8 @@ export default (
     next_asset,
   } = { ...contract_data }
 
-  rate =
-    rate ||
-    1
-
   const _image = contract_data?.image
-
-  const image_paths =
-    (_image || '')
-      .split('/')
-
+  const image_paths = split(_image, 'normal', '/')
   const image_name = _.last(image_paths)
 
   const x_asset_data =
@@ -1581,13 +1178,11 @@ export default (
       ...(
         Object.fromEntries(
           Object.entries({ ...asset_data })
-            .filter(([k, v]) =>
-              !['contracts'].includes(k)
-            )
+            .filter(([k, v]) => !['contracts'].includes(k))
         )
       ),
       ...(
-        equals_ignore_case(
+        equalsIgnoreCase(
           adopted.address,
           contract_address,
         ) ?
@@ -1603,26 +1198,11 @@ export default (
                   _image :
                   adopted.symbol.startsWith(WRAPPED_PREFIX) ?
                     !image_name.startsWith(WRAPPED_PREFIX) ?
-                      image_paths
-                        .map((s, i) =>
-                          i === image_paths.length - 1 ?
-                            `${WRAPPED_PREFIX}${s}` :
-                            s
-                        )
-                        .join('/') :
+                      image_paths.map((s, i) => i === image_paths.length - 1 ? `${WRAPPED_PREFIX}${s}` : s).join('/') :
                       _image :
                     !image_name.startsWith(WRAPPED_PREFIX) ?
                       _image :
-                      image_paths
-                        .map((s, i) =>
-                          i === image_paths.length - 1 ?
-                            s
-                              .substring(
-                                WRAPPED_PREFIX.length,
-                              ) :
-                            s
-                        )
-                        .join('/') :
+                      image_paths.map((s, i) => i === image_paths.length - 1 ? s.substring(WRAPPED_PREFIX.length) : s).join('/') :
                 undefined,
           }
       ),
@@ -1634,25 +1214,13 @@ export default (
       ...(
         Object.fromEntries(
           Object.entries({ ...asset_data })
-            .filter(([k, v]) =>
-              !['contracts'].includes(k)
-            )
+            .filter(([k, v]) => !['contracts'].includes(k))
         )
       ),
       ...contract_data,
     }
 
-  const x_balance =
-    x_asset_data &&
-    (balances_data?.[chain_id] || [])
-      .find(b =>
-        equals_ignore_case(
-          b?.contract_address,
-          x_asset_data.contract_address,
-        )
-      )
-  
-  const x_balance_amount = x_balance?.amount
+  const x_balance_amount = x_asset_data && getBalance(chain_id, x_asset_data.contract_address, balances_data)?.amount
 
   const y_asset_data =
     local?.address &&
@@ -1660,13 +1228,11 @@ export default (
       ...(
         Object.fromEntries(
           Object.entries({ ...asset_data })
-            .filter(([k, v]) =>
-              !['contracts'].includes(k)
-            )
+            .filter(([k, v]) => !['contracts'].includes(k))
         )
       ),
       ...(
-        equals_ignore_case(
+        equalsIgnoreCase(
           local.address,
           contract_address,
         ) ?
@@ -1682,123 +1248,47 @@ export default (
                   _image :
                   local.symbol.startsWith(WRAPPED_PREFIX) ?
                     !image_name.startsWith(WRAPPED_PREFIX) ?
-                      image_paths
-                        .map((s, i) =>
-                          i === image_paths.length - 1 ?
-                            `${WRAPPED_PREFIX}${s}` :
-                            s
-                        )
-                        .join('/') :
+                      image_paths.map((s, i) => i === image_paths.length - 1 ? `${WRAPPED_PREFIX}${s}` : s).join('/') :
                       _image :
                     !image_name.startsWith(WRAPPED_PREFIX) ?
                       _image :
-                      image_paths
-                        .map((s, i) =>
-                          i === image_paths.length - 1 ?
-                            s
-                              .substring(
-                                WRAPPED_PREFIX.length,
-                              ) :
-                            s
-                        )
-                        .join('/') :
+                      image_paths.map((s, i) => i === image_paths.length - 1 ? s.substring(WRAPPED_PREFIX.length) : s).join('/') :
                 undefined,
             mintable:
-              [
-                WRAPPED_PREFIX,
-              ]
-              .findIndex(s =>
-                local.symbol?.startsWith(s)
-              ) > -1 ||
-              [
-                'TEST',
-              ]
-              .findIndex(s =>
-                equals_ignore_case(
-                  s,
-                  local.symbol,
-                )
-              ) > -1,
+              toArray(WRAPPED_PREFIX).findIndex(s => local.symbol?.startsWith(s)) > -1 ||
+              ['TEST'].findIndex(s => equalsIgnoreCase(s, local.symbol)) > -1,
             wrapable:
-              [
-                'WETH',
-              ]
-              .findIndex(s =>
-                equals_ignore_case(
-                  s,
-                  local.symbol,
-                )
-              ) > -1,
+              ['WETH'].findIndex(s => equalsIgnoreCase(s, local.symbol)) > -1,
           }
       ),
     }
 
-  const y_balance =
-    y_asset_data &&
-    (balances_data?.[chain_id] || [])
-      .find(b =>
-        equals_ignore_case(
-          b?.contract_address,
-          y_asset_data.contract_address,
-        )
-      )
-  
-  const y_balance_amount = y_balance?.amount
+  const y_balance_amount = y_asset_data && getBalance(chain_id, y_asset_data.contract_address, balances_data)?.amount
 
-  const pool_loading =
-    selected &&
-    !no_pool &&
-    !error &&
-    !pool_data
+  const pool_loading = selected && !no_pool && !error && !pool_data
 
-  const user_pool_data =
-    pool_data &&
-    (user_pools_data || [])
-      .find(p =>
-        p?.chain_data?.id === chain &&
-        p.asset_data?.id === asset
-      )
+  const user_pool_data = pool_data && toArray(userPoolsData).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
 
   const {
     lpTokenBalance,
   } = { ...user_pool_data }
 
-  const x_remove_amount =
-    equals_ignore_case(
-      adopted?.address,
-      contract_address,
-    ) ?
-      _.head(removeAmounts) :
-      _.last(removeAmounts)
+  const x_remove_amount = equalsIgnoreCase(adopted?.address, contract_address) ? _.head(removeAmounts) : _.last(removeAmounts)
 
-  const y_remove_amount =
-    equals_ignore_case(
-      adopted?.address,
-      contract_address,
-    ) ?
-      _.last(removeAmounts) :
-      _.head(removeAmounts)
+  const y_remove_amount = equalsIgnoreCase(adopted?.address, contract_address) ? _.last(removeAmounts) : _.head(removeAmounts)
 
-  const position_loading =
-    selected &&
-    !no_pool &&
-    !error &&
-    (
-      !user_pools_data ||
-      pool_loading
-    )
+  const position_loading = selected && !no_pool && !error && (!userPoolsData || pool_loading)
 
   const pool_tokens_data =
-    [
-      adopted,
-      local,
-    ]
-    .map((t, i) => {
+    toArray(
+      _.concat(adopted, local)
+    )
+    .map((a, i) => {
       const {
         address,
         symbol,
         decimals,
-      } = { ...t }
+      } = { ...a }
 
       return {
         i,
@@ -1808,40 +1298,24 @@ export default (
         decimals,
         image:
           (
-            equals_ignore_case(
+            equalsIgnoreCase(
               address,
               contract_address,
             ) ?
               contract_data?.image :
-              equals_ignore_case(
+              equalsIgnoreCase(
                 address,
                 next_asset?.contract_address,
               ) ?
-                next_asset?.image ||
-                contract_data?.image :
+                next_asset?.image || contract_data?.image :
                 null
           ) ||
           asset_data?.image,
       }
     })
 
-  adopted =
-    {
-      ...adopted,
-      asset_data:
-        _.head(
-          pool_tokens_data
-        ),
-    }
-
-  local =
-    {
-      ...local,
-      asset_data:
-        _.last(
-          pool_tokens_data
-        ),
-    }
+  adopted = { ...adopted, asset_data: _.head(pool_tokens_data) }
+  local = { ...local, asset_data: _.last(pool_tokens_data) }
 
   const native_asset =
     !adopted?.symbol?.startsWith(WRAPPED_PREFIX) ?
@@ -1853,17 +1327,9 @@ export default (
       adopted :
       local
 
-  const native_amount =
-    Number(
-      native_asset?.balance ||
-      '0'
-    )
+  const native_amount = Number(native_asset?.balance || '0')
 
-  const wrapped_amount =
-    Number(
-      wrapped_asset?.balance ||
-      '0'
-    )
+  const wrapped_amount = Number(wrapped_asset?.balance || '0')
 
   const total_amount = native_amount + wrapped_amount
 
@@ -1873,146 +1339,26 @@ export default (
 
   const valid_amount =
     action === 'withdraw' ?
-      typeof amount === 'string' &&
-      !isNaN(amount) &&
-      amount &&
-      utils.parseUnits(
-        amount ||
-        '0',
-        18,
-      )
-      .lte(
-        utils.parseUnits(
-          (
-            lpTokenBalance ||
-            0
-          )
-          .toString(),
-          18,
-        )
-      ) &&
-      utils.parseUnits(
-        amount ||
-        '0',
-        18,
-      )
-      .gt(
-        BigNumber.from(
-          '0'
-        )
-      ) :
-      typeof amountX === 'string' &&
-      !isNaN(amountX) &&
-      typeof amountY === 'string' &&
-      !isNaN(amountY) &&
-      (
-        amountX ||
-        amountY
-      ) &&
-      utils.parseUnits(
-        amountX ||
-        '0',
-        x_asset_data?.decimals ||
-        18,
-      )
-      .lte(
-        utils.parseUnits(
-          (
-            x_balance_amount ||
-            0
-          )
-          .toString(),
-          x_asset_data?.decimals ||
-          18,
-        )
-      ) &&
-      utils.parseUnits(
-        amountY ||
-        '0',
-        y_asset_data?.decimals ||
-        18,
-      )
-      .lte(
-        utils.parseUnits(
-          (
-            y_balance_amount ||
-            0
-          )
-          .toString(),
-          y_asset_data?.decimals ||
-          18,
-        )
-      ) &&
-      (
-        utils.parseUnits(
-          amountX ||
-          '0',
-          x_asset_data?.decimals ||
-          18,
-        )
-        .gt(
-          BigNumber.from(
-            '0'
-          )
-        ) ||
-        utils.parseUnits(
-          amountY ||
-          '0',
-          y_asset_data?.decimals ||
-          18,
-        )
-        .gt(
-          BigNumber.from(
-            '0'
-          )
-        )
-      )
-
-  const wrong_chain =
-    wallet_chain_id !== chain_id &&
-    !callResponse
-
-  const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
-
-  const disabled =
-    !pool_data ||
-    error ||
-    calling ||
-    approving
+      typeof amount === 'string' && !isNaN(amount) && amount &&
+      utils.parseUnits(amount, 18).toBigInt() <= utils.parseUnits((lpTokenBalance || 0).toString(), 18).toBigInt() &&
+      utils.parseUnits(amount, 18).toBigInt() > 0 :
+      typeof amountX === 'string' && !isNaN(amountX) && typeof amountY === 'string' && !isNaN(amountY) && (amountX || amountY) &&
+      utils.parseUnits(amountX || '0', x_asset_data?.decimals || 18).toBigInt() <= utils.parseUnits((x_balance_amount || 0).toString(), x_asset_data?.decimals || 18).toBigInt() &&
+      utils.parseUnits(amountY || '0', y_asset_data?.decimals || 18).toBigInt() <= utils.parseUnits((y_balance_amount || 0).toString(), y_asset_data?.decimals || 18).toBigInt() &&
+      (utils.parseUnits(amountX || '0', x_asset_data?.decimals || 18).toBigInt() > 0 || utils.parseUnits(amountY || '0', y_asset_data?.decimals || 18).toBigInt() > 0)
 
   const overweighted_asset =
-    adopted &&
-    local &&
-    (
-      Number(amountX) +
-      Number(
-        (
-          equals_ignore_case(
-            adopted.address,
-            x_asset_data?.contract_address,
-          ) ?
-            adopted :
-            local
-        )
-        .balance
-      )
-    ) >
-    (
-      Number(amountY) +
-      Number(
-        (
-          equals_ignore_case(
-            adopted.address,
-            y_asset_data?.contract_address,
-          ) ?
-            adopted :
-            local
-        )
-        .balance
-      )
-    ) ?
-     'x' :
-     'y'
+    adopted && local &&
+    (Number(amountX) + Number((equalsIgnoreCase(adopted.address, x_asset_data?.contract_address) ? adopted : local).balance)) >
+    (Number(amountY) + Number((equalsIgnoreCase(adopted.address, y_asset_data?.contract_address) ? adopted : local).balance)) ?
+      'x' :
+      'y'
+
+  const disabled = !pool_data || error || calling || approving
+
+  const wrong_chain = wallet_chain_id !== chain_id && !callResponse
+
+  const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
 
   return (
     <div className="order-1 lg:order-2 space-y-3">
@@ -2058,27 +1404,17 @@ export default (
                         (
                           <button
                             disabled={disabled}
-                            onClick={() => {
-                              if (
-                                [
-                                  'string',
-                                  'number',
-                                ]
-                                .includes(typeof x_balance_amount)
-                              ) {
-                                setAmountX(
-                                  x_balance_amount
-                                    .toString()
-                                )
+                            onClick={
+                              () => {
+                                if (['string', 'number'].includes(typeof x_balance_amount)) {
+                                  setAmountX(x_balance_amount.toString())
 
-                                if (
-                                  typeof amountY !== 'string' ||
-                                  !amountY
-                                ) {
-                                  setAmountY('0')
+                                  if (typeof amountY !== 'string' || !amountY) {
+                                    setAmountY('0')
+                                  }
                                 }
                               }
-                            }}
+                            }
                             className="flex items-center space-x-1.5"
                           >
                             <Balance
@@ -2135,87 +1471,49 @@ export default (
                         type="number"
                         placeholder="0.00"
                         disabled={disabled}
-                        value={
-                          [
-                            'string',
-                            'number',
-                          ]
-                          .includes(typeof amountX) &&
-                          !isNaN(amountX) ?
-                            amountX :
-                            ''
-                        }
-                        onChange={e => {
-                          const regex = /^[0-9.\b]+$/
+                        value={['string', 'number'].includes(typeof amountX) && !isNaN(amountX) ? amountX : ''}
+                        onChange={
+                          e => {
+                            const regex = /^[0-9.\b]+$/
 
-                          let value
+                            let value
 
-                          if (
-                            e.target.value === '' ||
-                            regex.test(e.target.value)
-                          ) {
-                            value = e.target.value
-                          }
-
-                          if (typeof value === 'string') {
-                            if (value.startsWith('.')) {
-                              value = `0${value}`
+                            if (e.target.value === '' || regex.test(e.target.value)) {
+                              value = e.target.value
                             }
 
-                            value =
-                              number_to_fixed(
-                                value,
-                                x_asset_data?.decimals ||
-                                18,
-                              )
-                          }
+                            if (typeof value === 'string') {
+                              if (value.startsWith('.')) {
+                                value = `0${value}`
+                              }
 
-                          setAmountX(value)
+                              value = numberToFixed(value, x_asset_data?.decimals || 18)
+                            }
 
-                          if (
-                            typeof amountY !== 'string' ||
-                            !amountY
-                          ) {
-                            setAmountY('0')
+                            setAmountX(value)
+
+                            if (typeof amountY !== 'string' || !amountY) {
+                              setAmountY('0')
+                            }
                           }
-                        }}
-                        onWheel={e => e.target.blur()}
-                        onKeyDown={e =>
-                          [
-                            'e',
-                            'E',
-                            '-',
-                          ]
-                          .includes(e.key) &&
-                          e.preventDefault()
                         }
+                        onWheel={e => e.target.blur()}
+                        onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                         className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
                       />
                     </div>
                     {
-                      typeof amountX === 'string' &&
-                      [
-                        'string',
-                        'number',
-                      ]
-                      .includes(typeof x_balance_amount) &&
+                      typeof amountX === 'string' && ['string', 'number'].includes(typeof x_balance_amount) &&
                       utils.parseUnits(
-                        amountX ||
-                        '0',
-                        x_asset_data?.decimals ||
-                        18,
+                        amountX || '0',
+                        x_asset_data?.decimals || 18,
                       )
-                      .gt(
-                        utils.parseUnits(
-                          (
-                            x_balance_amount ||
-                            0
-                          )
-                          .toString(),
-                          x_asset_data?.decimals ||
-                          18,
-                        )
-                      ) &&
+                      .toBigInt() >
+                      utils.parseUnits(
+                        (x_balance_amount || 0).toString(),
+                        x_asset_data?.decimals || 18,
+                      )
+                      .toBigInt() &&
                       (
                         <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
                           <BiMessageError
@@ -2250,27 +1548,17 @@ export default (
                         (
                           <button
                             disabled={disabled}
-                            onClick={() => {
-                              if (
-                                [
-                                  'string',
-                                  'number',
-                                ]
-                                .includes(typeof y_balance_amount)
-                              ) {
-                                setAmountY(
-                                  y_balance_amount
-                                    .toString()
-                                )
+                            onClick={
+                              () => {
+                                if (['string', 'number'].includes(typeof y_balance_amount)) {
+                                  setAmountY(y_balance_amount.toString())
 
-                                if (
-                                  typeof amountX !== 'string' ||
-                                  !amountX
-                                ) {
-                                  setAmountX('0')
+                                  if (typeof amountX !== 'string' || !amountX) {
+                                    setAmountX('0')
+                                  }
                                 }
                               }
-                            }}
+                            }
                             className="flex items-center space-x-1.5"
                           >
                             <Balance
@@ -2327,87 +1615,49 @@ export default (
                         type="number"
                         placeholder="0.00"
                         disabled={disabled}
-                        value={
-                          [
-                            'string',
-                            'number',
-                          ]
-                          .includes(typeof amountY) &&
-                          !isNaN(amountY) ?
-                            amountY :
-                            ''
-                        }
-                        onChange={e => {
-                          const regex = /^[0-9.\b]+$/
+                        value={['string', 'number'].includes(typeof amountY) && !isNaN(amountY) ? amountY : ''}
+                        onChange={
+                          e => {
+                            const regex = /^[0-9.\b]+$/
 
-                          let value
+                            let value
 
-                          if (
-                            e.target.value === '' ||
-                            regex.test(e.target.value)
-                          ) {
-                            value = e.target.value
-                          }
-
-                          if (typeof value === 'string') {
-                            if (value.startsWith('.')) {
-                              value = `0${value}`
+                            if (e.target.value === '' || regex.test(e.target.value)) {
+                              value = e.target.value
                             }
 
-                            value =
-                              number_to_fixed(
-                                value,
-                                y_asset_data?.decimals ||
-                                18,
-                              )
-                          }
+                            if (typeof value === 'string') {
+                              if (value.startsWith('.')) {
+                                value = `0${value}`
+                              }
 
-                          setAmountY(value)
+                              value = numberToFixed(value, y_asset_data?.decimals || 18)
+                            }
 
-                          if (
-                            typeof amountX !== 'string' ||
-                            !amountX
-                          ) {
-                            setAmountX('0')
+                            setAmountY(value)
+
+                            if (typeof amountX !== 'string' || !amountX) {
+                              setAmountX('0')
+                            }
                           }
-                        }}
-                        onWheel={e => e.target.blur()}
-                        onKeyDown={e =>
-                          [
-                            'e',
-                            'E',
-                            '-',
-                          ]
-                          .includes(e.key) &&
-                          e.preventDefault()
                         }
+                        onWheel={e => e.target.blur()}
+                        onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                         className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
                       />
                     </div>
                     {
-                      typeof amountY === 'string' &&
-                      [
-                        'string',
-                        'number',
-                      ]
-                      .includes(typeof y_balance_amount) &&
+                      typeof amountY === 'string' && ['string', 'number'].includes(typeof y_balance_amount) &&
                       utils.parseUnits(
-                        amountY ||
-                        '0',
-                        y_asset_data?.decimals ||
-                        18,
+                        amountY || '0',
+                        y_asset_data?.decimals || 18,
                       )
-                      .gt(
-                        utils.parseUnits(
-                          (
-                            y_balance_amount ||
-                            0
-                          )
-                          .toString(),
-                          y_asset_data?.decimals ||
-                          18,
-                        )
-                      ) &&
+                      .toBigInt() >
+                      utils.parseUnits(
+                        (y_balance_amount || 0).toString(),
+                        y_asset_data?.decimals || 18,
+                      )
+                      .toBigInt() &&
                       (
                         <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
                           <BiMessageError
@@ -2429,11 +1679,9 @@ export default (
                   (
                     <div className="flex flex-col space-y-3">
                       <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
-                        Pool balance
+                        Pool Ratio
                       </div>
-                      <div
-                        className="w-full h-6 flex flex-col items-end justify-center space-y-1.5"
-                      >
+                      <div className="w-full h-6 flex flex-col items-end justify-center space-y-1.5">
                         <ProgressBar
                           width={native_amount * 100 / total_amount}
                           className="w-full rounded-lg"
@@ -2445,7 +1693,7 @@ export default (
                           }
                           backgroundStyle={
                             {
-                              backgroundColor: `${color}66`,
+                              backgroundColor: `${color}33`,
                             }
                           }
                         />
@@ -2464,24 +1712,7 @@ export default (
                                 )
                               }
                               <DecimalsFormat
-                                value={
-                                  number_format(
-                                    native_amount * 100 / total_amount,
-                                    native_amount * 100 / total_amount > 100 ?
-                                      '0,0' :
-                                      native_amount * 100 / total_amount > 1 ?
-                                        '0,0.00' :
-                                        '0,0.000000',
-                                    true,
-                                  )
-                                }
-                                max_decimals={
-                                  native_amount * 100 / total_amount > 100 ?
-                                    0 :
-                                    native_amount * 100 / total_amount > 1 ?
-                                      2 :
-                                      6
-                                }
+                                value={native_amount * 100 / total_amount}
                                 suffix="%"
                                 className="leading-4 text-xs font-medium"
                               />
@@ -2490,16 +1721,10 @@ export default (
                           <div className="flex flex-col items-end space-y-0.5">
                             <div className="flex items-center space-x-1">
                               {
-                                (
-                                  wrapped_asset?.contract_data?.next_asset?.image ||
-                                  wrapped_asset?.asset_data?.image
-                                ) &&
+                                (wrapped_asset?.contract_data?.next_asset?.image || wrapped_asset?.asset_data?.image) &&
                                 (
                                   <Image
-                                    src={
-                                      wrapped_asset?.contract_data?.next_asset?.image ||
-                                      wrapped_asset?.asset_data?.image
-                                    }
+                                    src={wrapped_asset?.contract_data?.next_asset?.image || wrapped_asset?.asset_data?.image}
                                     width={16}
                                     height={16}
                                     className="rounded-full"
@@ -2507,24 +1732,7 @@ export default (
                                 )
                               }
                               <DecimalsFormat
-                                value={
-                                  number_format(
-                                    100 - (native_amount * 100 / total_amount),
-                                    100 - (native_amount * 100 / total_amount) > 100 ?
-                                      '0,0' :
-                                      100 - (native_amount * 100 / total_amount) > 1 ?
-                                        '0,0.00' :
-                                        '0,0.000000',
-                                    true,
-                                  )
-                                }
-                                max_decimals={
-                                  100 - (native_amount * 100 / total_amount) > 100 ?
-                                    0 :
-                                    100 - (native_amount * 100 / total_amount) > 1 ?
-                                      2 :
-                                      6
-                                }
+                                value={100 - (native_amount * 100 / total_amount)}
                                 suffix="%"
                                 className="leading-4 text-xs font-medium"
                               />
@@ -2544,13 +1752,7 @@ export default (
                     >
                       <div className="flex items-center">
                         <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
-                          {
-                            typeof priceImpactAdd === 'number' ?
-                              priceImpactAdd < 0 ?
-                                'Slippage' :
-                                'Bonus' :
-                              'Price impact'
-                          }
+                          {typeof priceImpactAdd === 'number' ? priceImpactAdd < 0 ? 'Slippage' : 'Bonus' : 'Price impact'}
                         </div>
                         <BiInfoCircle
                           size={14}
@@ -2559,51 +1761,43 @@ export default (
                       </div>
                     </Tooltip>
                     <div className="flex items-center text-xs font-semibold space-x-1">
-                      {
-                        priceImpactAdd === true &&
-                        !priceImpactAddResponse ?
-                          <Oval
-                            color={loader_color(theme)}
-                            width="16"
-                            height="16"
-                          /> :
-                          <span
-                            className={
-                              `${
-                                typeof priceImpactAdd === 'number' ?
-                                  priceImpactAdd < 0 ?
-                                    'text-red-500 dark:text-red-500' :
-                                    priceImpactAdd > 0 ?
-                                      'text-green-500 dark:text-green-500' :
-                                      '' :
-                                  ''
-                              }`
-                            }
-                          >
-                            <span className="whitespace-nowrap">
-                              {
-                                typeof priceImpactAdd === 'number' ||
-                                priceImpactAddResponse ?
-                                  number_format(
-                                    priceImpactAdd,
-                                    '0,0.000000',
-                                    true,
-                                  ) :
-                                  '-'
-                              }
-                            </span>
+                      {priceImpactAdd === true && !priceImpactAddResponse ?
+                        <Oval
+                          width="16"
+                          height="16"
+                          color={loaderColor(theme)}
+                        /> :
+                        <span
+                          className={
+                            `${
+                              typeof priceImpactAdd === 'number' ?
+                                priceImpactAdd < 0 ?
+                                  'text-red-500 dark:text-red-500' :
+                                  priceImpactAdd > 0 ?
+                                    'text-green-500 dark:text-green-500' :
+                                    '' :
+                                ''
+                            }`
+                          }
+                        >
+                          {typeof priceImpactAdd === 'number' || priceImpactAddResponse ?
+                            <DecimalsFormat
+                              value={priceImpactAdd}
+                              className="whitespace-nowrap"
+                            /> :
                             <span>
-                              %
+                              -
                             </span>
+                          }
+                          <span>
+                            %
                           </span>
+                        </span>
                       }
                     </div>
                   </div>
                   {
-                    typeof priceImpactAdd === 'number' &&
-                    priceImpactAdd < 0 &&
-                    // overweighted_asset === 'x' &&
-                    // amountX > amountY &&
+                    typeof priceImpactAdd === 'number' && priceImpactAdd < 0 &&
                     (
                       <div className="bg-yellow-50 dark:bg-yellow-200 bg-opacity-50 dark:bg-opacity-10 rounded flex items-start space-x-2 pt-2 pb-3 px-2">
                         <IoWarning
@@ -2619,26 +1813,16 @@ export default (
                               <span className="mr-1">
                                 You may have
                               </span>
-                              <span className="font-bold mr-1">
-                                {
-                                  number_format(
-                                    priceImpactAdd,
-                                    '0,0.000000',
-                                    true,
-                                  )
-                                }
-                                %
-                              </span>
+                              <DecimalsFormat
+                                value={priceImpactAdd}
+                                className="font-bold mr-1"
+                                suffix="%"
+                              />
                               <span className="mr-1">
                                 slippage because
                               </span>
                               <span className="font-bold mr-1">
-                                {
-                                  (overweighted_asset === 'x' ?
-                                    x_asset_data :
-                                    y_asset_data
-                                  )?.symbol
-                                }
+                                {(overweighted_asset === 'x' ? x_asset_data : y_asset_data)?.symbol}
                               </span>
                               <span>
                                 is currently overweighted in this pool.
@@ -2650,12 +1834,7 @@ export default (
                                   If you provide additional
                                 </span>
                                 <span className="font-bold mr-1">
-                                  {
-                                    (overweighted_asset === 'x' ?
-                                      y_asset_data :
-                                      x_asset_data
-                                    )?.symbol
-                                  }
+                                  {(overweighted_asset === 'x' ? y_asset_data : x_asset_data)?.symbol}
                                 </span>
                                 <span className="mr-1">
                                   instead, you may receive
@@ -2669,711 +1848,51 @@ export default (
                               </span>
                             </div>
                           </div>
-                          {
-                            pool_tokens_data
-                              .filter(d =>
-                                d.symbol?.includes(WRAPPED_PREFIX)
-                              )
-                              .length > 0 &&
-                            // (overweighted_asset === 'x' ?
-                            //   y_asset_data :
-                            //   x_asset_data
-                            // )?.symbol?.includes(WRAPPED_PREFIX) &&
-                            (
-                              <div className="flex flex-col space-y-0">
-                                <div className="w-fit bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 rounded flex items-center space-x-1 pt-0.5 pb-1 px-2">
-                                  <a
-                                    href={
-                                      `/${asset.toUpperCase()}-from-${_.head(chains_data)?.id}-to-${chain}?${
-                                        (overweighted_asset === 'x' ?
-                                          y_asset_data :
-                                          x_asset_data
-                                        )?.symbol?.includes(WRAPPED_PREFIX) ?
-                                          'receive_next=true&' :
-                                          ''
-                                      }source=pool`
-                                    }
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    <span className="leading-3 text-white text-xs font-medium">
-                                      Click here to get {
-                                        (overweighted_asset === 'x' ?
-                                          y_asset_data :
-                                          x_asset_data
-                                        )?.symbol
-                                      }
-                                    </span>
-                                  </a>
-                                </div>
-                              </div>
-                            )
-                          }
-                        </div>
-                      </div>
-                    )
-                  }
-                </div>
-              </div>
-              <div className="flex items-end">
-                {
-                  chain &&
-                  web3_provider &&
-                  wrong_chain ?
-                    <Wallet
-                      connectChainId={chain_id}
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
-                    >
-                      <span className="mr-1.5 sm:mr-2">
-                        {is_walletconnect ?
-                          'Reconnect' :
-                          'Switch'
-                        } to
-                      </span>
-                      {
-                        image &&
-                        (
-                          <Image
-                            src={image}
-                            width={28}
-                            height={28}
-                            className="rounded-full"
-                          />
-                        )
-                      }
-                      <span className="font-semibold">
-                        {name}
-                      </span>
-                    </Wallet> :
-                    callResponse ||
-                    approveResponse ||
-                    priceImpactAddResponse ||
-                    priceImpactRemoveResponse ?
-                      [
-                        callResponse ||
-                        approveResponse ||
-                        priceImpactAddResponse ||
-                        priceImpactRemoveResponse,
-                      ]
-                      .map((r, i) => {
-                        const {
-                          status,
-                          message,
-                          tx_hash,
-                        } = { ...r }
-
-                        return (
-                          <Alert
-                            key={i}
-                            color={
-                              `${
-                                status === 'failed' ?
-                                  'bg-red-400 dark:bg-red-500' :
-                                  status === 'success' ?
-                                    'bg-green-400 dark:bg-green-500' :
-                                    'bg-blue-400 dark:bg-blue-500'
-                              } text-white`
-                            }
-                            icon={
-                              status === 'failed' ?
-                                <BiMessageError
-                                  className="w-4 h-4 stroke-current mr-2.5"
-                                /> :
-                                status === 'success' ?
-                                  <BiMessageCheck
-                                    className="w-4 h-4 stroke-current mr-2.5"
-                                  /> :
-                                  status === 'pending' ?
-                                    <div className="mr-2.5">
-                                      <Watch
-                                        color="white"
-                                        width="16"
-                                        height="16"
-                                      />
-                                    </div> :
-                                    <BiMessageDetail
-                                      className="w-4 h-4 stroke-current mr-2.5"
-                                    />
-                            }
-                            closeDisabled={true}
-                            rounded={true}
-                            className="rounded p-3"
-                          >
-                            <div className="flex items-center justify-between space-x-2">
-                              <span className={`leading-5 ${status === 'failed' ? 'break-words text-xs' : 'break-words'} text-sm font-medium`}>
-                                {ellipse(
-                                  (message || '')
-                                    .substring(
-                                      0,
-                                      status === 'failed' &&
-                                      error_patterns
-                                        .findIndex(c =>
-                                          message?.indexOf(c) > -1
-                                        ) > -1 ?
-                                        message.indexOf(
-                                          error_patterns
-                                            .find(c =>
-                                              message.indexOf(c) > -1
-                                            )
-                                        ) :
-                                        undefined,
-                                    )
-                                    .trim() ||
-                                  message,
-                                  128,
-                                )}
-                              </span>
-                              <div className="flex items-center space-x-1">
-                                {
-                                  url &&
-                                  tx_hash &&
-                                  (
-                                    <a
-                                      href={`${url}${transaction_path?.replace('{tx}', r.tx_hash)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <TiArrowRight
-                                        size={20}
-                                        className="transform -rotate-45"
-                                      />
-                                    </a>
-                                  )
-                                }
-                                {status === 'failed' ?
-                                  <>
-                                    <Copy
-                                      value={message}
-                                      className="cursor-pointer text-slate-200 hover:text-white"
-                                    />
-                                    <button
-                                      onClick={() => reset()}
-                                      className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                                    >
-                                      <MdClose
-                                        size={14}
-                                      />
-                                    </button>
-                                  </> :
-                                  status === 'success' ?
-                                    <button
-                                      onClick={() => reset()}
-                                      className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
-                                    >
-                                      <MdClose
-                                        size={14}
-                                      />
-                                    </button> :
-                                    null
-                                }
-                              </div>
+                          <div className="flex flex-col space-y-0">
+                            <div className="w-fit bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 rounded flex items-center space-x-1 pt-0.5 pb-1 px-2">
+                              <a
+                                href={`/${asset.toUpperCase()}-from-${_.head(chains_data)?.id}-to-${chain}?${(overweighted_asset === 'x' ? y_asset_data : x_asset_data)?.symbol?.includes(WRAPPED_PREFIX) ? 'receive_next=true&' : ''}source=pool`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <span className="leading-3 text-white text-xs font-medium">
+                                  Click here to get {(overweighted_asset === 'x' ? y_asset_data : x_asset_data)?.symbol}
+                                </span>
+                              </a>
                             </div>
-                          </Alert>
-                        )
-                      }) :
-                      web3_provider ?
-                        <button
-                          disabled={
-                            disabled ||
-                            !valid_amount
-                          }
-                          onClick={() => call(pool_data)}
-                          className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base text-center py-3 px-2 sm:px-3`}
-                        >
-                          <span className="flex items-center justify-center space-x-1.5">
-                            {
-                              (
-                                calling ||
-                                approving
-                              ) &&
-                              (
-                                <TailSpin
-                                  color="white"
-                                  width="20"
-                                  height="20"
-                                />
-                              )
-                            }
-                            <span>
-                              {calling ?
-                                approving ?
-                                  approveProcessing ?
-                                    'Approving' :
-                                    'Please Approve' :
-                                  callProcessing ?
-                                    'Depositing' :
-                                    typeof approving === 'boolean' ?
-                                      'Please Confirm' :
-                                      'Checking Approval' :
-                                !valid_amount ?
-                                  'Enter amount' :
-                                  'Supply'
-                              }
-                            </span>
-                          </span>
-                        </button> :
-                        <Wallet
-                          connectChainId={chain_id}
-                          buttonConnectTitle="Connect Wallet"
-                          className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base font-medium text-center py-3 px-2 sm:px-3"
-                        >
-                          <span>
-                            Connect Wallet
-                          </span>
-                        </Wallet>
-                }
-              </div>
-            </> :
-            <>
-              <div className="space-y-3 py-3 px-0">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between space-x-2">
-                    {
-                      lpTokenAddress &&
-                      url ?
-                        <a
-                          href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-slate-400 dark:text-slate-500 text-xs font-medium"
-                        >
-                          Pool Tokens
-                        </a> :
-                        <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
-                          Pool Tokens
-                        </span>
-                    }
-                    <div className="flex items-center space-x-1">
-                      <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
-                        Balance:
-                      </div>
-                      {
-                        web3_provider &&
-                        user_pool_data &&
-                        (
-                          <div className="flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs space-x-1">
-                            {
-                              [
-                                'string',
-                                'number',
-                              ]
-                              .includes(typeof lpTokenBalance) ?
-                                <span className="font-semibold">
-                                  {number_format(
-                                    Number(lpTokenBalance),
-                                    Number(lpTokenBalance) > 1000000 ?
-                                      '0,0' :
-                                      Number(lpTokenBalance) > 10000 ?
-                                        '0,0.00' :
-                                        '0,0.000000000000000000',
-                                    true,
-                                  )}
-                                </span> :
-                                typeof lpTokenBalance === 'string' ?
-                                  <span>
-                                    n/a
-                                  </span> :
-                                  <RotatingSquare
-                                    color={loader_color(theme)}
-                                    width="16"
-                                    height="16"
-                                  />
-                            }
                           </div>
-                        )
-                      }
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="rounded border dark:border-slate-800 flex items-center justify-between space-x-2 py-2.5 px-3">
-                      <DebounceInput
-                        debounceTimeout={750}
-                        size="small"
-                        type="number"
-                        placeholder="0.00"
-                        disabled={disabled}
-                        value={
-                          [
-                            'string',
-                            'number',
-                          ]
-                          .includes(typeof amount) &&
-                          !isNaN(amount) ?
-                            amount :
-                            ''
-                        }
-                        onChange={e => {
-                          const regex = /^[0-9.\b]+$/
-
-                          let value
-
-                          if (
-                            e.target.value === '' ||
-                            regex.test(e.target.value)
-                          ) {
-                            value = e.target.value
-                          }
-
-                          if (typeof value === 'string') {
-                            if (value.startsWith('.')) {
-                              value = `0${value}`
-                            }
-
-                            value =
-                              number_to_fixed(
-                                value,
-                                18,
-                              )
-                          }
-
-                          setAmount(value)
-                        }}
-                        onWheel={e => e.target.blur()}
-                        onKeyDown={e =>
-                          [
-                            'e',
-                            'E',
-                            '-',
-                          ]
-                          .includes(e.key) &&
-                          e.preventDefault()
-                        }
-                        className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
-                      />
-                    </div>
-                    {
-                      typeof amount === 'string' &&
-                      [
-                        'string',
-                        'number',
-                      ]
-                      .includes(typeof lpTokenBalance) &&
-                      utils.parseUnits(
-                        amount ||
-                        '0',
-                        18,
-                      )
-                      .gt(
-                        utils.parseUnits(
-                          (
-                            lpTokenBalance ||
-                            0
-                          )
-                          .toString(),
-                          18,
-                        )
-                      ) &&
-                      (
-                        <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
-                          <BiMessageError
-                            size={16}
-                            className="min-w-max"
-                          />
-                          <span className="text-xs font-medium">
-                            Not enough {symbol}
-                          </span>
                         </div>
-                      )
-                    }
-                  </div>
-                  {
-                    [
-                      'string',
-                      'number',
-                    ]
-                    .includes(typeof lpTokenBalance) &&
-                    utils.parseUnits(
-                      (
-                        lpTokenBalance ||
-                        0
-                      )
-                      .toString(),
-                      18,
-                    )
-                    .gt(
-                      BigNumber.from(
-                        '0'
-                      )
-                    ) &&
-                    (
-                      <div className="flex items-center justify-end space-x-2.5">
-                        {
-                          [
-                            0.25,
-                            0.5,
-                            0.75,
-                            1.0,
-                          ]
-                          .map((p, i) => (
-                            <div
-                              key={i}
-                              onClick={() => {
-                                let _amount
-
-                                try {
-                                  _amount =
-                                    p === 1 ?
-                                      (
-                                        lpTokenBalance ||
-                                        0
-                                      )
-                                      .toString() :
-                                      FixedNumber.fromString(
-                                        (
-                                          lpTokenBalance ||
-                                          0
-                                        )
-                                        .toString()
-                                      )
-                                      .mulUnsafe(
-                                        FixedNumber.fromString(
-                                          p
-                                            .toString()
-                                        )
-                                      )
-                                      .toString()
-                                } catch (error) {
-                                  _amount = '0'
-                                }
-
-                                setAmount(_amount)
-                              }}
-                              className={
-                                `${
-                                  disabled ||
-                                  ![
-                                    'string',
-                                    'number',
-                                  ]
-                                  .includes(typeof lpTokenBalance) ?
-                                    'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' :
-                                    FixedNumber.fromString(
-                                      (
-                                        lpTokenBalance ||
-                                        0
-                                      )
-                                      .toString()
-                                    )
-                                    .mulUnsafe(
-                                      FixedNumber.fromString(
-                                        p
-                                          .toString()
-                                      )
-                                    )
-                                    .toString() ===
-                                    amount ?
-                                      'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' :
-                                      'bg-slate-100 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'
-                                } rounded text-xs py-0.5 px-1.5`
-                              }
-                            >
-                              {p * 100} %
-                            </div>
-                          ))
-                        }
                       </div>
                     )
                   }
                 </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between space-x-2">
-                    {
-                      url &&
-                      x_asset_data?.contract_address ?
-                        <a
-                          href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <span className="text-xs font-semibold">
-                            {x_asset_data.symbol}
-                          </span>
-                        </a> :
-                        <div className="text-xs font-semibold">
-                          {x_asset_data?.symbol}
-                        </div>
-                    }
-                    {web3_provider ?
-                      [
-                        'string',
-                        'number',
-                      ]
-                      .includes(typeof x_remove_amount) &&
-                      !isNaN(x_remove_amount) ?
-                        <span className="text-xs">
-                          {number_format(
-                            x_remove_amount ||
-                            0,
-                            '0,0.000000',
-                            true,
-                          )}
-                        </span> :
-                        selected &&
-                        !no_pool &&
-                        !error &&
-                        (
-                          position_loading ?
-                            <TailSpin
-                              color={loader_color(theme)}
-                              width="24"
-                              height="24"
-                            /> :
-                            '-'
-                        ) :
-                      <span className="text-xs">
-                        -
-                      </span>
-                    }
-                  </div>
-                  <div className="flex items-center justify-between space-x-2">
-                    {
-                      url &&
-                      y_asset_data?.contract_address ?
-                        <a
-                          href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <span className="text-xs font-semibold">
-                            {y_asset_data.symbol}
-                          </span>
-                        </a> :
-                        <div className="text-xs font-semibold">
-                          {y_asset_data?.symbol}
-                        </div>
-                    }
-                    {web3_provider ?
-                      [
-                        'string',
-                        'number',
-                      ]
-                      .includes(typeof y_remove_amount) &&
-                      !isNaN(y_remove_amount) ?
-                        <span className="text-xs">
-                          {number_format(
-                            y_remove_amount ||
-                            0,
-                            '0,0.000000',
-                            true,
-                          )}
-                        </span> :
-                        selected &&
-                        !no_pool &&
-                        !error &&
-                        (
-                          position_loading ?
-                            <TailSpin
-                              color={loader_color(theme)}
-                              width="24"
-                              height="24"
-                            /> :
-                            '-'
-                        ) :
-                      <span className="text-xs">
-                        -
-                      </span>
-                    }
-                  </div>
-                </div>
               </div>
-              {/*
-                <div className="flex items-center justify-between space-x-1">
-                  <Tooltip
-                    placement="top"
-                    content="The adjusted amount you are paying for LP tokens above or below current market price."
-                    className="w-80 z-50 bg-dark text-white text-xs"
-                  >
-                    <div className="flex items-center">
-                      <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
-                        Price impact
-                      </div>
-                      <BiInfoCircle
-                        size={14}
-                        className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                      />
-                    </div>
-                  </Tooltip>
-                  <div className="flex items-center text-xs font-semibold space-x-1">
-                    {
-                      priceImpactRemove === true &&
-                      !priceImpactRemoveResponse ?
-                        <Oval
-                          color={loader_color(theme)}
-                          width="16"
-                          height="16"
-                        /> :
-                        <span
-                          className={
-                            `${
-                              typeof priceImpactRemove === 'number' ?
-                                priceImpactRemove < 0 ?
-                                  'text-red-500 dark:text-red-500' :
-                                  priceImpactRemove > 0 ?
-                                    'text-green-500 dark:text-green-500' :
-                                    '' :
-                                ''
-                            }`
-                          }
-                        >
-                          <span className="whitespace-nowrap">
-                            {
-                              typeof priceImpactRemove === 'number' ||
-                              priceImpactRemoveResponse ?
-                                number_format(
-                                  priceImpactRemove,
-                                  '0,0.000000',
-                                  true,
-                                ) :
-                                '-'
-                            }
-                          </span>
-                          <span>
-                            %
-                          </span>
-                        </span>
-                    }
-                  </div>
-                </div>
-              */}
               <div className="flex items-end">
-                {
-                  web3_provider &&
-                  wrong_chain ?
-                    <Wallet
-                      connectChainId={chain_id}
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3  px-2 sm:px-3"
-                    >
-                      <span className="mr-1.5 sm:mr-2">
-                        {is_walletconnect ?
-                          'Reconnect' :
-                          'Switch'
-                        } to
-                      </span>
-                      {
-                        image &&
-                        (
-                          <Image
-                            src={image}
-                            width={28}
-                            height={28}
-                            className="rounded-full"
-                          />
-                        )
-                      }
-                      <span className="font-semibold">
-                        {name}
-                      </span>
-                    </Wallet> :
-                    callResponse ||
-                    approveResponse ||
-                    priceImpactAdd ||
-                    priceImpactRemoveResponse ?
-                      [
-                        callResponse ||
-                        approveResponse ||
-                        priceImpactAdd ||
-                        priceImpactRemoveResponse,
-                      ]
+                {chain && browser_provider && wrong_chain ?
+                  <Wallet
+                    connectChainId={chain_id}
+                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
+                  >
+                    <span className="mr-1.5 sm:mr-2">
+                      {is_walletconnect ? 'Reconnect' : 'Switch'} to
+                    </span>
+                    {
+                      image &&
+                      (
+                        <Image
+                          src={image}
+                          width={28}
+                          height={28}
+                          className="rounded-full"
+                        />
+                      )
+                    }
+                    <span className="font-semibold">
+                      {name}
+                    </span>
+                  </Wallet> :
+                  callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse ?
+                    toArray(callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse)
                       .map((r, i) => {
                         const {
                           status,
@@ -3421,29 +1940,16 @@ export default (
                             <div className="flex items-center justify-between space-x-2">
                               <span className={`leading-5 ${status === 'failed' ? 'break-words text-xs' : 'break-words'} text-sm font-medium`}>
                                 {ellipse(
-                                  (message || '')
-                                    .substring(
-                                      0,
-                                      status === 'failed' &&
-                                      error_patterns.findIndex(c =>
-                                        message?.indexOf(c) > -1
-                                      ) > -1 ?
-                                        message.indexOf(
-                                          error_patterns.find(c =>
-                                            message.indexOf(c) > -1
-                                          )
-                                        ) :
-                                        undefined,
-                                    )
-                                    .trim() ||
+                                  split(message, 'normal', ' ')
+                                    .join(' ')
+                                    .substring(0, status === 'failed' && errorPatterns.findIndex(c => message?.indexOf(c) > -1) > -1 ? message.indexOf(errorPatterns.find(c => message.indexOf(c) > -1)) : undefined) ||
                                   message,
                                   128,
                                 )}
                               </span>
                               <div className="flex items-center space-x-1">
                                 {
-                                  url &&
-                                  r.tx_hash &&
+                                  url && tx_hash &&
                                   (
                                     <a
                                       href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
@@ -3488,26 +1994,440 @@ export default (
                           </Alert>
                         )
                       }) :
-                      web3_provider ?
+                      browser_provider ?
                         <button
-                          disabled={
-                            disabled ||
-                            !valid_amount
-                          }
+                          disabled={disabled || !valid_amount}
                           onClick={() => call(pool_data)}
                           className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base text-center py-3 px-2 sm:px-3`}
                         >
                           <span className="flex items-center justify-center space-x-1.5">
                             {
-                              (
-                                calling ||
-                                approving
-                              ) &&
+                              (calling || approving) &&
                               (
                                 <TailSpin
-                                  color="white"
                                   width="20"
                                   height="20"
+                                  color="white"
+                                />
+                              )
+                            }
+                            <span>
+                              {calling ?
+                                approving ?
+                                  approveProcessing ?
+                                    'Approving' :
+                                    'Please Approve' :
+                                  callProcessing ?
+                                    'Depositing' :
+                                    typeof approving === 'boolean' ?
+                                      'Please Confirm' :
+                                      'Checking Approval' :
+                                !valid_amount ?
+                                  'Enter amount' :
+                                  'Supply'
+                              }
+                            </span>
+                          </span>
+                        </button> :
+                        <Wallet
+                          connectChainId={chain_id}
+                          buttonConnectTitle="Connect Wallet"
+                          className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base font-medium text-center py-3 px-2 sm:px-3"
+                        >
+                          <span>
+                            Connect Wallet
+                          </span>
+                        </Wallet>
+                }
+              </div>
+            </> :
+            <>
+              <div className="space-y-3 py-3 px-0">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between space-x-2">
+                    {
+                      lpTokenAddress && url ?
+                        <a
+                          href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-slate-400 dark:text-slate-500 text-xs font-medium"
+                        >
+                          Pool Tokens
+                        </a> :
+                        <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                          Pool Tokens
+                        </span>
+                    }
+                    <div className="flex items-center space-x-1">
+                      <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                        Balance:
+                      </div>
+                      {
+                        browser_provider && user_pool_data &&
+                        (
+                          <div className="flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs space-x-1">
+                            {['string', 'number'].includes(typeof lpTokenBalance) ?
+                              <DecimalsFormat
+                                value={lpTokenBalance}
+                                className="font-semibold"
+                              /> :
+                              typeof lpTokenBalance === 'string' ?
+                                <span>
+                                  n/a
+                                </span> :
+                                <RotatingSquare
+                                  width="16"
+                                  height="16"
+                                  color={loaderColor(theme)}
+                                />
+                            }
+                          </div>
+                        )
+                      }
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="rounded border dark:border-slate-800 flex items-center justify-between space-x-2 py-2.5 px-3">
+                      <DebounceInput
+                        debounceTimeout={750}
+                        size="small"
+                        type="number"
+                        placeholder="0.00"
+                        disabled={disabled}
+                        value={['string', 'number'].includes(typeof amount) && !isNaN(amount) ? amount : ''}
+                        onChange={
+                          e => {
+                            const regex = /^[0-9.\b]+$/
+
+                            let value
+
+                            if (e.target.value === '' || regex.test(e.target.value)) {
+                              value = e.target.value
+                            }
+
+                            if (typeof value === 'string') {
+                              if (value.startsWith('.')) {
+                                value = `0${value}`
+                              }
+
+                              value = numberToFixed(value, 18)
+                            }
+
+                            setAmount(value)
+                          }
+                        }
+                        onWheel={e => e.target.blur()}
+                        onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                        className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
+                      />
+                    </div>
+                    {
+                      typeof amount === 'string' && ['string', 'number'].includes(typeof lpTokenBalance) &&
+                      utils.parseUnits(
+                        amount || '0',
+                        18,
+                      )
+                      .toBigInt() >
+                      utils.parseUnits(
+                        (lpTokenBalance || 0).toString(),
+                        18,
+                      )
+                      .toBigInt() &&
+                      (
+                        <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
+                          <BiMessageError
+                            size={16}
+                            className="min-w-max"
+                          />
+                          <span className="text-xs font-medium">
+                            Not enough {symbol}
+                          </span>
+                        </div>
+                      )
+                    }
+                  </div>
+                  {
+                    ['string', 'number'].includes(typeof lpTokenBalance) &&
+                    utils.parseUnits(
+                      (lpTokenBalance || 0).toString(),
+                      18,
+                    )
+                    .toBigInt() > 0 &&
+                    (
+                      <div className="flex items-center justify-end space-x-2.5">
+                        {[0.25, 0.5, 0.75, 1.0]
+                          .map((p, i) => (
+                            <div
+                              key={i}
+                              onClick={
+                                () => {
+                                  let _amount
+
+                                  try {
+                                    _amount =
+                                      p === 1 ?
+                                        (lpTokenBalance || 0).toString() :
+                                        FixedNumber
+                                          .fromString(
+                                            (lpTokenBalance || 0).toString()
+                                          )
+                                          .mulUnsafe(
+                                            FixedNumber
+                                              .fromString(
+                                                p.toString()
+                                              )
+                                          )
+                                          .toString()
+                                  } catch (error) {
+                                    _amount = '0'
+                                  }
+
+                                  setAmount(_amount)
+                                }
+                              }
+                              className={
+                                `${
+                                  disabled || !['string', 'number'].includes(typeof lpTokenBalance) ?
+                                    'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' :
+                                    FixedNumber
+                                      .fromString(
+                                        (lpTokenBalance || 0).toString()
+                                      )
+                                      .mulUnsafe(
+                                        FixedNumber
+                                          .fromString(
+                                            p.toString()
+                                          )
+                                      )
+                                      .toString() === amount ?
+                                      'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' :
+                                      'bg-slate-100 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'
+                                } rounded text-xs py-0.5 px-1.5`
+                              }
+                            >
+                              {p * 100} %
+                            </div>
+                          ))
+                        }
+                      </div>
+                    )
+                  }
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between space-x-2">
+                    {url && x_asset_data?.contract_address ?
+                      <a
+                        href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span className="text-xs font-semibold">
+                          {x_asset_data.symbol}
+                        </span>
+                      </a> :
+                      <div className="text-xs font-semibold">
+                        {x_asset_data?.symbol}
+                      </div>
+                    }
+                    {browser_provider ?
+                      ['string', 'number'].includes(typeof x_remove_amount) && !isNaN(x_remove_amount) ?
+                        <DecimalsFormat
+                          value={x_remove_amount || 0}
+                          className="text-xs"
+                        /> :
+                        selected && !no_pool && !error &&
+                        (position_loading ?
+                          <TailSpin
+                            width="24"
+                            height="24"
+                            color={loaderColor(theme)}
+                          /> :
+                          '-'
+                        ) :
+                      <span className="text-xs">
+                        -
+                      </span>
+                    }
+                  </div>
+                  <div className="flex items-center justify-between space-x-2">
+                    {url && y_asset_data?.contract_address ?
+                      <a
+                        href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span className="text-xs font-semibold">
+                          {y_asset_data.symbol}
+                        </span>
+                      </a> :
+                      <div className="text-xs font-semibold">
+                        {y_asset_data?.symbol}
+                      </div>
+                    }
+                    {browser_provider ?
+                      ['string', 'number'].includes(typeof y_remove_amount) && !isNaN(y_remove_amount) ?
+                        <DecimalsFormat
+                          value={y_remove_amount || 0}
+                          className="text-xs"
+                        /> :
+                        selected && !no_pool && !error &&
+                        (position_loading ?
+                          <TailSpin
+                            width="24"
+                            height="24"
+                            color={loaderColor(theme)}
+                          /> :
+                          '-'
+                        ) :
+                      <span className="text-xs">
+                        -
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-end">
+                {browser_provider && wrong_chain ?
+                  <Wallet
+                    connectChainId={chain_id}
+                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3  px-2 sm:px-3"
+                  >
+                    <span className="mr-1.5 sm:mr-2">
+                      {is_walletconnect ? 'Reconnect' : 'Switch'} to
+                    </span>
+                    {
+                      image &&
+                      (
+                        <Image
+                          src={image}
+                          width={28}
+                          height={28}
+                          className="rounded-full"
+                        />
+                      )
+                    }
+                    <span className="font-semibold">
+                      {name}
+                    </span>
+                  </Wallet> :
+                  callResponse || approveResponse || priceImpactAdd || priceImpactRemoveResponse ?
+                    toArray(callResponse || approveResponse || priceImpactAdd || priceImpactRemoveResponse)
+                      .map((r, i) => {
+                        const {
+                          status,
+                          message,
+                          tx_hash,
+                        } = { ...r }
+
+                        return (
+                          <Alert
+                            key={i}
+                            color={
+                              `${
+                                status === 'failed' ?
+                                  'bg-red-400 dark:bg-red-500' :
+                                  status === 'success' ?
+                                    'bg-green-400 dark:bg-green-500' :
+                                    'bg-blue-400 dark:bg-blue-500'
+                              } text-white`
+                            }
+                            icon={
+                              status === 'failed' ?
+                                <BiMessageError
+                                  className="w-4 h-4 stroke-current mr-2.5"
+                                /> :
+                                status === 'success' ?
+                                  <BiMessageCheck
+                                    className="w-4 h-4 stroke-current mr-2.5"
+                                  /> :
+                                  status === 'pending' ?
+                                    <div className="mr-2.5">
+                                      <Watch
+                                        color="white"
+                                        width="16"
+                                        height="16"
+                                      />
+                                    </div> :
+                                    <BiMessageDetail
+                                      className="w-4 h-4 stroke-current mr-2.5"
+                                    />
+                            }
+                            closeDisabled={true}
+                            rounded={true}
+                            className="rounded p-3"
+                          >
+                            <div className="flex items-center justify-between space-x-2">
+                              <span className={`leading-5 ${status === 'failed' ? 'break-words text-xs' : 'break-words'} text-sm font-medium`}>
+                                {ellipse(
+                                  split(message, 'normal', ' ')
+                                    .join(' ')
+                                    .substring(0, status === 'failed' && errorPatterns.findIndex(c => message?.indexOf(c) > -1) > -1 ? message.indexOf(errorPatterns.find(c => message.indexOf(c) > -1)) : undefined) ||
+                                  message,
+                                  128,
+                                )}
+                              </span>
+                              <div className="flex items-center space-x-1">
+                                {
+                                  url && r.tx_hash &&
+                                  (
+                                    <a
+                                      href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <TiArrowRight
+                                        size={20}
+                                        className="transform -rotate-45"
+                                      />
+                                    </a>
+                                  )
+                                }
+                                {status === 'failed' ?
+                                  <>
+                                    <Copy
+                                      value={message}
+                                      className="cursor-pointer text-slate-200 hover:text-white"
+                                    />
+                                    <button
+                                      onClick={() => reset()}
+                                      className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
+                                    >
+                                      <MdClose
+                                        size={14}
+                                      />
+                                    </button>
+                                  </> :
+                                  status === 'success' ?
+                                    <button
+                                      onClick={() => reset()}
+                                      className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                                    >
+                                      <MdClose
+                                        size={14}
+                                      />
+                                    </button> :
+                                    null
+                                }
+                              </div>
+                            </div>
+                          </Alert>
+                        )
+                      }) :
+                      browser_provider ?
+                        <button
+                          disabled={disabled || !valid_amount}
+                          onClick={() => call(pool_data)}
+                          className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base text-center py-3 px-2 sm:px-3`}
+                        >
+                          <span className="flex items-center justify-center space-x-1.5">
+                            {
+                              (calling || approving) &&
+                              (
+                                <TailSpin
+                                  width="20"
+                                  height="20"
+                                  color="white"
                                 />
                               )
                             }
@@ -3543,21 +2463,13 @@ export default (
             </>
           }
           {
-            (
-              _x_asset_data?.mintable ||
-              _x_asset_data?.wrapable ||
-              _x_asset_data?.wrapped
-            ) &&
+            (_x_asset_data?.mintable || _x_asset_data?.wrapable || _x_asset_data?.wrapped) &&
             (
               <Faucet
-                token_id={asset}
-                contract_data={_x_asset_data}
+                tokenId={asset}
+                contractData={_x_asset_data}
+                titleClassName={wrong_chain ? 'text-slate-400 dark:text-slate-600' : ''}
                 className="w-full max-w-lg bg-transparent flex flex-col items-center justify-center space-y-2 mx-auto"
-                titleClassName={
-                  wrong_chain ?
-                    'text-slate-400 dark:text-slate-600' :
-                    ''
-                }
               />
             )
           }

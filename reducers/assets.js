@@ -2,7 +2,7 @@ import { ASSETS_DATA } from './types'
 
 export default (
   state = {
-    [`${ASSETS_DATA}`]: null,
+    [ASSETS_DATA]: null,
   },
   action,
 ) => {
@@ -10,7 +10,7 @@ export default (
     case ASSETS_DATA:
       return {
         ...state,
-        [`${ASSETS_DATA}`]: action.value,
+        [ASSETS_DATA]: action.value,
       }
     default:
       return state

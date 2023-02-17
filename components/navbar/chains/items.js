@@ -3,6 +3,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import Image from '../../image'
 import Wallet from '../../wallet'
 import { chainName } from '../../../lib/object/chain'
+import { toArray } from '../../../lib/utils'
 
 export default (
   {
@@ -13,8 +14,8 @@ export default (
     preferences,
     chains,
     wallet,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
         chains: state.chains,
@@ -38,11 +39,8 @@ export default (
 
   return (
     <div className="flex flex-wrap pb-0">
-      {(chains_data || [])
-        .filter(c =>
-          c &&
-          !c.menu_hidden
-        )
+      {toArray(chains_data)
+        .filter(c => !c.menu_hidden)
         .map(c => {
           const {
             id,

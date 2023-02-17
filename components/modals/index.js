@@ -33,8 +33,8 @@ export default (
 ) => {
   const {
     preferences,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
       }
@@ -53,7 +53,6 @@ export default (
     if (onClick) {
       onClick(true)
     }
-
     setOpen(true)
   }
 
@@ -67,14 +66,8 @@ export default (
     () => {
       const handleClickOutside = e => {
         if (
-          !modalRef ||
-          !modalRef.current
-        ) {
-          return false
-        }
-
-        if (
           !open ||
+          !modalRef?.current ||
           modalRef.current.contains(e.target)
         ) {
           return false
@@ -90,18 +83,8 @@ export default (
       }
 
       if (!noCancelOnClickOutside) {
-        document
-          .addEventListener(
-            'mousedown',
-            handleClickOutside,
-          )
-
-        return () =>
-          document
-            .removeEventListener(
-              'mousedown',
-              handleClickOutside,
-            )
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
       }
     },
     [modalRef, open, cancelDisabled],
@@ -169,44 +152,40 @@ export default (
                         <button
                           type="button"
                           disabled={cancelDisabled}
-                          onClick={() => {
-                            if (onCancel) {
-                              onCancel()
+                          onClick={
+                            () => {
+                              if (onCancel) {
+                                onCancel()
+                              }
+                              hide()
                             }
-
-                            hide()
-                          }}
+                          }
                           className={
                             cancelButtonClassName ||
                             'btn btn-default btn-rounded bg-white hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800'
                           }
                         >
-                          {
-                            cancelButtonTitle ||
-                            'Cancel'
-                          }
+                          {cancelButtonTitle || 'Cancel'}
                         </button>
                         <button
                           type="button"
                           disabled={confirmDisabled}
-                          onClick={() => {
-                            if (onConfirm) {
-                              onConfirm()
+                          onClick={
+                            () => {
+                              if (onConfirm) {
+                                onConfirm()
+                              }
+                              if (onConfirmHide) {
+                                hide()
+                              }
                             }
-
-                            if (onConfirmHide) {
-                              hide()
-                            }
-                          }}
+                          }
                           className={
                             confirmButtonClassName ||
                             'btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 text-white'
                           }
                         >
-                          {
-                            confirmButtonTitle ||
-                            'Confirm'
-                          }
+                          {confirmButtonTitle || 'Confirm'}
                         </button>
                       </div>
                     )

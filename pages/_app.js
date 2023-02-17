@@ -18,25 +18,13 @@ import '../styles/components/dropdown.css'
 import '../styles/components/forms.css'
 import '../styles/components/modals.css'
 import '../styles/components/navbar.css'
-import '../styles/components/notifications.css'
 import '../styles/components/nprogress.css'
 import '../styles/components/skeleton.css'
 import '../styles/components/table.css'
 
-Router.events.on(
-  'routeChangeStart',
-  () => NProgress.start(),
-)
-
-Router.events.on(
-  'routeChangeComplete',
-  () => NProgress.done(),
-)
-
-Router.events.on(
-  'routeChangeError',
-  () => NProgress.done(),
-)
+Router.events.on('routeChangeStart', () => NProgress.start())
+Router.events.on('routeChangeComplete', () => NProgress.done())
+Router.events.on('routeChangeError', () => NProgress.done())
 
 export default (
   {
@@ -45,6 +33,7 @@ export default (
   },
 ) => {
   const router = useRouter()
+
   const store = useStore(pageProps.initialReduxState)
 
   const [rendered, setRendered] = useState(false)
@@ -52,19 +41,10 @@ export default (
 
   useEffect(
     () => {
-      const handleRouteChange = url =>
-        ga.pageview(url)
+      const handleRouteChange = url => ga.pageview(url)
 
-      router.events.on(
-        'routeChangeComplete',
-        handleRouteChange,
-      )
-
-      return () =>
-        router.events.off(
-          'routeChangeComplete',
-          handleRouteChange,
-        )
+      router.events.on('routeChangeComplete', handleRouteChange)
+      return () => router.events.off('routeChangeComplete', handleRouteChange)
     },
     [router.events],
   )
@@ -78,17 +58,8 @@ export default (
 
   useEffect(
     () => {
-      if (
-        process.env.NEXT_PUBLIC_GTM_ID &&
-        rendered &&
-        !initiated
-      ) {
-        TagManager.initialize(
-          {
-            gtmId: process.env.NEXT_PUBLIC_GTM_ID,
-          },
-        )
-
+      if (process.env.NEXT_PUBLIC_GTM_ID && rendered && !initiated) {
+        TagManager.initialize({ gtmId: process.env.NEXT_PUBLIC_GTM_ID })
         setInitiated(true)
       }
     },

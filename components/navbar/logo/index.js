@@ -4,19 +4,11 @@ import { BsArrowLeft } from 'react-icons/bs'
 import Image from '../../image'
 
 export default () => {
-  const is_testnet =
-    [
-      'testnet',
-    ]
-    .includes(
-      process.env.NEXT_PUBLIC_NETWORK
-    )
-
   return (
     <div className="logo flex flex-col items-start ml-3 mr-0.5 sm:mr-3">
       <a
         title="Cross-Chain Bridge"
-        href={process.env.NEXT_PUBLIC_MAIN_URL}
+        href={process.env.NEXT_PUBLIC_PROTOCOL_URL}
         target="_blank"
         rel="noopener noreferrer"
         className="w-full flex flex-col items-start"
@@ -79,7 +71,7 @@ export default () => {
         </Tooltip>
         <div className="hidden sm:block">
           {
-            is_testnet &&
+            process.env.NEXT_PUBLIC_NETWORK === 'testnet' &&
             (
               <div className="max-w-min whitespace-nowrap lowercase text-slate-400 dark:text-slate-500 text-xs">
                 {process.env.NEXT_PUBLIC_NETWORK}

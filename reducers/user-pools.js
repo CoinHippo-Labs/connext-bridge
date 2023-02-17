@@ -1,10 +1,11 @@
 import _ from 'lodash'
 
 import { USER_POOLS_DATA } from './types'
+import { toArray } from '../lib/utils'
 
 export default (
   state = {
-    [`${USER_POOLS_DATA}`]: null,
+    [USER_POOLS_DATA]: null,
   },
   action,
 ) => {
@@ -14,43 +15,36 @@ export default (
         key,
         value,
       ] = (
-        _.head(
-          Object.entries({ ...action.value })
-        ) ||
-        []
+        toArray(
+          _.head(
+            Object.entries({ ...action.value })
+          )
+        )
       )
 
-      if (
-        key &&
-        value
-      ) {
-        let values = state?.[`${USER_POOLS_DATA}`]?.[key]
+      if (key && value) {
+        let values = state?.[USER_POOLS_DATA]?.[key]
 
         values =
           _.uniqBy(
-            _.concat(
-              value,
-              values,
-            )
-            .filter(v => v),
+            toArray(
+              _.concat(value, values)
+            ),
             'id',
           )
 
-        action.value = {
-          [key]: values,
-        }
+        action.value = { [key]: values }
       }
 
       return {
         ...state,
-        [`${USER_POOLS_DATA}`]:
+        [USER_POOLS_DATA]:
           action.value &&
           (
-            Object.keys(action.value)
-              .length < 1 ?
+            Object.keys(action.value).length < 1 ?
               action.value :
               {
-                ...state?.[`${USER_POOLS_DATA}`], 
+                ...state?.[USER_POOLS_DATA],
                 ...action.value,
               }
           ),

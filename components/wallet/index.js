@@ -7,8 +7,9 @@ import Portis from '@portis/web3'
 import Coinbase from '@coinbase/wallet-sdk'
 import { providers, utils } from 'ethers'
 
-import { equals_ignore_case } from '../../lib/utils'
 import blocked_addresses from '../../config/blocked_addresses.json'
+import { getChain } from '../../lib/object/chain'
+import { find, equalsIgnoreCase } from '../../lib/utils'
 import { WALLET_DATA, WALLET_RESET } from '../../reducers/types'
 
 const providerOptions = {
@@ -17,22 +18,22 @@ const providerOptions = {
     options: {
       rpc: {
         1: 'https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
-        56: 'https://bsc-dataseed.binance.org',
-        137: 'https://matic-mainnet.chainstacklabs.com',
+        56: 'https://rpc.ankr.com/bsc',
+        137: 'https://polygon-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
         43114: 'https://rpc.ankr.com/avalanche',
         10: 'https://optimism-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
-        42161: 'https://arb1.arbitrum.io/rpc',
+        42161: 'https://arbitrum-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
         42170: 'https://nova.arbitrum.io/rpc',
         250: 'https://rpc.ankr.com/fantom',
-        100: 'https://rpc.gnosischain.com',
+        100: 'https://xdai-rpc.gateway.pokt.network',
         1284: 'https://rpc.ankr.com/moonbeam',
         5: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
-        97: 'https://data-seed-prebsc-1-s1.binance.org:8545',
+        97: 'https://rpc.ankr.com/bsc_testnet_chapel',
         80001: 'https://polygon-mumbai.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
         43113: 'https://rpc.ankr.com/avalanche_fuji',
         420: 'https://optimism-goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
         421613: 'https://goerli-rollup.arbitrum.io/rpc',
-        4002: 'https://rpc.testnet.fantom.network',
+        4002: 'https://rpc.ankr.com/fantom_testnet',
         1287: 'https://rpc.api.moonbase.moonbeam.network',
       },
     },
@@ -84,7 +85,7 @@ export default (
   {
     mainController = false,
     hidden = false,
-    disabled = false, 
+    disabled = false,
     connectChainId,
     onSwitch,
     children,
@@ -93,22 +94,17 @@ export default (
 ) => {
   const dispatch = useDispatch()
   const {
-    preferences,
     chains,
     wallet,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
-        preferences: state.preferences,
         chains: state.chains,
         wallet: state.wallet,
       }
     ),
     shallowEqual,
   )
-  const {
-    theme,
-  } = { ...preferences }
   const {
     chains_data,
   } = { ...chains }
@@ -118,7 +114,7 @@ export default (
   const {
     chain_id,
     provider,
-    web3_provider,
+    browser_provider,
   } = { ...wallet_data }
 
   const [defaultChainId, setDefaultChainId] = useState(null)
@@ -138,7 +134,7 @@ export default (
   useEffect(
     () => {
       if (typeof window !== 'undefined') {
-        if (web3_provider) {
+        if (browser_provider) {
           dispatch(
             {
               type: WALLET_DATA,
@@ -149,8 +145,7 @@ export default (
           )
         }
 
-        /*
-        if (window.clover) {
+        if (false && window.clover) {
           providerOptions['custom-clover'] = {
             package: async () => {
               let provider = null
@@ -159,12 +154,11 @@ export default (
                 provider = window.clover
 
                 try {
-                  await provider
-                    .request(
-                      {
-                        method: 'eth_requestAccounts',
-                      },
-                    )
+                  await provider.request(
+                    {
+                      method: 'eth_requestAccounts',
+                    },
+                  )
                 } catch (error) {
                   throw new Error('User Rejected')
                 }
@@ -173,12 +167,11 @@ export default (
                 provider = window.ethereum
 
                 try {
-                  await provider
-                    .request(
-                      {
-                        method: 'eth_requestAccounts',
-                      },
-                    )
+                  await provider.request(
+                    {
+                      method: 'eth_requestAccounts',
+                    },
+                  )
                 } catch (error) {
                   throw new Error('User Rejected')
                 }
@@ -199,9 +192,7 @@ export default (
               ProviderPackage,
               options,
             ) => {
-              const provider = new ProviderPackage(
-                options,
-              )
+              const provider = new ProviderPackage(options)
 
               try {
                 await provider.enable()
@@ -215,17 +206,11 @@ export default (
             },
           }
         }
-        */
 
         web3Modal =
           new Web3Modal(
             {
-              network:
-                getNetwork(defaultChainId) ||
-                (process.env.NETWORK === 'testnet' ?
-                  'goerli' :
-                  'mainnet'
-                ),
+              network: getNetwork(defaultChainId) || (process.env.NETWORK === 'testnet' ? 'goerli' : 'mainnet'),
               cacheProvider: true,
               providerOptions,
             }
@@ -244,37 +229,16 @@ export default (
     [web3Modal],
   )
 
-  useEffect(
-    () => {
-      const update = async () => {
-        if (web3Modal) {
-          await web3Modal.updateTheme(theme)
-        }
-      }
-
-      update()
-    },
-    [theme],
-  )
-
   const connect =
     useCallback(
       async () => {
         const provider = await web3Modal.connect()
-        const web3Provider = new providers.Web3Provider(provider)
-        const network = await web3Provider.getNetwork()
-        const signer = web3Provider.getSigner()
+        const browser_provider = new providers.Web3Provider(provider)
+        const network = await browser_provider.getNetwork()
+        const signer = browser_provider.getSigner()
         const address = await signer.getAddress()
 
-        if (
-          blocked_addresses
-            .findIndex(a =>
-              equals_ignore_case(
-                a,
-                address,
-              )
-            ) > -1
-        ) {
+        if (find(address, blocked_addresses)) {
           dispatch(
             {
               type: WALLET_RESET,
@@ -292,9 +256,9 @@ export default (
               value: {
                 chain_id: chainId,
                 provider,
-                web3_provider: web3Provider,
-                address,
+                browser_provider,
                 signer,
+                address,
               },
             }
           )
@@ -309,47 +273,34 @@ export default (
         e,
         is_reestablish,
       ) => {
-        if (
-          web3Modal &&
-          !is_reestablish
-        ) {
+        if (web3Modal && !is_reestablish) {
           await web3Modal.clearCachedProvider()
         }
 
-        if (
-          provider?.disconnect &&
-          typeof provider.disconnect === 'function'
-        ) {
+        if (typeof provider?.disconnect === 'function') {
           await provider.disconnect()
         }
 
-        dispatch(
-          {
-            type: WALLET_RESET,
-          }
-        )
+        if (!is_reestablish) {
+          dispatch(
+            {
+              type: WALLET_RESET,
+            }
+          )
+        }
       },
       [web3Modal, provider],
     )
 
   const switchChain = async () => {
-    if (
-      connectChainId &&
-      connectChainId !== chain_id &&
-      provider
-    ) {
+    if (connectChainId && connectChainId !== chain_id && provider) {
       try {
-        await provider
-          .request(
-            {
-              method: 'wallet_switchEthereumChain',
-              params: [
-                {
-                  chainId: utils.hexValue(connectChainId),
-                },
-              ],
-            },
-          )
+        await provider.request(
+          {
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: utils.hexValue(connectChainId) }],
+          },
+        )
       } catch (error) {
         const {
           code,
@@ -359,22 +310,14 @@ export default (
           try {
             const {
               provider_params,
-            } = {
-              ...(
-                (chains_data || [])
-                  .find(c =>
-                    c.chain_id === connectChainId
-                  )
-              ),
-            }
+            } = { ...getChain(connectChainId, chains_data) }
 
-            await provider
-              .request(
-                {
-                  method: 'wallet_addEthereumChain',
-                  params: provider_params,
-                },
-              )
+            await provider.request(
+              {
+                method: 'wallet_addEthereumChain',
+                params: provider_params,
+              },
+            )
           } catch (error) {}
         }
       }
@@ -414,51 +357,26 @@ export default (
             code,
           } = { ...e }
 
-          disconnect(
-            e,
-            code === 1013,
-          )
+          disconnect(e, code === 1013)
 
           if (code === 1013) {
             connect()
           }
         }
 
-        provider
-          .on(
-            'chainChanged',
-            handleChainChanged,
-          )
-        provider
-          .on(
-            'accountsChanged',
-            handleAccountsChanged,
-          )
-        provider
-          .on(
-            'disconnect',
-            handleDisconnect,
-          )
+        provider.on('chainChanged', handleChainChanged)
+        provider.on('accountsChanged', handleAccountsChanged)
+        provider.on('disconnect', handleDisconnect)
 
-        return () => {
-          if (provider.removeListener) {
-            provider
-              .removeListener(
-                'chainChanged',
-                handleChainChanged,
-              )
-            provider
-              .removeListener(
-                'accountsChanged',
-                handleAccountsChanged,
-              )
-            provider
-              .removeListener(
-                'disconnect',
-                handleDisconnect,
-              )
+        return (
+          () => {
+            if (provider.removeListener) {
+              provider.removeListener('chainChanged', handleChainChanged)
+              provider.removeListener('accountsChanged', handleAccountsChanged)
+              provider.removeListener('disconnect', handleDisconnect)
+            }
           }
-        }
+        )
       }
     },
     [provider, disconnect],
@@ -468,19 +386,18 @@ export default (
     !hidden &&
     (
       <>
-        {web3_provider ?
-          !mainController &&
-          connectChainId &&
-          connectChainId !== chain_id ?
+        {browser_provider ?
+          !mainController && connectChainId && connectChainId !== chain_id ?
             <button
               disabled={disabled}
-              onClick={() => {
-                switchChain()
-
-                if (onSwitch) {
-                  onSwitch()
+              onClick={
+                () => {
+                  switchChain()
+                  if (onSwitch) {
+                    onSwitch()
+                  }
                 }
-              }}
+              }
               className={className}
             >
               {
