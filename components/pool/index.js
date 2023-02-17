@@ -136,14 +136,13 @@ export default () => {
           asset,
         } = { ...pool }
 
-        const chain_data = getChain(chain, chains_data, true)
+        const chain_data = getChain(chain, chains_data, true, true)
 
         const {
           chain_id,
-          no_pool,
         } = { ...chain_data }
 
-        if (chain_data && !no_pool) {
+        if (chain_data) {
           params.chain = chain
 
           if (asset && getAsset(asset, pool_assets_data, chain_id)) {
@@ -172,11 +171,7 @@ export default () => {
         delete params.asset
 
         router.push(
-          `/pool/${
-            chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''
-          }${
-            Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''
-          }`,
+          `/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`,
           undefined,
           {
             shallow: true,

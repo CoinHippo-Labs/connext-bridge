@@ -533,7 +533,7 @@ export default () => {
         if (
           chains_data &&
           router_asset_balances_data &&
-          getChain(null, chains_data, true, false, undefined, true).length <= Object.keys(router_asset_balances_data).length
+          getChain(null, chains_data, true, false, false, undefined, true).length <= Object.keys(router_asset_balances_data).length
         ) {
           const addresses =
             _.uniq(
@@ -1107,7 +1107,7 @@ export default () => {
               Array.isArray(get_balances_data) ?
                 get_balances_data :
                 [get_balances_data] :
-            getChain(null, chains_data, true, false, undefined, true)
+            getChain(null, chains_data, true, false, false, undefined, true)
               .map(c => {
                 return {
                   chain: c.id,

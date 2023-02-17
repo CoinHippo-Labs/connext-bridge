@@ -1948,7 +1948,7 @@ export default (
                                   url && tx_hash &&
                                   (
                                     <a
-                                      href={`${url}${transaction_path?.replace('{tx}', r.tx_hash)}`}
+                                      href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                     >

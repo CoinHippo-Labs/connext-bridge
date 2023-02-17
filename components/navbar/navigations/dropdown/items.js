@@ -79,10 +79,10 @@ export default (
                 let source_chain, destination_chain, asset
 
                 if (chains_data && assets_data) {
-                  const source_chain_data = getChain(chain_id, chains_data, true, true)
+                  const source_chain_data = getChain(chain_id, chains_data, true, false, true)
                   source_chain = source_chain_data?.id
 
-                  const destination_chain_data = getChain(chain_id, chains_data, true, true, source_chain)
+                  const destination_chain_data = getChain(chain_id, chains_data, true, false, true, source_chain)
                   destination_chain = destination_chain_data?.id
 
                   const chain_ids = [source_chain_data?.chain_id, destination_chain_data?.chain_id]
@@ -106,7 +106,7 @@ export default (
 
                 if (chains_data && assets_data) {
                   const chains_data =
-                    getChain(chain_id, chains_data, true, false, undefined, true)
+                    getChain(chain_id, chains_data, true, false, false, undefined, true)
                       .filter(c =>
                         getAsset(null, assets_data, c?.chain_id, undefined, undefined, true, true, true)
                       )

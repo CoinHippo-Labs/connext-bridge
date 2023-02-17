@@ -19,7 +19,7 @@ import Wallet from '../wallet'
 import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
 import { getContract } from '../../lib/object/contract'
-import { toArray, includesStringList, numberFormat, ellipse, equalsIgnoreCase, loaderColor, errorPatterns, parseError } from '../../lib/utils'
+import { toArray, includesStringList, ellipse, equalsIgnoreCase, loaderColor, errorPatterns, parseError } from '../../lib/utils'
 
 const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT)
 const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT)
@@ -889,9 +889,11 @@ export default (
                                 color={loaderColor(theme)}
                               /> :
                               <>
-                                <span className="text-sm font-semibold">
-                                  {numberFormat(newSlippage, '0,0.00')}%
-                                </span>
+                                <DecimalsFormat
+                                  value={newSlippage}
+                                  suffix="%"
+                                  className="text-sm font-semibold"
+                                />
                                 <button
                                   disabled={disabled}
                                   onClick={
@@ -914,8 +916,7 @@ export default (
                       </div>
                     </div>
                     {
-                      typeof newSlippage === 'number' &&
-                      (estimated_slippage > newSlippage || newSlippage < 0.2 || newSlippage > 5.0) &&
+                      typeof newSlippage === 'number' && (estimated_slippage > newSlippage || newSlippage < 0.2 || newSlippage > 5.0) &&
                       (
                         <div className="flex items-start space-x-1">
                           <IoWarning
