@@ -1679,7 +1679,7 @@ export default (
                   (
                     <div className="flex flex-col space-y-3">
                       <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
-                        Pool balance
+                        Pool Ratio
                       </div>
                       <div className="w-full h-6 flex flex-col items-end justify-center space-y-1.5">
                         <ProgressBar
@@ -1693,7 +1693,7 @@ export default (
                           }
                           backgroundStyle={
                             {
-                              backgroundColor: `${color}66`,
+                              backgroundColor: `${color}33`,
                             }
                           }
                         />

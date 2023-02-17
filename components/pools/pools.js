@@ -525,7 +525,7 @@ export default (
                     },
                   },
                   {
-                    Header: 'Assets',
+                    Header: 'Pool Ratio',
                     accessor: 'assets',
                     sortType: (a, b) =>
                       a.original.tvl > b.original.tvl ?
@@ -607,7 +607,7 @@ export default (
                                 }
                                 backgroundStyle={
                                   {
-                                    backgroundColor: `${color}66`,
+                                    backgroundColor: `${color}33`,
                                   }
                                 }
                               />
@@ -634,8 +634,8 @@ export default (
                                           </span>
                                         </div>
                                         <DecimalsFormat
-                                          value={native_amount * 100 / total_amount}
-                                          suffix="%"
+                                          value={native_amount}
+                                          noTooltip={true}
                                           className="leading-3 text-2xs font-medium"
                                         />
                                       </div>
@@ -644,7 +644,9 @@ export default (
                                   >
                                     <div>
                                       <DecimalsFormat
-                                        value={native_amount}
+                                        value={native_amount * 100 / total_amount}
+                                        suffix="%"
+                                        noTooltip={true}
                                         className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
                                       />
                                     </div>
@@ -672,8 +674,8 @@ export default (
                                           </span>
                                         </div>
                                         <DecimalsFormat
-                                          value={100 - (native_amount * 100 / total_amount)}
-                                          suffix="%"
+                                          value={wrapped_amount}
+                                          noTooltip={true}
                                           className="leading-3 text-2xs font-medium"
                                         />
                                       </div>
@@ -682,7 +684,9 @@ export default (
                                   >
                                     <div>
                                       <DecimalsFormat
-                                        value={wrapped_amount}
+                                        value={100 - (native_amount * 100 / total_amount)}
+                                        suffix="%"
+                                        noTooltip={true}
                                         className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
                                       />
                                     </div>
@@ -751,7 +755,7 @@ export default (
                                             }
                                             backgroundStyle={
                                               {
-                                                backgroundColor: `${color}66`,
+                                                backgroundColor: `${color}33`,
                                               }
                                             }
                                           />
@@ -778,8 +782,8 @@ export default (
                                                       </span>
                                                     </div>
                                                     <DecimalsFormat
-                                                      value={native_amount * 100 / total_amount}
-                                                      suffix="%"
+                                                      value={native_amount}
+                                                      noTooltip={true}
                                                       className="leading-3 text-2xs font-medium"
                                                     />
                                                   </div>
@@ -788,7 +792,9 @@ export default (
                                               >
                                                 <div>
                                                   <DecimalsFormat
-                                                    value={native_amount}
+                                                    value={native_amount * 100 / total_amount}
+                                                    suffix="%"
+                                                    noTooltip={true}
                                                     className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
                                                   />
                                                 </div>
@@ -816,8 +822,8 @@ export default (
                                                       </span>
                                                     </div>
                                                     <DecimalsFormat
-                                                      value={100 - (native_amount * 100 / total_amount)}
-                                                      suffix="%"
+                                                      value={wrapped_amount}
+                                                      noTooltip={true}
                                                       className="leading-3 text-2xs font-medium"
                                                     />
                                                   </div>
@@ -826,7 +832,9 @@ export default (
                                               >
                                                 <div>
                                                   <DecimalsFormat
-                                                    value={wrapped_amount}
+                                                    value={100 - (native_amount * 100 / total_amount)}
+                                                    suffix="%"
+                                                    noTooltip={true}
                                                     className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
                                                   />
                                                 </div>

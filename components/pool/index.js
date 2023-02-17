@@ -527,6 +527,7 @@ export default () => {
                             <DecimalsFormat
                               value={apy * 100}
                               suffix="%"
+                              noTooltip={true}
                               className="uppercase"
                             /> :
                             'TBD' :
