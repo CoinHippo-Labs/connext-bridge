@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { FixedNumber, formatUnits, parseUnits } from 'ethers'
+import { FixedNumber, utils } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
 import { TailSpin, Watch, RotatingSquare, Oval } from 'react-loader-spinner'
 import { Tooltip } from '@material-tailwind/react'
@@ -161,14 +161,14 @@ export default (
 
           try {
             _amountX =
-              parseUnits(
+              utils.parseUnits(
                 (amountX || 0).toString(),
                 adopted?.decimals || 18,
               )
               .toString()
 
             _amountY =
-              parseUnits(
+              utils.parseUnits(
                 (amountY || 0).toString(),
                 local?.decimals || 18,
               )
@@ -217,7 +217,7 @@ export default (
         setPriceImpactRemove(null)
 
         if (typeof amount === 'string') {
-          if (parseUnits(amount || '0', 18 <= 0)) {
+          if (utils.parseUnits(amount || '0', 18).toBigInt() <= 0) {
             setRemoveAmounts(['0', '0'])
           }
           else {
@@ -241,7 +241,7 @@ export default (
               contract_address,
             } = { ...contract_data }
 
-            const _amount = parseUnits((amount || 0).toString(), 18).toString()
+            const _amount = utils.parseUnits((amount || 0).toString(), 18).toString()
 
             try {
               setPriceImpactRemove(true)
@@ -305,7 +305,7 @@ export default (
                 toArray(_amounts)
                   .map((a, i) =>
                     Number(
-                      formatUnits(
+                      utils.formatUnits(
                         BigInt(a || '0'),
                         (i === 0 ? adopted : local)?.decimals || 18,
                       )
@@ -478,12 +478,12 @@ export default (
 
           let amounts =
             [
-              parseUnits(
+              utils.parseUnits(
                 (amountX || 0).toString(),
                 x_asset_data?.decimals || 18,
               )
               .toString(),
-              parseUnits(
+              utils.parseUnits(
                 (amountY || 0).toString(),
                 y_asset_data?.decimals || 18,
               )
@@ -748,7 +748,7 @@ export default (
             break
           }
 
-          const _amount = parseUnits((amount || 0).toString(), 18).toString()
+          const _amount = utils.parseUnits((amount || 0).toString(), 18).toString()
 
           const minAmounts = ['0', '0']
 
@@ -989,7 +989,7 @@ export default (
 
         setPriceImpactAdd(
           Number(
-            formatUnits(
+            utils.formatUnits(
               BigInt(price_impact || '0'),
               18,
             )
@@ -1073,7 +1073,7 @@ export default (
 
         setPriceImpactRemove(
           Number(
-            formatUnits(
+            utils.formatUnits(
               BigInt(price_impact || '0'),
               18,
             )
@@ -1340,12 +1340,12 @@ export default (
   const valid_amount =
     action === 'withdraw' ?
       typeof amount === 'string' && !isNaN(amount) && amount &&
-      parseUnits(amount, 18) <= parseUnits((lpTokenBalance || 0).toString(), 18) &&
-      parseUnits(amount, 18) > 0 :
+      utils.parseUnits(amount, 18).toBigInt() <= utils.parseUnits((lpTokenBalance || 0).toString(), 18).toBigInt() &&
+      utils.parseUnits(amount, 18).toBigInt() > 0 :
       typeof amountX === 'string' && !isNaN(amountX) && typeof amountY === 'string' && !isNaN(amountY) && (amountX || amountY) &&
-      parseUnits(amountX || '0', x_asset_data?.decimals || 18) <= parseUnits((x_balance_amount || 0).toString(), x_asset_data?.decimals || 18) &&
-      parseUnits(amountY || '0', y_asset_data?.decimals || 18) <= parseUnits((y_balance_amount || 0).toString(), y_asset_data?.decimals || 18) &&
-      (parseUnits(amountX || '0', x_asset_data?.decimals || 18) > 0 || parseUnits(amountY || '0', y_asset_data?.decimals || 18) > 0)
+      utils.parseUnits(amountX || '0', x_asset_data?.decimals || 18).toBigInt() <= utils.parseUnits((x_balance_amount || 0).toString(), x_asset_data?.decimals || 18).toBigInt() &&
+      utils.parseUnits(amountY || '0', y_asset_data?.decimals || 18).toBigInt() <= utils.parseUnits((y_balance_amount || 0).toString(), y_asset_data?.decimals || 18).toBigInt() &&
+      (utils.parseUnits(amountX || '0', x_asset_data?.decimals || 18).toBigInt() > 0 || utils.parseUnits(amountY || '0', y_asset_data?.decimals || 18).toBigInt() > 0)
 
   const overweighted_asset =
     adopted && local &&
@@ -1504,14 +1504,16 @@ export default (
                     </div>
                     {
                       typeof amountX === 'string' && ['string', 'number'].includes(typeof x_balance_amount) &&
-                      parseUnits(
+                      utils.parseUnits(
                         amountX || '0',
                         x_asset_data?.decimals || 18,
-                      ) >
-                      parseUnits(
+                      )
+                      .toBigInt() >
+                      utils.parseUnits(
                         (x_balance_amount || 0).toString(),
                         x_asset_data?.decimals || 18,
-                      ) &&
+                      )
+                      .toBigInt() &&
                       (
                         <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
                           <BiMessageError
@@ -1646,14 +1648,16 @@ export default (
                     </div>
                     {
                       typeof amountY === 'string' && ['string', 'number'].includes(typeof y_balance_amount) &&
-                      parseUnits(
+                      utils.parseUnits(
                         amountY || '0',
                         y_asset_data?.decimals || 18,
-                      ) >
-                      parseUnits(
+                      )
+                      .toBigInt() >
+                      utils.parseUnits(
                         (y_balance_amount || 0).toString(),
                         y_asset_data?.decimals || 18,
-                      ) &&
+                      )
+                      .toBigInt() &&
                       (
                         <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
                           <BiMessageError
@@ -2120,14 +2124,16 @@ export default (
                     </div>
                     {
                       typeof amount === 'string' && ['string', 'number'].includes(typeof lpTokenBalance) &&
-                      parseUnits(
+                      utils.parseUnits(
                         amount || '0',
                         18,
-                      ) >
-                      parseUnits(
+                      )
+                      .toBigInt() >
+                      utils.parseUnits(
                         (lpTokenBalance || 0).toString(),
                         18,
-                      ) &&
+                      )
+                      .toBigInt() &&
                       (
                         <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
                           <BiMessageError
@@ -2143,10 +2149,11 @@ export default (
                   </div>
                   {
                     ['string', 'number'].includes(typeof lpTokenBalance) &&
-                    parseUnits(
+                    utils.parseUnits(
                       (lpTokenBalance || 0).toString(),
                       18,
-                    ) > 0 &&
+                    )
+                    .toBigInt() > 0 &&
                     (
                       <div className="flex items-center justify-end space-x-2.5">
                         {[0.25, 0.5, 0.75, 1.0]
@@ -2185,7 +2192,7 @@ export default (
                                     'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' :
                                     FixedNumber
                                       .fromString(
-                                        (pTokenBalance || 0).toString()
+                                        (lpTokenBalance || 0).toString()
                                       )
                                       .mulUnsafe(
                                         FixedNumber

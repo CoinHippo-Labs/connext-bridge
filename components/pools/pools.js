@@ -86,7 +86,7 @@ export default (
       userPoolsData ?
         userPoolsData
           .filter(d =>
-            Number(p?.lpTokenBalance) > 0
+            Number(d?.lpTokenBalance) > 0
           )
           .map(d => {
             const {
@@ -127,7 +127,7 @@ export default (
               ) * (price || 0)
 
             return {
-              ...p,
+              ...d,
               share,
               tvl,
             }
@@ -153,7 +153,10 @@ export default (
                       v,
                       toArray(pool_assets_data)
                         .filter(a =>
-                          getAsset(k, pool_assets_data)
+                          equalsIgnoreCase(
+                            a?.id,
+                            getAsset(k, pool_assets_data)?.id,
+                          )
                         )
                         .flatMap(a =>
                           toArray(a.contracts)
@@ -174,7 +177,7 @@ export default (
 
                             return {
                               id: `${chain_data.id}_${asset_data.id}`,
-                              name: `${contract_data.symbol || asset_data.symbol}-Pool`,
+                              name: `${contract_data.symbol || asset_data.symbol} Pool`,
                               chain_id,
                               chain_data,
                               asset_data,
@@ -191,20 +194,20 @@ export default (
                     const {
                       chain_data,
                       tvl,
-                      apr,
+                      apy,
                     } = { ...d }
 
                     return {
                       ...d,
                       i: toArray(chains_data).findIndex(c => equalsIgnoreCase(c?.id, chain_data?.id)),
                       _tvl: !isNaN(tvl) ? tvl : -1,
-                      _apr: !isNaN(apr) ? apr : -1,
+                      _apy: !isNaN(apy) ? apy : -1,
                     }
                   }),
                   [
                     'i',
                     '_tvl',
-                    '_apr',
+                    '_apy',
                   ],
                   [
                     'asc',
@@ -322,7 +325,7 @@ export default (
                                     } = { ...p }
                                     let {
                                       symbol,
-                                    } = {  ...contract_data }
+                                    } = { ...contract_data }
 
                                     symbol = symbol || asset_data?.symbol
                                     name = name || symbol
@@ -1067,14 +1070,14 @@ export default (
                           className="z-50 bg-dark text-white text-xs"
                         >
                           <div>
-                            APR
+                            APY
                           </div>
                         </Tooltip>
                       ),
-                    accessor: 'apr',
+                    accessor: 'apy',
                     sortType: (a, b) =>
-                      _.meanBy(a.original.pools, 'apr') >
-                      _.sumBy(b.original.pools, 'apr') ?
+                      _.meanBy(a.original.pools, 'apy') >
+                      _.sumBy(b.original.pools, 'apy') ?
                         1 :
                         -1,
                     Cell: props => {
@@ -1092,16 +1095,16 @@ export default (
                           pools
                             .map(p => {
                               const {
-                                apr,
+                                apy,
                                 tvl,
                               } = { ...p }
 
                               return {
                                 ...p,
-                                weighted_apr: (apr || 0) * (tvl || 0),
+                                weighted_apy: (apy || 0) * (tvl || 0),
                               }
                             }),
-                          'weighted_apr',
+                          'weighted_apy',
                         ) / _.sumBy(pools, 'tvl')
 
                       return (
@@ -1123,12 +1126,12 @@ export default (
                                 const {
                                   chain_data,
                                   asset_data,
-                                  apr,
+                                  apy,
                                 } = { ...p }
 
                                 const chain = chain_data?.id
                                 const asset = asset_data?.id
-                                const value = apr
+                                const value = apy
 
                                 return (
                                   <Link
@@ -1320,7 +1323,7 @@ export default (
                       'tvl',
                       'volume_value',
                       'fees_value',
-                      'apr',
+                      'apy',
                     ] :
                     [
                       'lpTokenBalance',

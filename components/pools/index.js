@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { formatEther, formatUnits } from 'ethers'
+import { utils } from 'ethers'
 
 import Pools from './pools'
 import { getChain } from '../../lib/object/chain'
+import { getAsset } from '../../lib/object/asset'
 import { split, toArray } from '../../lib/utils'
 
 const VIEWS =
@@ -131,7 +132,7 @@ export default () => {
                             } = { ...adopted }
 
                             adopted.balance =
-                              formatUnits(
+                              utils.formatUnits(
                                 BigInt(balance || '0'),
                                 decimals || 18,
                               )
@@ -146,7 +147,7 @@ export default () => {
                             } = { ...local }
 
                             local.balance =
-                              formatUnits(
+                              utils.formatUnits(
                                 BigInt(balance || '0'),
                                 decimals || 18,
                               )
@@ -165,12 +166,12 @@ export default () => {
                             asset_data,
                             ...info,
                             symbols,
-                            lpTokenBalance: formatEther(BigInt(lpTokenBalance || '0')),
+                            lpTokenBalance: utils.formatEther(BigInt(lpTokenBalance || '0')),
                             poolTokenBalances:
                               toArray(poolTokenBalances)
                                 .map((b, i) =>
                                   Number(
-                                    formatUnits(
+                                    utils.formatUnits(
                                       BigInt(b || '0'),
                                       adopted?.index === i ?
                                         adopted.decimals :

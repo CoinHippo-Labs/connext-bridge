@@ -2,7 +2,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import { useState, useEffect } from 'react'
 import _ from 'lodash'
 import moment from 'moment'
-import { ZeroAddress, formatUnits } from 'ethers'
+import { constants, utils } from 'ethers'
 import { XTransferStatus } from '@connext/nxtp-utils'
 import { Tooltip } from '@material-tailwind/react'
 import Fade from 'react-reveal/Fade'
@@ -105,7 +105,7 @@ export default (
     delete source_contract_data.next_asset
   }
   // native asset
-  if (!source_contract_data && equalsIgnoreCase(ZeroAddress, origin_transacting_asset)) {
+  if (!source_contract_data && equalsIgnoreCase(constants.AddressZero, origin_transacting_asset)) {
     const {
       nativeCurrency,
     } = { ..._.head(source_chain_data?.provider_params) }
@@ -129,7 +129,7 @@ export default (
   const source_amount =
     origin_transacting_amount &&
     Number(
-      formatUnits(
+      utils.formatUnits(
         BigInt(origin_transacting_amount).toString(),
         source_decimals,
       )
@@ -151,7 +151,7 @@ export default (
     delete destination_contract_data.next_asset
   }
   // native asset
-  if (!destination_contract_data && equalsIgnoreCase(ZeroAddress, destination_transacting_asset)) {
+  if (!destination_contract_data && equalsIgnoreCase(constants.AddressZero, destination_transacting_asset)) {
     const {
       nativeCurrency,
     } = { ..._.head(destination_chain_data?.provider_params) }
@@ -175,7 +175,7 @@ export default (
   const destination_amount =
     destination_transacting_amount ?
       Number(
-        formatUnits(
+        utils.formatUnits(
           BigInt(destination_transacting_amount).toString(),
           destination_decimals,
         )

@@ -41,7 +41,7 @@ export default (
       }
     }
 
-    if (value_number >= Math.pow(10, -maxDecimals)) {
+    if (Math.abs(value_number) >= Math.pow(10, -maxDecimals)) {
       if (decimals.length > maxDecimals) {
         _value = value_number.toFixed(maxDecimals)
       }
@@ -78,15 +78,16 @@ export default (
     if (_value?.endsWith(`${delimiter}0`)) {
       _value = _.head(_value.split(delimiter))
     }
+
+    if (_value && Number(_value) >= 1000) {
+      _value = numberFormat(_value, '0,0.00', true)
+    }
   }
   else {
     _value = undefined
   }
 
-  if (
-    typeof value === 'string' &&
-    value.endsWith(`${delimiter}0`)
-  ) {
+  if (typeof value === 'string' && value.endsWith(`${delimiter}0`)) {
     value = _.head(value.split(delimiter))
   }
 

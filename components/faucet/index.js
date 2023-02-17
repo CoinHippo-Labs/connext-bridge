@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { Contract, ZeroAddress, parseUnits } from 'ethers'
+import { Contract, constants, utils } from 'ethers'
 import { TailSpin } from 'react-loader-spinner'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiChevronDown, BiChevronUp } from 'react-icons/bi'
 
@@ -212,7 +212,7 @@ export default (
           data?.address || address
 
       const _amount =
-        parseUnits(
+        utils.parseUnits(
           (is_wrapped ? data?.amount : faucetAmount).toString(),
           is_wrapped ? 'ether' : decimals || 18,
         )
@@ -308,8 +308,6 @@ export default (
       const contract_data = contractData || getContract(chain_id, contracts)
 
       const {
-        contract_address,
-        decimals,
         wrapped,
       } = { ...contract_data }
 
@@ -412,7 +410,7 @@ export default (
 
   const has_all_fields = fields.length === fields.filter(f => data?.[f.name]).length
 
-  const native_amount = getBalance(chain_data?.chain_id, ZeroAddress, balances_data)?.amount
+  const native_amount = getBalance(chain_data?.chain_id, constants.AddressZero, balances_data)?.amount
 
   const wrapped_amount = getBalance(chain_data?.chain_id, wrapped?.contract_address || contractData?.contract_address, balances_data)?.amount
 
@@ -491,7 +489,7 @@ export default (
                       <Balance
                         chainId={contractData?.chain_id || chain_id}
                         asset={tokenId}
-                        contractAddress={ZeroAddress}
+                        contractAddress={constants.AddressZero}
                         decimals={nativeCurrency?.decimals || 18}
                         symbol={nativeCurrency?.symbol || asset_data.symbol}
                         trigger={trigger}

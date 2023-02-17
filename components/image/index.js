@@ -23,6 +23,7 @@ export default (
     src,
     srcEnd,
     duration = 2,
+    alt = '',
     ...rest
   }
 ) => {
@@ -71,6 +72,7 @@ export default (
 
   return (
     <Image
+      alt={alt}
       { ...rest }
       src={imageSrc}
       loader={

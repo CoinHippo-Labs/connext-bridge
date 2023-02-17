@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
-import { formatUnits } from 'ethers'
+import { utils } from 'ethers'
 import { RotatingSquare } from 'react-loader-spinner'
 import { MdLocalGasStation } from 'react-icons/md'
 
@@ -54,7 +54,7 @@ export default (
               gasPrice,
             } = { ...fee_data }
 
-            setGasPrice(Number(formatUnits(gasPrice, 'gwei')))
+            setGasPrice(Number(utils.formatUnits(gasPrice, 'gwei')))
           } catch (error) {
             if (!gasPrice) {
               setGasPrice('')

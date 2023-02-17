@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { FixedNumber, formatUnits, parseUnits } from 'ethers'
+import { FixedNumber, utils } from 'ethers'
 import { TailSpin, Watch, Oval } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { Tooltip } from '@material-tailwind/react'
@@ -134,7 +134,7 @@ export default () => {
     () => {
       let updated = false
 
-      const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(sPath.indexOf('?') + 1))
+      const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
 
       let path = !asPath ? '/' : asPath.toLowerCase()
       path = path.includes('?') ? path.substring(0, path.indexOf('?')) : path
@@ -178,7 +178,7 @@ export default () => {
 
       if (
         (!path.includes('on-') || !swap.chain) &&
-        !path.includes('[swap]') && getChain(null, chains_data, false, true, false, undefined, true).length > 0
+        !path.includes('[swap]') && getChain(null, chains_data, false, true, false, undefined, true)?.length > 0
       ) {
         const _chain = getChain(null, chains_data, false, true, true)?.id
 
@@ -274,7 +274,7 @@ export default () => {
       } = { ...getChain(wallet_chain_id, chains_data) }
 
       if (asPath && id) {
-        const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(sPath.indexOf('?') + 1))
+        const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
 
         if (!chain && !params?.chain && getChain(id, chains_data, true)) {
           chain = id
@@ -445,7 +445,7 @@ export default () => {
                 } = { ...adopted }
 
                 adopted.balance =
-                  formatUnits(
+                  utils.formatUnits(
                     BigInt(balance || '0'),
                     decimals || 18,
                   )
@@ -460,7 +460,7 @@ export default () => {
                 } = { ...local }
 
                 local.balance =
-                  formatUnits(
+                  utils.formatUnits(
                     BigInt(balance || '0'),
                     decimals || 18,
                   )
@@ -481,7 +481,7 @@ export default () => {
 
                 try {
                   supply = await sdk.sdkPool.getTokenSupply(domain_id, lpTokenAddress)
-                  supply = formatUnits(BigInt(supply), 18)
+                  supply = utils.formatUnits(BigInt(supply), 18)
 
                   console.log(
                     '[LPTokenSupply]',
@@ -514,7 +514,7 @@ export default () => {
 
                 try {
                   rate = await sdk.sdkPool.getVirtualPrice(domain_id, contract_address)
-                  rate = Number(formatUnits(BigInt(rate || '0'), 18))
+                  rate = Number(utils.formatUnits(BigInt(rate || '0'), 18))
 
                   console.log(
                     '[virtualPrice]',
@@ -792,7 +792,7 @@ export default () => {
           .toFixed(recv_decimals)
 
         amount =
-          parseUnits(
+          utils.parseUnits(
             (
               (typeof amount === 'string' && amount.indexOf('.') > -1 ?
                 amount.substring(0, amount.indexOf('.') + _decimals + 1) :
@@ -805,7 +805,7 @@ export default () => {
       }
 
       minDy =
-        parseUnits(
+        utils.parseUnits(
           (minDy || 0).toString(),
           recv_decimals,
         )
@@ -1079,7 +1079,7 @@ export default () => {
 
         try {
           amount =
-            parseUnits(
+            utils.parseUnits(
               (
                 (typeof amount === 'string' && amount.indexOf('.') > -1 ?
                   amount.substring(0, amount.indexOf('.') + ((origin === 'x' ? x_asset_data : y_asset_data)?.decimals || 18) + 1) :
@@ -1143,7 +1143,7 @@ export default () => {
             },
           )
 
-          setSwapAmount(formatUnits(BigInt(_amount || '0'), (origin === 'x' ? y_asset_data : x_asset_data)?.decimals || 18))
+          setSwapAmount(utils.formatUnits(BigInt(_amount || '0'), (origin === 'x' ? y_asset_data : x_asset_data)?.decimals || 18))
         } catch (error) {
           const response = parseError(error)
 
@@ -1200,7 +1200,7 @@ export default () => {
       },
     )
 
-    setPriceImpact(Number(formatUnits(BigInt(price_impact || '0'), 18)) * 100)
+    setPriceImpact(Number(utils.formatUnits(BigInt(price_impact || '0'), 18)) * 100)
   }
 
   const {
@@ -1327,17 +1327,19 @@ export default () => {
 
   const valid_amount =
     typeof amount === 'string' && !['', '0', '0.0'].includes(amount) && !isNaN(amount) &&
-    parseUnits(
+    utils.parseUnits(
       (amount.indexOf('.') > -1 ?
         amount.substring(0, amount.indexOf('.') + ((origin === 'x' ? x_asset_data : y_asset_data)?.decimals || 18) + 1) :
         amount
       ) || '0',
       (origin === 'x' ? x_asset_data : y_asset_data)?.decimals || 18,
-    ) <=
-    parseUnits(
+    )
+    .toBigInt() <=
+    utils.parseUnits(
       ((origin === 'x' ? x_balance_amount : y_balance_amount) || 0).toString(),
       (origin === 'x' ? x_asset_data : y_asset_data)?.decimals || 18,
     )
+    .toBigInt()
 
   const disabled = swapAmount === true || calling || approving
 
@@ -1756,14 +1758,12 @@ export default () => {
                                           DEFAULT_SWAP_SLIPPAGE_PERCENTAGE :
                                           value
 
-                                      const _data = 
-
                                       setOptions(
                                         {
                                           ...options,
                                           slippage:
                                             value && !isNaN(value) ?
-                                              parseFloat(Number(value)toFixed(6)) :
+                                              parseFloat(Number(value).toFixed(6)) :
                                               value,
                                         }
                                       )
@@ -1908,17 +1908,19 @@ export default () => {
                   (
                     Number(amount) < 0 ||
                     (
-                      parseUnits(
+                      utils.parseUnits(
                         (typeof amount === 'string' && amount.indexOf('.') > -1 ?
                           amount.substring(0, amount.indexOf('.') + ((origin === 'x' ? x_asset_data : y_asset_data)?.decimals || 18) + 1) :
                           amount
                         ) || '0',
                         (origin === 'x' ? x_asset_data : y_asset_data).decimals || 18,
-                      ) >
-                      parseUnits(
+                      )
+                      .toBigInt() >
+                      utils.parseUnits(
                         (origin === 'x' ? x_balance_amount : y_balance_amount) || '0',
                         (origin === 'x' ? x_asset_data : y_asset_data ).decimals || 18,
-                      ) &&
+                      )
+                      .toBigInt() &&
                       ['string', 'number'].includes(typeof (origin === 'x' ? x_balance_amount : y_balance_amount))
                     )
                   ) ?
@@ -2088,8 +2090,7 @@ export default () => {
                               </div>
                             </Alert>
                           )
-                        })
-                      ) :
+                        }) :
                   browser_provider ?
                     <button
                       disabled={true}

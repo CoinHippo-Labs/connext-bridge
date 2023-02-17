@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { FixedNumber, ZeroAddress, formatUnits, parseEther, parseUnits } from 'ethers'
+import { FixedNumber, constants, utils } from 'ethers'
 import { XTransferErrorStatus } from '@connext/nxtp-utils'
 import { TailSpin, Oval } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
@@ -147,7 +147,7 @@ export default (
 
   const source_asset_data = getAsset(null, assets_data, source_chain_data?.chain_id, origin_transacting_asset)
 
-  let source_contract_data = source_contract_data = getContract(source_chain_data?.chain_id, source_asset_data?.contracts)
+  let source_contract_data = getContract(source_chain_data?.chain_id, source_asset_data?.contracts)
   const _source_contract_data = _.cloneDeep(source_contract_data)
   // next asset
   if (source_contract_data?.next_asset && equalsIgnoreCase(source_contract_data.next_asset.contract_address, origin_transacting_asset)) {
@@ -159,7 +159,7 @@ export default (
     delete source_contract_data.next_asset
   }
   // native asset
-  if (!source_contract_data && equalsIgnoreCase(ZeroAddress, origin_transacting_asset)) {
+  if (!source_contract_data && equalsIgnoreCase(constants.AddressZero, origin_transacting_asset)) {
     const {
       nativeCurrency,
     } = { ..._.head(source_chain_data?.provider_params) }
@@ -184,7 +184,7 @@ export default (
   const source_amount =
     origin_transacting_amount &&
     Number(
-      formatUnits(
+      utils.formatUnits(
         BigInt(origin_transacting_amount).toString(),
         source_decimals,
       )
@@ -195,8 +195,8 @@ export default (
   const _contract_data = getContract(destination_chain_data?.chain_id, _asset_data?.contracts)
   const destination_asset_data = getAsset(null, assets_data, destination_chain_data?.chain_id, [destination_transacting_asset, _asset_data ? receive_local ? _contract_data?.next_asset?.contract_address : _contract_data?.contract_address : destination_local_asset])
 
-  const _destination_contract_data = _.cloneDeep(destination_contract_data)
   let destination_contract_data = getContract(destination_chain_data?.chain_id, destination_asset_data?.contracts)
+  const _destination_contract_data = _.cloneDeep(destination_contract_data)
   // next asset
   if (destination_contract_data?.next_asset && (equalsIgnoreCase(destination_contract_data.next_asset.contract_address, destination_transacting_asset) || receive_local)) {
     destination_contract_data = {
@@ -207,7 +207,7 @@ export default (
     delete destination_contract_data.next_asset
   }
   // native asset
-  if (!destination_contract_data && equalsIgnoreCase(ZeroAddress, destination_transacting_asset)) {
+  if (!destination_contract_data && equalsIgnoreCase(constants.AddressZero, destination_transacting_asset)) {
     const {
       nativeCurrency,
     } = { ..._.head(destination_chain_data?.provider_params) }
@@ -231,7 +231,7 @@ export default (
   const destination_amount =
     destination_transacting_amount ?
       Number(
-        formatUnits(
+        utils.formatUnits(
           BigInt(destination_transacting_amount).toString(),
           destination_decimals,
         )
@@ -246,7 +246,7 @@ export default (
       null
 
   relayer_fee =
-    formatUnits(
+    utils.formatUnits(
       relayer_fee || '0',
       source_gas_native_token?.decimals || 18,
     )
@@ -305,12 +305,7 @@ export default (
 
               const response = await sdk.sdkBase.estimateRelayerFee(params)
 
-              const gasFee =
-                response &&
-                formatUnits(
-                  response,
-                  decimals || 18,
-                )
+              const gasFee = response && utils.formatUnits(response, decimals || 18)
 
               console.log(
                 '[action required]',
@@ -358,7 +353,7 @@ export default (
       const originDomain = source_chain_data?.domain_id
       const destinationDomain = destination_chain_data?.domain_id
 
-      const originTokenAddress = (equalsIgnoreCase(source_contract_data?.contract_address, ZeroAddress) ? _source_contract_data : source_contract_data)?.contract_address
+      const originTokenAddress = (equalsIgnoreCase(source_contract_data?.contract_address, constants.AddressZero) ? _source_contract_data : source_contract_data)?.contract_address
       let destinationTokenAddress = _destination_contract_data?.contract_address
 
       const isNextAsset =
@@ -374,10 +369,11 @@ export default (
       }
 
       const amount =
-        parseUnits(
+        utils.parseUnits(
           (_amount || 0).toString(),
           source_decimals,
         )
+        .toBigInt()
 
       let manual, _estimatedValues
 
@@ -399,7 +395,7 @@ export default (
             },
           )
 
-          const response = await sdk.sdkPool.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount, isNextAsset)
+          const response = await sdk.sdkPool.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount.toString(), isNextAsset)
 
           console.log(
             '[action required]',
@@ -422,7 +418,7 @@ export default (
                   return (
                     [
                       k,
-                      formatUnits(
+                      utils.formatUnits(
                         v,
                         ['amountReceived'].includes(k) ?
                           (isNextAsset && _destination_contract_data?.next_asset ?
@@ -484,10 +480,7 @@ export default (
             routerFee,
             destinationSlippage: '0',
             originSlippage: '0',
-            isNextAsset:
-              typeof receive_local === 'boolean' ?
-                receive_local :
-                false,
+            isNextAsset: typeof receive_local === 'boolean' ? receive_local : false,
           }
 
         setEstimatedValues(_estimatedValues)
@@ -626,7 +619,7 @@ export default (
             params = {
               domainId: origin_domain,
               transferId: transfer_id,
-              relayerFee: parseEther(relayer_fee_to_bump || '0').toString(),
+              relayerFee: utils.parseEther(relayer_fee_to_bump || '0').toString(),
             }
 
             console.log(

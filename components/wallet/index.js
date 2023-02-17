@@ -5,7 +5,7 @@ import Web3Modal from 'web3modal'
 import WalletConnect from '@walletconnect/web3-provider'
 import Portis from '@portis/web3'
 import Coinbase from '@coinbase/wallet-sdk'
-import { BrowserProvider, toBeHex } from 'ethers'
+import { providers, utils } from 'ethers'
 
 import blocked_addresses from '../../config/blocked_addresses.json'
 import { getChain } from '../../lib/object/chain'
@@ -233,7 +233,7 @@ export default (
     useCallback(
       async () => {
         const provider = await web3Modal.connect()
-        const browser_provider = new BrowserProvider(provider)
+        const browser_provider = new providers.Web3Provider(provider)
         const network = await browser_provider.getNetwork()
         const signer = browser_provider.getSigner()
         const address = await signer.getAddress()
@@ -293,16 +293,12 @@ export default (
     )
 
   const switchChain = async () => {
-    if (
-      connectChainId &&
-      connectChainId !== chain_id &&
-      provider
-    ) {
+    if (connectChainId && connectChainId !== chain_id && provider) {
       try {
         await provider.request(
           {
             method: 'wallet_switchEthereumChain',
-            params: [{ chainId: toBeHex(connectChainId) }],
+            params: [{ chainId: utils.hexValue(connectChainId) }],
           },
         )
       } catch (error) {

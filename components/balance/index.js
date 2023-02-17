@@ -5,7 +5,7 @@ import { RotatingSquare } from 'react-loader-spinner'
 
 import DecimalsFormat from '../decimals-format'
 import { getAsset } from '../../lib/object/asset'
-import { getContract } from '../../lib/object/getContract'
+import { getContract } from '../../lib/object/contract'
 import { getBalance } from '../../lib/object/balance'
 import { loaderColor } from '../../lib/utils'
 import { GET_BALANCES_DATA } from '../../reducers/types'

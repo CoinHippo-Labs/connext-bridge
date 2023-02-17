@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import { create } from '@connext/sdk'
-import { Contract, FallbackProvider, JsonRpcProvider, ZeroAddress, formatEther, formatUnits } from 'ethers'
+import { Contract, providers, constants, utils } from 'ethers'
 import Linkify from 'react-linkify'
 import parse from 'html-react-parser'
 
@@ -103,6 +103,7 @@ export default () => {
     address,
   } = { ...wallet_data }
   const {
+    balances_data,
     get_balances_data,
   } = { ...balances }
 
@@ -163,7 +164,7 @@ export default () => {
         dispatch(
           {
             type: POOL_ASSETS_DATA,
-            value: getAsset(null, response, null, undefined, undefined, true, false, true, true),
+            value: getAsset(null, response, undefined, undefined, undefined, true, false, true, true),
           }
         )
       }
@@ -226,7 +227,7 @@ export default () => {
             }
           }
 
-          const pool_assets_data = getAsset(null, assets_data, null, undefined, undefined, true, false, true, true)
+          const pool_assets_data = getAsset(null, assets_data, undefined, undefined, undefined, true, false, true, true)
 
           if (pool_assets_data.findIndex(d => !updated_ids.includes(d?.id)) < 0) {
             dispatch(
@@ -259,7 +260,7 @@ export default () => {
         url,
         chain_id,
       ) =>
-        new JsonRpcProvider(
+        new providers.StaticJsonRpcProvider(
           url,
           chain_id ?
             Number(chain_id) :
@@ -285,8 +286,8 @@ export default () => {
 
               _rpcs[chain_id] =
                 rpc_urls.length > 1 ?
-                  new FallbackProvider(
-                    rpcs
+                  new providers.FallbackProvider(
+                    rpc_urls
                       .map((url, i) => {
                         return {
                           priority: i + 1,
@@ -296,10 +297,9 @@ export default () => {
                               chain_id,
                             ),
                           stallTimeout: 1000,
-                          weight: 1,
                         }
                       }),
-                    chain_id,
+                    rpc_urls.length / 3,
                   ) :
                   createRpcProvider(
                     _.head(rpc_urls),
@@ -543,13 +543,13 @@ export default () => {
                 .filter(a => a && !ens_data?.[a])
             )
 
-          const ens_data = await getEns(addresses)
+          const _ens_data = await getEns(addresses)
 
-          if (ens_data) {
+          if (_ens_data) {
             dispatch(
               {
                 type: ENS_DATA,
-                value: ens_data,
+                value: _ens_data,
               }
             )
           }
@@ -623,7 +623,7 @@ export default () => {
               } = { ...adopted }
 
               adopted.balance =
-                formatUnits(
+                utils.formatUnits(
                   BigInt(balance || '0'),
                   decimals || 18,
                 )
@@ -638,7 +638,7 @@ export default () => {
               } = { ...local }
 
               local.balance =
-                formatUnits(
+                utils.formatUnits(
                   BigInt(balance || '0'),
                   decimals || 18,
                 )
@@ -666,7 +666,7 @@ export default () => {
                     )
 
                 supply =
-                  formatUnits(
+                  utils.formatUnits(
                     BigInt(supply || '0'),
                     18,
                   )
@@ -907,7 +907,7 @@ export default () => {
                           } = { ...adopted }
 
                           adopted.balance =
-                            formatUnits(
+                            utils.formatUnits(
                               BigInt(balance || '0'),
                               decimals || 18,
                             )
@@ -922,7 +922,7 @@ export default () => {
                           } = { ...local }
 
                           local.balance =
-                            formatUnits(
+                            utils.formatUnits(
                               BigInt(balance || '0'),
                               decimals || 18,
                             )
@@ -941,12 +941,12 @@ export default () => {
                           asset_data,
                           ...info,
                           symbols,
-                          lpTokenBalance: formatEther(BigInt(lpTokenBalance || '0')),
+                          lpTokenBalance: utils.formatEther(BigInt(lpTokenBalance || '0')),
                           poolTokenBalances:
                             toArray(poolTokenBalances)
                               .map((b, i) =>
                                 Number(
-                                  formatUnits(
+                                  utils.formatUnits(
                                     BigInt(b || '0'),
                                     adopted?.index === i ?
                                       adopted.decimals :
@@ -1038,7 +1038,7 @@ export default () => {
               _.concat(
                 { ...contract_data },
                 wrapable &&
-                { ...contract_data, contract_address: ZeroAddress },
+                { ...contract_data, contract_address: constants.AddressZero },
                 next_asset &&
                 { ...contract_data, ...next_asset },
               )
@@ -1056,7 +1056,7 @@ export default () => {
             let balance
 
             switch (contract_address) {
-              case ZeroAddress:
+              case constants.AddressZero:
                 balance = await provider.getBalance(address)
                 break
               default:
@@ -1069,12 +1069,7 @@ export default () => {
               balances.push(
                 {
                   ...contract_data,
-                  amount:
-                    balance &&
-                    formatUnits(
-                      balance,
-                      decimals || 18,
-                    ),
+                  amount: balance && utils.formatUnits(balance, decimals || 18),
                 }
               )
             }
@@ -1093,7 +1088,7 @@ export default () => {
         }
       }
 
-      const getData = async () => {
+      const getData = async is_interval => {
         if (
           page_visible &&
           chains_data &&
@@ -1102,17 +1097,19 @@ export default () => {
           rpcs &&
           address
         ) {
+          const all_chains_data = getChain(null, chains_data, true, false, false, undefined, true)
+
           const data =
-            get_balances_data ?
+            get_balances_data && !is_interval && all_chains_data.findIndex(c => !balances_data?.[c.chain_id]) < 0 ?
               Array.isArray(get_balances_data) ?
                 get_balances_data :
                 [get_balances_data] :
-            getChain(null, chains_data, true, false, false, undefined, true)
-              .map(c => {
-                return {
-                  chain: c.id,
-                }
-              })
+              all_chains_data
+                .map(c => {
+                  return {
+                    chain: c.id,
+                  }
+                })
 
           data
             .forEach(c => {
@@ -1135,9 +1132,11 @@ export default () => {
         }
       }
 
+      getData()
+
       const interval =
         setInterval(
-          () => getData(),
+          () => getData(true),
           1 * 60 * 1000,
         )
 

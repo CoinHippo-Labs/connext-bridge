@@ -101,12 +101,12 @@ export default () => {
                 let chain, asset
 
                 if (chains_data && assets_data) {
-                  const chains_data =
-                    getChain(chain_id, chains_data, true, false, false, undefined, true)
+                  const _chains_data =
+                    getChain(chain_id, chains_data, true, true, false, undefined, true)
                       .filter(c =>
                         getAsset(null, assets_data, c?.chain_id, undefined, undefined, true, true, true)
                       )
-                  const chain_data = _.head(chains_data)
+                  const chain_data = _.head(_chains_data)
                   chain = chain_data?.id
 
                   const asset_data = getAsset(null, assets_data, chain_data?.chain_id, undefined, undefined, true, true, true)

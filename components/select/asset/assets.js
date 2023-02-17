@@ -1,6 +1,6 @@
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { ZeroAddress } from 'ethers'
+import { constants } from 'ethers'
 
 import DecimalsFormat from '../../decimals-format'
 import Image from '../../image'
@@ -177,7 +177,7 @@ export default (
                 wrapable && isBridge && (showNativeAssets || showOnlyWrapable) &&
                 {
                   ...contract_data,
-                  contract_address: ZeroAddress,
+                  contract_address: constants.AddressZero,
                   symbol,
                   image,
                 },
@@ -296,7 +296,7 @@ export default (
                         symbol,
                       } = { ...contract_data }
 
-                      contract_address = wrapable ? ZeroAddress : contract_address
+                      contract_address = wrapable ? constants.AddressZero : contract_address
                       symbol = wrapable ? a.symbol : symbol
 
                       onSelect(id, isBridge ? symbol : contract_address)

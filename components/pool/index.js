@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { formatEther, formatUnits } from 'ethers'
+import { utils } from 'ethers'
 import { TailSpin } from 'react-loader-spinner'
 import { Tooltip } from '@material-tailwind/react'
 import { TiArrowLeft } from 'react-icons/ti'
@@ -92,7 +92,7 @@ export default () => {
     () => {
       let updated = false
 
-      const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(sPath.indexOf('?') + 1))
+      const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
 
       let path = !asPath ? '/' : asPath.toLowerCase()
       path = path.includes('?') ? path.substring(0, path.indexOf('?')) : path
@@ -190,7 +190,7 @@ export default () => {
       } = { ...getChain(chain_id, chains_data) }
 
       if (asPath && id) {
-        const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(sPath.indexOf('?') + 1))
+        const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
 
         if (!params?.chain && !asPath.includes('on-') && getChain(id, chains_data, true)) {
           setPool(
@@ -336,7 +336,7 @@ export default () => {
                       } = { ...adopted }
 
                       adopted.balance =
-                        formatUnits(
+                        utils.formatUnits(
                           BigInt(balance || '0'),
                           decimals || 18,
                         )
@@ -351,7 +351,7 @@ export default () => {
                       } = { ...local }
 
                       local.balance =
-                        formatUnits(
+                        utils.formatUnits(
                           BigInt(balance || '0'),
                           decimals || 18,
                         )
@@ -370,12 +370,12 @@ export default () => {
                       asset_data,
                       ...info,
                       symbols,
-                      lpTokenBalance: formatEther(BigInt(lpTokenBalance || '0')),
+                      lpTokenBalance: utils.formatEther(BigInt(lpTokenBalance || '0')),
                       poolTokenBalances:
                         toArray(poolTokenBalances)
                           .map((b, i) =>
                             Number(
-                              formatUnits(
+                              utils.formatUnits(
                                 BigInt(b || '0'),
                                 adopted?.index === i ?
                                   adopted.decimals :
@@ -462,7 +462,8 @@ export default () => {
   const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
 
   const {
-    apr,
+    name,
+    apy,
     error,
   } = { ...pool_data }
 
@@ -517,14 +518,14 @@ export default () => {
                 >
                   <div>
                     <span className="text-slate-400 dark:text-slate-200 text-base font-medium">
-                      Reward APR
+                      Reward APY
                     </span>
                     <div className="flex flex-col items-end space-y-1">
                       <span className="text-lg sm:text-3xl font-semibold">
                         {pool_data && !error ?
-                          !isNaN(apr) ?
+                          !isNaN(apy) ?
                             <DecimalsFormat
-                              value={apr * 100}
+                              value={apy * 100}
                               suffix="%"
                               className="uppercase"
                             /> :

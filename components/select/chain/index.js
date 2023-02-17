@@ -58,7 +58,7 @@ export default (
     color,
   } = { ...chain_data }
 
-  const boxShadow = color && !no_shadow && `${color}${theme === 'light' ? '44' : '33'} 0px 4px 16px 8px`
+  const boxShadow = color && !noShadow && `${color}${theme === 'light' ? '44' : '33'} 0px 4px 16px 8px`
 
   return (
     <Modal

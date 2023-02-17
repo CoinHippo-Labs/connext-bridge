@@ -107,7 +107,7 @@ export default (
     lpTokenBalance,
   } = { ...user_pool_data }
 
-  const share = parseFloat((Number(lpTokenBalance) * 100 / (Number(supply) || 1)).toFixed(18))
+  const share = parseFloat((Number(lpTokenBalance || '0') * 100 / (Number(supply) || 1)).toFixed(18))
 
   const position_loading = address && selected && !no_pool && !error && (!userPoolsData || pool_loading)
 
