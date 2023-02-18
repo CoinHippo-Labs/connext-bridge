@@ -2163,7 +2163,7 @@ export default () => {
                                 )
 
                                 if (['string', 'number'].includes(typeof value)) {
-                                  if (value && ['0', '0.0'].includes(value)) {
+                                  if (value && !['0', '0.0'].includes(value)) {
                                     calculateAmountReceived(value)
                                     checkApprovedNeeded(value)
                                   }
