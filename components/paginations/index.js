@@ -37,7 +37,7 @@ export const Page = (
   <button
     disabled={disabled}
     onClick={onClick}
-    className={active ? activeClassNames : nactiveClassNames}
+    className={active ? activeClassNames : inactiveClassNames}
   >
     {children}
   </button>
