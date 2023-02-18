@@ -128,7 +128,7 @@ export default () => {
   // set pool to path
   useEffect(
     () => {
-      const params = {}
+      const params = (paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))) || {}
 
       if (pool) {
         const {
