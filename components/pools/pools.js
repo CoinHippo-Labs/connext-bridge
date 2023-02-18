@@ -1127,6 +1127,7 @@ export default (
                             {/*!isNaN(value) ?
                               <DecimalsFormat
                                 value={value * 100}
+                                maxDecimals={2}
                                 suffix="%"
                                 className="uppercase"
                               /> :
@@ -1156,6 +1157,7 @@ export default (
                                       {!isNaN(value) ?
                                         <DecimalsFormat
                                           value={value * 100}
+                                          maxDecimals={2}
                                           suffix="%"
                                           className="uppercase"
                                         /> :

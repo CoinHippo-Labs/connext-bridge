@@ -79,10 +79,6 @@ export default (
     if (_value?.endsWith(`${delimiter}0`)) {
       _value = _.head(_value.split(delimiter))
     }
-
-    if (_value && Number(_value) >= 1000) {
-      _value = numberFormat(_value, '0,0.00', true)
-    }
   }
   else {
     _value = undefined
@@ -90,6 +86,13 @@ export default (
 
   if (typeof value === 'string' && value.endsWith(`${delimiter}0`)) {
     value = _.head(value.split(delimiter))
+  }
+
+  if (_value && Number(_value) >= 1000) {
+    _value = numberFormat(_value, '0,0.00', true)
+  }
+  else if (value && Number(value) >= 1000) {
+    value = numberFormat(value, '0,0.00', true)
   }
 
   return (

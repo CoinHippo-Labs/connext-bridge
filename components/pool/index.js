@@ -84,7 +84,7 @@ export default () => {
   } = { ...router }
 
   const [pool, setPool] = useState({})
-  const [pools, setPools] = useState(null)
+  const [userPools, setUserPools] = useState(null)
   const [poolsTrigger, setPoolsTrigger] = useState(null)
 
   // get pool from path
@@ -314,7 +314,7 @@ export default () => {
             )
 
             if (Array.isArray(response)) {
-              setPools(
+              setUserPools(
                 response
                   .map(p => {
                     const {
@@ -390,7 +390,7 @@ export default () => {
               )
             }
             else {
-              setPools(toArray(pools))
+              setUserPools(toArray(userPools))
             }
           } catch (error) {
             console.log(
@@ -525,6 +525,7 @@ export default () => {
                           !isNaN(apy) ?
                             <DecimalsFormat
                               value={apy * 100}
+                              maxDecimals={2}
                               suffix="%"
                               noTooltip={true}
                               className="uppercase"
@@ -560,13 +561,13 @@ export default () => {
               <div className="order-2 lg:order-1 lg:col-span-2">
                 <Info
                   pool={pool}
-                  userPoolsData={pools}
+                  userPoolsData={userPools}
                   onSelect={p => setPool(p)}
                 />
               </div>
               <Liquidity
                 pool={pool}
-                userPoolsData={pools}
+                userPoolsData={userPools}
                 onFinish={
                   () => {
                     setPoolsTrigger(moment().valueOf())
