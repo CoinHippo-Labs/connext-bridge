@@ -139,7 +139,7 @@ export default () => {
             `bg-transparent hover:bg-blue-50 dark:hover:bg-slate-800 rounded ${
               disabled ?
                 'cursor-not-allowed' :
-                ''
+                'cursor-pointer'
             } flex items-center uppercase ${
               selected ?
                 'text-blue-600 dark:text-white text-sm font-extrabold' :
@@ -160,9 +160,10 @@ export default () => {
               <Link
                 key={id}
                 href={path}
-                className={className}
               >
-                {item}
+                <div className={className}>
+                  {item}
+                </div>
               </Link>
           )
         })

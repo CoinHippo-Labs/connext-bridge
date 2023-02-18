@@ -971,7 +971,7 @@ export default (
                         /> :
                         <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
                           <DecimalsFormat
-                            value={relayer_fee_to_bump}
+                            value={Number(relayer_fee_to_bump) <= 0 ? 0 : relayer_fee_to_bump}
                             className="text-sm"
                           />
                           <span>

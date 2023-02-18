@@ -388,24 +388,23 @@ export default (
                       return (
                         <div className="flex flex-col space-y-3">
                           {view === 'my_positions' ?
-                            <Link
-                              href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                              className="min-w-max h-6 flex items-center space-x-2"
-                            >
-                              {
-                                image &&
-                                (
-                                  <Image
-                                    src={image}
-                                    width={24}
-                                    height={24}
-                                    className="rounded-full"
-                                  />
-                                )
-                              }
-                              <span className="text-sm font-medium">
-                                {name}
-                              </span>
+                            <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                              <div className="min-w-max h-6 flex items-center space-x-2">
+                                {
+                                  image &&
+                                  (
+                                    <Image
+                                      src={image}
+                                      width={24}
+                                      height={24}
+                                      className="rounded-full"
+                                    />
+                                  )
+                                }
+                                <span className="text-sm font-medium">
+                                  {name}
+                                </span>
+                              </div>
                             </Link> :
                             <>
                               <div
@@ -498,22 +497,23 @@ export default (
                                       <Link
                                         key={i}
                                         href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                                        className="h-6 flex items-center space-x-2"
                                       >
-                                        {
-                                          image &&
-                                          (
-                                            <Image
-                                              src={image}
-                                              width={24}
-                                              height={24}
-                                              className="rounded-full"
-                                            />
-                                          )
-                                        }
-                                        <span className="hidden sm:block text-sm font-medium">
-                                          {name}
-                                        </span>
+                                        <div className="h-6 flex items-center space-x-2">
+                                          {
+                                            image &&
+                                            (
+                                              <Image
+                                                src={image}
+                                                width={24}
+                                                height={24}
+                                                className="rounded-full"
+                                              />
+                                            )
+                                          }
+                                          <span className="hidden sm:block text-sm font-medium">
+                                            {name}
+                                          </span>
+                                        </div>
                                       </Link>
                                     )
                                   })
@@ -729,126 +729,129 @@ export default (
                                 } = { ...asset_data }
 
                                 return (
-                                  <Link
+                                  <div
                                     key={i}
-                                    href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                                    className="w-full h-6 flex items-center justify-end text-sm font-medium text-right"
+                                    className="w-full h-6"
                                   >
-                                    {!lpTokenAddress && !error ?
-                                      <div className="flex items-center justify-end">
-                                        <TailSpin
-                                          width="18"
-                                          height="18"
-                                          color={loaderColor(theme)}
-                                        />
-                                      </div> :
-                                      total_amount > 0 ?
-                                        <div className="w-full h-6 flex flex-col items-end justify-center space-y-0 pt-2 pb-1">
-                                          <ProgressBar
-                                            width={native_amount * 100 / total_amount}
-                                            className="w-full rounded-lg"
-                                            backgroundClassName="rounded-lg"
-                                            style={
-                                              {
-                                                backgroundColor: color,
-                                              }
-                                            }
-                                            backgroundStyle={
-                                              {
-                                                backgroundColor: `${color}33`,
-                                              }
-                                            }
-                                          />
-                                          <div className="w-full flex items-center justify-between space-x-2">
-                                            <div className="flex flex-col items-start space-y-0.5">
-                                              <Tooltip
-                                                placement="top"
-                                                content={
-                                                  <div className="flex flex-col items-end space-y-1">
-                                                    <div className="flex items-center space-x-1">
-                                                      {
-                                                        asset_data?.image &&
-                                                        (
-                                                          <Image
-                                                            src={asset_data.image}
-                                                            width={14}
-                                                            height={14}
-                                                            className="rounded-full"
-                                                          />
-                                                        )
-                                                      }
-                                                      <span className="leading-3 text-2xs font-medium">
-                                                        {native_asset?.symbol || asset_data?.symbol}
-                                                      </span>
-                                                    </div>
-                                                    <DecimalsFormat
-                                                      value={native_amount}
-                                                      noTooltip={true}
-                                                      className="leading-3 text-2xs font-medium"
-                                                    />
-                                                  </div>
+                                    <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                                      <div className="flex items-center justify-end text-sm font-medium text-right">
+                                        {!lpTokenAddress && !error ?
+                                          <div className="flex items-center justify-end">
+                                            <TailSpin
+                                              width="18"
+                                              height="18"
+                                              color={loaderColor(theme)}
+                                            />
+                                          </div> :
+                                          total_amount > 0 ?
+                                            <div className="w-full h-6 flex flex-col items-end justify-center space-y-0 pt-2 pb-1">
+                                              <ProgressBar
+                                                width={native_amount * 100 / total_amount}
+                                                className="w-full rounded-lg"
+                                                backgroundClassName="rounded-lg"
+                                                style={
+                                                  {
+                                                    backgroundColor: color,
+                                                  }
                                                 }
-                                                className="z-50 bg-dark text-white text-xs"
-                                              >
-                                                <div>
-                                                  <DecimalsFormat
-                                                    value={native_amount * 100 / total_amount}
-                                                    suffix="%"
-                                                    noTooltip={true}
-                                                    className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
-                                                  />
-                                                </div>
-                                              </Tooltip>
-                                            </div>
-                                            <div className="flex flex-col items-end space-y-0.5">
-                                              <Tooltip
-                                                placement="top"
-                                                content={
-                                                  <div className="flex flex-col items-end space-y-1">
-                                                    <div className="flex items-center space-x-1">
-                                                      {
-                                                        (contract_data?.next_asset?.image || asset_data?.image) &&
-                                                        (
-                                                          <Image
-                                                            src={contract_data?.next_asset?.image || asset_data?.image}
-                                                            width={14}
-                                                            height={14}
-                                                            className="rounded-full"
-                                                          />
-                                                        )
-                                                      }
-                                                      <span className="leading-3 text-2xs font-medium">
-                                                        {wrapped_asset?.symbol || contract_data?.next_asset?.symbol}
-                                                      </span>
-                                                    </div>
-                                                    <DecimalsFormat
-                                                      value={wrapped_amount}
-                                                      noTooltip={true}
-                                                      className="leading-3 text-2xs font-medium"
-                                                    />
-                                                  </div>
+                                                backgroundStyle={
+                                                  {
+                                                    backgroundColor: `${color}33`,
+                                                  }
                                                 }
-                                                className="z-50 bg-dark text-white text-xs"
-                                              >
-                                                <div>
-                                                  <DecimalsFormat
-                                                    value={100 - (native_amount * 100 / total_amount)}
-                                                    suffix="%"
-                                                    noTooltip={true}
-                                                    className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
-                                                  />
+                                              />
+                                              <div className="w-full flex items-center justify-between space-x-2">
+                                                <div className="flex flex-col items-start space-y-0.5">
+                                                  <Tooltip
+                                                    placement="top"
+                                                    content={
+                                                      <div className="flex flex-col items-end space-y-1">
+                                                        <div className="flex items-center space-x-1">
+                                                          {
+                                                            asset_data?.image &&
+                                                            (
+                                                              <Image
+                                                                src={asset_data.image}
+                                                                width={14}
+                                                                height={14}
+                                                                className="rounded-full"
+                                                              />
+                                                            )
+                                                          }
+                                                          <span className="leading-3 text-2xs font-medium">
+                                                            {native_asset?.symbol || asset_data?.symbol}
+                                                          </span>
+                                                        </div>
+                                                        <DecimalsFormat
+                                                          value={native_amount}
+                                                          noTooltip={true}
+                                                          className="leading-3 text-2xs font-medium"
+                                                        />
+                                                      </div>
+                                                    }
+                                                    className="z-50 bg-dark text-white text-xs"
+                                                  >
+                                                    <div>
+                                                      <DecimalsFormat
+                                                        value={native_amount * 100 / total_amount}
+                                                        suffix="%"
+                                                        noTooltip={true}
+                                                        className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
+                                                      />
+                                                    </div>
+                                                  </Tooltip>
                                                 </div>
-                                              </Tooltip>
+                                                <div className="flex flex-col items-end space-y-0.5">
+                                                  <Tooltip
+                                                    placement="top"
+                                                    content={
+                                                      <div className="flex flex-col items-end space-y-1">
+                                                        <div className="flex items-center space-x-1">
+                                                          {
+                                                            (contract_data?.next_asset?.image || asset_data?.image) &&
+                                                            (
+                                                              <Image
+                                                                src={contract_data?.next_asset?.image || asset_data?.image}
+                                                                width={14}
+                                                                height={14}
+                                                                className="rounded-full"
+                                                              />
+                                                            )
+                                                          }
+                                                          <span className="leading-3 text-2xs font-medium">
+                                                            {wrapped_asset?.symbol || contract_data?.next_asset?.symbol}
+                                                          </span>
+                                                        </div>
+                                                        <DecimalsFormat
+                                                          value={wrapped_amount}
+                                                          noTooltip={true}
+                                                          className="leading-3 text-2xs font-medium"
+                                                        />
+                                                      </div>
+                                                    }
+                                                    className="z-50 bg-dark text-white text-xs"
+                                                  >
+                                                    <div>
+                                                      <DecimalsFormat
+                                                        value={100 - (native_amount * 100 / total_amount)}
+                                                        suffix="%"
+                                                        noTooltip={true}
+                                                        className="leading-3 text-slate-600 dark:text-slate-400 text-2xs font-medium"
+                                                      />
+                                                    </div>
+                                                  </Tooltip>
+                                                </div>
+                                              </div>
+                                            </div> :
+                                            <div className="h-6 flex items-center justify-end">
+                                              <span className="text-slate-400 dark:text-slate-500">
+                                                No liquidity
+                                              </span>
                                             </div>
-                                          </div>
-                                        </div> :
-                                        <div className="h-6 flex items-center justify-end">
-                                          <span className="text-slate-400 dark:text-slate-500">
-                                            No liquidity
-                                          </span>
-                                        </div>
-                                    }
-                                  </Link>
+                                        }
+                                      </div>
+                                    </Link>
+                                  </div>
                                 )
                               })
                           }
@@ -906,22 +909,23 @@ export default (
                                   <Link
                                     key={i}
                                     href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                                    className="h-6 flex items-center justify-end text-sm font-medium text-right"
                                   >
-                                    {!lpTokenAddress && !error ?
-                                      <div className="flex items-center justify-end">
-                                        <TailSpin
-                                          width="18"
-                                          height="18"
-                                          color={loaderColor(theme)}
+                                    <div className="h-6 flex items-center justify-end text-sm font-medium text-right">
+                                      {!lpTokenAddress && !error ?
+                                        <div className="flex items-center justify-end">
+                                          <TailSpin
+                                            width="18"
+                                            height="18"
+                                            color={loaderColor(theme)}
+                                          />
+                                        </div> :
+                                        <DecimalsFormat
+                                          value={value}
+                                          prefix={currency_symbol}
+                                          className="uppercase"
                                         />
-                                      </div> :
-                                      <DecimalsFormat
-                                        value={value}
-                                        prefix={currency_symbol}
-                                        className="uppercase"
-                                      />
-                                    }
+                                      }
+                                    </div>
                                   </Link>
                                 )
                               })
@@ -981,16 +985,17 @@ export default (
                                   <Link
                                     key={i}
                                     href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                                    className="h-6 flex items-center justify-end text-sm font-medium text-right"
                                   >
-                                    {!isNaN(value) ?
-                                      <DecimalsFormat
-                                        value={value}
-                                        prefix={currency_symbol}
-                                        className="uppercase"
-                                      /> :
-                                      'TBD'
-                                    }
+                                    <div className="h-6 flex items-center justify-end text-sm font-medium text-right">
+                                      {!isNaN(value) ?
+                                        <DecimalsFormat
+                                          value={value}
+                                          prefix={currency_symbol}
+                                          className="uppercase"
+                                        /> :
+                                        'TBD'
+                                      }
+                                    </div>
                                   </Link>
                                 )
                               })
@@ -1050,16 +1055,17 @@ export default (
                                   <Link
                                     key={i}
                                     href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                                    className="h-6 flex items-center justify-end text-sm font-medium text-right"
                                   >
-                                    {!isNaN(value) ?
-                                      <DecimalsFormat
-                                        value={value}
-                                        prefix={currency_symbol}
-                                        className="uppercase"
-                                      /> :
-                                      'TBD'
-                                    }
+                                    <div className="h-6 flex items-center justify-end text-sm font-medium text-right">
+                                      {!isNaN(value) ?
+                                        <DecimalsFormat
+                                          value={value}
+                                          prefix={currency_symbol}
+                                          className="uppercase"
+                                        /> :
+                                        'TBD'
+                                      }
+                                    </div>
                                   </Link>
                                 )
                               })
@@ -1145,16 +1151,17 @@ export default (
                                   <Link
                                     key={i}
                                     href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                                    className="h-6 flex items-center justify-end text-sm font-medium text-right"
                                   >
-                                    {!isNaN(value) ?
-                                      <DecimalsFormat
-                                        value={value * 100}
-                                        suffix="%"
-                                        className="uppercase"
-                                      /> :
-                                      'TBD'
-                                    }
+                                    <div className="h-6 flex items-center justify-end text-sm font-medium text-right">
+                                      {!isNaN(value) ?
+                                        <DecimalsFormat
+                                          value={value * 100}
+                                          suffix="%"
+                                          className="uppercase"
+                                        /> :
+                                        'TBD'
+                                      }
+                                    </div>
                                   </Link>
                                 )
                               })

@@ -473,17 +473,16 @@ export default () => {
     <div className="mb-4">
       <div className="flex justify-center">
         <div className="w-full flex flex-col space-y-3.5 my-4 sm:my-12 mx-1 sm:mx-4">
-          <Link
-            href="/pools"
-            className="w-fit rounded border dark:border-slate-800 flex items-center text-slate-600 dark:text-slate-500 font-semibold space-x-1 py-0.5 px-2.5"
-          >
-            <TiArrowLeft
-              size={18}
-              className="-ml-0.5"
-            />
-            <span className="text-base">
-              Back to pools
-            </span>
+          <Link href="/pools">
+            <div className="w-fit rounded border dark:border-slate-800 flex items-center text-slate-600 dark:text-slate-500 space-x-1 py-0.5 px-2.5">
+              <TiArrowLeft
+                size={18}
+                className="-ml-0.5"
+              />
+              <span className="text-base font-semibold">
+                Back to pools
+              </span>
+            </div>
           </Link>
           <div className="space-y-6 sm:space-y-16">
             <div className="space-y-2">

@@ -20,8 +20,8 @@ export default (
     preferences,
     chains,
     assets,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
         chains: state.chains,

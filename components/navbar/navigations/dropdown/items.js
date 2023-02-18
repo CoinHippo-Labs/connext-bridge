@@ -143,7 +143,7 @@ export default (
             `dropdown-item w-full bg-transparent hover:bg-blue-50 dark:hover:bg-slate-800 ${
               disabled ?
                 'cursor-not-allowed' :
-                ''
+                'cursor-pointer'
             } flex items-center uppercase ${
               selected ?
                 'text-blue-600 dark:text-white text-sm font-extrabold' :
@@ -165,10 +165,13 @@ export default (
               <Link
                 key={id}
                 href={path}
-                onClick={onClick}
-                className={className}
               >
-                {item}
+                <div
+                  onClick={onClick}
+                  className={className}
+                >
+                  {item}
+                </div>
               </Link>
           )
         })

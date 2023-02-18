@@ -2602,7 +2602,7 @@ export default () => {
                                   </Tooltip>
                                   <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-semibold space-x-1.5">
                                     <DecimalsFormat
-                                      value={Number(router_fee) <= 0 ? 0 : router_fee}
+                                      value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
                                       className="text-sm"
                                     />
                                     <span>
