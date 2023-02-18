@@ -1,13 +1,19 @@
+import { useRouter } from 'next/router'
+import { useState } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
+import moment from 'moment'
 import { TailSpin } from 'react-loader-spinner'
 
 import DecimalsFormat from '../decimals-format'
 import Image from '../image'
+import LineChart from '../charts/line'
 import { currency_symbol } from '../../lib/object/currency'
 import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
-import { toArray, equalsIgnoreCase, loaderColor } from '../../lib/utils'
+import { toArray, name, equalsIgnoreCase, loaderColor } from '../../lib/utils'
+
+const DAILY_METRICS = ['tvl', 'volume']
 
 export default (
   {
@@ -23,6 +29,7 @@ export default (
     assets,
     pool_assets,
     pools,
+    pools_daily_stats,
     wallet,
   } = useSelector(
     state => (
@@ -32,6 +39,7 @@ export default (
         assets: state.assets,
         pool_assets: state.pool_assets,
         pools: state.pools,
+        pools_daily_stats: state.pools_daily_stats,
         wallet: state.wallet,
       }
     ),
@@ -53,11 +61,24 @@ export default (
     pools_data,
   } = { ...pools }
   const {
+    pools_daily_stats_data,
+  } = { ...pools_daily_stats }
+  const {
     wallet_data,
   } = { ...wallet }
   const {
     address,
   } = { ...wallet_data }
+
+  const router = useRouter()
+  const {
+    query,
+  } = { ...router }
+  const {
+    mode,
+  } = { ...query }
+
+  const [dailyMetric, setDailyMetric] = useState(_.head(DAILY_METRICS))
 
   const {
     chain,
@@ -86,6 +107,8 @@ export default (
   const {
     asset_data,
     contract_data,
+    domainId,
+    canonicalHash,
     lpTokenAddress,
     adopted,
     local,
@@ -162,6 +185,38 @@ export default (
         .map(a => Number(a.balance))
       )
     ) * (price || 0)
+
+  const chartData =
+    !pool_loading && pools_daily_stats_data?.[`${dailyMetric}s`] &&
+    {
+      data:
+        toArray(pools_daily_stats_data[`${dailyMetric}s`])
+          .filter(d => equalsIgnoreCase(d.pool_id, canonicalHash) && d.domain === domainId)
+          .map(d => {
+            let time, value
+
+            switch (dailyMetric) {
+              case 'tvl':
+                time = d.day
+                value = _.sum(d.balances)
+                break
+              case 'volume':
+              default:
+                time = d.swap_day
+                value = d.volume
+                break
+            }
+
+            return {
+              ...d,
+              timestamp: moment(time).valueOf(),
+              value,
+            }
+          }),
+      chain_data,
+      asset_data: getAsset(asset, assets_data),
+      pool_data,
+    }
 
   const metricClassName = 'bg-slate-50 dark:bg-slate-900 bg-opacity-60 dark:bg-opacity-60 rounded border dark:border-slate-800 flex flex-col space-y-12 py-5 px-4'
   const titleClassName = 'text-slate-400 dark:text-slate-200 text-base font-medium'
@@ -392,6 +447,32 @@ export default (
                 }
               </div>
             </div>
+            {
+              (mode || process.env.NEXT_PUBLIC_NETWORK === 'testnet') &&
+              (
+                <div className={`${metricClassName} col-span-2 pt-6 pb-1`}>
+                  <LineChart
+                    id={dailyMetric}
+                    chartData={chartData}
+                    header={
+                      <div className="w-fit border-b dark:border-slate-800 flex items-center justify-between space-x-4">
+                        {DAILY_METRICS
+                          .map((m, i) => (
+                            <div
+                              key={i}
+                              onClick={() => setDailyMetric(m)}
+                              className={`w-fit border-b-2 ${dailyMetric === m ? 'border-slate-300 dark:border-slate-200 font-semibold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer text-base font-medium pt-0 pb-3 px-2`}
+                            >
+                              {name(m)}
+                            </div>
+                          ))
+                        }
+                      </div>
+                    }
+                  />
+                </div>
+              )
+            }
           </div>
         </div>
       </div>

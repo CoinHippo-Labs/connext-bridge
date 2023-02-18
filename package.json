@@ -53,6 +53,7 @@
     "react-reveal": "^1.2.2",
     "react-switch": "^7.0.0",
     "react-table": "^7.8.0",
+    "recharts": "2.1.11",
     "redux": "^4.2.1",
     "web3modal": "^1.9.12"
   },

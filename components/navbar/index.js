@@ -18,13 +18,14 @@ import Copy from '../copy'
 import { getChains, getAssets } from '../../lib/api/config'
 import { assetsPrice } from '../../lib/api/assets'
 import { ens as getEns } from '../../lib/api/ens'
+import { daily_swap_tvl, daily_swap_volume } from '../../lib/api/metrics'
 import { getChain } from '../../lib/object/chain'
 import { getAsset, getChainContracts } from '../../lib/object/asset'
 import { getContract } from '../../lib/object/contract'
 import { getPool } from '../../lib/object/pool'
 import { getBalance } from '../../lib/object/balance'
 import { split, toArray, ellipse, equalsIgnoreCase, sleep } from '../../lib/utils'
-import { STATUS_MESSAGE, CHAINS_DATA, ASSETS_DATA, POOL_ASSETS_DATA, ENS_DATA, ROUTER_ASSET_BALANCES_DATA, POOLS_DATA, USER_POOLS_DATA, SDK, RPCS, BALANCES_DATA } from '../../reducers/types'
+import { STATUS_MESSAGE, CHAINS_DATA, ASSETS_DATA, POOL_ASSETS_DATA, ENS_DATA, ROUTER_ASSET_BALANCES_DATA, POOLS_DATA, USER_POOLS_DATA, POOLS_DAILY_STATS_DATA, SDK, RPCS, BALANCES_DATA } from '../../reducers/types'
 
 const is_staging =
   process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' ||
@@ -1015,6 +1016,37 @@ export default () => {
       return () => clearInterval(interval)
     },
     [page_visible, sdk, chains_data, pool_assets_data, address],
+  )
+
+  // pools daily stats
+  useEffect(
+    () => {
+      const getData = async () => {
+        const tvls = toArray(await daily_swap_tvl())
+        const volumes = toArray(await daily_swap_volume())
+
+        dispatch(
+          {
+            type: POOLS_DAILY_STATS_DATA,
+            value: {
+              tvls,
+              volumes,
+            },
+          }
+        )
+      }
+
+      getData()
+
+      const interval =
+        setInterval(
+          () => getData(),
+          5 * 60 * 1000,
+        )
+
+      return () => clearInterval(interval)
+    },
+    [],
   )
 
   // balances

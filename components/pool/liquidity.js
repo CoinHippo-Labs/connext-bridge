@@ -1400,7 +1400,7 @@ export default (
                         Balance:
                       </div>
                       {
-                        x_asset_data?.contract_address &&
+                        x_asset_data?.contract_address && browser_provider &&
                         (
                           <button
                             disabled={disabled}
@@ -1544,7 +1544,7 @@ export default (
                         Balance:
                       </div>
                       {
-                        y_asset_data?.contract_address &&
+                        y_asset_data?.contract_address && browser_provider &&
                         (
                           <button
                             disabled={disabled}

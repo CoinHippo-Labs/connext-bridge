@@ -19,6 +19,7 @@ export const ROUTER_ASSET_BALANCES_DATA = 'router_asset_balances_data'
 // pools
 export const POOLS_DATA = 'pools_data'
 export const USER_POOLS_DATA = 'user_pools_data'
+export const POOLS_DAILY_STATS_DATA = 'pools_daily_stats_data'
 
 // rpc
 export const RPCS = 'rpcs'
