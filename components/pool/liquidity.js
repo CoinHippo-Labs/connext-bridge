@@ -1254,11 +1254,6 @@ export default (
                       _image :
                       image_paths.map((s, i) => i === image_paths.length - 1 ? s.substring(WRAPPED_PREFIX.length) : s).join('/') :
                 undefined,
-            mintable:
-              toArray(WRAPPED_PREFIX).findIndex(s => local.symbol?.startsWith(s)) > -1 ||
-              ['TEST'].findIndex(s => equalsIgnoreCase(s, local.symbol)) > -1,
-            wrapable:
-              ['WETH'].findIndex(s => equalsIgnoreCase(s, local.symbol)) > -1,
           }
       ),
     }
@@ -2311,8 +2306,8 @@ export default (
                       {name}
                     </span>
                   </Wallet> :
-                  callResponse || approveResponse || priceImpactAdd || priceImpactRemoveResponse ?
-                    toArray(callResponse || approveResponse || priceImpactAdd || priceImpactRemoveResponse)
+                  callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse ?
+                    toArray(callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse)
                       .map((r, i) => {
                         const {
                           status,
