@@ -1,4 +1,3 @@
-import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
@@ -69,14 +68,6 @@ export default (
   const {
     address,
   } = { ...wallet_data }
-
-  const router = useRouter()
-  const {
-    query,
-  } = { ...router }
-  const {
-    mode,
-  } = { ...query }
 
   const [dailyMetric, setDailyMetric] = useState(_.head(DAILY_METRICS))
 
@@ -447,32 +438,27 @@ export default (
                 }
               </div>
             </div>
-            {
-              (mode || process.env.NEXT_PUBLIC_NETWORK === 'testnet') &&
-              (
-                <div className={`${metricClassName} col-span-2 pt-6 pb-1`}>
-                  <LineChart
-                    id={dailyMetric}
-                    chartData={chartData}
-                    header={
-                      <div className="w-fit border-b dark:border-slate-800 flex items-center justify-between space-x-4">
-                        {DAILY_METRICS
-                          .map((m, i) => (
-                            <div
-                              key={i}
-                              onClick={() => setDailyMetric(m)}
-                              className={`w-fit border-b-2 ${dailyMetric === m ? 'border-slate-300 dark:border-slate-200 font-semibold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer text-base font-medium pt-0 pb-3 px-2`}
-                            >
-                              {name(m)}
-                            </div>
-                          ))
-                        }
-                      </div>
+            <div className={`${metricClassName} col-span-2 pt-6 pb-1`}>
+              <LineChart
+                id={dailyMetric}
+                chartData={chartData}
+                header={
+                  <div className="w-fit border-b dark:border-slate-800 flex items-center justify-between space-x-4">
+                    {DAILY_METRICS
+                      .map((m, i) => (
+                        <div
+                          key={i}
+                          onClick={() => setDailyMetric(m)}
+                          className={`w-fit border-b-2 ${dailyMetric === m ? 'border-slate-300 dark:border-slate-200 font-semibold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer text-base font-medium pt-0 pb-3 px-2`}
+                        >
+                          {name(m)}
+                        </div>
+                      ))
                     }
-                  />
-                </div>
-              )
-            }
+                  </div>
+                }
+              />
+            </div>
           </div>
         </div>
       </div>
