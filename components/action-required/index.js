@@ -19,7 +19,7 @@ import Wallet from '../wallet'
 import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
 import { getContract } from '../../lib/object/contract'
-import { toArray, includesStringList, ellipse, equalsIgnoreCase, loaderColor, errorPatterns, parseError } from '../../lib/utils'
+import { split, toArray, includesStringList, ellipse, equalsIgnoreCase, loaderColor, errorPatterns, parseError } from '../../lib/utils'
 
 const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT)
 const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT)
@@ -971,7 +971,7 @@ export default (
                         /> :
                         <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
                           <DecimalsFormat
-                            value={Number(relayer_fee_to_bump) <= 0 ? 0 : relayer_fee_to_bump}
+                            value={relayer_fee_to_bump}
                             className="text-sm"
                           />
                           <span>
