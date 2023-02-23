@@ -220,10 +220,12 @@
         "chainId": "0x64",
         "chainName": "Gnosis",
         "rpcUrls": [
-          "https://xdai-rpc.gateway.pokt.network",
-          "https://gnosischain-rpc.gateway.pokt.network",
           "https://gnosis.blockpi.network/v1/rpc/public",
-          "https://rpc.gnosis.gateway.fm"
+          "https://rpc.gnosis.gateway.fm",
+          "https://rpc.gnosischain.com",
+          "https://rpc.ankr.com/gnosis",
+          "https://xdai-rpc.gateway.pokt.network",
+          "https://gnosischain-rpc.gateway.pokt.network"
         ],
         "nativeCurrency": {
           "name": "xDAI",
