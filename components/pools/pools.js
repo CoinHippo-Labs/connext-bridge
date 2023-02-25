@@ -527,10 +527,7 @@ export default (
                   {
                     Header: 'Pool Ratio',
                     accessor: 'assets',
-                    sortType: (a, b) =>
-                      a.original.tvl > b.original.tvl ?
-                        1 :
-                        -1,
+                    sortType: (a, b) => a.original.tvl > b.original.tvl ? 1 : -1,
                     Cell: props => {
                       const {
                         row,
@@ -863,11 +860,7 @@ export default (
                   {
                     Header: 'Liquidity',
                     accessor: 'tvl',
-                    sortType: (a, b) =>
-                      _.sumBy(a.original.pools, 'tvl') >
-                      _.sumBy(b.original.pools, 'tvl') ?
-                        1 :
-                        -1,
+                    sortType: (a, b) => _.sumBy(a.original.pools, 'tvl') > _.sumBy(b.original.pools, 'tvl') ? 1 : -1,
                     Cell: props => {
                       const {
                         row,
@@ -938,11 +931,7 @@ export default (
                   {
                     Header: 'Volume (7d)',
                     accessor: 'volume_value',
-                    sortType: (a, b) =>
-                      _.sumBy(a.original.pools, 'volume_value') >
-                      _.sumBy(b.original.pools, 'volume_value') ?
-                        1 :
-                        -1,
+                    sortType: (a, b) => _.sumBy(a.original.pools, 'volume_value') > _.sumBy(b.original.pools, 'volume_value') ? 1 : -1,
                     Cell: props => {
                       const {
                         row,
@@ -1008,11 +997,7 @@ export default (
                   {
                     Header: 'Fees (7d)',
                     accessor: 'fees_value',
-                    sortType: (a, b) =>
-                      _.sumBy(a.original.pools, 'fees_value') >
-                      _.sumBy(b.original.pools, 'fees_value') ?
-                        1 :
-                        -1,
+                    sortType: (a, b) => _.sumBy(a.original.pools, 'fees_value') > _.sumBy(b.original.pools, 'fees_value') ? 1 : -1,
                     Cell: props => {
                       const {
                         row,
@@ -1076,24 +1061,19 @@ export default (
                     headerClassName: 'whitespace-nowrap justify-end text-right',
                   },
                   {
-                    Header:
-                      (
-                        <Tooltip
-                          placement="top"
-                          content="Yield from 0.04% user swap fees"
-                          className="z-50 bg-dark text-white text-xs"
-                        >
-                          <div>
-                            APY
-                          </div>
-                        </Tooltip>
-                      ),
+                    Header: (
+                      <Tooltip
+                        placement="top"
+                        content="Yield from 0.04% user swap fees"
+                        className="z-50 bg-dark text-white text-xs"
+                      >
+                        <div>
+                          APY
+                        </div>
+                      </Tooltip>
+                    ),
                     accessor: 'apy',
-                    sortType: (a, b) =>
-                      _.meanBy(a.original.pools, 'apy') >
-                      _.sumBy(b.original.pools, 'apy') ?
-                        1 :
-                        -1,
+                    sortType: (a, b) => _.meanBy(a.original.pools, 'apy') > _.sumBy(b.original.pools, 'apy') ? 1 : -1,
                     Cell: props => {
                       const {
                         row,
@@ -1176,11 +1156,7 @@ export default (
                   {
                     Header: 'Your Pool Tokens',
                     accessor: 'lpTokenBalance',
-                    sortType: (a, b) =>
-                      Number(a.original.lpTokenBalance) * a.original.price >
-                      Number(b.original.lpTokenBalance) * b.original.price ?
-                        1 :
-                        -1,
+                    sortType: (a, b) => Number(a.original.lpTokenBalance) * a.original.price > Number(b.original.lpTokenBalance) * b.original.price ? 1 : -1,
                     Cell: props => {
                       const {
                         row,
@@ -1236,10 +1212,7 @@ export default (
                   {
                     Header: 'Pooled Tokens',
                     accessor: 'balances',
-                    sortType: (a, b) =>
-                      a.original.tvl > b.original.tvl ?
-                        1 :
-                        -1,
+                    sortType: (a, b) => a.original.tvl > b.original.tvl ? 1 : -1,
                     Cell: props => {
                       const {
                         row,
@@ -1299,10 +1272,7 @@ export default (
                   {
                     Header: 'Pool Share',
                     accessor: 'share',
-                    sortType: (a, b) =>
-                      a.original.share > b.original.share ?
-                        1 :
-                        -1,
+                    sortType: (a, b) => a.original.share > b.original.share ? 1 : -1,
                     Cell: props => {
                       const {
                         row,

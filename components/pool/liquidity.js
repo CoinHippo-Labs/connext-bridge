@@ -1863,176 +1863,187 @@ export default (
                 </div>
               </div>
               <div className="flex items-end">
-                {chain && browser_provider && wrong_chain ?
-                  <Wallet
-                    connectChainId={chain_id}
-                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
+                {!valid_amount ?
+                  <button
+                    disabled={true}
+                    className="w-full bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500 rounded text-base text-center py-3 px-2 sm:px-3"
                   >
-                    <span className="mr-1.5 sm:mr-2">
-                      {is_walletconnect ? 'Reconnect' : 'Switch'} to
+                    <span className="flex items-center justify-center space-x-1.5">
+                      <span>
+                        Enter amount
+                      </span>
                     </span>
-                    {
-                      image &&
-                      (
-                        <Image
-                          src={image}
-                          width={28}
-                          height={28}
-                          className="rounded-full"
-                        />
-                      )
-                    }
-                    <span className="font-semibold">
-                      {name}
-                    </span>
-                  </Wallet> :
-                  callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse ?
-                    toArray(callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse)
-                      .map((r, i) => {
-                        const {
-                          status,
-                          message,
-                          tx_hash,
-                        } = { ...r }
+                  </button> :
+                  chain && browser_provider && wrong_chain ?
+                    <Wallet
+                      connectChainId={chain_id}
+                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
+                    >
+                      <span className="mr-1.5 sm:mr-2">
+                        {is_walletconnect ? 'Reconnect' : 'Switch'} to
+                      </span>
+                      {
+                        image &&
+                        (
+                          <Image
+                            src={image}
+                            width={28}
+                            height={28}
+                            className="rounded-full"
+                          />
+                        )
+                      }
+                      <span className="font-semibold">
+                        {name}
+                      </span>
+                    </Wallet> :
+                    callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse ?
+                      toArray(callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse)
+                        .map((r, i) => {
+                          const {
+                            status,
+                            message,
+                            tx_hash,
+                          } = { ...r }
 
-                        return (
-                          <Alert
-                            key={i}
-                            color={
-                              `${
+                          return (
+                            <Alert
+                              key={i}
+                              color={
+                                `${
+                                  status === 'failed' ?
+                                    'bg-red-400 dark:bg-red-500' :
+                                    status === 'success' ?
+                                      'bg-green-400 dark:bg-green-500' :
+                                      'bg-blue-400 dark:bg-blue-500'
+                                } text-white`
+                              }
+                              icon={
                                 status === 'failed' ?
-                                  'bg-red-400 dark:bg-red-500' :
-                                  status === 'success' ?
-                                    'bg-green-400 dark:bg-green-500' :
-                                    'bg-blue-400 dark:bg-blue-500'
-                              } text-white`
-                            }
-                            icon={
-                              status === 'failed' ?
-                                <BiMessageError
-                                  className="w-4 h-4 stroke-current mr-2.5"
-                                /> :
-                                status === 'success' ?
-                                  <BiMessageCheck
+                                  <BiMessageError
                                     className="w-4 h-4 stroke-current mr-2.5"
                                   /> :
-                                  status === 'pending' ?
-                                    <div className="mr-2.5">
-                                      <Watch
-                                        color="white"
-                                        width="16"
-                                        height="16"
-                                      />
-                                    </div> :
-                                    <BiMessageDetail
-                                      className="w-4 h-4 stroke-current mr-2.5"
-                                    />
-                            }
-                            closeDisabled={true}
-                            rounded={true}
-                            className="rounded p-3"
-                          >
-                            <div className="flex items-center justify-between space-x-2">
-                              <span className={`leading-5 ${status === 'failed' ? 'break-words text-xs' : 'break-words'} text-sm font-medium`}>
-                                {ellipse(
-                                  split(message, 'normal', ' ')
-                                    .join(' ')
-                                    .substring(0, status === 'failed' && errorPatterns.findIndex(c => message?.indexOf(c) > -1) > -1 ? message.indexOf(errorPatterns.find(c => message.indexOf(c) > -1)) : undefined) ||
-                                  message,
-                                  128,
-                                )}
-                              </span>
-                              <div className="flex items-center space-x-1">
-                                {
-                                  url && tx_hash &&
-                                  (
-                                    <a
-                                      href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <TiArrowRight
-                                        size={20}
-                                        className="transform -rotate-45"
-                                      />
-                                    </a>
-                                  )
-                                }
-                                {status === 'failed' ?
-                                  <>
-                                    <Copy
-                                      value={message}
-                                      className="cursor-pointer text-slate-200 hover:text-white"
-                                    />
-                                    <button
-                                      onClick={() => reset()}
-                                      className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                                    >
-                                      <MdClose
-                                        size={14}
-                                      />
-                                    </button>
-                                  </> :
                                   status === 'success' ?
-                                    <button
-                                      onClick={() => reset()}
-                                      className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
-                                    >
-                                      <MdClose
-                                        size={14}
+                                    <BiMessageCheck
+                                      className="w-4 h-4 stroke-current mr-2.5"
+                                    /> :
+                                    status === 'pending' ?
+                                      <div className="mr-2.5">
+                                        <Watch
+                                          color="white"
+                                          width="16"
+                                          height="16"
+                                        />
+                                      </div> :
+                                      <BiMessageDetail
+                                        className="w-4 h-4 stroke-current mr-2.5"
                                       />
-                                    </button> :
-                                    null
-                                }
-                              </div>
-                            </div>
-                          </Alert>
-                        )
-                      }) :
-                      browser_provider ?
-                        <button
-                          disabled={disabled || !valid_amount}
-                          onClick={() => call(pool_data)}
-                          className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base text-center py-3 px-2 sm:px-3`}
-                        >
-                          <span className="flex items-center justify-center space-x-1.5">
-                            {
-                              (calling || approving) &&
-                              (
-                                <TailSpin
-                                  width="20"
-                                  height="20"
-                                  color="white"
-                                />
-                              )
-                            }
-                            <span>
-                              {calling ?
-                                approving ?
-                                  approveProcessing ?
-                                    'Approving' :
-                                    'Please Approve' :
-                                  callProcessing ?
-                                    'Depositing' :
-                                    typeof approving === 'boolean' ?
-                                      'Please Confirm' :
-                                      'Checking Approval' :
-                                !valid_amount ?
-                                  'Enter amount' :
-                                  'Supply'
                               }
+                              closeDisabled={true}
+                              rounded={true}
+                              className="rounded p-3"
+                            >
+                              <div className="flex items-center justify-between space-x-2">
+                                <span className={`leading-5 ${status === 'failed' ? 'break-words text-xs' : 'break-words'} text-sm font-medium`}>
+                                  {ellipse(
+                                    split(message, 'normal', ' ')
+                                      .join(' ')
+                                      .substring(0, status === 'failed' && errorPatterns.findIndex(c => message?.indexOf(c) > -1) > -1 ? message.indexOf(errorPatterns.find(c => message.indexOf(c) > -1)) : undefined) ||
+                                    message,
+                                    128,
+                                  )}
+                                </span>
+                                <div className="flex items-center space-x-1">
+                                  {
+                                    url && tx_hash &&
+                                    (
+                                      <a
+                                        href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <TiArrowRight
+                                          size={20}
+                                          className="transform -rotate-45"
+                                        />
+                                      </a>
+                                    )
+                                  }
+                                  {status === 'failed' ?
+                                    <>
+                                      <Copy
+                                        value={message}
+                                        className="cursor-pointer text-slate-200 hover:text-white"
+                                      />
+                                      <button
+                                        onClick={() => reset()}
+                                        className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
+                                      >
+                                        <MdClose
+                                          size={14}
+                                        />
+                                      </button>
+                                    </> :
+                                    status === 'success' ?
+                                      <button
+                                        onClick={() => reset()}
+                                        className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                                      >
+                                        <MdClose
+                                          size={14}
+                                        />
+                                      </button> :
+                                      null
+                                  }
+                                </div>
+                              </div>
+                            </Alert>
+                          )
+                        }) :
+                        browser_provider ?
+                          <button
+                            disabled={disabled || !valid_amount}
+                            onClick={() => call(pool_data)}
+                            className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base text-center py-3 px-2 sm:px-3`}
+                          >
+                            <span className="flex items-center justify-center space-x-1.5">
+                              {
+                                (calling || approving) &&
+                                (
+                                  <TailSpin
+                                    width="20"
+                                    height="20"
+                                    color="white"
+                                  />
+                                )
+                              }
+                              <span>
+                                {calling ?
+                                  approving ?
+                                    approveProcessing ?
+                                      'Approving' :
+                                      'Please Approve' :
+                                    callProcessing ?
+                                      'Depositing' :
+                                      typeof approving === 'boolean' ?
+                                        'Please Confirm' :
+                                        'Checking Approval' :
+                                  !valid_amount ?
+                                    'Enter amount' :
+                                    'Supply'
+                                }
+                              </span>
                             </span>
-                          </span>
-                        </button> :
-                        <Wallet
-                          connectChainId={chain_id}
-                          buttonConnectTitle="Connect Wallet"
-                          className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base font-medium text-center py-3 px-2 sm:px-3"
-                        >
-                          <span>
-                            Connect Wallet
-                          </span>
-                        </Wallet>
+                          </button> :
+                          <Wallet
+                            connectChainId={chain_id}
+                            buttonConnectTitle="Connect Wallet"
+                            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base font-medium text-center py-3 px-2 sm:px-3"
+                          >
+                            <span>
+                              Connect Wallet
+                            </span>
+                          </Wallet>
                 }
               </div>
             </> :
@@ -2040,19 +2051,18 @@ export default (
               <div className="space-y-3 py-3 px-0">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between space-x-2">
-                    {
-                      lpTokenAddress && url ?
-                        <a
-                          href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-slate-400 dark:text-slate-500 text-xs font-medium"
-                        >
-                          Pool Tokens
-                        </a> :
-                        <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
-                          Pool Tokens
-                        </span>
+                    {lpTokenAddress && url ?
+                      <a
+                        href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-slate-400 dark:text-slate-500 text-xs font-medium"
+                      >
+                        Pool Tokens
+                      </a> :
+                      <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                        Pool Tokens
+                      </span>
                     }
                     <div className="flex items-center space-x-1">
                       <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
@@ -2119,16 +2129,7 @@ export default (
                     </div>
                     {
                       typeof amount === 'string' && ['string', 'number'].includes(typeof lpTokenBalance) &&
-                      utils.parseUnits(
-                        amount || '0',
-                        18,
-                      )
-                      .toBigInt() >
-                      utils.parseUnits(
-                        (lpTokenBalance || 0).toString(),
-                        18,
-                      )
-                      .toBigInt() &&
+                      utils.parseUnits(amount || '0', 18).toBigInt() > utils.parseUnits((lpTokenBalance || 0).toString(), 18).toBigInt() &&
                       (
                         <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
                           <BiMessageError
@@ -2283,176 +2284,187 @@ export default (
                 </div>
               </div>
               <div className="flex items-end">
-                {browser_provider && wrong_chain ?
-                  <Wallet
-                    connectChainId={chain_id}
-                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3  px-2 sm:px-3"
+                {!valid_amount ?
+                  <button
+                    disabled={true}
+                    className="w-full bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500 rounded text-base text-center py-3 px-2 sm:px-3"
                   >
-                    <span className="mr-1.5 sm:mr-2">
-                      {is_walletconnect ? 'Reconnect' : 'Switch'} to
+                    <span className="flex items-center justify-center space-x-1.5">
+                      <span>
+                        Enter amount
+                      </span>
                     </span>
-                    {
-                      image &&
-                      (
-                        <Image
-                          src={image}
-                          width={28}
-                          height={28}
-                          className="rounded-full"
-                        />
-                      )
-                    }
-                    <span className="font-semibold">
-                      {name}
-                    </span>
-                  </Wallet> :
-                  callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse ?
-                    toArray(callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse)
-                      .map((r, i) => {
-                        const {
-                          status,
-                          message,
-                          tx_hash,
-                        } = { ...r }
+                  </button> :
+                  browser_provider && wrong_chain ?
+                    <Wallet
+                      connectChainId={chain_id}
+                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3  px-2 sm:px-3"
+                    >
+                      <span className="mr-1.5 sm:mr-2">
+                        {is_walletconnect ? 'Reconnect' : 'Switch'} to
+                      </span>
+                      {
+                        image &&
+                        (
+                          <Image
+                            src={image}
+                            width={28}
+                            height={28}
+                            className="rounded-full"
+                          />
+                        )
+                      }
+                      <span className="font-semibold">
+                        {name}
+                      </span>
+                    </Wallet> :
+                    callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse ?
+                      toArray(callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse)
+                        .map((r, i) => {
+                          const {
+                            status,
+                            message,
+                            tx_hash,
+                          } = { ...r }
 
-                        return (
-                          <Alert
-                            key={i}
-                            color={
-                              `${
+                          return (
+                            <Alert
+                              key={i}
+                              color={
+                                `${
+                                  status === 'failed' ?
+                                    'bg-red-400 dark:bg-red-500' :
+                                    status === 'success' ?
+                                      'bg-green-400 dark:bg-green-500' :
+                                      'bg-blue-400 dark:bg-blue-500'
+                                } text-white`
+                              }
+                              icon={
                                 status === 'failed' ?
-                                  'bg-red-400 dark:bg-red-500' :
-                                  status === 'success' ?
-                                    'bg-green-400 dark:bg-green-500' :
-                                    'bg-blue-400 dark:bg-blue-500'
-                              } text-white`
-                            }
-                            icon={
-                              status === 'failed' ?
-                                <BiMessageError
-                                  className="w-4 h-4 stroke-current mr-2.5"
-                                /> :
-                                status === 'success' ?
-                                  <BiMessageCheck
+                                  <BiMessageError
                                     className="w-4 h-4 stroke-current mr-2.5"
                                   /> :
-                                  status === 'pending' ?
-                                    <div className="mr-2.5">
-                                      <Watch
-                                        color="white"
-                                        width="16"
-                                        height="16"
-                                      />
-                                    </div> :
-                                    <BiMessageDetail
-                                      className="w-4 h-4 stroke-current mr-2.5"
-                                    />
-                            }
-                            closeDisabled={true}
-                            rounded={true}
-                            className="rounded p-3"
-                          >
-                            <div className="flex items-center justify-between space-x-2">
-                              <span className={`leading-5 ${status === 'failed' ? 'break-words text-xs' : 'break-words'} text-sm font-medium`}>
-                                {ellipse(
-                                  split(message, 'normal', ' ')
-                                    .join(' ')
-                                    .substring(0, status === 'failed' && errorPatterns.findIndex(c => message?.indexOf(c) > -1) > -1 ? message.indexOf(errorPatterns.find(c => message.indexOf(c) > -1)) : undefined) ||
-                                  message,
-                                  128,
-                                )}
-                              </span>
-                              <div className="flex items-center space-x-1">
-                                {
-                                  url && r.tx_hash &&
-                                  (
-                                    <a
-                                      href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <TiArrowRight
-                                        size={20}
-                                        className="transform -rotate-45"
-                                      />
-                                    </a>
-                                  )
-                                }
-                                {status === 'failed' ?
-                                  <>
-                                    <Copy
-                                      value={message}
-                                      className="cursor-pointer text-slate-200 hover:text-white"
-                                    />
-                                    <button
-                                      onClick={() => reset()}
-                                      className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                                    >
-                                      <MdClose
-                                        size={14}
-                                      />
-                                    </button>
-                                  </> :
                                   status === 'success' ?
-                                    <button
-                                      onClick={() => reset()}
-                                      className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
-                                    >
-                                      <MdClose
-                                        size={14}
+                                    <BiMessageCheck
+                                      className="w-4 h-4 stroke-current mr-2.5"
+                                    /> :
+                                    status === 'pending' ?
+                                      <div className="mr-2.5">
+                                        <Watch
+                                          color="white"
+                                          width="16"
+                                          height="16"
+                                        />
+                                      </div> :
+                                      <BiMessageDetail
+                                        className="w-4 h-4 stroke-current mr-2.5"
                                       />
-                                    </button> :
-                                    null
-                                }
-                              </div>
-                            </div>
-                          </Alert>
-                        )
-                      }) :
-                      browser_provider ?
-                        <button
-                          disabled={disabled || !valid_amount}
-                          onClick={() => call(pool_data)}
-                          className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base text-center py-3 px-2 sm:px-3`}
-                        >
-                          <span className="flex items-center justify-center space-x-1.5">
-                            {
-                              (calling || approving) &&
-                              (
-                                <TailSpin
-                                  width="20"
-                                  height="20"
-                                  color="white"
-                                />
-                              )
-                            }
-                            <span>
-                              {calling ?
-                                approving ?
-                                  approveProcessing ?
-                                    'Approving' :
-                                    'Please Approve' :
-                                  callProcessing ?
-                                    'Withdrawing' :
-                                    typeof approving === 'boolean' ?
-                                      'Please Confirm' :
-                                      'Checking Approval' :
-                                !valid_amount ?
-                                  'Enter amount' :
-                                  'Withdraw'
                               }
+                              closeDisabled={true}
+                              rounded={true}
+                              className="rounded p-3"
+                            >
+                              <div className="flex items-center justify-between space-x-2">
+                                <span className={`leading-5 ${status === 'failed' ? 'break-words text-xs' : 'break-words'} text-sm font-medium`}>
+                                  {ellipse(
+                                    split(message, 'normal', ' ')
+                                      .join(' ')
+                                      .substring(0, status === 'failed' && errorPatterns.findIndex(c => message?.indexOf(c) > -1) > -1 ? message.indexOf(errorPatterns.find(c => message.indexOf(c) > -1)) : undefined) ||
+                                    message,
+                                    128,
+                                  )}
+                                </span>
+                                <div className="flex items-center space-x-1">
+                                  {
+                                    url && r.tx_hash &&
+                                    (
+                                      <a
+                                        href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <TiArrowRight
+                                          size={20}
+                                          className="transform -rotate-45"
+                                        />
+                                      </a>
+                                    )
+                                  }
+                                  {status === 'failed' ?
+                                    <>
+                                      <Copy
+                                        value={message}
+                                        className="cursor-pointer text-slate-200 hover:text-white"
+                                      />
+                                      <button
+                                        onClick={() => reset()}
+                                        className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
+                                      >
+                                        <MdClose
+                                          size={14}
+                                        />
+                                      </button>
+                                    </> :
+                                    status === 'success' ?
+                                      <button
+                                        onClick={() => reset()}
+                                        className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                                      >
+                                        <MdClose
+                                          size={14}
+                                        />
+                                      </button> :
+                                      null
+                                  }
+                                </div>
+                              </div>
+                            </Alert>
+                          )
+                        }) :
+                        browser_provider ?
+                          <button
+                            disabled={disabled || !valid_amount}
+                            onClick={() => call(pool_data)}
+                            className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base text-center py-3 px-2 sm:px-3`}
+                          >
+                            <span className="flex items-center justify-center space-x-1.5">
+                              {
+                                (calling || approving) &&
+                                (
+                                  <TailSpin
+                                    width="20"
+                                    height="20"
+                                    color="white"
+                                  />
+                                )
+                              }
+                              <span>
+                                {calling ?
+                                  approving ?
+                                    approveProcessing ?
+                                      'Approving' :
+                                      'Please Approve' :
+                                    callProcessing ?
+                                      'Withdrawing' :
+                                      typeof approving === 'boolean' ?
+                                        'Please Confirm' :
+                                        'Checking Approval' :
+                                  !valid_amount ?
+                                    'Enter amount' :
+                                    'Withdraw'
+                                }
+                              </span>
                             </span>
-                          </span>
-                        </button> :
-                        <Wallet
-                          connectChainId={chain_id}
-                          buttonConnectTitle="Connect Wallet"
-                          className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base font-medium text-center py-3 px-2 sm:px-3"
-                        >
-                          <span>
-                            Connect Wallet
-                          </span>
-                        </Wallet>
+                          </button> :
+                          <Wallet
+                            connectChainId={chain_id}
+                            buttonConnectTitle="Connect Wallet"
+                            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base font-medium text-center py-3 px-2 sm:px-3"
+                          >
+                            <span>
+                              Connect Wallet
+                            </span>
+                          </Wallet>
                 }
               </div>
             </>
