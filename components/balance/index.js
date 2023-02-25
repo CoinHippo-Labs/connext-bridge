@@ -118,7 +118,7 @@ export default (
 
   useEffect(
     () => {
-      if (typeof balance === 'number') {
+      if (['string', 'number'].includes(typeof balance)) {
         setBalance(null)
         setTrigger(moment().valueOf())
       }

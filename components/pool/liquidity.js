@@ -1846,7 +1846,7 @@ export default (
                           <div className="flex flex-col space-y-0">
                             <div className="w-fit bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 rounded flex items-center space-x-1 pt-0.5 pb-1 px-2">
                               <a
-                                href={`/${asset.toUpperCase()}-from-${_.head(chains_data)?.id}-to-${chain}?${(overweighted_asset === 'x' ? y_asset_data : x_asset_data)?.symbol?.includes(WRAPPED_PREFIX) ? 'receive_next=true&' : ''}source=pool`}
+                                href={`/${asset.toUpperCase()}-from-${_.head(chains_data)?.id}-to-${chain}?${asset_data?.symbol === _.head(_.head(chains_data)?.provider_params)?.nativeCurrency?.symbol ? `symbol=${asset_data?.symbol}&` : ''}${(overweighted_asset === 'x' ? y_asset_data : x_asset_data)?.symbol?.includes(WRAPPED_PREFIX) ? 'receive_next=true&' : ''}source=pool`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
