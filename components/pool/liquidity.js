@@ -803,19 +803,7 @@ export default (
 
                 return (
                   utils.parseUnits(
-                    FixedNumber
-                      .fromString(
-                        a.toString()
-                      )
-                      .mulUnsafe(
-                        FixedNumber
-                          .fromString(
-                            (1 - (slippage / 100)).toFixed(decimals)
-                          )
-                      )
-                      .round(0)
-                      .toString()
-                      .replace('.0', ''),
+                    (a * (1 - slippage / 100)).toFixed(decimals),
                     decimals,
                   )
                   .toString()
