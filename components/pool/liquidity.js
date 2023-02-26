@@ -770,7 +770,7 @@ export default (
 
               switch (response.code) {
                 case 'user_rejected':
-                  reset(code)
+                  reset(response.code)
                   break
                 default:
                   setCallResponse(
@@ -980,7 +980,7 @@ export default (
 
               switch (response.code) {
                 case 'user_rejected':
-                  reset(code)
+                  reset(response.code)
                   break
                 default:
                   setCallResponse(
