@@ -382,13 +382,18 @@ export default (
             contract_address,
           } = { ...contract_data }
 
-          const amounts =
-            equalsIgnoreCase(
-              contract_address,
-              local?.address,
-            ) ?
-              _.reverse(_.cloneDeep(removeAmounts)) :
-              _.cloneDeep(removeAmounts)
+          let amounts =
+            _.cloneDeep(removeAmounts)
+              .map((a, i) =>
+                utils.parseUnits(
+                  a.toString(),
+                  (i === 0 ? adopted : local)?.decimals || 18,
+                )
+              )
+
+          if (equalsIgnoreCase(contract_address, local?.address)) {
+            amounts = _.reverse(amounts)
+          }
 
           calculateRemoveLiquidityPriceImpact(domainId, contract_address, _.head(amounts), _.last(amounts))
         }
@@ -797,7 +802,19 @@ export default (
             removeAmounts
               .map((a, i) =>
                 utils.parseUnits(
-                  (a * (1 - (slippage / 100))).toString(),
+                  FixedNumber
+                    .fromString(
+                      a.toString()
+                    )
+                    .mulUnsafe(
+                      FixedNumber
+                        .fromString(
+                          (1 - (slippage / 100)).toString()
+                        )
+                    )
+                    .round(0)
+                    .toString()
+                    .replace('.0', ''),
                   (i === 0 ? adopted : local)?.decimals || 18,
                 )
                 .toString()
