@@ -384,12 +384,10 @@ export default (
 
           let amounts =
             _.cloneDeep(removeAmounts)
-              .map((a, i) =>
-                utils.parseUnits(
-                  a.toString(),
-                  (i === 0 ? adopted : local)?.decimals || 18,
-                )
-              )
+              .map((a, i) => {
+                const decimals = (i === 0 ? adopted : local)?.decimals || 18
+                return utils.parseUnits(a.toFixed(decimals), decimals)
+              })
 
           if (equalsIgnoreCase(contract_address, local?.address)) {
             amounts = _.reverse(amounts)
