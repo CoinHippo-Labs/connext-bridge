@@ -798,25 +798,29 @@ export default (
           let _amounts =
             removeAmounts?.length > 1 &&
             removeAmounts
-              .map((a, i) =>
-                utils.parseUnits(
-                  FixedNumber
-                    .fromString(
-                      a.toString()
-                    )
-                    .mulUnsafe(
-                      FixedNumber
-                        .fromString(
-                          (1 - (slippage / 100)).toString()
-                        )
-                    )
-                    .round(0)
-                    .toString()
-                    .replace('.0', ''),
-                  (i === 0 ? adopted : local)?.decimals || 18,
+              .map((a, i) => {
+                const decimals = (i === 0 ? adopted : local)?.decimals || 18
+
+                return (
+                  utils.parseUnits(
+                    FixedNumber
+                      .fromString(
+                        a.toString()
+                      )
+                      .mulUnsafe(
+                        FixedNumber
+                          .fromString(
+                            (1 - (slippage / 100)).toFixed(decimals)
+                          )
+                      )
+                      .round(0)
+                      .toString()
+                      .replace('.0', ''),
+                    decimals,
+                  )
+                  .toString()
                 )
-                .toString()
-              )
+              })
 
           if (adopted?.index === 1) {
             _amounts = _.reverse(_amounts)
