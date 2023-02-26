@@ -30,6 +30,8 @@
     "@walletconnect/web3-provider": "^1.8.0",
     "env-cmd": "^10.1.0",
     "ethers": "^5.7.2",
+    "flowbite": "^1.6.3",
+    "flowbite-react": "^0.3.8",
     "html-react-parser": "^3.0.9",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
