@@ -2321,7 +2321,7 @@ export default (
                         </div>
                         <RangeSlider
                           sizing="sm"
-                          disabled={disabled || !(valid_amount || amount)}
+                          disabled={disabled || !(valid_amount || amount) || true}
                           min={0}
                           max={100}
                           step={0.01}
@@ -2399,7 +2399,7 @@ export default (
                           }
                         </div>
                         {
-                          amount > 0 &&
+                          amount > 0 && false &&
                           (
                             <div className="grid grid-cols-3 gap-4">
                               <button
