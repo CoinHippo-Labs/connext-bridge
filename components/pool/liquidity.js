@@ -6,6 +6,7 @@ import { FixedNumber, utils } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
 import { TailSpin, Watch, RotatingSquare, Oval } from 'react-loader-spinner'
 import { Tooltip } from '@material-tailwind/react'
+import { RangeSlider } from 'flowbite-react'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
 import { BiPlus, BiMessageError, BiMessageCheck, BiMessageDetail, BiInfoCircle } from 'react-icons/bi'
@@ -298,7 +299,7 @@ export default (
                   _amounts = _.cloneDeep(amounts)
                 }
 
-                calculateRemoveLiquidityPriceImpact(domainId, contract_address, _.head(amounts), _.last(amounts))
+                // calculateRemoveLiquidityPriceImpact(domainId, contract_address, _.head(amounts), _.last(amounts))
               }
 
               setRemoveAmounts(
@@ -356,6 +357,46 @@ export default (
       getData()
     },
     [amount],
+  )
+
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (removeAmounts?.length > 1) {
+          const {
+            chain,
+            asset,
+          } = { ...pool }
+
+          const chain_data = getChain(chain, chains_data)
+
+          const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
+
+          const {
+            contract_data,
+            domainId,
+            local,
+          } = { ...pool_data }
+
+          const {
+            contract_address,
+          } = { ...contract_data }
+
+          const amounts =
+            equalsIgnoreCase(
+              contract_address,
+              local?.address,
+            ) ?
+              _.reverse(_.cloneDeep(removeAmounts)) :
+              _.cloneDeep(removeAmounts)
+
+          calculateRemoveLiquidityPriceImpact(domainId, contract_address, _.head(amounts), _.last(amounts))
+        }
+      }
+
+      getData()
+    },
+    [removeAmounts],
   )
 
   const reset = async origin => {
@@ -458,6 +499,7 @@ export default (
 
       const {
         infiniteApprove,
+        slippage,
       } = { ...options }
       let {
         deadline,
@@ -750,7 +792,22 @@ export default (
 
           const _amount = utils.parseUnits((amount || 0).toString(), 18).toString()
 
-          const minAmounts = ['0', '0']
+          let _amounts =
+            removeAmounts?.length > 1 &&
+            removeAmounts
+              .map((a, i) =>
+                utils.parseUnits(
+                  (a * (1 - (slippage / 100))).toString(),
+                  (i === 0 ? adopted : local)?.decimals || 18,
+                )
+                .toString()
+              )
+
+          if (adopted?.index === 1) {
+            _amounts = _.reverse(_amounts)
+          }
+
+          const minAmounts = _amounts || ['0', '0']
 
           if (!failed) {
             try {
@@ -987,14 +1044,7 @@ export default (
           },
         )
 
-        setPriceImpactAdd(
-          Number(
-            utils.formatUnits(
-              BigInt(price_impact || '0'),
-              18,
-            )
-          ) * 100
-        )
+        setPriceImpactAdd(Number(utils.formatUnits(BigInt(price_impact || '0'), 18)) * 100)
       }
       else {
         manual = true
@@ -1071,14 +1121,7 @@ export default (
           },
         )
 
-        setPriceImpactRemove(
-          Number(
-            utils.formatUnits(
-              BigInt(price_impact || '0'),
-              18,
-            )
-          ) * 100
-        )
+        setPriceImpactRemove(Number(utils.formatUnits(BigInt(price_impact || '0'), 18)) * 100)
       }
       else {
         manual = true
@@ -2048,7 +2091,7 @@ export default (
               </div>
             </> :
             <>
-              <div className="space-y-3 py-3 px-0">
+              <div className="space-y-4 py-3 px-0">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between space-x-2">
                     {lpTokenAddress && url ?
@@ -2210,78 +2253,219 @@ export default (
                     )
                   }
                 </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between space-x-2">
-                    {url && x_asset_data?.contract_address ?
-                      <a
-                        href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <span className="text-xs font-semibold">
-                          {x_asset_data.symbol}
-                        </span>
-                      </a> :
-                      <div className="text-xs font-semibold">
-                        {x_asset_data?.symbol}
+                {
+                  x_asset_data && y_asset_data &&
+                  (
+                    <div className="space-y-1">
+                      <div>
+                        <div className="flex items-center justify-between space-x-2">
+                          {url && x_asset_data?.contract_address ?
+                            <a
+                              href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center space-x-1"
+                            >
+                              {
+                                x_asset_data.image &&
+                                (
+                                  <Image
+                                    src={x_asset_data.image}
+                                    width={16}
+                                    height={16}
+                                    className="rounded-full"
+                                  />
+                                )
+                              }
+                              <span className="text-xs font-semibold">
+                                {x_asset_data.symbol}
+                              </span>
+                            </a> :
+                            <div className="text-xs font-semibold">
+                              {x_asset_data?.symbol}
+                            </div>
+                          }
+                          {url && y_asset_data?.contract_address ?
+                            <a
+                              href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center space-x-1"
+                            >
+                              {
+                                y_asset_data.image &&
+                                (
+                                  <Image
+                                    src={y_asset_data.image}
+                                    width={16}
+                                    height={16}
+                                    className="rounded-full"
+                                  />
+                                )
+                              }
+                              <span className="text-xs font-semibold">
+                                {y_asset_data.symbol}
+                              </span>
+                            </a> :
+                            <div className="text-xs font-semibold">
+                              {y_asset_data?.symbol}
+                            </div>
+                          }
+                        </div>
+                        <RangeSlider
+                          sizing="sm"
+                          disabled={disabled || !(valid_amount || amount)}
+                          min={0}
+                          max={100}
+                          step={0.01}
+                          value={(removeAmounts?.length > 0 ? _.head(removeAmounts) / (_.sum(removeAmounts) || 1) : 0.5) * 100}
+                          onChange={
+                            e => {
+                              const ratio = Number(e.target.value) / 100
+                              setRemoveAmounts([amount * ratio, amount * (1 - ratio)])
+                            }
+                          }
+                          color={color}
+                          className="w-full rounded-lg"
+                          style={
+                            {
+                              backgroundColor: `${color}33`,
+                            }
+                          }
+                        />
                       </div>
-                    }
-                    {browser_provider ?
-                      ['string', 'number'].includes(typeof x_remove_amount) && !isNaN(x_remove_amount) ?
-                        <DecimalsFormat
-                          value={x_remove_amount || 0}
-                          className="text-xs"
-                        /> :
-                        selected && !no_pool && !error &&
-                        (position_loading ?
-                          <TailSpin
-                            width="24"
-                            height="24"
-                            color={loaderColor(theme)}
-                          /> :
-                          '-'
-                        ) :
-                      <span className="text-xs">
-                        -
-                      </span>
-                    }
-                  </div>
-                  <div className="flex items-center justify-between space-x-2">
-                    {url && y_asset_data?.contract_address ?
-                      <a
-                        href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <span className="text-xs font-semibold">
-                          {y_asset_data.symbol}
-                        </span>
-                      </a> :
-                      <div className="text-xs font-semibold">
-                        {y_asset_data?.symbol}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between space-x-2">
+                          {browser_provider ?
+                            ['string', 'number'].includes(typeof x_remove_amount) && !isNaN(x_remove_amount) ?
+                              <div className="flex items-center space-x-1">
+                                <DecimalsFormat
+                                  value={x_remove_amount || 0}
+                                  className="text-slate-600 dark:text-slate-500 text-xs"
+                                />
+                                <DecimalsFormat
+                                  value={(Number(x_remove_amount) || 0) / (_.sum([x_remove_amount, y_remove_amount].map(n => Number(n) || 0))) * 100}
+                                  prefix="("
+                                  suffix="%)"
+                                  className="text-xs font-semibold"
+                                />
+                              </div> :
+                              selected && !no_pool && !error &&
+                              (position_loading && amount ?
+                                <TailSpin
+                                  width="24"
+                                  height="24"
+                                  color={loaderColor(theme)}
+                                /> :
+                                null
+                              ) :
+                            <span className="text-xs">
+                              -
+                            </span>
+                          }
+                          {browser_provider ?
+                            ['string', 'number'].includes(typeof y_remove_amount) && !isNaN(y_remove_amount) ?
+                              <div className="flex items-center space-x-1">
+                                <DecimalsFormat
+                                  value={y_remove_amount || 0}
+                                  className="text-slate-600 dark:text-slate-500 text-xs"
+                                />
+                                <DecimalsFormat
+                                  value={(Number(y_remove_amount) || 0) / (_.sum([x_remove_amount, y_remove_amount].map(n => Number(n) || 0))) * 100}
+                                  prefix="("
+                                  suffix="%)"
+                                  className="text-xs font-semibold"
+                                />
+                              </div> :
+                              selected && !no_pool && !error &&
+                              (position_loading && amount ?
+                                <TailSpin
+                                  width="24"
+                                  height="24"
+                                  color={loaderColor(theme)}
+                                /> :
+                                null
+                              ) :
+                            <span className="text-xs">
+                              -
+                            </span>
+                          }
+                        </div>
+                        {
+                          amount > 0 &&
+                          (
+                            <div className="grid grid-cols-3 gap-4">
+                              <button
+                                disabled={disabled || !(valid_amount || amount)}
+                                onClick={
+                                  () => {
+                                    const ratio = 1
+                                    setRemoveAmounts([amount * ratio, amount * (1 - ratio)])
+                                  }
+                                }
+                                className="w-fit hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded flex items-center space-x-1 py-0.5 px-1"
+                              >
+                                <span className="text-2xs font-medium">
+                                  Only
+                                </span>
+                                {
+                                  x_asset_data.image &&
+                                  (
+                                    <Image
+                                      src={x_asset_data.image}
+                                      width={14}
+                                      height={14}
+                                      className="rounded-full"
+                                    />
+                                  )
+                                }
+                              </button>
+                              <button
+                                disabled={disabled || !(valid_amount || amount)}
+                                onClick={
+                                  () => {
+                                    const ratio = 0.5
+                                    setRemoveAmounts([amount * ratio, amount * (1 - ratio)])
+                                  }
+                                }
+                                className="w-fit hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded flex items-center space-x-1 mx-auto py-0.5 px-1"
+                              >
+                                <span className="text-2xs font-medium">
+                                  Balance
+                                </span>
+                              </button>
+                              <button
+                                disabled={disabled || !(valid_amount || amount)}
+                                onClick={
+                                  () => {
+                                    const ratio = 0
+                                    setRemoveAmounts([amount * ratio, amount * (1 - ratio)])
+                                  }
+                                }
+                                className="w-fit hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded flex items-center space-x-1 ml-auto py-0.5 px-1"
+                              >
+                                <span className="text-2xs font-medium">
+                                  Only
+                                </span>
+                                {
+                                  y_asset_data.image &&
+                                  (
+                                    <Image
+                                      src={y_asset_data.image}
+                                      width={14}
+                                      height={14}
+                                      className="rounded-full"
+                                    />
+                                  )
+                                }
+                              </button>
+                            </div>
+                          )
+                        }
                       </div>
-                    }
-                    {browser_provider ?
-                      ['string', 'number'].includes(typeof y_remove_amount) && !isNaN(y_remove_amount) ?
-                        <DecimalsFormat
-                          value={y_remove_amount || 0}
-                          className="text-xs"
-                        /> :
-                        selected && !no_pool && !error &&
-                        (position_loading ?
-                          <TailSpin
-                            width="24"
-                            height="24"
-                            color={loaderColor(theme)}
-                          /> :
-                          '-'
-                        ) :
-                      <span className="text-xs">
-                        -
-                      </span>
-                    }
-                  </div>
-                </div>
+                    </div>
+                  )
+                }
               </div>
               <div className="flex items-end">
                 {!valid_amount ?
