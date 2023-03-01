@@ -322,7 +322,7 @@ export default (
       const contract = new Contract(contract_address, ABI, signer)
 
       const _amount =
-        parseUnits(
+        utils.parseUnits(
           (data?.amount || 0).toString(),
           'ether',
         )
