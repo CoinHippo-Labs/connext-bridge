@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
@@ -96,6 +97,14 @@ export default (
   const {
     balances_data,
   } = { ...balances }
+
+  const router = useRouter()
+  const {
+    query,
+  } = { ...router }
+  const {
+    mode,
+  } = { ...query }
 
   const wallet_chain_id = wallet_data?.chain_id
 
@@ -2321,7 +2330,7 @@ export default (
                         </div>
                         <RangeSlider
                           sizing="sm"
-                          disabled={disabled || !(valid_amount || amount) || true}
+                          disabled={disabled || !(valid_amount || amount) || !mode}
                           min={0}
                           max={100}
                           step={0.01}
@@ -2399,7 +2408,7 @@ export default (
                           }
                         </div>
                         {
-                          amount > 0 && false &&
+                          amount > 0 && !!mode &&
                           (
                             <div className="grid grid-cols-3 gap-4">
                               <button
