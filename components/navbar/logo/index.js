@@ -52,23 +52,25 @@ export default () => {
         </div>
       </a>
       <div className="flex items-center space-x-2 ml-0 sm:ml-11">
-        <Tooltip
-          placement="bottom"
-          content="return back to nxtp-v1"
-          className="z-50 bg-dark text-white text-xs"
-        >
-          <a
-            href="https://v1.bridge.connext.network"
-            className="bg-slate-200 dark:bg-slate-800 flex items-center text-blue-500 dark:text-blue-500 space-x-1 py-1 px-2"
+        {/*
+          <Tooltip
+            placement="bottom"
+            content="return back to nxtp-v1"
+            className="z-50 bg-dark text-white text-xs"
           >
-            <BsArrowLeft
-              size={12}
-            />
-            <span className="whitespace-nowrap text-xs font-semibold">
-              NXTPv1
-            </span>
-          </a>
-        </Tooltip>
+            <a
+              href="https://v1.bridge.connext.network"
+              className="bg-slate-200 dark:bg-slate-800 flex items-center text-blue-500 dark:text-blue-500 space-x-1 py-1 px-2"
+            >
+              <BsArrowLeft
+                size={12}
+              />
+              <span className="whitespace-nowrap text-xs font-semibold">
+                NXTPv1
+              </span>
+            </a>
+          </Tooltip>
+        */}
         <div className="hidden sm:block">
           {
             process.env.NEXT_PUBLIC_NETWORK === 'testnet' &&
