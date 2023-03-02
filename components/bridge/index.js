@@ -1291,10 +1291,10 @@ export default () => {
           if (is_wrap_eth) {
             xcallParams.asset = _source_contract_data?.contract_address
             xcallParams.wrapNativeOnOrigin = source_contract_data?.contract_address === constants.AddressZero
+          }
 
-            if (_.head(destination_chain_data?.provider_params)?.nativeCurrency?.symbol?.endsWith('ETH')) {
-              xcallParams.unwrapNativeOnDestination = xcallParams.receiveLocal || receive_wrap ? false : true
-            }
+          if (_.head(destination_chain_data?.provider_params)?.nativeCurrency?.symbol?.endsWith('ETH')) {
+            xcallParams.unwrapNativeOnDestination = xcallParams.receiveLocal || receive_wrap ? false : true
           }
 
           console.log(
