@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import _ from 'lodash'
 import moment from 'moment'
 import { constants, utils } from 'ethers'
-import { XTransferStatus } from '@connext/nxtp-utils'
+import { XTransferStatus, XTransferErrorStatus } from '@connext/nxtp-utils'
 import { Tooltip } from '@material-tailwind/react'
 import Fade from 'react-reveal/Fade'
 import { TiArrowRight } from 'react-icons/ti'
@@ -183,7 +183,7 @@ export default (
       source_amount * (1 - ROUTER_FEE_PERCENT / 100)
 
   const pending = ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(status)
-  const errored = error_status && !execute_transaction_hash && ![XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(status)
+  const errored = error_status && !execute_transaction_hash && [XTransferStatus.XCalled, XTransferStatus.Reconciled].includes(status)
 
   return (
     transferData &&
@@ -278,6 +278,7 @@ export default (
           <div className="flex flex-col items-center">
             {errored ?
               <ActionRequired
+                forceDisabled={[XTransferErrorStatus.ExecutionError].includes(error_status)}
                 transferData={transferData}
                 buttonTitle={
                   <Tooltip
@@ -410,6 +411,7 @@ export default (
                 <div /> :
                 errored ?
                   <ActionRequired
+                    forceDisabled={[XTransferErrorStatus.ExecutionError].includes(error_status)}
                     transferData={transferData}
                     buttonTitle={
                       <Tooltip
@@ -461,11 +463,7 @@ export default (
                           <div className="flex items-center">
                             <BsLightningChargeFill
                               size={16}
-                              className={
-                                routers?.length > 0 ?
-                                  'text-yellow-500 dark:text-yellow-400' :
-                                  'text-blue-300 dark:text-blue-200'
-                              }
+                              className={routers?.length > 0 ? 'text-yellow-500 dark:text-yellow-400' : 'text-blue-300 dark:text-blue-200'}
                             />
                             <BiInfoCircle
                               size={14}

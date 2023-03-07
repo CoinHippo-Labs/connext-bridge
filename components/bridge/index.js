@@ -1593,7 +1593,7 @@ export default () => {
   const latest_transfer = _.head(latestTransfers)
   const estimated_time_seconds = (latest_transfer?.routers && latest_transfer.routers.length < 1) || latest_transfer?.force_slow ? 5400 : 240
   const time_spent_seconds = moment().diff(moment(latest_transfer?.xcall_timestamp ? latest_transfer.xcall_timestamp * 1000 : undefined), 'seconds')
-  const errored = latest_transfer?.error_status && !latest_transfer.execute_transaction_hash && ![XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(latest_transfer.status)
+  const errored = latest_transfer?.error_status && !latest_transfer.execute_transaction_hash && [XTransferStatus.XCalled, XTransferStatus.Reconciled].includes(latest_transfer.status)
   const has_latest_transfers = typeof latestTransfersSize === 'number' && latestTransfersSize > 0
 
   const disabled = calling || approving
@@ -1633,7 +1633,7 @@ export default () => {
                 </div>
                 <div className="flex items-center justify-center">
                   <ActionRequired
-                    forceDisabled={latest_transfer.execute_transaction_hash || !errored}
+                    forceDisabled={latest_transfer.execute_transaction_hash || !errored || [XTransferErrorStatus.ExecutionError].includes(latest_transfer?.error_status)}
                     transferData={latest_transfer}
                     buttonTitle={
                       <Image
@@ -1732,6 +1732,7 @@ export default () => {
                       errored ?
                         <div className="flex flex-col items-center space-y-1">
                           <ActionRequired
+                            forceDisabled={[XTransferErrorStatus.ExecutionError].includes(latest_transfer.error_status)}
                             transferData={latest_transfer}
                             buttonTitle={
                               <span className="text-center">

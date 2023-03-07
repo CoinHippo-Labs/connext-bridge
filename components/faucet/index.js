@@ -20,18 +20,17 @@ import { GET_BALANCES_DATA } from '../../reducers/types'
 
 const GAS_LIMIT = 500000
 
-const ABI =
-  [
-    // Read-Only Functions
-    'function balanceOf(address owner) view returns (uint256)',
-    'function decimals() view returns (uint8)',
-    'function symbol() view returns (string)',
-    // Authenticated Functions
-    'function transfer(address to, uint amount) returns (boolean)',
-    'function mint(address account, uint256 amount)',
-    'function deposit() payable',
-    'function withdraw(uint256 amount)',
-  ]
+const ABI = [
+  // Read-Only Functions
+  'function balanceOf(address owner) view returns (uint256)',
+  'function decimals() view returns (uint8)',
+  'function symbol() view returns (string)',
+  // Authenticated Functions
+  'function transfer(address to, uint amount) returns (boolean)',
+  'function mint(address account, uint256 amount)',
+  'function deposit() payable',
+  'function withdraw(uint256 amount)',
+]
 
 const getInputFields = is_wrapped =>
   is_wrapped ?
@@ -206,10 +205,7 @@ export default (
 
       const contract = new Contract(contract_address, ABI, signer)
 
-      const _address =
-        is_wrapped ?
-          wrapped?.contract_address || contract_address :
-          data?.address || address
+      const _address = is_wrapped ? wrapped?.contract_address || contract_address : data?.address || address
 
       const _amount =
         utils.parseUnits(
@@ -247,10 +243,7 @@ export default (
       setMintResponse(
         {
           status: !status ? 'failed' : 'success',
-          message:
-            !status ?
-              `Failed to ${is_wrapped ? 'wrap' : 'faucet'}` :
-              `${is_wrapped ? 'Wrap' : 'Faucet'} Successful`,
+          message: !status ? `Failed to ${is_wrapped ? 'wrap' : 'faucet'}` : `${is_wrapped ? 'Wrap' : 'Faucet'} Successful`,
           ...response,
         }
       )
@@ -321,11 +314,7 @@ export default (
 
       const contract = new Contract(contract_address, ABI, signer)
 
-      const _amount =
-        utils.parseUnits(
-          (data?.amount || 0).toString(),
-          'ether',
-        )
+      const _amount = utils.parseUnits((data?.amount || 0).toString(), 'ether')
 
       console.log(
         '[unwrap]',
@@ -349,10 +338,7 @@ export default (
       setWithdrawResponse(
         {
           status: !status ? 'failed' : 'success',
-          message:
-            !status ?
-              'Failed to unwrap' :
-              'Unwrap Successful',
+          message: !status ? 'Failed to unwrap' : 'Unwrap Successful',
           ...response,
         }
       )
@@ -535,15 +521,7 @@ export default (
                           <SelectChain
                             disabled={disabled}
                             value={data?.[name]}
-                            onSelect={
-                              c =>
-                                setData(
-                                  {
-                                    ...data,
-                                    [name]: c,
-                                  }
-                                )
-                            }
+                            onSelect={c => setData({ ...data, [name]: c })}
                           />
                         </div> :
                         <input
@@ -553,12 +531,7 @@ export default (
                           value={data?.[name]}
                           onChange={
                             e =>
-                              setData(
-                                {
-                                  ...data,
-                                  [`${f.name}`]: e.target.value,
-                                }
-                              )
+                              setData({ ...data, [f.name]: e.target.value })
                           }
                           className="form-input rounded border-0 focus:ring-0"
                         />
@@ -568,8 +541,7 @@ export default (
                 })
               }
               {
-                signer &&
-                has_all_fields &&
+                signer && has_all_fields &&
                 (
                   <div className="flex justify-end space-x-2 mb-2">
                     <button
@@ -595,7 +567,7 @@ export default (
                       Cancel
                     </button>
                     {chain_data?.chain_id !== chain_id ?
-                      !className &&
+                      (!className || true) &&
                       (
                         <Wallet
                           connectChainId={chain_data?.chain_id}
@@ -627,13 +599,7 @@ export default (
                         <button
                           disabled={disabled || wrap_disabled}
                           onClick={() => mint()}
-                          className={
-                            `${
-                              disabled || wrap_disabled ?
-                                'bg-blue-400 dark:bg-blue-500 cursor-not-allowed' :
-                                'bg-blue-600 hover:bg-blue-700'
-                            } rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`
-                          }
+                          className={`${disabled || wrap_disabled ? 'bg-blue-400 dark:bg-blue-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
                         >
                           {
                             minting &&
@@ -673,13 +639,7 @@ export default (
                             <button
                               disabled={disabled || unwrap_disabled}
                               onClick={() => withdraw()}
-                              className={
-                                `${
-                                  disabled || unwrap_disabled ?
-                                    'bg-red-400 dark:bg-red-500 cursor-not-allowed' :
-                                    'bg-red-600 hover:bg-red-700'
-                                } rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`
-                              }
+                              className={`${disabled || unwrap_disabled ? 'bg-red-400 dark:bg-red-500 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'} rounded flex items-center text-white font-semibold space-x-1.5 py-2 px-3`}
                             >
                               {
                                 withdrawing &&
