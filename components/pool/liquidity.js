@@ -719,15 +719,9 @@ export default (
 
                 if (gasLimit) {
                   gasLimit =
-                    FixedNumber
-                      .fromString(
-                        gasLimit.toString()
-                      )
+                    FixedNumber.fromString(gasLimit.toString())
                       .mulUnsafe(
-                        FixedNumber
-                          .fromString(
-                            GAS_LIMIT_ADJUSTMENT.toString()
-                          )
+                        FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
                       )
                       .round(0)
                       .toString()
@@ -909,15 +903,9 @@ export default (
 
                 if (gasLimit) {
                   gasLimit =
-                    FixedNumber
-                      .fromString(
-                        gasLimit.toString()
-                      )
+                    FixedNumber.fromString(gasLimit.toString())
                       .mulUnsafe(
-                        FixedNumber
-                          .fromString(
-                            GAS_LIMIT_ADJUSTMENT.toString()
-                          )
+                        FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
                       )
                       .round(0)
                       .toString()
@@ -1821,19 +1809,7 @@ export default (
                           height="16"
                           color={loaderColor(theme)}
                         /> :
-                        <span
-                          className={
-                            `${
-                              typeof priceImpactAdd === 'number' ?
-                                priceImpactAdd < 0 ?
-                                  'text-red-500 dark:text-red-500' :
-                                  priceImpactAdd > 0 ?
-                                    'text-green-500 dark:text-green-500' :
-                                    '' :
-                                ''
-                            }`
-                          }
-                        >
+                        <span className={`${typeof priceImpactAdd === 'number' ? priceImpactAdd < 0 ? 'text-red-500 dark:text-red-500' : priceImpactAdd > 0 ? 'text-green-500 dark:text-green-500' : '' : ''}`}>
                           {typeof priceImpactAdd === 'number' || priceImpactAddResponse ?
                             <DecimalsFormat
                               value={priceImpactAdd}
@@ -2125,7 +2101,7 @@ export default (
                     }
                     <div className="flex items-center space-x-1">
                       <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
-                        Balance:
+                        LP Tokens:
                       </div>
                       {
                         browser_provider && user_pool_data &&
@@ -2223,15 +2199,9 @@ export default (
                                     _amount =
                                       p === 1 ?
                                         (lpTokenBalance || 0).toString() :
-                                        FixedNumber
-                                          .fromString(
-                                            (lpTokenBalance || 0).toString()
-                                          )
+                                        FixedNumber.fromString((lpTokenBalance || 0).toString())
                                           .mulUnsafe(
-                                            FixedNumber
-                                              .fromString(
-                                                p.toString()
-                                              )
+                                            FixedNumber.fromString(p.toString())
                                           )
                                           .toString()
                                   } catch (error) {
@@ -2245,15 +2215,9 @@ export default (
                                 `${
                                   disabled || !['string', 'number'].includes(typeof lpTokenBalance) ?
                                     'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' :
-                                    FixedNumber
-                                      .fromString(
-                                        (lpTokenBalance || 0).toString()
-                                      )
+                                    FixedNumber.fromString((lpTokenBalance || 0).toString())
                                       .mulUnsafe(
-                                        FixedNumber
-                                          .fromString(
-                                            p.toString()
-                                          )
+                                        FixedNumber.fromString(p.toString())
                                       )
                                       .toString() === amount ?
                                       'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' :
@@ -2333,12 +2297,13 @@ export default (
                           disabled={disabled || !(valid_amount || amount) || !mode}
                           min={0}
                           max={100}
-                          step={0.01}
+                          step={10}
                           value={(removeAmounts?.length > 0 ? _.head(removeAmounts) / (_.sum(removeAmounts) || 1) : 0.5) * 100}
                           onChange={
                             e => {
                               const ratio = Number(e.target.value) / 100
                               setRemoveAmounts([amount * ratio, amount * (1 - ratio)])
+                              setCallResponse(null)
                             }
                           }
                           color={color}
@@ -2410,13 +2375,14 @@ export default (
                         {
                           amount > 0 && !!mode &&
                           (
-                            <div className="grid grid-cols-3 gap-4">
+                            <div className="grid grid-cols-2 gap-4">
                               <button
                                 disabled={disabled || !(valid_amount || amount)}
                                 onClick={
                                   () => {
                                     const ratio = 1
                                     setRemoveAmounts([amount * ratio, amount * (1 - ratio)])
+                                    setCallResponse(null)
                                   }
                                 }
                                 className="w-fit hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded flex items-center space-x-1 py-0.5 px-1"
@@ -2440,22 +2406,9 @@ export default (
                                 disabled={disabled || !(valid_amount || amount)}
                                 onClick={
                                   () => {
-                                    const ratio = 0.5
-                                    setRemoveAmounts([amount * ratio, amount * (1 - ratio)])
-                                  }
-                                }
-                                className="w-fit hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded flex items-center space-x-1 mx-auto py-0.5 px-1"
-                              >
-                                <span className="text-2xs font-medium">
-                                  Balance
-                                </span>
-                              </button>
-                              <button
-                                disabled={disabled || !(valid_amount || amount)}
-                                onClick={
-                                  () => {
                                     const ratio = 0
                                     setRemoveAmounts([amount * ratio, amount * (1 - ratio)])
+                                    setCallResponse(null)
                                   }
                                 }
                                 className="w-fit hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded flex items-center space-x-1 ml-auto py-0.5 px-1"
@@ -2482,6 +2435,48 @@ export default (
                     </div>
                   )
                 }
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between space-x-1">
+                    <Tooltip
+                      placement="top"
+                      content="The adjusted amount you are withdrawing for LP tokens above or below current market prices."
+                      className="w-80 z-50 bg-dark text-white text-xs"
+                    >
+                      <div className="flex items-center">
+                        <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
+                          Slippage
+                        </div>
+                        <BiInfoCircle
+                          size={14}
+                          className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                        />
+                      </div>
+                    </Tooltip>
+                    <div className="flex items-center text-xs font-semibold space-x-1">
+                      {priceImpactRemove === true && !priceImpactRemoveResponse ?
+                        <Oval
+                          width="16"
+                          height="16"
+                          color={loaderColor(theme)}
+                        /> :
+                        <span className={`${typeof priceImpactRemove === 'number' ? priceImpactRemove < 0 ? 'text-red-500 dark:text-red-500' : priceImpactRemove > 0 ? 'text-green-500 dark:text-green-500' : '' : ''}`}>
+                          {typeof priceImpactRemove === 'number' || priceImpactRemoveResponse ?
+                            <DecimalsFormat
+                              value={priceImpactRemove}
+                              className="whitespace-nowrap"
+                            /> :
+                            <span>
+                              -
+                            </span>
+                          }
+                          <span>
+                            %
+                          </span>
+                        </span>
+                      }
+                    </div>
+                  </div>
+                </div>
               </div>
               <div className="flex items-end">
                 {!valid_amount ?

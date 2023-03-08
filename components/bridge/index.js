@@ -1311,15 +1311,9 @@ export default () => {
 
             if (gasLimit) {
               gasLimit =
-                FixedNumber
-                  .fromString(
-                    gasLimit.toString()
-                  )
+                FixedNumber.fromString(gasLimit.toString())
                   .mulUnsafe(
-                    FixedNumber
-                      .fromString(
-                        GAS_LIMIT_ADJUSTMENT.toString()
-                      )
+                    FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
                   )
                   .round(0)
                   .toString()
