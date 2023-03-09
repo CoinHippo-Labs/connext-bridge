@@ -525,7 +525,7 @@ export default () => {
       const interval =
         setInterval(
           () => getData(),
-          10 * 1000,
+          20 * 1000,
         )
 
       return () => clearInterval(interval)
