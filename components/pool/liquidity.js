@@ -2101,7 +2101,7 @@ export default (
                     }
                     <div className="flex items-center space-x-1">
                       <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
-                        LP Tokens:
+                        LP Token Balance:
                       </div>
                       {
                         browser_provider && user_pool_data &&
