@@ -8,7 +8,7 @@ import { FixedNumber, constants, utils } from 'ethers'
 import { TailSpin, Oval } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { Tooltip, Alert as AlertNotification } from '@material-tailwind/react'
-import { MdClose } from 'react-icons/md'
+import { MdClose, MdRefresh } from 'react-icons/md'
 import { HiArrowRight } from 'react-icons/hi'
 import { BiMessageError, BiMessageCheck, BiMessageDetail, BiEditAlt, BiCheckCircle, BiInfoCircle } from 'react-icons/bi'
 import { IoInformationCircleOutline, IoWarning } from 'react-icons/io5'
@@ -525,7 +525,7 @@ export default () => {
       const interval =
         setInterval(
           () => getData(),
-          20 * 1000,
+          10 * 1000,
         )
 
       return () => clearInterval(interval)
@@ -555,9 +555,21 @@ export default () => {
   // estimate fees trigger
   useEffect(
     () => {
-      if (estimateFeesTrigger && !(approving || approveResponse || calling || xcall || xcallResponse)) {
-        estimateFees()
+      const update = () => {
+        if (estimateFeesTrigger && !(approving || approveResponse || calling || xcall || xcallResponse)) {
+          estimateFees()
+        }
       }
+
+      update()
+
+      const interval =
+        setInterval(
+          () => update(),
+          20 * 1000,
+        )
+
+      return () => clearInterval(interval)
     },
     [estimateFeesTrigger],
   )
@@ -2573,8 +2585,8 @@ export default () => {
                                       </span>
                                     </span> :
                                     <Oval
-                                      width="16"
-                                      height="16"
+                                      width="14"
+                                      height="14"
                                       color={loaderColor(theme)}
                                     />
                                   }
@@ -2596,18 +2608,35 @@ export default () => {
                                     </div>
                                   </Tooltip>
                                   {fees ?
-                                    <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-semibold space-x-1.5">
-                                      <DecimalsFormat
-                                        value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
-                                        className="text-sm"
-                                      />
-                                      <span>
-                                        {source_gas_native_token?.symbol}
+                                    <div className="flex items-center space-x-1.5">
+                                      <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-semibold space-x-1.5">
+                                        <DecimalsFormat
+                                          value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
+                                          className="text-sm"
+                                        />
+                                        <span>
+                                          {source_gas_native_token?.symbol}
+                                        </span>
                                       </span>
-                                    </span> :
+                                      <button
+                                        disabled={disabled}
+                                        onClick={
+                                          () => {
+                                            if (!disabled) {
+                                              setEstimateFeesTrigger(moment().valueOf())
+                                            }
+                                          }
+                                        }
+                                        className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                                      >
+                                        <MdRefresh
+                                          size={16}
+                                        />
+                                      </button>
+                                    </div> :
                                     <Oval
-                                      width="16"
-                                      height="16"
+                                      width="14"
+                                      height="14"
                                       color={loaderColor(theme)}
                                     />
                                   }
