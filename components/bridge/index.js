@@ -960,7 +960,7 @@ export default () => {
             },
           )
 
-          const response = await sdk.sdkPool.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount.toString(), isNextAsset)
+          const response = await sdk.sdkBase.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount.toString(), isNextAsset)
 
           console.log(
             '[amountReceived]',
@@ -1293,7 +1293,7 @@ export default () => {
             xcallParams.wrapNativeOnOrigin = source_contract_data?.contract_address === constants.AddressZero
           }
 
-          if (_.head(destination_chain_data?.provider_params)?.nativeCurrency?.symbol?.endsWith('ETH')) {
+          if (['ETH'].includes(source_asset_data?.symbol) && _.head(destination_chain_data?.provider_params)?.nativeCurrency?.symbol?.endsWith('ETH')) {
             xcallParams.unwrapNativeOnDestination = xcallParams.receiveLocal || receive_wrap ? false : true
           }
 

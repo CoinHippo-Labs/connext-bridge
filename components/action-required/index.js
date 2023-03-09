@@ -395,7 +395,7 @@ export default (
             },
           )
 
-          const response = await sdk.sdkPool.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount.toString(), isNextAsset)
+          const response = await sdk.sdkBase.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount.toString(), isNextAsset)
 
           console.log(
             '[action required]',
