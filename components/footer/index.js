@@ -31,7 +31,17 @@ export default () => {
         process.env.NEXT_PUBLIC_FEEDBACK_URL &&
         (
           <div className={`${theme} footer flex flex-col md:flex-row items-center space-y-2.5 sm:space-y-0 py-1 px-3`}>
-            <div className="w-full md:w-2/2 lg:w-3/3 min-w-max flex items-center justify-center md:justify-end text-slate-400 dark:text-white space-x-1">
+            <div className="w-full md:w-2/2 lg:w-3/3 min-w-max flex items-center justify-center md:justify-end text-slate-400 dark:text-white space-x-3">
+              <a
+                href="https://www.connext.network/terms-of-service-connext-network"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center text-blue-600 dark:text-blue-500 space-x-1"
+              >
+                <span className="text-xs font-semibold">
+                  Terms of service
+                </span>
+              </a>
               <a
                 href={process.env.NEXT_PUBLIC_FEEDBACK_URL}
                 target="_blank"
