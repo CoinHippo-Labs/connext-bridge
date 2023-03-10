@@ -111,6 +111,7 @@ export default (
   const [action, setAction] = useState(_.head(ACTIONS))
   const [amountX, setAmountX] = useState(null)
   const [amountY, setAmountY] = useState(null)
+  const [withdrawPercent, setWithdrawPercent] = useState(null)
   const [amount, setAmount] = useState(null)
   const [removeAmounts, setRemoveAmounts] = useState(null)
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
@@ -395,7 +396,7 @@ export default (
             _.cloneDeep(removeAmounts)
               .map((a, i) => {
                 const decimals = (i === 0 ? adopted : local)?.decimals || 18
-                return utils.parseUnits(a.toFixed(decimals), decimals)
+                return utils.parseUnits(Number(a).toFixed(decimals), decimals)
               })
 
           if (equalsIgnoreCase(contract_address, local?.address)) {
@@ -417,6 +418,7 @@ export default (
     if (reset_pool) {
       setAmountX(null)
       setAmountY(null)
+      setWithdrawPercent(null)
       setAmount(null)
     }
 
@@ -530,19 +532,18 @@ export default (
             break
           }
 
-          let amounts =
-            [
-              utils.parseUnits(
-                (amountX || 0).toString(),
-                x_asset_data?.decimals || 18,
-              )
-              .toString(),
-              utils.parseUnits(
-                (amountY || 0).toString(),
-                y_asset_data?.decimals || 18,
-              )
-              .toString(),
-            ]
+          let amounts = [
+            utils.parseUnits(
+              (amountX || 0).toString(),
+              x_asset_data?.decimals || 18,
+            )
+            .toString(),
+            utils.parseUnits(
+              (amountY || 0).toString(),
+              y_asset_data?.decimals || 18,
+            )
+            .toString(),
+          ]
 
           const minToMint = '0'
 
@@ -806,7 +807,7 @@ export default (
 
                 return (
                   utils.parseUnits(
-                    (a * (1 - slippage / 100)).toFixed(decimals),
+                    (Number(a) * (1 - slippage / 100)).toFixed(decimals),
                     decimals,
                   )
                   .toString()
@@ -1004,6 +1005,7 @@ export default (
             setAmountY(null)
             break
           case 'withdraw':
+            setWithdrawPercent(null)
             setAmount(null)
             break
           default:
@@ -2083,22 +2085,12 @@ export default (
               </div>
             </> :
             <>
-              <div className="space-y-4 py-3 px-0">
+              <div className="space-y-6 py-3 px-0">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between space-x-2">
-                    {lpTokenAddress && url ?
-                      <a
-                        href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-slate-400 dark:text-slate-500 text-xs font-medium"
-                      >
-                        Pool Tokens
-                      </a> :
-                      <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
-                        Pool Tokens
-                      </span>
-                    }
+                    <span className="text-xs font-medium">
+                      Withdraw percentage
+                    </span>
                     <div className="flex items-center space-x-1">
                       <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
                         LP Token Balance:
@@ -2128,14 +2120,14 @@ export default (
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <div className="rounded border dark:border-slate-800 flex items-center justify-between space-x-2 py-2.5 px-3">
+                    <div className="rounded border dark:border-slate-800 flex items-center justify-between space-x-1 py-2.5 px-3">
                       <DebounceInput
                         debounceTimeout={750}
                         size="small"
                         type="number"
                         placeholder="0.00"
                         disabled={disabled}
-                        value={['string', 'number'].includes(typeof amount) && !isNaN(amount) ? amount : ''}
+                        value={['string', 'number'].includes(typeof withdrawPercent) && !isNaN(withdrawPercent) ? withdrawPercent : ''}
                         onChange={
                           e => {
                             const regex = /^[0-9.\b]+$/
@@ -2151,16 +2143,50 @@ export default (
                                 value = `0${value}`
                               }
 
-                              value = numberToFixed(value, 18)
+                              if (value) {
+                                if (Number(value) < 0) {
+                                  value = '0'
+                                }
+                                else if (Number(value) > 100) {
+                                  value = '100'
+                                }
+                              }
+
+                              value = numberToFixed(value, 2)
                             }
 
-                            setAmount(value)
+                            setWithdrawPercent(value)
+
+                            let _amount
+
+                            try {
+                              if (value) {
+                                _amount =
+                                  Number(value) === 100 ?
+                                    (lpTokenBalance || 0).toString() :
+                                    FixedNumber.fromString((lpTokenBalance || 0).toString())
+                                      .mulUnsafe(
+                                        FixedNumber.fromString(value.toString())
+                                      )
+                                      .divUnsafe(
+                                        FixedNumber.fromString('100')
+                                      )
+                                      .toString()
+                              }
+                            } catch (error) {
+                              _amount = '0'
+                            }
+
+                            setAmount(_amount)
                           }
                         }
                         onWheel={e => e.target.blur()}
                         onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                         className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
                       />
+                      <span className="text-slate-400 dark:text-slate-500">
+                        %
+                      </span>
                     </div>
                     {
                       typeof amount === 'string' && ['string', 'number'].includes(typeof lpTokenBalance) &&
@@ -2193,6 +2219,8 @@ export default (
                               key={i}
                               onClick={
                                 () => {
+                                  setWithdrawPercent(p * 100)
+
                                   let _amount
 
                                   try {
@@ -2325,7 +2353,7 @@ export default (
                                   className="text-slate-600 dark:text-slate-500 text-xs"
                                 />
                                 <DecimalsFormat
-                                  value={(Number(x_remove_amount) || 0) / (_.sum([x_remove_amount, y_remove_amount].map(n => Number(n) || 0))) * 100}
+                                  value={(Number(x_remove_amount) || 0) / (_.sum([x_remove_amount, y_remove_amount].map(n => Number(n) || 0)) || 1) * 100}
                                   prefix="("
                                   suffix="%)"
                                   className="text-xs font-semibold"
@@ -2352,7 +2380,7 @@ export default (
                                   className="text-slate-600 dark:text-slate-500 text-xs"
                                 />
                                 <DecimalsFormat
-                                  value={(Number(y_remove_amount) || 0) / (_.sum([x_remove_amount, y_remove_amount].map(n => Number(n) || 0))) * 100}
+                                  value={(Number(y_remove_amount) || 0) / (_.sum([x_remove_amount, y_remove_amount].map(n => Number(n) || 0)) || 1) * 100}
                                   prefix="("
                                   suffix="%)"
                                   className="text-xs font-semibold"
@@ -2525,15 +2553,7 @@ export default (
                           return (
                             <Alert
                               key={i}
-                              color={
-                                `${
-                                  status === 'failed' ?
-                                    'bg-red-400 dark:bg-red-500' :
-                                    status === 'success' ?
-                                      'bg-green-400 dark:bg-green-500' :
-                                      'bg-blue-400 dark:bg-blue-500'
-                                } text-white`
-                              }
+                              color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
                               icon={
                                 status === 'failed' ?
                                   <BiMessageError
