@@ -989,15 +989,12 @@ export default () => {
 
           const destination_contract_data = getContract(destination_chain_data?.chain_id, destination_asset_data?.contracts)
 
-          delete response.isFastPath
-
           setEstimatedValues(
             Object.fromEntries(
               Object.entries({ ...response })
                 .map(([k, v]) => {
-                  return (
-                    [
-                      k,
+                  try {
+                    v =
                       utils.formatUnits(
                         v,
                         ['amountReceived'].includes(k) ?
@@ -1006,7 +1003,13 @@ export default () => {
                             destination_contract_data?.decimals
                           ) || 18 :
                           source_decimals,
-                      ),
+                      )
+                  } catch (error) {}
+
+                  return (
+                    [
+                      k,
+                      v,
                     ]
                   )
                 })
