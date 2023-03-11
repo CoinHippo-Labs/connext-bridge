@@ -208,9 +208,7 @@ export default () => {
           updated = true
 
           if (sdk) {
-            if (estimatedValues === undefined) {
-              calculateAmountReceived(bridge.amount)
-            }
+            calculateAmountReceived(bridge.amount)
 
             if (isApproveNeeded === undefined) {
               checkApprovedNeeded(bridge.amount)
