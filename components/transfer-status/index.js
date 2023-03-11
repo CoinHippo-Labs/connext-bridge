@@ -278,7 +278,7 @@ export default (
           <div className="flex flex-col items-center">
             {errored ?
               <ActionRequired
-                forceDisabled={[XTransferErrorStatus.ExecutionError].includes(error_status)}
+                forceDisabled={[XTransferErrorStatus.ExecutionError, XTransferErrorStatus.NoBidsReceived].includes(error_status)}
                 transferData={transferData}
                 buttonTitle={
                   <Tooltip
@@ -411,7 +411,7 @@ export default (
                 <div /> :
                 errored ?
                   <ActionRequired
-                    forceDisabled={[XTransferErrorStatus.ExecutionError].includes(error_status)}
+                    forceDisabled={[XTransferErrorStatus.ExecutionError, XTransferErrorStatus.NoBidsReceived].includes(error_status)}
                     transferData={transferData}
                     buttonTitle={
                       <Tooltip

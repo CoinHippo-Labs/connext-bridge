@@ -1639,7 +1639,7 @@ export default () => {
                 </div>
                 <div className="flex items-center justify-center">
                   <ActionRequired
-                    forceDisabled={latest_transfer.execute_transaction_hash || !errored || [XTransferErrorStatus.ExecutionError].includes(latest_transfer?.error_status)}
+                    forceDisabled={latest_transfer.execute_transaction_hash || !errored || [XTransferErrorStatus.ExecutionError, XTransferErrorStatus.NoBidsReceived].includes(latest_transfer?.error_status)}
                     transferData={latest_transfer}
                     buttonTitle={
                       <Image
@@ -1738,7 +1738,7 @@ export default () => {
                       errored ?
                         <div className="flex flex-col items-center space-y-1">
                           <ActionRequired
-                            forceDisabled={[XTransferErrorStatus.ExecutionError].includes(latest_transfer.error_status)}
+                            forceDisabled={[XTransferErrorStatus.ExecutionError, XTransferErrorStatus.NoBidsReceived].includes(latest_transfer.error_status)}
                             transferData={latest_transfer}
                             buttonTitle={
                               <span className="text-center">
