@@ -1242,7 +1242,7 @@ export default () => {
         status_message &&
         (
           <div className="w-full bg-slate-100 dark:bg-slate-800 dark:bg-opacity-50 overflow-x-auto flex items-center py-2 sm:py-3 px-2 sm:px-4">
-            <div className="flex flex-wrap items-center text-slate-600 dark:text-slate-200 text-2xs xl:text-sm font-medium space-x-1.5 xl:space-x-2 mx-auto">
+            <div className="flex flex-wrap items-center text-blue-600 dark:text-blue-400 text-2xs xl:text-sm font-bold space-x-1.5 xl:space-x-2 mx-auto">
               <span className="status-message">
                 <Linkify>
                   {parse(status_message)}
