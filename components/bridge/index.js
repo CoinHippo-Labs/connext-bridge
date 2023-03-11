@@ -989,6 +989,8 @@ export default () => {
 
           const destination_contract_data = getContract(destination_chain_data?.chain_id, destination_asset_data?.contracts)
 
+          delete response.isFastPath
+
           setEstimatedValues(
             Object.fromEntries(
               Object.entries({ ...response })
