@@ -1807,8 +1807,8 @@ export default (
                     <div className="flex items-center text-xs font-semibold space-x-1">
                       {priceImpactAdd === true && !priceImpactAddResponse ?
                         <Oval
-                          width="16"
-                          height="16"
+                          width="14"
+                          height="14"
                           color={loaderColor(theme)}
                         /> :
                         <span className={`${typeof priceImpactAdd === 'number' ? priceImpactAdd < 0 ? 'text-red-500 dark:text-red-500' : priceImpactAdd > 0 ? 'text-green-500 dark:text-green-500' : '' : ''}`}>
@@ -2483,8 +2483,8 @@ export default (
                     <div className="flex items-center text-xs font-semibold space-x-1">
                       {priceImpactRemove === true && !priceImpactRemoveResponse ?
                         <Oval
-                          width="16"
-                          height="16"
+                          width="14"
+                          height="14"
                           color={loaderColor(theme)}
                         /> :
                         <span className={`${typeof priceImpactRemove === 'number' ? priceImpactRemove < 0 ? 'text-red-500 dark:text-red-500' : priceImpactRemove > 0 ? 'text-green-500 dark:text-green-500' : '' : ''}`}>
