@@ -6,7 +6,7 @@ import moment from 'moment'
 import { FixedNumber, utils } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
 import { TailSpin, Watch, RotatingSquare, Oval } from 'react-loader-spinner'
-import { Tooltip } from '@material-tailwind/react'
+import { Radio, Tooltip } from '@material-tailwind/react'
 import { RangeSlider } from 'flowbite-react'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
@@ -34,6 +34,25 @@ const DEFAULT_POOL_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_
 const DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES = 60
 
 const ACTIONS = ['deposit', 'withdraw']
+
+const WITHDRAW_OPTIONS = [
+  {
+    title: 'Balanced amounts',
+    value: 'balanced_amounts',
+  },
+  {
+    title: '{x} only',
+    value: 'x_only',
+  },
+  {
+    title: '{y} only',
+    value: 'y_only',
+  },
+  {
+    title: 'Custom amounts',
+    value: 'custom_amounts',
+  },
+]
 
 const DEFAULT_OPTIONS = {
   infiniteApprove: true,
@@ -113,6 +132,7 @@ export default (
   const [amountY, setAmountY] = useState(null)
   const [withdrawPercent, setWithdrawPercent] = useState(null)
   const [amount, setAmount] = useState(null)
+  const [withdrawOption, setWithdrawOption] = useState(_.head(WITHDRAW_OPTIONS))
   const [removeAmounts, setRemoveAmounts] = useState(null)
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [openOptions, setOpenOptions] = useState(false)
@@ -420,6 +440,7 @@ export default (
       setAmountY(null)
       setWithdrawPercent(null)
       setAmount(null)
+      setWithdrawOption(_.head(WITHDRAW_OPTIONS))
     }
 
     setPriceImpactAddResponse(null)
@@ -2264,7 +2285,38 @@ export default (
                 {
                   x_asset_data && y_asset_data &&
                   (
-                    <div className="space-y-1">
+                    <div className="space-y-2">
+                      {/*<div className="flex flex-col space-y-2">
+                        {WITHDRAW_OPTIONS.map((o, i) => {
+                          const {
+                            value,
+                          } = { ...o }
+                          let {
+                            title,
+                          } = { ...o }
+
+                          title = title.replace('{x}', x_asset_data.symbol).replace('{y}', y_asset_data.symbol)
+
+                          const selected = value === withdrawOption
+
+                          return (
+                            <div
+                              key={i}
+                              className="inline-flex items-center space-x-2"
+                            >
+                              <input
+                                disabled={disabled}
+                                type="radio"
+                                value={value}
+                                className={`h-4 w-4 text-blue-500 ${selected ? 'font-semibold' : 'font-medium'}`}
+                              />
+                              <span>
+                                {title}
+                              </span>
+                            </div>
+                          )
+                        })}
+                      </div>*/}
                       <div>
                         <div className="flex items-center justify-between space-x-2">
                           {url && x_asset_data?.contract_address ?
@@ -2460,51 +2512,49 @@ export default (
                           )
                         }
                       </div>
+                      <div className="flex items-center justify-between space-x-1">
+                        <Tooltip
+                          placement="top"
+                          content="The adjusted amount you are withdrawing for LP tokens above or below current market prices."
+                          className="w-80 z-50 bg-dark text-white text-xs"
+                        >
+                          <div className="flex items-center">
+                            <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
+                              Slippage
+                            </div>
+                            <BiInfoCircle
+                              size={14}
+                              className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                            />
+                          </div>
+                        </Tooltip>
+                        <div className="flex items-center text-xs font-semibold space-x-1">
+                          {priceImpactRemove === true && !priceImpactRemoveResponse ?
+                            <Oval
+                              width="14"
+                              height="14"
+                              color={loaderColor(theme)}
+                            /> :
+                            <span className={`${typeof priceImpactRemove === 'number' ? priceImpactRemove < 0 ? 'text-red-500 dark:text-red-500' : priceImpactRemove > 0 ? 'text-green-500 dark:text-green-500' : '' : ''}`}>
+                              {typeof priceImpactRemove === 'number' || priceImpactRemoveResponse ?
+                                <DecimalsFormat
+                                  value={priceImpactRemove}
+                                  className="whitespace-nowrap"
+                                /> :
+                                <span>
+                                  -
+                                </span>
+                              }
+                              <span>
+                                %
+                              </span>
+                            </span>
+                          }
+                        </div>
+                      </div>
                     </div>
                   )
                 }
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between space-x-1">
-                    <Tooltip
-                      placement="top"
-                      content="The adjusted amount you are withdrawing for LP tokens above or below current market prices."
-                      className="w-80 z-50 bg-dark text-white text-xs"
-                    >
-                      <div className="flex items-center">
-                        <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
-                          Slippage
-                        </div>
-                        <BiInfoCircle
-                          size={14}
-                          className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                        />
-                      </div>
-                    </Tooltip>
-                    <div className="flex items-center text-xs font-semibold space-x-1">
-                      {priceImpactRemove === true && !priceImpactRemoveResponse ?
-                        <Oval
-                          width="14"
-                          height="14"
-                          color={loaderColor(theme)}
-                        /> :
-                        <span className={`${typeof priceImpactRemove === 'number' ? priceImpactRemove < 0 ? 'text-red-500 dark:text-red-500' : priceImpactRemove > 0 ? 'text-green-500 dark:text-green-500' : '' : ''}`}>
-                          {typeof priceImpactRemove === 'number' || priceImpactRemoveResponse ?
-                            <DecimalsFormat
-                              value={priceImpactRemove}
-                              className="whitespace-nowrap"
-                            /> :
-                            <span>
-                              -
-                            </span>
-                          }
-                          <span>
-                            %
-                          </span>
-                        </span>
-                      }
-                    </div>
-                  </div>
-                </div>
               </div>
               <div className="flex items-end">
                 {!valid_amount ?
