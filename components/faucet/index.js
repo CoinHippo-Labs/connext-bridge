@@ -670,15 +670,7 @@ export default (
           (
             <div className="w-full mx-2 sm:mx-4">
               <Alert
-                color={
-                  `${
-                    status === 'failed' ?
-                      'bg-red-400 dark:bg-red-500' :
-                      status === 'success' ?
-                        'bg-green-400 dark:bg-green-500' :
-                        'bg-blue-400 dark:bg-blue-500'
-                  } text-white mt-1 mb-2`
-                }
+                color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white mt-1 mb-2`}
                 icon={
                   status === 'failed' ?
                     <BiMessageError

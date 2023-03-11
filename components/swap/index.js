@@ -1672,13 +1672,7 @@ export default () => {
                                 '0.00' :
                                 '0.00'
                           }
-                          className={
-                            `w-36 sm:w-48 bg-transparent ${
-                              ['', undefined].includes(amount) ?
-                                'text-slate-500 dark:text-slate-500' :
-                                ''
-                            } sm:text-lg font-semibold text-right py-1.5`
-                          }
+                          className={`w-36 sm:w-48 bg-transparent ${['', undefined].includes(amount) ? 'text-slate-500 dark:text-slate-500' : ''} sm:text-lg font-semibold text-right py-1.5`}
                         />
                       }
                     </div>
@@ -1991,15 +1985,7 @@ export default () => {
                           return (
                             <Alert
                               key={i}
-                              color={
-                                `${
-                                  status === 'failed' ?
-                                    'bg-red-400 dark:bg-red-500' :
-                                    status === 'success' ?
-                                      'bg-green-400 dark:bg-green-500' :
-                                      'bg-blue-400 dark:bg-blue-500'
-                                } text-white`
-                              }
+                              color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
                               icon={
                                 status === 'failed' ?
                                   <BiMessageError

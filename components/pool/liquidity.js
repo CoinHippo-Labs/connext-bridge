@@ -6,8 +6,7 @@ import moment from 'moment'
 import { FixedNumber, utils } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
 import { TailSpin, Watch, RotatingSquare, Oval } from 'react-loader-spinner'
-import { Radio, Tooltip } from '@material-tailwind/react'
-import { RangeSlider } from 'flowbite-react'
+import { Tooltip } from '@material-tailwind/react'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
 import { BiPlus, BiMessageError, BiMessageCheck, BiMessageDetail, BiInfoCircle } from 'react-icons/bi'
@@ -26,7 +25,7 @@ import Wallet from '../wallet'
 import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
 import { getBalance } from '../../lib/object/balance'
-import { split, toArray, numberToFixed, ellipse, equalsIgnoreCase, loaderColor, sleep, errorPatterns, parseError } from '../../lib/utils'
+import { split, toArray, removeDecimal, numberToFixed, ellipse, equalsIgnoreCase, loaderColor, sleep, errorPatterns, parseError } from '../../lib/utils'
 
 const WRAPPED_PREFIX = process.env.NEXT_PUBLIC_WRAPPED_PREFIX
 const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT)
@@ -43,14 +42,17 @@ const WITHDRAW_OPTIONS = [
   {
     title: '{x} only',
     value: 'x_only',
+    is_staging: true,
   },
   {
     title: '{y} only',
     value: 'y_only',
+    is_staging: true,
   },
   {
     title: 'Custom amounts',
     value: 'custom_amounts',
+    is_staging: true,
   },
 ]
 
@@ -132,7 +134,7 @@ export default (
   const [amountY, setAmountY] = useState(null)
   const [withdrawPercent, setWithdrawPercent] = useState(null)
   const [amount, setAmount] = useState(null)
-  const [withdrawOption, setWithdrawOption] = useState(_.head(WITHDRAW_OPTIONS))
+  const [withdrawOption, setWithdrawOption] = useState(_.head(WITHDRAW_OPTIONS)?.value)
   const [removeAmounts, setRemoveAmounts] = useState(null)
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [openOptions, setOpenOptions] = useState(false)
@@ -244,149 +246,60 @@ export default (
 
   useEffect(
     () => {
-      const getData = async () => {
-        setPriceImpactRemove(null)
-
-        if (typeof amount === 'string') {
-          if (utils.parseUnits(amount || '0', 18).toBigInt() <= 0) {
-            setRemoveAmounts(['0', '0'])
-          }
-          else {
-            const {
-              chain,
-              asset,
-            } = { ...pool }
-
-            const chain_data = getChain(chain, chains_data)
-
-            const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
-
-            const {
-              contract_data,
-              domainId,
-              adopted,
-              local,
-            } = { ...pool_data }
-
-            const {
-              contract_address,
-            } = { ...contract_data }
-
-            const _amount = utils.parseUnits((amount || 0).toString(), 18).toString()
-
-            try {
-              setPriceImpactRemove(true)
-
-              console.log(
-                '[calculateRemoveSwapLiquidity]',
-                {
-                  domainId,
-                  contract_address,
-                  amount: _amount,
-                },
-              )
-
-              let amounts = await sdk.sdkPool.calculateRemoveSwapLiquidity(domainId, contract_address, _amount)
-
-              console.log(
-                '[amountsRemoveSwapLiquidity]',
-                {
-                  domainId,
-                  contract_address,
-                  amount: _amount,
-                  amounts,
-                },
-              )
-
-              let _amounts
-
-              if (amounts?.length > 1) {
-                console.log(
-                  '[getPoolTokenIndex]',
-                  {
-                    domainId,
-                    contract_address,
-                    tokenAddress: contract_address,
-                  },
-                )
-
-                const tokenIndex = await sdk.sdkPool.getPoolTokenIndex(domainId, contract_address, contract_address)
-
-                console.log(
-                  '[poolTokenIndex]',
-                  {
-                    domainId,
-                    contract_address,
-                    tokenAddress: contract_address,
-                    tokenIndex,
-                  },
-                )
-
-                if (tokenIndex === 1) {
-                  _amounts = _.reverse(_.cloneDeep(amounts))
-                }
-                else {
-                  _amounts = _.cloneDeep(amounts)
-                }
-
-                // calculateRemoveLiquidityPriceImpact(domainId, contract_address, _.head(amounts), _.last(amounts))
-              }
-
-              setRemoveAmounts(
-                toArray(_amounts)
-                  .map((a, i) =>
-                    Number(
-                      utils.formatUnits(
-                        BigInt(a || '0'),
-                        (i === 0 ? adopted : local)?.decimals || 18,
-                      )
-                    )
-                  )
-              )
-              setCallResponse(null)
-            } catch (error) {
-              const response = parseError(error)
-
-              console.log(
-                '[calculateRemoveSwapLiquidity error]',
-                {
-                  domainId,
-                  contract_address,
-                  amount: _amount,
-                  error,
-                },
-              )
-
-              let {
-                message,
-              } = { ...response }
-
-              if (message?.includes('exceed total supply')) {
-                message = 'Exceed Total Supply'
-              }
-
-              setCallResponse(
-                {
-                  status: 'failed',
-                  ...response,
-                  message,
-                }
-              )
-
-              setRemoveAmounts(null)
-              setPriceImpactRemove(null)
-            }
-          }
-        }
-        else {
-          setRemoveAmounts(null)
+      switch (withdrawOption) {
+        case 'balanced_amounts':
+          calculateRemoveSwapLiquidity()
+          break
+        case 'x_only':
+        case 'y_only':
+          const ratio = withdrawOption === 'x_only' ? 1 : 0
+          setRemoveAmounts(
+            [
+              amount * ratio,
+              amount * (1 - ratio),
+            ]
+            .map((a, i) =>
+              isNaN(a) ? '' : removeDecimal(a.toFixed((i === 0 ? adopted : local)?.decimals || 18))
+            )
+          )
           setCallResponse(null)
-        }
+          break
+        default:
+          calculateRemoveSwapLiquidity()
+          break
       }
-
-      getData()
     },
     [amount],
+  )
+
+  useEffect(
+    () => {
+      switch (withdrawOption) {
+        case 'balanced_amounts':
+          calculateRemoveSwapLiquidity()
+          break
+        case 'x_only':
+        case 'y_only':
+          const ratio = withdrawOption === 'x_only' ? 1 : 0
+          setRemoveAmounts(
+            [
+              amount * ratio,
+              amount * (1 - ratio),
+            ]
+            .map((a, i) =>
+              isNaN(a) ? '' : removeDecimal(a.toFixed((i === 0 ? adopted : local)?.decimals || 18))
+            )
+          )
+          setCallResponse(null)
+          break
+        default:
+          if (!(removeAmounts?.length > 1)) {
+            calculateRemoveSwapLiquidity()
+          }
+          break
+      }
+    },
+    [withdrawOption],
   )
 
   useEffect(
@@ -440,7 +353,7 @@ export default (
       setAmountY(null)
       setWithdrawPercent(null)
       setAmount(null)
-      setWithdrawOption(_.head(WITHDRAW_OPTIONS))
+      setWithdrawOption(_.head(WITHDRAW_OPTIONS)?.value)
     }
 
     setPriceImpactAddResponse(null)
@@ -1036,6 +949,146 @@ export default (
     }
   }
 
+  const calculateRemoveSwapLiquidity = async () => {
+    setPriceImpactRemove(null)
+
+    if (typeof amount === 'string') {
+      if (utils.parseUnits(amount || '0', 18).toBigInt() <= 0) {
+        setRemoveAmounts(['0', '0'])
+      }
+      else {
+        const {
+          chain,
+          asset,
+        } = { ...pool }
+
+        const chain_data = getChain(chain, chains_data)
+
+        const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
+
+        const {
+          contract_data,
+          domainId,
+          adopted,
+          local,
+        } = { ...pool_data }
+
+        const {
+          contract_address,
+        } = { ...contract_data }
+
+        const _amount = utils.parseUnits((amount || 0).toString(), 18).toString()
+
+        try {
+          setPriceImpactRemove(true)
+
+          console.log(
+            '[calculateRemoveSwapLiquidity]',
+            {
+              domainId,
+              contract_address,
+              amount: _amount,
+            },
+          )
+
+          let amounts = await sdk.sdkPool.calculateRemoveSwapLiquidity(domainId, contract_address, _amount)
+
+          console.log(
+            '[amountsRemoveSwapLiquidity]',
+            {
+              domainId,
+              contract_address,
+              amount: _amount,
+              amounts,
+            },
+          )
+
+          let _amounts
+
+          if (amounts?.length > 1) {
+            console.log(
+              '[getPoolTokenIndex]',
+              {
+                domainId,
+                contract_address,
+                tokenAddress: contract_address,
+              },
+            )
+
+            const tokenIndex = await sdk.sdkPool.getPoolTokenIndex(domainId, contract_address, contract_address)
+
+            console.log(
+              '[poolTokenIndex]',
+              {
+                domainId,
+                contract_address,
+                tokenAddress: contract_address,
+                tokenIndex,
+              },
+            )
+
+            if (tokenIndex === 1) {
+              _amounts = _.reverse(_.cloneDeep(amounts))
+            }
+            else {
+              _amounts = _.cloneDeep(amounts)
+            }
+
+            // calculateRemoveLiquidityPriceImpact(domainId, contract_address, _.head(amounts), _.last(amounts))
+          }
+
+          setRemoveAmounts(
+            toArray(_amounts)
+              .map((a, i) =>
+                Number(
+                  utils.formatUnits(
+                    BigInt(a || '0'),
+                    (i === 0 ? adopted : local)?.decimals || 18,
+                  )
+                )
+              )
+          )
+          setCallResponse(null)
+        } catch (error) {
+          const response = parseError(error)
+
+          console.log(
+            '[calculateRemoveSwapLiquidity error]',
+            {
+              domainId,
+              contract_address,
+              amount: _amount,
+              error,
+            },
+          )
+
+          let {
+            message,
+          } = { ...response }
+
+          if (message?.includes('exceed total supply')) {
+            message = 'Exceed Total Supply'
+          }
+
+          setCallResponse(
+            {
+              status: 'failed',
+              ...response,
+              message,
+            }
+          )
+
+          setRemoveAmounts(null)
+          setPriceImpactRemove(null)
+        }
+      }
+    }
+    else {
+      setRemoveAmounts(null)
+      setCallResponse(null)
+    }
+  }
+
   const calculateAddLiquidityPriceImpact = async (
     domainId,
     contractAddress,
@@ -1382,15 +1435,9 @@ export default (
   adopted = { ...adopted, asset_data: _.head(pool_tokens_data) }
   local = { ...local, asset_data: _.last(pool_tokens_data) }
 
-  const native_asset =
-    !adopted?.symbol?.startsWith(WRAPPED_PREFIX) ?
-      adopted :
-      local
+  const native_asset = !adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local
 
-  const wrapped_asset =
-    adopted?.symbol?.startsWith(WRAPPED_PREFIX) ?
-      adopted :
-      local
+  const wrapped_asset = adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local
 
   const native_amount = Number(native_asset?.balance || '0')
 
@@ -1828,8 +1875,8 @@ export default (
                     <div className="flex items-center text-xs font-semibold space-x-1">
                       {priceImpactAdd === true && !priceImpactAddResponse ?
                         <Oval
-                          width="14"
-                          height="14"
+                          width="10"
+                          height="10"
                           color={loaderColor(theme)}
                         /> :
                         <span className={`${typeof priceImpactAdd === 'number' ? priceImpactAdd < 0 ? 'text-red-500 dark:text-red-500' : priceImpactAdd > 0 ? 'text-green-500 dark:text-green-500' : '' : ''}`}>
@@ -1967,15 +2014,7 @@ export default (
                           return (
                             <Alert
                               key={i}
-                              color={
-                                `${
-                                  status === 'failed' ?
-                                    'bg-red-400 dark:bg-red-500' :
-                                    status === 'success' ?
-                                      'bg-green-400 dark:bg-green-500' :
-                                      'bg-blue-400 dark:bg-blue-500'
-                                } text-white`
-                              }
+                              color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
                               icon={
                                 status === 'failed' ?
                                   <BiMessageError
@@ -2285,271 +2324,335 @@ export default (
                 {
                   x_asset_data && y_asset_data &&
                   (
-                    <div className="space-y-2">
-                      {/*<div className="flex flex-col space-y-2">
-                        {WITHDRAW_OPTIONS.map((o, i) => {
-                          const {
-                            value,
-                          } = { ...o }
-                          let {
-                            title,
-                          } = { ...o }
+                    <div className="space-y-4">
+                      <div className="flex flex-col space-y-2">
+                        {WITHDRAW_OPTIONS
+                          .map((o, i) => {
+                            const {
+                              value,
+                              is_staging,
+                            } = { ...o }
+                            let {
+                              title,
+                            } = { ...o }
 
-                          title = title.replace('{x}', x_asset_data.symbol).replace('{y}', y_asset_data.symbol)
+                            title = title.replace('{x}', x_asset_data.symbol).replace('{y}', y_asset_data.symbol)
 
-                          const selected = value === withdrawOption
+                            const selected = value === withdrawOption
 
-                          return (
-                            <div
-                              key={i}
-                              className="inline-flex items-center space-x-2"
-                            >
-                              <input
-                                disabled={disabled}
-                                type="radio"
-                                value={value}
-                                className={`h-4 w-4 text-blue-500 ${selected ? 'font-semibold' : 'font-medium'}`}
-                              />
-                              <span>
-                                {title}
-                              </span>
-                            </div>
-                          )
-                        })}
-                      </div>*/}
-                      <div>
-                        <div className="flex items-center justify-between space-x-2">
-                          {url && x_asset_data?.contract_address ?
-                            <a
-                              href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center space-x-1"
-                            >
-                              {
-                                x_asset_data.image &&
-                                (
-                                  <Image
-                                    src={x_asset_data.image}
-                                    width={16}
-                                    height={16}
-                                    className="rounded-full"
-                                  />
-                                )
-                              }
-                              <span className="text-xs font-semibold">
-                                {x_asset_data.symbol}
-                              </span>
-                            </a> :
-                            <div className="text-xs font-semibold">
-                              {x_asset_data?.symbol}
-                            </div>
-                          }
-                          {url && y_asset_data?.contract_address ?
-                            <a
-                              href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center space-x-1"
-                            >
-                              {
-                                y_asset_data.image &&
-                                (
-                                  <Image
-                                    src={y_asset_data.image}
-                                    width={16}
-                                    height={16}
-                                    className="rounded-full"
-                                  />
-                                )
-                              }
-                              <span className="text-xs font-semibold">
-                                {y_asset_data.symbol}
-                              </span>
-                            </a> :
-                            <div className="text-xs font-semibold">
-                              {y_asset_data?.symbol}
-                            </div>
-                          }
-                        </div>
-                        <RangeSlider
-                          sizing="sm"
-                          disabled={disabled || !(valid_amount || amount) || !mode}
-                          min={0}
-                          max={100}
-                          step={10}
-                          value={(removeAmounts?.length > 0 ? _.head(removeAmounts) / (_.sum(removeAmounts) || 1) : 0.5) * 100}
-                          onChange={
-                            e => {
-                              const ratio = Number(e.target.value) / 100
-                              setRemoveAmounts([amount * ratio, amount * (1 - ratio)])
-                              setCallResponse(null)
-                            }
-                          }
-                          color={color}
-                          className="w-full rounded-lg"
-                          style={
-                            {
-                              backgroundColor: `${color}33`,
-                            }
-                          }
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between space-x-2">
-                          {browser_provider ?
-                            ['string', 'number'].includes(typeof x_remove_amount) && !isNaN(x_remove_amount) ?
-                              <div className="flex items-center space-x-1">
-                                <DecimalsFormat
-                                  value={x_remove_amount || 0}
-                                  className="text-slate-600 dark:text-slate-500 text-xs"
-                                />
-                                <DecimalsFormat
-                                  value={(Number(x_remove_amount) || 0) / (_.sum([x_remove_amount, y_remove_amount].map(n => Number(n) || 0)) || 1) * 100}
-                                  prefix="("
-                                  suffix="%)"
-                                  className="text-xs font-semibold"
-                                />
-                              </div> :
-                              selected && !no_pool && !error &&
-                              (position_loading && amount ?
-                                <TailSpin
-                                  width="24"
-                                  height="24"
-                                  color={loaderColor(theme)}
-                                /> :
-                                null
-                              ) :
-                            <span className="text-xs">
-                              -
-                            </span>
-                          }
-                          {browser_provider ?
-                            ['string', 'number'].includes(typeof y_remove_amount) && !isNaN(y_remove_amount) ?
-                              <div className="flex items-center space-x-1">
-                                <DecimalsFormat
-                                  value={y_remove_amount || 0}
-                                  className="text-slate-600 dark:text-slate-500 text-xs"
-                                />
-                                <DecimalsFormat
-                                  value={(Number(y_remove_amount) || 0) / (_.sum([x_remove_amount, y_remove_amount].map(n => Number(n) || 0)) || 1) * 100}
-                                  prefix="("
-                                  suffix="%)"
-                                  className="text-xs font-semibold"
-                                />
-                              </div> :
-                              selected && !no_pool && !error &&
-                              (position_loading && amount ?
-                                <TailSpin
-                                  width="24"
-                                  height="24"
-                                  color={loaderColor(theme)}
-                                /> :
-                                null
-                              ) :
-                            <span className="text-xs">
-                              -
-                            </span>
-                          }
-                        </div>
-                        {
-                          amount > 0 && !!mode &&
-                          (
-                            <div className="grid grid-cols-2 gap-4">
-                              <button
-                                disabled={disabled || !(valid_amount || amount)}
+                            const _disabled = disabled || (is_staging && !mode)
+
+                            return (
+                              <div
+                                key={i}
                                 onClick={
                                   () => {
-                                    const ratio = 1
-                                    setRemoveAmounts([amount * ratio, amount * (1 - ratio)])
-                                    setCallResponse(null)
+                                    if (!_disabled) {
+                                      setWithdrawOption(value)
+                                    }
                                   }
                                 }
-                                className="w-fit hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded flex items-center space-x-1 py-0.5 px-1"
+                                className={`${_disabled ? 'cursor-not-allowed' : 'cursor-pointer'} inline-flex items-center space-x-2`}
                               >
-                                <span className="text-2xs font-medium">
-                                  Only
+                                <input
+                                  disabled={_disabled}
+                                  type="radio"
+                                  value={value}
+                                  checked={selected}
+                                  className={`h-4 w-4 ${_disabled ? 'cursor-not-allowed' : 'cursor-pointer'} text-blue-500 mt-0.5`}
+                                />
+                                <span className={`${selected ? 'font-bold' : 'text-slate-400 dark:text-slate-500 font-medium'}`}>
+                                  {title} {is_staging && !mode ? '(coming soon)' : ''}
                                 </span>
-                                {
-                                  x_asset_data.image &&
-                                  (
-                                    <Image
-                                      src={x_asset_data.image}
-                                      width={14}
-                                      height={14}
-                                      className="rounded-full"
-                                    />
-                                  )
-                                }
-                              </button>
-                              <button
-                                disabled={disabled || !(valid_amount || amount)}
-                                onClick={
-                                  () => {
-                                    const ratio = 0
-                                    setRemoveAmounts([amount * ratio, amount * (1 - ratio)])
-                                    setCallResponse(null)
-                                  }
-                                }
-                                className="w-fit hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded flex items-center space-x-1 ml-auto py-0.5 px-1"
-                              >
-                                <span className="text-2xs font-medium">
-                                  Only
-                                </span>
-                                {
-                                  y_asset_data.image &&
-                                  (
-                                    <Image
-                                      src={y_asset_data.image}
-                                      width={14}
-                                      height={14}
-                                      className="rounded-full"
-                                    />
-                                  )
-                                }
-                              </button>
-                            </div>
-                          )
+                              </div>
+                            )
+                          })
                         }
                       </div>
-                      <div className="flex items-center justify-between space-x-1">
-                        <Tooltip
-                          placement="top"
-                          content="The adjusted amount you are withdrawing for LP tokens above or below current market prices."
-                          className="w-80 z-50 bg-dark text-white text-xs"
-                        >
-                          <div className="flex items-center">
-                            <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
-                              Slippage
+                      <div className="space-y-2.5">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between space-x-2">
+                            <span className="text-slate-600 dark:text-slate-500 text-xs font-medium">
+                              You Receive
+                            </span>
+                            <div className="flex items-center justify-between space-x-2">
+                              <div className="flex items-center space-x-1">
+                                <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                                  Balance:
+                                </div>
+                                <button
+                                  disabled={disabled}
+                                  className="cursor-default"
+                                >
+                                  <Balance
+                                    chainId={chain_id}
+                                    asset={asset}
+                                    contractAddress={x_asset_data.contract_address}
+                                    decimals={x_asset_data.decimals}
+                                    symbol={x_asset_data.symbol}
+                                    hideSymbol={false}
+                                    className="text-xs"
+                                  />
+                                </button>
+                              </div>
                             </div>
-                            <BiInfoCircle
-                              size={14}
-                              className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                            />
                           </div>
-                        </Tooltip>
-                        <div className="flex items-center text-xs font-semibold space-x-1">
-                          {priceImpactRemove === true && !priceImpactRemoveResponse ?
-                            <Oval
-                              width="14"
-                              height="14"
-                              color={loaderColor(theme)}
-                            /> :
-                            <span className={`${typeof priceImpactRemove === 'number' ? priceImpactRemove < 0 ? 'text-red-500 dark:text-red-500' : priceImpactRemove > 0 ? 'text-green-500 dark:text-green-500' : '' : ''}`}>
-                              {typeof priceImpactRemove === 'number' || priceImpactRemoveResponse ?
-                                <DecimalsFormat
-                                  value={priceImpactRemove}
-                                  className="whitespace-nowrap"
-                                /> :
-                                <span>
-                                  -
+                          <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-0.5 py-2.5 px-3">
+                            <div className="flex items-center justify-between space-x-2">
+                              {url && x_asset_data.contract_address ?
+                                <a
+                                  href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}${address ? `?a=${address}` : ''}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="min-w-max flex items-center space-x-1.5"
+                                >
+                                  {
+                                    x_asset_data.image &&
+                                    (
+                                      <Image
+                                        src={x_asset_data.image}
+                                        width={20}
+                                        height={20}
+                                        className="rounded-full"
+                                      />
+                                    )
+                                  }
+                                  <span className="text-base font-semibold">
+                                    {x_asset_data.symbol}
+                                  </span>
+                                </a> :
+                                <span className="text-base font-semibold">
+                                  {x_asset_data.symbol}
                                 </span>
                               }
-                              <span>
-                                %
+                              {withdrawOption === 'custom_amounts' ?
+                                <DebounceInput
+                                  debounceTimeout={750}
+                                  size="small"
+                                  type="number"
+                                  placeholder="0.00"
+                                  disabled={disabled}
+                                  value={['string', 'number'].includes(typeof x_remove_amount) && !isNaN(x_remove_amount) ? x_remove_amount : ''}
+                                  onChange={
+                                    e => {
+                                      const regex = /^[0-9.\b]+$/
+
+                                      let value
+
+                                      if (e.target.value === '' || regex.test(e.target.value)) {
+                                        value = e.target.value
+                                      }
+
+                                      if (typeof value === 'string') {
+                                        if (value.startsWith('.')) {
+                                          value = `0${value}`
+                                        }
+
+                                        value = numberToFixed(value, x_asset_data?.decimals || 18)
+                                      }
+
+                                      if (amount) {
+                                        if (Number(value) > amount) {
+                                          value = numberToFixed(amount.toString(), x_asset_data?.decimals || 18)
+                                        }
+                                      }
+                                      else {
+                                        value = '0'
+                                      }
+
+                                      setRemoveAmounts(
+                                        [
+                                          value,
+                                          amount - Number(value),
+                                        ]
+                                        .map((a, i) =>
+                                          isNaN(a) ? '' : removeDecimal(Number(a).toFixed((i === 0 ? x_asset_data : y_asset_data)?.decimals || 18))
+                                        )
+                                      )
+                                    }
+                                  }
+                                  onWheel={e => e.target.blur()}
+                                  onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                                  className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
+                                /> :
+                                ['string', 'number'].includes(typeof x_remove_amount) && !isNaN(x_remove_amount) ?
+                                  <DecimalsFormat
+                                    value={x_remove_amount}
+                                    className="w-fit bg-transparent text-slate-500 dark:text-slate-500 text-base font-medium text-right"
+                                  /> :
+                                  selected && !no_pool && !error &&
+                                  (position_loading && amount ?
+                                    <TailSpin
+                                      width="24"
+                                      height="24"
+                                      color={loaderColor(theme)}
+                                    /> :
+                                    null
+                                  )
+                              }
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between space-x-2">
+                            <span className="text-slate-600 dark:text-slate-500 text-xs font-medium" />
+                            <div className="flex items-center justify-between space-x-2">
+                              <div className="flex items-center space-x-1">
+                                <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                                  Balance:
+                                </div>
+                                <button
+                                  disabled={disabled}
+                                  className="cursor-default"
+                                >
+                                  <Balance
+                                    chainId={chain_id}
+                                    asset={asset}
+                                    contractAddress={y_asset_data.contract_address}
+                                    decimals={y_asset_data.decimals}
+                                    symbol={y_asset_data.symbol}
+                                    hideSymbol={false}
+                                    className="text-xs"
+                                  />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-0.5 py-2.5 px-3">
+                            <div className="flex items-center justify-between space-x-2">
+                              {url && y_asset_data.contract_address ?
+                                <a
+                                  href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}${address ? `?a=${address}` : ''}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="min-w-max flex items-center space-x-1.5"
+                                >
+                                  {
+                                    y_asset_data.image &&
+                                    (
+                                      <Image
+                                        src={y_asset_data.image}
+                                        width={20}
+                                        height={20}
+                                        className="rounded-full"
+                                      />
+                                    )
+                                  }
+                                  <span className="text-base font-semibold">
+                                    {y_asset_data.symbol}
+                                  </span>
+                                </a> :
+                                <span className="text-base font-semibold">
+                                  {y_asset_data.symbol}
+                                </span>
+                              }
+                              {withdrawOption === 'custom_amounts' ?
+                                <DebounceInput
+                                  debounceTimeout={750}
+                                  size="small"
+                                  type="number"
+                                  placeholder="0.00"
+                                  disabled={disabled}
+                                  value={['string', 'number'].includes(typeof y_remove_amount) && !isNaN(y_remove_amount) ? y_remove_amount : ''}
+                                  onChange={
+                                    e => {
+                                      const regex = /^[0-9.\b]+$/
+
+                                      let value
+
+                                      if (e.target.value === '' || regex.test(e.target.value)) {
+                                        value = e.target.value
+                                      }
+
+                                      if (typeof value === 'string') {
+                                        if (value.startsWith('.')) {
+                                          value = `0${value}`
+                                        }
+
+                                        value = numberToFixed(value, y_asset_data?.decimals || 18)
+                                      }
+
+                                      if (amount) {
+                                        if (Number(value) > amount) {
+                                          value = numberToFixed(amount.toString(), y_asset_data?.decimals || 18)
+                                        }
+                                      }
+                                      else {
+                                        value = '0'
+                                      }
+
+                                      setRemoveAmounts(
+                                        [
+                                          amount - Number(value),
+                                          value,
+                                        ]
+                                        .map((a, i) =>
+                                          isNaN(a) ? '' : removeDecimal(Number(a).toFixed((i === 0 ? x_asset_data : y_asset_data)?.decimals || 18))
+                                        )
+                                      )
+                                    }
+                                  }
+                                  onWheel={e => e.target.blur()}
+                                  onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                                  className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
+                                /> :
+                                ['string', 'number'].includes(typeof y_remove_amount) && !isNaN(y_remove_amount) ?
+                                  <DecimalsFormat
+                                    value={y_remove_amount}
+                                    className="w-fit bg-transparent text-slate-500 dark:text-slate-500 text-base font-medium text-right"
+                                  /> :
+                                  selected && !no_pool && !error &&
+                                  (position_loading && amount ?
+                                    <TailSpin
+                                      width="24"
+                                      height="24"
+                                      color={loaderColor(theme)}
+                                    /> :
+                                    null
+                                )
+                              }
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between space-x-1">
+                          <Tooltip
+                            placement="top"
+                            content="The adjusted amount you are withdrawing for LP tokens above or below current market prices."
+                            className="w-80 z-50 bg-dark text-white text-xs"
+                          >
+                            <div className="flex items-center">
+                              <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
+                                Slippage
+                              </div>
+                              <BiInfoCircle
+                                size={14}
+                                className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                              />
+                            </div>
+                          </Tooltip>
+                          <div className="flex items-center text-xs font-semibold space-x-1">
+                            {priceImpactRemove === true && !priceImpactRemoveResponse ?
+                              <Oval
+                                width="10"
+                                height="10"
+                                color={loaderColor(theme)}
+                              /> :
+                              <span className={`${typeof priceImpactRemove === 'number' ? priceImpactRemove < 0 ? 'text-red-500 dark:text-red-500' : priceImpactRemove > 0 ? 'text-green-500 dark:text-green-500' : '' : ''}`}>
+                                {typeof priceImpactRemove === 'number' || priceImpactRemoveResponse ?
+                                  <DecimalsFormat
+                                    value={priceImpactRemove}
+                                    className="whitespace-nowrap"
+                                  /> :
+                                  <span>
+                                    -
+                                  </span>
+                                }
+                                <span>
+                                  %
+                                </span>
                               </span>
-                            </span>
-                          }
+                            }
+                          </div>
                         </div>
                       </div>
                     </div>
