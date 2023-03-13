@@ -544,7 +544,7 @@ export default () => {
         chain_id,
       } = { ...getChain(source_chain, chains_data) }
 
-      if (chain_id && Object.keys({ ...balances_data }).length >= chains_data.length && balances_data[chain_id] && amount) {
+      if (false && chain_id && Object.keys({ ...balances_data }).length >= chains_data.length && balances_data[chain_id] && amount) {
         setEstimateFeesTrigger(moment().valueOf())
       }
     },
@@ -2334,7 +2334,7 @@ export default () => {
                                           {
                                             'to' in options && to &&
                                             (
-                                              <div className="flex items-center justify-between space-x-1">
+                                              <div className="flex items-center justify-between space-x-2">
                                                 <Tooltip
                                                   placement="top"
                                                   content="The destination address that you want to send asset to."
@@ -2427,7 +2427,7 @@ export default () => {
                                             !['pool'].includes(source) &&
                                             (
                                               <div className="flex flex-col space-y-0.5">
-                                                <div className="flex items-start justify-between space-x-1">
+                                                <div className="flex items-start justify-between space-x-2">
                                                   <Tooltip
                                                     placement="top"
                                                     content="The maximum percentage you are willing to lose due to market changes."
@@ -2581,45 +2581,7 @@ export default () => {
                                               </div>
                                             )
                                           }
-                                          <div className="flex items-center justify-between space-x-1">
-                                            <Tooltip
-                                              placement="top"
-                                              content={`Minimum amount received after slippage${typeof slippage === 'number' && slippage >= 0 ? ` ${slippage}%` : ''}`}
-                                              className="z-50 bg-dark text-white text-xs"
-                                            >
-                                              <div className="flex items-center">
-                                                <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-medium">
-                                                  Minimum amount received
-                                                </div>
-                                                <BiInfoCircle
-                                                  size={14}
-                                                  className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                                />
-                                              </div>
-                                            </Tooltip>
-                                            {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.amountReceived) || estimateResponse ?
-                                              <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-semibold space-x-1.5">
-                                                {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimated_received) && !estimateResponse ?
-                                                  <DecimalsFormat
-                                                    value={(estimated_received * ((100 - (typeof slippage === 'number' && slippage >= 0 ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)) / 100)).toFixed(destination_decimals)}
-                                                    className="text-sm"
-                                                  /> :
-                                                  <span className="text-sm">
-                                                    -
-                                                  </span>
-                                                }
-                                                <span>
-                                                  {destination_symbol}
-                                                </span>
-                                              </span> :
-                                              <Oval
-                                                width="14"
-                                                height="14"
-                                                color={loaderColor(theme)}
-                                              />
-                                            }
-                                          </div>
-                                          <div className="flex items-center justify-between space-x-1">
+                                          <div className="flex items-center justify-between space-x-2">
                                             <Tooltip
                                               placement="top"
                                               content="This supports our router users providing fast liquidity."
@@ -2652,7 +2614,7 @@ export default () => {
                                               />
                                             }
                                           </div>
-                                          <div className="flex items-center justify-between space-x-1">
+                                          <div className="flex items-center justify-between space-x-2">
                                             <Tooltip
                                               placement="top"
                                               content="This covers costs to execute your transfer on the destination chain."
@@ -2708,10 +2670,48 @@ export default () => {
                                             gasFee={relayer_fee}
                                             gasSymbol={source_gas_native_token?.symbol}
                                           />
+                                          <div className="flex items-center justify-between space-x-2">
+                                            <Tooltip
+                                              placement="top"
+                                              content={`Minimum amount received after slippage${typeof slippage === 'number' && slippage >= 0 ? ` ${slippage}%` : ''}`}
+                                              className="z-50 bg-dark text-white text-xs"
+                                            >
+                                              <div className="flex items-center">
+                                                <div className="sm:whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-medium">
+                                                  Min amount received (with max slippage)
+                                                </div>
+                                                <BiInfoCircle
+                                                  size={14}
+                                                  className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                                />
+                                              </div>
+                                            </Tooltip>
+                                            {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.amountReceived) || estimateResponse ?
+                                              <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-semibold space-x-1.5">
+                                                {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimated_received) && !estimateResponse ?
+                                                  <DecimalsFormat
+                                                    value={(estimated_received * ((100 - (typeof slippage === 'number' && slippage >= 0 ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)) / 100)).toFixed(destination_decimals)}
+                                                    className="text-sm"
+                                                  /> :
+                                                  <span className="text-sm">
+                                                    -
+                                                  </span>
+                                                }
+                                                <span>
+                                                  {destination_symbol}
+                                                </span>
+                                              </span> :
+                                              <Oval
+                                                width="14"
+                                                height="14"
+                                                color={loaderColor(theme)}
+                                              />
+                                            }
+                                          </div>
                                           {
                                             typeof price_impact === 'number' &&
                                             (
-                                              <div className="flex items-center justify-between space-x-1">
+                                              <div className="flex items-center justify-between space-x-2">
                                                 <Tooltip
                                                   placement="top"
                                                   content="Price impact"
