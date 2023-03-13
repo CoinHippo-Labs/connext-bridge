@@ -25,7 +25,7 @@ import { getContract } from '../../lib/object/contract'
 import { getPool } from '../../lib/object/pool'
 import { getBalance } from '../../lib/object/balance'
 import { split, toArray, ellipse, equalsIgnoreCase, sleep } from '../../lib/utils'
-import { STATUS_MESSAGE, CHAINS_DATA, ASSETS_DATA, POOL_ASSETS_DATA, ENS_DATA, ROUTER_ASSET_BALANCES_DATA, POOLS_DATA, USER_POOLS_DATA, POOLS_DAILY_STATS_DATA, SDK, RPCS, BALANCES_DATA } from '../../reducers/types'
+import { STATUS_MESSAGE, CHAINS_DATA, GAS_TOKENS_PRICE_DATA, ASSETS_DATA, POOL_ASSETS_DATA, ENS_DATA, ROUTER_ASSET_BALANCES_DATA, POOLS_DATA, USER_POOLS_DATA, POOLS_DAILY_STATS_DATA, SDK, RPCS, BALANCES_DATA } from '../../reducers/types'
 
 const is_staging =
   process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' ||
@@ -38,6 +38,7 @@ export default () => {
     chains,
     assets,
     pool_assets,
+    gas_tokens_price,
     ens,
     router_asset_balances,
     pools,
@@ -52,6 +53,7 @@ export default () => {
         chains: state.chains,
         assets: state.assets,
         pool_assets: state.pool_assets,
+        gas_tokens_price: state.gas_tokens_price,
         ens: state.ens,
         router_asset_balances: state.router_asset_balances,
         pools: state.pools,
@@ -77,6 +79,9 @@ export default () => {
   const {
     pool_assets_data,
   } = { ...pool_assets }
+  const {
+    gas_tokens_price_data,
+  } = { ...gas_tokens_price }
   const {
     ens_data,
   } = { ...ens }
@@ -175,7 +180,7 @@ export default () => {
     [],
   )
 
-  // price
+  // assets price
   useEffect(
     () => {
       const getData = async is_interval => {
@@ -252,6 +257,67 @@ export default () => {
       return () => clearInterval(interval)
     },
     [page_visible, assets_data],
+  )
+
+  // gas tokens price
+  useEffect(
+    () => {
+      const getData = async is_interval => {
+        if (page_visible && chains_data) {
+          const updated_ids =
+            toArray(gas_tokens_price_data)
+              .filter(d => !is_interval && typeof d.price === 'number')
+              .map(d => d.asset_id)
+
+          const gas_tokens = toArray(chains_data.map(c => _.head(c.provider_params)?.nativeCurrency?.symbol), 'lower')
+
+          if (updated_ids.length < gas_tokens.length) {
+            const assets = gas_tokens.filter(t => !updated_ids.includes(t))
+
+            if (assets.length > 0) {
+              const response = toArray(await assetsPrice({ assets }))
+
+              let data = _.cloneDeep(gas_tokens_price_data)
+
+              if (data) {
+                response
+                  .forEach(d => {
+                    const index = toArray(data).findIndex(_d => _d?.asset_id === d?.asset_id)
+
+                    if (index > -1) {
+                      data[index] = d
+                    }
+                    else {
+                      data.push(d)
+                    }
+                  })
+              }
+              else {
+                data = response
+              }
+
+              dispatch(
+                {
+                  type: GAS_TOKENS_PRICE_DATA,
+                  value: data,
+                }
+              )
+            }
+          }
+        }
+      }
+
+      getData()
+
+      const interval =
+        setInterval(
+          () => getData(true),
+          5 * 60 * 1000,
+        )
+
+      return () => clearInterval(interval)
+    },
+    [page_visible, chains_data, gas_tokens_price_data],
   )
 
   // rpcs

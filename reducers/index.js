@@ -4,6 +4,7 @@ import preferences from './preferences'
 import chains from './chains'
 import assets from './assets'
 import pool_assets from './pool-assets'
+import gas_tokens_price from './gas-tokens-price'
 import ens from './ens'
 import router_asset_balances from './router-asset-balances'
 import pools from './pools'
@@ -20,6 +21,7 @@ export default combineReducers(
     chains,
     assets,
     pool_assets,
+    gas_tokens_price,
     ens,
     router_asset_balances,
     pools,

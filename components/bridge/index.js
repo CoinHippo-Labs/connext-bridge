@@ -14,6 +14,7 @@ import { BiMessageError, BiMessageCheck, BiMessageDetail, BiEditAlt, BiCheckCirc
 import { IoInformationCircleOutline, IoWarning } from 'react-icons/io5'
 
 import Options from './options'
+import WarningGasVsAmount from './warning-gas-vs-amount'
 import ActionRequired from '../action-required'
 import Alert from '../alerts'
 import Balance from '../balance'
@@ -2701,6 +2702,12 @@ export default () => {
                                               />
                                             }
                                           </div>
+                                          <WarningGasVsAmount
+                                            amount={amount}
+                                            assetPrice={source_asset_data?.price}
+                                            gasFee={relayer_fee}
+                                            gasSymbol={source_gas_native_token?.symbol}
+                                          />
                                           {
                                             typeof price_impact === 'number' &&
                                             (
