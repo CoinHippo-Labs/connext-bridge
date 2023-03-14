@@ -27,9 +27,7 @@ import { getBalance } from '../../lib/object/balance'
 import { split, toArray, ellipse, equalsIgnoreCase, sleep } from '../../lib/utils'
 import { STATUS_MESSAGE, CHAINS_DATA, GAS_TOKENS_PRICE_DATA, ASSETS_DATA, POOL_ASSETS_DATA, ENS_DATA, ROUTER_ASSET_BALANCES_DATA, POOLS_DATA, USER_POOLS_DATA, POOLS_DAILY_STATS_DATA, SDK, RPCS, BALANCES_DATA } from '../../reducers/types'
 
-const is_staging =
-  process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' ||
-  process.env.NEXT_PUBLIC_APP_URL?.includes('staging')
+const is_staging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' || process.env.NEXT_PUBLIC_APP_URL?.includes('staging')
 
 export default () => {
   const dispatch = useDispatch()

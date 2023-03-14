@@ -35,10 +35,12 @@ import { getBalance } from '../../lib/object/balance'
 import { split, toArray, includesStringList, paramsToObj, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, loaderColor, sleep, errorPatterns, parseError } from '../../lib/utils'
 import { BALANCES_DATA, GET_BALANCES_DATA } from '../../reducers/types'
 
+const is_staging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' || process.env.NEXT_PUBLIC_APP_URL?.includes('staging')
 const WRAPPED_PREFIX = process.env.NEXT_PUBLIC_WRAPPED_PREFIX
 const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT)
 const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT)
 const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)
+const RELAYER_FEE_ASSET_TYPES = ['native', 'transacting']
 
 const DEFAULT_OPTIONS = {
   to: '',
@@ -134,6 +136,7 @@ export default () => {
   const [estimateResponse, setEstimateResponse] = useState(null)
   const [isApproveNeeded, setIsApproveNeeded] = useState(undefined)
 
+  const [relayerFeeAssetType, setRelayerFeeAssetType] = useState(_.head(RELAYER_FEE_ASSET_TYPES))
   const [fees, setFees] = useState(null)
   const [estimateFeesTrigger, setEstimateFeesTrigger] = useState(null)
 
@@ -767,6 +770,7 @@ export default () => {
     }
 
     if (reset_bridge) {
+      setRelayerFeeAssetType(_.head(RELAYER_FEE_ASSET_TYPES))
       setFees(null)
       setEstimateFeesTrigger(null)
     }
@@ -870,6 +874,7 @@ export default () => {
               originDomain: source_chain_data?.domain_id,
               destinationDomain: destination_chain_data?.domain_id,
               isHighPriority: !forceSlow,
+              // priceIn: relayerFeeAssetType.filter(t => is_staging || ['transacting'].includes(t)).includes(relayerFeeAssetType) ? 'usd' : 'native',
             }
 
             try {
@@ -2599,10 +2604,15 @@ export default () => {
                                             </Tooltip>
                                             {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.routerFee) || estimateResponse ?
                                               <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-semibold space-x-1.5">
-                                                <DecimalsFormat
-                                                  value={Number(router_fee) <= 0 ? 0 : router_fee}
-                                                  className="text-sm"
-                                                />
+                                                {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimatedValues?.routerFee) && !estimateResponse ?
+                                                  <DecimalsFormat
+                                                    value={Number(router_fee) <= 0 ? 0 : router_fee}
+                                                    className="text-sm"
+                                                  /> :
+                                                  <span>
+                                                    -
+                                                  </span>
+                                                }
                                                 <span>
                                                   {source_symbol}
                                                 </span>
