@@ -864,9 +864,11 @@ export default () => {
               nativeCurrency,
             } = { ..._.head(provider_params) }
 
-            const {
+            let {
               decimals,
             } = { ...nativeCurrency }
+
+            decimals = decimals || 18
 
             const routerFee = forceSlow ? 0 : parseFloat((Number(amount) * ROUTER_FEE_PERCENT / 100).toFixed(source_contract_data.decimals))
 
@@ -874,7 +876,7 @@ export default () => {
               originDomain: source_chain_data?.domain_id,
               destinationDomain: destination_chain_data?.domain_id,
               isHighPriority: !forceSlow,
-              // priceIn: relayerFeeAssetType.filter(t => is_staging || ['transacting'].includes(t)).includes(relayerFeeAssetType) ? 'usd' : 'native',
+              priceIn: ['transacting'].includes(relayerFeeAssetType) ? 'usd' : 'native',
             }
 
             try {
@@ -885,7 +887,17 @@ export default () => {
 
               const response = await sdk.sdkBase.estimateRelayerFee(params)
 
-              const relayerFee = response && utils.formatUnits(response, decimals || 18)
+              let relayerFee = response && utils.formatUnits(response, decimals)
+
+              if (relayerFee && params.priceIn === 'usd') {
+                const {
+                  price,
+                } = { ...source_asset_data }
+
+                if (price) {
+                  relayerFee = (Number(relayerFee) / price).toFixed(decimals)
+                }
+              }
 
               console.log(
                 '[relayerFee]',
@@ -1203,6 +1215,9 @@ export default () => {
         }
       }
 
+      const relayer_fee_field = `relayerFee${relayerFeeAssetType === 'transacting' ? 'InTransactingAsset' : ''}`
+      const relayer_fee_decimals = relayerFeeAssetType === 'transacting' ? source_contract_data?.decimals || 18 : 18
+
       const xcallParams = {
         origin: source_chain_data?.domain_id,
         destination: destination_chain_data?.domain_id,
@@ -1213,12 +1228,13 @@ export default () => {
         slippage: ((typeof slippage === 'number' ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE) * 100).toString(),
         receiveLocal: receiveLocal || false,
         callData: callData || '0x',
-        relayerFee: relayerFee && Number(relayerFee) > 0 ? utils.parseEther(relayerFee.toString()).toString() : undefined,
+        [relayer_fee_field]: relayerFee && Number(relayerFee) > 0 ? utils.parseUnits(Number(relayerFee).toFixed(relayer_fee_decimals), relayer_fee_decimals).toString() : undefined,
       }
 
       console.log(
         '[xcall setup]',
         {
+          relayerFeeAssetType,
           relayerFee,
           fees,
         },
@@ -1229,7 +1245,7 @@ export default () => {
 
       let failed = false
 
-      if (!xcallParams.relayerFee && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') {
+      if (!xcallParams[relayer_fee_field] && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') {
         setXcallResponse(
           {
             status: 'failed',
@@ -1599,7 +1615,7 @@ export default () => {
   const pool_amounts = toArray(_.concat(adopted, local)).filter(a => ['string', 'number'].includes(typeof a.balance)).map(a => Number(a.balance))
   const pool_amount = receiveLocal || estimatedValues?.isNextAsset ? null : Number(next_asset_data?.balance) > -1 ? Number(next_asset_data.balance) : _.min(pool_amounts)
   const min_amount = 0
-  const max_amount = source_amount && utils.formatUnits(utils.parseUnits(source_amount, source_decimals).toBigInt() - utils.parseUnits(relayer_fee && source_contract_data?.contract_address === constants.AddressZero ? relayer_fee : '0', source_decimals).toBigInt(), source_decimals)
+  const max_amount = source_amount && utils.formatUnits(utils.parseUnits(source_amount, source_decimals).toBigInt() - utils.parseUnits(relayerFeeAssetType === 'native' && relayer_fee && source_contract_data?.contract_address === constants.AddressZero ? relayer_fee : '0', source_decimals).toBigInt(), source_decimals)
 
   const estimated_received = estimatedValues?.amountReceived ? estimatedValues.amountReceived : Number(amount) > 0 && typeof router_fee === 'number' ? Number(amount) - router_fee : null
   const estimated_slippage = estimatedValues?.destinationSlippage && estimatedValues?.originSlippage ? (Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100 : null
@@ -2647,9 +2663,36 @@ export default () => {
                                                     value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
                                                     className="text-sm"
                                                   />
-                                                  <span>
-                                                    {source_gas_native_token?.symbol}
-                                                  </span>
+                                                  {is_staging || true ?
+                                                    <select
+                                                      disabled={disabled}
+                                                      value={relayerFeeAssetType}
+                                                      onChange={
+                                                        e => {
+                                                          setRelayerFeeAssetType(e.target.value)
+                                                          setEstimateFeesTrigger(moment().valueOf())
+                                                        }
+                                                      }
+                                                      className="bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0"
+                                                    >
+                                                      {RELAYER_FEE_ASSET_TYPES
+                                                        .map((t, i) => {
+                                                          return (
+                                                            <option
+                                                              key={i}
+                                                              title={`${t} asset`}
+                                                              value={t}
+                                                            >
+                                                              {t === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
+                                                            </option>
+                                                          )
+                                                        })
+                                                      }
+                                                    </select> :
+                                                    <span>
+                                                      {relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
+                                                    </span>
+                                                  }
                                                 </span>
                                                 <button
                                                   disabled={disabled}
@@ -2823,7 +2866,7 @@ export default () => {
                             Number(amount) < 0 || Number(amount) < min_amount ||
                             (typeof pool_amount === 'number' && Number(amount) > pool_amount) ||
                             (fees && (!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') ||
-                            (fees && Number(relayer_fee) > 0 && source_gas_amount && utils.parseEther(source_gas_amount).toBigInt() < utils.parseEther(relayer_fee).toBigInt() + utils.parseEther(source_contract_data?.contract_address === constants.AddressZero ? amount : '0').toBigInt())
+                            (fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'native' && source_gas_amount && utils.parseEther(source_gas_amount).toBigInt() < utils.parseEther(relayer_fee).toBigInt() + utils.parseEther(source_contract_data?.contract_address === constants.AddressZero ? amount : '0').toBigInt())
                           ) ?
                             <Alert
                               color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
@@ -2847,7 +2890,7 @@ export default () => {
                                         `Exceed Pool Balances: ${pool_amount >= 1000 ? numberFormat(pool_amount, '0,0.00') : pool_amount}` :
                                         fees && (!relayer_fee || Number(relayer_fee) <= 0) ?
                                           'Cannot estimate the relayer fee at the moment. Please try again later.' :
-                                          fees && Number(relayer_fee) > 0 && source_gas_amount && utils.parseEther(source_gas_amount).toBigInt() < utils.parseEther(relayer_fee).toBigInt() + utils.parseEther(source_contract_data?.contract_address === constants.AddressZero ? amount : '0').toBigInt() ?
+                                          fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'native' && source_gas_amount && utils.parseEther(source_gas_amount).toBigInt() < utils.parseEther(relayer_fee).toBigInt() + utils.parseEther(source_contract_data?.contract_address === constants.AddressZero ? amount : '0').toBigInt() ?
                                             'Insufficient gas for the destination gas fee.' :
                                             ''
                                 }
@@ -2867,8 +2910,7 @@ export default () => {
                                   `w-full ${
                                     disabled ?
                                       'bg-blue-400 dark:bg-blue-500' :
-                                      ['', '0', '0.0'].includes(amount) ||
-                                      ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') ?
+                                      ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') ?
                                         'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' :
                                         'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
                                   } rounded flex items-center ${
