@@ -1615,7 +1615,7 @@ export default () => {
   const pool_amounts = toArray(_.concat(adopted, local)).filter(a => ['string', 'number'].includes(typeof a.balance)).map(a => Number(a.balance))
   const pool_amount = receiveLocal || estimatedValues?.isNextAsset ? null : Number(next_asset_data?.balance) > -1 ? Number(next_asset_data.balance) : _.min(pool_amounts)
   const min_amount = 0
-  const max_amount = source_amount && utils.formatUnits(utils.parseUnits(source_amount, source_decimals).toBigInt() - utils.parseUnits(relayerFeeAssetType === 'native' && relayer_fee && source_contract_data?.contract_address === constants.AddressZero ? relayer_fee : '0', source_decimals).toBigInt(), source_decimals)
+  const max_amount = source_amount && utils.formatUnits(utils.parseUnits(source_amount, source_decimals).toBigInt() - utils.parseUnits(relayer_fee && source_contract_data?.contract_address === constants.AddressZero ? relayer_fee : '0', source_decimals).toBigInt(), source_decimals)
 
   const estimated_received = estimatedValues?.amountReceived ? estimatedValues.amountReceived : Number(amount) > 0 && typeof router_fee === 'number' ? Number(amount) - router_fee : null
   const estimated_slippage = estimatedValues?.destinationSlippage && estimatedValues?.originSlippage ? (Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100 : null
@@ -2721,7 +2721,7 @@ export default () => {
                                             amount={amount}
                                             assetPrice={source_asset_data?.price}
                                             gasFee={relayer_fee}
-                                            gasSymbol={source_gas_native_token?.symbol}
+                                            gasSymbol={relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
                                           />
                                           <div className="flex items-center justify-between space-x-2">
                                             <Tooltip

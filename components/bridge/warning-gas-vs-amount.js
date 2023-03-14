@@ -36,9 +36,13 @@ export default (
     [amount, gasFee, gasSymbol],
   )
 
-  const {
+  const gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d?.symbol, gasSymbol))
+
+  let {
     price,
-  } = { ...toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d?.symbol, gasSymbol)) }
+  } = { ...gas_token_data }
+
+  price = price || (!gas_token_data && assetPrice)
 
   return (
     !hidden && Number(amount) > 0 && assetPrice > 0 && Number(gasFee) > 0 && price > 0 &&
