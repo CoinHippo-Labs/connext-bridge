@@ -21,9 +21,11 @@ import { getAsset } from '../../lib/object/asset'
 import { getContract } from '../../lib/object/contract'
 import { split, toArray, includesStringList, ellipse, equalsIgnoreCase, loaderColor, errorPatterns, parseError } from '../../lib/utils'
 
+const is_staging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' || process.env.NEXT_PUBLIC_APP_URL?.includes('staging')
 const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT)
 const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT)
 const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)
+const RELAYER_FEE_ASSET_TYPES = ['native', 'transacting']
 
 export default (
   {
@@ -39,6 +41,7 @@ export default (
     preferences,
     chains,
     assets,
+    gas_tokens_price,
     dev,
     wallet,
   } = useSelector(
@@ -47,6 +50,7 @@ export default (
         preferences: state.preferences,
         chains: state.chains,
         assets: state.assets,
+        gas_tokens_price: state.gas_tokens_price,
         dev: state.dev,
         wallet: state.wallet,
       }
@@ -62,6 +66,9 @@ export default (
   const {
     assets_data,
   } = { ...assets }
+  const {
+    gas_tokens_price_data,
+  } = { ...gas_tokens_price }
   const {
     wallet_data,
   } = { ...wallet }
@@ -81,6 +88,7 @@ export default (
   const [loaded, setLoaded] = useState(false)
   const [newSlippage, setNewSlippage] = useState(null)
   const [slippageEditing, setSlippageEditing] = useState(false)
+  const [relayerFeeAssetType, setRelayerFeeAssetType] = useState(_.head(RELAYER_FEE_ASSET_TYPES))
   const [newRelayerFee, setNewRelayerFee] = useState(null)
   const [estimatedValues, setEstimatedValues] = useState(undefined)
   const [estimateResponse, setEstimateResponse] = useState(null)
@@ -113,7 +121,7 @@ export default (
         setLoaded(true)
       }
     },
-    [transferData, data, loaded],
+    [transferData, data, loaded, relayerFeeAssetType],
   )
 
   const {
@@ -129,6 +137,7 @@ export default (
     destination_local_asset,
     slippage,
     receive_local,
+    relayer_fees,
   } = { ...data }
   let {
     relayer_fee,
@@ -181,6 +190,7 @@ export default (
   const source_decimals = source_contract_data?.decimals || 18
   const source_asset_image = source_contract_data?.image || source_asset_data?.image
   const source_gas_native_token = _.head(source_chain_data?.provider_params)?.nativeCurrency
+  const source_gas_decimals = source_gas_native_token?.decimals || 18
   const source_amount =
     origin_transacting_amount &&
     Number(
@@ -245,7 +255,26 @@ export default (
       Number(((Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100).toFixed(2)) :
       null
 
-  relayer_fee = utils.formatUnits(relayer_fee || '0', source_gas_native_token?.decimals || 18)
+  const gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d?.symbol, source_gas_native_token?.symbol))
+
+  const {
+    price,
+  } = { ...gas_token_data }
+
+  relayer_fee =
+    relayer_fees ?
+      _.sum(
+        Object.entries(relayer_fees)
+          .map(([k, v]) =>
+            Number(utils.formatUnits(v, k === constants.AddressZero ? source_gas_decimals : source_decimals)) *
+            (relayerFeeAssetType === 'transacting' ?
+              k === constants.AddressZero ? price / source_asset_data?.price : 1 :
+              k === constants.AddressZero ? 1 : source_asset_data?.price / price
+            )
+          )
+      )
+      .toFixed(relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals) :
+      utils.formatUnits(relayer_fee || '0', source_gas_decimals)
 
   const relayer_fee_to_bump = relayer_fee && newRelayerFee ? Number(newRelayerFee) - Number(relayer_fee) : null
 
@@ -255,6 +284,7 @@ export default (
     setLoaded(false)
     setNewSlippage(null)
     setSlippageEditing(false)
+    setRelayerFeeAssetType(_.head(RELAYER_FEE_ASSET_TYPES))
     setNewRelayerFee(null)
     setEstimatedValues(undefined)
     setUpdating(null)
@@ -282,14 +312,17 @@ export default (
               nativeCurrency,
             } = { ..._.head(provider_params) }
 
-            const {
+            let {
               decimals,
             } = { ...nativeCurrency }
+
+            decimals = decimals || 18
 
             const params = {
               originDomain: source_chain_data?.domain_id,
               destinationDomain: destination_chain_data?.domain_id,
               isHighPriority: true,
+              priceIn: ['transacting'].includes(relayerFeeAssetType) ? 'usd' : 'native',
             }
 
             try {
@@ -301,7 +334,17 @@ export default (
 
               const response = await sdk.sdkBase.estimateRelayerFee(params)
 
-              const gasFee = response && utils.formatUnits(response, decimals || 18)
+              let relayerFee = response && utils.formatUnits(response, decimals)
+
+              if (relayerFee && params.priceIn === 'usd') {
+                const {
+                  price,
+                } = { ...source_asset_data }
+
+                if (price) {
+                  relayerFee = (Number(relayerFee) / price).toFixed(decimals)
+                }
+              }
 
               console.log(
                 '[action required]',
@@ -309,11 +352,11 @@ export default (
                 {
                   params,
                   response,
-                  gasFee,
+                  relayerFee,
                 },
               )
 
-              setNewRelayerFee(gasFee)
+              setNewRelayerFee(relayerFee)
             } catch (error) {
               const response = parseError(error)
 
@@ -528,15 +571,9 @@ export default (
 
                 if (gasLimit) {
                   gasLimit =
-                    FixedNumber
-                      .fromString(
-                        gasLimit.toString()
-                      )
+                    FixedNumber.fromString(gasLimit.toString())
                       .mulUnsafe(
-                        FixedNumber
-                          .fromString(
-                            GAS_LIMIT_ADJUSTMENT.toString()
-                          )
+                        FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
                       )
                       .round(0)
                       .toString()
@@ -613,6 +650,7 @@ export default (
             params = {
               domainId: origin_domain,
               transferId: transfer_id,
+              asset: ['transacting'].includes(relayerFeeAssetType) ? origin_transacting_asset : constants.AddressZero,
               relayerFee: utils.parseEther(relayer_fee_to_bump || '0').toString(),
             }
 
@@ -631,15 +669,9 @@ export default (
 
                 if (gasLimit) {
                   gasLimit =
-                    FixedNumber
-                      .fromString(
-                        gasLimit.toString()
-                      )
+                    FixedNumber.fromString(gasLimit.toString())
                       .mulUnsafe(
-                        FixedNumber
-                          .fromString(
-                            GAS_LIMIT_ADJUSTMENT.toString()
-                          )
+                        FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
                       )
                       .round(0)
                       .toString()
@@ -944,15 +976,37 @@ export default (
                       <div className="whitespace-nowrap text-slate-800 dark:text-slate-200 text-sm font-medium">
                         Current relayer fee
                       </div>
-                      <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
-                        <DecimalsFormat
-                          value={relayer_fee}
-                          className="text-sm"
-                        />
-                        <span>
-                          {source_gas_native_token?.symbol}
+                      {relayer_fees ?
+                        <div className="flex flex-col space-y-2">
+                          {Object.entries(relayer_fees)
+                            .map(([k, v]) => {
+                              return (
+                                <span
+                                  key={k}
+                                  className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5"
+                                >
+                                  <DecimalsFormat
+                                    value={utils.formatUnits(v || '0', k === constants.AddressZero ? source_gas_decimals : source_decimals)}
+                                    className="text-sm"
+                                  />
+                                  <span>
+                                    {k === constants.AddressZero ? source_gas_native_token?.symbol : source_symbol}
+                                  </span>
+                                </span>
+                              )
+                            })
+                          }
+                        </div> :
+                        <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
+                          <DecimalsFormat
+                            value={relayer_fee}
+                            className="text-sm"
+                          />
+                          <span>
+                            {source_gas_native_token?.symbol}
+                          </span>
                         </span>
-                      </span>
+                      }
                     </div>
                     <div className="flex items-center justify-between space-x-1">
                       <div className="whitespace-nowrap text-slate-800 dark:text-slate-200 text-sm font-medium">
@@ -969,9 +1023,31 @@ export default (
                             value={relayer_fee_to_bump && relayer_fee_to_bump > 0 ? relayer_fee_to_bump : 0}
                             className="text-sm"
                           />
-                          <span>
-                            {source_gas_native_token?.symbol}
-                          </span>
+                          {is_staging ?
+                            <select
+                              disabled={disabled}
+                              value={relayerFeeAssetType}
+                              onChange={e => setRelayerFeeAssetType(e.target.value)}
+                              className="bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0"
+                            >
+                              {RELAYER_FEE_ASSET_TYPES
+                                .map((t, i) => {
+                                  return (
+                                    <option
+                                      key={i}
+                                      title={`${t} asset`}
+                                      value={t}
+                                    >
+                                      {t === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
+                                    </option>
+                                  )
+                                })
+                              }
+                            </select> :
+                            <span>
+                              {relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
+                            </span>
+                          }
                         </span>
                       }
                     </div>
