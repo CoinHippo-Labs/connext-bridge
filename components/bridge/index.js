@@ -1700,7 +1700,7 @@ export default () => {
                       />
                     }
                     onTransferBumped={
-                      relayer_fee => {
+                      relayer_fee_data => {
                         if (latestTransfers) {
                           const index =
                             latestTransfers
@@ -1713,7 +1713,7 @@ export default () => {
                             latestTransfers[index] =
                               {
                                 ...latestTransfers[index],
-                                relayer_fee,
+                                ...relayer_fee_data,
                                 error_status: null,
                               }
 
@@ -1775,7 +1775,7 @@ export default () => {
                               </span>
                             }
                             onTransferBumped={
-                              relayer_fee => {
+                              relayer_fee_data => {
                                 if (latestTransfers) {
                                   const index =
                                     latestTransfers
@@ -1788,7 +1788,7 @@ export default () => {
                                     latestTransfers[index] =
                                       {
                                         ...latestTransfers[index],
-                                        relayer_fee,
+                                        ...relayer_fee_data,
                                         error_status: null,
                                       }
 

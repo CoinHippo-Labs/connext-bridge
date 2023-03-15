@@ -295,12 +295,12 @@ export default (
                   </Tooltip>
                 }
                 onTransferBumped={
-                  relayer_fee => {
+                  relayer_fee_data => {
                     if (data) {
                       setTransferData(
                         {
                           ...data,
-                          relayer_fee,
+                          ...relayer_fee_data,
                           error_status: null,
                         }
                       )
@@ -425,12 +425,12 @@ export default (
                       </Tooltip>
                     }
                     onTransferBumped={
-                      relayer_fee => {
+                      relayer_fee_data => {
                         if (data) {
                           setTransferData(
                             {
                               ...data,
-                              relayer_fee,
+                              ...relayer_fee_data,
                               error_status: null,
                             }
                           )
