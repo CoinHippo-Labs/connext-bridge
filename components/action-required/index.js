@@ -245,11 +245,7 @@ export default (
       Number(((Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100).toFixed(2)) :
       null
 
-  relayer_fee =
-    utils.formatUnits(
-      relayer_fee || '0',
-      source_gas_native_token?.decimals || 18,
-    )
+  relayer_fee = utils.formatUnits(relayer_fee || '0', source_gas_native_token?.decimals || 18)
 
   const relayer_fee_to_bump = relayer_fee && newRelayerFee ? Number(newRelayerFee) - Number(relayer_fee) : null
 
@@ -415,9 +411,8 @@ export default (
             Object.fromEntries(
               Object.entries({ ...response })
                 .map(([k, v]) => {
-                  return (
-                    [
-                      k,
+                  try {
+                    v =
                       utils.formatUnits(
                         v,
                         ['amountReceived'].includes(k) ?
@@ -426,7 +421,13 @@ export default (
                             destination_contract_data?.decimals
                           ) || 18 :
                           source_decimals,
-                      ),
+                      )
+                  } catch (error) {}
+
+                  return (
+                    [
+                      k,
+                      v,
                     ]
                   )
                 })
@@ -491,11 +492,7 @@ export default (
           Number(((Number(_estimatedValues.destinationSlippage) + Number(_estimatedValues.originSlippage)) * 100).toFixed(2)) :
           null
 
-      setNewSlippage(
-        !_newSlippage || _newSlippage < 0 ?
-          DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
-          _newSlippage
-      )
+      setNewSlippage(!_newSlippage || _newSlippage < 0 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : _newSlippage)
     }
   }
 
@@ -611,10 +608,7 @@ export default (
           break
         case XTransferErrorStatus.LowRelayerFee:
           try {
-            const relayer_fee_to_bump =
-              relayer_fee && newRelayerFee ?
-                (Number(newRelayerFee) - Number(relayer_fee)).toFixed(18) :
-                null
+            const relayer_fee_to_bump = relayer_fee && newRelayerFee ? (Number(newRelayerFee) - Number(relayer_fee)).toFixed(18) : null
 
             params = {
               domainId: origin_domain,
@@ -742,6 +736,7 @@ export default (
 
   return (
     data && buttonTitle &&
+    (error_status !== XTransferErrorStatus.LowRelayerFee || relayer_fee_to_bump > 0) &&
     (
       <Modal
         hidden={hidden}
@@ -971,7 +966,7 @@ export default (
                         /> :
                         <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
                           <DecimalsFormat
-                            value={relayer_fee_to_bump}
+                            value={relayer_fee_to_bump && relayer_fee_to_bump > 0 ? relayer_fee_to_bump : 0}
                             className="text-sm"
                           />
                           <span>
@@ -1051,7 +1046,7 @@ export default (
                         >
                           <div className="flex items-center justify-center space-x-2">
                             <span className="break-all text-sm font-medium text-center">
-                              Processing ...
+                              Relaying ...
                             </span>
                           </div>
                         </Alert> :

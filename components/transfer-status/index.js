@@ -420,7 +420,7 @@ export default (
                         className="z-50 bg-dark text-white text-xs"
                       >
                         <span className="whitespace-nowrap text-red-600 dark:text-red-500 text-xs font-semibold">
-                          Action required
+                          {error_status}
                         </span>
                       </Tooltip>
                     }
