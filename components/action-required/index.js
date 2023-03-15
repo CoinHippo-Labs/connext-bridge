@@ -121,7 +121,20 @@ export default (
         setLoaded(true)
       }
     },
-    [transferData, data, loaded, relayerFeeAssetType],
+    [transferData, data, loaded],
+  )
+
+  useEffect(
+    () => {
+      switch (error_status) {
+        case XTransferErrorStatus.LowRelayerFee:
+          estimate()
+          break
+        default:
+          break
+      }
+    },
+    [loaded, relayerFeeAssetType],
   )
 
   const {
@@ -277,6 +290,20 @@ export default (
       utils.formatUnits(relayer_fee || '0', source_gas_decimals)
 
   const relayer_fee_to_bump = relayer_fee && newRelayerFee ? Number(newRelayerFee) - Number(relayer_fee) : null
+
+  if (error_status === XTransferErrorStatus.LowRelayerFee) {
+    console.log(
+      '[debug]',
+      '[relayerFee]',
+      {
+        relayerFeeAssetType,
+        relayer_fees,
+        relayer_fee,
+        newRelayerFee,
+        relayer_fee_to_bump,
+      },
+    )
+  }
 
   const reset = () => {
     setHidden(true)
@@ -707,7 +734,14 @@ export default (
               )
 
               if (!failed && onTransferBumped) {
-                onTransferBumped(params.relayerFee)
+                onTransferBumped(
+                  {
+                    relayer_fee: params.relayerFee,
+                    relayer_fees: {
+                      [params.asset]: params.relayerFee,
+                    },
+                  }
+                )
               }
             }
           } catch (error) {
