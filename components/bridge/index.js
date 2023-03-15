@@ -2717,12 +2717,14 @@ export default () => {
                                               />
                                             }
                                           </div>
-                                          <WarningGasVsAmount
-                                            amount={amount}
-                                            assetPrice={source_asset_data?.price}
-                                            gasFee={relayer_fee}
-                                            gasSymbol={relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
-                                          />
+                                          {/*
+                                            <WarningGasVsAmount
+                                              amount={amount}
+                                              assetPrice={source_asset_data?.price}
+                                              gasFee={relayer_fee}
+                                              gasSymbol={relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
+                                            />
+                                          */}
                                           <div className="flex items-center justify-between space-x-2">
                                             <Tooltip
                                               placement="top"
