@@ -1787,7 +1787,7 @@ export default (
               </div>
               <div className="space-y-4">
                 {
-                  pool_data &&
+                  pool_data && false &&
                   (
                     <div className="flex flex-col space-y-3">
                       <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">

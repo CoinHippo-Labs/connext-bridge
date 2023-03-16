@@ -7,11 +7,13 @@ import { TailSpin } from 'react-loader-spinner'
 import DecimalsFormat from '../decimals-format'
 import Image from '../image'
 import LineChart from '../charts/line'
-import { currency_symbol } from '../../lib/object/currency'
+import { ProgressBar } from '../progress-bars'
+import { currency, currency_symbol } from '../../lib/object/currency'
 import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
 import { toArray, name, equalsIgnoreCase, loaderColor } from '../../lib/utils'
 
+const WRAPPED_PREFIX = process.env.NEXT_PUBLIC_WRAPPED_PREFIX
 const DAILY_METRICS = ['tvl', 'volume']
 
 export default (
@@ -101,11 +103,13 @@ export default (
     domainId,
     canonicalHash,
     lpTokenAddress,
-    adopted,
-    local,
     supply,
     volume_value,
     error,
+  } = { ...pool_data }
+  let {
+    adopted,
+    local,
   } = { ...pool_data }
 
   const {
@@ -161,6 +165,19 @@ export default (
         balance,
       }
     })
+
+  adopted = { ...adopted, asset_data: _.head(pool_tokens_data) }
+  local = { ...local, asset_data: _.last(pool_tokens_data) }
+
+  const native_asset = !adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local
+
+  const wrapped_asset = adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local
+
+  const native_amount = Number(native_asset?.balance || '0')
+
+  const wrapped_amount = Number(wrapped_asset?.balance || '0')
+
+  const total_amount = native_amount + wrapped_amount
 
   const {
     price,
@@ -231,213 +248,6 @@ export default (
             }
           />
           <div className="grid grid-cols-2 lg:grid-cols-2 gap-2">
-            <div className={metricClassName}>
-              <span className={titleClassName}>
-                TVL
-              </span>
-              <div className="flex flex-col space-y-1">
-                <span className={valueClassName}>
-                  {pool_data && !error ?
-                    <span className="uppercase">
-                      {currency_symbol}
-                      <DecimalsFormat
-                        value={tvl}
-                        className={valueClassName}
-                      />
-                    </span> :
-                    selected && !no_pool && !error &&
-                    (pool_loading ?
-                      <div className="mt-1">
-                        <TailSpin
-                          width="24"
-                          height="24"
-                          color={loaderColor(theme)}
-                        />
-                      </div> :
-                      '-'
-                    )
-                  }
-                </span>
-              </div>
-            </div>
-            <div className={metricClassName}>
-              <span className={titleClassName}>
-                Volume (7d)
-              </span>
-              <div className="flex flex-col space-y-1">
-                <span className={valueClassName}>
-                  {pool_data && !error ?
-                    !isNaN(volume_value) ?
-                      <span className="uppercase">
-                        {currency_symbol}
-                        <DecimalsFormat
-                          value={volume_value}
-                          className={valueClassName}
-                        />
-                      </span> :
-                      'TBD' :
-                    selected && !no_pool && !error &&
-                    (pool_loading ?
-                      <div className="mt-1">
-                        <TailSpin
-                          width="24"
-                          height="24"
-                          color={loaderColor(theme)}
-                        />
-                      </div> :
-                      '-'
-                    )
-                  }
-                </span>
-              </div>
-            </div>
-            <div className={metricClassName}>
-              <span className={titleClassName}>
-                Liquidity provided
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {position_loading || pool_loading ?
-                  <div>
-                    <div className="mt-1">
-                      <TailSpin
-                        width="24"
-                        height="24"
-                        color={loaderColor(theme)}
-                      />
-                    </div>
-                  </div> :
-                  pool_tokens_data
-                    .map((p, i) => {
-                      const {
-                        contract_address,
-                        symbol,
-                        image,
-                        balance,
-                      } = { ...p }
-
-                      return (
-                        <div
-                          key={i}
-                          className="flex flex-col space-y-1"
-                        >
-                          <a
-                            href={`${url}${contract_path?.replace('{address}', contract_address)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center space-x-2"
-                          >
-                            {
-                              image &&
-                              (
-                                <Image
-                                  src={image}
-                                  width={16}
-                                  height={16}
-                                  className="rounded-full"
-                                />
-                              )
-                            }
-                            <span className="text-xs font-medium">
-                              {symbol}
-                            </span>
-                          </a>
-                          <a
-                            href={`${url}${contract_path?.replace('{address}', contract_address)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={gridValueClassName}
-                          >
-                            {pool_data && !error ?
-                              <span className="uppercase">
-                                {balance > -1 ?
-                                  <DecimalsFormat
-                                    value={balance}
-                                    className={gridValueClassName}
-                                  /> :
-                                  '-'
-                                }
-                              </span> :
-                              selected && !no_pool && !error &&
-                              (pool_loading ?
-                                <div className="mt-1">
-                                  <TailSpin
-                                    width="24"
-                                    height="24"
-                                    color={loaderColor(theme)}
-                                  />
-                                </div> :
-                                '-'
-                              )
-                            }
-                          </a>
-                        </div>
-                      )
-                    })
-                }
-              </div>
-            </div>
-            <div className={metricClassName}>
-              <span className={titleClassName}>
-                My positions
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {position_loading || pool_loading ?
-                  <div>
-                    <div className="mt-1">
-                      <TailSpin
-                        width="24"
-                        height="24"
-                        color={loaderColor(theme)}
-                      />
-                    </div>
-                  </div> :
-                  <>
-                    <div className="flex flex-col space-y-1">
-                      {lpTokenAddress && url ?
-                        <a
-                          href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs font-medium"
-                        >
-                          Pool Tokens
-                        </a> :
-                        <span className="text-xs font-medium">
-                          Pool Tokens
-                        </span>
-                      }
-                      {lpTokenAddress && url ?
-                        <a
-                          href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={gridValueClassName}
-                        >
-                          <DecimalsFormat
-                            value={lpTokenBalance || '0'}
-                            className={gridValueClassName}
-                          />
-                        </a> :
-                        <DecimalsFormat
-                          value={lpTokenBalance || '0'}
-                          className={gridValueClassName}
-                        />
-                      }
-                    </div>
-                    <div className="flex flex-col space-y-1">
-                      <span className="text-xs font-medium">
-                        Share
-                      </span>
-                      <DecimalsFormat
-                        value={share}
-                        suffix="%"
-                        className={gridValueClassName}
-                      />
-                    </div>
-                  </>
-                }
-              </div>
-            </div>
             <div className={`${metricClassName} col-span-2 pt-6 pb-1`}>
               <LineChart
                 id={dailyMetric}
@@ -458,6 +268,253 @@ export default (
                   </div>
                 }
               />
+            </div>
+            {/*
+              <div className={metricClassName}>
+                <span className={titleClassName}>
+                  TVL
+                </span>
+                <div className="flex flex-col space-y-1">
+                  <span className={valueClassName}>
+                    {pool_data && !error ?
+                      <span className="uppercase">
+                        {currency_symbol}
+                        <DecimalsFormat
+                          value={tvl}
+                          className={valueClassName}
+                        />
+                      </span> :
+                      selected && !no_pool && !error &&
+                      (pool_loading ?
+                        <div className="mt-1">
+                          <TailSpin
+                            width="24"
+                            height="24"
+                            color={loaderColor(theme)}
+                          />
+                        </div> :
+                        '-'
+                      )
+                    }
+                  </span>
+                </div>
+              </div>
+              <div className={metricClassName}>
+                <span className={titleClassName}>
+                  Volume (7d)
+                </span>
+                <div className="flex flex-col space-y-1">
+                  <span className={valueClassName}>
+                    {pool_data && !error ?
+                      !isNaN(volume_value) ?
+                        <span className="uppercase">
+                          {currency_symbol}
+                          <DecimalsFormat
+                            value={volume_value}
+                            className={valueClassName}
+                          />
+                        </span> :
+                        'TBD' :
+                      selected && !no_pool && !error &&
+                      (pool_loading ?
+                        <div className="mt-1">
+                          <TailSpin
+                            width="24"
+                            height="24"
+                            color={loaderColor(theme)}
+                          />
+                        </div> :
+                        '-'
+                      )
+                    }
+                  </span>
+                </div>
+              </div>
+            */}
+            <div className={metricClassName}>
+              <span className={titleClassName}>
+                Pool Composition
+              </span>
+              <div className="space-y-3">
+                {
+                  !(position_loading || pool_loading) &&
+                  (
+                    <ProgressBar
+                      width={native_amount * 100 / total_amount}
+                      className="w-full rounded-lg"
+                      backgroundClassName="rounded-lg"
+                      style={
+                        {
+                          backgroundColor: asset_data?.color,
+                        }
+                      }
+                      backgroundStyle={
+                        {
+                          backgroundColor: `${asset_data?.color}33`,
+                        }
+                      }
+                    />
+                  )
+                }
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {position_loading || pool_loading ?
+                    <div>
+                      <div className="mt-1">
+                        <TailSpin
+                          width="24"
+                          height="24"
+                          color={loaderColor(theme)}
+                        />
+                      </div>
+                    </div> :
+                    pool_tokens_data
+                      .map((p, i) => {
+                        const {
+                          contract_address,
+                          symbol,
+                          image,
+                          balance,
+                        } = { ...p }
+
+                        return (
+                          <div
+                            key={i}
+                            className="flex flex-col space-y-1"
+                          >
+                            <a
+                              href={`${url}${contract_path?.replace('{address}', contract_address)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center space-x-2"
+                            >
+                              {
+                                image &&
+                                (
+                                  <Image
+                                    src={image}
+                                    width={16}
+                                    height={16}
+                                    className="rounded-full"
+                                  />
+                                )
+                              }
+                              <span className="text-xs font-medium">
+                                {symbol}
+                              </span>
+                            </a>
+                            <a
+                              href={`${url}${contract_path?.replace('{address}', contract_address)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={gridValueClassName}
+                            >
+                              {pool_data && !error ?
+                                <div className="flex items-center space-x-1.5">
+                                  <span className="uppercase">
+                                    {balance > -1 ?
+                                      <DecimalsFormat
+                                        value={balance}
+                                        noTooltip={true}
+                                        className={gridValueClassName}
+                                      /> :
+                                      '-'
+                                    }
+                                  </span>
+                                  {
+                                    balance > -1 && total_amount > 0 &&
+                                    (
+                                      <DecimalsFormat
+                                        value={balance * 100 / total_amount}
+                                        prefix="("
+                                        suffix="%)"
+                                        noTooltip={true}
+                                        className="text-xs mt-0.5"
+                                      />
+                                    )
+                                  }
+                                </div> :
+                                selected && !no_pool && !error &&
+                                (pool_loading ?
+                                  <div className="mt-1">
+                                    <TailSpin
+                                      width="24"
+                                      height="24"
+                                      color={loaderColor(theme)}
+                                    />
+                                  </div> :
+                                  '-'
+                                )
+                              }
+                            </a>
+                          </div>
+                        )
+                      })
+                  }
+                </div>
+              </div>
+            </div>
+            <div className={metricClassName}>
+              <span className={titleClassName}>
+                My Position
+              </span>
+              <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${!(position_loading || pool_loading) ? 'pt-4' : ''}`}>
+                {position_loading || pool_loading ?
+                  <div>
+                    <div className="mt-1">
+                      <TailSpin
+                        width="24"
+                        height="24"
+                        color={loaderColor(theme)}
+                      />
+                    </div>
+                  </div> :
+                  <>
+                    <div className="flex flex-col space-y-1">
+                      {lpTokenAddress && url ?
+                        <a
+                          href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-medium"
+                        >
+                          Current Value ({currency.toUpperCase()})
+                        </a> :
+                        <span className="text-xs font-medium">
+                          Current Value ({currency.toUpperCase()})
+                        </span>
+                      }
+                      {lpTokenAddress && url ?
+                        <a
+                          href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={gridValueClassName}
+                        >
+                          <DecimalsFormat
+                            value={(lpTokenBalance || '0') * price}
+                            prefix={currency_symbol}
+                            className={gridValueClassName}
+                          />
+                        </a> :
+                        <DecimalsFormat
+                          value={(lpTokenBalance || '0') * price}
+                          className={gridValueClassName}
+                        />
+                      }
+                    </div>
+                    <div className="flex flex-col space-y-1">
+                      <span className="text-xs font-medium">
+                        Share
+                      </span>
+                      <DecimalsFormat
+                        value={share}
+                        suffix="%"
+                        className={gridValueClassName}
+                      />
+                    </div>
+                  </>
+                }
+              </div>
             </div>
           </div>
         </div>
