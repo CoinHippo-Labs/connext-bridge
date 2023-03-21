@@ -1,7 +1,6 @@
 import { CgArrowRightR } from 'react-icons/cg'
 import { RiCopperCoinLine } from 'react-icons/ri'
 import { HiSwitchVertical, HiOutlineDocumentSearch } from 'react-icons/hi'
-import { BiCommentDetail } from 'react-icons/bi'
 
 export default
   [
@@ -48,18 +47,6 @@ export default
       external: true,
       icon: (
         <HiOutlineDocumentSearch
-          size={20}
-          className="stroke-current"
-        />
-      ),
-    },
-    {
-      id: 'feedback',
-      title: 'Feedback',
-      path: process.env.NEXT_PUBLIC_FEEDBACK_URL,
-      external: true,
-      icon: (
-        <BiCommentDetail
           size={20}
           className="stroke-current"
         />

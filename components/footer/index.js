@@ -38,7 +38,7 @@ export default () => {
 
   return (
     <>
-      {
+      {/*
         process.env.NEXT_PUBLIC_FEEDBACK_URL &&
         (
           <div className={`${theme} footer flex flex-col md:flex-row items-center space-y-2.5 sm:space-y-0 py-1 px-3`}>
@@ -59,7 +59,7 @@ export default () => {
             </div>
           </div>
         )
-      }
+      */}
       <div className={`${theme} footer flex flex-col md:flex-row items-center space-y-2.5 sm:space-y-0 p-3`}>
         <div className="w-full md:w-1/2 lg:w-1/3 min-w-max flex items-center justify-center md:justify-start text-slate-400 dark:text-slate-500 font-medium space-x-2">
           <span>
