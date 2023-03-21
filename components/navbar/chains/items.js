@@ -11,22 +11,17 @@ export default (
   },
 ) => {
   const {
-    preferences,
     chains,
     wallet,
   } = useSelector(
     state => (
       {
-        preferences: state.preferences,
         chains: state.chains,
         wallet: state.wallet,
       }
     ),
     shallowEqual,
   )
-  const {
-    theme,
-  } = { ...preferences }
   const {
     chains_data,
   } = { ...chains }

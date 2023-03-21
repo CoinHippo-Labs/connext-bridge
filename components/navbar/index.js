@@ -14,6 +14,7 @@ import EnsProfile from '../ens-profile'
 import Wallet from '../wallet'
 import Chains from './chains'
 import Theme from './theme'
+import Menus from './menus'
 import Copy from '../copy'
 import { getChains, getAssets } from '../../lib/api/config'
 import { assetsPrice } from '../../lib/api/assets'
@@ -1299,6 +1300,7 @@ export default () => {
               />
             </div>
             <Theme />
+            <Menus />
           </div>
         </div>
       </div>

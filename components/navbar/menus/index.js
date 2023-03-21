@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { FiMenu } from 'react-icons/fi'
+import { RxHamburgerMenu } from 'react-icons/rx'
 
 import Items from './items'
 
@@ -28,25 +28,28 @@ export default () => {
   const onClick = () => setHidden(!hidden)
 
   return (
-    <div className="block lg:hidden relative">
+    <div className="relative">
       <button
         ref={buttonRef}
         onClick={onClick}
-        className="w-10 sm:w-12 h-16 flex items-center justify-center"
+        className="w-8 h-16 flex items-center justify-center sm:mr-2"
       >
-        <FiMenu
-          size={24}
+        <RxHamburgerMenu
+          size={20}
         />
       </button>
       <div
         ref={dropdownRef}
-        className={`dropdown ${hidden ? '' : 'open'} absolute top-0 left-3 mt-12`}
+        className={`dropdown ${hidden ? '' : 'open'} absolute top-0 right-4 mt-12`}
       >
-        <div className="dropdown-content w-40 bottom-start">
-          <Items
-            onClick={onClick}
-          />
-        </div>
+        {
+          !hidden &&
+          (
+            <div className="dropdown-content w-44 bottom-start">
+              <Items />
+            </div>
+          )
+        }
       </div>
     </div>
   )

@@ -65,11 +65,7 @@ export default (
   useEffect(
     () => {
       const handleClickOutside = e => {
-        if (
-          !open ||
-          !modalRef?.current ||
-          modalRef.current.contains(e.target)
-        ) {
+        if (!open || !modalRef?.current || modalRef.current.contains(e.target)) {
           return false
         }
 
