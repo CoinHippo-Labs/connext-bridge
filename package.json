@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/CoinHippo-Labs/connext-bridge#readme",
   "dependencies": {
-    "@coinbase/wallet-sdk": "^3.6.3",
+    "@coinbase/wallet-sdk": "^3.6.5",
     "@connext/sdk": "1.0.3-alpha.0",
     "@material-tailwind/react": "^1.4.2",
     "@portis/web3": "^4.0.7",
@@ -30,10 +30,10 @@
     "@walletconnect/web3-provider": "^1.8.0",
     "env-cmd": "^10.1.0",
     "ethers": "^5.7.2",
-    "html-react-parser": "^3.0.9",
+    "html-react-parser": "^3.0.13",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
-    "next": "^13.1.6",
+    "next": "^13.2.4",
     "next-secure-headers": "^2.2.0",
     "nprogress": "^0.2.0",
     "numeral": "^2.0.6",
@@ -45,7 +45,7 @@
     "react-debounce-input": "^3.3.0",
     "react-dom": "18.2.0",
     "react-gtm-module": "^2.0.11",
-    "react-icons": "^4.7.1",
+    "react-icons": "^4.8.0",
     "react-linkify": "^1.0.0-alpha",
     "react-loader-spinner": "^5.3.4",
     "react-page-visibility": "^7.0.0",
@@ -58,7 +58,7 @@
     "web3modal": "1.9.7"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.13",
+    "autoprefixer": "^10.4.14",
     "crypto-browserify": "^3.12.0",
     "events": "^3.3.0",
     "https-browserify": "^1.0.0",
@@ -67,6 +67,6 @@
     "postcss-color-function": "^4.1.0",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
-    "tailwindcss": "^3.2.6"
+    "tailwindcss": "^3.2.7"
   }
 }

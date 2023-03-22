@@ -47,11 +47,7 @@ export default (
 
   useEffect(
     () => {
-      if (
-        typeof window !== 'undefined' &&
-        localStorage.getItem(THEME) &&
-        localStorage.getItem(THEME) !== theme
-      ) {
+      if (typeof window !== 'undefined' && localStorage.getItem(THEME) && localStorage.getItem(THEME) !== theme) {
         dispatch(
           {
             type: THEME,
@@ -63,13 +59,7 @@ export default (
     [theme],
   )
 
-  const headMeta =
-    meta(
-      asPath,
-      null,
-      chains_data,
-      assets_data,
-    )
+  const headMeta = meta(asPath, null, chains_data, assets_data)
 
   const {
     title,
@@ -170,15 +160,7 @@ export default (
         />
       </Head>
       <PageVisibility
-        onChange={
-          v =>
-            dispatch(
-              {
-                type: PAGE_VISIBLE,
-                value: v,
-              }
-            )
-        }
+        onChange={v => dispatch({ type: PAGE_VISIBLE, value: v })}
       >
         <div
           data-layout="layout"

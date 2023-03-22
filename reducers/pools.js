@@ -13,13 +13,7 @@ export default (
     case POOLS_DATA:
       return {
         ...state,
-        [POOLS_DATA]:
-          _.uniqBy(
-            toArray(
-              _.concat(action.value, state[POOLS_DATA])
-            ),
-            'id',
-          ),
+        [POOLS_DATA]: _.uniqBy(toArray(_.concat(action.value, state[POOLS_DATA])), 'id'),
       }
     default:
       return state

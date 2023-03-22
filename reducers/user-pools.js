@@ -14,24 +14,12 @@ export default (
       const [
         key,
         value,
-      ] = (
-        toArray(
-          _.head(
-            Object.entries({ ...action.value })
-          )
-        )
-      )
+      ] = toArray(_.head(Object.entries({ ...action.value })))
 
       if (key && value) {
         let values = state?.[USER_POOLS_DATA]?.[key]
 
-        values =
-          _.uniqBy(
-            toArray(
-              _.concat(value, values)
-            ),
-            'id',
-          )
+        values = _.uniqBy(toArray(_.concat(value, values)), 'id')
 
         action.value = { [key]: values }
       }
@@ -40,13 +28,12 @@ export default (
         ...state,
         [USER_POOLS_DATA]:
           action.value &&
-          (
-            Object.keys(action.value).length < 1 ?
-              action.value :
-              {
-                ...state?.[USER_POOLS_DATA],
-                ...action.value,
-              }
+          (Object.keys(action.value).length < 1 ?
+            action.value :
+            {
+              ...state?.[USER_POOLS_DATA],
+              ...action.value,
+            }
           ),
       }
     default:

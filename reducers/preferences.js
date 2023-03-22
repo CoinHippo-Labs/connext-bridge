@@ -10,11 +10,7 @@ export default (
 ) => {
   switch (action.type) {
     case THEME:
-      localStorage
-        .setItem(
-          THEME,
-          action.value,
-        )
+      localStorage.setItem(THEME, action.value)
 
       return {
         ...state,
