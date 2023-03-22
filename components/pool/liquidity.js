@@ -42,17 +42,17 @@ const WITHDRAW_OPTIONS = [
   {
     title: '{x} only',
     value: 'x_only',
-    is_staging: true,
+    is_staging: false,
   },
   {
     title: '{y} only',
     value: 'y_only',
-    is_staging: true,
+    is_staging: false,
   },
   {
     title: 'Custom amounts',
     value: 'custom_amounts',
-    is_staging: true,
+    is_staging: false,
   },
 ]
 
@@ -193,19 +193,8 @@ export default (
           let _amountX, _amountY
 
           try {
-            _amountX =
-              utils.parseUnits(
-                (amountX || 0).toString(),
-                adopted?.decimals || 18,
-              )
-              .toString()
-
-            _amountY =
-              utils.parseUnits(
-                (amountY || 0).toString(),
-                local?.decimals || 18,
-              )
-              .toString()
+            _amountX = utils.parseUnits((amountX || 0).toString(), adopted?.decimals || 18).toString()
+            _amountY = utils.parseUnits((amountY || 0).toString(), local?.decimals || 18).toString()
 
             if (adopted?.index === 1) {
               const _amount = _amountX
@@ -252,17 +241,10 @@ export default (
           break
         case 'x_only':
         case 'y_only':
-          const ratio = withdrawOption === 'x_only' ? 1 : 0
-          setRemoveAmounts(
-            [
-              amount * ratio,
-              amount * (1 - ratio),
-            ]
-            .map((a, i) =>
-              isNaN(a) ? '' : removeDecimal(a.toFixed((i === 0 ? adopted : local)?.decimals || 18))
-            )
-          )
-          setCallResponse(null)
+          // const ratio = withdrawOption === 'x_only' ? 1 : 0
+          // setRemoveAmounts([amount * ratio, amount * (1 - ratio)].map((a, i) => isNaN(a) ? '' : removeDecimal(a.toFixed((i === 0 ? adopted : local)?.decimals || 18))))
+          // setCallResponse(null)
+          calculateRemoveSwapLiquidity()
           break
         default:
           calculateRemoveSwapLiquidity()
@@ -280,17 +262,10 @@ export default (
           break
         case 'x_only':
         case 'y_only':
-          const ratio = withdrawOption === 'x_only' ? 1 : 0
-          setRemoveAmounts(
-            [
-              amount * ratio,
-              amount * (1 - ratio),
-            ]
-            .map((a, i) =>
-              isNaN(a) ? '' : removeDecimal(a.toFixed((i === 0 ? adopted : local)?.decimals || 18))
-            )
-          )
-          setCallResponse(null)
+          // const ratio = withdrawOption === 'x_only' ? 1 : 0
+          // setRemoveAmounts([amount * ratio, amount * (1 - ratio)].map((a, i) => isNaN(a) ? '' : removeDecimal(a.toFixed((i === 0 ? adopted : local)?.decimals || 18))))
+          // setCallResponse(null)
+          calculateRemoveSwapLiquidity()
           break
         default:
           if (!(removeAmounts?.length > 1)) {
@@ -400,17 +375,9 @@ export default (
       const x_asset_data =
         adopted?.address &&
         {
+          ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
           ...(
-            Object.fromEntries(
-              Object.entries({ ...asset_data })
-                .filter(([k, v]) => !['contracts'].includes(k))
-            )
-          ),
-          ...(
-            equalsIgnoreCase(
-              adopted.address,
-              contract_address,
-            ) ?
+            equalsIgnoreCase(adopted.address, contract_address) ?
               contract_data :
               {
                 chain_id,
@@ -424,17 +391,9 @@ export default (
       const y_asset_data =
         local?.address &&
         {
+          ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
           ...(
-            Object.fromEntries(
-              Object.entries({ ...asset_data })
-                .filter(([k, v]) => !['contracts'].includes(k))
-            )
-          ),
-          ...(
-            equalsIgnoreCase(
-              local.address,
-              contract_address,
-            ) ?
+            equalsIgnoreCase(local.address, contract_address) ?
               contract_data :
               {
                 chain_id,
@@ -457,26 +416,15 @@ export default (
 
       switch (action) {
         case 'deposit':
-          if (
-            !(typeof amountX === 'string' && !isNaN(amountX) && typeof amountY === 'string' && !isNaN(amountY)) ||
-            !(amountX || amountY)
-          ) {
+          if (!(typeof amountX === 'string' && !isNaN(amountX) && typeof amountY === 'string' && !isNaN(amountY)) || !(amountX || amountY)) {
             failed = true
             setApproving(false)
             break
           }
 
           let amounts = [
-            utils.parseUnits(
-              (amountX || 0).toString(),
-              x_asset_data?.decimals || 18,
-            )
-            .toString(),
-            utils.parseUnits(
-              (amountY || 0).toString(),
-              y_asset_data?.decimals || 18,
-            )
-            .toString(),
+            utils.parseUnits((amountX || 0).toString(), x_asset_data?.decimals || 18).toString(),
+            utils.parseUnits((amountY || 0).toString(), y_asset_data?.decimals || 18).toString(),
           ]
 
           const minToMint = '0'
@@ -731,28 +679,24 @@ export default (
             break
           }
 
+          const is_one_token_withdraw = withdrawOption?.endsWith('_only')
+
           const _amount = utils.parseUnits((amount || 0).toString(), 18).toString()
 
           let _amounts =
             removeAmounts?.length > 1 &&
-            removeAmounts
-              .map((a, i) => {
-                const decimals = (i === 0 ? adopted : local)?.decimals || 18
-
-                return (
-                  utils.parseUnits(
-                    (Number(a) * (1 - slippage / 100)).toFixed(decimals),
-                    decimals,
-                  )
-                  .toString()
-                )
-              })
+            removeAmounts.map((a, i) => {
+              const decimals = (i === 0 ? adopted : local)?.decimals || 18
+              return utils.parseUnits((Number(a) * (1 - slippage / 100)).toFixed(decimals), decimals).toString()
+            })
 
           if (adopted?.index === 1) {
             _amounts = _.reverse(_amounts)
           }
 
+          const withdraw_contract_address = is_one_token_withdraw ? (withdrawOption === 'x_only' ? x_asset_data : y_asset_data)?.contract_address : undefined
           const minAmounts = _amounts || ['0', '0']
+          const minAmount = is_one_token_withdraw ? _.head(toArray(minAmounts).filter(a => a !== '0')) : undefined
 
           if (!failed) {
             try {
@@ -819,19 +763,26 @@ export default (
           }
 
           if (!failed) {
+            const method = is_one_token_withdraw ? 'removeLiquidityOneToken' : 'removeLiquidity'
+
             try {
               console.log(
-                '[removeLiquidity]',
+                `[${method}]`,
                 {
                   domainId,
                   contract_address,
+                  withdraw_contract_address,
                   amount: _amount,
                   minAmounts,
+                  minAmount,
                   deadline,
                 },
               )
 
-              const remove_request = await sdk.sdkPool.removeLiquidity(domainId, contract_address, _amount, minAmounts, deadline)
+              const remove_request =
+                is_one_token_withdraw ?
+                  await sdk.sdkPool.removeLiquidityOneToken(domainId, contract_address, withdraw_contract_address, _amount, minAmount, deadline) :
+                  await sdk.sdkPool.removeLiquidity(domainId, contract_address, _amount, minAmounts, deadline)
 
               if (remove_request) {
                 let gasLimit = await signer.estimateGas(remove_request)
@@ -879,12 +830,14 @@ export default (
               const response = parseError(error)
 
               console.log(
-                '[removeLiquidity error]',
+                `[${method} error]`,
                 {
                   domainId,
                   contract_address,
+                  withdraw_contract_address,
                   amount: _amount,
                   minAmounts,
+                  minAmount,
                   deadline,
                   error,
                 },
@@ -982,26 +935,63 @@ export default (
         try {
           setPriceImpactRemove(true)
 
-          console.log(
-            '[calculateRemoveSwapLiquidity]',
-            {
-              domainId,
-              contract_address,
-              amount: _amount,
-            },
-          )
+          let amounts
 
-          let amounts = await sdk.sdkPool.calculateRemoveSwapLiquidity(domainId, contract_address, _amount)
+          if (withdrawOption?.endsWith('_only')) {
+            const index = (withdrawOption === 'x_only' && adopted?.index === 1) || (withdrawOption === 'y_only' && local?.index === 1) ? 1 : 0
 
-          console.log(
-            '[amountsRemoveSwapLiquidity]',
-            {
-              domainId,
-              contract_address,
-              amount: _amount,
-              amounts,
-            },
-          )
+            console.log(
+              '[calculateRemoveSwapLiquidityOneToken]',
+              {
+                domainId,
+                contract_address,
+                amount: _amount,
+                index,
+              },
+            )
+
+            amounts = await sdk.sdkPool.calculateRemoveSwapLiquidityOneToken(domainId, contract_address, _amount, index)
+
+            if (index === 1) {
+              amounts = _.concat('0', amounts?.toString())
+            }
+            else {
+              amounts = _.concat(amounts?.toString(), '0')
+            }
+
+            console.log(
+              '[amountsRemoveSwapLiquidityOneToken]',
+              {
+                domainId,
+                contract_address,
+                amount: _amount,
+                index,
+                amounts,
+              },
+            )
+          }
+          else {
+            console.log(
+              '[calculateRemoveSwapLiquidity]',
+              {
+                domainId,
+                contract_address,
+                amount: _amount,
+              },
+            )
+
+            amounts = await sdk.sdkPool.calculateRemoveSwapLiquidity(domainId, contract_address, _amount)
+
+            console.log(
+              '[amountsRemoveSwapLiquidity]',
+              {
+                domainId,
+                contract_address,
+                amount: _amount,
+                amounts,
+              },
+            )
+          }
 
           let _amounts
 
@@ -1037,17 +1027,7 @@ export default (
             // calculateRemoveLiquidityPriceImpact(domainId, contract_address, _.head(amounts), _.last(amounts))
           }
 
-          setRemoveAmounts(
-            toArray(_amounts)
-              .map((a, i) =>
-                Number(
-                  utils.formatUnits(
-                    BigInt(a || '0'),
-                    (i === 0 ? adopted : local)?.decimals || 18,
-                  )
-                )
-              )
-          )
+          setRemoveAmounts(toArray(_amounts).map((a, i) => Number(utils.formatUnits(BigInt(a || '0'), (i === 0 ? adopted : local)?.decimals || 18))))
           setCallResponse(null)
         } catch (error) {
           const response = parseError(error)
@@ -1298,17 +1278,9 @@ export default (
   const x_asset_data =
     adopted?.address &&
     {
+      ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
       ...(
-        Object.fromEntries(
-          Object.entries({ ...asset_data })
-            .filter(([k, v]) => !['contracts'].includes(k))
-        )
-      ),
-      ...(
-        equalsIgnoreCase(
-          adopted.address,
-          contract_address,
-        ) ?
+        equalsIgnoreCase(adopted.address, contract_address) ?
           contract_data :
           {
             chain_id,
@@ -1334,12 +1306,7 @@ export default (
   const _x_asset_data =
     adopted?.address &&
     {
-      ...(
-        Object.fromEntries(
-          Object.entries({ ...asset_data })
-            .filter(([k, v]) => !['contracts'].includes(k))
-        )
-      ),
+      ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
       ...contract_data,
     }
 
@@ -1348,17 +1315,9 @@ export default (
   const y_asset_data =
     local?.address &&
     {
+      ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
       ...(
-        Object.fromEntries(
-          Object.entries({ ...asset_data })
-            .filter(([k, v]) => !['contracts'].includes(k))
-        )
-      ),
-      ...(
-        equalsIgnoreCase(
-          local.address,
-          contract_address,
-        ) ?
+        equalsIgnoreCase(local.address, contract_address) ?
           contract_data :
           {
             chain_id,
@@ -1398,39 +1357,30 @@ export default (
   const position_loading = selected && !no_pool && !error && (!userPoolsData || pool_loading)
 
   const pool_tokens_data =
-    toArray(
-      _.concat(adopted, local)
-    )
-    .map((a, i) => {
-      const {
-        address,
-        symbol,
-        decimals,
-      } = { ...a }
+    toArray(_.concat(adopted, local))
+      .map((a, i) => {
+        const {
+          address,
+          symbol,
+          decimals,
+        } = { ...a }
 
-      return {
-        i,
-        contract_address: address,
-        chain_id,
-        symbol,
-        decimals,
-        image:
-          (
-            equalsIgnoreCase(
-              address,
-              contract_address,
-            ) ?
+        return {
+          i,
+          contract_address: address,
+          chain_id,
+          symbol,
+          decimals,
+          image:
+            (equalsIgnoreCase(address, contract_address) ?
               contract_data?.image :
-              equalsIgnoreCase(
-                address,
-                next_asset?.contract_address,
-              ) ?
+              equalsIgnoreCase(address, next_asset?.contract_address) ?
                 next_asset?.image || contract_data?.image :
                 null
-          ) ||
-          asset_data?.image,
-      }
-    })
+            ) ||
+            asset_data?.image,
+        }
+      })
 
   adopted = { ...adopted, asset_data: _.head(pool_tokens_data) }
   local = { ...local, asset_data: _.last(pool_tokens_data) }
@@ -1487,17 +1437,15 @@ export default (
         </div>
         <div className="space-y-4">
           <div className="w-fit border-b dark:border-slate-800 flex items-center justify-between space-x-4">
-            {ACTIONS
-              .map((a, i) => (
-                <div
-                  key={i}
-                  onClick={() => setAction(a)}
-                  className={`w-fit border-b-2 ${action === a ? 'border-slate-300 dark:border-slate-200 font-semibold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer capitalize text-sm text-left py-3 px-0`}
-                >
-                  {a}
-                </div>
-              ))
-            }
+            {ACTIONS.map((a, i) => (
+              <div
+                key={i}
+                onClick={() => setAction(a)}
+                className={`w-fit border-b-2 ${action === a ? 'border-slate-300 dark:border-slate-200 font-semibold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer capitalize text-sm text-left py-3 px-0`}
+              >
+                {a}
+              </div>
+            ))}
           </div>
           {action === 'deposit' ?
             <>
@@ -1616,16 +1564,7 @@ export default (
                     </div>
                     {
                       typeof amountX === 'string' && ['string', 'number'].includes(typeof x_balance_amount) &&
-                      utils.parseUnits(
-                        amountX || '0',
-                        x_asset_data?.decimals || 18,
-                      )
-                      .toBigInt() >
-                      utils.parseUnits(
-                        (x_balance_amount || 0).toString(),
-                        x_asset_data?.decimals || 18,
-                      )
-                      .toBigInt() &&
+                      utils.parseUnits(amountX || '0', x_asset_data?.decimals || 18).toBigInt() > utils.parseUnits((x_balance_amount || 0).toString(), x_asset_data?.decimals || 18).toBigInt() &&
                       (
                         <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
                           <BiMessageError
@@ -1760,16 +1699,7 @@ export default (
                     </div>
                     {
                       typeof amountY === 'string' && ['string', 'number'].includes(typeof y_balance_amount) &&
-                      utils.parseUnits(
-                        amountY || '0',
-                        y_asset_data?.decimals || 18,
-                      )
-                      .toBigInt() >
-                      utils.parseUnits(
-                        (y_balance_amount || 0).toString(),
-                        y_asset_data?.decimals || 18,
-                      )
-                      .toBigInt() &&
+                      utils.parseUnits(amountY || '0', y_asset_data?.decimals || 18).toBigInt() > utils.parseUnits((y_balance_amount || 0).toString(), y_asset_data?.decimals || 18).toBigInt() &&
                       (
                         <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
                           <BiMessageError
@@ -1798,16 +1728,8 @@ export default (
                           width={native_amount * 100 / total_amount}
                           className="w-full rounded-lg"
                           backgroundClassName="rounded-lg"
-                          style={
-                            {
-                              backgroundColor: color,
-                            }
-                          }
-                          backgroundStyle={
-                            {
-                              backgroundColor: `${color}33`,
-                            }
-                          }
+                          style={{ backgroundColor: color }}
+                          backgroundStyle={{ backgroundColor: `${color}33` }}
                         />
                         <div className="w-full flex items-center justify-between space-x-2">
                           <div className="flex flex-col items-start space-y-0.5">
@@ -2265,58 +2187,51 @@ export default (
                     }
                   </div>
                   {
-                    ['string', 'number'].includes(typeof lpTokenBalance) &&
-                    utils.parseUnits(
-                      (lpTokenBalance || 0).toString(),
-                      18,
-                    )
-                    .toBigInt() > 0 &&
+                    ['string', 'number'].includes(typeof lpTokenBalance) && utils.parseUnits((lpTokenBalance || 0).toString(), 18).toBigInt() > 0 &&
                     (
                       <div className="flex items-center justify-end space-x-2.5">
-                        {[0.25, 0.5, 0.75, 1.0]
-                          .map((p, i) => (
-                            <div
-                              key={i}
-                              onClick={
-                                () => {
-                                  setWithdrawPercent(p * 100)
+                        {[0.25, 0.5, 0.75, 1.0].map((p, i) => (
+                          <div
+                            key={i}
+                            onClick={
+                              () => {
+                                setWithdrawPercent(p * 100)
 
-                                  let _amount
+                                let _amount
 
-                                  try {
-                                    _amount =
-                                      p === 1 ?
-                                        (lpTokenBalance || 0).toString() :
-                                        FixedNumber.fromString((lpTokenBalance || 0).toString())
-                                          .mulUnsafe(
-                                            FixedNumber.fromString(p.toString())
-                                          )
-                                          .toString()
-                                  } catch (error) {
-                                    _amount = '0'
-                                  }
-
-                                  setAmount(_amount)
+                                try {
+                                  _amount =
+                                    p === 1 ?
+                                      (lpTokenBalance || 0).toString() :
+                                      FixedNumber.fromString((lpTokenBalance || 0).toString())
+                                        .mulUnsafe(
+                                          FixedNumber.fromString(p.toString())
+                                        )
+                                        .toString()
+                                } catch (error) {
+                                  _amount = '0'
                                 }
+
+                                setAmount(_amount)
                               }
-                              className={
-                                `${
-                                  disabled || !['string', 'number'].includes(typeof lpTokenBalance) ?
-                                    'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' :
-                                    FixedNumber.fromString((lpTokenBalance || 0).toString())
-                                      .mulUnsafe(
-                                        FixedNumber.fromString(p.toString())
-                                      )
-                                      .toString() === amount ?
-                                      'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' :
-                                      'bg-slate-100 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'
-                                } rounded text-xs py-0.5 px-1.5`
-                              }
-                            >
-                              {p * 100} %
-                            </div>
-                          ))
-                        }
+                            }
+                            className={
+                              `${
+                                disabled || !['string', 'number'].includes(typeof lpTokenBalance) ?
+                                  'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' :
+                                  FixedNumber.fromString((lpTokenBalance || 0).toString())
+                                    .mulUnsafe(
+                                      FixedNumber.fromString(p.toString())
+                                    )
+                                    .toString() === amount ?
+                                    'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' :
+                                    'bg-slate-100 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'
+                              } rounded text-xs py-0.5 px-1.5`
+                            }
+                          >
+                            {p * 100} %
+                          </div>
+                        ))}
                       </div>
                     )
                   }
@@ -2326,48 +2241,46 @@ export default (
                   (
                     <div className="space-y-4">
                       <div className="flex flex-col space-y-2">
-                        {WITHDRAW_OPTIONS
-                          .map((o, i) => {
-                            const {
-                              value,
-                              is_staging,
-                            } = { ...o }
-                            let {
-                              title,
-                            } = { ...o }
+                        {WITHDRAW_OPTIONS.map((o, i) => {
+                          const {
+                            value,
+                            is_staging,
+                          } = { ...o }
+                          let {
+                            title,
+                          } = { ...o }
 
-                            title = title.replace('{x}', x_asset_data.symbol).replace('{y}', y_asset_data.symbol)
+                          title = title.replace('{x}', x_asset_data.symbol).replace('{y}', y_asset_data.symbol)
 
-                            const selected = value === withdrawOption
+                          const selected = value === withdrawOption
 
-                            const _disabled = disabled || (is_staging && !mode)
+                          const _disabled = disabled || (is_staging && !mode)
 
-                            return (
-                              <div
-                                key={i}
-                                onClick={
-                                  () => {
-                                    if (!_disabled) {
-                                      setWithdrawOption(value)
-                                    }
+                          return (
+                            <div
+                              key={i}
+                              onClick={
+                                () => {
+                                  if (!_disabled) {
+                                    setWithdrawOption(value)
                                   }
                                 }
-                                className={`${_disabled ? 'cursor-not-allowed' : 'cursor-pointer'} inline-flex items-center space-x-2`}
-                              >
-                                <input
-                                  disabled={_disabled}
-                                  type="radio"
-                                  value={value}
-                                  checked={selected}
-                                  className={`h-4 w-4 ${_disabled ? 'cursor-not-allowed' : 'cursor-pointer'} text-blue-500 mt-0.5`}
-                                />
-                                <span className={`${selected ? 'font-bold' : 'text-slate-400 dark:text-slate-500 font-medium'}`}>
-                                  {title} {is_staging && !mode ? '(coming soon)' : ''}
-                                </span>
-                              </div>
-                            )
-                          })
-                        }
+                              }
+                              className={`${_disabled ? 'cursor-not-allowed' : 'cursor-pointer'} inline-flex items-center space-x-2`}
+                            >
+                              <input
+                                disabled={_disabled}
+                                type="radio"
+                                value={value}
+                                checked={selected}
+                                className={`h-4 w-4 ${_disabled ? 'cursor-not-allowed' : 'cursor-pointer'} text-blue-500 mt-0.5`}
+                              />
+                              <span className={`${selected ? 'font-bold' : 'text-slate-400 dark:text-slate-500 font-medium'}`}>
+                                {title} {is_staging && !mode ? '(coming soon)' : ''}
+                              </span>
+                            </div>
+                          )
+                        })}
                       </div>
                       <div className="space-y-2.5">
                         <div className="space-y-2">
@@ -2460,15 +2373,7 @@ export default (
                                         value = '0'
                                       }
 
-                                      setRemoveAmounts(
-                                        [
-                                          value,
-                                          amount - Number(value),
-                                        ]
-                                        .map((a, i) =>
-                                          isNaN(a) ? '' : removeDecimal(Number(a).toFixed((i === 0 ? x_asset_data : y_asset_data)?.decimals || 18))
-                                        )
-                                      )
+                                      setRemoveAmounts([value, amount - Number(value)].map((a, i) => isNaN(a) ? '' : removeDecimal(Number(a).toFixed((i === 0 ? x_asset_data : y_asset_data)?.decimals || 18))))
                                     }
                                   }
                                   onWheel={e => e.target.blur()}
@@ -2581,15 +2486,7 @@ export default (
                                         value = '0'
                                       }
 
-                                      setRemoveAmounts(
-                                        [
-                                          amount - Number(value),
-                                          value,
-                                        ]
-                                        .map((a, i) =>
-                                          isNaN(a) ? '' : removeDecimal(Number(a).toFixed((i === 0 ? x_asset_data : y_asset_data)?.decimals || 18))
-                                        )
-                                      )
+                                      setRemoveAmounts([amount - Number(value), value].map((a, i) => isNaN(a) ? '' : removeDecimal(Number(a).toFixed((i === 0 ? x_asset_data : y_asset_data)?.decimals || 18))))
                                     }
                                   }
                                   onWheel={e => e.target.blur()}
