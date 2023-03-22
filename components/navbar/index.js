@@ -307,10 +307,7 @@ export default () => {
         url,
         chain_id,
       ) =>
-        new providers.StaticJsonRpcProvider(
-          url,
-          chain_id ? Number(chain_id) : undefined
-        )
+        new providers.StaticJsonRpcProvider(url, chain_id ? Number(chain_id) : undefined)
 
       const init = async => {
         if (chains_data) {
