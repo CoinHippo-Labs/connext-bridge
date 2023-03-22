@@ -391,23 +391,10 @@ export default () => {
         _.sum(
           toArray(router_asset_balances_data?.[chain_id])
             .filter(a =>
-              toArray(
-                _.concat(contract_address, next_asset?.contract_address)
-              )
-              .findIndex(_a =>
-                equalsIgnoreCase(
-                  a?.contract_address,
-                  _a,
-                )
-              ) > -1
+              toArray(_.concat(contract_address, next_asset?.contract_address)).findIndex(_a => equalsIgnoreCase(a?.contract_address, _a)) > -1
             )
             .map(a =>
-              Number(
-                utils.formatUnits(
-                  BigInt(a?.amount || '0'),
-                  equalsIgnoreCase(a?.contract_address, next_asset?.contract_address) && next_asset ? next_asset?.decimals || 18 : destination_decimals,
-                )
-              )
+              Number(utils.formatUnits(BigInt(a?.amount || '0'), equalsIgnoreCase(a?.contract_address, next_asset?.contract_address) && next_asset ? next_asset?.decimals || 18 : destination_decimals))
             )
         )
 
@@ -607,12 +594,18 @@ export default () => {
             } = { ...transfer_data }
 
             if (status || error_status) {
+              if (transfer_data.transfer_id) {
+                setXcall(
+                  {
+                    ...xcall,
+                    transfer_id: transfer_data.transfer_id,
+                  }
+                )
+              }
+
               setLatestTransfers(
                 _.orderBy(
-                  _.uniqBy(
-                    _.concat(transfer_data, latestTransfers),
-                    'xcall_transaction_hash',
-                  ),
+                  _.uniqBy(_.concat(transfer_data, latestTransfers), 'xcall_transaction_hash'),
                   ['xcall_timestamp'],
                   ['desc'],
                 )
@@ -665,10 +658,7 @@ export default () => {
               if (updated) {
                 setLatestTransfers(
                   _.orderBy(
-                    _.uniqBy(
-                      _.concat(transfer_data, latestTransfers),
-                      'xcall_transaction_hash',
-                    ),
+                    _.uniqBy(_.concat(transfer_data, latestTransfers), 'xcall_transaction_hash'),
                     ['xcall_timestamp'],
                     ['desc'],
                   )
@@ -846,7 +836,6 @@ export default () => {
         if (sdk) {
           setFees(null)
           setApproveResponse(null)
-          setXcall(null)
           setCallProcessing(false)
           setCalling(false)
           setXcallResponse(null)
@@ -954,12 +943,7 @@ export default () => {
         destinationTokenAddress = _destination_contract_data?.next_asset?.contract_address || destinationTokenAddress
       }
 
-      const amount =
-        utils.parseUnits(
-          (_amount || 0).toString(),
-          source_decimals,
-        )
-        .toBigInt()
+      const amount = utils.parseUnits((_amount || 0).toString(), source_decimals).toBigInt()
 
       let manual
 
@@ -967,15 +951,7 @@ export default () => {
         setEstimatedValues(null)
         setEstimateResponse(null)
 
-        if (
-          amount > 0 &&
-          toArray(
-            _.concat(source_chain_data?.id, destination_chain_data?.id)
-          )
-          .findIndex(chain =>
-            toArray(pools_data).find(p => p?.chain_data?.id === chain && !p.tvl)
-          ) < 0
-        ) {
+        if (amount > 0 && toArray(_.concat(source_chain_data?.id, destination_chain_data?.id)).findIndex(chain => toArray(pools_data).find(p => p?.chain_data?.id === chain && !p.tvl)) < 0) {
           console.log(
             '[calculateAmountReceived]',
             {
@@ -1359,11 +1335,7 @@ export default () => {
               xcall_request.gasLimit = gasLimit
             }
 
-            const xcall_response =
-              await signer
-                .sendTransaction(
-                  xcall_request,
-                )
+            const xcall_response = await signer.sendTransaction(xcall_request)
 
             const {
               hash,
@@ -1585,23 +1557,10 @@ export default () => {
     _.sum(
       toArray(router_asset_balances_data?.[destination_chain_data?.chain_id])
         .filter(a =>
-          toArray(
-            _.concat(destination_contract_data?.contract_address, destination_contract_data?.next_asset?.contract_address)
-          )
-          .findIndex(_a =>
-            equalsIgnoreCase(
-              a?.contract_address,
-              _a,
-            )
-          ) > -1
+          toArray(_.concat(destination_contract_data?.contract_address, destination_contract_data?.next_asset?.contract_address)).findIndex(_a => equalsIgnoreCase(a?.contract_address, _a)) > -1
         )
         .map(a =>
-          Number(
-            utils.formatUnits(
-              BigInt(a?.amount || '0'),
-              equalsIgnoreCase(a?.contract_address, destination_contract_data?.next_asset?.contract_address) && destination_contract_data?.next_asset ? destination_contract_data.next_asset?.decimals || 18 : destination_decimals,
-            )
-          )
+          Number(utils.formatUnits(BigInt(a?.amount || '0'), equalsIgnoreCase(a?.contract_address, destination_contract_data?.next_asset?.contract_address) && destination_contract_data?.next_asset ? destination_contract_data.next_asset?.decimals || 18 : destination_decimals))
         )
     )
 
@@ -1702,20 +1661,14 @@ export default () => {
                     onTransferBumped={
                       relayer_fee_data => {
                         if (latestTransfers) {
-                          const index =
-                            latestTransfers
-                              .findIndex(t =>
-                                (t?.transfer_id && t.transfer_id === latest_transfer?.transfer_id) ||
-                                (t?.xcall_transaction_hash && t.xcall_transaction_hash === latest_transfer?.transaction_hash)
-                              )
+                          const index = latestTransfers.findIndex(t => (t?.transfer_id && t.transfer_id === latest_transfer?.transfer_id) || (t?.xcall_transaction_hash && t.xcall_transaction_hash === latest_transfer?.transaction_hash))
 
                           if (index > -1) {
-                            latestTransfers[index] =
-                              {
-                                ...latestTransfers[index],
-                                ...relayer_fee_data,
-                                error_status: null,
-                              }
+                            latestTransfers[index] = {
+                              ...latestTransfers[index],
+                              ...relayer_fee_data,
+                              error_status: null,
+                            }
 
                             setLatestTransfers(latestTransfers)
                           }
@@ -1725,20 +1678,14 @@ export default () => {
                     onSlippageUpdated={
                       slippage => {
                         if (latestTransfers) {
-                          const index =
-                            latestTransfers
-                              .findIndex(t =>
-                                (t?.transfer_id && t.transfer_id === latest_transfer?.transfer_id) ||
-                                (t?.xcall_transaction_hash && t.xcall_transaction_hash === latest_transfer?.transaction_hash)
-                              )
+                          const index = latestTransfers.findIndex(t => (t?.transfer_id && t.transfer_id === latest_transfer?.transfer_id) || (t?.xcall_transaction_hash && t.xcall_transaction_hash === latest_transfer?.transaction_hash))
 
                           if (index > -1) {
-                            latestTransfers[index] =
-                              {
-                                ...latestTransfers[index],
-                                slippage,
-                                error_status: null,
-                              }
+                            latestTransfers[index] = {
+                              ...latestTransfers[index],
+                              slippage,
+                              error_status: null,
+                            }
 
                             setLatestTransfers(latestTransfers)
                           }
@@ -1767,30 +1714,20 @@ export default () => {
                             transferData={latest_transfer}
                             buttonTitle={
                               <span className="text-center">
-                                Please click here to bump the {
-                                  latest_transfer?.error_status === XTransferErrorStatus.LowSlippage ?
-                                    'slippage' :
-                                    'gas amount'
-                                } higher.
+                                Please click here to bump the {latest_transfer?.error_status === XTransferErrorStatus.LowSlippage ? 'slippage' : 'gas amount'} higher.
                               </span>
                             }
                             onTransferBumped={
                               relayer_fee_data => {
                                 if (latestTransfers) {
-                                  const index =
-                                    latestTransfers
-                                      .findIndex(t =>
-                                        (t?.transfer_id && t.transfer_id === latest_transfer?.transfer_id) ||
-                                        (t?.xcall_transaction_hash && t.xcall_transaction_hash === latest_transfer?.transaction_hash)
-                                      )
+                                  const index = latestTransfers.findIndex(t => (t?.transfer_id && t.transfer_id === latest_transfer?.transfer_id) || (t?.xcall_transaction_hash && t.xcall_transaction_hash === latest_transfer?.transaction_hash))
 
                                   if (index > -1) {
-                                    latestTransfers[index] =
-                                      {
-                                        ...latestTransfers[index],
-                                        ...relayer_fee_data,
-                                        error_status: null,
-                                      }
+                                    latestTransfers[index] = {
+                                      ...latestTransfers[index],
+                                      ...relayer_fee_data,
+                                      error_status: null,
+                                    }
 
                                     setLatestTransfers(latestTransfers)
                                   }
@@ -1800,20 +1737,14 @@ export default () => {
                             onSlippageUpdated={
                               slippage => {
                                 if (latestTransfers) {
-                                  const index =
-                                    latestTransfers
-                                      .findIndex(t =>
-                                        (t?.transfer_id && t.transfer_id === latest_transfer?.transfer_id) ||
-                                        (t?.xcall_transaction_hash && t.xcall_transaction_hash === latest_transfer?.transaction_hash)
-                                      )
+                                  const index = latestTransfers.findIndex(t => (t?.transfer_id && t.transfer_id === latest_transfer?.transfer_id) || (t?.xcall_transaction_hash && t.xcall_transaction_hash === latest_transfer?.transaction_hash))
 
                                   if (index > -1) {
-                                    latestTransfers[index] =
-                                      {
-                                        ...latestTransfers[index],
-                                        slippage,
-                                        error_status: null,
-                                      }
+                                    latestTransfers[index] = {
+                                      ...latestTransfers[index],
+                                      slippage,
+                                      error_status: null,
+                                    }
 
                                     setLatestTransfers(latestTransfers)
                                   }
@@ -1859,17 +1790,8 @@ export default () => {
                           className="mb-0.5"
                         />
                       }
-                      animate={
-                        {
-                          mount: { y: 0 },
-                          unmount: { y: 32 },
-                        }
-                      }
-                      dismissible={
-                        {
-                          onClose: () => setDisplayReceiveNextInfo(false),
-                        }
-                      }
+                      animate={{ mount: { y: 0 }, unmount: { y: 32 } }}
+                      dismissible={{ onClose: () => setDisplayReceiveNextInfo(false) }}
                       className="alert-box flex"
                     >
                       <span className="text-sm">
@@ -2417,10 +2339,7 @@ export default () => {
                                                         className="z-50 bg-dark text-white text-xs"
                                                       >
                                                         <span className="text-sm font-semibold">
-                                                          {ellipse(
-                                                            to,
-                                                            8,
-                                                          )}
+                                                          {ellipse(to, 8)}
                                                         </span>
                                                       </Tooltip>
                                                       <button
@@ -2494,17 +2413,8 @@ export default () => {
                                                                   }
                                                                 }
 
-                                                                value =
-                                                                  value && !isNaN(value) ?
-                                                                    parseFloat(Number(value).toFixed(2)) :
-                                                                    value
-
-                                                                value =
-                                                                  value <= 0 ?
-                                                                    0.01 :
-                                                                    value > 100 ?
-                                                                      DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
-                                                                      value
+                                                                value = value && !isNaN(value) ? parseFloat(Number(value).toFixed(2)) : value
+                                                                value = value <= 0 ? 0.01 : value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
 
                                                                 setOptions(
                                                                   {
@@ -2528,27 +2438,25 @@ export default () => {
                                                           </button>
                                                         </div>
                                                         <div className="flex items-center space-x-1.5 -mr-1.5">
-                                                          {[3.0, 1.0, 0.5]
-                                                            .map((s, i) => (
-                                                              <div
-                                                                key={i}
-                                                                onClick={
-                                                                  () => {
-                                                                    setOptions(
-                                                                      {
-                                                                        ...options,
-                                                                        slippage: s,
-                                                                      }
-                                                                    )
-                                                                    setSlippageEditing(false)
-                                                                  }
+                                                          {[3.0, 1.0, 0.5].map((s, i) => (
+                                                            <div
+                                                              key={i}
+                                                              onClick={
+                                                                () => {
+                                                                  setOptions(
+                                                                    {
+                                                                      ...options,
+                                                                      slippage: s,
+                                                                    }
+                                                                  )
+                                                                  setSlippageEditing(false)
                                                                 }
-                                                                className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
-                                                              >
-                                                                {s} %
-                                                              </div>
-                                                            ))
-                                                          }
+                                                              }
+                                                              className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
+                                                            >
+                                                              {s} %
+                                                            </div>
+                                                          ))}
                                                         </div>
                                                       </> :
                                                       <div className="flex items-center space-x-1.5">
@@ -2675,19 +2583,17 @@ export default () => {
                                                       }
                                                       className="bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0"
                                                     >
-                                                      {RELAYER_FEE_ASSET_TYPES
-                                                        .map((t, i) => {
-                                                          return (
-                                                            <option
-                                                              key={i}
-                                                              title={`${t} asset`}
-                                                              value={t}
-                                                            >
-                                                              {t === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
-                                                            </option>
-                                                          )
-                                                        })
-                                                      }
+                                                      {RELAYER_FEE_ASSET_TYPES.map((t, i) => {
+                                                        return (
+                                                          <option
+                                                            key={i}
+                                                            title={`${t} asset`}
+                                                            value={t}
+                                                          >
+                                                            {t === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
+                                                          </option>
+                                                        )
+                                                      })}
                                                     </select> :
                                                     <span>
                                                       {relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
