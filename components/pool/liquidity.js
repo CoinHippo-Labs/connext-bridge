@@ -1918,7 +1918,7 @@ export default (
                       connectChainId={chain_id}
                       className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
                     >
-                      <span className="mr-1.5 sm:mr-2">
+                      <span>
                         {is_walletconnect ? 'Reconnect' : 'Switch'} to
                       </span>
                       {
@@ -1932,7 +1932,7 @@ export default (
                           />
                         )
                       }
-                      <span className="font-semibold">
+                      <span className="font-medium">
                         {name}
                       </span>
                     </Wallet> :
@@ -2585,7 +2585,7 @@ export default (
                       connectChainId={chain_id}
                       className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3  px-2 sm:px-3"
                     >
-                      <span className="mr-1.5 sm:mr-2">
+                      <span>
                         {is_walletconnect ? 'Reconnect' : 'Switch'} to
                       </span>
                       {
@@ -2599,7 +2599,7 @@ export default (
                           />
                         )
                       }
-                      <span className="font-semibold">
+                      <span className="font-medium">
                         {name}
                       </span>
                     </Wallet> :
