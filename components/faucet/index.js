@@ -573,11 +573,8 @@ export default (
                           connectChainId={chain_data?.chain_id}
                           className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 ${disabled ? 'cursor-not-allowed' : ''} rounded flex items-center text-white text-sm font-medium space-x-1.5 py-2 px-3`}
                         >
-                          <span className="mr-1 sm:mr-1.5">
-                            {is_walletconnect ?
-                              'Reconnect' :
-                              'Switch'
-                            } to
+                          <span>
+                            {is_walletconnect ? 'Reconnect' : 'Switch'} to
                           </span>
                           {
                             image &&
@@ -590,7 +587,7 @@ export default (
                               />
                             )
                           }
-                          <span className="font-semibold">
+                          <span className="font-medium">
                             {chain_data?.name}
                           </span>
                         </Wallet>
