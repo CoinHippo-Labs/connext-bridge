@@ -6,13 +6,15 @@ import PageVisibility from 'react-page-visibility'
 
 import Navbar from '../../components/navbar'
 import Footer from '../../components/footer'
+import AgreeToTerms from '../../components/agree-to-terms'
 import meta from '../../lib/meta'
 import { equalsIgnoreCase } from '../../lib/utils'
-import { THEME, PAGE_VISIBLE } from '../../reducers/types'
+import { THEME, PAGE_VISIBLE, TERMS_AGREED } from '../../reducers/types'
 
 export default (
   {
     children,
+    agreeToTermsUseModal = false,
   },
 ) => {
   const dispatch = useDispatch()
@@ -32,6 +34,7 @@ export default (
   )
   const {
     theme,
+    terms_agreed,
   } = { ...preferences }
   const {
     chains_data,
@@ -47,13 +50,24 @@ export default (
 
   useEffect(
     () => {
-      if (typeof window !== 'undefined' && localStorage.getItem(THEME) && localStorage.getItem(THEME) !== theme) {
-        dispatch(
-          {
-            type: THEME,
-            value: localStorage.getItem(THEME),
-          }
-        )
+      if (typeof window !== 'undefined') {
+        if (localStorage.getItem(THEME) && localStorage.getItem(THEME) !== theme) {
+          dispatch(
+            {
+              type: THEME,
+              value: localStorage.getItem(THEME),
+            }
+          )
+        }
+
+        if (localStorage.getItem(TERMS_AGREED) && localStorage.getItem(TERMS_AGREED) !== terms_agreed?.toString()) {
+          dispatch(
+            {
+              type: TERMS_AGREED,
+              value: localStorage.getItem(TERMS_AGREED),
+            }
+          )
+        }
       }
     },
     [theme],
@@ -182,7 +196,17 @@ export default (
             >
               <Navbar />
               <div className="w-full px-2 sm:px-4">
-                {children}
+                {agreeToTermsUseModal ?
+                  <>
+                    <AgreeToTerms useModal={agreeToTermsUseModal} />
+                    {children}
+                  </> :
+                  terms_agreed ?
+                    children :
+                    <div className="min-h-screen flex items-center">
+                      <AgreeToTerms useModal={agreeToTermsUseModal} />
+                    </div>
+                }
               </div>
             </div>
           </div>
