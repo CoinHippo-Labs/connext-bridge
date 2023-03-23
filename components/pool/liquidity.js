@@ -416,85 +416,23 @@ export default (
 
       switch (action) {
         case 'deposit':
-          if (!(typeof amountX === 'string' && !isNaN(amountX) && typeof amountY === 'string' && !isNaN(amountY)) || !(amountX || amountY)) {
-            failed = true
-            setApproving(false)
-            break
-          }
-
-          let amounts = [
-            utils.parseUnits((amountX || 0).toString(), x_asset_data?.decimals || 18).toString(),
-            utils.parseUnits((amountY || 0).toString(), y_asset_data?.decimals || 18).toString(),
-          ]
-
-          const minToMint = '0'
-
-          if (!failed) {
-            try {
-              const approve_request = await sdk.sdkBase.approveIfNeeded(domainId, x_asset_data?.contract_address, _.head(amounts), infiniteApprove)
-
-              if (approve_request) {
-                setApproving(true)
-
-                const approve_response = await signer.sendTransaction(approve_request)
-
-                const {
-                  hash,
-                } = { ...approve_response }
-
-                setApproveResponse(
-                  {
-                    status: 'pending',
-                    message: `Waiting for ${x_asset_data?.symbol} approval`,
-                    tx_hash: hash,
-                  }
-                )
-
-                setApproveProcessing(true)
-
-                const approve_receipt = await signer.provider.waitForTransaction(hash)
-
-                const {
-                  status,
-                } = { ...approve_receipt }
-
-                setApproveResponse(
-                  status ?
-                    null :
-                    {
-                      status: 'failed',
-                      message: `Failed to approve ${x_asset_data?.symbol}`,
-                      tx_hash: hash,
-                    }
-                )
-
-                failed = !status
-
-                setApproveProcessing(false)
-                setApproving(false)
-              }
-              else {
-                setApproving(false)
-              }
-            } catch (error) {
-              const response = parseError(error)
-
-              setApproveResponse(
-                {
-                  status: 'failed',
-                  ...response,
-                }
-              )
-
+          try {
+            if (!(typeof amountX === 'string' && !isNaN(amountX) && typeof amountY === 'string' && !isNaN(amountY)) || !(amountX || amountY)) {
               failed = true
-
-              setApproveProcessing(false)
               setApproving(false)
+              break
             }
+
+            let amounts = [
+              utils.parseUnits((amountX || 0).toString(), x_asset_data?.decimals || 18).toString(),
+              utils.parseUnits((amountY || 0).toString(), y_asset_data?.decimals || 18).toString(),
+            ]
+
+            const minToMint = '0'
 
             if (!failed) {
               try {
-                const approve_request = await sdk.sdkBase.approveIfNeeded(domainId, y_asset_data?.contract_address, _.last(amounts), infiniteApprove)
+                const approve_request = await sdk.sdkBase.approveIfNeeded(domainId, x_asset_data?.contract_address, _.head(amounts), infiniteApprove)
 
                 if (approve_request) {
                   setApproving(true)
@@ -508,7 +446,7 @@ export default (
                   setApproveResponse(
                     {
                       status: 'pending',
-                      message: `Waiting for ${y_asset_data?.symbol} approval`,
+                      message: `Waiting for ${x_asset_data?.symbol} approval`,
                       tx_hash: hash,
                     }
                   )
@@ -526,7 +464,280 @@ export default (
                       null :
                       {
                         status: 'failed',
-                        message: `Failed to approve ${y_asset_data?.symbol}`,
+                        message: `Failed to approve ${x_asset_data?.symbol}`,
+                        tx_hash: hash,
+                      }
+                  )
+
+                  failed = !status
+
+                  setApproveProcessing(false)
+                  setApproving(false)
+                }
+                else {
+                  setApproving(false)
+                }
+              } catch (error) {
+                const response = parseError(error)
+
+                setApproveResponse(
+                  {
+                    status: 'failed',
+                    ...response,
+                  }
+                )
+
+                failed = true
+
+                setApproveProcessing(false)
+                setApproving(false)
+              }
+
+              if (!failed) {
+                try {
+                  const approve_request = await sdk.sdkBase.approveIfNeeded(domainId, y_asset_data?.contract_address, _.last(amounts), infiniteApprove)
+
+                  if (approve_request) {
+                    setApproving(true)
+
+                    const approve_response = await signer.sendTransaction(approve_request)
+
+                    const {
+                      hash,
+                    } = { ...approve_response }
+
+                    setApproveResponse(
+                      {
+                        status: 'pending',
+                        message: `Waiting for ${y_asset_data?.symbol} approval`,
+                        tx_hash: hash,
+                      }
+                    )
+
+                    setApproveProcessing(true)
+
+                    const approve_receipt = await signer.provider.waitForTransaction(hash)
+
+                    const {
+                      status,
+                    } = { ...approve_receipt }
+
+                    setApproveResponse(
+                      status ?
+                        null :
+                        {
+                          status: 'failed',
+                          message: `Failed to approve ${y_asset_data?.symbol}`,
+                          tx_hash: hash,
+                        }
+                    )
+
+                    failed = !status
+
+                    setApproveProcessing(false)
+                    setApproving(false)
+                  }
+                  else {
+                    setApproving(false)
+                  }
+                } catch (error) {
+                  const response = parseError(error)
+
+                  setApproveResponse(
+                    {
+                      status: 'failed',
+                      ...response,
+                    }
+                  )
+
+                  failed = true
+
+                  setApproveProcessing(false)
+                  setApproving(false)
+                }
+              }
+            }
+
+            if (!failed) {
+              try {
+                console.log(
+                  '[getPoolTokenIndex]',
+                  {
+                    domainId,
+                    contract_address,
+                    tokenAddress: contract_address,
+                  },
+                )
+
+                const tokenIndex = await sdk.sdkPool.getPoolTokenIndex(domainId, contract_address, contract_address)
+
+                console.log(
+                  '[poolTokenIndex]',
+                  {
+                    domainId,
+                    contract_address,
+                    tokenAddress: contract_address,
+                    tokenIndex,
+                  },
+                )
+
+                if (tokenIndex === 1) {
+                  amounts = _.reverse(_.cloneDeep(amounts))
+                }
+
+                console.log(
+                  '[addLiquidity]',
+                  {
+                    domainId,
+                    contract_address,
+                    amounts,
+                    minToMint,
+                    deadline,
+                  },
+                )
+
+                const add_request = await sdk.sdkPool.addLiquidity(domainId, contract_address, amounts, minToMint, deadline)
+
+                if (add_request) {
+                  let gasLimit = await signer.estimateGas(add_request)
+
+                  if (gasLimit) {
+                    gasLimit =
+                      FixedNumber.fromString(gasLimit.toString())
+                        .mulUnsafe(
+                          FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
+                        )
+                        .round(0)
+                        .toString()
+                        .replace('.0', '')
+
+                    add_request.gasLimit = gasLimit
+                  }
+
+                  const add_response = await signer.sendTransaction(add_request)
+
+                  const {
+                    hash,
+                  } = { ...add_response }
+
+                  setCallProcessing(true)
+
+                  const add_receipt = await signer.provider.waitForTransaction(hash)
+
+                  const {
+                    status,
+                  } = { ...add_receipt }
+
+                  failed = !status
+
+                  setCallResponse(
+                    {
+                      status: failed ? 'failed' : 'success',
+                      message: failed ? `Failed to add ${symbol} liquidity` : `Add ${symbol} liquidity successful`,
+                      tx_hash: hash,
+                    }
+                  )
+
+                  success = true
+                }
+              } catch (error) {
+                const response = parseError(error)
+
+                console.log(
+                  '[addLiquidity error]',
+                  {
+                    domainId,
+                    contract_address,
+                    amounts,
+                    minToMint,
+                    deadline,
+                    error,
+                  },
+                )
+
+                switch (response.code) {
+                  case 'user_rejected':
+                    reset(response.code)
+                    break
+                  default:
+                    setCallResponse(
+                      {
+                        status: 'failed',
+                        ...response
+                      }
+                    )
+                    break
+                }
+
+                failed = true
+              }
+            }
+          } catch (error) {}
+          break
+        case 'withdraw':
+          try {
+            if (!amount || ['0', '0.0'].includes(amount)) {
+              failed = true
+              setApproving(false)
+              break
+            }
+
+            const is_one_token_withdraw = withdrawOption?.endsWith('_only')
+
+            const _amount = utils.parseUnits((amount || 0).toString(), 18).toString()
+
+            let _amounts =
+              removeAmounts?.length > 1 &&
+              removeAmounts.map((a, i) => {
+                const decimals = (i === 0 ? adopted : local)?.decimals || 18
+                return utils.parseUnits((Number(a) * (1 - slippage / 100)).toFixed(decimals), decimals).toString()
+              })
+
+            if (adopted?.index === 1) {
+              _amounts = _.reverse(_amounts)
+            }
+
+            const withdraw_contract_address = is_one_token_withdraw ? (withdrawOption === 'x_only' ? x_asset_data : y_asset_data)?.contract_address : undefined
+            const minAmounts = withdrawOption !== 'custom_amounts' ? _amounts || ['0', '0'] : undefined
+            const minAmount = is_one_token_withdraw ? _.head(toArray(minAmounts).filter(a => a !== '0')) : undefined
+            const amounts = withdrawOption === 'custom_amounts' ? _amounts || ['0', '0'] : undefined
+            const maxBurnAmount = withdrawOption === 'custom_amounts' ? '0' : undefined
+
+            if (!failed) {
+              try {
+                const approve_request = await sdk.sdkBase.approveIfNeeded(domainId, lpTokenAddress, _amount, infiniteApprove)
+
+                if (approve_request) {
+                  setApproving(true)
+
+                  const approve_response = await signer.sendTransaction(approve_request)
+
+                  const {
+                    hash,
+                  } = { ...approve_response }
+
+                  setApproveResponse(
+                    {
+                      status: 'pending',
+                      message: `Waiting for ${symbol} approval`,
+                      tx_hash: hash,
+                    }
+                  )
+
+                  setApproveProcessing(true)
+
+                  const approve_receipt = await signer.provider.waitForTransaction(hash)
+
+                  const {
+                    status,
+                  } = { ...approve_receipt }
+
+                  setApproveResponse(
+                    status ?
+                      null :
+                      {
+                        status: 'failed',
+                        message: `Failed to approve ${symbol}`,
                         tx_hash: hash,
                       }
                   )
@@ -555,320 +766,121 @@ export default (
                 setApproving(false)
               }
             }
-          }
 
-          if (!failed) {
-            try {
-              console.log(
-                '[getPoolTokenIndex]',
-                {
-                  domainId,
-                  contract_address,
-                  tokenAddress: contract_address,
-                },
-              )
+            if (!failed) {
+              const method = is_one_token_withdraw ? 'removeLiquidityOneToken' : withdrawOption === 'custom_amounts' ? 'removeLiquidityImbalance' : 'removeLiquidity'
 
-              const tokenIndex = await sdk.sdkPool.getPoolTokenIndex(domainId, contract_address, contract_address)
-
-              console.log(
-                '[poolTokenIndex]',
-                {
-                  domainId,
-                  contract_address,
-                  tokenAddress: contract_address,
-                  tokenIndex,
-                },
-              )
-
-              if (tokenIndex === 1) {
-                amounts = _.reverse(_.cloneDeep(amounts))
-              }
-
-              console.log(
-                '[addLiquidity]',
-                {
-                  domainId,
-                  contract_address,
-                  amounts,
-                  minToMint,
-                  deadline,
-                },
-              )
-
-              const add_request = await sdk.sdkPool.addLiquidity(domainId, contract_address, amounts, minToMint, deadline)
-
-              if (add_request) {
-                let gasLimit = await signer.estimateGas(add_request)
-
-                if (gasLimit) {
-                  gasLimit =
-                    FixedNumber.fromString(gasLimit.toString())
-                      .mulUnsafe(
-                        FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
-                      )
-                      .round(0)
-                      .toString()
-                      .replace('.0', '')
-
-                  add_request.gasLimit = gasLimit
-                }
-
-                const add_response = await signer.sendTransaction(add_request)
-
-                const {
-                  hash,
-                } = { ...add_response }
-
-                setCallProcessing(true)
-
-                const add_receipt = await signer.provider.waitForTransaction(hash)
-
-                const {
-                  status,
-                } = { ...add_receipt }
-
-                failed = !status
-
-                setCallResponse(
+              try {
+                console.log(
+                  `[${method}]`,
                   {
-                    status: failed ? 'failed' : 'success',
-                    message: failed ? `Failed to add ${symbol} liquidity` : `Add ${symbol} liquidity successful`,
-                    tx_hash: hash,
-                  }
+                    domainId,
+                    contract_address,
+                    withdraw_contract_address,
+                    amount: _amount,
+                    minAmounts,
+                    minAmount,
+                    amounts,
+                    maxBurnAmount,
+                    deadline,
+                  },
                 )
 
-                success = true
-              }
-            } catch (error) {
-              const response = parseError(error)
+                const remove_request =
+                  is_one_token_withdraw ?
+                    await sdk.sdkPool.removeLiquidityOneToken(domainId, contract_address, withdraw_contract_address, _amount, minAmount, deadline) :
+                    withdrawOption === 'custom_amounts' ?
+                      await sdk.sdkPool.removeLiquidityImbalance(domainId, contract_address, amounts, maxBurnAmount, deadline) :
+                      await sdk.sdkPool.removeLiquidity(domainId, contract_address, _amount, minAmounts, deadline)
 
-              console.log(
-                '[addLiquidity error]',
-                {
-                  domainId,
-                  contract_address,
-                  amounts,
-                  minToMint,
-                  deadline,
-                  error,
-                },
-              )
+                if (remove_request) {
+                  let gasLimit = await signer.estimateGas(remove_request)
 
-              switch (response.code) {
-                case 'user_rejected':
-                  reset(response.code)
-                  break
-                default:
+                  if (gasLimit) {
+                    gasLimit =
+                      FixedNumber.fromString(gasLimit.toString())
+                        .mulUnsafe(
+                          FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
+                        )
+                        .round(0)
+                        .toString()
+                        .replace('.0', '')
+
+                    remove_request.gasLimit = gasLimit
+                  }
+
+                  const remove_response = await signer.sendTransaction(remove_request)
+
+                  const {
+                    hash,
+                  } = { ...remove_response }
+
+                  setCallProcessing(true)
+
+                  const remove_receipt = await signer.provider.waitForTransaction(hash)
+
+                  const {
+                    status,
+                  } = { ...remove_receipt }
+
+                  failed = !status
+
                   setCallResponse(
                     {
-                      status: 'failed',
-                      ...response
-                    }
-                  )
-                  break
-              }
-
-              failed = true
-            }
-          }
-          break
-        case 'withdraw':
-          if (!amount || ['0', '0.0'].includes(amount)) {
-            failed = true
-            setApproving(false)
-            break
-          }
-
-          const is_one_token_withdraw = withdrawOption?.endsWith('_only')
-
-          const _amount = utils.parseUnits((amount || 0).toString(), 18).toString()
-
-          let _amounts =
-            removeAmounts?.length > 1 &&
-            removeAmounts.map((a, i) => {
-              const decimals = (i === 0 ? adopted : local)?.decimals || 18
-              return utils.parseUnits((Number(a) * (1 - slippage / 100)).toFixed(decimals), decimals).toString()
-            })
-
-          if (adopted?.index === 1) {
-            _amounts = _.reverse(_amounts)
-          }
-
-          const withdraw_contract_address = is_one_token_withdraw ? (withdrawOption === 'x_only' ? x_asset_data : y_asset_data)?.contract_address : undefined
-          const minAmounts = _amounts || ['0', '0']
-          const minAmount = is_one_token_withdraw ? _.head(toArray(minAmounts).filter(a => a !== '0')) : undefined
-
-          if (!failed) {
-            try {
-              const approve_request = await sdk.sdkBase.approveIfNeeded(domainId, lpTokenAddress, _amount, infiniteApprove)
-
-              if (approve_request) {
-                setApproving(true)
-
-                const approve_response = await signer.sendTransaction(approve_request)
-
-                const {
-                  hash,
-                } = { ...approve_response }
-
-                setApproveResponse(
-                  {
-                    status: 'pending',
-                    message: `Waiting for ${symbol} approval`,
-                    tx_hash: hash,
-                  }
-                )
-
-                setApproveProcessing(true)
-
-                const approve_receipt = await signer.provider.waitForTransaction(hash)
-
-                const {
-                  status,
-                } = { ...approve_receipt }
-
-                setApproveResponse(
-                  status ?
-                    null :
-                    {
-                      status: 'failed',
-                      message: `Failed to approve ${symbol}`,
+                      status: failed ? 'failed' : 'success',
+                      message: failed ? `Failed to remove ${symbol} liquidity` : `Remove ${symbol} liquidity successful`,
                       tx_hash: hash,
                     }
-                )
-
-                failed = !status
-
-                setApproveProcessing(false)
-                setApproving(false)
-              }
-              else {
-                setApproving(false)
-              }
-            } catch (error) {
-              const response = parseError(error)
-
-              setApproveResponse(
-                {
-                  status: 'failed',
-                  ...response,
-                }
-              )
-
-              failed = true
-
-              setApproveProcessing(false)
-              setApproving(false)
-            }
-          }
-
-          if (!failed) {
-            const method = is_one_token_withdraw ? 'removeLiquidityOneToken' : 'removeLiquidity'
-
-            try {
-              console.log(
-                `[${method}]`,
-                {
-                  domainId,
-                  contract_address,
-                  withdraw_contract_address,
-                  amount: _amount,
-                  minAmounts,
-                  minAmount,
-                  deadline,
-                },
-              )
-
-              const remove_request =
-                is_one_token_withdraw ?
-                  await sdk.sdkPool.removeLiquidityOneToken(domainId, contract_address, withdraw_contract_address, _amount, minAmount, deadline) :
-                  await sdk.sdkPool.removeLiquidity(domainId, contract_address, _amount, minAmounts, deadline)
-
-              if (remove_request) {
-                let gasLimit = await signer.estimateGas(remove_request)
-
-                if (gasLimit) {
-                  gasLimit =
-                    FixedNumber.fromString(gasLimit.toString())
-                      .mulUnsafe(
-                        FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
-                      )
-                      .round(0)
-                      .toString()
-                      .replace('.0', '')
-
-                  remove_request.gasLimit = gasLimit
-                }
-
-                const remove_response = await signer.sendTransaction(remove_request)
-
-                const {
-                  hash,
-                } = { ...remove_response }
-
-                setCallProcessing(true)
-
-                const remove_receipt = await signer.provider.waitForTransaction(hash)
-
-                const {
-                  status,
-                } = { ...remove_receipt }
-
-                failed = !status
-
-                setCallResponse(
-                  {
-                    status: failed ? 'failed' : 'success',
-                    message: failed ? `Failed to remove ${symbol} liquidity` : `Remove ${symbol} liquidity successful`,
-                    tx_hash: hash,
-                  }
-                )
-
-                success = true
-              }
-            } catch (error) {
-              const response = parseError(error)
-
-              console.log(
-                `[${method} error]`,
-                {
-                  domainId,
-                  contract_address,
-                  withdraw_contract_address,
-                  amount: _amount,
-                  minAmounts,
-                  minAmount,
-                  deadline,
-                  error,
-                },
-              )
-
-              let {
-                message,
-              } = { ...response }
-
-              if (message?.includes('exceed total supply')) {
-                message = 'Exceed Total Supply'
-              }
-
-              switch (response.code) {
-                case 'user_rejected':
-                  reset(response.code)
-                  break
-                default:
-                  setCallResponse(
-                    {
-                      status: 'failed',
-                      message,
-                      ...response,
-                    }
                   )
-                  break
-              }
 
-              failed = true
+                  success = true
+                }
+              } catch (error) {
+                const response = parseError(error)
+
+                console.log(
+                  `[${method} error]`,
+                  {
+                    domainId,
+                    contract_address,
+                    withdraw_contract_address,
+                    amount: _amount,
+                    minAmounts,
+                    minAmount,
+                    amounts,
+                    maxBurnAmount,
+                    deadline,
+                    error,
+                  },
+                )
+
+                let {
+                  message,
+                } = { ...response }
+
+                if (message?.includes('exceed total supply')) {
+                  message = 'Exceed Total Supply'
+                }
+
+                switch (response.code) {
+                  case 'user_rejected':
+                    reset(response.code)
+                    break
+                  default:
+                    setCallResponse(
+                      {
+                        status: 'failed',
+                        message,
+                        ...response,
+                      }
+                    )
+                    break
+                }
+
+                failed = true
+              }
             }
-          }
+          } catch (error) {}
           break
         default:
           break
