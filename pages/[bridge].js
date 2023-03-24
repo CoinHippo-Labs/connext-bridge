@@ -11,15 +11,13 @@ export async function getStaticPaths() {
 
   return {
     paths:
-      assets
-        .flatMap(a =>
+      assets.flatMap(a =>
+        chains.flatMap(c =>
           chains
-            .flatMap(c =>
-              chains
-                .filter(_c => _c !== c)
-                .map(_c => `/${a ? `${a.toUpperCase()}-` : ''}from-${c}-to-${_c}`)
-            )
-        ),
+            .filter(_c => _c !== c)
+            .map(_c => `/${a ? `${a.toUpperCase()}-` : ''}from-${c}-to-${_c}`)
+        )
+      ),
     fallback: false,
   }
 }
@@ -37,13 +35,7 @@ export async function getStaticProps(
 
   return {
     props: {
-      headMeta:
-        meta(
-          asPath,
-          null,
-          getChains(),
-          getAssets(),
-        ),
+      headMeta: meta(asPath, null, getChains(), getAssets()),
     },
   }
 }

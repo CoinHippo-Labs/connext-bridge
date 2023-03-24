@@ -10,11 +10,10 @@ export default (
     case ROUTER_ASSET_BALANCES_DATA:
       return {
         ...state,
-        [ROUTER_ASSET_BALANCES_DATA]:
-          {
-            ...state[ROUTER_ASSET_BALANCES_DATA],
-            ...action.value,
-          },
+        [ROUTER_ASSET_BALANCES_DATA]: {
+          ...state[ROUTER_ASSET_BALANCES_DATA],
+          ...action.value,
+        },
       }
     default:
       return state

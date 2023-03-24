@@ -40,11 +40,7 @@ export default (
   useEffect(
     () => {
       const handleClickOutside = e => {
-        if (
-          hidden ||
-          buttonRef.current.contains(e.target) ||
-          dropdownRef.current.contains(e.target)
-        ) {
+        if (hidden || buttonRef.current.contains(e.target) || dropdownRef.current.contains(e.target)) {
           return false
         }
 

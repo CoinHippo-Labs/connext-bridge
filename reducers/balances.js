@@ -15,24 +15,12 @@ export default (
       const [
         key,
         value,
-      ] = (
-        toArray(
-          _.head(
-            Object.entries({ ...action.value })
-          )
-        )
-      )
+      ] = toArray(_.head(Object.entries({ ...action.value })))
 
       if (key && value) {
         let values = state?.[BALANCES_DATA]?.[key]
 
-        values =
-          _.uniqBy(
-            toArray(
-              _.concat(value, values)
-            ),
-            'contract_address',
-          )
+        values = _.uniqBy(toArray(_.concat(value, values)), 'contract_address')
 
         action.value = { [key]: values }
       }

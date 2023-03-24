@@ -6,6 +6,17 @@ import { BsTwitter, BsTelegram, BsGithub, BsArrowRight } from 'react-icons/bs'
 import Image from '../image'
 import _package from '../../package.json'
 
+const NAVIGATIONS = [
+  {
+    title: 'Terms of Service',
+    url: 'https://www.connext.network/terms-of-service-connext-network',
+  },
+  {
+    title: 'Privacy Policy',
+    url: 'https://www.connext.network/privacy-policy',
+  },
+]
+
 export default () => {
   const {
     preferences,
@@ -27,21 +38,11 @@ export default () => {
 
   return (
     <>
-      {
+      {/*
         process.env.NEXT_PUBLIC_FEEDBACK_URL &&
         (
           <div className={`${theme} footer flex flex-col md:flex-row items-center space-y-2.5 sm:space-y-0 py-1 px-3`}>
-            <div className="w-full md:w-2/2 lg:w-3/3 min-w-max flex items-center justify-center md:justify-end text-slate-400 dark:text-white space-x-3">
-              <a
-                href="https://www.connext.network/terms-of-service-connext-network"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center text-blue-600 dark:text-blue-500 space-x-1"
-              >
-                <span className="text-xs font-semibold">
-                  Terms of service
-                </span>
-              </a>
+            <div className="w-full md:w-2/2 lg:w-3/3 min-w-max flex items-center justify-center md:justify-end space-x-3">
               <a
                 href={process.env.NEXT_PUBLIC_FEEDBACK_URL}
                 target="_blank"
@@ -58,9 +59,9 @@ export default () => {
             </div>
           </div>
         )
-      }
+      */}
       <div className={`${theme} footer flex flex-col md:flex-row items-center space-y-2.5 sm:space-y-0 p-3`}>
-        <div className="w-full md:w-1/2 lg:w-1/3 min-w-max flex items-center justify-center md:justify-start font-medium space-x-2">
+        <div className="w-full md:w-1/2 lg:w-1/3 min-w-max flex items-center justify-center md:justify-start text-slate-400 dark:text-slate-500 font-medium space-x-2">
           <span>
             Built with
           </span>
@@ -98,15 +99,44 @@ export default () => {
                 href="https://github.com/connext/monorepo"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 dark:text-white font-medium"
               >
                 SDK v{dependencies['@connext/sdk'].replace('^', '')}
               </a>
             )
           }
         </div>
-        <div className="hidden lg:flex w-full lg:w-1/3 flex-wrap items-center justify-center space-x-2">
-          {
+        <div className="hidden lg:flex w-full lg:w-1/3 flex-wrap items-center justify-center space-x-3">
+          {NAVIGATIONS
+            .map((n, i) => {
+              const {
+                title,
+                url,
+              } = { ...n }
+
+              return (
+                <div
+                  key={i}
+                  className="flex items-center justify-center space-x-3"
+                >
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-slate-400 dark:text-slate-500 font-semibold"
+                  >
+                    {title}
+                  </a>
+                  {
+                    i < NAVIGATIONS.length - 1 &&
+                    (
+                      <div className="w-0.5 h-4 bg-slate-500 dark:bg-white" />
+                    )
+                  }
+                </div>
+              )
+            })
+          }
+          {/*
             process.env.NEXT_PUBLIC_TWITTER_USERNAME &&
             (
               <a
@@ -120,8 +150,8 @@ export default () => {
                 />
               </a>
             )
-          }
-          {
+          */}
+          {/*
             process.env.NEXT_PUBLIC_TELEGRAM_USERNAME &&
             (
               <a
@@ -135,8 +165,8 @@ export default () => {
                 />
               </a>
             )
-          }
-          {
+          */}
+          {/*
             process.env.NEXT_PUBLIC_DISCORD_URL &&
             (
               <a
@@ -150,8 +180,8 @@ export default () => {
                 />
               </a>
             )
-          }
-          {
+          */}
+          {/*
             process.env.NEXT_PUBLIC_GITHUB_URL &&
             (
               <a
@@ -165,9 +195,9 @@ export default () => {
                 />
               </a>
             )
-          }
+          */}
         </div>
-        <div className="w-full md:w-1/2 lg:w-1/3 min-w-max flex items-center justify-center md:justify-end text-slate-400 dark:text-white space-x-1">
+        <div className="w-full md:w-1/2 lg:w-1/3 min-w-max flex items-center justify-center md:justify-end text-slate-400 dark:text-slate-500 space-x-1">
           <span>
             © {moment().format('YYYY')} made with
           </span>
@@ -180,7 +210,7 @@ export default () => {
               href={process.env.NEXT_PUBLIC_BUILD_BY_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 dark:text-white font-semibold"
+              className="font-semibold"
             >
               {process.env.NEXT_PUBLIC_BUILD_BY}
             </a>

@@ -65,11 +65,7 @@ export default (
   useEffect(
     () => {
       const handleClickOutside = e => {
-        if (
-          !open ||
-          !modalRef?.current ||
-          modalRef.current.contains(e.target)
-        ) {
+        if (!open || !modalRef?.current || modalRef.current.contains(e.target)) {
           return false
         }
 
@@ -101,18 +97,20 @@ export default (
 
   return (
     <>
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={show}
-        className={
-          buttonClassName ||
-          'btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 text-white'
-        }
-        style={buttonStyle}
-      >
-        {buttonTitle}
-      </button>
+      {
+        buttonTitle &&
+        (
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={show}
+            className={buttonClassName || 'btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 text-white'}
+            style={buttonStyle}
+          >
+            {buttonTitle}
+          </button>
+        )
+      }
       {
         open &&
         (

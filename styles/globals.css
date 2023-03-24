@@ -311,3 +311,7 @@ a {
 .status-message a {
   @apply text-blue-500 dark:text-blue-600;
 }
+
+.loadButton {
+  bottom: 2.5rem !important;
+}

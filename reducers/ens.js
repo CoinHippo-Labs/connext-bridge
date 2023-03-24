@@ -10,11 +10,10 @@ export default (
     case ENS_DATA:
       return {
         ...state,
-        [ENS_DATA]:
-          {
-            ...state[ENS_DATA],
-            ...action.value,
-          },
+        [ENS_DATA]: {
+          ...state[ENS_DATA],
+          ...action.value,
+        },
       }
     default:
       return state

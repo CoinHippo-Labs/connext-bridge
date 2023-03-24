@@ -121,6 +121,17 @@ export default (
             </>
           )
         */}
+        {
+          process.env.NEXT_PUBLIC_MAVA_TOKEN &&
+          (
+            <script
+              async
+              src="https://widget.mava.app"
+              id="MavaWebChat"
+              data-token={process.env.NEXT_PUBLIC_MAVA_TOKEN}
+            />
+          )
+        }
       </Head>
       <Provider store={store}>
         <Layout>

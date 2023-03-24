@@ -10,12 +10,7 @@ export async function getStaticPaths() {
   const assets = _.concat(getAssets().map(a => a?.id), '')
 
   return {
-    paths:
-      assets
-        .flatMap(a =>
-          chains
-            .map(c => `/swap/${a ? `${a.toUpperCase()}-` : ''}on-${c}`)
-        ),
+    paths: assets.flatMap(a => chains.map(c => `/swap/${a ? `${a.toUpperCase()}-` : ''}on-${c}`)),
     fallback: false,
   }
 }
@@ -33,13 +28,7 @@ export async function getStaticProps(
 
   return {
     props: {
-      headMeta:
-        meta(
-          asPath,
-          null,
-          getChains(),
-          getAssets(),
-        ),
+      headMeta: meta(asPath, null, getChains(), getAssets()),
     },
   }
 }

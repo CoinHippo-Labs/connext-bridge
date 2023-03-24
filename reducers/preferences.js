@@ -1,20 +1,17 @@
-import { THEME, PAGE_VISIBLE, STATUS_MESSAGE } from './types'
+import { THEME, PAGE_VISIBLE, STATUS_MESSAGE, TERMS_AGREED } from './types'
 
 export default (
   state = {
     [THEME]: 'dark',
     [PAGE_VISIBLE]: true,
     [STATUS_MESSAGE]: process.env.STATUS_MESSAGE || process.env.NEXT_PUBLIC_STATUS_MESSAGE,
+    [TERMS_AGREED]: false,
   },
   action,
 ) => {
   switch (action.type) {
     case THEME:
-      localStorage
-        .setItem(
-          THEME,
-          action.value,
-        )
+      localStorage.setItem(THEME, action.value)
 
       return {
         ...state,
@@ -29,6 +26,13 @@ export default (
       return {
         ...state,
         [STATUS_MESSAGE]: action.value,
+      }
+    case TERMS_AGREED:
+      localStorage.setItem(TERMS_AGREED, action.value)
+
+      return {
+        ...state,
+        [TERMS_AGREED]: action.value,
       }
     default:
       return state
