@@ -801,7 +801,7 @@ export default () => {
       const getChainData = async chain_data => pool_assets_data.forEach(a => getPoolData(chain_data, a))
 
       const getData = async () => {
-        if (page_visible && sdk && chains_data && pool_assets_data && pool_assets_data.findIndex(a => typeof a?.price !== 'number') < 0) {
+        if (page_visible && sdk && chains_data && pool_assets_data && pool_assets_data.findIndex(a => typeof a?.price !== 'number') < 0 && !['/', '/[bridge]'].includes(pathname)) {
           chains_data.forEach(c => getChainData(c))
         }
       }
@@ -816,7 +816,7 @@ export default () => {
 
       return () => clearInterval(interval)
     },
-    [page_visible, sdk, chains_data, pool_assets_data],
+    [page_visible, sdk, chains_data, pool_assets_data, pathname],
   )
 
   // user pools
@@ -933,7 +933,7 @@ export default () => {
       }
 
       const getData = async () => {
-        if (page_visible && sdk && chains_data && pool_assets_data) {
+        if (page_visible && sdk && chains_data && pool_assets_data && !['/', '/[bridge]'].includes(pathname)) {
           if (address) {
             chains_data.forEach(c => getChainData(c))
           }
@@ -958,7 +958,7 @@ export default () => {
 
       return () => clearInterval(interval)
     },
-    [page_visible, sdk, chains_data, pool_assets_data, address],
+    [page_visible, sdk, chains_data, pool_assets_data, address, pathname],
   )
 
   // pools daily stats
