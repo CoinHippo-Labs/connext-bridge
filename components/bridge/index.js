@@ -2571,7 +2571,7 @@ export default () => {
                                                     value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
                                                     className="text-sm"
                                                   />
-                                                  {is_staging ?
+                                                  {is_staging || true ?
                                                     <select
                                                       disabled={disabled}
                                                       value={relayerFeeAssetType}

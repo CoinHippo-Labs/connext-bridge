@@ -1057,7 +1057,7 @@ export default (
                             value={relayer_fee_to_bump && relayer_fee_to_bump > 0 ? relayer_fee_to_bump : 0}
                             className="text-sm"
                           />
-                          {is_staging ?
+                          {is_staging || true ?
                             <select
                               disabled={disabled}
                               value={relayerFeeAssetType}
