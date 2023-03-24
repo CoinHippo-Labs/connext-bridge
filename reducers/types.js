@@ -2,6 +2,7 @@
 export const THEME = 'theme'
 export const PAGE_VISIBLE = 'page_visible'
 export const STATUS_MESSAGE = 'status_message'
+export const TERMS_AGREED = 'terms_agreed'
 
 // chains
 export const CHAINS_DATA = 'chains_data'

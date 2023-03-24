@@ -97,18 +97,20 @@ export default (
 
   return (
     <>
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={show}
-        className={
-          buttonClassName ||
-          'btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 text-white'
-        }
-        style={buttonStyle}
-      >
-        {buttonTitle}
-      </button>
+      {
+        buttonTitle &&
+        (
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={show}
+            className={buttonClassName || 'btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 text-white'}
+            style={buttonStyle}
+          >
+            {buttonTitle}
+          </button>
+        )
+      }
       {
         open &&
         (
