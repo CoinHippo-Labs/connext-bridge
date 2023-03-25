@@ -1078,6 +1078,7 @@ export default () => {
       } = { ...source_contract_data }
 
       const amount = utils.parseUnits((_amount || 0).toString(), source_decimals).toBigInt()
+      const approve_amount = BigNumber.from(amount.toString()).add(BigNumber.from(relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? utils.parseUnits(relayer_fee.toString(), source_contract_data?.decimals || 18).toString() : '0')).toString()
 
       try {
         setIsApproveNeeded(undefined)
@@ -1089,10 +1090,11 @@ export default () => {
               domain_id,
               contract_address,
               amount,
+              approve_amount,
             },
           )
 
-          const response = await sdk.sdkBase.approveIfNeeded(domain_id, contract_address, amount.toString())
+          const response = await sdk.sdkBase.approveIfNeeded(domain_id, contract_address, approve_amount)
           const _isApproveNeeded = !!response
 
           console.log(
@@ -1101,6 +1103,7 @@ export default () => {
               domain_id,
               contract_address,
               amount,
+              approve_amount,
               isApproveNeeded: _isApproveNeeded,
               response,
             },
@@ -1120,6 +1123,7 @@ export default () => {
             domain_id,
             contract_address,
             amount,
+            approve_amount,
             error,
             ...response,
           },
@@ -1240,7 +1244,7 @@ export default () => {
 
       if (!failed) {
         try {
-          const approve_amount = BigNumber.from(xcallParams.amount).add(BigNumber.from(relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? utils.parseUnits(relayer_fee.toString(), source_contract_data?.decimals || 18).toString() : '0'))
+          const approve_amount = BigNumber.from(xcallParams.amount).add(BigNumber.from(relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? utils.parseUnits(relayer_fee.toString(), source_contract_data?.decimals || 18).toString() : '0')).toString()
           const approve_request = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xcallParams.asset, approve_amount, infiniteApprove)
 
           if (approve_request) {
