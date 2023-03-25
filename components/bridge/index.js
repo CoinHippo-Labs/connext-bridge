@@ -1720,7 +1720,7 @@ export default () => {
                             transferData={latest_transfer}
                             buttonTitle={
                               <span className="text-center">
-                                {bumped ? 'Waiting for bump' : `Please click here to bump the ${latest_transfer?.error_status === XTransferErrorStatus.LowSlippage ? 'slippage' : 'gas amount'} higher.`
+                                {bumped ? 'Waiting for bump' : `Please click here to bump the ${latest_transfer?.error_status === XTransferErrorStatus.LowSlippage ? 'slippage' : 'gas amount'} higher.`}
                               </span>
                             }
                             onTransferBumped={
