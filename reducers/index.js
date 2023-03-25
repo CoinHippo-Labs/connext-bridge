@@ -14,6 +14,7 @@ import rpc_providers from './rpc-providers'
 import dev from './dev'
 import wallet from './wallet'
 import balances from './balances'
+import latest_bumped_transfers from './latest-bumped-transfers'
 
 export default combineReducers(
   {
@@ -31,5 +32,6 @@ export default combineReducers(
     dev,
     wallet,
     balances,
+    latest_bumped_transfers,
   },
 )

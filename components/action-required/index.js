@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSelector, shallowEqual } from 'react-redux'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import { FixedNumber, constants, utils } from 'ethers'
 import { XTransferErrorStatus } from '@connext/nxtp-utils'
@@ -20,6 +20,7 @@ import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
 import { getContract } from '../../lib/object/contract'
 import { split, toArray, includesStringList, ellipse, equalsIgnoreCase, loaderColor, errorPatterns, parseError } from '../../lib/utils'
+import { LATEST_BUMPED_TRANSFERS_DATA } from '../../reducers/types'
 
 const is_staging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' || process.env.NEXT_PUBLIC_APP_URL?.includes('staging')
 const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT)
@@ -37,6 +38,7 @@ export default (
     onSlippageUpdated,
   },
 ) => {
+  const dispatch = useDispatch()
   const {
     preferences,
     chains,
@@ -734,6 +736,13 @@ export default (
               )
 
               if (!failed && onTransferBumped) {
+                dispatch(
+                  {
+                    type: LATEST_BUMPED_TRANSFERS_DATA,
+                    value: transfer_id,
+                  }
+                )
+
                 onTransferBumped(
                   {
                     relayer_fee: params.relayerFee,
@@ -802,10 +811,10 @@ export default (
 
   return (
     data && buttonTitle &&
-    (error_status !== XTransferErrorStatus.LowRelayerFee || relayer_fee_to_bump > 0) &&
+    // (error_status !== XTransferErrorStatus.LowRelayerFee || relayer_fee_to_bump > 0) &&
     (
       <Modal
-        hidden={hidden}
+        hidden={hidden || ![XTransferErrorStatus.LowRelayerFee, XTransferErrorStatus.LowSlippage].includes(error_status)}
         disabled={disabled}
         onClick={() => setHidden(false)}
         buttonTitle={buttonTitle}
@@ -1010,7 +1019,7 @@ export default (
                       <div className="whitespace-nowrap text-slate-800 dark:text-slate-200 text-sm font-medium">
                         Current relayer fee
                       </div>
-                      {relayer_fees ?
+                      {Object.keys({ ...relayer_fees }).length > 0 ?
                         <div className="flex flex-col space-y-2">
                           {Object.entries(relayer_fees)
                             .map(([k, v]) => {
@@ -1103,7 +1112,7 @@ export default (
                     connectChainId={chain_data?.chain_id}
                     className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                   >
-                    <span>
+                    <span className="mr-1.5 sm:mr-2">
                       {is_walletconnect ? 'Reconnect' : 'Switch'} to
                     </span>
                     {
@@ -1117,7 +1126,7 @@ export default (
                         />
                       )
                     }
-                    <span className="font-medium">
+                    <span className="font-semibold">
                       {chain_data?.name}
                     </span>
                   </Wallet> :
@@ -1156,7 +1165,7 @@ export default (
                         >
                           <div className="flex items-center justify-center space-x-2">
                             <span className="break-all text-sm font-medium text-center">
-                              Relaying ...
+                              Waiting for bump ...
                             </span>
                           </div>
                         </Alert> :

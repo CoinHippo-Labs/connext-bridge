@@ -20,7 +20,7 @@ import Image from '../image'
 import { getChain, chainName } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
 import { getContract } from '../../lib/object/contract'
-import { ellipse, equalsIgnoreCase, loaderColor } from '../../lib/utils'
+import { toArray, ellipse, equalsIgnoreCase, loaderColor } from '../../lib/utils'
 
 const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT)
 
@@ -34,6 +34,7 @@ export default (
     chains,
     assets,
     wallet,
+    latest_bumped_transfers,
   } = useSelector(
     state => (
       {
@@ -41,6 +42,7 @@ export default (
         chains: state.chains,
         assets: state.assets,
         wallet: state.wallet,
+        latest_bumped_transfers: state.latest_bumped_transfers,
       }
     ),
     shallowEqual,
@@ -60,6 +62,9 @@ export default (
   const {
     address,
   } = { ...wallet_data }
+  const {
+    latest_bumped_transfers_data,
+  } = { ...latest_bumped_transfers }
 
   const [transferData, setTransferData] = useState(null)
 
@@ -183,7 +188,8 @@ export default (
       source_amount * (1 - ROUTER_FEE_PERCENT / 100)
 
   const pending = ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(status)
-  const errored = error_status && !execute_transaction_hash && [XTransferStatus.XCalled, XTransferStatus.Reconciled].includes(status)
+  const errored = error_status === XTransferErrorStatus.LowRelayerFee && !execute_transaction_hash && [XTransferStatus.XCalled, XTransferStatus.Reconciled].includes(status)
+  const bumped = [XTransferErrorStatus.LowRelayerFee, XTransferErrorStatus.ExecutionError].includes(error_status) && toArray(latest_bumped_transfers_data).findIndex(t => equalsIgnoreCase(t.transfer_id, value) && moment().diff(moment(t.updated), 'minutes', true) <= 5) > -1
 
   return (
     transferData &&
@@ -279,12 +285,12 @@ export default (
           <div className="flex flex-col items-center">
             {errored ?
               <ActionRequired
-                forceDisabled={[XTransferErrorStatus.ExecutionError, XTransferErrorStatus.NoBidsReceived].includes(error_status)}
+                forceDisabled={[XTransferErrorStatus.ExecutionError, XTransferErrorStatus.NoBidsReceived].includes(error_status) || bumped}
                 transferData={transferData}
                 buttonTitle={
                   <Tooltip
                     placement="top"
-                    content={error_status}
+                    content={bumped ? 'Waiting for bump' : error_status}
                     className="z-50 bg-dark text-white text-xs"
                   >
                     <div>
@@ -403,16 +409,16 @@ export default (
                 <div /> :
                 errored ?
                   <ActionRequired
-                    forceDisabled={[XTransferErrorStatus.ExecutionError, XTransferErrorStatus.NoBidsReceived].includes(error_status)}
+                    forceDisabled={[XTransferErrorStatus.ExecutionError, XTransferErrorStatus.NoBidsReceived].includes(error_status) || bumped}
                     transferData={transferData}
                     buttonTitle={
                       <Tooltip
                         placement="top"
-                        content={error_status}
+                        content={bumped ? 'Waiting for bump' : error_status}
                         className="z-50 bg-dark text-white text-xs"
                       >
                         <span className="whitespace-nowrap text-red-600 dark:text-red-500 text-xs font-semibold">
-                          {error_status}
+                          {bumped ? 'Waiting for bump' : error_status}
                         </span>
                       </Tooltip>
                     }

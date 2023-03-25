@@ -9,7 +9,7 @@ import Footer from '../../components/footer'
 import AgreeToTerms from '../../components/agree-to-terms'
 import meta from '../../lib/meta'
 import { equalsIgnoreCase } from '../../lib/utils'
-import { THEME, PAGE_VISIBLE, TERMS_AGREED } from '../../reducers/types'
+import { THEME, PAGE_VISIBLE, TERMS_AGREED, LATEST_BUMPED_TRANSFERS_DATA } from '../../reducers/types'
 
 export default (
   {
@@ -65,6 +65,15 @@ export default (
             {
               type: TERMS_AGREED,
               value: localStorage.getItem(TERMS_AGREED) === 'true' ? true : false,
+            }
+          )
+        }
+
+        if (localStorage.getItem(LATEST_BUMPED_TRANSFERS_DATA)) {
+          dispatch(
+            {
+              type: LATEST_BUMPED_TRANSFERS_DATA,
+              value: localStorage.getItem(LATEST_BUMPED_TRANSFERS_DATA),
             }
           )
         }

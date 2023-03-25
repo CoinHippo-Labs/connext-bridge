@@ -36,3 +36,6 @@ export const WALLET_RESET = 'wallet_reset'
 // balances
 export const BALANCES_DATA = 'balances_data'
 export const GET_BALANCES_DATA = 'get_balances_data'
+
+// transfers
+export const LATEST_BUMPED_TRANSFERS_DATA = 'latest_bumped_transfers_data'

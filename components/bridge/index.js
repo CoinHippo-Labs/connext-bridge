@@ -64,6 +64,7 @@ export default () => {
     dev,
     wallet,
     balances,
+    latest_bumped_transfers,
   } = useSelector(
     state => (
       {
@@ -76,6 +77,7 @@ export default () => {
         dev: state.dev,
         wallet: state.wallet,
         balances: state.balances,
+        latest_bumped_transfers: state.latest_bumped_transfers,
       }
     ),
     shallowEqual,
@@ -114,6 +116,9 @@ export default () => {
   const {
     balances_data,
   } = { ...balances }
+  const {
+    latest_bumped_transfers_data,
+  } = { ...latest_bumped_transfers }
 
   const wallet_chain_id = wallet_data?.chain_id
 
@@ -1584,6 +1589,7 @@ export default () => {
   const estimated_time_seconds = (latest_transfer?.routers && latest_transfer.routers.length < 1) || latest_transfer?.force_slow ? 5400 : 240
   const time_spent_seconds = moment().diff(moment(latest_transfer?.xcall_timestamp ? latest_transfer.xcall_timestamp * 1000 : undefined), 'seconds')
   const errored = latest_transfer?.error_status && !latest_transfer.execute_transaction_hash && [XTransferStatus.XCalled, XTransferStatus.Reconciled].includes(latest_transfer.status)
+  const bumped = [XTransferErrorStatus.LowRelayerFee, XTransferErrorStatus.ExecutionError].includes(latest_transfer?.error_status) && toArray(latest_bumped_transfers_data).findIndex(t => equalsIgnoreCase(t.transfer_id, latest_transfer.transfer_id) && moment().diff(moment(t.updated), 'minutes', true) <= 5) > -1
   const has_latest_transfers = typeof latestTransfersSize === 'number' && latestTransfersSize > 0
 
   const disabled = calling || approving
@@ -1623,7 +1629,7 @@ export default () => {
                 </div>
                 <div className="flex items-center justify-center">
                   <ActionRequired
-                    forceDisabled={latest_transfer.execute_transaction_hash || !errored || [XTransferErrorStatus.ExecutionError, XTransferErrorStatus.NoBidsReceived].includes(latest_transfer?.error_status)}
+                    forceDisabled={latest_transfer.execute_transaction_hash || !errored || [XTransferErrorStatus.ExecutionError, XTransferErrorStatus.NoBidsReceived].includes(latest_transfer?.error_status) || bumped}
                     transferData={latest_transfer}
                     buttonTitle={
                       <Image
@@ -1710,11 +1716,11 @@ export default () => {
                       errored ?
                         <div className="flex flex-col items-center space-y-1">
                           <ActionRequired
-                            forceDisabled={[XTransferErrorStatus.ExecutionError, XTransferErrorStatus.NoBidsReceived].includes(latest_transfer.error_status)}
+                            forceDisabled={[XTransferErrorStatus.ExecutionError, XTransferErrorStatus.NoBidsReceived].includes(latest_transfer.error_status) || bumped}
                             transferData={latest_transfer}
                             buttonTitle={
                               <span className="text-center">
-                                Please click here to bump the {latest_transfer?.error_status === XTransferErrorStatus.LowSlippage ? 'slippage' : 'gas amount'} higher.
+                                {bumped ? 'Waiting for bump' : `Please click here to bump the ${latest_transfer?.error_status === XTransferErrorStatus.LowSlippage ? 'slippage' : 'gas amount'} higher.`
                               </span>
                             }
                             onTransferBumped={
