@@ -2609,6 +2609,7 @@ export default () => {
                                                         e => {
                                                           setRelayerFeeAssetType(e.target.value)
                                                           setEstimateFeesTrigger(moment().valueOf())
+                                                          checkApprovedNeeded(amount)
                                                         }
                                                       }
                                                       className="bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0"
