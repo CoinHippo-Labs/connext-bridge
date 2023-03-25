@@ -4,7 +4,7 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { XTransferStatus, XTransferErrorStatus } from '@connext/nxtp-utils'
-import { FixedNumber, constants, utils } from 'ethers'
+import { BigNumber, FixedNumber, constants, utils } from 'ethers'
 import { TailSpin, Oval } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
 import { Tooltip, Alert as AlertNotification } from '@material-tailwind/react'
@@ -1240,7 +1240,8 @@ export default () => {
 
       if (!failed) {
         try {
-          const approve_request = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xcallParams.asset, xcallParams.amount, infiniteApprove)
+          const approve_amount = BigNumber.from(xcallParams.amount).add(BigNumber.from(relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? utils.parseUnits(relayer_fee.toString(), source_contract_data?.decimals || 18).toString() : '0'))
+          const approve_request = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xcallParams.asset, approve_amount, infiniteApprove)
 
           if (approve_request) {
             setApproving(true)
@@ -2171,13 +2172,27 @@ export default () => {
                                       }
                                     />
                                     {
+                                      relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 &&
+                                      (
+                                        <div className="text-slate-400 dark:text-slate-500 text-right">
+                                          <span className="text-xs 2xl:text-xl font-medium mr-1.5">
+                                            + Relayer fee
+                                          </span>
+                                          <DecimalsFormat
+                                            value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
+                                            className="text-xs 2xl:text-xl font-medium"
+                                          />
+                                        </div>
+                                      )
+                                    }
+                                    {
                                       amount && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin &&
                                       (
                                         <div className="text-slate-400 dark:text-slate-500 text-right">
                                           <DecimalsFormat
-                                            value={Number(amount) * source_asset_data.price}
+                                            value={(Number(amount) + (relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? Number(relayer_fee) : 0)) * source_asset_data.price}
                                             prefix={currency_symbol}
-                                            className="font-medium text-xs 2xl:text-xl"
+                                            className="text-xs 2xl:text-xl font-medium"
                                           />
                                         </div>
                                       )
