@@ -202,26 +202,24 @@ export default () => {
   )
 
   return (
-    <div className="mb-4">
+    <div className="w-full mb-4">
       <div className="flex justify-center">
         <div className="w-full flex flex-col space-y-4 sm:space-y-8 my-4 sm:my-12 mx-1 sm:mx-4">
           <div className="grid sm:grid-cols-1 gap-4">
             <div className="flex flex-col space-y-6 sm:space-y-12">
-              <h1 className="tracking-tighter text-xl sm:text-5xl font-semibold">
+              <h1 className="tracking-tighter text-xl sm:text-5xl 2xl:text-6xl font-semibold">
                 Add liquidity to earn rewards.
               </h1>
               <div className="border-0 dark:border-slate-800 flex items-center">
-                {VIEWS
-                  .map((v, i) => (
-                    <div
-                      key={i}
-                      onClick={() => setView(v.id)}
-                      className={`border-b-2 ${view === v.id ? 'border-slate-600 dark:border-white font-medium' : 'border-transparent text-slate-400 dark:text-slate-500 font-medium'} whitespace-nowrap cursor-pointer text-lg mr-2 p-2`}
-                    >
-                      {v.title}
-                    </div>
-                  ))
-                }
+                {VIEWS.map((v, i) => (
+                  <div
+                    key={i}
+                    onClick={() => setView(v.id)}
+                    className={`border-b-2 ${view === v.id ? 'border-slate-600 dark:border-white font-medium' : 'border-transparent text-slate-400 dark:text-slate-500 font-medium'} whitespace-nowrap cursor-pointer text-lg 2xl:text-2xl mr-2 p-2`}
+                  >
+                    {v.title}
+                  </div>
+                ))}
               </div>
             </div>
           </div>

@@ -32,10 +32,11 @@ export default () => {
       <button
         ref={buttonRef}
         onClick={onClick}
-        className="w-8 h-16 flex items-center justify-center sm:mr-2"
+        className="w-8 h-16 flex items-center justify-center sm:mr-2 2xl:w-10 2xl:h-20"
       >
         <RxHamburgerMenu
           size={20}
+          className="2xl:w-6 2xl:h-6"
         />
       </button>
       <div
@@ -45,7 +46,7 @@ export default () => {
         {
           !hidden &&
           (
-            <div className="dropdown-content w-44 bottom-start">
+            <div className="dropdown-content w-44 2xl:w-60 bottom-start">
               <Items />
             </div>
           )

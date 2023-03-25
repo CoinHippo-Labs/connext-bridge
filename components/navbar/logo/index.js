@@ -1,11 +1,8 @@
-import { Tooltip } from '@material-tailwind/react'
-import { BsArrowLeft } from 'react-icons/bs'
-
 import Image from '../../image'
 
 export default () => {
   return (
-    <div className="logo flex flex-col items-start ml-3 mr-0.5 sm:mr-3">
+    <div className="logo flex flex-col items-start ml-3 mr-0.5 sm:mr-3 2xl:mx-6">
       <a
         title="Cross-Chain Bridge"
         href={process.env.NEXT_PUBLIC_PROTOCOL_URL}
@@ -27,6 +24,7 @@ export default () => {
                 src="/logos/logo_with_name.png"
                 width={128}
                 height={32}
+                className="2xl:w-40 2xl:h-10"
               />
             </div>
           </div>
@@ -43,39 +41,21 @@ export default () => {
                 src="/logos/logo_with_name_white.png"
                 width={128}
                 height={32}
+                className="2xl:w-40 2xl:h-10"
               />
             </div>
           </div>
-          <div className="max-w-min bg-slate-200 dark:bg-slate-800 whitespace-nowrap uppercase text-slate-600 dark:text-white text-xs font-semibold py-1 px-2">
+          <div className="max-w-min bg-slate-200 dark:bg-slate-800 whitespace-nowrap uppercase text-slate-600 dark:text-white text-xs 2xl:text-2xl font-semibold py-1 px-2">
             Beta
           </div>
         </div>
       </a>
-      <div className="flex items-center space-x-2 ml-0 sm:ml-11">
-        {/*
-          <Tooltip
-            placement="bottom"
-            content="return back to nxtp-v1"
-            className="z-50 bg-dark text-white text-xs"
-          >
-            <a
-              href="https://v1.bridge.connext.network"
-              className="bg-slate-200 dark:bg-slate-800 flex items-center text-blue-500 dark:text-blue-500 space-x-1 py-1 px-2"
-            >
-              <BsArrowLeft
-                size={12}
-              />
-              <span className="whitespace-nowrap text-xs font-semibold">
-                NXTPv1
-              </span>
-            </a>
-          </Tooltip>
-        */}
+      <div className="flex items-center space-x-2 ml-0 sm:ml-11 2xl:ml-14">
         <div className="hidden sm:block">
           {
             process.env.NEXT_PUBLIC_NETWORK === 'testnet' &&
             (
-              <div className="max-w-min whitespace-nowrap lowercase text-slate-400 dark:text-slate-500 text-xs">
+              <div className="max-w-min whitespace-nowrap lowercase text-slate-400 dark:text-slate-500 text-xs 2xl:text-xl">
                 {process.env.NEXT_PUBLIC_NETWORK}
               </div>
             )

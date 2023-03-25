@@ -81,6 +81,7 @@ export default (
       <div className={`flex items-center justify-center text-slate-400 dark:text-slate-500 space-x-1 ${className}`}>
         <MdLocalGasStation
           size={iconSize}
+          className="2xl:w-6 2xl:h-6"
         />
         {typeof gasPrice === 'number' ?
           <>

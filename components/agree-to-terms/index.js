@@ -63,7 +63,7 @@ export default (
   )
 
   return (
-    !terms_agreed &&
+    terms_agreed === false &&
     (useModal ?
       <Modal
         hidden={false}

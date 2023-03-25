@@ -94,29 +94,20 @@ export default (
     (
       <span
         title={name}
-        className={
-          className ||
-          'normal-case tracking-wider text-black dark:text-white text-base font-medium'
-        }
+        className={className || 'normal-case tracking-wider text-black dark:text-white text-base 2xl:text-2xl font-medium'}
       >
         <span className="xl:hidden">
-          {ellipse(
-            name,
-            12,
-          )}
+          {ellipse(name, 12)}
         </span>
         <span className="hidden xl:block">
-          {ellipse(
-            name,
-            12,
-          )}
+          {ellipse(name, 12)}
         </span>
       </span>
     )
 
   return (
     ens_name ?
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 2xl:space-x-3">
         {
           !imageUnavailable &&
           (
@@ -124,7 +115,7 @@ export default (
               src={`https://metadata.ens.domains/mainnet/avatar/${name}`}
               alt=""
               onError={() => setImageUnavailable(true)}
-              className="w-6 h-6 rounded-full"
+              className="w-6 2xl:w-8 h-6 2xl:h-8 rounded-full"
             />
           )
         }

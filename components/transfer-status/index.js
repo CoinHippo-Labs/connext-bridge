@@ -198,11 +198,11 @@ export default (
                   src={source_chain_data.image}
                   width={20}
                   height={20}
-                  className="rounded-full"
+                  className="2xl:w-6 2xl:h-6 rounded-full"
                 />
               )
             }
-            <span className="text-xs font-medium">
+            <span className="text-xs 2xl:text-xl font-medium">
               {chainName(source_chain_data)}
             </span>
           </div>
@@ -239,11 +239,11 @@ export default (
                   src={destination_chain_data.image}
                   width={20}
                   height={20}
-                  className="rounded-full"
+                  className="2xl:w-6 2xl:h-6 rounded-full"
                 />
               )
             }
-            <span className="text-xs font-medium">
+            <span className="text-xs 2xl:text-xl font-medium">
               {chainName(destination_chain_data)}
             </span>
           </div>
@@ -255,6 +255,7 @@ export default (
               (
                 <DecimalsFormat
                   value={source_amount}
+                  className="text-sm 2xl:text-xl"
                 />
               )
             }
@@ -266,11 +267,11 @@ export default (
                     src={source_asset_image}
                     width={16}
                     height={16}
-                    className="rounded-full"
+                    className="2xl:w-5 2xl:h-5 rounded-full"
                   />
                 )
               }
-              <span className="text-xs font-medium">
+              <span className="text-xs 2xl:text-xl font-medium">
                 {source_symbol}
               </span>
             </div>
@@ -330,24 +331,21 @@ export default (
                 >
                   <HiOutlineCheckCircle
                     size={32}
-                    className="text-green-500 dark:text-green-400"
+                    className="2xl:w-10 2xl:h-10 text-green-500 dark:text-green-400"
                   />
                 </a>
             }
           </div>
           <div
             className="flex flex-col items-end space-y-1.5"
-            style={
-              {
-                minWidth: '4rem',
-              }
-            }
+            style={{ minWidth: '4rem' }}
           >
             {
               typeof destination_amount === 'number' &&
               (
                 <DecimalsFormat
                   value={destination_amount}
+                  className="text-sm 2xl:text-xl"
                 />
               )
             }
@@ -359,11 +357,11 @@ export default (
                     src={destination_asset_image}
                     width={16}
                     height={16}
-                    className="rounded-full"
+                    className="2xl:w-5 2xl:h-5 rounded-full"
                   />
                 )
               }
-              <span className="text-xs font-medium">
+              <span className="text-xs 2xl:text-xl font-medium">
                 {destination_symbol}
               </span>
             </div>
@@ -382,18 +380,12 @@ export default (
                   <Copy
                     value={to}
                     title={
-                      <span className="cursor-pointer text-slate-600 dark:text-white text-sm">
+                      <span className="cursor-pointer text-slate-600 dark:text-white text-sm 2xl:text-xl">
                         <span className="sm:hidden">
-                          {ellipse(
-                            to,
-                            12,
-                          )}
+                          {ellipse(to, 12)}
                         </span>
                         <span className="hidden sm:block">
-                          {ellipse(
-                            to,
-                            8,
-                          )}
+                          {ellipse(to, 8)}
                         </span>
                       </span>
                     }
@@ -463,7 +455,7 @@ export default (
                           <div className="flex items-center">
                             <BsLightningChargeFill
                               size={16}
-                              className={routers?.length > 0 ? 'text-yellow-500 dark:text-yellow-400' : 'text-blue-300 dark:text-blue-200'}
+                              className={`2xl:w-5 2xl:h-5 ${routers?.length > 0 ? 'text-yellow-500 dark:text-yellow-400' : 'text-blue-300 dark:text-blue-200'}`}
                             />
                             <BiInfoCircle
                               size={14}
@@ -481,7 +473,7 @@ export default (
                 className="z-50 bg-dark text-white text-xs"
               >
                 <div className="flex items-center">
-                  <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                  <span className="text-slate-400 dark:text-slate-500 text-xs 2xl:text-xl font-medium">
                     {moment(xcall_timestamp * 1000).format('MMM D, YYYY h:mm:ss A')}
                   </span>
                 </div>
@@ -497,14 +489,14 @@ export default (
                 href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/tx/${transfer_id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center text-blue-500 dark:text-blue-500 text-xs font-medium space-x-0 -mr-1"
+                className="flex items-center text-blue-500 dark:text-blue-500 text-xs 2xl:text-xl font-medium space-x-0 -mr-1"
               >
                 <span>
                   See more on explorer
                 </span>
                 <TiArrowRight
                   size={16}
-                  className="transform -rotate-45 mt-0.5"
+                  className="2xl:w-5 2xl:h-5 transform -rotate-45 mt-0.5"
                 />
               </a>
             </div>

@@ -1,7 +1,7 @@
 import { useSelector, shallowEqual } from 'react-redux'
 import moment from 'moment'
 import { FaHeart, FaDiscord } from 'react-icons/fa'
-import { BsTwitter, BsTelegram, BsGithub, BsArrowRight } from 'react-icons/bs'
+import { BsTwitter, BsTelegram, BsGithub } from 'react-icons/bs'
 
 import Image from '../image'
 import _package from '../../package.json'
@@ -38,29 +38,7 @@ export default () => {
 
   return (
     <>
-      {/*
-        process.env.NEXT_PUBLIC_FEEDBACK_URL &&
-        (
-          <div className={`${theme} footer flex flex-col md:flex-row items-center space-y-2.5 sm:space-y-0 py-1 px-3`}>
-            <div className="w-full md:w-2/2 lg:w-3/3 min-w-max flex items-center justify-center md:justify-end space-x-3">
-              <a
-                href={process.env.NEXT_PUBLIC_FEEDBACK_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center text-blue-600 dark:text-blue-500 space-x-1"
-              >
-                <span className="text-xs font-semibold">
-                  Issues or feedback
-                </span>
-                <BsArrowRight
-                  size={12}
-                />
-              </a>
-            </div>
-          </div>
-        )
-      */}
-      <div className={`${theme} footer flex flex-col md:flex-row items-center space-y-2.5 sm:space-y-0 p-3`}>
+      <div className={`${theme} footer flex flex-col md:flex-row items-center space-y-2.5 sm:space-y-0 p-3 2xl:text-2xl 2xl:p-8`}>
         <div className="w-full md:w-1/2 lg:w-1/3 min-w-max flex items-center justify-center md:justify-start text-slate-400 dark:text-slate-500 font-medium space-x-2">
           <span>
             Built with
@@ -78,6 +56,7 @@ export default () => {
                   src="/logos/logo.png"
                   width={20}
                   height={20}
+                  className="2xl:w-8 2xl:h-8"
                 />
               </div>
               <div className="hidden dark:flex items-center">
@@ -85,6 +64,7 @@ export default () => {
                   src="/logos/logo_white.png"
                   width={20}
                   height={20}
+                  className="2xl:w-8 2xl:h-8"
                 />
               </div>
             </div>
@@ -202,7 +182,7 @@ export default () => {
             © {moment().format('YYYY')} made with
           </span>
           <FaHeart
-            className="text-red-400 text-xl pr-0.5"
+            className="text-red-400 text-xl 2xl:text-2xl pr-0.5"
           />
           <span>
             {"by "}

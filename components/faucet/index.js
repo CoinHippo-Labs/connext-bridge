@@ -427,12 +427,7 @@ export default (
   return (
     asset_data &&
     (
-      <div
-        className={
-          className ||
-          'w-full max-w-md bg-white dark:bg-slate-900 rounded border dark:border-slate-800 flex flex-col items-center justify-center space-y-2 mx-auto p-3 sm:p-6'
-        }
-      >
+      <div className={className || 'w-full max-w-md 2xl:max-w-xl bg-white dark:bg-slate-900 rounded border dark:border-slate-800 flex flex-col items-center justify-center space-y-2 mx-auto p-3 sm:p-6 2xl:p-8'}>
         <button
           onClick={() => setCollapse(!collapse)}
           className={`w-full flex items-center justify-center text-base font-semibold space-x-1.5 ${titleClassName}`}
@@ -440,16 +435,13 @@ export default (
           {
             !signer &&
             (
-              <span className="whitespace-nowrap text-xs sm:text-base font-medium">
+              <span className="whitespace-nowrap text-xs sm:text-base 2xl:text-2xl font-medium">
                 Connect wallet to
               </span>
             )
           }
-          <span className="whitespace-nowrap text-xs sm:text-base font-medium">
-            {is_wrapped ?
-              `Wrap or unwrap ${symbol}` :
-              'Faucet'
-            }
+          <span className="whitespace-nowrap text-xs sm:text-base 2xl:text-2xl font-medium">
+            {is_wrapped ? `Wrap or unwrap ${symbol}` : 'Faucet'}
           </span>
           {collapse ?
             <BiChevronDown
@@ -463,7 +455,7 @@ export default (
         {
           !collapse &&
           (
-            <div className="w-full">
+            <div className="w-full 2xl:space-y-8">
               {
                 is_wrapped && signer &&
                 (
@@ -506,12 +498,12 @@ export default (
                   return (
                     <div
                       key={i}
-                      className="form-element"
+                      className="form-element 2xl:space-y-2"
                     >
                       {
                         label &&
                         (
-                          <div className="form-label text-slate-600 dark:text-slate-200 font-medium">
+                          <div className="form-label text-slate-600 dark:text-slate-200 2xl:text-xl font-medium">
                             {label}
                           </div>
                         )
@@ -529,11 +521,8 @@ export default (
                           disabled={disabled}
                           placeholder={placeholder}
                           value={data?.[name]}
-                          onChange={
-                            e =>
-                              setData({ ...data, [f.name]: e.target.value })
-                          }
-                          className="form-input rounded border-0 focus:ring-0"
+                          onChange={e => setData({ ...data, [f.name]: e.target.value })}
+                          className="form-input rounded border-0 focus:ring-0 2xl:text-2xl"
                         />
                       }
                     </div>

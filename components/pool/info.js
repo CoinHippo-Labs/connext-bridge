@@ -183,16 +183,7 @@ export default (
     price,
   } = { ...getAsset(asset, assets_data) }
 
-  const tvl =
-    Number(
-      supply ||
-      _.sum(
-        toArray(
-          _.concat(adopted, local)
-        )
-        .map(a => Number(a.balance))
-      )
-    ) * (price || 0)
+  const tvl = Number(supply || _.sum(toArray(_.concat(adopted, local)).map(a => Number(a.balance)))) * (price || 0)
 
   const chartData =
     !pool_loading && pools_daily_stats_data?.[`${dailyMetric}s`] &&
@@ -226,19 +217,19 @@ export default (
       pool_data,
     }
 
-  const metricClassName = 'bg-slate-50 dark:bg-slate-900 bg-opacity-60 dark:bg-opacity-60 rounded border dark:border-slate-800 flex flex-col space-y-12 py-5 px-4'
-  const titleClassName = 'text-slate-400 dark:text-slate-200 text-base font-medium'
-  const valueClassName = 'text-lg sm:text-3xl font-semibold'
-  const gridValueClassName = 'text-lg font-semibold'
+  const metricClassName = 'bg-slate-50 dark:bg-slate-900 bg-opacity-60 dark:bg-opacity-60 rounded border dark:border-slate-800 flex flex-col space-y-12 2xl:space-y-16 py-5 2xl:py-8 px-4 2xl:px-6'
+  const titleClassName = 'text-slate-400 dark:text-slate-200 text-base 2xl:text-xl font-medium'
+  const valueClassName = 'text-lg sm:text-3xl 2xl:text-4xl font-semibold'
+  const gridValueClassName = 'text-lg 2xl:text-2xl font-semibold'
 
   const boxShadow = `${color || '#e53f3f'}${theme === 'light' ? '44' : '33'} 0px 32px 128px 64px`
 
   return (
     <div className="sm:min-h-full bg-transparent">
       <div className="space-y-6">
-        <div className="space-y-0">
+        <div className="space-y-0 2xl:space-y-2">
           <div
-            className="w-32 sm:w-64 mx-auto sm:mr-8"
+            className="w-32 sm:w-64 2xl:w-96 mx-auto sm:mr-8"
             style={
               {
                 boxShadow,
@@ -254,17 +245,15 @@ export default (
                 chartData={chartData}
                 header={
                   <div className="w-fit border-b dark:border-slate-800 flex items-center justify-between space-x-4">
-                    {DAILY_METRICS
-                      .map((m, i) => (
-                        <div
-                          key={i}
-                          onClick={() => setDailyMetric(m)}
-                          className={`w-fit border-b-2 ${dailyMetric === m ? 'border-slate-300 dark:border-slate-200 font-semibold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer text-base font-medium pt-0 pb-3 px-2`}
-                        >
-                          {name(m)}
-                        </div>
-                      ))
-                    }
+                    {DAILY_METRICS.map((m, i) => (
+                      <div
+                        key={i}
+                        onClick={() => setDailyMetric(m)}
+                        className={`w-fit border-b-2 ${dailyMetric === m ? 'border-slate-300 dark:border-slate-200 font-semibold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer text-base 2xl:text-xl font-medium pt-0 pb-3 px-2`}
+                      >
+                        {name(m)}
+                      </div>
+                    ))}
                   </div>
                 }
               />
@@ -341,18 +330,10 @@ export default (
                   (
                     <ProgressBar
                       width={native_amount * 100 / total_amount}
-                      className="w-full rounded-lg"
-                      backgroundClassName="rounded-lg"
-                      style={
-                        {
-                          backgroundColor: asset_data?.color,
-                        }
-                      }
-                      backgroundStyle={
-                        {
-                          backgroundColor: `${asset_data?.color}33`,
-                        }
-                      }
+                      className="w-full 2xl:h-2 rounded-lg"
+                      backgroundClassName="2xl:h-2 rounded-lg"
+                      style={{ backgroundColor: asset_data?.color }}
+                      backgroundStyle={{ backgroundColor: `${asset_data?.color}33` }}
                     />
                   )
                 }
@@ -367,88 +348,87 @@ export default (
                         />
                       </div>
                     </div> :
-                    pool_tokens_data
-                      .map((p, i) => {
-                        const {
-                          contract_address,
-                          symbol,
-                          image,
-                          balance,
-                        } = { ...p }
+                    pool_tokens_data.map((p, i) => {
+                      const {
+                        contract_address,
+                        symbol,
+                        image,
+                        balance,
+                      } = { ...p }
 
-                        return (
-                          <div
-                            key={i}
-                            className="flex flex-col space-y-1"
+                      return (
+                        <div
+                          key={i}
+                          className="flex flex-col space-y-1"
+                        >
+                          <a
+                            href={`${url}${contract_path?.replace('{address}', contract_address)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center space-x-2"
                           >
-                            <a
-                              href={`${url}${contract_path?.replace('{address}', contract_address)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center space-x-2"
-                            >
-                              {
-                                image &&
-                                (
-                                  <Image
-                                    src={image}
-                                    width={16}
-                                    height={16}
-                                    className="rounded-full"
-                                  />
-                                )
-                              }
-                              <span className="text-xs font-medium">
-                                {symbol}
-                              </span>
-                            </a>
-                            <a
-                              href={`${url}${contract_path?.replace('{address}', contract_address)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={gridValueClassName}
-                            >
-                              {pool_data && !error ?
-                                <div className="flex items-center space-x-1.5">
-                                  <span className="uppercase">
-                                    {balance > -1 ?
-                                      <DecimalsFormat
-                                        value={balance}
-                                        noTooltip={true}
-                                        className={gridValueClassName}
-                                      /> :
-                                      '-'
-                                    }
-                                  </span>
-                                  {
-                                    balance > -1 && total_amount > 0 &&
-                                    (
-                                      <DecimalsFormat
-                                        value={balance * 100 / total_amount}
-                                        prefix="("
-                                        suffix="%)"
-                                        noTooltip={true}
-                                        className="text-xs mt-0.5"
-                                      />
-                                    )
+                            {
+                              image &&
+                              (
+                                <Image
+                                  src={image}
+                                  width={16}
+                                  height={16}
+                                  className="2xl:w-5 2xl:h-5 rounded-full"
+                                />
+                              )
+                            }
+                            <span className="text-xs 2xl:text-lg font-medium">
+                              {symbol}
+                            </span>
+                          </a>
+                          <a
+                            href={`${url}${contract_path?.replace('{address}', contract_address)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={gridValueClassName}
+                          >
+                            {pool_data && !error ?
+                              <div className="flex items-center space-x-1.5">
+                                <span className="uppercase">
+                                  {balance > -1 ?
+                                    <DecimalsFormat
+                                      value={balance}
+                                      noTooltip={true}
+                                      className={gridValueClassName}
+                                    /> :
+                                    '-'
                                   }
-                                </div> :
-                                selected && !no_pool && !error &&
-                                (pool_loading ?
-                                  <div className="mt-1">
-                                    <TailSpin
-                                      width="24"
-                                      height="24"
-                                      color={loaderColor(theme)}
+                                </span>
+                                {
+                                  balance > -1 && total_amount > 0 &&
+                                  (
+                                    <DecimalsFormat
+                                      value={balance * 100 / total_amount}
+                                      prefix="("
+                                      suffix="%)"
+                                      noTooltip={true}
+                                      className="text-xs 2xl:text-lg mt-0.5"
                                     />
-                                  </div> :
-                                  '-'
-                                )
-                              }
-                            </a>
-                          </div>
-                        )
-                      })
+                                  )
+                                }
+                              </div> :
+                              selected && !no_pool && !error &&
+                              (pool_loading ?
+                                <div className="mt-1">
+                                  <TailSpin
+                                    width="24"
+                                    height="24"
+                                    color={loaderColor(theme)}
+                                  />
+                                </div> :
+                                '-'
+                              )
+                            }
+                          </a>
+                        </div>
+                      )
+                    })
                   }
                 </div>
               </div>
@@ -469,17 +449,17 @@ export default (
                     </div>
                   </div> :
                   <>
-                    <div className="flex flex-col space-y-1">
+                    <div className="flex flex-col space-y-1 2xl:space-y-1.5">
                       {lpTokenAddress && url ?
                         <a
                           href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs font-medium"
+                          className="text-xs 2xl:text-lg font-medium"
                         >
                           Current Value ({currency.toUpperCase()})
                         </a> :
-                        <span className="text-xs font-medium">
+                        <span className="text-xs 2xl:text-lg font-medium">
                           Current Value ({currency.toUpperCase()})
                         </span>
                       }
@@ -502,8 +482,8 @@ export default (
                         />
                       }
                     </div>
-                    <div className="flex flex-col space-y-1">
-                      <span className="text-xs font-medium">
+                    <div className="flex flex-col space-y-1 2xl:space-y-1.5">
+                      <span className="text-xs 2xl:text-lg font-medium">
                         Share
                       </span>
                       <DecimalsFormat

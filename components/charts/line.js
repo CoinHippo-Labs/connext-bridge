@@ -65,14 +65,14 @@ const CustomTooltip = (
                     src={contract_data.image}
                     width={18}
                     height={18}
-                    className="rounded-full"
+                    className="2xl:w-6 2xl:h-6 rounded-full"
                   />
                 )
               }
               <DecimalsFormat
                 value={balances?.[(equalsIgnoreCase(contract_address, adopted?.address) ? adopted : local)?.index]}
                 maxDecimals={2}
-                className="text-base font-semibold"
+                className="text-base 2xl:text-2xl font-semibold"
               />
             </div>
             <div className="flex items-center space-x-2">
@@ -83,14 +83,14 @@ const CustomTooltip = (
                     src={next_asset.image}
                     width={18}
                     height={18}
-                    className="rounded-full"
+                    className="2xl:w-6 2xl:h-6 rounded-full"
                   />
                 )
               }
               <DecimalsFormat
                 value={balances?.[(equalsIgnoreCase(next_asset?.contract_address, adopted?.address) ? adopted : local)?.index]}
                 maxDecimals={2}
-                className="text-base font-semibold"
+                className="text-base 2xl:text-2xl font-semibold"
               />
             </div>
           </>
@@ -100,22 +100,22 @@ const CustomTooltip = (
         component = (
           <>
             <div className="flex flex-col space-y-1">
-              <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+              <span className="text-slate-400 dark:text-slate-500 text-xs 2xl:text-xl font-medium">
                 Volume
               </span>
               <DecimalsFormat
                 value={volume}
                 maxDecimals={2}
-                className="text-base font-semibold"
+                className="text-base 2xl:text-2xl font-semibold"
               />
             </div>
             <div className="flex flex-col space-y-1">
-              <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+              <span className="text-slate-400 dark:text-slate-500 text-xs 2xl:text-xl font-medium">
                 No. Transactions
               </span>
               <DecimalsFormat
                 value={swap_count}
-                className="text-base font-semibold"
+                className="text-base 2xl:text-2xl font-semibold"
               />
             </div>
           </>
@@ -128,7 +128,7 @@ const CustomTooltip = (
       component &&
       (
         <div className="bg-slate-100 dark:bg-slate-800 dark:bg-opacity-75 border border-slate-200 dark:border-slate-800 flex flex-col space-y-2 p-2">
-          <span className="leading-4 whitespace-nowrap text-slate-600 dark:text-slate-200 text-base font-medium">
+          <span className="leading-4 whitespace-nowrap text-slate-600 dark:text-slate-200 text-base 2xl:text-2xl font-medium">
             {time_string}
           </span>
           {component}
@@ -234,10 +234,10 @@ export default (
           header ||
           (
             <div className="flex flex-col space-y-0.5">
-            <span className="font-semibold">
+            <span className="2xl:text-2xl font-semibold">
               {title}
             </span>
-            <span className="text-slate-400 dark:text-slate-500 text-xs">
+            <span className="text-slate-400 dark:text-slate-500 text-xs 2xl:text-xl">
               {description}
             </span>
           </div>
@@ -251,7 +251,7 @@ export default (
                 <DecimalsFormat
                   value={focus_value}
                   maxDecimals={maxDecimals}
-                  className="uppercase text-base font-semibold"
+                  className="uppercase text-base 2xl:text-2xl font-semibold"
                 />
                 {
                   asset_data?.image &&
@@ -260,12 +260,12 @@ export default (
                       src={asset_data.image}
                       width={18}
                       height={18}
-                      className="rounded-full"
+                      className="2xl:w-6 2xl:h-6 rounded-full"
                     />
                   )
                 }
               </div>
-              <span className="leading-4 whitespace-nowrap text-slate-400 dark:text-slate-500 text-2xs sm:text-sm font-medium text-right">
+              <span className="leading-4 whitespace-nowrap text-slate-400 dark:text-slate-500 text-2xs sm:text-sm 2xl:text-xl font-medium text-right">
                 {focus_time_string}
               </span>
             </div>

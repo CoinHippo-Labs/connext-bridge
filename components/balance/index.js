@@ -154,7 +154,7 @@ export default (
   return (
     chainId && asset &&
     (
-      <div className={`flex items-center justify-center text-slate-600 dark:text-slate-50 text-sm space-x-1 ${className}`}>
+      <div className={`flex items-center justify-center text-slate-600 dark:text-slate-50 text-sm 2xl:text-xl space-x-1 2xl:space-x-2 ${className}`}>
         {['string', 'number'].includes(typeof amount) && !isNaN(amount) ?
           <>
             <DecimalsFormat

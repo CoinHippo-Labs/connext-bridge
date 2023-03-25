@@ -75,7 +75,7 @@ export default (
               src={image}
               width={24}
               height={24}
-              className="rounded-full"
+              className="2xl:w-8 2xl:h-8 rounded-full"
             /> :
             <span className="font-semibold">
               {short_name}
@@ -83,7 +83,7 @@ export default (
           chains_data ?
             <RiRefreshFill
               size={20}
-              className="transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out"
+              className="2xl:w-8 2xl:h-8 transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out"
             /> :
             <Puff
               width="24"

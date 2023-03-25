@@ -87,9 +87,10 @@ export default (
     <Modal
       disabled={disabled}
       buttonTitle={
-        <div className={`bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded flex items-center ${applied ? 'text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400' : 'text-slate-600 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200'} space-x-1 py-2 px-2`}>
+        <div className={`bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded flex items-center ${applied ? 'text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400' : 'text-slate-600 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200'} space-x-1 p-2 2xl:p-3`}>
           <RiSettings3Line
             size={20}
+            className="2xl:w-6 2xl:h-6"
           />
         </div>
       }

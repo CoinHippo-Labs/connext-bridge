@@ -470,25 +470,25 @@ export default () => {
   const pool_loading = selected && !no_pool && !error && !pool_data
 
   return (
-    <div className="mb-4">
+    <div className="w-full mb-4">
       <div className="flex justify-center">
-        <div className="w-full flex flex-col space-y-3.5 my-4 sm:my-12 mx-1 sm:mx-4">
+        <div className="w-full flex flex-col space-y-3.5 2xl:space-y-6 my-4 sm:my-12 mx-1 sm:mx-4">
           <Link href="/pools">
-            <div className="w-fit rounded border dark:border-slate-800 flex items-center text-slate-600 dark:text-slate-500 space-x-1 py-0.5 px-2.5">
+            <div className="w-fit rounded border dark:border-slate-800 flex items-center text-slate-600 dark:text-slate-500 space-x-1 2xl:space-x-2 py-0.5 px-2.5">
               <TiArrowLeft
                 size={18}
-                className="-ml-0.5"
+                className="2xl:w-6 2xl:h-6 -ml-0.5"
               />
-              <span className="text-base font-semibold">
+              <span className="text-base 2xl:text-2xl font-semibold">
                 Back to pools
               </span>
             </div>
           </Link>
-          <div className="space-y-6 sm:space-y-16">
+          <div className="space-y-6 sm:space-y-16 2xl:space-y-20">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center justify-between space-y-4 lg:space-y-0 sm:space-x-2">
                 <div className="flex items-center space-x-1">
-                  <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4 2xl:space-x-6">
                     {
                       chain_data?.image &&
                       (
@@ -496,7 +496,7 @@ export default () => {
                           src={chain_data.image}
                           width={48}
                           height={48}
-                          className="rounded-full"
+                          className="2xl:w-16 2xl:h-16 rounded-full"
                         />
                       )
                     }
@@ -516,11 +516,11 @@ export default () => {
                   className="z-50 bg-dark text-white text-xs"
                 >
                   <div>
-                    <span className="text-slate-400 dark:text-slate-200 text-base font-medium">
+                    <span className="text-slate-400 dark:text-slate-200 text-base 2xl:text-2xl font-medium">
                       Reward APY
                     </span>
                     <div className="flex flex-col items-end space-y-1">
-                      <span className="text-lg sm:text-3xl font-semibold">
+                      <span className="text-lg sm:text-3xl 2xl:text-4xl font-semibold">
                         {pool_data && !error ?
                           !isNaN(apy) ?
                             <DecimalsFormat
@@ -528,7 +528,7 @@ export default () => {
                               maxDecimals={2}
                               suffix="%"
                               noTooltip={true}
-                              className="uppercase"
+                              className="uppercase 2xl:text-4xl"
                             /> :
                             'TBD' :
                             selected && !no_pool && !error &&
@@ -551,7 +551,7 @@ export default () => {
               {
                 error &&
                 (
-                  <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-100 dark:bg-opacity-50 rounded break-all tracking-tighter text-red-600 dark:text-red-400 text-base font-medium py-1.5 px-4">
+                  <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-100 dark:bg-opacity-50 rounded break-all tracking-tighter text-red-600 dark:text-red-400 text-base 2xl:text-xl font-medium py-1.5 px-4">
                     {error.message}
                   </div>
                 )

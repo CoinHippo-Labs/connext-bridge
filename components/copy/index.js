@@ -31,7 +31,7 @@ export default (
 
   return (
     copied ?
-      <div className={`${title ? 'min-w-max' : ''} flex items-center space-x-1`}>
+      <div className={`${title ? 'min-w-max' : ''} flex items-center space-x-1 2xl:space-x-2`}>
         {
           title &&
           (
@@ -42,10 +42,7 @@ export default (
         }
         <HiCheckCircle
           size={size}
-          className={
-            className ||
-            'text-green-400 dark:text-green-300'
-          }
+          className={className || '2xl:w-6 2xl:h-6 text-green-400 dark:text-green-300'}
         />
       </div> :
       <CopyToClipboard
@@ -60,7 +57,7 @@ export default (
           }
         }
       >
-        <div className={`${title ? 'min-w-max' : ''} flex items-center space-x-1`}>
+        <div className={`${title ? 'min-w-max' : ''} flex items-center space-x-1 2xl:space-x-2`}>
           {
             title &&
             (
@@ -71,10 +68,7 @@ export default (
           }
           <IoMdCopy
             size={size}
-            className={
-              className ||
-              'cursor-pointer text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500'
-            }
+            className={className || '2xl:w-6 2xl:h-6 cursor-pointer text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500'}
           />
         </div>
       </CopyToClipboard>

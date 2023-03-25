@@ -49,18 +49,18 @@ export default (
     (Number(gasFee) * price) / (Number(amount) * assetPrice) > 1 + threshold &&
     (
       <div className="bg-slate-50 dark:bg-slate-800 rounded flex items-center justify-between space-x-2 py-2 pl-2 pr-2.5">
-        <div className="flex items-start space-x-1.5">
+        <div className="flex items-start space-x-1.5 2xl:space-x-2.5">
           <IoWarning
             size={16}
-            className="min-w-max text-yellow-600 dark:text-yellow-400 mt-0.5"
+            className="min-w-max 2xl:w-5 2xl:h-5 text-yellow-600 dark:text-yellow-400 mt-0.5"
           />
-          <div className="text-yellow-600 dark:text-yellow-400 text-xs">
+          <div className="text-yellow-600 dark:text-yellow-400 text-xs 2xl:text-xl">
             The estimated destination gas fee is higher than {threshold * 100}% of the amount you're trying to bridge.
           </div>
         </div>
         <button
           onClick={() => setHidden(true)}
-          className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-xs font-medium mt-0.5 py-1 px-1.5"
+          className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-xs 2xl:text-xl font-medium mt-0.5 py-1 2xl:py-1.5 px-1.5 2xl:px-2"
         >
           Accept
         </button>

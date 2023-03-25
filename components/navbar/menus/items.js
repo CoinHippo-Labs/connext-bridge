@@ -15,7 +15,7 @@ const menus = [
     icon: (
       <HiCode
         size={20}
-        className="text-blue-500 dark:text-white"
+        className="2xl:w-6 2xl:h-6 text-blue-500 dark:text-white"
       />
     ),
     items: [
@@ -26,7 +26,7 @@ const menus = [
         icon: (
           <CgFileDocument
             size={20}
-            className="text-blue-500 dark:text-white"
+            className="2xl:w-6 2xl:h-6 text-blue-500 dark:text-white"
           />
         ),
       },
@@ -37,7 +37,7 @@ const menus = [
         icon: (
           <BsGithub
             size={20}
-            className="text-black dark:text-white"
+            className="2xl:w-6 2xl:h-6 text-black dark:text-white"
           />
         ),
       },
@@ -48,7 +48,7 @@ const menus = [
         icon: (
           <BsGithub
             size={20}
-            className="text-black dark:text-white"
+            className="2xl:w-6 2xl:h-6 text-black dark:text-white"
           />
         ),
       },
@@ -64,6 +64,7 @@ const menus = [
         src="/logos/logo.png"
         width={20}
         height={20}
+        className="2xl:w-6 2xl:h-6"
       />
     ),
   },
@@ -74,7 +75,7 @@ const menus = [
     icon: (
       <BsTwitter
         size={20}
-        className="text-blue-400 dark:text-white"
+        className="2xl:w-6 2xl:h-6 text-blue-400 dark:text-white"
       />
     ),
   },
@@ -85,7 +86,7 @@ const menus = [
     icon: (
       <BsTelegram
         size={20}
-        className="text-blue-500 dark:text-white"
+        className="2xl:w-6 2xl:h-6 text-blue-500 dark:text-white"
       />
     ),
   },
@@ -96,7 +97,7 @@ const menus = [
     icon: (
       <FaDiscord
         size={20}
-        className="text-blue-600 dark:text-white"
+        className="2xl:w-6 2xl:h-6 text-blue-600 dark:text-white"
       />
     ),
   },
@@ -119,9 +120,9 @@ export default () => {
             <ImArrowLeft2
               size={20}
               onClick={() => setOpenMenu(null)}
-              className="bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 cursor-pointer rounded-full p-1 mt-0.5"
+              className="2xl:w-6 2xl:h-6 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 cursor-pointer rounded-full p-1 mt-0.5"
             />
-            <span className="font-bold">
+            <span className="2xl:text-xl font-bold">
               {title}
             </span>
           </div>
@@ -136,7 +137,7 @@ export default () => {
               const item = (
                 <>
                   {icon}
-                  <span className="font-medium">
+                  <span className="2xl:text-xl font-medium">
                     {title}
                   </span>
                 </>
@@ -169,7 +170,7 @@ export default () => {
             const item = (
               <>
                 {icon}
-                <span className="font-medium">
+                <span className="2xl:text-xl font-medium">
                   {title}
                 </span>
               </>
@@ -188,7 +189,7 @@ export default () => {
                   </div>
                   <BiChevronRight
                     size={18}
-                    className="mt-0.5"
+                    className="2xl:w-5 2xl:h-5 mt-0.5"
                   />
                 </div> :
                 <a

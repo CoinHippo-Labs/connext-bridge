@@ -49,9 +49,9 @@ export default (
                 src={image}
                 width={20}
                 height={20}
-                className="rounded-full"
+                className="2xl:w-6 2xl:h-6 rounded-full"
               />
-              <span className={`leading-4 text-2xs ${c.chain_id === chain_id ? 'font-semibold' : 'font-medium'}`}>
+              <span className={`leading-4 text-2xs ${c.chain_id === chain_id ? 'font-semibold' : 'font-medium'} 2xl:leading-6 2xl:text-xl`}>
                 {chainName(c)}
               </span>
             </>
@@ -62,7 +62,7 @@ export default (
               <div
                 key={id}
                 title="Disabled"
-                className="dropdown-item w-full cursor-not-allowed flex items-center justify-start font-medium space-x-1.5 p-2"
+                className="dropdown-item w-full cursor-not-allowed flex items-center justify-start font-medium space-x-1.5 p-2 2xl:space-x-2.5 2xl:p-3"
               >
                 {item}
               </div> :
@@ -72,7 +72,7 @@ export default (
                 onSwitch={onClick}
                 className="dropdown-item w-full"
               >
-                <div className="flex items-center justify-start space-x-1.5 p-2">
+                <div className="flex items-center justify-start space-x-1.5 p-2 2xl:space-x-2.5 2xl:p-3">
                   {item}
                 </div>
               </Wallet>

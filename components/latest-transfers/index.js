@@ -125,11 +125,9 @@ export default (
           return (
             <div
               key={i}
-              className="w-70 mx-auto"
+              className="w-70 2xl:w-96 mx-auto"
             >
-              <TransferStatus
-                data={t}
-              />
+              <TransferStatus data={t} />
             </div>
           )
         }),
@@ -145,15 +143,17 @@ export default (
           onClick={() => setCollapse(!collapse)}
           className={`w-full flex items-center justify-center ${collapse ? 'text-slate-300 hover:text-slate-800 dark:text-slate-700 dark:hover:text-slate-200 font-medium' : 'font-semibold'} space-x-1 mb-3`}
         >
-          <span className="capitalize text-sm">
+          <span className="capitalize text-sm 2xl:text-2xl">
             Latest Transfers
           </span>
           {collapse ?
             <BiChevronDown
               size={18}
+              className="2xl:w-6 2xl:h-6"
             /> :
             <BiChevronUp
               size={18}
+              className="2xl:w-6 2xl:h-6"
             />
           }
         </button>
@@ -161,7 +161,7 @@ export default (
           !collapse &&
           (
             <>
-              <div className="max-w-xl grid sm:grid-cols-1 lg:grid-cols-1 gap-4 mx-auto">
+              <div className="max-w-xl grid sm:grid-cols-1 lg:grid-cols-1 gap-4 2xl:gap-8 mx-auto">
                 {transfersComponent}
               </div>
               {
@@ -171,14 +171,14 @@ export default (
                     href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${address}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center text-blue-500 dark:text-slate-200 mt-2.5"
+                    className="flex items-center justify-center text-blue-500 dark:text-slate-200 2xl:text-2xl mt-2.5"
                   >
                     <span className="font-medium">
                       See more
                     </span>
                     <TiArrowRight
                       size={18}
-                      className="transform -rotate-45 mt-0.5"
+                      className="2xl:w-6 2xl:h-6 transform -rotate-45 mt-0.5"
                     />
                   </a>
                 )

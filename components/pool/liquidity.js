@@ -1436,24 +1436,24 @@ export default (
 
   return (
     <div className="order-1 lg:order-2 space-y-3">
-      <div className="bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-3 pt-4 pb-5 px-4">
+      <div className="bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-3 pt-4 2xl: pt-6 pb-5 2xl:pb-7 px-4 2xl:px-6">
         <div className="flex items-center justify-between space-x-2">
-          <span className="text-lg font-semibold">
+          <span className="text-lg 2xl:text-2xl font-semibold">
             Manage Balance
           </span>
           <GasPrice
             chainId={chain_id}
             iconSize={16}
-            className="text-xs"
+            className="text-xs 2xl:text-xl"
           />
         </div>
-        <div className="space-y-4">
+        <div className="space-y-4 2xl:space-y-6">
           <div className="w-fit border-b dark:border-slate-800 flex items-center justify-between space-x-4">
             {ACTIONS.map((a, i) => (
               <div
                 key={i}
                 onClick={() => setAction(a)}
-                className={`w-fit border-b-2 ${action === a ? 'border-slate-300 dark:border-slate-200 font-semibold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer capitalize text-sm text-left py-3 px-0`}
+                className={`w-fit border-b-2 ${action === a ? 'border-slate-300 dark:border-slate-200 font-semibold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer capitalize text-sm 2xl:text-xl text-left py-3 px-0`}
               >
                 {a}
               </div>
@@ -1461,14 +1461,14 @@ export default (
           </div>
           {action === 'deposit' ?
             <>
-              <div className="pt-1 px-0">
+              <div className="2xl:space-y-4 pt-1 px-0">
                 <div className="space-y-1">
                   <div className="flex items-center justify-between space-x-2">
-                    <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                    <div className="text-slate-400 dark:text-slate-500 text-xs 2xl:text-xl font-medium">
                       Token 1
                     </div>
                     <div className="flex items-center space-x-1">
-                      <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                      <div className="text-slate-400 dark:text-slate-500 text-xs 2xl:text-xl font-medium">
                         Balance:
                       </div>
                       {
@@ -1495,9 +1495,9 @@ export default (
                               contractAddress={x_asset_data.contract_address}
                               symbol={x_asset_data.symbol}
                               hideSymbol={true}
-                              className="text-xs"
+                              className="text-xs 2xl:text-xl"
                             />
-                            <span className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-xs font-medium`}>
+                            <span className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-xs 2xl:text-xl font-medium`}>
                               Max
                             </span>
                           </button>
@@ -1525,11 +1525,11 @@ export default (
                                       src={x_asset_data.image}
                                       width={20}
                                       height={20}
-                                      className="rounded-full"
+                                      className="2xl:w-6 2xl:h-6 rounded-full"
                                     />
                                   )
                                 }
-                                <span className="text-base font-semibold">
+                                <span className="text-base 2xl:text-2xl font-semibold">
                                   {x_asset_data.symbol}
                                 </span>
                               </a>
@@ -1571,7 +1571,7 @@ export default (
                         }
                         onWheel={e => e.target.blur()}
                         onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                        className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
+                        className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base 2xl:text-2xl font-medium text-right`}
                       />
                     </div>
                     {
@@ -1581,9 +1581,9 @@ export default (
                         <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
                           <BiMessageError
                             size={16}
-                            className="min-w-max"
+                            className="min-w-max 2xl:w-5 2xl:h-5"
                           />
-                          <span className="text-xs font-medium">
+                          <span className="text-xs 2xl:text-lg font-medium">
                             Not enough {x_asset_data?.symbol}
                           </span>
                         </div>
@@ -1594,16 +1594,16 @@ export default (
                 <div className="w-full flex items-center justify-center mt-2.5 -mb-2">
                   <BiPlus
                     size={20}
-                    className="text-slate-400 dark:text-slate-500"
+                    className="2xl:w-6 2xl:h-6 text-slate-400 dark:text-slate-500"
                   />
                 </div>
                 <div className="space-y-1 mt-2.5">
                   <div className="flex items-center justify-between space-x-2">
-                    <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                    <div className="text-slate-400 dark:text-slate-500 text-xs 2xl:text-xl font-medium">
                       Token 2
                     </div>
                     <div className="flex items-center space-x-1">
-                      <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                      <div className="text-slate-400 dark:text-slate-500 text-xs 2xl:text-xl font-medium">
                         Balance:
                       </div>
                       {
@@ -1630,9 +1630,9 @@ export default (
                               contractAddress={y_asset_data.contract_address}
                               symbol={y_asset_data.symbol}
                               hideSymbol={true}
-                              className="text-xs"
+                              className="text-xs 2xl:text-xl"
                             />
-                            <span className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-xs font-medium`}>
+                            <span className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-xs 2xl:text-xl font-medium`}>
                               Max
                             </span>
                           </button>
@@ -1660,11 +1660,11 @@ export default (
                                       src={y_asset_data.image}
                                       width={20}
                                       height={20}
-                                      className="rounded-full"
+                                      className="2xl:w-5 2xl:h-5 rounded-full"
                                     />
                                   )
                                 }
-                                <span className="text-base font-semibold">
+                                <span className="text-base 2xl:text-2xl font-semibold">
                                   {y_asset_data.symbol}
                                 </span>
                               </a>
@@ -1706,7 +1706,7 @@ export default (
                         }
                         onWheel={e => e.target.blur()}
                         onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                        className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
+                        className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base 2xl:text-2xl font-medium text-right`}
                       />
                     </div>
                     {
@@ -1716,9 +1716,9 @@ export default (
                         <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
                           <BiMessageError
                             size={16}
-                            className="min-w-max"
+                            className="min-w-max 2xl:w-5 2xl:h-5"
                           />
-                          <span className="text-xs font-medium">
+                          <span className="text-xs 2xl:text-lg font-medium">
                             Not enough {y_asset_data?.symbol}
                           </span>
                         </div>
@@ -1732,14 +1732,14 @@ export default (
                   pool_data && false &&
                   (
                     <div className="flex flex-col space-y-3">
-                      <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
+                      <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs 2xl:text-xl font-medium">
                         Pool Ratio
                       </div>
                       <div className="w-full h-6 flex flex-col items-end justify-center space-y-1.5">
                         <ProgressBar
                           width={native_amount * 100 / total_amount}
-                          className="w-full rounded-lg"
-                          backgroundClassName="rounded-lg"
+                          className="w-full 2xl:h-2 rounded-lg"
+                          backgroundClassName="2xl: h-2 rounded-lg"
                           style={{ backgroundColor: color }}
                           backgroundStyle={{ backgroundColor: `${color}33` }}
                         />
@@ -1760,7 +1760,7 @@ export default (
                               <DecimalsFormat
                                 value={native_amount * 100 / total_amount}
                                 suffix="%"
-                                className="leading-4 text-xs font-medium"
+                                className="leading-4 text-xs 2xl:text-xl font-medium"
                               />
                             </div>
                           </div>
@@ -1780,7 +1780,7 @@ export default (
                               <DecimalsFormat
                                 value={100 - (native_amount * 100 / total_amount)}
                                 suffix="%"
-                                className="leading-4 text-xs font-medium"
+                                className="leading-4 text-xs 2xl:text-xl font-medium"
                               />
                             </div>
                           </div>
@@ -1797,7 +1797,7 @@ export default (
                       className="w-80 z-50 bg-dark text-white text-xs"
                     >
                       <div className="flex items-center">
-                        <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
+                        <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs 2xl:text-xl font-medium">
                           {typeof priceImpactAdd === 'number' ? priceImpactAdd < 0 ? 'Slippage' : 'Bonus' : 'Price impact'}
                         </div>
                         <BiInfoCircle
@@ -1806,7 +1806,7 @@ export default (
                         />
                       </div>
                     </Tooltip>
-                    <div className="flex items-center text-xs font-semibold space-x-1">
+                    <div className="flex items-center text-xs 2xl:text-xl font-semibold space-x-1">
                       {priceImpactAdd === true && !priceImpactAddResponse ?
                         <Oval
                           width="10"
@@ -1836,14 +1836,14 @@ export default (
                       <div className="bg-yellow-50 dark:bg-yellow-200 bg-opacity-50 dark:bg-opacity-10 rounded flex items-start space-x-2 pt-2 pb-3 px-2">
                         <IoWarning
                           size={18}
-                          className="min-w-max text-yellow-500 dark:text-yellow-400 mt-1"
+                          className="min-w-max 2xl:w-6 2xl:h-6 text-yellow-500 dark:text-yellow-400 mt-1"
                         />
                         <div className="flex flex-col space-y-3">
                           <div className="flex flex-col space-y-2.5">
-                            <span className="text-base font-bold">
+                            <span className="text-base 2xl:text-xl font-bold">
                               Warning
                             </span>
-                            <span className="flex flex-wrap items-center leading-4 text-xs text-left">
+                            <span className="flex flex-wrap items-center leading-4 text-xs 2xl:text-lg text-left">
                               <span className="mr-1">
                                 You may have
                               </span>
@@ -1863,7 +1863,7 @@ export default (
                               </span>
                             </span>
                             <div className="flex flex-col items-center space-y-1">
-                              <span className="leading-4 text-xs text-left">
+                              <span className="leading-4 text-xs 2xl:text-lg text-left">
                                 <span className="mr-1">
                                   If you provide additional
                                 </span>
@@ -1889,7 +1889,7 @@ export default (
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
-                                <span className="leading-3 text-white text-xs font-medium">
+                                <span className="leading-3 2xl:leading-4 text-white text-xs 2xl:text-xl font-medium">
                                   Click here to get {(overweighted_asset === 'x' ? y_asset_data : x_asset_data)?.symbol}
                                 </span>
                               </a>
@@ -1905,7 +1905,7 @@ export default (
                 {!valid_amount ?
                   <button
                     disabled={true}
-                    className="w-full bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500 rounded text-base text-center py-3 px-2 sm:px-3"
+                    className="w-full bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500 rounded text-base 2xl:text-2xl text-center py-3 px-2 sm:px-3"
                   >
                     <span className="flex items-center justify-center space-x-1.5">
                       <span>
@@ -1916,7 +1916,7 @@ export default (
                   chain && browser_provider && wrong_chain ?
                     <Wallet
                       connectChainId={chain_id}
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
+                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base 2xl:text-2xl font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
                     >
                       <span>
                         {is_walletconnect ? 'Reconnect' : 'Switch'} to
@@ -1975,7 +1975,7 @@ export default (
                               className="rounded p-3"
                             >
                               <div className="flex items-center justify-between space-x-2">
-                                <span className={`leading-5 ${status === 'failed' ? 'break-words text-xs' : 'break-words'} text-sm font-medium`}>
+                                <span className={`leading-5 ${status === 'failed' ? 'break-words text-xs' : 'break-words'} text-sm 2xl:text-xl font-medium`}>
                                   {ellipse(
                                     split(message, 'normal', ' ')
                                       .join(' ')
@@ -2035,7 +2035,7 @@ export default (
                           <button
                             disabled={disabled || !valid_amount}
                             onClick={() => call(pool_data)}
-                            className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base text-center py-3 px-2 sm:px-3`}
+                            className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base 2xl:text-2xl text-center py-3 px-2 sm:px-3`}
                           >
                             <span className="flex items-center justify-center space-x-1.5">
                               {
@@ -2069,7 +2069,7 @@ export default (
                           <Wallet
                             connectChainId={chain_id}
                             buttonConnectTitle="Connect Wallet"
-                            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base font-medium text-center py-3 px-2 sm:px-3"
+                            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base 2xl:text-2xl font-medium text-center py-3 px-2 sm:px-3"
                           >
                             <span>
                               Connect Wallet
@@ -2082,21 +2082,21 @@ export default (
               <div className="space-y-6 py-3 px-0">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between space-x-2">
-                    <span className="text-xs font-medium">
-                      Withdraw percentage
+                    <span className="text-xs 2xl:text-lg font-medium">
+                      Withdraw %
                     </span>
                     <div className="flex items-center space-x-1">
-                      <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                      <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs 2xl:text-lg font-medium">
                         LP Token Balance:
                       </div>
                       {
                         browser_provider && user_pool_data &&
                         (
-                          <div className="flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs space-x-1">
+                          <div className="flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs 2xl:text-lg space-x-1">
                             {['string', 'number'].includes(typeof lpTokenBalance) ?
                               <DecimalsFormat
                                 value={lpTokenBalance}
-                                className="font-semibold"
+                                className="2xl:text-lg font-semibold"
                               /> :
                               typeof lpTokenBalance === 'string' ?
                                 <span>
@@ -2176,9 +2176,9 @@ export default (
                         }
                         onWheel={e => e.target.blur()}
                         onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                        className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
+                        className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base 2xl:text-2xl font-medium text-right`}
                       />
-                      <span className="text-slate-400 dark:text-slate-500">
+                      <span className="text-slate-400 dark:text-slate-500 2xl:text-2xl">
                         %
                       </span>
                     </div>
@@ -2189,9 +2189,9 @@ export default (
                         <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
                           <BiMessageError
                             size={16}
-                            className="min-w-max"
+                            className="min-w-max 2xl:w-5 2xl:h-5"
                           />
-                          <span className="text-xs font-medium">
+                          <span className="text-xs 2xl:text-lg font-medium">
                             Not enough {symbol}
                           </span>
                         </div>
@@ -2237,7 +2237,7 @@ export default (
                                     )
                                     .toString() === amount ?
                                     'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' :
-                                    'bg-slate-100 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white font-medium'
+                                    'bg-slate-100 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white 2xl:text-xl font-medium'
                               } rounded text-xs py-0.5 px-1.5`
                             }
                           >
@@ -2285,9 +2285,9 @@ export default (
                                 type="radio"
                                 value={value}
                                 checked={selected}
-                                className={`h-4 w-4 ${_disabled ? 'cursor-not-allowed' : 'cursor-pointer'} text-blue-500 mt-0.5`}
+                                className={`w-4 2xl:w-5 h-4 2xl:h-5 ${_disabled ? 'cursor-not-allowed' : 'cursor-pointer'} text-blue-500 mt-0.5`}
                               />
-                              <span className={`${selected ? 'font-bold' : 'text-slate-400 dark:text-slate-500 font-medium'}`}>
+                              <span className={`${selected ? 'font-bold' : 'text-slate-400 dark:text-slate-500 font-medium'} 2xl:text-xl`}>
                                 {title} {is_staging && !mode ? '(coming soon)' : ''}
                               </span>
                             </div>
@@ -2297,12 +2297,12 @@ export default (
                       <div className="space-y-2.5">
                         <div className="space-y-2">
                           <div className="flex items-center justify-between space-x-2">
-                            <span className="text-slate-600 dark:text-slate-500 text-xs font-medium">
+                            <span className="text-slate-600 dark:text-slate-500 text-xs 2xl:text-xl font-medium">
                               You Receive
                             </span>
                             <div className="flex items-center justify-between space-x-2">
                               <div className="flex items-center space-x-1">
-                                <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                                <div className="text-slate-400 dark:text-slate-500 text-xs 2xl:text-xl font-medium">
                                   Balance:
                                 </div>
                                 <button
@@ -2316,7 +2316,7 @@ export default (
                                     decimals={x_asset_data.decimals}
                                     symbol={x_asset_data.symbol}
                                     hideSymbol={false}
-                                    className="text-xs"
+                                    className="text-xs 2xl:text-xl"
                                   />
                                 </button>
                               </div>
@@ -2338,15 +2338,15 @@ export default (
                                         src={x_asset_data.image}
                                         width={20}
                                         height={20}
-                                        className="rounded-full"
+                                        className="2xl:w-6 2xl:h-6 rounded-full"
                                       />
                                     )
                                   }
-                                  <span className="text-base font-semibold">
+                                  <span className="text-base 2xl:text-2xl font-semibold">
                                     {x_asset_data.symbol}
                                   </span>
                                 </a> :
-                                <span className="text-base font-semibold">
+                                <span className="text-base 2xl:text-2xl font-semibold">
                                   {x_asset_data.symbol}
                                 </span>
                               }
@@ -2390,12 +2390,12 @@ export default (
                                   }
                                   onWheel={e => e.target.blur()}
                                   onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                                  className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
+                                  className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base 2xl:text-2xl font-medium text-right`}
                                 /> :
                                 ['string', 'number'].includes(typeof x_remove_amount) && !isNaN(x_remove_amount) ?
                                   <DecimalsFormat
                                     value={x_remove_amount}
-                                    className="w-fit bg-transparent text-slate-500 dark:text-slate-500 text-base font-medium text-right"
+                                    className="w-fit bg-transparent text-slate-500 dark:text-slate-500 text-base 2xl:text-2xl font-medium text-right"
                                   /> :
                                   selected && !no_pool && !error &&
                                   (position_loading && amount ?
@@ -2415,7 +2415,7 @@ export default (
                             <span className="text-slate-600 dark:text-slate-500 text-xs font-medium" />
                             <div className="flex items-center justify-between space-x-2">
                               <div className="flex items-center space-x-1">
-                                <div className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                                <div className="text-slate-400 dark:text-slate-500 text-xs 2xl:text-xl font-medium">
                                   Balance:
                                 </div>
                                 <button
@@ -2429,7 +2429,7 @@ export default (
                                     decimals={y_asset_data.decimals}
                                     symbol={y_asset_data.symbol}
                                     hideSymbol={false}
-                                    className="text-xs"
+                                    className="text-xs 2xl:text-xl"
                                   />
                                 </button>
                               </div>
@@ -2451,15 +2451,15 @@ export default (
                                         src={y_asset_data.image}
                                         width={20}
                                         height={20}
-                                        className="rounded-full"
+                                        className="2xl:w-6 2xl:h-6 rounded-full"
                                       />
                                     )
                                   }
-                                  <span className="text-base font-semibold">
+                                  <span className="text-base 2xl:text-2xl font-semibold">
                                     {y_asset_data.symbol}
                                   </span>
                                 </a> :
-                                <span className="text-base font-semibold">
+                                <span className="text-base 2xl:text-2xl font-semibold">
                                   {y_asset_data.symbol}
                                 </span>
                               }
@@ -2503,7 +2503,7 @@ export default (
                                   }
                                   onWheel={e => e.target.blur()}
                                   onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                                  className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base font-medium text-right`}
+                                  className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base 2xl:text-2xl font-medium text-right`}
                                 /> :
                                 ['string', 'number'].includes(typeof y_remove_amount) && !isNaN(y_remove_amount) ?
                                   <DecimalsFormat
@@ -2530,7 +2530,7 @@ export default (
                             className="w-80 z-50 bg-dark text-white text-xs"
                           >
                             <div className="flex items-center">
-                              <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium">
+                              <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs 2xl:text-xl font-medium">
                                 Slippage
                               </div>
                               <BiInfoCircle
@@ -2539,7 +2539,7 @@ export default (
                               />
                             </div>
                           </Tooltip>
-                          <div className="flex items-center text-xs font-semibold space-x-1">
+                          <div className="flex items-center text-xs 2xl:text-xl font-semibold space-x-1">
                             {priceImpactRemove === true && !priceImpactRemoveResponse ?
                               <Oval
                                 width="10"
@@ -2550,7 +2550,7 @@ export default (
                                 {typeof priceImpactRemove === 'number' || priceImpactRemoveResponse ?
                                   <DecimalsFormat
                                     value={priceImpactRemove}
-                                    className="whitespace-nowrap"
+                                    className="whitespace-nowrap 2xl:text-xl"
                                   /> :
                                   <span>
                                     -
@@ -2572,7 +2572,7 @@ export default (
                 {!valid_amount ?
                   <button
                     disabled={true}
-                    className="w-full bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500 rounded text-base text-center py-3 px-2 sm:px-3"
+                    className="w-full bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500 rounded text-base 2xl:text-2xl text-center py-3 px-2 sm:px-3"
                   >
                     <span className="flex items-center justify-center space-x-1.5">
                       <span>
@@ -2583,7 +2583,7 @@ export default (
                   browser_provider && wrong_chain ?
                     <Wallet
                       connectChainId={chain_id}
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3  px-2 sm:px-3"
+                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base 2xl:text-2xl font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
                     >
                       <span>
                         {is_walletconnect ? 'Reconnect' : 'Switch'} to
@@ -2642,7 +2642,7 @@ export default (
                               className="rounded p-3"
                             >
                               <div className="flex items-center justify-between space-x-2">
-                                <span className={`leading-5 ${status === 'failed' ? 'break-words text-xs' : 'break-words'} text-sm font-medium`}>
+                                <span className={`leading-5 ${status === 'failed' ? 'break-words text-xs' : 'break-words'} text-sm 2xl:text-xl font-medium`}>
                                   {ellipse(
                                     split(message, 'normal', ' ')
                                       .join(' ')
@@ -2702,7 +2702,7 @@ export default (
                           <button
                             disabled={disabled || !valid_amount}
                             onClick={() => call(pool_data)}
-                            className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base text-center py-3 px-2 sm:px-3`}
+                            className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base 2xl:text-2xl text-center py-3 px-2 sm:px-3`}
                           >
                             <span className="flex items-center justify-center space-x-1.5">
                               {
@@ -2736,7 +2736,7 @@ export default (
                           <Wallet
                             connectChainId={chain_id}
                             buttonConnectTitle="Connect Wallet"
-                            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base font-medium text-center py-3 px-2 sm:px-3"
+                            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base 2xl:text-2xl font-medium text-center py-3 px-2 sm:px-3"
                           >
                             <span>
                               Connect Wallet
@@ -2762,7 +2762,7 @@ export default (
       {
         process.env.NEXT_PUBLIC_LP_GUIDE &&
         (
-          <div className="flex flex-wrap items-center text-xs space-x-1 ml-4">
+          <div className="flex flex-wrap items-center text-xs 2xl:text-xl space-x-1 ml-4 2xl:ml-6">
             <span className="text-slate-400 dark:text-slate-500 font-medium">
               Stuck?
             </span>
@@ -2780,7 +2780,7 @@ export default (
               </span>
               <BsArrowRight
                 size={10}
-                className="text-blue-500 dark:text-white"
+                className="2xl:w-4 2xl:h-4 text-blue-500 dark:text-white"
               />
             </a>
           </div>

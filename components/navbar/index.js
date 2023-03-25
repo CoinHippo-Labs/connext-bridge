@@ -115,6 +115,7 @@ export default () => {
   const router = useRouter()
   const {
     pathname,
+    asPath,
   } = { ...router }
 
   const [currentAddress, setCurrentAddress] = useState(null)
@@ -802,7 +803,7 @@ export default () => {
 
       const getData = async () => {
         if (page_visible && sdk && chains_data && pool_assets_data && pool_assets_data.findIndex(a => typeof a?.price !== 'number') < 0 && !['/', '/[bridge]'].includes(pathname)) {
-          chains_data.forEach(c => getChainData(c))
+          chains_data.filter(c => !pathname?.includes('/[') || asPath?.includes(c.id)).forEach(c => getChainData(c))
         }
       }
 
@@ -933,9 +934,9 @@ export default () => {
       }
 
       const getData = async () => {
-        if (page_visible && sdk && chains_data && pool_assets_data && !['/', '/[bridge]'].includes(pathname)) {
+        if (page_visible && sdk && chains_data && pool_assets_data && ['/pools'].includes(pathname)) {
           if (address) {
-            chains_data.forEach(c => getChainData(c))
+            chains_data.filter(c => !pathname.includes('/[') || asPath?.includes(c.id)).forEach(c => getChainData(c))
           }
           else {
             dispatch(
@@ -1135,18 +1136,12 @@ export default () => {
                       <Copy
                         value={address}
                         title={
-                          <span className="text-slate-400 dark:text-slate-200 text-sm">
+                          <span className="text-slate-400 dark:text-slate-200 text-sm 2xl:text-2xl">
                             <span className="xl:hidden">
-                              {ellipse(
-                                address,
-                                6,
-                              )}
+                              {ellipse(address, 6)}
                             </span>
                             <span className="hidden xl:block">
-                              {ellipse(
-                                address,
-                                6,
-                              )}
+                              {ellipse(address, 6)}
                             </span>
                           </span>
                         }
@@ -1170,8 +1165,8 @@ export default () => {
       {
         status_message &&
         (
-          <div className="w-full bg-slate-100 dark:bg-slate-800 dark:bg-opacity-50 overflow-x-auto flex items-center py-2 sm:py-3 px-2 sm:px-4">
-            <div className="flex flex-wrap items-center text-blue-600 dark:text-blue-400 text-2xs xl:text-sm font-bold space-x-1.5 xl:space-x-2 mx-auto">
+          <div className="w-full bg-slate-100 dark:bg-slate-800 dark:bg-opacity-50 overflow-x-auto flex items-center py-2 sm:py-3 px-2 sm:px-4 2xl:py-4 2xl:px-6">
+            <div className="flex flex-wrap items-center text-blue-600 dark:text-blue-400 text-2xs xl:text-sm font-bold space-x-1.5 xl:space-x-2 mx-auto 2xl:text-2xl 2xl:space-x-3">
               <span className="status-message">
                 <Linkify>
                   {parse(status_message)}

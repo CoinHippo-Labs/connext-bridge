@@ -167,6 +167,10 @@ body {
   width: 17.5rem;
 }
 
+.\32xl\:w-96 {
+  width: 21rem !important;
+}
+
 .max-w-8xl {
   max-width: 88rem;
 }

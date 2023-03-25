@@ -12,7 +12,7 @@ export default
       icon: (
         <CgArrowRightR
           size={20}
-          className="stroke-current"
+          className="2xl:w-6 2xl:h-6 stroke-current"
         />
       ),
     },
@@ -24,7 +24,7 @@ export default
       icon: (
         <RiCopperCoinLine
           size={20}
-          className="stroke-current"
+          className="2xl:w-6 2xl:h-6 stroke-current"
         />
       ),
     },
@@ -36,7 +36,7 @@ export default
       icon: (
         <HiSwitchVertical
           size={20}
-          className="stroke-current"
+          className="2xl:w-6 2xl:h-6 stroke-current"
         />
       ),
     },
@@ -48,7 +48,7 @@ export default
       icon: (
         <HiOutlineDocumentSearch
           size={20}
-          className="stroke-current"
+          className="2xl:w-6 2xl:h-6 stroke-current"
         />
       ),
     },

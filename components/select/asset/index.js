@@ -115,8 +115,7 @@ export default (
             className={
               fixed ?
                 'cursor-default flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1' :
-                className ||
-                'w-32 sm:w-48 min-w-max bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded border dark:border-slate-700 flex items-center justify-between space-x-1.5 sm:space-x-2 py-1.5 sm:py-2 px-2 sm:px-3'
+                className || 'w-32 sm:w-48 min-w-max bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded border dark:border-slate-700 flex items-center justify-between space-x-1.5 sm:space-x-2 py-1.5 sm:py-2 2xl:py-4 px-2 sm:px-3 2xl:px-5'
             }
           >
             {
@@ -136,13 +135,13 @@ export default (
                       src={image}
                       width={24}
                       height={24}
-                      className="rounded-full"
+                      className="2xl:w-8 2xl:h-8 rounded-full"
                     />
                   </div>
                 </>
               )
             }
-            <span className={`whitespace-nowrap sm:text-lg font-semibold ${!image ? 'sm:ml-3' : ''}`}>
+            <span className={`whitespace-nowrap sm:text-lg 2xl:text-2xl font-semibold ${!image ? 'sm:ml-3' : ''}`}>
               {symbol}
             </span>
             {
@@ -150,7 +149,7 @@ export default (
               (
                 <BiChevronDown
                   size={18}
-                  className="text-slate-400 dark:text-slate-200"
+                  className="2xl:w-6 2xl:h-6 text-slate-400 dark:text-slate-200"
                 />
               )
             }
@@ -161,10 +160,7 @@ export default (
             color={loaderColor(theme)}
           />
       }
-      buttonClassName={
-        className ||
-        `w-32 sm:w-48 min-w-max h-10 sm:h-12 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`
-      }
+      buttonClassName={className || `w-32 sm:w-48 min-w-max h-10 sm:h-12 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
       title={
         <div className="flex items-center justify-between space-x-2 pt-1 pb-2">
           <span className="flex items-center space-x-1">

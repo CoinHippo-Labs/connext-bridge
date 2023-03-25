@@ -60,11 +60,11 @@ export default (
           )
         }
 
-        if (localStorage.getItem(TERMS_AGREED) && localStorage.getItem(TERMS_AGREED) !== terms_agreed?.toString()) {
+        if (localStorage.getItem(TERMS_AGREED) !== terms_agreed?.toString()) {
           dispatch(
             {
               type: TERMS_AGREED,
-              value: localStorage.getItem(TERMS_AGREED),
+              value: localStorage.getItem(TERMS_AGREED) === 'true' ? true : false,
             }
           )
         }

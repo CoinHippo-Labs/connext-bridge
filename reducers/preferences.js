@@ -5,7 +5,7 @@ export default (
     [THEME]: 'dark',
     [PAGE_VISIBLE]: true,
     [STATUS_MESSAGE]: process.env.STATUS_MESSAGE || process.env.NEXT_PUBLIC_STATUS_MESSAGE,
-    [TERMS_AGREED]: false,
+    [TERMS_AGREED]: null,
   },
   action,
 ) => {
