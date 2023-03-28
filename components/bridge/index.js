@@ -1243,8 +1243,22 @@ export default () => {
       }
 
       if (!failed) {
+        let approve_amount
+
         try {
-          const approve_amount = BigNumber.from(xcallParams.amount).add(BigNumber.from(relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? utils.parseUnits(relayer_fee.toString(), source_contract_data?.decimals || 18).toString() : '0')).toString()
+          approve_amount = BigNumber.from(xcallParams.amount).add(BigNumber.from(relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? utils.parseUnits(relayer_fee.toString(), source_contract_data?.decimals || 18).toString() : '0')).toString()
+
+          console.log(
+            '[approveIfNeeded before xcall]',
+            {
+              domain_id: xcallParams.origin,
+              contract_address: xcallParams.asset,
+              amount: xcallParams.amount,
+              approve_amount,
+              infiniteApprove,
+            },
+          )
+
           const approve_request = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xcallParams.asset, approve_amount, infiniteApprove)
 
           if (approve_request) {
@@ -1294,6 +1308,18 @@ export default () => {
           failed = true
 
           const response = parseError(error)
+
+          console.log(
+            '[approveIfNeeded error before xcall]',
+            {
+              domain_id: xcallParams.origin,
+              contract_address: xcallParams.asset,
+              amount: xcallParams.amount,
+              approve_amount,
+              error,
+              ...response,
+            },
+          )
 
           setApproveResponse(
             {
