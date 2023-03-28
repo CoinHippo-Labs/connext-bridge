@@ -950,6 +950,8 @@ export default () => {
 
       const amount = utils.parseUnits((_amount || 0).toString(), source_decimals).toBigInt()
 
+      const checkFastLiquidity = true
+
       let manual
 
       try {
@@ -966,10 +968,11 @@ export default () => {
               destinationTokenAddress,
               amount,
               isNextAsset,
+              checkFastLiquidity,
             },
           )
 
-          const response = await sdk.sdkBase.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount.toString(), isNextAsset)
+          const response = await sdk.sdkBase.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount.toString(), isNextAsset, checkFastLiquidity)
 
           console.log(
             '[amountReceived]',
@@ -980,6 +983,7 @@ export default () => {
               destinationTokenAddress,
               amount,
               isNextAsset,
+              checkFastLiquidity,
               ...response,
             },
           )
@@ -1028,6 +1032,7 @@ export default () => {
             destinationTokenAddress,
             amount,
             isNextAsset,
+            checkFastLiquidity,
             error,
           },
         )
@@ -2769,7 +2774,7 @@ export default () => {
                                           <Tooltip
                                             placement="top"
                                             content={
-                                              Number(amount) > routers_liquidity_amount || forceSlow ?
+                                              Number(amount) > routers_liquidity_amount || forceSlow || estimatedValues?.isFastPath === false ?
                                                 'Unable to leverage fast liquidity. Your transfer will still complete.' :
                                                 'Fast transfer enabled by Connext router network.'
                                             }
@@ -2777,7 +2782,7 @@ export default () => {
                                           >
                                             <div className="flex items-center">
                                               <span className="whitespace-nowrap text-sm 2xl:text-xl font-semibold space-x-1.5">
-                                                {Number(amount) > routers_liquidity_amount || forceSlow ?
+                                                {Number(amount) > routers_liquidity_amount || forceSlow || estimatedValues?.isFastPath === false ?
                                                   <span className="text-yellow-500 dark:text-yellow-400">
                                                     90 minutes
                                                   </span> :
