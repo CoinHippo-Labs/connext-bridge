@@ -156,21 +156,21 @@ export default (
     delete destination_contract_data.next_asset
   }
   // native asset
-  if (!destination_contract_data && equalsIgnoreCase(constants.AddressZero, destination_transacting_asset)) {
-    const {
-      nativeCurrency,
-    } = { ..._.head(destination_chain_data?.provider_params) }
+  const {
+    nativeCurrency,
+  } = { ..._.head(destination_chain_data?.provider_params) }
 
-    const {
-      symbol,
-    } = { ...nativeCurrency }
+  const {
+    symbol,
+  } = { ...nativeCurrency }
 
-    const _destination_asset_data = getAsset(symbol, assets_data)
+  const _destination_asset_data = getAsset(symbol?.endsWith('ETH') ? 'ETH' : symbol, assets_data)
 
+  if ((!destination_contract_data && equalsIgnoreCase(constants.AddressZero, destination_transacting_asset)) || (destination_asset_data?.id === 'eth' && _destination_asset_data?.id === 'eth' && equalsIgnoreCase(to, destination_chain_data?.unwrapper_contract))) {
     destination_contract_data = {
       ...getContract(destination_chain_data?.chain_id, _destination_asset_data?.contracts),
       ...nativeCurrency,
-      contract_address: destination_transacting_asset,
+      contract_address: constants.AddressZero,
     }
   }
 
