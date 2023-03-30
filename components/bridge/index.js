@@ -405,7 +405,7 @@ export default () => {
 
       setOptions(
         {
-          ...DEFAULT_OPTIONS,
+          ...options,
           slippage,
           forceSlow: destination_chain_data && router_asset_balances_data ? Number(amount) > routers_liquidity_amount : false,
           receiveLocal,
