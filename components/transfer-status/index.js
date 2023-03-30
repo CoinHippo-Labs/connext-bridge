@@ -290,7 +290,7 @@ export default (
                 buttonTitle={
                   <Tooltip
                     placement="top"
-                    content={bumped ? 'Waiting for bump' : error_status}
+                    content={error_status === XTransferErrorStatus.NoBidsReceived ? 'The transfer is not getting boosted by routers (fast path) and will complete in slow path eventually, if no new bids are received till the end.' : bumped ? 'Waiting for bump' : error_status}
                     className="z-50 bg-dark text-white text-xs"
                   >
                     <div>
@@ -414,7 +414,7 @@ export default (
                     buttonTitle={
                       <Tooltip
                         placement="top"
-                        content={bumped ? 'Waiting for bump' : error_status}
+                        content={error_status === XTransferErrorStatus.NoBidsReceived ? 'The transfer is not getting boosted by routers (fast path) and will complete in slow path eventually, if no new bids are received till the end.' : bumped ? 'Waiting for bump' : error_status}
                         className="z-50 bg-dark text-white text-xs"
                       >
                         <span className="whitespace-nowrap text-red-600 dark:text-red-500 text-xs font-semibold">
