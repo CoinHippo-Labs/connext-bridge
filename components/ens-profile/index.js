@@ -9,6 +9,7 @@ import { ENS_DATA } from '../../reducers/types'
 export default (
   {
     address,
+    copySize = 18,
     noCopy = false,
     noImage = false,
     fallback,
@@ -41,15 +42,14 @@ export default (
           if (addresses.length > 0) {
             let _ens_data
 
-            addresses
-              .forEach(a => {
-                if (!_ens_data?.[a]) {
-                  _ens_data = {
-                    ..._ens_data,
-                    [a]: {},
-                  }
+            addresses.forEach(a => {
+              if (!_ens_data?.[a]) {
+                _ens_data = {
+                  ..._ens_data,
+                  [a]: {},
                 }
-              })
+              }
+            })
 
             dispatch(
               {
@@ -60,15 +60,14 @@ export default (
 
             _ens_data = await getEns(addresses)
 
-            addresses
-              .forEach(a => {
-                if (!_ens_data?.[a]) {
-                  _ens_data = {
-                    ..._ens_data,
-                    [a]: {},
-                  }
+            addresses.forEach(a => {
+              if (!_ens_data?.[a]) {
+                _ens_data = {
+                  ..._ens_data,
+                  [a]: {},
                 }
-              })
+              }
+            })
 
             dispatch(
               {
@@ -122,8 +121,10 @@ export default (
         {noCopy ?
           ens_name :
           <Copy
+            size={copySize}
             value={name}
             title={ens_name}
+            className="2xl:w-6 2xl:h-6 cursor-pointer text-slate-300 hover:text-slate-400 dark:text-slate-500 dark:hover:text-slate-400 ml-4"
           />
         }
       </div> :

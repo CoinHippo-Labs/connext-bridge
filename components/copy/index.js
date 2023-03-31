@@ -68,7 +68,7 @@ export default (
           }
           <IoMdCopy
             size={size}
-            className={className || '2xl:w-6 2xl:h-6 cursor-pointer text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500'}
+            className={className || '2xl:w-6 2xl:h-6 cursor-pointer text-slate-300 hover:text-slate-400 dark:text-slate-500 dark:hover:text-slate-400'}
           />
         </div>
       </CopyToClipboard>

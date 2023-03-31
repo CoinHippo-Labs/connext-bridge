@@ -6,6 +6,7 @@ import { create } from '@connext/sdk'
 import { Contract, providers, constants, utils } from 'ethers'
 import Linkify from 'react-linkify'
 import parse from 'html-react-parser'
+import { TbLogout } from 'react-icons/tb'
 
 import Logo from './logo'
 import DropdownNavigations from './navigations/dropdown'
@@ -16,6 +17,7 @@ import Chains from './chains'
 import Theme from './theme'
 import Menus from './menus'
 import Copy from '../copy'
+import Image from '../image'
 import { getChains, getAssets } from '../../lib/api/config'
 import { assetsPrice } from '../../lib/api/assets'
 import { ens as getEns } from '../../lib/api/ens'
@@ -1106,6 +1108,29 @@ export default () => {
     [page_visible, chains_data, assets_data, rpcs, address, get_balances_data],
   )
 
+  let walletImageName
+  let walletImageClassName = ''
+
+  if (provider) {
+    const wallet_name = provider.constructor?.name?.toLowerCase()
+
+    if (wallet_name.includes('walletconnect')) {
+      walletImageName = 'walletconnect.png'
+      walletImageClassName = 'rounded-full'
+    }
+    else if (wallet_name.includes('portis')) {
+      walletImageName = 'portis.png'
+    }
+    else if (['walletlink', 'coinbase'].findIndex(s => wallet_name.includes(s)) > -1) {
+      walletImageName = 'coinbase.png'
+      walletImageClassName = 'rounded-lg'
+    }
+    else if (provider.isMetaMask) {
+      walletImageName = 'metamask.png'
+      walletImageClassName = 'w-4 h-4'
+    }
+  }
+
   return (
     <>
       <div className="navbar">
@@ -1129,9 +1154,21 @@ export default () => {
             {
               browser_provider && address &&
               (
-                <div className="hidden sm:flex lg:hidden xl:flex flex-col space-y-0.5 mx-2">
+                <div className="hidden sm:flex lg:hidden xl:flex items-center border border-slate-400 dark:border-slate-600 rounded cursor-pointer whitespace-nowrap text-slate-500 dark:text-slate-500 font-bold space-x-2 mx-2 py-1.5 pl-2.5 pr-2">
+                  {
+                    walletImageName &&
+                    (
+                      <Image
+                        src={`/logos/wallets/${walletImageName}`}
+                        width={20}
+                        height={20}
+                        className={`2xl:w-7 2xl:h-7 ${walletImageClassName}`}
+                      />
+                    )
+                  }
                   <EnsProfile
                     address={address}
+                    copySize={18}
                     fallback={
                       <Copy
                         value={address}
@@ -1151,11 +1188,23 @@ export default () => {
                 </div>
               )
             }
-            <div className="mx-2">
+            <div className="mx-0">
               <Wallet
                 mainController={true}
                 connectChainId={default_chain_id}
-              />
+              >
+                {!browser_provider ?
+                  <div className="border border-slate-400 dark:border-slate-600 rounded whitespace-nowrap text-slate-500 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300 font-bold mx-2 py-1.5 px-2.5">
+                    Connect Wallet
+                  </div> :
+                  <div className="flex items-center justify-center py-1.5 px-2.5">
+                    <TbLogout
+                      size={18}
+                      className="text-slate-500 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300"
+                    />
+                  </div>
+                }
+              </Wallet>
             </div>
             <Theme />
             <Menus />
