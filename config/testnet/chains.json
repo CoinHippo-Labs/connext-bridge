@@ -163,7 +163,7 @@
         "chainId": "0xe704",
         "chainName": "Linea Goerli",
         "rpcUrls": [
-          "https://rpc.goerli.linea.build"
+          "https://consensys-zkevm-goerli-prealpha.infura.io/v3/faf4bc4ea7344e5da5e56c55de087480"
         ],
         "nativeCurrency": {
           "name": "Ethereum",
