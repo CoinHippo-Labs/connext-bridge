@@ -61,10 +61,7 @@ export default (
       },
       {
         label: 'Infinite Approval',
-        tooltip:
-          showInfiniteApproval ?
-            'This allows you to only need to pay for approval on your first transfer.' :
-            'Approval sufficient. If you need to, please revoke using other tools.',
+        tooltip: showInfiniteApproval ? 'This allows you to only need to pay for approval on your first transfer.' : 'Approval sufficient. If you need to, please revoke using other tools.',
         name: 'infiniteApprove',
         type: 'switch',
       },

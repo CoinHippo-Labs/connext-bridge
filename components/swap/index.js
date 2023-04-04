@@ -1344,7 +1344,7 @@ export default () => {
   const boxShadow = color && `${color}${theme === 'light' ? '44' : '33'} 0px 16px 128px 64px`
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-8 items-start 2xl:items-center gap-4 my-4">
+    <div className="grid grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4 2xl:mt-24">
       <div className="hidden lg:block col-span-0 lg:col-span-2" />
       <div className="col-span-1 lg:col-span-4">
         <div className="flex flex-col items-center justify-center space-y-6 sm:space-y-6 my-4 sm:my-6 mx-1 sm:mx-4">

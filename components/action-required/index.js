@@ -1066,7 +1066,7 @@ export default (
                             value={relayer_fee_to_bump && relayer_fee_to_bump > 0 ? relayer_fee_to_bump : 0}
                             className="text-sm"
                           />
-                          {is_staging || true ?
+                          {is_staging || process.env.NEXT_PUBLIC_NETWORK === 'testnet' ?
                             <select
                               disabled={disabled}
                               value={relayerFeeAssetType}

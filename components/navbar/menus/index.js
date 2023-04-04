@@ -41,12 +41,12 @@ export default () => {
       </button>
       <div
         ref={dropdownRef}
-        className={`dropdown ${hidden ? '' : 'open'} absolute top-0 right-4 mt-12`}
+        className={`dropdown ${hidden ? '' : 'open'} absolute top-0 right-4 mt-16`}
       >
         {
           !hidden &&
           (
-            <div className="dropdown-content w-44 2xl:w-60 bottom-start">
+            <div className="dropdown-content w-56 2xl:w-72 bottom-start">
               <Items />
             </div>
           )

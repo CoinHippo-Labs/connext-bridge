@@ -93,7 +93,7 @@ export default (
     (
       <span
         title={name}
-        className={className || 'normal-case tracking-wider text-black dark:text-white text-base 2xl:text-2xl font-medium'}
+        className={className || 'normal-case text-black dark:text-white text-base 2xl:text-2xl font-medium'}
       >
         <span className="xl:hidden">
           {ellipse(name, 12)}

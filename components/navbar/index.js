@@ -1133,7 +1133,7 @@ export default () => {
 
   return (
     <>
-      <div className="navbar">
+      <div className="navbar 2xl:pt-6">
         <div className="navbar-inner w-full sm:h-20 flex xl:grid xl:grid-flow-row xl:grid-cols-3 items-center justify-between gap-4">
           <div className="flex items-center">
             <Logo />
@@ -1154,37 +1154,41 @@ export default () => {
             {
               browser_provider && address &&
               (
-                <div className="hidden sm:flex lg:hidden xl:flex items-center border border-slate-400 dark:border-slate-600 rounded cursor-pointer whitespace-nowrap text-slate-500 dark:text-slate-500 font-bold space-x-2 mx-2 py-1.5 pl-2.5 pr-2">
+                <div className={`hidden sm:flex lg:hidden xl:flex items-center border border-slate-200 dark:border-slate-800 rounded-sm cursor-pointer whitespace-nowrap tracking-tight text-slate-500 dark:text-slate-500 font-semibold space-x-1.5 mx-2 pr-1.5 ${walletImageName ? 'rounded-l-full pl-0' : 'pl-2'}`}>
                   {
                     walletImageName &&
                     (
-                      <Image
-                        src={`/logos/wallets/${walletImageName}`}
-                        width={20}
-                        height={20}
-                        className={`2xl:w-7 2xl:h-7 ${walletImageClassName}`}
-                      />
+                      <div className="bg-slate-100 dark:bg-slate-700 rounded-full p-1.5 m-0.5">
+                        <Image
+                          src={`/logos/wallets/${walletImageName}`}
+                          width={20}
+                          height={20}
+                          className={`2xl:w-7 2xl:h-7 ${walletImageClassName}`}
+                        />
+                      </div>
                     )
                   }
-                  <EnsProfile
-                    address={address}
-                    copySize={18}
-                    fallback={
-                      <Copy
-                        value={address}
-                        title={
-                          <span className="text-slate-400 dark:text-slate-200 text-sm 2xl:text-2xl">
-                            <span className="xl:hidden">
-                              {ellipse(address, 6)}
+                  <div className="py-1">
+                    <EnsProfile
+                      address={address}
+                      copySize={18}
+                      fallback={
+                        <Copy
+                          value={address}
+                          title={
+                            <span className="text-slate-500 dark:text-slate-500 text-sm 2xl:text-2xl">
+                              <span className="xl:hidden">
+                                {ellipse(address, 6)}
+                              </span>
+                              <span className="hidden xl:block">
+                                {ellipse(address, 6)}
+                              </span>
                             </span>
-                            <span className="hidden xl:block">
-                              {ellipse(address, 6)}
-                            </span>
-                          </span>
-                        }
-                      />
-                    }
-                  />
+                          }
+                        />
+                      }
+                    />
+                  </div>
                 </div>
               )
             }
@@ -1200,7 +1204,7 @@ export default () => {
                   <div className="flex items-center justify-center py-1.5 px-2.5">
                     <TbLogout
                       size={18}
-                      className="text-slate-500 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300"
+                      className="2xl:w-6 2xl:h-6 text-slate-500 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300"
                     />
                   </div>
                 }

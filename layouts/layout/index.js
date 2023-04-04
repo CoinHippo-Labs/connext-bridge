@@ -196,7 +196,7 @@ export default (
               className="main w-full bg-white dark:bg-black"
               style={
                 {
-                  minHeight: 'calc(100vh - 44px)',
+                  minHeight: 'calc(95.5vh)',
                   backgroundColor: theme === 'light' ? '#ececec' : '#1a1919',
                   // backgroundImage: `url("/images/background${theme === 'light' ? '_white' : ''}.png")`,
                   // backgroundSize: 'cover',

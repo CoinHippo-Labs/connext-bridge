@@ -6,6 +6,7 @@ import moment from 'moment'
 import { XTransferStatus, XTransferErrorStatus } from '@connext/nxtp-utils'
 import { BigNumber, FixedNumber, constants, utils } from 'ethers'
 import { TailSpin, Oval } from 'react-loader-spinner'
+import Switch from 'react-switch'
 import { DebounceInput } from 'react-debounce-input'
 import { Tooltip, Alert as AlertNotification } from '@material-tailwind/react'
 import { MdClose, MdRefresh } from 'react-icons/md'
@@ -32,7 +33,7 @@ import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
 import { getContract } from '../../lib/object/contract'
 import { getBalance } from '../../lib/object/balance'
-import { split, toArray, includesStringList, paramsToObj, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, loaderColor, sleep, errorPatterns, parseError } from '../../lib/utils'
+import { split, toArray, includesStringList, paramsToObj, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, loaderColor, switchColor, sleep, errorPatterns, parseError } from '../../lib/utils'
 import { BALANCES_DATA, GET_BALANCES_DATA } from '../../reducers/types'
 
 const is_staging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' || process.env.NEXT_PUBLIC_APP_URL?.includes('staging')
@@ -1637,10 +1638,10 @@ export default () => {
   const boxShadow = color && `${color}${theme === 'light' ? '44' : '33'} 0px 16px 128px 64px`
 
   return (
-    <div className={`min-h-screen grid grid-cols-1 ${has_latest_transfers ? 'lg:grid-cols-8' : ''} items-start gap-4 my-4 sm:my-0 xl:my-4`}>
+    <div className={`grid grid-cols-1 ${has_latest_transfers ? 'lg:grid-cols-8' : ''} items-start gap-4 my-4 sm:my-0 xl:my-4`}>
       <div className="hidden xl:block col-span-0 xl:col-span-2" />
-      <div className={`min-h-screen col-span-1 ${has_latest_transfers ? 'lg:col-span-5' : ''} xl:col-span-4 2xl:items-center`}>
-        <div className="min-h-screen flex flex-col items-center justify-center space-y-6 sm:space-y-6 my-4 sm:my-0 xl:my-6 mx-1 sm:mx-4">
+      <div className={`col-span-1 ${has_latest_transfers ? 'lg:col-span-5' : ''} xl:col-span-4 2xl:mt-16`}>
+        <div className="flex flex-col items-center justify-center space-y-6 sm:space-y-6 my-4 sm:my-0 xl:my-6 mx-1 sm:mx-4 2xl:justify-start">
           <div className={`w-full ${openTransferStatus && latest_transfer ? 'max-w-xl 2xl:max-w-2xl' : 'max-w-md 2xl:max-w-xl'} space-y-3`}>
             {openTransferStatus && latest_transfer ?
               <div className="bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-4 pt-5 sm:pt-5 pb-6 sm:pb-6 px-4 sm:px-6">
@@ -2571,6 +2572,83 @@ export default () => {
                                               </div>
                                             )
                                           }
+                                          {
+                                            isApproveNeeded &&
+                                            (
+                                              <div className="flex flex-col space-y-0.5">
+                                                <div className="flex items-center justify-between space-x-2">
+                                                  <Tooltip
+                                                    placement="top"
+                                                    content="We need your approval to execute this transaction on your behalf."
+                                                    className="z-50 bg-dark text-white text-xs"
+                                                  >
+                                                    <div className="flex items-center">
+                                                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 2xl:text-xl font-medium">
+                                                        Infinite approval
+                                                      </div>
+                                                      <BiInfoCircle
+                                                        size={14}
+                                                        className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                                      />
+                                                    </div>
+                                                  </Tooltip>
+                                                  <Tooltip
+                                                    placement="top"
+                                                    content={isApproveNeeded ? 'We need your approval to execute this transaction on your behalf.' : 'Approval sufficient. If you need to, please revoke using other tools.'}
+                                                    className="z-50 bg-dark text-white text-xs"
+                                                  >
+                                                    <div className="w-fit flex items-center">
+                                                      <Switch
+                                                        disabled={disabled || !isApproveNeeded}
+                                                        width={32}
+                                                        height={16}
+                                                        checked={typeof infiniteApprove === 'boolean' ? infiniteApprove : false}
+                                                        onChange={
+                                                          e => {
+                                                            setOptions(
+                                                              {
+                                                                ...options,
+                                                                infiniteApprove: !infiniteApprove,
+                                                              }
+                                                            )
+                                                          }
+                                                        }
+                                                        checkedIcon={false}
+                                                        uncheckedIcon={false}
+                                                        onColor={switchColor(theme).on}
+                                                        onHandleColor="#f8fafc"
+                                                        offColor={switchColor(theme).off}
+                                                        offHandleColor="#f8fafc"
+                                                      />
+                                                    </div>
+                                                  </Tooltip>
+                                                </div>
+                                                {
+                                                  typeof slippage === 'number' && (estimated_slippage > slippage || slippage < 0.2 || slippage > 5.0) &&
+                                                  (
+                                                    <div className="flex items-start space-x-1">
+                                                      <IoWarning
+                                                        size={14}
+                                                        className="min-w-max 2xl:w-5 2xl:h-5 text-yellow-500 dark:text-yellow-400 mt-0.5"
+                                                      />
+                                                      <div className="text-yellow-500 dark:text-yellow-400 text-xs 2xl:text-xl">
+                                                        {estimated_slippage > slippage ?
+                                                          <>
+                                                            Slippage tolerance is too low
+                                                            <br />
+                                                            (use a larger amount or set tolerance higher)
+                                                          </> :
+                                                          slippage < 0.2 ?
+                                                            'Your transfer may not complete due to low slippage tolerance.' :
+                                                            'Your transfer may be frontrun due to high slippage tolerance.'
+                                                        }
+                                                      </div>
+                                                    </div>
+                                                  )
+                                                }
+                                              </div>
+                                            )
+                                          }
                                           <div className="flex items-center justify-between space-x-2">
                                             <Tooltip
                                               placement="top"
@@ -2632,7 +2710,7 @@ export default () => {
                                                     value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
                                                     className="text-sm 2xl:text-xl"
                                                   />
-                                                  {is_staging || true ?
+                                                  {is_staging || process.env.NEXT_PUBLIC_NETWORK === 'testnet' ?
                                                     <select
                                                       disabled={disabled}
                                                       value={relayerFeeAssetType}

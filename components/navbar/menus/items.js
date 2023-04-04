@@ -116,7 +116,7 @@ export default () => {
     <div className="flex flex-wrap pb-0">
       {openMenu ?
         <>
-          <div className="w-full bg-slate-50 dark:bg-slate-800 flex items-center justify-start space-x-2.5 p-2.5">
+          <div className="w-full bg-slate-50 dark:bg-slate-800 flex items-center justify-start space-x-2.5 p-3.5">
             <ImArrowLeft2
               size={20}
               onClick={() => setOpenMenu(null)}
@@ -137,7 +137,7 @@ export default () => {
               const item = (
                 <>
                   {icon}
-                  <span className="2xl:text-xl font-medium">
+                  <span className="2xl:text-xl font-semibold">
                     {title}
                   </span>
                 </>
@@ -150,7 +150,7 @@ export default () => {
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 flex items-center justify-start space-x-2.5 p-2.5"
+                  className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 flex items-center justify-start space-x-2.5 p-3.5"
                 >
                   {item}
                 </a>
@@ -170,7 +170,7 @@ export default () => {
             const item = (
               <>
                 {icon}
-                <span className="2xl:text-xl font-medium">
+                <span className="2xl:text-xl font-semibold">
                   {title}
                 </span>
               </>
@@ -182,14 +182,14 @@ export default () => {
                   key={i}
                   title={title}
                   onClick={() => setOpenMenu(m)}
-                  className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 cursor-pointer flex items-center justify-between space-x-2.5 p-2.5"
+                  className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 cursor-pointer flex items-center justify-between space-x-2.5 p-3.5"
                 >
                   <div className="flex items-center justify-start space-x-2.5">
                     {item}
                   </div>
                   <BiChevronRight
                     size={18}
-                    className="2xl:w-5 2xl:h-5 mt-0.5"
+                    className="2xl:w-6 2xl:h-6 mt-0.5"
                   />
                 </div> :
                 <a
@@ -198,7 +198,7 @@ export default () => {
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 flex items-center justify-start space-x-2.5 p-2.5"
+                  className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 flex items-center justify-start space-x-2.5 p-3.5"
                 >
                   {item}
                 </a>
