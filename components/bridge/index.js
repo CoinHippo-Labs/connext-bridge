@@ -44,7 +44,7 @@ const RELAYER_FEE_ASSET_TYPES = ['native', 'transacting']
 
 const DEFAULT_OPTIONS = {
   to: '',
-  infiniteApprove: true,
+  infiniteApprove: false,
   callData: '',
   slippage: DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE,
   forceSlow: false,
