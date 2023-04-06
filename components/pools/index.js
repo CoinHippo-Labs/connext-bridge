@@ -70,17 +70,13 @@ export default () => {
   useEffect(
     () => {
       if (
-        chains_data &&
-        user_pools_data &&
+        chains_data && user_pools_data &&
         (
           getChain(null, chains_data, true, false, false, undefined, true).length <= Object.keys(user_pools_data).length ||
           Object.values(user_pools_data).flatMap(d => d).filter(d => Number(d?.lpTokenBalance) > 0).length > 0
         )
       ) {
-        setPools(
-          Object.values(user_pools_data)
-            .flatMap(d => d)
-        )
+        setPools(Object.values(user_pools_data).flatMap(d => d))
       }
     },
     [chains_data, user_pools_data],
@@ -90,11 +86,7 @@ export default () => {
   useEffect(
     () => {
       const getData = async () => {
-        if (
-          sdk &&
-          user_pools_data &&
-          ['my_positions'].includes(view)
-        ) {
+        if (sdk && user_pools_data && ['my_positions'].includes(view)) {
           if (address) {
             let data
 
@@ -111,78 +103,77 @@ export default () => {
                   toArray(
                     _.concat(
                       data,
-                      response
-                        .map(p => {
+                      response.map(p => {
+                        const {
+                          info,
+                          lpTokenBalance,
+                          poolTokenBalances,
+                        } = { ...p }
+
+                        const {
+                          adopted,
+                          local,
+                          symbol,
+                        } = { ...info }
+
+                        if (adopted) {
                           const {
-                            info,
-                            lpTokenBalance,
-                            poolTokenBalances,
-                          } = { ...p }
+                            balance,
+                            decimals,
+                          } = { ...adopted }
 
+                          adopted.balance =
+                            utils.formatUnits(
+                              BigInt(balance || '0'),
+                              decimals || 18,
+                            )
+
+                          info.adopted = adopted
+                        }
+
+                        if (local) {
                           const {
-                            adopted,
-                            local,
-                            symbol,
-                          } = { ...info }
+                            balance,
+                            decimals,
+                          } = { ...local }
 
-                          if (adopted) {
-                            const {
-                              balance,
-                              decimals,
-                            } = { ...adopted }
+                          local.balance =
+                            utils.formatUnits(
+                              BigInt(balance || '0'),
+                              decimals || 18,
+                            )
 
-                            adopted.balance =
-                              utils.formatUnits(
-                                BigInt(balance || '0'),
-                                decimals || 18,
-                              )
+                          info.local = local
+                        }
 
-                            info.adopted = adopted
-                          }
+                        const symbols = split(symbol, 'normal', '-')
 
-                          if (local) {
-                            const {
-                              balance,
-                              decimals,
-                            } = { ...local }
+                        const asset_data = getAsset(null, pool_assets_data, chain_id, undefined, symbols)
 
-                            local.balance =
-                              utils.formatUnits(
-                                BigInt(balance || '0'),
-                                decimals || 18,
-                              )
-
-                            info.local = local
-                          }
-
-                          const symbols = split(symbol, 'normal', '-')
-
-                          const asset_data = getAsset(null, pool_assets_data, chain_id, undefined, symbols)
-
-                          return {
-                            ...p,
-                            id: `${chain_data.id}_${asset_data?.id}`,
-                            chain_data,
-                            asset_data,
-                            ...info,
-                            symbols,
-                            lpTokenBalance: utils.formatEther(BigInt(lpTokenBalance || '0')),
-                            poolTokenBalances:
-                              toArray(poolTokenBalances)
-                                .map((b, i) =>
-                                  Number(
-                                    utils.formatUnits(
-                                      BigInt(b || '0'),
-                                      adopted?.index === i ?
-                                        adopted.decimals :
-                                        local?.index === i ?
-                                          local.decimals :
-                                          18,
-                                    )
+                        return {
+                          ...p,
+                          id: `${chain_data.id}_${asset_data?.id}`,
+                          chain_data,
+                          asset_data,
+                          ...info,
+                          symbols,
+                          lpTokenBalance: utils.formatEther(BigInt(lpTokenBalance || '0')),
+                          poolTokenBalances:
+                            toArray(poolTokenBalances)
+                              .map((b, i) =>
+                                Number(
+                                  utils.formatUnits(
+                                    BigInt(b || '0'),
+                                    adopted?.index === i ?
+                                      adopted.decimals :
+                                      local?.index === i ?
+                                        local.decimals :
+                                        18,
                                   )
-                                ),
-                          }
-                        }),
+                                )
+                              ),
+                        }
+                      }),
                     )
                   )
               } catch (error) {}

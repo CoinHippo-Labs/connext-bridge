@@ -24,13 +24,13 @@ export default (
   } = { ...preferences }
 
   const title = (
-    <span className="normal-case text-base font-bold">
-      Welcome to the {process.env.NEXT_PUBLIC_APP_NAME} bridge
+    <span className="normal-case text-xl font-bold">
+      Welcome to the {process.env.NEXT_PUBLIC_APP_NAME} Bridge
     </span>
   )
 
   const body = (
-    <div className="space-y-4 mt-4">
+    <div className="space-y-6 mt-6">
       <div className="flex flex-wrap">
         <span className="mr-1">
           By clicking the below, you agree to our
@@ -73,7 +73,7 @@ export default (
         noButtons={true}
         modalClassName="max-w-md"
       /> :
-      <div className="max-w-md bg-slate-50 dark:bg-slate-900 rounded mx-auto py-5 px-4">
+      <div className="max-w-md bg-slate-100 dark:bg-slate-800 rounded mx-auto py-8 px-6">
         {title}
         {body}
       </div>

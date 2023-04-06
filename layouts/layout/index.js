@@ -210,7 +210,7 @@ export default (
                     <AgreeToTerms useModal={agreeToTermsUseModal} />
                     {children}
                   </> :
-                  terms_agreed ?
+                  terms_agreed || !['testnet'].includes(process.env.NEXT_PUBLIC_NETWORK) ?
                     children :
                     <div className="min-h-screen flex items-center">
                       <AgreeToTerms useModal={agreeToTermsUseModal} />
