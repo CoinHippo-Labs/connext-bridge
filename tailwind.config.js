@@ -32,6 +32,9 @@ module.exports = {
           50: '#f0f0f0',
         },
       },
+      screens: {
+        '2xl': '10000px',
+      },
     },
   },
 }
