@@ -926,22 +926,20 @@ export default (
                               </button>
                             </div>
                             <div className="flex items-center space-x-1.5 -mr-1.5">
-                              {[3.0, 1.0, 0.5]
-                                .map((s, i) => (
-                                  <div
-                                    key={i}
-                                    onClick={
-                                      () => {
-                                        setNewSlippage(s)
-                                        setSlippageEditing(false)
-                                      }
+                              {[3.0, 1.0, 0.5].map((s, i) => (
+                                <div
+                                  key={i}
+                                  onClick={
+                                    () => {
+                                      setNewSlippage(s)
+                                      setSlippageEditing(false)
                                     }
-                                    className={`${newSlippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
-                                  >
-                                    {s} %
-                                  </div>
-                                ))
-                              }
+                                  }
+                                  className={`${newSlippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
+                                >
+                                  {s} %
+                                </div>
+                              ))}
                             </div>
                           </> :
                           <div className="flex items-center space-x-1.5">
@@ -1066,26 +1064,24 @@ export default (
                             value={relayer_fee_to_bump && relayer_fee_to_bump > 0 ? relayer_fee_to_bump : 0}
                             className="text-sm"
                           />
-                          {is_staging || process.env.NEXT_PUBLIC_NETWORK === 'testnet' ?
+                          {is_staging || true ?
                             <select
                               disabled={disabled}
                               value={relayerFeeAssetType}
                               onChange={e => setRelayerFeeAssetType(e.target.value)}
                               className="bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0"
                             >
-                              {RELAYER_FEE_ASSET_TYPES
-                                .map((t, i) => {
-                                  return (
-                                    <option
-                                      key={i}
-                                      title={`${t} asset`}
-                                      value={t}
-                                    >
-                                      {t === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
-                                    </option>
-                                  )
-                                })
-                              }
+                              {RELAYER_FEE_ASSET_TYPES.map((t, i) => {
+                                return (
+                                  <option
+                                    key={i}
+                                    title={`${t} asset`}
+                                    value={t}
+                                  >
+                                    {t === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
+                                  </option>
+                                )
+                              })}
                             </select> :
                             <span>
                               {relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}

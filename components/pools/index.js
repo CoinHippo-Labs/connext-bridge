@@ -176,6 +176,7 @@ export default () => {
                       }),
                     )
                   )
+                  .filter(d => d.asset_data)
               } catch (error) {}
             }
 

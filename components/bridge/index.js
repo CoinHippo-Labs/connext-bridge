@@ -2710,7 +2710,7 @@ export default () => {
                                                     value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
                                                     className="text-sm 2xl:text-xl"
                                                   />
-                                                  {is_staging || process.env.NEXT_PUBLIC_NETWORK === 'testnet' ?
+                                                  {is_staging || true ?
                                                     <select
                                                       disabled={disabled}
                                                       value={relayerFeeAssetType}
