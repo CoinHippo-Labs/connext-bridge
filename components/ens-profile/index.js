@@ -93,7 +93,7 @@ export default (
     (
       <span
         title={name}
-        className={className || 'normal-case text-black dark:text-white text-base 2xl:text-2xl font-medium'}
+        className={className || 'normal-case text-black dark:text-white text-base 3xl:text-2xl font-medium'}
       >
         <span className="xl:hidden">
           {ellipse(name, 12)}
@@ -106,7 +106,7 @@ export default (
 
   return (
     ens_name ?
-      <div className="flex items-center space-x-2 2xl:space-x-3">
+      <div className="flex items-center space-x-2 3xl:space-x-3">
         {
           !imageUnavailable &&
           (
@@ -114,7 +114,7 @@ export default (
               src={`https://metadata.ens.domains/mainnet/avatar/${name}`}
               alt=""
               onError={() => setImageUnavailable(true)}
-              className="w-6 2xl:w-8 h-6 2xl:h-8 rounded-full"
+              className="w-6 3xl:w-8 h-6 3xl:h-8 rounded-full"
             />
           )
         }
@@ -124,7 +124,7 @@ export default (
             size={copySize}
             value={name}
             title={ens_name}
-            className="2xl:w-6 2xl:h-6 cursor-pointer text-slate-300 hover:text-slate-400 dark:text-slate-500 dark:hover:text-slate-400 ml-4"
+            className="3xl:w-6 3xl:h-6 cursor-pointer text-slate-300 hover:text-slate-400 dark:text-slate-500 dark:hover:text-slate-400 ml-4"
           />
         }
       </div> :

@@ -236,12 +236,12 @@ export default (
     data ?
       <div className="grid my-4 sm:my-6">
         {no_positions ?
-          <div className="whitespace-nowrap text-slate-800 dark:text-slate-200 2xl:text-2xl ml-2">
+          <div className="whitespace-nowrap text-slate-800 dark:text-slate-200 3xl:text-2xl ml-2">
             You currently don't have any positions.
           </div> :
           <>
             <div
-              className="w-32 sm:w-64 2xl:w-96 mx-auto"
+              className="w-32 sm:w-64 3xl:w-96 mx-auto"
               style={
                 {
                   boxShadow,
@@ -290,12 +290,12 @@ export default (
                           {view === 'my_positions' ?
                             <Link
                               href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                              className="h-6 2xl:h-12 flex items-center 2xl:text-2xl font-medium"
+                              className="h-6 3xl:h-12 flex items-center 3xl:text-2xl font-medium"
                             >
                               {name}
                             </Link> :
                             <>
-                              <div className="h-6 2xl:h-12 flex items-center space-x-2">
+                              <div className="h-6 3xl:h-12 flex items-center space-x-2">
                                 {
                                   image &&
                                   (
@@ -303,11 +303,11 @@ export default (
                                       src={image}
                                       width={24}
                                       height={24}
-                                      className="2xl:w-8 2xl:h-8 rounded-full"
+                                      className="3xl:w-8 3xl:h-8 rounded-full"
                                     />
                                   )
                                 }
-                                <span className="text-slate-600 dark:text-slate-400 text-sm 2xl:text-2xl font-medium">
+                                <span className="text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium">
                                   {_symbol}
                                 </span>
                               </div>
@@ -337,7 +337,7 @@ export default (
                                       <Link
                                         key={i}
                                         href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                                        className="h-6 2xl:h-12 flex items-center 2xl:text-2xl font-medium ml-8"
+                                        className="h-6 3xl:h-12 flex items-center 3xl:text-2xl font-medium ml-8"
                                       >
                                         {name}
                                       </Link>
@@ -349,7 +349,7 @@ export default (
                         </div>
                       )
                     },
-                    headerClassName: '2xl:text-xl 2xl:py-2',
+                    headerClassName: '3xl:text-xl 3xl:py-2',
                   },
                   {
                     Header: 'Chains',
@@ -390,7 +390,7 @@ export default (
                         <div className="flex flex-col space-y-3">
                           {view === 'my_positions' ?
                             <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
-                              <div className="min-w-max h-6 2xl:h-12 flex items-center space-x-2">
+                              <div className="min-w-max h-6 3xl:h-12 flex items-center space-x-2">
                                 {
                                   image &&
                                   (
@@ -398,11 +398,11 @@ export default (
                                       src={image}
                                       width={24}
                                       height={24}
-                                      className="2xl:w-8 2xl:h-8 rounded-full"
+                                      className="3xl:w-8 3xl:h-8 rounded-full"
                                     />
                                   )
                                 }
-                                <span className="text-sm 2xl:text-2xl font-medium">
+                                <span className="text-sm 3xl:text-2xl font-medium">
                                   {name}
                                 </span>
                               </div>
@@ -410,7 +410,7 @@ export default (
                             <>
                               <div
                                 onClick={() => onClick()}
-                                className={`w-fit h-6 2xl:h-12 ${pools?.length > 0 ? 'cursor-pointer' : ''} flex items-center`}
+                                className={`w-fit h-6 3xl:h-12 ${pools?.length > 0 ? 'cursor-pointer' : ''} flex items-center`}
                               >
                                 {pools?.length > 0 ?
                                   <>
@@ -429,7 +429,7 @@ export default (
                                           <div
                                             key={i}
                                             title={name}
-                                            className="w-5 2xl:w-6 h-6 2xl:h-12 flex items-center mr-1.5"
+                                            className="w-5 3xl:w-6 h-6 3xl:h-12 flex items-center mr-1.5"
                                           >
                                             {
                                               image &&
@@ -438,7 +438,7 @@ export default (
                                                   src={image}
                                                   width={20}
                                                   height={20}
-                                                  className="2xl:w-6 2xl:h-6 rounded-full"
+                                                  className="3xl:w-6 3xl:h-6 rounded-full"
                                                 />
                                               )
                                             }
@@ -449,8 +449,8 @@ export default (
                                     {
                                       pools.length > 3 &&
                                       (
-                                        <div className="h-6 2xl:h-12 flex items-center">
-                                          <span className="text-slate-500 dark:text-slate-400 text-xs 2xl:text-xl font-medium">
+                                        <div className="h-6 3xl:h-12 flex items-center">
+                                          <span className="text-slate-500 dark:text-slate-400 text-xs 3xl:text-xl font-medium">
                                             (+{pools.length - 3})
                                           </span>
                                         </div>
@@ -459,22 +459,22 @@ export default (
                                     <div className="mr-1.5">
                                       <button
                                         onClick={() => onClick()}
-                                        className="w-5 h-6 2xl:h-12 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full flex items-center justify-center"
+                                        className="w-5 h-6 3xl:h-12 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full flex items-center justify-center"
                                       >
                                         {uncollapseAssetIds?.includes(id) ?
                                           <MdKeyboardArrowUp
                                             size={16}
-                                            className="2xl:w-5 2xl:h-5"
+                                            className="3xl:w-5 3xl:h-5"
                                           /> :
                                           <MdKeyboardArrowDown
                                             size={16}
-                                            className="2xl:w-5 2xl:h-5"
+                                            className="3xl:w-5 3xl:h-5"
                                           />
                                         }
                                       </button>
                                     </div>
                                   </> :
-                                  <span className="text-slate-400 dark:text-slate-500 2xl:text-xl">
+                                  <span className="text-slate-400 dark:text-slate-500 3xl:text-xl">
                                     No chains supported
                                   </span>
                                 }
@@ -501,7 +501,7 @@ export default (
                                         key={i}
                                         href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                       >
-                                        <div className="h-6 2xl:h-12 flex items-center space-x-2">
+                                        <div className="h-6 3xl:h-12 flex items-center space-x-2">
                                           {
                                             image &&
                                             (
@@ -509,11 +509,11 @@ export default (
                                                 src={image}
                                                 width={24}
                                                 height={24}
-                                                className="2xl:w-8 2xl:h-8 rounded-full"
+                                                className="3xl:w-8 3xl:h-8 rounded-full"
                                               />
                                             )
                                           }
-                                          <span className="hidden sm:block text-sm 2xl:text-2xl font-medium">
+                                          <span className="hidden sm:block text-sm 3xl:text-2xl font-medium">
                                             {name}
                                           </span>
                                         </div>
@@ -526,7 +526,7 @@ export default (
                         </div>
                       )
                     },
-                    headerClassName: '2xl:text-xl 2xl:py-2',
+                    headerClassName: '3xl:text-xl 3xl:py-2',
                   },
                   {
                     Header: 'Pool Ratio',
@@ -592,11 +592,11 @@ export default (
                           style={{ minWidth: '8rem' }}
                         >
                           {total_amount > 0 ?
-                            <div className="w-full h-6 2xl:h-12 flex flex-col items-end justify-center space-y-0 2xl:space-y-1 pt-2 pb-1">
+                            <div className="w-full h-6 3xl:h-12 flex flex-col items-end justify-center space-y-0 3xl:space-y-1 pt-2 pb-1">
                               <ProgressBar
                                 width={native_amount * 100 / total_amount}
-                                className="w-full 2xl:h-2 rounded-lg"
-                                backgroundClassName="2xl:h-2 rounded-lg"
+                                className="w-full 3xl:h-2 rounded-lg"
+                                backgroundClassName="3xl:h-2 rounded-lg"
                                 style={{ backgroundColor: color }}
                                 backgroundStyle={{ backgroundColor: `${color}33` }}
                               />
@@ -636,7 +636,7 @@ export default (
                                         value={native_amount * 100 / total_amount}
                                         suffix="%"
                                         noTooltip={true}
-                                        className="leading-3 2xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 2xl:text-base font-medium"
+                                        className="leading-3 3xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 3xl:text-base font-medium"
                                       />
                                     </div>
                                   </Tooltip>
@@ -676,15 +676,15 @@ export default (
                                         value={100 - (native_amount * 100 / total_amount)}
                                         suffix="%"
                                         noTooltip={true}
-                                        className="leading-3 2xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 2xl:text-base font-medium"
+                                        className="leading-3 3xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 3xl:text-base font-medium"
                                       />
                                     </div>
                                   </Tooltip>
                                 </div>
                               </div>
                             </div> :
-                            <div className="h-6 2xl:h-12 flex items-center justify-end">
-                              <span className="text-slate-400 dark:text-slate-500 2xl:text-2xl">
+                            <div className="h-6 3xl:h-12 flex items-center justify-end">
+                              <span className="text-slate-400 dark:text-slate-500 3xl:text-2xl">
                                 No liquidity
                               </span>
                             </div>
@@ -720,7 +720,7 @@ export default (
                                 return (
                                   <div
                                     key={i}
-                                    className="w-full h-6 2xl:h-12"
+                                    className="w-full h-6 3xl:h-12"
                                   >
                                     <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
                                       <div className="flex items-center justify-end text-sm font-medium text-right">
@@ -733,11 +733,11 @@ export default (
                                             />
                                           </div> :
                                           total_amount > 0 ?
-                                            <div className="w-full h-6 2xl:h-12 flex flex-col items-end justify-center space-y-0 2xl:space-y-1 pt-2 pb-1">
+                                            <div className="w-full h-6 3xl:h-12 flex flex-col items-end justify-center space-y-0 3xl:space-y-1 pt-2 pb-1">
                                               <ProgressBar
                                                 width={native_amount * 100 / total_amount}
-                                                className="w-full 2xl:h-2 rounded-lg"
-                                                backgroundClassName="2xl:h-2 rounded-lg"
+                                                className="w-full 3xl:h-2 rounded-lg"
+                                                backgroundClassName="3xl:h-2 rounded-lg"
                                                 style={{ backgroundColor: color }}
                                                 backgroundStyle={{ backgroundColor: `${color}33` }}
                                               />
@@ -777,7 +777,7 @@ export default (
                                                         value={native_amount * 100 / total_amount}
                                                         suffix="%"
                                                         noTooltip={true}
-                                                        className="leading-3 2xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 2xl:text-base font-medium"
+                                                        className="leading-3 3xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 3xl:text-base font-medium"
                                                       />
                                                     </div>
                                                   </Tooltip>
@@ -817,15 +817,15 @@ export default (
                                                         value={100 - (native_amount * 100 / total_amount)}
                                                         suffix="%"
                                                         noTooltip={true}
-                                                        className="leading-3 2xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 2xl:text-base font-medium"
+                                                        className="leading-3 3xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 3xl:text-base font-medium"
                                                       />
                                                     </div>
                                                   </Tooltip>
                                                 </div>
                                               </div>
                                             </div> :
-                                            <div className="h-6 2xl:h-12 flex items-center justify-end">
-                                              <span className="text-slate-400 dark:text-slate-500 2xl:text-2xl">
+                                            <div className="h-6 3xl:h-12 flex items-center justify-end">
+                                              <span className="text-slate-400 dark:text-slate-500 3xl:text-2xl">
                                                 No liquidity
                                               </span>
                                             </div>
@@ -839,7 +839,7 @@ export default (
                         </div>
                       )
                     },
-                    headerClassName: 'whitespace-nowrap 2xl:text-xl justify-end text-right 2xl:py-2',
+                    headerClassName: 'whitespace-nowrap 3xl:text-xl justify-end text-right 3xl:py-2',
                   },
                   {
                     Header: 'Liquidity',
@@ -859,11 +859,11 @@ export default (
 
                       return (
                         <div className="flex flex-col space-y-3">
-                          <div className="h-6 2xl:h-12 flex items-center justify-end text-right">
+                          <div className="h-6 3xl:h-12 flex items-center justify-end text-right">
                             <DecimalsFormat
                               value={value}
                               prefix={currency_symbol}
-                              className="uppercase text-slate-600 dark:text-slate-400 text-sm 2xl:text-2xl font-medium"
+                              className="uppercase text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium"
                             />
                           </div>
                           {
@@ -887,7 +887,7 @@ export default (
                                     key={i}
                                     href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                   >
-                                    <div className="h-6 2xl:h-12 flex items-center justify-end text-sm 2xl:text-2xl font-medium text-right">
+                                    <div className="h-6 3xl:h-12 flex items-center justify-end text-sm 3xl:text-2xl font-medium text-right">
                                       {!lpTokenAddress && !error ?
                                         <div className="flex items-center justify-end">
                                           <TailSpin
@@ -899,7 +899,7 @@ export default (
                                         <DecimalsFormat
                                           value={value}
                                           prefix={currency_symbol}
-                                          className="uppercase 2xl:text-2xl"
+                                          className="uppercase 3xl:text-2xl"
                                         />
                                       }
                                     </div>
@@ -910,7 +910,7 @@ export default (
                         </div>
                       )
                     },
-                    headerClassName: 'whitespace-nowrap 2xl:text-xl justify-end text-right 2xl:py-2',
+                    headerClassName: 'whitespace-nowrap 3xl:text-xl justify-end text-right 3xl:py-2',
                   },
                   {
                     Header: 'Volume (7d)',
@@ -930,12 +930,12 @@ export default (
 
                       return (
                         <div className="flex flex-col space-y-3">
-                          <div className="h-6 2xl:h-12 flex items-center justify-end text-right">
+                          <div className="h-6 3xl:h-12 flex items-center justify-end text-right">
                             {!isNaN(value) ?
                               <DecimalsFormat
                                 value={value}
                                 prefix={currency_symbol}
-                                className="uppercase text-slate-600 dark:text-slate-400 text-sm 2xl:text-2xl font-medium"
+                                className="uppercase text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium"
                               /> :
                               'TBD'
                             }
@@ -959,12 +959,12 @@ export default (
                                     key={i}
                                     href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                   >
-                                    <div className="h-6 2xl:h-12 flex items-center justify-end text-sm 2xl:text-2xl font-medium text-right">
+                                    <div className="h-6 3xl:h-12 flex items-center justify-end text-sm 3xl:text-2xl font-medium text-right">
                                       {!isNaN(value) ?
                                         <DecimalsFormat
                                           value={value}
                                           prefix={currency_symbol}
-                                          className="uppercase 2xl:text-2xl"
+                                          className="uppercase 3xl:text-2xl"
                                         /> :
                                         'TBD'
                                       }
@@ -976,7 +976,7 @@ export default (
                         </div>
                       )
                     },
-                    headerClassName: 'whitespace-nowrap 2xl:text-xl justify-end text-right 2xl:py-2',
+                    headerClassName: 'whitespace-nowrap 3xl:text-xl justify-end text-right 3xl:py-2',
                   },
                   {
                     Header: 'Fees (7d)',
@@ -996,12 +996,12 @@ export default (
 
                       return (
                         <div className="flex flex-col space-y-3">
-                          <div className="h-6 2xl:h-12 flex items-center justify-end text-right">
+                          <div className="h-6 3xl:h-12 flex items-center justify-end text-right">
                             {!isNaN(value) ?
                               <DecimalsFormat
                                 value={value}
                                 prefix={currency_symbol}
-                                className="uppercase text-slate-600 dark:text-slate-400 text-sm 2xl:text-2xl font-medium"
+                                className="uppercase text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium"
                               /> :
                               'TBD'
                             }
@@ -1025,12 +1025,12 @@ export default (
                                     key={i}
                                     href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                   >
-                                    <div className="h-6 2xl:h-12 flex items-center justify-end text-sm 2xl:text-2xl font-medium text-right">
+                                    <div className="h-6 3xl:h-12 flex items-center justify-end text-sm 3xl:text-2xl font-medium text-right">
                                       {!isNaN(value) ?
                                         <DecimalsFormat
                                           value={value}
                                           prefix={currency_symbol}
-                                          className="uppercase 2xl:text-2xl"
+                                          className="uppercase 3xl:text-2xl"
                                         /> :
                                         'TBD'
                                       }
@@ -1042,7 +1042,7 @@ export default (
                         </div>
                       )
                     },
-                    headerClassName: 'whitespace-nowrap 2xl:text-xl justify-end text-right 2xl:py-2',
+                    headerClassName: 'whitespace-nowrap 3xl:text-xl justify-end text-right 3xl:py-2',
                   },
                   {
                     Header: (
@@ -1087,13 +1087,13 @@ export default (
 
                       return (
                         <div className="flex flex-col space-y-3">
-                          <div className="h-6 2xl:h-12 flex items-center justify-end text-slate-600 dark:text-slate-400 text-sm 2xl:text-2xl font-medium text-right">
+                          <div className="h-6 3xl:h-12 flex items-center justify-end text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium text-right">
                             {/*!isNaN(value) ?
                               <DecimalsFormat
                                 value={value * 100}
                                 maxDecimals={2}
                                 suffix="%"
-                                className="uppercase 2xl:text-2xl"
+                                className="uppercase 3xl:text-2xl"
                               /> :
                               'TBD'
                             */}
@@ -1117,13 +1117,13 @@ export default (
                                     key={i}
                                     href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                                   >
-                                    <div className="h-6 2xl:h-12 flex items-center justify-end text-sm 2xl:text-2xl font-medium text-right">
+                                    <div className="h-6 3xl:h-12 flex items-center justify-end text-sm 3xl:text-2xl font-medium text-right">
                                       {!isNaN(value) ?
                                         <DecimalsFormat
                                           value={value * 100}
                                           maxDecimals={2}
                                           suffix="%"
-                                          className="uppercase 2xl:text-2xl"
+                                          className="uppercase 3xl:text-2xl"
                                         /> :
                                         'TBD'
                                       }
@@ -1135,7 +1135,7 @@ export default (
                         </div>
                       )
                     },
-                    headerClassName: 'whitespace-nowrap 2xl:text-xl justify-end text-right 2xl:py-2',
+                    headerClassName: 'whitespace-nowrap 3xl:text-xl justify-end text-right 3xl:py-2',
                   },
                   {
                     Header: 'Your Pool Tokens',
@@ -1160,12 +1160,12 @@ export default (
                       return (
                         <Link
                           href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                          className="h-6 2xl:h-12 flex flex-col justify-center space-y-1"
+                          className="h-6 3xl:h-12 flex flex-col justify-center space-y-1"
                         >
-                          <div className="flex items-center text-sm 2xl:text-2xl font-medium text-right space-x-1">
+                          <div className="flex items-center text-sm 3xl:text-2xl font-medium text-right space-x-1">
                             <DecimalsFormat
                               value={value}
-                              className="uppercase 2xl:text-2xl"
+                              className="uppercase 3xl:text-2xl"
                             />
                             {
                               symbol &&
@@ -1179,11 +1179,11 @@ export default (
                           {
                             price > 0 &&
                             (
-                              <div className="text-slate-800 dark:text-slate-200 text-sm 2xl:text-2xl text-right">
+                              <div className="text-slate-800 dark:text-slate-200 text-sm 3xl:text-2xl text-right">
                                 <DecimalsFormat
                                   value={value * price}
                                   prefix={currency_symbol}
-                                  className="uppercase 2xl:text-2xl"
+                                  className="uppercase 3xl:text-2xl"
                                 />
                               </div>
                             )
@@ -1191,7 +1191,7 @@ export default (
                         </Link>
                       )
                     },
-                    headerClassName: 'whitespace-nowrap 2xl:text-xl 2xl:py-2',
+                    headerClassName: 'whitespace-nowrap 3xl:text-xl 3xl:py-2',
                   },
                   {
                     Header: 'Pooled Tokens',
@@ -1215,12 +1215,12 @@ export default (
                       return (
                         <Link
                           href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                          className="h-6 2xl:h-12 flex items-center justify-end space-x-1.5"
+                          className="h-6 3xl:h-12 flex items-center justify-end space-x-1.5"
                         >
-                          <div className="flex items-center text-sm 2xl:text-2xl font-medium space-x-1">
+                          <div className="flex items-center text-sm 3xl:text-2xl font-medium space-x-1">
                             <DecimalsFormat
                               value={adopted?.balance}
-                              className="uppercase 2xl:text-2xl"
+                              className="uppercase 3xl:text-2xl"
                             />
                             {
                               adopted?.symbol &&
@@ -1231,13 +1231,13 @@ export default (
                               )
                             }
                           </div>
-                          <span className="text-sm 2xl:text-2xl font-medium">
+                          <span className="text-sm 3xl:text-2xl font-medium">
                             /
                           </span>
-                          <div className="flex items-center text-sm 2xl:text-2xl font-medium space-x-1">
+                          <div className="flex items-center text-sm 3xl:text-2xl font-medium space-x-1">
                             <DecimalsFormat
                               value={local?.balance}
-                              className="uppercase 2xl:text-2xl"
+                              className="uppercase 3xl:text-2xl"
                             />
                             {
                               local?.symbol &&
@@ -1251,7 +1251,7 @@ export default (
                         </Link>
                       )
                     },
-                    headerClassName: 'whitespace-nowrap 2xl:text-xl justify-end text-right 2xl:py-2',
+                    headerClassName: 'whitespace-nowrap 3xl:text-xl justify-end text-right 3xl:py-2',
                   },
                   {
                     Header: 'Pool Share',
@@ -1274,17 +1274,17 @@ export default (
                       return (
                         <Link
                           href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                          className="h-6 2xl:h-12 flex items-center justify-end text-right"
+                          className="h-6 3xl:h-12 flex items-center justify-end text-right"
                         >
                           <DecimalsFormat
                             value={typeof value === 'number' ? value : '-'}
                             suffix="%"
-                            className="text-sm 2xl:text-2xl font-medium"
+                            className="text-sm 3xl:text-2xl font-medium"
                           />
                         </Link>
                       )
                     },
-                    headerClassName: 'whitespace-nowrap 2xl:text-xl justify-end text-right 2xl:py-2',
+                    headerClassName: 'whitespace-nowrap 3xl:text-xl justify-end text-right 3xl:py-2',
                   },
                 ]
                 .filter(c =>

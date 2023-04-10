@@ -1134,7 +1134,7 @@ export default () => {
 
   return (
     <>
-      <div className="navbar 2xl:pt-6">
+      <div className="navbar 3xl:pt-6">
         <div className="navbar-inner w-full sm:h-20 flex xl:grid xl:grid-flow-row xl:grid-cols-3 items-center justify-between gap-4">
           <div className="flex items-center">
             <Logo />
@@ -1164,7 +1164,7 @@ export default () => {
                           src={`/logos/wallets/${walletImageName}`}
                           width={20}
                           height={20}
-                          className={`2xl:w-7 2xl:h-7 ${walletImageClassName}`}
+                          className={`3xl:w-7 3xl:h-7 ${walletImageClassName}`}
                         />
                       </div>
                     )
@@ -1177,7 +1177,7 @@ export default () => {
                         <Copy
                           value={address}
                           title={
-                            <span className="text-slate-500 dark:text-slate-500 text-sm 2xl:text-2xl">
+                            <span className="text-slate-500 dark:text-slate-500 text-sm 3xl:text-2xl">
                               <span className="xl:hidden">
                                 {ellipse(address, 6)}
                               </span>
@@ -1205,7 +1205,7 @@ export default () => {
                   <div className="flex items-center justify-center py-1.5 px-2.5">
                     <TbLogout
                       size={18}
-                      className="2xl:w-6 2xl:h-6 text-slate-500 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300"
+                      className="3xl:w-6 3xl:h-6 text-slate-500 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300"
                     />
                   </div>
                 }
@@ -1219,8 +1219,8 @@ export default () => {
       {
         status_message &&
         (
-          <div className="w-full bg-slate-100 dark:bg-slate-800 dark:bg-opacity-50 overflow-x-auto flex items-center py-2 sm:py-3 px-2 sm:px-4 2xl:py-4 2xl:px-6">
-            <div className="flex flex-wrap items-center text-blue-600 dark:text-blue-400 text-2xs xl:text-sm font-bold space-x-1.5 xl:space-x-2 mx-auto 2xl:text-2xl 2xl:space-x-3">
+          <div className="w-full bg-slate-100 dark:bg-slate-800 dark:bg-opacity-50 overflow-x-auto flex items-center py-2 sm:py-3 px-2 sm:px-4 3xl:py-4 3xl:px-6">
+            <div className="flex flex-wrap items-center text-blue-600 dark:text-blue-400 text-2xs xl:text-sm font-bold space-x-1.5 xl:space-x-2 mx-auto 3xl:text-2xl 3xl:space-x-3">
               <span className="status-message">
                 <Linkify>
                   {parse(status_message)}

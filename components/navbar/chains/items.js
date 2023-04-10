@@ -51,16 +51,16 @@ export default (
                 src={image}
                 width={22}
                 height={22}
-                className="2xl:w-6 2xl:h-6 rounded-full"
+                className="3xl:w-6 3xl:h-6 rounded-full"
               />
               <div className="w-full flex items-center justify-between space-x-2">
-                <span className={`leading-4 text-sm ${selected ? 'font-bold' : 'text-slate-500 dark:text-slate-500 font-medium'} 2xl:leading-6 2xl:text-xl`}>
+                <span className={`leading-4 text-sm ${selected ? 'font-bold' : 'text-slate-500 dark:text-slate-500 font-medium'} 3xl:leading-6 3xl:text-xl`}>
                   {chainName(c)}
                 </span>
                 {
                   selected &&
                   (
-                    <span className="leading-4 text-slate-500 dark:text-slate-500 text-xs font-medium 2xl:leading-6 2xl:text-lg">
+                    <span className="leading-4 text-slate-500 dark:text-slate-500 text-xs font-medium 3xl:leading-6 3xl:text-lg">
                       Connected
                     </span>
                   )
@@ -69,7 +69,7 @@ export default (
             </>
           )
 
-          const className = `${selected ? 'bg-slate-100 dark:bg-slate-700' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700'} w-full flex items-center justify-start space-x-2 p-2 2xl:space-x-2.5 2xl:p-3`
+          const className = `${selected ? 'bg-slate-100 dark:bg-slate-700' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700'} w-full flex items-center justify-start space-x-2 p-2 3xl:space-x-2.5 3xl:p-3`
 
           return (
             disabled ?

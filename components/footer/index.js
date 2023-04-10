@@ -38,7 +38,7 @@ export default () => {
 
   return (
     <>
-      <div className={`${theme} footer flex flex-col md:flex-row items-center space-y-2.5 sm:space-y-0 p-3 2xl:text-2xl 2xl:p-8`}>
+      <div className={`${theme} footer flex flex-col md:flex-row items-center space-y-2.5 sm:space-y-0 p-3 3xl:text-2xl 3xl:p-8`}>
         <div className="w-full md:w-1/2 lg:w-1/3 min-w-max flex items-center justify-center md:justify-start text-slate-400 dark:text-slate-500 font-medium space-x-2">
           <span>
             Built with
@@ -56,7 +56,7 @@ export default () => {
                   src="/logos/logo.png"
                   width={20}
                   height={20}
-                  className="2xl:w-8 2xl:h-8"
+                  className="3xl:w-8 3xl:h-8"
                 />
               </div>
               <div className="hidden dark:flex items-center">
@@ -64,7 +64,7 @@ export default () => {
                   src="/logos/logo_white.png"
                   width={20}
                   height={20}
-                  className="2xl:w-8 2xl:h-8"
+                  className="3xl:w-8 3xl:h-8"
                 />
               </div>
             </div>
@@ -182,7 +182,7 @@ export default () => {
             © {moment().format('YYYY')} made with
           </span>
           <FaHeart
-            className="text-red-400 text-xl 2xl:text-2xl pr-0.5"
+            className="text-red-400 text-xl 3xl:text-2xl pr-0.5"
           />
           <span>
             {"by "}

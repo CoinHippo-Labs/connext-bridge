@@ -217,19 +217,19 @@ export default (
       pool_data,
     }
 
-  const metricClassName = 'bg-slate-50 dark:bg-slate-900 bg-opacity-60 dark:bg-opacity-60 rounded border dark:border-slate-800 flex flex-col space-y-12 2xl:space-y-16 py-5 2xl:py-8 px-4 2xl:px-6'
-  const titleClassName = 'text-slate-400 dark:text-slate-200 text-base 2xl:text-xl font-medium'
-  const valueClassName = 'text-lg sm:text-3xl 2xl:text-4xl font-semibold'
-  const gridValueClassName = 'text-lg 2xl:text-2xl font-semibold'
+  const metricClassName = 'bg-slate-50 dark:bg-slate-900 bg-opacity-60 dark:bg-opacity-60 rounded border dark:border-slate-800 flex flex-col space-y-12 3xl:space-y-16 py-5 3xl:py-8 px-4 3xl:px-6'
+  const titleClassName = 'text-slate-400 dark:text-slate-200 text-base 3xl:text-xl font-medium'
+  const valueClassName = 'text-lg sm:text-3xl 3xl:text-4xl font-semibold'
+  const gridValueClassName = 'text-lg 3xl:text-2xl font-semibold'
 
   const boxShadow = `${color || '#e53f3f'}${theme === 'light' ? '44' : '33'} 0px 32px 128px 64px`
 
   return (
     <div className="sm:min-h-full bg-transparent">
       <div className="space-y-6">
-        <div className="space-y-0 2xl:space-y-2">
+        <div className="space-y-0 3xl:space-y-2">
           <div
-            className="w-32 sm:w-64 2xl:w-96 mx-auto sm:mr-8"
+            className="w-32 sm:w-64 3xl:w-96 mx-auto sm:mr-8"
             style={
               {
                 boxShadow,
@@ -249,7 +249,7 @@ export default (
                       <div
                         key={i}
                         onClick={() => setDailyMetric(m)}
-                        className={`w-fit border-b-2 ${dailyMetric === m ? 'border-slate-300 dark:border-slate-200 font-semibold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer text-base 2xl:text-xl font-medium pt-0 pb-3 px-2`}
+                        className={`w-fit border-b-2 ${dailyMetric === m ? 'border-slate-300 dark:border-slate-200 font-semibold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer text-base 3xl:text-xl font-medium pt-0 pb-3 px-2`}
                       >
                         {name(m)}
                       </div>
@@ -330,8 +330,8 @@ export default (
                   (
                     <ProgressBar
                       width={native_amount * 100 / total_amount}
-                      className="w-full 2xl:h-2 rounded-lg"
-                      backgroundClassName="2xl:h-2 rounded-lg"
+                      className="w-full 3xl:h-2 rounded-lg"
+                      backgroundClassName="3xl:h-2 rounded-lg"
                       style={{ backgroundColor: asset_data?.color }}
                       backgroundStyle={{ backgroundColor: `${asset_data?.color}33` }}
                     />
@@ -374,11 +374,11 @@ export default (
                                   src={image}
                                   width={16}
                                   height={16}
-                                  className="2xl:w-5 2xl:h-5 rounded-full"
+                                  className="3xl:w-5 3xl:h-5 rounded-full"
                                 />
                               )
                             }
-                            <span className="text-xs 2xl:text-lg font-medium">
+                            <span className="text-xs 3xl:text-lg font-medium">
                               {symbol}
                             </span>
                           </a>
@@ -408,7 +408,7 @@ export default (
                                       prefix="("
                                       suffix="%)"
                                       noTooltip={true}
-                                      className="text-xs 2xl:text-lg mt-0.5"
+                                      className="text-xs 3xl:text-lg mt-0.5"
                                     />
                                   )
                                 }
@@ -449,17 +449,17 @@ export default (
                     </div>
                   </div> :
                   <>
-                    <div className="flex flex-col space-y-1 2xl:space-y-1.5">
+                    <div className="flex flex-col space-y-1 3xl:space-y-1.5">
                       {lpTokenAddress && url ?
                         <a
                           href={`${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs 2xl:text-lg font-medium"
+                          className="text-xs 3xl:text-lg font-medium"
                         >
                           Current Value ({currency.toUpperCase()})
                         </a> :
-                        <span className="text-xs 2xl:text-lg font-medium">
+                        <span className="text-xs 3xl:text-lg font-medium">
                           Current Value ({currency.toUpperCase()})
                         </span>
                       }
@@ -482,8 +482,8 @@ export default (
                         />
                       }
                     </div>
-                    <div className="flex flex-col space-y-1 2xl:space-y-1.5">
-                      <span className="text-xs 2xl:text-lg font-medium">
+                    <div className="flex flex-col space-y-1 3xl:space-y-1.5">
+                      <span className="text-xs 3xl:text-lg font-medium">
                         Share
                       </span>
                       <DecimalsFormat

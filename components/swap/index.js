@@ -1344,13 +1344,13 @@ export default () => {
   const boxShadow = color && `${color}${theme === 'light' ? '44' : '33'} 0px 16px 128px 64px`
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4 2xl:mt-24">
+    <div className="grid grid-cols-1 lg:grid-cols-8 items-start gap-4 my-4 3xl:mt-24">
       <div className="hidden lg:block col-span-0 lg:col-span-2" />
       <div className="col-span-1 lg:col-span-4">
         <div className="flex flex-col items-center justify-center space-y-6 sm:space-y-6 my-4 sm:my-6 mx-1 sm:mx-4">
-          <div className="w-full max-w-md 2xl:max-w-xl space-y-3">
+          <div className="w-full max-w-md 3xl:max-w-xl space-y-3">
             <div
-              className="bg-white dark:bg-slate-900 rounded border dark:border-slate-700 space-y-8 2xl:space-y-10 pt-5 sm:pt-6 2xl:pt-8 pb-6 sm:pb-7 2xl:pb-10 px-4 sm:px-6 2xl:px-8"
+              className="bg-white dark:bg-slate-900 rounded border dark:border-slate-700 space-y-8 3xl:space-y-10 pt-5 sm:pt-6 3xl:pt-8 pb-6 sm:pb-7 3xl:pb-10 px-4 sm:px-6 3xl:px-8"
               style={
                 chain &&
                 boxShadow ?
@@ -1364,7 +1364,7 @@ export default () => {
             >
               <div className="flex items-center justify-between space-x-2">
                 <div className="flex items-center space-x-0">
-                  <h1 className="text-xl 2xl:text-2xl font-semibold">
+                  <h1 className="text-xl 3xl:text-2xl font-semibold">
                     Swap on
                   </h1>
                   <SelectChain
@@ -1381,7 +1381,7 @@ export default () => {
                     }
                     isPool={true}
                     noShadow={true}
-                    className="w-fit flex items-center justify-center space-x-1.5 sm:space-x-2 mt-0.25 2xl:mt-0"
+                    className="w-fit flex items-center justify-center space-x-1.5 sm:space-x-2 mt-0.25 3xl:mt-0"
                   />
                 </div>
                 <Options
@@ -1405,7 +1405,7 @@ export default () => {
               <div>
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between space-x-2">
-                    <span className="text-slate-600 dark:text-slate-500 text-sm 2xl:text-xl font-medium">
+                    <span className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                       Pay with
                     </span>
                     {
@@ -1413,7 +1413,7 @@ export default () => {
                       (
                         <div className="flex items-center justify-between space-x-2">
                           <div className="flex items-center space-x-1">
-                            <div className="text-slate-400 dark:text-slate-500 text-sm 2xl:text-xl font-medium">
+                            <div className="text-slate-400 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                               Balance:
                             </div>
                             <button
@@ -1535,12 +1535,12 @@ export default () => {
                         }
                         onWheel={e => e.target.blur()}
                         onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                        className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg 2xl:text-2xl font-semibold text-right py-1.5 2xl:py-3`}
+                        className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg 3xl:text-2xl font-semibold text-right py-1.5 3xl:py-3`}
                       />
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center justify-center mt-2 2xl:mt-4 mb-0.5 2xl:mb-2">
+                <div className="flex items-center justify-center mt-2 3xl:mt-4 mb-0.5 3xl:mb-2">
                   <button
                     disabled={disabled || !pair}
                     onClick={
@@ -1576,7 +1576,7 @@ export default () => {
                 </div>
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between space-x-2">
-                    <span className="text-slate-600 dark:text-slate-500 text-sm 2xl:text-xl font-medium">
+                    <span className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                       You Receive
                     </span>
                     {
@@ -1584,7 +1584,7 @@ export default () => {
                       (
                         <div className="flex items-center justify-between space-x-2">
                           <div className="flex items-center space-x-1">
-                            <div className="text-slate-400 dark:text-slate-500 text-sm 2xl:text-xl font-medium">
+                            <div className="text-slate-400 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                               Balance:
                             </div>
                             <button
@@ -1672,7 +1672,7 @@ export default () => {
                                 '0.00' :
                                 '0.00'
                           }
-                          className={`w-36 sm:w-48 bg-transparent ${['', undefined].includes(amount) ? 'text-slate-500 dark:text-slate-500' : ''} sm:text-lg 2xl:text-2xl font-semibold text-right py-1.5`}
+                          className={`w-36 sm:w-48 bg-transparent ${['', undefined].includes(amount) ? 'text-slate-500 dark:text-slate-500' : ''} sm:text-lg 3xl:text-2xl font-semibold text-right py-1.5`}
                         />
                       }
                     </div>
@@ -1684,13 +1684,13 @@ export default () => {
                 (
                   <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-2.5 py-3.5 px-3">
                     <div className="flex items-center justify-between space-x-1">
-                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 2xl:text-xl font-medium">
+                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                         Rate
                       </div>
                       <span className="whitespace-nowrap text-sm font-semibold space-x-1.5">
                         <DecimalsFormat
                           value={rate}
-                          className="text-sm 2xl:text-xl"
+                          className="text-sm 3xl:text-xl"
                         />
                       </span>
                     </div>
@@ -1702,7 +1702,7 @@ export default () => {
                           className="z-50 bg-dark text-white text-xs"
                         >
                           <div className="flex items-center">
-                            <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 2xl:text-xl font-medium">
+                            <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                               Slippage Tolerance
                             </div>
                             <BiInfoCircle
@@ -1759,7 +1759,7 @@ export default () => {
                                   }
                                   onWheel={e => e.target.blur()}
                                   onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                                  className="w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm 2xl:text-xl font-semibold text-right py-1 px-2"
+                                  className="w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm 3xl:text-xl font-semibold text-right py-1 px-2"
                                 />
                                 <button
                                   onClick={() => setSlippageEditing(false)}
@@ -1767,7 +1767,7 @@ export default () => {
                                 >
                                   <BiCheckCircle
                                     size={16}
-                                    className="2xl:w-5 2xl:h-5"
+                                    className="3xl:w-5 3xl:h-5"
                                   />
                                 </button>
                               </div>
@@ -1787,7 +1787,7 @@ export default () => {
                                           setSlippageEditing(false)
                                         }
                                       }
-                                      className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs 2xl:text-xl py-1 px-1.5`}
+                                      className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs 3xl:text-xl py-1 px-1.5`}
                                     >
                                       {s} %
                                     </div>
@@ -1799,7 +1799,7 @@ export default () => {
                               <DecimalsFormat
                                 value={slippage}
                                 suffix="%"
-                                className="text-sm 2xl:text-xl font-semibold"
+                                className="text-sm 3xl:text-xl font-semibold"
                               />
                               <button
                                 disabled={disabled}
@@ -1814,7 +1814,7 @@ export default () => {
                               >
                                 <BiEditAlt
                                   size={16}
-                                  className="2xl:w-5 2xl:h-5"
+                                  className="3xl:w-5 3xl:h-5"
                                 />
                               </button>
                             </div>
@@ -1827,9 +1827,9 @@ export default () => {
                           <div className="flex items-center space-x-1">
                             <IoWarning
                               size={16}
-                              className="min-w-max 2xl:w-5 2xl:h-5 text-yellow-500 dark:text-yellow-400 mt-0.5"
+                              className="min-w-max 3xl:w-5 3xl:h-5 text-yellow-500 dark:text-yellow-400 mt-0.5"
                             />
-                            <div className="text-yellow-500 dark:text-yellow-400 2xl:text-xl text-xs">
+                            <div className="text-yellow-500 dark:text-yellow-400 3xl:text-xl text-xs">
                               {slippage < 0.2 ?
                                 'Your transfer may not complete due to low slippage tolerance.' :
                                 'Your transfer may be frontrun due to high slippage tolerance.'
@@ -1846,10 +1846,10 @@ export default () => {
                           <Tooltip
                             placement="top"
                             content="Price impact"
-                            className="z-50 bg-dark text-white text-xs 2xl:text-xl"
+                            className="z-50 bg-dark text-white text-xs 3xl:text-xl"
                           >
                             <div className="flex items-center">
-                              <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 2xl:text-xl font-medium">
+                              <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                                 Price Impact
                               </div>
                               <BiInfoCircle
@@ -1861,7 +1861,7 @@ export default () => {
                           <DecimalsFormat
                             value={priceImpact}
                             suffix="%"
-                            className="whitespace-nowrap text-sm 2xl:text-xl font-semibold space-x-1.5"
+                            className="whitespace-nowrap text-sm 3xl:text-xl font-semibold space-x-1.5"
                           />
                         </div>
                       )
@@ -1872,7 +1872,7 @@ export default () => {
               {browser_provider && wrong_chain ?
                 <Wallet
                   connectChainId={chain_id}
-                  className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base 2xl:text-2xl font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                  className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base 3xl:text-2xl font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                 >
                   <span>
                     {is_walletconnect ? 'Reconnect' : 'Switch'} to
@@ -1884,7 +1884,7 @@ export default () => {
                         src={image}
                         width={28}
                         height={28}
-                        className="2xl:w-8 2xl:h-8 rounded-full"
+                        className="3xl:w-8 3xl:h-8 rounded-full"
                       />
                     )
                   }
@@ -1915,7 +1915,7 @@ export default () => {
                     )
                   ) ?
                     <Alert
-                      color="bg-red-400 dark:bg-red-500 text-white text-sm 2xl:text-xl font-medium"
+                      color="bg-red-400 dark:bg-red-500 text-white text-sm 3xl:text-xl font-medium"
                       icon={
                         <BiMessageError
                           className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
@@ -1938,7 +1938,7 @@ export default () => {
                             call()
                           }
                         }
-                        className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base 2xl:text-2xl text-center py-3 sm:py-4 px-2 sm:px-3`}
+                        className={`w-full ${disabled || !pair || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base 3xl:text-2xl text-center py-3 sm:py-4 px-2 sm:px-3`}
                       >
                         <span className="flex items-center justify-center space-x-1.5">
                           {
@@ -2011,7 +2011,7 @@ export default () => {
                               className="rounded p-4.5"
                             >
                               <div className="flex items-center justify-between space-x-2">
-                                <span className="break-words text-sm 2xl:text-xl font-medium">
+                                <span className="break-words text-sm 3xl:text-xl font-medium">
                                   {ellipse(
                                     split(message, 'normal', ' ')
                                       .join(' ')
@@ -2074,7 +2074,7 @@ export default () => {
                     <button
                       disabled={true}
                       onClick={() => call()}
-                      className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base 2xl:text-2xl text-center py-3 sm:py-4 px-2 sm:px-3"
+                      className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base 3xl:text-2xl text-center py-3 sm:py-4 px-2 sm:px-3"
                     >
                       {!asset ?
                         'Swap' :
@@ -2094,7 +2094,7 @@ export default () => {
                                   color={loaderColor(theme)}
                                 />
                               </div>
-                              <span className="text-slate-400 dark:text-slate-500 text-base 2xl:text-2xl">
+                              <span className="text-slate-400 dark:text-slate-500 text-base 3xl:text-2xl">
                                 Fetching pair information ...
                               </span>
                             </div>
@@ -2103,7 +2103,7 @@ export default () => {
                     <Wallet
                       connectChainId={chain_id}
                       buttonConnectTitle="Connect Wallet"
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base 2xl:text-2xl font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base 3xl:text-2xl font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                     >
                       <span>
                         Connect Wallet

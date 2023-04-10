@@ -31,17 +31,17 @@ export default () => {
           )
         }
       }
-      className="w-8 h-16 flex items-center justify-center sm:mr-1 2xl:w-10 2xl:h-20"
+      className="w-8 h-16 flex items-center justify-center sm:mr-1 3xl:w-10 3xl:h-20"
     >
       <div className="w-6 h-6 flex items-center justify-center">
         {theme === 'light' ?
           <FiMoon
             size={16}
-            className="2xl:w-6 2xl:h-6"
+            className="3xl:w-6 3xl:h-6"
           /> :
           <FiSun
             size={16}
-            className="2xl:w-6 2xl:h-6"
+            className="3xl:w-6 3xl:h-6"
           />
         }
       </div>

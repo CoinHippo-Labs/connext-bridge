@@ -47,7 +47,7 @@ export default () => {
   } = { ...query }
 
   return (
-    <div className="hidden lg:flex items-center space-x-0 xl:space-x-2 2xl:space-x-3 mx-auto">
+    <div className="hidden lg:flex items-center space-x-0 xl:space-x-2 3xl:space-x-3 mx-auto">
       {menus
         .filter(m =>
           m?.path &&
@@ -144,7 +144,7 @@ export default () => {
               selected ?
                 'text-blue-600 dark:text-white text-sm font-extrabold' :
                 'text-slate-600 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200 text-sm font-semibold hover:font-bold'
-            } space-x-1.5 py-2 px-2.5 2xl:text-xl 2xl:space-x-3`
+            } space-x-1.5 py-2 px-2.5 3xl:text-xl 3xl:space-x-3`
 
           return (
             external ?

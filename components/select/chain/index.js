@@ -76,7 +76,7 @@ export default (
                 className || 'w-32 sm:w-40 min-w-max bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded border dark:border-slate-700 flex items-center justify-between space-x-0.5 sm:space-x-2 py-1.5 sm:py-2 pl-2 pr-1 sm:px-1.5'
             }
           >
-            <div className="flex items-center space-x-2 2xl:space-x-3">
+            <div className="flex items-center space-x-2 3xl:space-x-3">
               {
                 image &&
                 (
@@ -94,13 +94,13 @@ export default (
                         src={image}
                         width={20}
                         height={20}
-                        className="2xl:w-6 2xl:h-6 rounded-full"
+                        className="3xl:w-6 3xl:h-6 rounded-full"
                       />
                     </div>
                   </>
                 )
               }
-              <span className="whitespace-nowrap sm:text-lg 2xl:text-2xl font-semibold">
+              <span className="whitespace-nowrap sm:text-lg 3xl:text-2xl font-semibold">
                 {chainName(chain_data) || (origin ? 'Chain' : 'Select chain')}
               </span>
             </div>
@@ -109,7 +109,7 @@ export default (
               (
                 <BiChevronDown
                   size={18}
-                  className="2xl:w-6 2xl:h-6 text-slate-400 dark:text-slate-200"
+                  className="3xl:w-6 3xl:h-6 text-slate-400 dark:text-slate-200"
                 />
               )
             }
