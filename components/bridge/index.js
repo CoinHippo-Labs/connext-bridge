@@ -1084,7 +1084,9 @@ export default () => {
       } = { ...source_contract_data }
 
       const amount = utils.parseUnits((_amount || 0).toString(), source_decimals).toBigInt()
-      const approve_amount = BigNumber.from(amount.toString()).add(BigNumber.from(relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? utils.parseUnits(relayer_fee.toString(), source_contract_data?.decimals || 18).toString() : '0')).toString()
+
+      const decimals = source_contract_data?.decimals || 18
+      const approve_amount = BigNumber.from(amount.toString()).add(BigNumber.from(relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? utils.parseUnits(Number(relayer_fee).toFixed(decimals), decimals).toString() : '0')).toString()
 
       try {
         setIsApproveNeeded(undefined)
@@ -1252,7 +1254,8 @@ export default () => {
         let approve_amount
 
         try {
-          approve_amount = BigNumber.from(xcallParams.amount).add(BigNumber.from(relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? utils.parseUnits(relayer_fee.toString(), source_contract_data?.decimals || 18).toString() : '0')).toString()
+          const decimals = source_contract_data?.decimals || 18;
+          approve_amount = BigNumber.from(xcallParams.amount).add(BigNumber.from(relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? utils.parseUnits(Number(relayer_fee).toFixed(decimals), decimals).toString() : '0')).toString()
 
           console.log(
             '[approveIfNeeded before xcall]',
