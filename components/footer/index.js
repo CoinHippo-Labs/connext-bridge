@@ -9,11 +9,11 @@ import _package from '../../package.json'
 const NAVIGATIONS = [
   {
     title: 'Terms of Service',
-    url: 'https://www.connext.network/terms-of-service-connext-network',
+    url: process.env.NEXT_PUBLIC_TERMS_URL,
   },
   {
     title: 'Privacy Policy',
-    url: 'https://www.connext.network/privacy-policy',
+    url: process.env.NEXT_PUBLIC_PRIVACY_POLICY_URL,
   },
 ]
 

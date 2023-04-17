@@ -5,10 +5,16 @@ import { useState, useEffect } from 'react'
 import { Provider } from 'react-redux'
 import NProgress from 'nprogress'
 import TagManager from 'react-gtm-module'
+import { Hydrate, QueryClientProvider } from '@tanstack/react-query'
+import { Web3Modal } from '@web3modal/react'
+import _ from 'lodash'
 
 import Layout from '../layouts'
 import { useStore } from '../store'
 import * as ga from '../lib/ga'
+import { WALLETCONNECT_PROJECT_ID, EVM_CHAIN_CONFIGS, queryClient as wagmiQueryClient, ethereumClient } from '../config/wagmi'
+import WagmiConfigProvider from '../lib/provider/WagmiConfigProvider'
+import { equalsIgnoreCase, toArray } from '../lib/utils'
 import '../styles/globals.css'
 import '../styles/animate.css'
 import '../styles/layout.css'
@@ -33,11 +39,15 @@ export default (
   },
 ) => {
   const router = useRouter()
+  const {
+    asPath,
+  } = { ...router }
 
   const store = useStore(pageProps.initialReduxState)
 
   const [rendered, setRendered] = useState(false)
   const [initiated, setInitiated] = useState(null)
+  const [queryClient] = useState(() => wagmiQueryClient)
 
   useEffect(
     () => {
@@ -66,6 +76,9 @@ export default (
     [rendered, initiated],
   )
 
+  const paths = toArray(asPath, 'normal', '-')
+  const index = paths.findIndex(p => ['from', 'on'].findIndex(s => equalsIgnoreCase(s, p)) > -1)
+  const chain = index > -1 ? paths[index + 1] : undefined
   return (
     <>
       <Head>
@@ -123,14 +136,33 @@ export default (
         */}
       </Head>
       <Provider store={store}>
-        <Layout>
-          <div id="portal" />
-          <div id="modal-chains" />
-          <div id="modal-assets" />
-          <Component
-            { ...pageProps }
-          />
-        </Layout>
+        <QueryClientProvider client={queryClient}>
+          <Hydrate state={pageProps.dehydrateState}>
+            <WagmiConfigProvider>
+              <Layout>
+                <div id="portal" />
+                <div id="modal-chains" />
+                <div id="modal-assets" />
+                <Component
+                  { ...pageProps }
+                />
+                {
+                  rendered &&
+                  (
+                    <Web3Modal
+                      projectId={WALLETCONNECT_PROJECT_ID}
+                      ethereumClient={ethereumClient}
+                      defaultChain={EVM_CHAIN_CONFIGS.find(c => equalsIgnoreCase(c._id, chain)) || _.head(EVM_CHAIN_CONFIGS)}
+                      termsOfServiceUrl={process.env.NEXT_PUBLIC_TERMS_URL}
+                      privacyPolicyUrl={process.env.NEXT_PUBLIC_PRIVACY_POLICY_URL}
+                      themeVariables={{ '--w3m-font-family': 'Manrope, sans-serif' }}
+                    />
+                  )
+                }
+              </Layout>
+            </WagmiConfigProvider>
+          </Hydrate>
+        </QueryClientProvider>
       </Provider>
     </>
   )

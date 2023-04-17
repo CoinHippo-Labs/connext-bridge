@@ -5,6 +5,8 @@ import Web3Modal from 'web3modal'
 import WalletConnect from '@walletconnect/web3-provider'
 import Portis from '@portis/web3'
 import Coinbase from '@coinbase/wallet-sdk'
+import { useWeb3Modal } from '@web3modal/react'
+import { useProvider, useNetwork, useSwitchNetwork, useSigner, useAccount, useDisconnect } from 'wagmi'
 import { providers, utils } from 'ethers'
 
 import blocked_addresses from '../../config/blocked_addresses.json'
@@ -83,6 +85,7 @@ let web3Modal
 
 export default (
   {
+    useV1 = false,
     mainController = false,
     hidden = false,
     disabled = false,
@@ -119,12 +122,56 @@ export default (
 
   const [defaultChainId, setDefaultChainId] = useState(null)
 
+  const { open } = useWeb3Modal()
+  const _provider = useProvider()
+  const { chain } = useNetwork()
+  const { switchNetwork } = useSwitchNetwork()
+  const signer = useSigner()
+  const { address } = useAccount()
+  const { disconnect: _disconnect } = useDisconnect()
+  const chainId = chain?.id
+
   useEffect(
     () => {
-      if (
-        connectChainId &&
-        connectChainId !== defaultChainId
-      ) {
+      if (!useV1) {
+        if (chainId && address) {
+          if (find(address, blocked_addresses)) {
+            dispatch(
+              {
+                type: WALLET_RESET,
+              }
+            )
+          }
+          else {
+            dispatch(
+              {
+                type: WALLET_DATA,
+                value: {
+                  chain_id: chainId,
+                  provider: window?.ethereum,
+                  browser_provider: _provider,
+                  signer,
+                  address,
+                },
+              }
+            )
+          }
+        }
+        else {
+        dispatch(
+          {
+            type: WALLET_RESET,
+          }
+        )
+      }
+      }
+    },
+    [chainId, address],
+  )
+
+  useEffect(
+    () => {
+      if (connectChainId && connectChainId !== defaultChainId) {
         setDefaultChainId(connectChainId)
       }
     },
@@ -145,76 +192,16 @@ export default (
           )
         }
 
-        if (false && window.clover) {
-          providerOptions['custom-clover'] = {
-            package: async () => {
-              let provider = null
-
-              if (typeof window.clover !== 'undefined') {
-                provider = window.clover
-
-                try {
-                  await provider.request(
-                    {
-                      method: 'eth_requestAccounts',
-                    },
-                  )
-                } catch (error) {
-                  throw new Error('User Rejected')
-                }
+        if (useV1) {
+          web3Modal =
+            new Web3Modal(
+              {
+                network: getNetwork(defaultChainId) || (process.env.NETWORK === 'testnet' ? 'goerli' : 'mainnet'),
+                cacheProvider: true,
+                providerOptions,
               }
-              else if (typeof window.ethereum !== 'undefined') {
-                provider = window.ethereum
-
-                try {
-                  await provider.request(
-                    {
-                      method: 'eth_requestAccounts',
-                    },
-                  )
-                } catch (error) {
-                  throw new Error('User Rejected')
-                }
-              }
-              else if (window.web3) {
-                provider = window.web3.currentProvider
-              }
-              else if (window.celo) {
-                provider = window.celo
-              }
-              else {
-                throw new Error('No Web3 Provider found')
-              }
-
-              return provider
-            },
-            connector: async (
-              ProviderPackage,
-              options,
-            ) => {
-              const provider = new ProviderPackage(options)
-
-              try {
-                await provider.enable()
-              } catch (error) {}
-
-              return provider
-            },
-            display: {
-              name: 'Clover',
-              logo: '/logos/wallets/clover.png',
-            },
-          }
+            )
         }
-
-        web3Modal =
-          new Web3Modal(
-            {
-              network: getNetwork(defaultChainId) || (process.env.NETWORK === 'testnet' ? 'goerli' : 'mainnet'),
-              cacheProvider: true,
-              providerOptions,
-            }
-          )
       }
     },
     [defaultChainId],
@@ -326,7 +313,7 @@ export default (
 
   useEffect(
     () => {
-      if (provider?.on) {
+      if (useV1 && provider?.on) {
         const handleChainChanged = chainId => {
           if (!chainId) {
             disconnect()
@@ -392,7 +379,13 @@ export default (
               disabled={disabled}
               onClick={
                 () => {
-                  switchChain()
+                  if (useV1) {
+                    switchChain()
+                  }
+                  else {
+                    switchNetwork(connectChainId)
+                  }
+
                   if (onSwitch) {
                     onSwitch()
                   }
@@ -411,7 +404,7 @@ export default (
             </button> :
             <button
               disabled={disabled}
-              onClick={disconnect}
+              onClick={useV1 ? disconnect : _disconnect}
               className={className}
             >
               {
@@ -425,7 +418,7 @@ export default (
             </button> :
           <button
             disabled={disabled}
-            onClick={connect}
+            onClick={useV1 ? connect : open}
             className={className}
           >
             {

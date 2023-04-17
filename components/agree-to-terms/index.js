@@ -36,7 +36,7 @@ export default (
           By clicking the below, you agree to our
         </span>
         <a
-          href="https://www.connext.network/terms-of-service-connext-network"
+          href={process.env.NEXT_PUBLIC_TERMS_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 dark:text-blue-500 font-medium"
