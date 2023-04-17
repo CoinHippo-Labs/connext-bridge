@@ -126,7 +126,7 @@ export default (
   const _provider = useProvider()
   const { chain } = useNetwork()
   const { switchNetwork } = useSwitchNetwork()
-  const signer = useSigner()
+  const { data: signer } = useSigner()
   const { address } = useAccount()
   const { disconnect: _disconnect } = useDisconnect()
   const chainId = chain?.id
@@ -134,7 +134,7 @@ export default (
   useEffect(
     () => {
       if (!useV1) {
-        if (chainId && address) {
+        if (chainId && signer && address) {
           if (find(address, blocked_addresses)) {
             dispatch(
               {
@@ -166,7 +166,7 @@ export default (
       }
       }
     },
-    [chainId, address],
+    [chainId, signer, address],
   )
 
   useEffect(

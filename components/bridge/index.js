@@ -1365,20 +1365,22 @@ export default () => {
           const xcall_request = await sdk.sdkBase.xcall(xcallParams)
 
           if (xcall_request) {
-            let gasLimit = await signer.estimateGas(xcall_request)
+            try {
+              let gasLimit = await signer.estimateGas(xcall_request)
 
-            if (gasLimit) {
-              gasLimit =
-                FixedNumber.fromString(gasLimit.toString())
-                  .mulUnsafe(
-                    FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
-                  )
-                  .round(0)
-                  .toString()
-                  .replace('.0', '')
+              if (gasLimit) {
+                gasLimit =
+                  FixedNumber.fromString(gasLimit.toString())
+                    .mulUnsafe(
+                      FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
+                    )
+                    .round(0)
+                    .toString()
+                    .replace('.0', '')
 
-              xcall_request.gasLimit = gasLimit
-            }
+                xcall_request.gasLimit = gasLimit
+              }
+            } catch (error) {}
 
             const xcall_response = await signer.sendTransaction(xcall_request)
 
