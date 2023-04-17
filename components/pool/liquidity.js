@@ -599,20 +599,22 @@ export default (
                 const add_request = await sdk.sdkPool.addLiquidity(domainId, contract_address, amounts, minToMint, deadline)
 
                 if (add_request) {
-                  let gasLimit = await signer.estimateGas(add_request)
+                  try {
+                    let gasLimit = await signer.estimateGas(add_request)
 
-                  if (gasLimit) {
-                    gasLimit =
-                      FixedNumber.fromString(gasLimit.toString())
-                        .mulUnsafe(
-                          FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
-                        )
-                        .round(0)
-                        .toString()
-                        .replace('.0', '')
+                    if (gasLimit) {
+                      gasLimit =
+                        FixedNumber.fromString(gasLimit.toString())
+                          .mulUnsafe(
+                            FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
+                          )
+                          .round(0)
+                          .toString()
+                          .replace('.0', '')
 
-                    add_request.gasLimit = gasLimit
-                  }
+                      add_request.gasLimit = gasLimit
+                    }
+                  } catch (error) {}
 
                   const add_response = await signer.sendTransaction(add_request)
 
@@ -794,20 +796,22 @@ export default (
                       await sdk.sdkPool.removeLiquidity(domainId, contract_address, _amount, minAmounts, deadline)
 
                 if (remove_request) {
-                  let gasLimit = await signer.estimateGas(remove_request)
+                  try {
+                    let gasLimit = await signer.estimateGas(remove_request)
 
-                  if (gasLimit) {
-                    gasLimit =
-                      FixedNumber.fromString(gasLimit.toString())
-                        .mulUnsafe(
-                          FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
-                        )
-                        .round(0)
-                        .toString()
-                        .replace('.0', '')
+                    if (gasLimit) {
+                      gasLimit =
+                        FixedNumber.fromString(gasLimit.toString())
+                          .mulUnsafe(
+                            FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
+                          )
+                          .round(0)
+                          .toString()
+                          .replace('.0', '')
 
-                    remove_request.gasLimit = gasLimit
-                  }
+                      remove_request.gasLimit = gasLimit
+                    }
+                  } catch (error) {}
 
                   const remove_response = await signer.sendTransaction(remove_request)
 

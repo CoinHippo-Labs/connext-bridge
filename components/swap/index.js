@@ -893,20 +893,22 @@ export default () => {
           const swap_request = await sdk.sdkPool.swap(domainId, contract_address, (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address, (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address, amount, minDy, deadline)
 
           if (swap_request) {
-            let gasLimit = await signer.estimateGas(swap_request)
+            try {
+              let gasLimit = await signer.estimateGas(swap_request)
 
-            if (gasLimit) {
-              gasLimit =
-                FixedNumber.fromString(gasLimit.toString())
-                  .mulUnsafe(
-                    FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
-                  )
-                  .round(0)
-                  .toString()
-                  .replace('.0', '')
+              if (gasLimit) {
+                gasLimit =
+                  FixedNumber.fromString(gasLimit.toString())
+                    .mulUnsafe(
+                      FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
+                    )
+                    .round(0)
+                    .toString()
+                    .replace('.0', '')
 
-              swap_request.gasLimit = gasLimit
-            }
+                swap_request.gasLimit = gasLimit
+              }
+            } catch (error) {}
 
             const swap_response = await signer.sendTransaction(swap_request)
 
