@@ -1762,7 +1762,7 @@ export default () => {
                             transferData={latest_transfer}
                             buttonTitle={
                               <span className="text-center">
-                                {bumped ? 'Waiting for bump' : `Please click here to bump the ${latest_transfer?.error_status === XTransferErrorStatus.LowSlippage ? 'slippage' : 'gas amount'} higher.`}
+                                {[XTransferErrorStatus.ExecutionError, XTransferErrorStatus.NoBidsReceived].includes(latest_transfer.error_status) ? `Error Status: ${latest_transfer.error_status}` : bumped ? 'Waiting for bump' : `Please click here to bump the ${latest_transfer?.error_status === XTransferErrorStatus.LowSlippage ? 'slippage' : 'gas amount'} higher.`}
                               </span>
                             }
                             onTransferBumped={
