@@ -155,7 +155,13 @@ export default (
                       defaultChain={EVM_CHAIN_CONFIGS.find(c => equalsIgnoreCase(c._id, chain)) || _.head(EVM_CHAIN_CONFIGS)}
                       termsOfServiceUrl={process.env.NEXT_PUBLIC_TERMS_URL}
                       privacyPolicyUrl={process.env.NEXT_PUBLIC_PRIVACY_POLICY_URL}
-                      themeVariables={{ '--w3m-font-family': 'Manrope, sans-serif' }}
+                      enableExplorer={true}
+                      themeVariables={{
+                        '--w3m-font-family': 'Manrope, sans-serif',
+                        '--w3m-background-color': '#1d1c1c',
+                        '--w3m-color-bg-1': '#1d1c1c',
+                        '--w3m-logo-image-url': `${process.env.NEXT_PUBLIC_APP_URL}/logos/logo_with_name_white.png`,
+                      }}
                     />
                   )
                 }
