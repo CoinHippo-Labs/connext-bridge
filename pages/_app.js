@@ -80,6 +80,10 @@ export default (
   const index = paths.findIndex(p => ['from', 'on'].findIndex(s => equalsIgnoreCase(s, p)) > -1)
   const chain = index > -1 ? paths[index + 1] : undefined
 
+  if (typeof document !== 'undefined' && document.querySelector('w3m-modal')?.shadowRoot) {
+    document.querySelector('w3m-modal').shadowRoot.append(Object.assign(document.createElement('STYLE'), { innerText : `div.w3m-active { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(8px); }` }))
+  }
+
   return (
     <>
       <Head>
