@@ -2762,11 +2762,17 @@ export default () => {
                                                   />
                                                 </button>
                                               </div> :
-                                              <Oval
-                                                width="14"
-                                                height="14"
-                                                color={loaderColor(theme)}
-                                              />
+                                              !browser_provider ?
+                                                <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
+                                                  <span>
+                                                    -
+                                                  </span>
+                                                </span> :
+                                                <Oval
+                                                  width="14"
+                                                  height="14"
+                                                  color={loaderColor(theme)}
+                                                />
                                             }
                                           </div>
                                           {/*
