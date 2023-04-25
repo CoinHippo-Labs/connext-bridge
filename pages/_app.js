@@ -79,6 +79,7 @@ export default (
   const paths = toArray(asPath, 'normal', '-')
   const index = paths.findIndex(p => ['from', 'on'].findIndex(s => equalsIgnoreCase(s, p)) > -1)
   const chain = index > -1 ? paths[index + 1] : undefined
+
   return (
     <>
       <Head>

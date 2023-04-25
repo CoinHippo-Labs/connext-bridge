@@ -1143,7 +1143,7 @@ export default () => {
           <div className="flex items-center justify-center">
             <Navigations />
           </div>
-          <div className="flex items-center justify-end">
+          <div className="flex items-center justify-end 3xl:space-x-4">
             {
               browser_provider &&
               (
@@ -1199,7 +1199,7 @@ export default () => {
                 connectChainId={default_chain_id}
               >
                 {!browser_provider ?
-                  <div className="border border-slate-400 dark:border-slate-600 rounded whitespace-nowrap text-slate-500 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300 font-bold mx-2 py-1.5 px-2.5">
+                  <div className="border border-slate-400 dark:border-slate-600 rounded whitespace-nowrap text-slate-500 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300 3xl:text-xl font-bold mx-2 py-1.5 px-2.5 3xl:py-2 3xl:px-3">
                     Connect Wallet
                   </div> :
                   <div className="flex items-center justify-center py-1.5 px-2.5">

@@ -319,3 +319,7 @@ a {
 .loadButton {
   bottom: 2.5rem !important;
 }
+
+.w3m-active {
+  @apply backdrop-blur-8;
+}
