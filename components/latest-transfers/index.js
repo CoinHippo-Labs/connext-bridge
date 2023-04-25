@@ -138,7 +138,7 @@ export default (
   return (
     transfers?.length > 0 &&
     (
-      <div className="lg:max-w-xs xl:ml-auto">
+      <div className="lg:max-w-xs 2xl:max-w-sm xl:ml-auto">
         <button
           onClick={() => setCollapse(!collapse)}
           className={`w-full flex items-center justify-center ${collapse ? 'text-slate-300 hover:text-slate-800 dark:text-slate-700 dark:hover:text-slate-200 font-medium' : 'font-semibold'} space-x-1 mb-3`}
