@@ -233,6 +233,7 @@
         "chain_id": 100,
         "decimals": 18,
         "image": "/logos/assets/wxdai.png",
+        "symbol": "WXDAI",
         "next_asset": {
           "contract_address": "0x0e1D5Bcd2Ac5CF2f71841A9667afC1E995CaAf4F",
           "decimals": 18,
