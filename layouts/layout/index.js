@@ -212,7 +212,7 @@ export default (
                   </> :
                   terms_agreed ?
                     children :
-                    <div className="min-h-screen flex items-center">
+                    <div className="flex items-center" style={{ minHeight: 'calc(100vh - 220px)' }}>
                       <AgreeToTerms useModal={agreeToTermsUseModal} />
                     </div>
                 }
