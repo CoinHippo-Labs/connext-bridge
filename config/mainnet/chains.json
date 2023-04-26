@@ -228,8 +228,8 @@
           "https://gnosischain-rpc.gateway.pokt.network"
         ],
         "nativeCurrency": {
-          "name": "xDAI",
-          "symbol": "xDAI",
+          "name": "XDAI",
+          "symbol": "XDAI",
           "decimals": 18
         },
         "blockExplorerUrls": [

@@ -229,16 +229,17 @@
         "is_pool": true
       },
       {
-        "contract_address": "0x0000000000000000000000000000000000000000",
+        "contract_address": "0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d",
         "chain_id": 100,
         "decimals": 18,
-        "image": "/logos/assets/dai.png",
+        "image": "/logos/assets/wxdai.png",
         "next_asset": {
           "contract_address": "0x0e1D5Bcd2Ac5CF2f71841A9667afC1E995CaAf4F",
           "decimals": 18,
           "symbol": "nextDAI",
           "image": "/logos/assets/nextdai.png"
         },
+        "wrapable": true,
         "is_pool": true
       }
     ],
