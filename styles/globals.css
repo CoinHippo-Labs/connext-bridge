@@ -239,13 +239,12 @@ body {
   margin-top: 0.0625rem;
 }
 
-.mt-5\.5 {
-  margin-top: 1.375rem;
+.mt-4\.5 {
+  margin-top: 18px !important;
 }
 
-.my-4\.5 {
-  margin-top: 18px;
-  margin-bottom: 18px;
+.mt-5\.5 {
+  margin-top: 1.375rem;
 }
 
 .p-4\.5 {
