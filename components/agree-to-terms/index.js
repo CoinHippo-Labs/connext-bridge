@@ -55,7 +55,7 @@ export default (
                 This is beta software subject to change. For guidance, refer to our
               </span>
               <a
-                href={`${process.env.NEXT_PUBLIC_DOCS_URL}/routers/Guides/security`}
+                href={process.env.NEXT_PUBLIC_DOCS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline text-black dark:text-white font-semibold mr-1"
@@ -66,7 +66,7 @@ export default (
                 and
               </span>
               <a
-                href={process.env.NEXT_PUBLIC_DOCS_URL}
+                href={`${process.env.NEXT_PUBLIC_DOCS_URL}/routers/Guides/security`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline text-black dark:text-white font-semibold"
