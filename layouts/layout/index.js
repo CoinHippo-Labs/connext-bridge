@@ -189,14 +189,14 @@ export default (
           data-layout="layout"
           data-background={theme}
           data-navbar={theme}
-          className={`antialiased ${/*'overflow-y-scroll'*/'disable-scrollbars'} text-sm ${theme}`}
+          className={`min-h-screen antialiased ${/*'overflow-y-scroll'*/'disable-scrollbars'} text-sm ${theme}`}
         >
-          <div className="wrapper">
+          <div className="wrapper" style={{ minHeight: 'calc(100vh - 96px)' }}>
             <div
               className="main w-full bg-white dark:bg-black"
               style={
                 {
-                  minHeight: 'calc(95.5vh)',
+                  // minHeight: 'calc(95.5vh)',
                   backgroundColor: theme === 'light' ? '#ececec' : '#1a1919',
                   // backgroundImage: `url("/images/background${theme === 'light' ? '_white' : ''}.png")`,
                   // backgroundSize: 'cover',

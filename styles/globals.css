@@ -275,7 +275,7 @@ input[type=number] {
 }
 
 .min-h-screen {
-  min-height: calc(100vh - 168px) !important;
+  min-height: calc(100vh - 0px) !important;
 }
 
 a {
