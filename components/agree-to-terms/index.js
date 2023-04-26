@@ -84,7 +84,7 @@ export default (
             href={process.env.NEXT_PUBLIC_TERMS_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-black dark:text-white font-semibold"
+            className="underline text-black dark:text-white font-semibold"
           >
             Terms of Service
           </a>.
