@@ -173,6 +173,7 @@ export default (
                       enableExplorer={true}
                       themeVariables={{
                         '--w3m-font-family': 'Manrope, sans-serif',
+                        '--w3m-accent-fill-color': '#ffffff',
                         '--w3m-background-color': '#1d1c1c',
                         '--w3m-color-bg-1': '#1d1c1c',
                         '--w3m-logo-image-url': `${process.env.NEXT_PUBLIC_APP_URL}/logos/logo_with_name_white.png`,

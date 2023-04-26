@@ -319,3 +319,7 @@ a {
 .loadButton {
   bottom: 2.5rem !important;
 }
+
+.max-w-2md {
+  max-width: 466px;
+}
