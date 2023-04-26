@@ -66,7 +66,7 @@ export default (
                 and
               </span>
               <a
-                href={process.env.NEXT_PUBLIC_DOCS_URL}
+                href={`${process.env.NEXT_PUBLIC_DOCS_URL}/routers/Guides/security`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline text-black dark:text-white font-semibold"
