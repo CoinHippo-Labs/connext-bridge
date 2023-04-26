@@ -171,6 +171,10 @@ body {
   width: 21rem !important;
 }
 
+.max-w-2md {
+  max-width: 466px;
+}
+
 .max-w-8xl {
   max-width: 88rem;
 }
@@ -237,6 +241,11 @@ body {
 
 .mt-5\.5 {
   margin-top: 1.375rem;
+}
+
+.my-4\.5 {
+  margin-top: 18px;
+  margin-bottom: 18px;
 }
 
 .p-4\.5 {
@@ -318,8 +327,4 @@ a {
 
 .loadButton {
   bottom: 2.5rem !important;
-}
-
-.max-w-2md {
-  max-width: 466px;
 }

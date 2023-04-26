@@ -101,7 +101,7 @@ export default (
             )
           }
         }
-        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base 3xl:text-lg font-medium text-center py-3.5 px-2 sm:px-3"
+        className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base 3xl:text-lg font-medium text-center my-4.5 py-3.5 px-2 sm:px-3"
       >
         Agree to Terms
       </button>
