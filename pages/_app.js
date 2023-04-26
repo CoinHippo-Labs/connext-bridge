@@ -171,10 +171,13 @@ export default (
                         ]
                       }
                       enableExplorer={true}
+                      themeMode="dark"
                       themeVariables={{
                         '--w3m-font-family': 'Manrope, sans-serif',
                         '--w3m-background-color': '#1d1c1c',
                         '--w3m-color-bg-1': '#1d1c1c',
+                        '--w3m-color-bg-2': '#27272a',
+                        '--w3m-color-bg-3': '#1d1c1c',
                         '--w3m-color-fg-1': '#e4e7e7',
                         '--w3m-color-fg-2': '#bcc2c2',
                         '--w3m-color-fg-3': '#6e7777',
