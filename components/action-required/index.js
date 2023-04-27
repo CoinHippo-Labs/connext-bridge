@@ -80,7 +80,6 @@ export default (
   const {
     chain_id,
     provider,
-    browser_provider,
     signer,
     address,
   } = { ...wallet_data }
@@ -1095,7 +1094,7 @@ export default (
                 null
             }
             {
-              browser_provider &&
+              provider &&
               (
                 (
                   ['string', 'number'].includes(typeof (error_status === XTransferErrorStatus.LowSlippage ? newSlippage : error_status === XTransferErrorStatus.LowRelayerFee ? newRelayerFee : null)) &&
@@ -1108,7 +1107,7 @@ export default (
                     connectChainId={chain_data?.chain_id}
                     className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                   >
-                    <span className="mr-1.5 sm:mr-2">
+                    <span>
                       {is_walletconnect ? 'Reconnect' : 'Switch'} to
                     </span>
                     {
@@ -1293,7 +1292,7 @@ export default (
                             </Alert>
                           )
                         }) :
-                browser_provider ?
+                provider ?
                   <button
                     disabled={true}
                     className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base text-center py-3 sm:py-4 px-2 sm:px-3"
