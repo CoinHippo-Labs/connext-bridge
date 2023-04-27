@@ -1351,7 +1351,9 @@ export default () => {
             xcallParams.wrapNativeOnOrigin = source_contract_data?.contract_address === constants.AddressZero
           }
 
-          if (['ETH'].includes(source_asset_data?.symbol) && _.head(destination_chain_data?.provider_params)?.nativeCurrency?.symbol?.endsWith('ETH')) {
+          const NATIVE_ASSETS = ["ETH", "DAI"];
+          const CANONICAL_ASSET_SYMBOL = NATIVE_ASSETS.find(i => i == source_asset_data?.symbol);
+          if (CANONICAL_ASSET_SYMBOL && _.head(destination_chain_data?.provider_params)?.nativeCurrency?.symbol?.endsWith(CANONICAL_ASSET_SYMBOL)) {
             xcallParams.unwrapNativeOnDestination = xcallParams.receiveLocal || receive_wrap ? false : true
           }
 
@@ -1563,6 +1565,8 @@ export default () => {
   let destination_contract_data = getContract(destination_chain_data?.chain_id, destination_asset_data?.contracts)
   const _destination_contract_data = _.cloneDeep(destination_contract_data)
 
+  console.log({native_asset: destination_contract_data?.wrapable});
+
   let is_wrapable_asset = false
   // next asset
   if ((receiveLocal || estimatedValues?.isNextAsset) && destination_contract_data?.next_asset) {
@@ -1582,7 +1586,11 @@ export default () => {
         symbol: destination_asset_data.symbol,
         image: destination_asset_data.image,
       }
+
+      console.log("no recieve_wrap");
     }
+
+    console.log({destination_contract_data: destination_contract_data});
   }
 
   const source_decimals = source_contract_data?.decimals || 18
