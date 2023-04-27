@@ -22,6 +22,7 @@ import { getAsset } from '../../lib/object/asset'
 import { getContract } from '../../lib/object/contract'
 import { toArray, ellipse, equalsIgnoreCase, loaderColor } from '../../lib/utils'
 
+const NATIVE_WRAPPABLE_SYMBOLS = ['ETH', 'DAI']
 const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT)
 
 export default (
@@ -164,9 +165,9 @@ export default (
     symbol,
   } = { ...nativeCurrency }
 
-  const _destination_asset_data = getAsset(symbol?.endsWith('ETH') ? 'ETH' : symbol, assets_data)
+  const _destination_asset_data = getAsset(NATIVE_WRAPPABLE_SYMBOLS.find(s => symbol?.endsWith(s)) || symbol, assets_data)
 
-  if ((!destination_contract_data && equalsIgnoreCase(constants.AddressZero, destination_transacting_asset)) || (destination_asset_data?.id === 'eth' && _destination_asset_data?.id === 'eth' && equalsIgnoreCase(to, destination_chain_data?.unwrapper_contract))) {
+  if ((!destination_contract_data && equalsIgnoreCase(constants.AddressZero, destination_transacting_asset)) || (destination_asset_data?.id === _destination_asset_data?.id && equalsIgnoreCase(to, destination_chain_data?.unwrapper_contract))) {
     destination_contract_data = {
       ...getContract(destination_chain_data?.chain_id, _destination_asset_data?.contracts),
       ...nativeCurrency,
