@@ -42,6 +42,7 @@ const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT)
 const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT)
 const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)
 const RELAYER_FEE_ASSET_TYPES = ['native', 'transacting']
+const NATIVE_WRAPPABLE_SYMBOLS = ['ETH', 'DAI']
 
 const DEFAULT_OPTIONS = {
   to: '',
@@ -1343,16 +1344,16 @@ export default () => {
       }
 
       if (!failed) {
-        const is_wrap_eth = (equalsIgnoreCase(source_contract_data?.contract_address, constants.AddressZero) || (source_contract_data?.wrapable && !source_contract_data.symbol?.startsWith(WRAPPED_PREFIX))) && ['ETH'].includes(source_asset_data?.symbol)
+        const is_wrap_native = (equalsIgnoreCase(source_contract_data?.contract_address, constants.AddressZero) || (source_contract_data?.wrapable && !source_contract_data.symbol?.startsWith(WRAPPED_PREFIX))) && NATIVE_WRAPPABLE_SYMBOLS.includes(source_asset_data?.symbol)
 
         try {
-          if (is_wrap_eth) {
+          if (is_wrap_native) {
             xcallParams.asset = _source_contract_data?.contract_address
             xcallParams.wrapNativeOnOrigin = source_contract_data?.contract_address === constants.AddressZero
           }
 
-          const NATIVE_ASSETS = ["ETH", "DAI"];
-          const CANONICAL_ASSET_SYMBOL = NATIVE_ASSETS.find(i => i == source_asset_data?.symbol);
+          const CANONICAL_ASSET_SYMBOL = NATIVE_WRAPPABLE_SYMBOLS.find(s => s === source_asset_data?.symbol)
+
           if (CANONICAL_ASSET_SYMBOL && _.head(destination_chain_data?.provider_params)?.nativeCurrency?.symbol?.endsWith(CANONICAL_ASSET_SYMBOL)) {
             xcallParams.unwrapNativeOnDestination = xcallParams.receiveLocal || receive_wrap ? false : true
           }
@@ -1584,9 +1585,7 @@ export default () => {
         symbol: destination_asset_data.symbol,
         image: destination_asset_data.image,
       }
-
     }
-
   }
 
   const source_decimals = source_contract_data?.decimals || 18
