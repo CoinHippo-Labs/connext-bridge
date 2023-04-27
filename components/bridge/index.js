@@ -1565,8 +1565,6 @@ export default () => {
   let destination_contract_data = getContract(destination_chain_data?.chain_id, destination_asset_data?.contracts)
   const _destination_contract_data = _.cloneDeep(destination_contract_data)
 
-  console.log({native_asset: destination_contract_data?.wrapable});
-
   let is_wrapable_asset = false
   // next asset
   if ((receiveLocal || estimatedValues?.isNextAsset) && destination_contract_data?.next_asset) {
@@ -1587,10 +1585,8 @@ export default () => {
         image: destination_asset_data.image,
       }
 
-      console.log("no recieve_wrap");
     }
 
-    console.log({destination_contract_data: destination_contract_data});
   }
 
   const source_decimals = source_contract_data?.decimals || 18
