@@ -910,6 +910,10 @@ export default () => {
               }
             } catch (error) {}
 
+            if (chain_data?.default_gas_price) {
+              swap_request.gasPrice = chain_data.default_gas_price
+            }
+
             const swap_response = await signer.sendTransaction(swap_request)
 
             const {
