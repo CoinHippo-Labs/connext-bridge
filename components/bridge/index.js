@@ -60,6 +60,7 @@ export default () => {
     preferences,
     chains,
     assets,
+    gas_tokens_price,
     router_asset_balances,
     pools,
     rpc_providers,
@@ -73,6 +74,7 @@ export default () => {
         preferences: state.preferences,
         chains: state.chains,
         assets: state.assets,
+        gas_tokens_price: state.gas_tokens_price,
         router_asset_balances: state.router_asset_balances,
         pools: state.pools,
         rpc_providers: state.rpc_providers,
@@ -93,6 +95,9 @@ export default () => {
   const {
     assets_data,
   } = { ...assets }
+  const {
+    gas_tokens_price_data,
+  } = { ...gas_tokens_price }
   const {
     router_asset_balances_data,
   } = { ...router_asset_balances }
@@ -860,6 +865,9 @@ export default () => {
               nativeCurrency,
             } = { ..._.head(provider_params) }
 
+            const {
+              symbol,
+            } = { ...nativeCurrency }
             let {
               decimals,
             } = { ...nativeCurrency }
@@ -881,7 +889,22 @@ export default () => {
                 params,
               )
 
-              const response = await sdk.sdkBase.estimateRelayerFee(params)
+              const gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d?.symbol, symbol))
+
+              const {
+                price,
+              } = { ...gas_token_data }
+
+              const response =
+                destination_chain_data?.relayer_fee && price ?
+                  FixedNumber.fromString(destination_chain_data.relayer_fee)
+                    .mulUnsafe(
+                      FixedNumber.fromString((params.priceIn === 'usd' ? price : 1).toString())
+                    )
+                    .round(0)
+                    .toString()
+                    .replace('.0', '') :
+                  await sdk.sdkBase.estimateRelayerFee(params)
 
               let relayerFee = response && utils.formatUnits(response, decimals)
 
