@@ -22,7 +22,7 @@ import { getAsset } from '../../lib/object/asset'
 import { getContract } from '../../lib/object/contract'
 import { toArray, ellipse, equalsIgnoreCase, loaderColor } from '../../lib/utils'
 
-const NATIVE_WRAPPABLE_SYMBOLS = ['ETH', 'DAI']
+const NATIVE_WRAPPABLE_SYMBOLS = ['ETH', 'MATIC', 'DAI']
 const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT)
 
 export default (
