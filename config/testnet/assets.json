@@ -120,6 +120,32 @@
     "preset": true
   },
   {
+    "id": "matic",
+    "symbol": "MATIC",
+    "name": "Polygon",
+    "image": "/logos/assets/matic.png",
+    "contracts": [
+      {
+        "contract_address": "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889",
+        "chain_id": 80001,
+        "decimals": 18,
+        "symbol": "WMATIC",
+        "image": "/logos/assets/wmatic.png",
+        "wrapable": true,
+        "is_bridge": true
+      },
+      {
+        "contract_address": "0xcAA61BCAe7D37Fe9C33c0D8671448254eef44D63",
+        "chain_id": 59140,
+        "decimals": 18,
+        "symbol": "nextMATIC",
+        "image": "/logos/assets/nextmatic.png",
+        "is_bridge": true
+      }
+    ],
+    "color": "#7f43df"
+  },
+  {
     "id": "tkn",
     "symbol": "TKN",
     "name": "TKN",
