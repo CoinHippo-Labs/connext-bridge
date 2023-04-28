@@ -616,10 +616,6 @@ export default (
                     }
                   } catch (error) {}
 
-                  if (chain_data?.default_gas_price) {
-                    add_request.gasPrice = chain_data.default_gas_price
-                  }
-
                   const add_response = await signer.sendTransaction(add_request)
 
                   const {
