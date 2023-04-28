@@ -1385,6 +1385,10 @@ export default () => {
               }
             } catch (error) {}
 
+            if (source_chain_data?.default_gas_price) {
+              xcall_request.gasPrice = source_chain_data.default_gas_price
+            }
+
             const xcall_response = await signer.sendTransaction(xcall_request)
 
             const {
