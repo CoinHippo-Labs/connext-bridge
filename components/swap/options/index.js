@@ -68,126 +68,199 @@ export default (
           />
         </div>
       }
-      buttonClassName={
-        `min-w-max ${
-          disabled ?
-            'cursor-not-allowed' :
-            ''
-        } rounded ${
-          applied ?
-            'border border-blue-400 dark:border-blue-500' :
-            ''
-        } flex items-center justify-center`
-      }
+      buttonClassName={`min-w-max ${disabled ? 'cursor-not-allowed' : ''} rounded ${applied ? 'border border-blue-400 dark:border-blue-500' : ''} flex items-center justify-center`}
       title={
-        <span className="normal-case">
+        <span className="normal-case text-base 3xl:text-lg">
           Advanced options
         </span>
       }
       body={
         <div className="form mt-2">
-          {fields
-            .map((f, i) => {
-              const {
-                label,
-                tooltip,
-                name,
-                size,
-                type,
-                placeholder,
-                options,
-                presets,
-                postfix,
-              } = { ...f }
+          {fields.map((f, i) => {
+            const {
+              label,
+              tooltip,
+              name,
+              size,
+              type,
+              placeholder,
+              options,
+              presets,
+              postfix,
+            } = { ...f }
 
-              return (
-                <div
-                  key={i}
-                  className="form-element"
-                >
-                  {
-                    label &&
-                    (tooltip ?
-                      <Tooltip
-                        placement="right"
-                        content={tooltip}
-                        className="z-50 bg-dark text-white text-xs"
-                      >
-                        <div className="w-fit flex items-center">
-                          <div className="max-w-fit text-slate-600 dark:text-slate-200 font-medium mb-1">
-                            {label}
-                          </div>
-                          <BiInfoCircle
-                            size={16}
-                            className="block sm:hidden text-slate-400 dark:text-slate-500 mb-0.5 ml-1 sm:ml-0"
-                          />
+            return (
+              <div
+                key={i}
+                className="form-element"
+              >
+                {
+                  label &&
+                  (tooltip ?
+                    <Tooltip
+                      placement="right"
+                      content={tooltip}
+                      className="z-50 bg-dark text-white text-xs"
+                    >
+                      <div className="w-fit flex items-center">
+                        <div className="max-w-fit text-slate-600 dark:text-slate-200 text-sm 3xl:text-base font-medium mb-1">
+                          {label}
                         </div>
-                      </Tooltip> :
-                      <div className="form-label text-slate-600 dark:text-slate-200 font-medium">
-                        {label}
+                        <BiInfoCircle
+                          size={16}
+                          className="block sm:hidden text-slate-400 dark:text-slate-500 mb-0.5 ml-1 sm:ml-0"
+                        />
                       </div>
-                    )
-                  }
-                  {type === 'select' ?
-                    <select
-                      placeholder={placeholder}
-                      value={data?.[name]}
+                    </Tooltip> :
+                    <div className="form-label text-slate-600 dark:text-slate-200 text-sm 3xl:text-base font-medium">
+                      {label}
+                    </div>
+                  )
+                }
+                {type === 'select' ?
+                  <select
+                    placeholder={placeholder}
+                    value={data?.[name]}
+                    onChange={
+                      e => {
+                        setData(
+                          {
+                            ...data,
+                            [name]: e.target.value,
+                          }
+                        )
+                      }
+                    }
+                    className="form-select bg-slate-50 rounded border-0 focus:ring-0"
+                  >
+                    {toArray(options)
+                      .map((o, j) => {
+                        const {
+                          title,
+                          value,
+                          name,
+                        } = { ...o }
+
+                        return (
+                          <option
+                            key={j}
+                            title={title}
+                            value={value}
+                          >
+                            {name}
+                          </option>
+                        )
+                      })
+                    }
+                  </select> :
+                  type === 'switch' ?
+                    <Switch
+                      checked={typeof data?.[name] === 'boolean' ? data[name] : false}
                       onChange={
                         e => {
                           setData(
                             {
                               ...data,
-                              [name]: e.target.value,
+                              [name]: !data?.[name],
                             }
                           )
                         }
                       }
-                      className="form-select bg-slate-50 rounded border-0 focus:ring-0"
-                    >
-                      {toArray(options)
-                        .map((o, j) => {
-                          const {
-                            title,
-                            value,
-                            name,
-                          } = { ...o }
-
-                          return (
-                            <option
-                              key={j}
-                              title={title}
-                              value={value}
-                            >
-                              {name}
-                            </option>
-                          )
-                        })
-                      }
-                    </select> :
-                    type === 'switch' ?
-                      <Switch
-                        checked={typeof data?.[name] === 'boolean' ? data[name] : false}
+                      checkedIcon={false}
+                      uncheckedIcon={false}
+                      onColor={switchColor(theme).on}
+                      onHandleColor="#f8fafc"
+                      offColor={switchColor(theme).off}
+                      offHandleColor="#f8fafc"
+                    /> :
+                    type === 'textarea' ?
+                      <textarea
+                        type="text"
+                        rows="5"
+                        placeholder={placeholder}
+                        value={data?.[name]}
                         onChange={
                           e => {
                             setData(
                               {
                                 ...data,
-                                [name]: !data?.[name],
+                                [name]: e.target.value,
                               }
                             )
                           }
                         }
-                        checkedIcon={false}
-                        uncheckedIcon={false}
-                        onColor={switchColor(theme).on}
-                        onHandleColor="#f8fafc"
-                        offColor={switchColor(theme).off}
-                        offHandleColor="#f8fafc"
+                        className="form-textarea rounded border-0 focus:ring-0 text-sm 3xl:text-base"
                       /> :
-                      type === 'textarea' ?
-                        <textarea
-                          type="text"
-                          rows="5"
+                      type === 'number' ?
+                        <div className="flex items-center space-x-3">
+                          <DebounceInput
+                            debounceTimeout={750}
+                            size={size || 'small'}
+                            type={type}
+                            placeholder={placeholder}
+                            value={typeof data?.[name] === 'number' && data[name] >= 0 ? data[name] : ''}
+                            onChange={
+                              e => {
+                                const regex = /^[0-9.\b]+$/
+
+                                let value
+
+                                if (e.target.value === '' || regex.test(e.target.value)) {
+                                  value = e.target.value
+                                }
+
+                                if (typeof value === 'string') {
+                                  if (value.startsWith('.')) {
+                                    value = `0${value}`
+                                  }
+
+                                  if (!isNaN(value)) {
+                                    value = Number(value)
+                                  }
+                                }
+
+                                value = ['slippage'].includes(name) && (value <= 0 || value > 100) ? DEFAULT_SWAP_SLIPPAGE_PERCENTAGE : value
+
+                                setData(
+                                  {
+                                    ...data,
+                                    [name]: value && !isNaN(value) ? parseFloat(Number(value).toFixed(6)) : value,
+                                  }
+                                )
+                              }
+                            }
+                            onWheel={e => e.target.blur()}
+                            onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                            className="w-20 bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0 text-sm 3xl:text-base font-semibold py-1.5 px-2.5"
+                          />
+                          {
+                            presets?.length > 0 &&
+                            (
+                              <div className="flex items-center space-x-2.5">
+                                {presets.map((p, j) => (
+                                  <div
+                                    key={j}
+                                    onClick={
+                                      () => {
+                                        setData(
+                                          {
+                                            ...data,
+                                            [name]: p,
+                                          }
+                                        )
+                                      }
+                                    }
+                                    className={`${data?.[name] === p ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-sm 3xl:text-base py-1 px-2`}
+                                  >
+                                    {p} {postfix}
+                                  </div>
+                                ))}
+                              </div>
+                            )
+                          }
+                        </div> :
+                        <input
+                          type={type}
                           placeholder={placeholder}
                           value={data?.[name]}
                           onChange={
@@ -200,105 +273,12 @@ export default (
                               )
                             }
                           }
-                          className="form-textarea rounded border-0 focus:ring-0"
-                        /> :
-                        type === 'number' ?
-                          <div className="flex items-center space-x-3">
-                            <DebounceInput
-                              debounceTimeout={750}
-                              size={size || 'small'}
-                              type={type}
-                              placeholder={placeholder}
-                              value={typeof data?.[name] === 'number' && data[name] >= 0 ? data[name] : ''}
-                              onChange={
-                                e => {
-                                  const regex = /^[0-9.\b]+$/
-
-                                  let value
-
-                                  if (e.target.value === '' || regex.test(e.target.value)) {
-                                    value = e.target.value
-                                  }
-
-                                  if (typeof value === 'string') {
-                                    if (value.startsWith('.')) {
-                                      value = `0${value}`
-                                    }
-
-                                    if (!isNaN(value)) {
-                                      value = Number(value)
-                                    }
-                                  }
-
-                                  value =
-                                    ['slippage'].includes(name) && (value <= 0 || value > 100) ?
-                                      DEFAULT_SWAP_SLIPPAGE_PERCENTAGE :
-                                      value
-
-                                  setData(
-                                    {
-                                      ...data,
-                                      [name]:
-                                        value && !isNaN(value) ?
-                                          parseFloat(Number(value).toFixed(6)) :
-                                          value,
-                                    }
-                                  )
-                                }
-                              }
-                              onWheel={e => e.target.blur()}
-                              onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                              className="w-20 bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0 font-semibold py-1.5 px-2.5"
-                            />
-                            {
-                              presets?.length > 0 &&
-                              (
-                                <div className="flex items-center space-x-2.5">
-                                  {presets
-                                    .map((p, j) => (
-                                      <div
-                                        key={j}
-                                        onClick={
-                                          () => {
-                                            setData(
-                                              {
-                                                ...data,
-                                                [name]: p,
-                                              }
-                                            )
-                                          }
-                                        }
-                                        className={`${data?.[name] === p ? 'bg-slate-100 dark:bg-slate-800 font-bold' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer py-1 px-2`}
-                                      >
-                                        {p} {postfix}
-                                      </div>
-                                    ))
-                                  }
-                                </div>
-                              )
-                            }
-                          </div> :
-                          <input
-                            type={type}
-                            placeholder={placeholder}
-                            value={data?.[name]}
-                            onChange={
-                              e => {
-                                setData(
-                                  {
-                                    ...data,
-                                    [name]: e.target.value,
-                                  }
-                                )
-                              }
-                            }
-                            className="form-input rounded border-0 focus:ring-0"
-                          />
-                  }
-                </div>
-              )
-            })
-          }
+                          className="form-input rounded border-0 focus:ring-0 text-sm 3xl:text-base"
+                        />
+                }
+              </div>
+            )
+          })}
         </div>
       }
       onCancel={() => reset()}
