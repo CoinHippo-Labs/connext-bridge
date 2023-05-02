@@ -193,7 +193,7 @@ export default () => {
 
         const source_chain = paths[paths.indexOf('from') + 1]
         const destination_chain = paths[paths.indexOf('to') + 1]
-        const asset = _.head(paths) !== 'from' ? _.head(paths) : process.env.NEXT_PUBLIC_NETWORK === 'testnet' ? ['linea'].includes(destination_chain) ? 'matic' : 'test' : 'usdc'
+        const asset = _.head(paths) !== 'from' ? _.head(paths) : process.env.NEXT_PUBLIC_NETWORK === 'testnet' ? [source_chain, destination_chain].findIndex(c => ['linea'].includes(c)) > -1 ? 'matic' : 'test' : 'usdc'
 
         const source_chain_data = getChain(source_chain, chains_data)
         const destination_chain_data = getChain(destination_chain, chains_data)
