@@ -39,7 +39,8 @@
         "chain_id": 59140,
         "decimals": 18,
         "symbol": "TEST",
-        "mintable": true
+        "mintable": true,
+        "exclude_chains": ["linea"]
       },
       {
         "contract_address": "0x7C1412e456ad60B8ee458c4eb3A9852C3e389353",
