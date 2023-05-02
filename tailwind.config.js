@@ -33,7 +33,7 @@ module.exports = {
         },
       },
       screens: {
-        '3xl': '2500px',
+        '3xl': '3000px',
       },
     },
   },

@@ -104,7 +104,7 @@ export default (
             type="button"
             disabled={disabled}
             onClick={show}
-            className={buttonClassName || 'btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 text-white'}
+            className={buttonClassName || 'btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 text-white text-sm 3xl:text-base'}
             style={buttonStyle}
           >
             {buttonTitle}
@@ -158,10 +158,7 @@ export default (
                               hide()
                             }
                           }
-                          className={
-                            cancelButtonClassName ||
-                            'btn btn-default btn-rounded bg-white hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800'
-                          }
+                          className={cancelButtonClassName || 'btn btn-default btn-rounded bg-white hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-sm 3xl:text-base'}
                         >
                           {cancelButtonTitle || 'Cancel'}
                         </button>
@@ -178,10 +175,7 @@ export default (
                               }
                             }
                           }
-                          className={
-                            confirmButtonClassName ||
-                            'btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 text-white'
-                          }
+                          className={confirmButtonClassName || 'btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 text-white text-sm 3xl:text-base'}
                         >
                           {confirmButtonTitle || 'Confirm'}
                         </button>
