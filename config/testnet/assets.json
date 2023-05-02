@@ -40,6 +40,7 @@
         "decimals": 18,
         "symbol": "TEST",
         "mintable": true,
+        "is_bridge": false,
         "exclude_chains": ["linea"]
       },
       {
