@@ -865,9 +865,6 @@ export default () => {
               nativeCurrency,
             } = { ..._.head(provider_params) }
 
-            const {
-              symbol,
-            } = { ...nativeCurrency }
             let {
               decimals,
             } = { ...nativeCurrency }
@@ -881,6 +878,7 @@ export default () => {
               destinationDomain: destination_chain_data?.domain_id,
               isHighPriority: !forceSlow,
               priceIn: ['transacting'].includes(relayerFeeAssetType) ? 'usd' : 'native',
+              destinationGasPrice: destination_chain_data?.gas_price || undefined,
             }
 
             try {
@@ -889,23 +887,7 @@ export default () => {
                 params,
               )
 
-              const gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d?.symbol, symbol))
-
-              const {
-                price,
-              } = { ...gas_token_data }
-
-              const response =
-                destination_chain_data?.relayer_fee && price ?
-                  FixedNumber.fromString(destination_chain_data.relayer_fee)
-                    .mulUnsafe(
-                      FixedNumber.fromString((params.priceIn === 'usd' ? price : 1).toString())
-                    )
-                    .round(0)
-                    .toString()
-                    .replace('.0', '') :
-                  await sdk.sdkBase.estimateRelayerFee(params)
-
+              const response = await sdk.sdkBase.estimateRelayerFee(params)
               let relayerFee = response && utils.formatUnits(response, decimals)
 
               if (relayerFee && params.priceIn === 'usd') {
