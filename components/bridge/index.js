@@ -2079,7 +2079,7 @@ export default () => {
                                             ...bridge,
                                             asset: a,
                                             symbol: s,
-                                            amount:  a !== asset || !equalsIgnoreCase(s, symbol) ? null : amount,
+                                            amount: a !== asset || !equalsIgnoreCase(s, symbol) ? null : amount,
                                           }
                                         )
 
@@ -2151,7 +2151,7 @@ export default () => {
                                       onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                                       className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg 3xl:text-2xl font-semibold text-right ${amount && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin ? 'py-0' : 'py-1.5'}`}
                                     />
-                                    {
+                                    {/*
                                       relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 &&
                                       (
                                         <div className="text-slate-400 dark:text-slate-500 text-right">
@@ -2164,7 +2164,7 @@ export default () => {
                                           />
                                         </div>
                                       )
-                                    }
+                                    */}
                                     {
                                       amount && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin &&
                                       (
