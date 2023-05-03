@@ -142,7 +142,7 @@ export default () => {
   const [bridge, setBridge] = useState({})
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [buttonDirection, setButtonDirection] = useState(1)
-  const [collapse, setCollapse] = useState(true)
+  const [collapse, setCollapse] = useState(false)
   const [recipientEditing, setRecipientEditing] = useState(false)
   const [slippageEditing, setSlippageEditing] = useState(false)
   const [estimatedValues, setEstimatedValues] = useState(undefined)
@@ -2251,10 +2251,10 @@ export default () => {
                                         />
                                         {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.amountReceived) || estimateResponse ?
                                           <span className="text-lg font-semibold">
-                                            {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimated_received) && !estimateResponse ?
+                                            {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimated_received) && !estimateResponse && estimated_received > 0 ?
                                               <DecimalsFormat
                                                 value={estimated_received}
-                                                className={`w-36 sm:w-48 bg-transparent ${['', undefined].includes(estimated_received) ? 'text-slate-500 dark:text-slate-500' : ''} text-lg 3xl:text-2xl font-semibold text-right py-1.5`}
+                                                className={`w-36 sm:w-48 bg-transparent ${['', undefined].includes(estimated_received) || estimated_received <= 0 ? 'text-slate-500 dark:text-slate-500' : ''} text-lg 3xl:text-2xl font-semibold text-right py-1.5`}
                                               /> :
                                               '-'
                                             }
@@ -2751,7 +2751,7 @@ export default () => {
                                               </Tooltip>
                                               {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.amountReceived) || estimateResponse ?
                                                 <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                                  {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimated_received) && !estimateResponse ?
+                                                  {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimated_received) && !estimateResponse && estimated_received > 0 ?
                                                     <DecimalsFormat
                                                       value={(estimated_received * ((100 - (typeof slippage === 'number' && slippage >= 0 ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)) / 100)).toFixed(destination_decimals)}
                                                       className="text-sm 3xl:text-xl"
@@ -2804,7 +2804,7 @@ export default () => {
                                         )
                                       }
                                       {
-                                        Number(amount) > 0 && ['string', 'number'].includes(typeof estimated_received) && (Number(amount) < routers_liquidity_amount || router_asset_balances_data) &&
+                                        Number(amount) > 0 && ['string', 'number'].includes(typeof estimated_received) && estimated_received > 0 && (Number(amount) < routers_liquidity_amount || router_asset_balances_data) &&
                                         (
                                           <div className="flex items-center justify-between space-x-1">
                                             <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
@@ -2909,7 +2909,7 @@ export default () => {
                             </Alert> :
                             !xcall && !xcallResponse && !estimateResponse ?
                               <button
-                                disabled={disabled || ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet')}
+                                disabled={disabled || ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') || estimated_received <= 0}
                                 onClick={
                                   () => {
                                     setRecipientEditing(false)
@@ -2921,7 +2921,7 @@ export default () => {
                                   `w-full ${
                                     disabled ?
                                       'bg-blue-400 dark:bg-blue-500' :
-                                      ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') ?
+                                      ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') || estimated_received <= 0 ?
                                         'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' :
                                         'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
                                   } rounded flex items-center ${
