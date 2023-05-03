@@ -178,7 +178,6 @@ export default () => {
       let updated = false
 
       const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-
       let path = !asPath ? '/' : asPath.toLowerCase()
       path = path.includes('?') ? path.substring(0, path.indexOf('?')) : path
 
@@ -373,14 +372,7 @@ export default () => {
           delete params.symbol
         }
 
-        router.push(
-          `/${source_chain && destination_chain ? `${asset ? `${asset.toUpperCase()}-` : ''}from-${source_chain}-to-${destination_chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`,
-          undefined,
-          {
-            shallow: true,
-          },
-        )
-
+        router.push(`/${source_chain && destination_chain ? `${asset ? `${asset.toUpperCase()}-` : ''}from-${source_chain}-to-${destination_chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
         setBalanceTrigger(moment().valueOf())
       }
 
@@ -402,12 +394,8 @@ export default () => {
       const routers_liquidity_amount =
         _.sum(
           toArray(router_asset_balances_data?.[chain_id])
-            .filter(a =>
-              toArray(_.concat(contract_address, next_asset?.contract_address)).findIndex(_a => equalsIgnoreCase(a?.contract_address, _a)) > -1
-            )
-            .map(a =>
-              Number(utils.formatUnits(BigInt(a?.amount || '0'), equalsIgnoreCase(a?.contract_address, next_asset?.contract_address) && next_asset ? next_asset?.decimals || 18 : destination_decimals))
-            )
+            .filter(a => toArray(_.concat(contract_address, next_asset?.contract_address)).findIndex(_a => equalsIgnoreCase(a?.contract_address, _a)) > -1)
+            .map(a => Number(utils.formatUnits(BigInt(a?.amount || '0'), equalsIgnoreCase(a?.contract_address, next_asset?.contract_address) && next_asset ? next_asset?.decimals || 18 : destination_decimals)))
         )
 
       setOptions(
@@ -523,12 +511,7 @@ export default () => {
 
       getData()
 
-      const interval =
-        setInterval(
-          () => getData(),
-          10 * 1000,
-        )
-
+      const interval = setInterval(() => getData(), 10 * 1000)
       return () => clearInterval(interval)
     },
     [rpcs],
@@ -564,12 +547,7 @@ export default () => {
 
       update()
 
-      const interval =
-        setInterval(
-          () => update(),
-          60 * 1000,
-        )
-
+      const interval = setInterval(() => update(), 60 * 1000)
       return () => clearInterval(interval)
     },
     [estimateFeesTrigger],
@@ -687,12 +665,7 @@ export default () => {
 
       update()
 
-      const interval =
-        setInterval(
-          () => update(),
-          7.5 * 1000,
-        )
-
+      const interval = setInterval(() => update(), 7.5 * 1000)
       return () => clearInterval(interval)
     },
     [sdk, address, xcall],
@@ -717,12 +690,7 @@ export default () => {
 
       update()
 
-      const interval =
-        setInterval(
-          () => update(true),
-          1 * 1000,
-        )
-
+      const interval = setInterval(() => update(true), 1 * 1000)
       return () => clearInterval(interval)
     },
     [timeTrigger],
@@ -865,9 +833,6 @@ export default () => {
               nativeCurrency,
             } = { ..._.head(provider_params) }
 
-            const {
-              symbol,
-            } = { ...nativeCurrency }
             let {
               decimals,
             } = { ...nativeCurrency }
@@ -881,6 +846,7 @@ export default () => {
               destinationDomain: destination_chain_data?.domain_id,
               isHighPriority: !forceSlow,
               priceIn: ['transacting'].includes(relayerFeeAssetType) ? 'usd' : 'native',
+              destinationGasPrice: destination_chain_data?.gas_price || undefined,
             }
 
             try {
@@ -889,23 +855,7 @@ export default () => {
                 params,
               )
 
-              const gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d?.symbol, symbol))
-
-              const {
-                price,
-              } = { ...gas_token_data }
-
-              const response =
-                destination_chain_data?.relayer_fee && price ?
-                  FixedNumber.fromString(destination_chain_data.relayer_fee)
-                    .mulUnsafe(
-                      FixedNumber.fromString((params.priceIn === 'usd' ? price : 1).toString())
-                    )
-                    .round(0)
-                    .toString()
-                    .replace('.0', '') :
-                  await sdk.sdkBase.estimateRelayerFee(params)
-
+              const response = await sdk.sdkBase.estimateRelayerFee(params)
               let relayerFee = response && utils.formatUnits(response, decimals)
 
               if (relayerFee && params.priceIn === 'usd') {
@@ -937,9 +887,7 @@ export default () => {
               console.log(
                 '[estimateRelayerFee error]',
                 params,
-                {
-                  error,
-                },
+                { error },
               )
 
               setFees({ routerFee })
@@ -964,19 +912,14 @@ export default () => {
       const originTokenAddress = (equalsIgnoreCase(source_contract_data?.contract_address, constants.AddressZero) ? _source_contract_data : source_contract_data)?.contract_address
       let destinationTokenAddress = _destination_contract_data?.contract_address
 
-      const isNextAsset =
-        typeof receive_local === 'boolean' ?
-          receive_local :
-          receiveLocal || equalsIgnoreCase(destination_contract_data?.contract_address, _destination_contract_data?.next_asset?.contract_address)
+      const isNextAsset = typeof receive_local === 'boolean' ? receive_local : receiveLocal || equalsIgnoreCase(destination_contract_data?.contract_address, _destination_contract_data?.next_asset?.contract_address)
 
       if (isNextAsset) {
         destinationTokenAddress = _destination_contract_data?.next_asset?.contract_address || destinationTokenAddress
       }
 
       const amount = utils.parseUnits((_amount || 0).toString(), source_decimals).toBigInt()
-
       const checkFastLiquidity = true
-
       let manual
 
       try {
@@ -1032,12 +975,7 @@ export default () => {
                       )
                   } catch (error) {}
 
-                  return (
-                    [
-                      k,
-                      v,
-                    ]
-                  )
+                  return [k, v]
                 })
             )
           )
@@ -1108,7 +1046,6 @@ export default () => {
       } = { ...source_contract_data }
 
       const amount = utils.parseUnits((_amount || 0).toString(), source_decimals).toBigInt()
-
       const decimals = source_contract_data?.decimals || 18
       const approve_amount = BigNumber.from(amount.toString()).add(BigNumber.from(relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? utils.parseUnits(Number(relayer_fee).toFixed(decimals), decimals).toString() : '0')).toString()
 
@@ -1198,6 +1135,7 @@ export default () => {
 
       let source_contract_data = getContract(source_chain_data?.chain_id, source_asset_data?.contracts)
       const _source_contract_data = _.cloneDeep(source_contract_data)
+
       if (symbol) {
         // next asset
         if (equalsIgnoreCase(source_contract_data?.next_asset?.symbol, symbol)) {
@@ -1221,7 +1159,6 @@ export default () => {
 
       const destination_chain_data = getChain(destination_chain, chains_data)
       const destination_asset_data = getAsset(asset, assets_data)
-
       let destination_contract_data = getContract(destination_chain_data?.chain_id, destination_asset_data?.contracts)
 
       // next asset
@@ -1255,9 +1192,7 @@ export default () => {
           relayerFee,
           fees,
         },
-        {
-          xcallParams,
-        },
+        { xcallParams },
       )
 
       let failed = false
@@ -1383,9 +1318,7 @@ export default () => {
 
           console.log(
             '[xcall]',
-            {
-              xcallParams,
-            },
+            { xcallParams },
           )
 
           const xcall_request = await sdk.sdkBase.xcall(xcallParams)
@@ -1468,7 +1401,7 @@ export default () => {
                             )
                             .toString() :
                             undefined,
-                        to: xcallParams.to,
+                        to: xcallParams.to || (xcallParams.unwrapNativeOnDestination ? destination_chain_data?.unwrapper_contract : undefined),
                         force_slow: forceSlow,
                         receive_local: receiveLocal || estimatedValues?.isNextAsset,
                       },
@@ -1489,10 +1422,7 @@ export default () => {
 
           console.log(
             '[xcall error]',
-            {
-              xcallParams,
-              error,
-            },
+            { xcallParams, error },
           )
 
           let {
@@ -1557,13 +1487,15 @@ export default () => {
   } = { ...options }
 
   const source_chain_data = getChain(source_chain, chains_data)
+
   const {
     color,
   } = { ...source_chain_data }
-  const source_asset_data = getAsset(asset, assets_data)
 
+  const source_asset_data = getAsset(asset, assets_data)
   let source_contract_data = getContract(source_chain_data?.chain_id, source_asset_data?.contracts)
   const _source_contract_data = _.cloneDeep(source_contract_data)
+
   if (symbol) {
     // next asset
     if (equalsIgnoreCase(source_contract_data?.next_asset?.symbol, symbol)) {
@@ -1585,7 +1517,6 @@ export default () => {
 
   const destination_chain_data = getChain(destination_chain, chains_data)
   const destination_asset_data = getAsset(asset, assets_data)
-
   let destination_contract_data = getContract(destination_chain_data?.chain_id, destination_asset_data?.contracts)
   const _destination_contract_data = _.cloneDeep(destination_contract_data)
 
@@ -1629,19 +1560,17 @@ export default () => {
   const routers_liquidity_amount =
     _.sum(
       toArray(router_asset_balances_data?.[destination_chain_data?.chain_id])
-        .filter(a =>
-          toArray(_.concat(destination_contract_data?.contract_address, destination_contract_data?.next_asset?.contract_address)).findIndex(_a => equalsIgnoreCase(a?.contract_address, _a)) > -1
-        )
-        .map(a =>
-          Number(utils.formatUnits(BigInt(a?.amount || '0'), equalsIgnoreCase(a?.contract_address, destination_contract_data?.next_asset?.contract_address) && destination_contract_data?.next_asset ? destination_contract_data.next_asset?.decimals || 18 : destination_decimals))
-        )
+        .filter(a => toArray(_.concat(destination_contract_data?.contract_address, destination_contract_data?.next_asset?.contract_address)).findIndex(_a => equalsIgnoreCase(a?.contract_address, _a)) > -1)
+        .map(a => Number(utils.formatUnits(BigInt(a?.amount || '0'), equalsIgnoreCase(a?.contract_address, destination_contract_data?.next_asset?.contract_address) && destination_contract_data?.next_asset ? destination_contract_data.next_asset?.decimals || 18 : destination_decimals)))
     )
 
   const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === destination_chain && p.asset_data?.id === asset)
+
   const {
     adopted,
     local,
   } = { ...pool_data }
+
   const next_asset_data = adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local?.symbol?.startsWith(WRAPPED_PREFIX) ? local : local
 
   const pool_amounts = toArray(_.concat(adopted, local)).filter(a => ['string', 'number'].includes(typeof a.balance)).map(a => Number(a.balance))
@@ -1661,11 +1590,8 @@ export default () => {
   const has_latest_transfers = typeof latestTransfersSize === 'number' && latestTransfersSize > 0
 
   const disabled = calling || approving
-
   const wrong_chain = source_chain_data && wallet_chain_id !== source_chain_data.chain_id && !xcall
-
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
-
   const boxShadow = color && `${color}${theme === 'light' ? '44' : '33'} 0px 16px 128px 64px`
 
   return (
@@ -1950,14 +1876,7 @@ export default () => {
 
                                       if (query?.receive_next && !receiveLocal) {
                                         const params = { amount, receive_next: receiveLocal }
-
-                                        router.push(
-                                          `/${source_chain && destination_chain ? `${asset ? `${asset.toUpperCase()}-` : ''}from-${source_chain}-to-${destination_chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`,
-                                          undefined,
-                                          {
-                                            shallow: true,
-                                          },
-                                        )
+                                        router.push(`/${source_chain && destination_chain ? `${asset ? `${asset.toUpperCase()}-` : ''}from-${source_chain}-to-${destination_chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
                                       }
                                     }
                                   }
@@ -2170,12 +2089,7 @@ export default () => {
                                     showNextAssets={showNextAssets}
                                     showNativeAssets={true}
                                     fixed={['pool'].includes(source)}
-                                    data={
-                                      {
-                                        ...source_asset_data,
-                                        ...source_contract_data,
-                                      }
-                                    }
+                                    data={{ ...source_asset_data, ...source_contract_data }}
                                     className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
                                   />
                                   <div className="space-y-0">
@@ -2189,7 +2103,6 @@ export default () => {
                                       onChange={
                                         e => {
                                           const regex = /^[0-9.\b]+$/
-
                                           let value
 
                                           if (e.target.value === '' || regex.test(e.target.value)) {
@@ -2200,7 +2113,6 @@ export default () => {
                                             if (value.startsWith('.')) {
                                               value = `0${value}`
                                             }
-
                                             value = numberToFixed(value, source_decimals || 18)
                                           }
 
@@ -2231,13 +2143,7 @@ export default () => {
                                       }
                                       onWheel={e => e.target.blur()}
                                       onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                                      className={
-                                        `w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg 3xl:text-2xl font-semibold text-right ${
-                                          amount && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin ?
-                                            'py-0' :
-                                            'py-1.5'
-                                        }`
-                                      }
+                                      className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg 3xl:text-2xl font-semibold text-right ${amount && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin ? 'py-0' : 'py-1.5'}`}
                                     />
                                     {
                                       relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 &&
@@ -2332,12 +2238,7 @@ export default () => {
                                           showNativeAssets={true}
                                           showOnlyWrapable={is_wrapable_asset}
                                           fixed={['pool'].includes(source) || !is_wrapable_asset}
-                                          data={
-                                            {
-                                              ...destination_asset_data,
-                                              ...destination_contract_data,
-                                            }
-                                          }
+                                          data={{ ...destination_asset_data, ...destination_contract_data }}
                                           className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
                                         />
                                         {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.amountReceived) || estimateResponse ?
@@ -2488,7 +2389,6 @@ export default () => {
                                                             onChange={
                                                               e => {
                                                                 const regex = /^[0-9.\b]+$/
-
                                                                 let value
 
                                                                 if (e.target.value === '' || regex.test(e.target.value)) {
@@ -3046,17 +2946,7 @@ export default () => {
                                   return (
                                     <Alert
                                       key={i}
-                                      color={
-                                        `${
-                                          status === 'failed' ?
-                                            'bg-red-400 dark:bg-red-500' :
-                                            status === 'success' ?
-                                              xcallResponse ?
-                                                'bg-blue-500 dark:bg-blue-500' :
-                                                'bg-green-400 dark:bg-green-500' :
-                                              'bg-blue-400 dark:bg-blue-500'
-                                        } text-white text-base`
-                                      }
+                                      color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? xcallResponse ? 'bg-blue-500 dark:bg-blue-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
                                       icon={
                                         status === 'failed' ?
                                           <BiMessageError

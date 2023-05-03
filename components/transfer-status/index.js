@@ -132,14 +132,7 @@ export default (
   const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
   const source_decimals = source_contract_data?.decimals || 18
   const source_asset_image = source_contract_data?.image || source_asset_data?.image
-  const source_amount =
-    origin_transacting_amount &&
-    Number(
-      utils.formatUnits(
-        BigInt(origin_transacting_amount).toString(),
-        source_decimals,
-      )
-    )
+  const source_amount = origin_transacting_amount && Number(utils.formatUnits(BigInt(origin_transacting_amount).toString(), source_decimals))
 
   const destination_chain_data = getChain(destination_domain, chains_data)
   const _asset_data = getAsset(source_asset_data?.id, assets_data, destination_chain_data?.chain_id)
@@ -178,15 +171,7 @@ export default (
   const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol
   const destination_decimals = destination_contract_data?.decimals || 18
   const destination_asset_image = destination_contract_data?.image || destination_asset_data?.image
-  const destination_amount =
-    destination_transacting_amount ?
-      Number(
-        utils.formatUnits(
-          BigInt(destination_transacting_amount).toString(),
-          destination_decimals,
-        )
-      ) :
-      source_amount * (1 - ROUTER_FEE_PERCENT / 100)
+  const destination_amount = destination_transacting_amount ? Number(utils.formatUnits(BigInt(destination_transacting_amount).toString(), destination_decimals)) : source_amount * (1 - ROUTER_FEE_PERCENT / 100)
 
   const pending = ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(status)
   const errored = error_status === XTransferErrorStatus.LowRelayerFee && !execute_transaction_hash && [XTransferStatus.XCalled, XTransferStatus.Reconciled].includes(status)
@@ -228,11 +213,7 @@ export default (
                 >
                   <div
                     className="w-2 h-2 rounded-full"
-                    style={
-                      {
-                        background: `${source_asset_data?.color || loaderColor(theme)}aa`,
-                      }
-                    }
+                    style={{ background: `${source_asset_data?.color || loaderColor(theme)}aa` }}
                   />
                 </Fade>
               </div>
@@ -375,7 +356,7 @@ export default (
           </div>
         </div>
         {
-          to && !equalsIgnoreCase(to, address) &&
+          to && toArray([address, destination_chain_data?.unwrapper_contract]).findIndex(a => equalsIgnoreCase(a, to)) < 0 &&
           (
             <div className="flex items-center justify-between space-x-2">
               <span className="text-sm font-medium">
