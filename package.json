@@ -23,7 +23,7 @@
   "homepage": "https://github.com/CoinHippo-Labs/connext-bridge#readme",
   "dependencies": {
     "@coinbase/wallet-sdk": "^3.6.5",
-    "@connext/sdk": "2.0.3-alpha.10",
+    "@connext/sdk": "2.0.3-alpha.11",
     "@material-tailwind/react": "^1.4.2",
     "@portis/web3": "^4.0.7",
     "@redux-devtools/extension": "^3.2.5",
