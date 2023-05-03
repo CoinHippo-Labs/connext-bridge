@@ -142,7 +142,7 @@ export default () => {
   const [bridge, setBridge] = useState({})
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [buttonDirection, setButtonDirection] = useState(1)
-  const [collapse, setCollapse] = useState(true)
+  const [collapse, setCollapse] = useState(false)
   const [recipientEditing, setRecipientEditing] = useState(false)
   const [slippageEditing, setSlippageEditing] = useState(false)
   const [estimatedValues, setEstimatedValues] = useState(undefined)
@@ -1169,8 +1169,10 @@ export default () => {
         }
       }
 
+      const source_decimals = source_contract_data?.decimals || 18
       const relayer_fee_field = `relayerFee${relayerFeeAssetType === 'transacting' ? 'InTransactingAsset' : ''}`
-      const relayer_fee_decimals = relayerFeeAssetType === 'transacting' ? source_contract_data?.decimals || 18 : 18
+      const relayer_fee_decimals = relayerFeeAssetType === 'transacting' ? source_decimals : 18
+      const _amount = (amount || 0) - (relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? relayerFee : 0)
 
       const xcallParams = {
         origin: source_chain_data?.domain_id,
@@ -1178,7 +1180,7 @@ export default () => {
         asset: source_contract_data?.contract_address,
         to: to || address,
         delegate: to || address,
-        amount: utils.parseUnits((amount || 0).toString(), source_contract_data?.decimals || 18).toString(),
+        amount: utils.parseUnits(_amount.toFixed(source_decimals), source_decimals).toString(),
         slippage: ((typeof slippage === 'number' ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE) * 100).toString(),
         receiveLocal: receiveLocal || false,
         callData: callData || '0x',
@@ -1213,8 +1215,7 @@ export default () => {
         let approve_amount
 
         try {
-          const decimals = source_contract_data?.decimals || 18;
-          approve_amount = BigNumber.from(xcallParams.amount).add(BigNumber.from(relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? utils.parseUnits(Number(relayer_fee).toFixed(decimals), decimals).toString() : '0')).toString()
+          approve_amount = BigNumber.from(xcallParams.amount).add(BigNumber.from(relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? utils.parseUnits(Number(relayer_fee).toFixed(source_decimals), source_decimals).toString() : '0')).toString()
 
           console.log(
             '[approveIfNeeded before xcall]',
@@ -1386,7 +1387,7 @@ export default () => {
                         origin_chain: source_chain_data?.chain_id,
                         origin_domain: xcallParams.origin,
                         origin_transacting_asset: xcallParams.asset,
-                        origin_transacting_amount: Number(utils.parseUnits((amount || 0).toString(), source_contract_data?.decimals || 18).toString()),
+                        origin_transacting_amount: Number(utils.parseUnits((amount || 0).toString(), source_decimals).toString()),
                         destination_chain: destination_chain_data?.chain_id,
                         destination_domain: xcallParams.destination,
                         destination_transacting_asset,
@@ -1579,7 +1580,8 @@ export default () => {
   const min_amount = 0
   const max_amount = source_amount && utils.formatUnits(utils.parseUnits(source_amount, source_decimals).toBigInt() - utils.parseUnits(relayer_fee && source_contract_data?.contract_address === constants.AddressZero ? relayer_fee : '0', source_decimals).toBigInt(), source_decimals)
 
-  const estimated_received = estimatedValues?.amountReceived ? estimatedValues.amountReceived : Number(amount) > 0 && typeof router_fee === 'number' ? Number(amount) - router_fee : null
+  const relayer_fee_to_deduct = relayerFeeAssetType === 'transacting' && Number(relayer_fee) > 0 ? relayer_fee : 0
+  const estimated_received = estimatedValues?.amountReceived ? estimatedValues.amountReceived - relayer_fee_to_deduct : Number(amount) > 0 && typeof router_fee === 'number' ? Number(amount) - router_fee - relayer_fee_to_deduct : null
   const estimated_slippage = estimatedValues?.destinationSlippage && estimatedValues?.originSlippage ? (Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100 : null
   const recipient_address = to || address
 
