@@ -74,7 +74,7 @@ export default (
       postfix: '%',
     },
     {
-      label: 'Relayer Fee Asset',
+      label: 'Asset for Gas on destination',
       tooltip: 'This covers costs to execute your transfer on the destination chain.',
       name: 'relayerFeeAssetType',
       type: 'select',

@@ -2251,9 +2251,9 @@ export default () => {
                                         />
                                         {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.amountReceived) || estimateResponse ?
                                           <span className="text-lg font-semibold">
-                                            {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimated_received) && !estimateResponse && estimated_received > 0 ?
+                                            {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimated_received) && !estimateResponse ?
                                               <DecimalsFormat
-                                                value={estimated_received}
+                                                value={estimated_received > 0 ? estimated_received : 0}
                                                 className={`w-36 sm:w-48 bg-transparent ${['', undefined].includes(estimated_received) || estimated_received <= 0 ? 'text-slate-500 dark:text-slate-500' : ''} text-lg 3xl:text-2xl font-semibold text-right py-1.5`}
                                               /> :
                                               '-'
@@ -2426,12 +2426,12 @@ export default () => {
                                             <div className="flex items-center justify-between space-x-2">
                                               <Tooltip
                                                 placement="top"
-                                                content="This covers costs to execute your transfer on the destination chain."
+                                                content="Fee fluctuates with destination chain gas cost. You can change the asset to pay this in advanced settings."
                                                 className="z-50 bg-dark text-white text-xs"
                                               >
                                                 <div className="flex items-center">
                                                   <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                                    Relayer fee
+                                                    Gas on destination
                                                   </div>
                                                   <BiInfoCircle
                                                     size={14}
@@ -2751,9 +2751,9 @@ export default () => {
                                               </Tooltip>
                                               {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.amountReceived) || estimateResponse ?
                                                 <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                                  {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimated_received) && !estimateResponse && estimated_received > 0 ?
+                                                  {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimated_received) && !estimateResponse ?
                                                     <DecimalsFormat
-                                                      value={(estimated_received * ((100 - (typeof slippage === 'number' && slippage >= 0 ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)) / 100)).toFixed(destination_decimals)}
+                                                      value={((estimated_received > 0 ? estimated_received : 0) * ((100 - (typeof slippage === 'number' && slippage >= 0 ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)) / 100)).toFixed(estimated_received <= 0 ? 0 : destination_decimals)}
                                                       className="text-sm 3xl:text-xl"
                                                     /> :
                                                     <span>
@@ -2877,7 +2877,8 @@ export default () => {
                             Number(amount) < 0 || Number(amount) < min_amount ||
                             (typeof pool_amount === 'number' && Number(amount) > pool_amount) ||
                             (fees && (!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') ||
-                            (fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'native' && source_gas_amount && utils.parseEther(source_gas_amount).toBigInt() < utils.parseEther(relayer_fee).toBigInt() + utils.parseEther(source_contract_data?.contract_address === constants.AddressZero ? amount : '0').toBigInt())
+                            (fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'native' && source_gas_amount && utils.parseEther(source_gas_amount).toBigInt() < utils.parseEther(relayer_fee).toBigInt() + utils.parseEther(source_contract_data?.contract_address === constants.AddressZero ? amount : '0').toBigInt()) ||
+                            (fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'transacting' && estimated_received <= 0)
                           ) ?
                             <Alert
                               color="bg-red-400 dark:bg-red-500 text-white text-sm 3xl:text-xl font-medium"
@@ -2903,7 +2904,9 @@ export default () => {
                                           'Cannot estimate the relayer fee at the moment. Please try again later.' :
                                           fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'native' && source_gas_amount && utils.parseEther(source_gas_amount).toBigInt() < utils.parseEther(relayer_fee).toBigInt() + utils.parseEther(source_contract_data?.contract_address === constants.AddressZero ? amount : '0').toBigInt() ?
                                             'Insufficient gas for the destination gas fee.' :
-                                            ''
+                                            fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'transacting' && estimated_received <= 0 ?
+                                              'Fees greater than estimate received.' :
+                                              ''
                                 }
                               </span>
                             </Alert> :
