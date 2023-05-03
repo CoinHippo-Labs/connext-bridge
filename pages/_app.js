@@ -114,7 +114,7 @@ export default (
           name="theme-color"
           content="#050707"
         />
-        {/*
+        {
           process.env.NEXT_PUBLIC_GA_TRACKING_ID &&
           (
             <>
@@ -138,7 +138,7 @@ export default (
               />
             </>
           )
-        */}
+        }
       </Head>
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
@@ -163,7 +163,7 @@ export default (
                       explorerRecommendedWalletIds={
                         [
                           'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
-                          'fbc8d86ad914ebd733fec4812b4b7af5ca709fdd9e75a930115e5baa02c4ef4c',
+                          '19177a98252e07ddfc9af2083ba8e07ef627cb6103467ffebb3f8f4205fd7927',
                           '163d2cf19babf05eb8962e9748f9ebe613ed52ebf9c8107c9a0f104bfcf161b3',
                           'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa',
                           '1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369',
