@@ -80,7 +80,7 @@
           "symbol": "nextWETH",
           "image": "/logos/assets/nextweth.png"
         },
-        "is_pool": true,
+        "is_pool": false,
         "is_bridge": true
       },
       {
@@ -96,7 +96,7 @@
           "image": "/logos/assets/nextweth.png"
         },
         "wrapable": true,
-        "is_pool": true,
+        "is_pool": false,
         "is_bridge": true
       },
       {
