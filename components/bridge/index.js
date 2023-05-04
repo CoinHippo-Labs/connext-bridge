@@ -2271,19 +2271,61 @@ export default () => {
                                         className="cursor-pointer flex items-center space-x-2 justify-between"
                                       >
                                         <div className={`${collapse ? 'text-slate-600 dark:text-slate-500 font-medium' : 'font-semibold'} text-sm 3xl:text-xl`}>
-                                          Transaction details
+                                          Estimated Fees
                                         </div>
-                                        <div>
-                                          {collapse ?
-                                            <BiChevronDown
-                                              size={20}
-                                              className="3xl:w-5 3xl:h-5"
-                                            /> :
-                                            <BiChevronUp
-                                              size={20}
-                                              className="3xl:w-5 3xl:h-5"
-                                            />
-                                          }
+                                        <div className="flex items-center space-x-2">
+                                          <div>
+                                            {(!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.routerFee) || estimateResponse) && fees ?
+                                              <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
+                                                {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimatedValues?.routerFee) && !estimateResponse ?
+                                                  <DecimalsFormat
+                                                    value={(Number(router_fee) <= 0 ? 0 : Number(router_fee)) + (relayerFeeAssetType === 'native' || Number(relayer_fee) <= 0 ? 0 : Number(relayer_fee))}
+                                                    className="text-sm 3xl:text-xl"
+                                                  /> :
+                                                  <span>
+                                                    -
+                                                  </span>
+                                                }
+                                                <span>
+                                                  {source_symbol}
+                                                </span>
+                                                {
+                                                  relayerFeeAssetType === 'native' &&
+                                                  (
+                                                    <>
+                                                      <span>
+                                                        +
+                                                      </span>
+                                                      <DecimalsFormat
+                                                        value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
+                                                        className="text-sm 3xl:text-xl"
+                                                      />
+                                                      <span>
+                                                        {source_gas_native_token?.symbol}
+                                                      </span>
+                                                    </>
+                                                  )
+                                                }
+                                              </span> :
+                                              <Oval
+                                                width="14"
+                                                height="14"
+                                                color={loaderColor(theme)}
+                                              />
+                                            }
+                                          </div>
+                                          <div>
+                                            {collapse ?
+                                              <BiChevronDown
+                                                size={20}
+                                                className="3xl:w-5 3xl:h-5"
+                                              /> :
+                                              <BiChevronUp
+                                                size={20}
+                                                className="3xl:w-5 3xl:h-5"
+                                              />
+                                            }
+                                          </div>
                                         </div>
                                       </div>
                                       {
@@ -2804,7 +2846,7 @@ export default () => {
                                         (
                                           <div className="flex items-center justify-between space-x-1">
                                             <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                              Estimated time
+                                              Estimated Time
                                             </div>
                                             <Tooltip
                                               placement="top"
@@ -2822,7 +2864,7 @@ export default () => {
                                                       90 minutes
                                                     </span> :
                                                     <span className="text-green-500 dark:text-green-500">
-                                                      4 minutes
+                                                      {'<4 minutes'}
                                                     </span>
                                                   }
                                                 </span>
