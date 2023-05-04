@@ -11,7 +11,7 @@ import { DebounceInput } from 'react-debounce-input'
 import { Tooltip, Alert as AlertNotification } from '@material-tailwind/react'
 import { MdClose, MdRefresh } from 'react-icons/md'
 import { HiArrowRight } from 'react-icons/hi'
-import { BiMessageError, BiMessageCheck, BiMessageDetail, BiEditAlt, BiCheckCircle, BiInfoCircle } from 'react-icons/bi'
+import { BiMessageError, BiMessageCheck, BiMessageDetail, BiEditAlt, BiCheckCircle, BiInfoCircle, BiChevronUp, BiChevronDown } from 'react-icons/bi'
 import { IoInformationCircleOutline, IoWarning } from 'react-icons/io5'
 
 import Options from './options'
@@ -41,7 +41,7 @@ const WRAPPED_PREFIX = process.env.NEXT_PUBLIC_WRAPPED_PREFIX
 const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT)
 const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT)
 const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)
-const RELAYER_FEE_ASSET_TYPES = ['native', 'transacting']
+const RELAYER_FEE_ASSET_TYPES = ['transacting', 'native']
 const NATIVE_WRAPPABLE_SYMBOLS = ['ETH', 'MATIC', 'DAI']
 
 const DEFAULT_OPTIONS = {
@@ -49,6 +49,7 @@ const DEFAULT_OPTIONS = {
   infiniteApprove: false,
   callData: '',
   slippage: DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE,
+  relayerFeeAssetType: _.head(RELAYER_FEE_ASSET_TYPES),
   forceSlow: false,
   receiveLocal: false,
   showNextAssets: true,
@@ -141,14 +142,14 @@ export default () => {
   const [bridge, setBridge] = useState({})
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
   const [buttonDirection, setButtonDirection] = useState(1)
-  const [collapse, setCollapse] = useState(false)
+  const [collapse, setCollapse] = useState(true)
   const [recipientEditing, setRecipientEditing] = useState(false)
   const [slippageEditing, setSlippageEditing] = useState(false)
   const [estimatedValues, setEstimatedValues] = useState(undefined)
   const [estimateResponse, setEstimateResponse] = useState(null)
   const [isApproveNeeded, setIsApproveNeeded] = useState(undefined)
 
-  const [relayerFeeAssetType, setRelayerFeeAssetType] = useState(_.head(RELAYER_FEE_ASSET_TYPES))
+  // const [relayerFeeAssetType, setRelayerFeeAssetType] = useState(_.head(RELAYER_FEE_ASSET_TYPES))
   const [fees, setFees] = useState(null)
   const [estimateFeesTrigger, setEstimateFeesTrigger] = useState(null)
 
@@ -740,7 +741,7 @@ export default () => {
     }
 
     if (reset_bridge) {
-      setRelayerFeeAssetType(_.head(RELAYER_FEE_ASSET_TYPES))
+      // setRelayerFeeAssetType(_.head(RELAYER_FEE_ASSET_TYPES))
       setFees(null)
       setEstimateFeesTrigger(null)
     }
@@ -1168,8 +1169,10 @@ export default () => {
         }
       }
 
+      const source_decimals = source_contract_data?.decimals || 18
       const relayer_fee_field = `relayerFee${relayerFeeAssetType === 'transacting' ? 'InTransactingAsset' : ''}`
-      const relayer_fee_decimals = relayerFeeAssetType === 'transacting' ? source_contract_data?.decimals || 18 : 18
+      const relayer_fee_decimals = relayerFeeAssetType === 'transacting' ? source_decimals : 18
+      const _amount = (amount || 0) - (relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? Number(relayerFee) : 0)
 
       const xcallParams = {
         origin: source_chain_data?.domain_id,
@@ -1177,7 +1180,7 @@ export default () => {
         asset: source_contract_data?.contract_address,
         to: to || address,
         delegate: to || address,
-        amount: utils.parseUnits((amount || 0).toString(), source_contract_data?.decimals || 18).toString(),
+        amount: utils.parseUnits(_amount.toFixed(source_decimals), source_decimals).toString(),
         slippage: ((typeof slippage === 'number' ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE) * 100).toString(),
         receiveLocal: receiveLocal || false,
         callData: callData || '0x',
@@ -1212,8 +1215,7 @@ export default () => {
         let approve_amount
 
         try {
-          const decimals = source_contract_data?.decimals || 18;
-          approve_amount = BigNumber.from(xcallParams.amount).add(BigNumber.from(relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? utils.parseUnits(Number(relayer_fee).toFixed(decimals), decimals).toString() : '0')).toString()
+          approve_amount = BigNumber.from(xcallParams.amount).add(BigNumber.from(relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? utils.parseUnits(Number(relayer_fee).toFixed(source_decimals), source_decimals).toString() : '0')).toString()
 
           console.log(
             '[approveIfNeeded before xcall]',
@@ -1375,6 +1377,12 @@ export default () => {
                   destination_contract_data?.next_asset?.contract_address || destination_contract_data?.contract_address :
                   destination_contract_data?.contract_address
 
+              const destination_decimals =
+                (equalsIgnoreCase(destination_transacting_asset, destination_contract_data?.next_asset?.contract_address) && destination_contract_data?.next_asset ?
+                  destination_contract_data.next_asset?.decimals :
+                  destination_contract_data?.decimals
+                ) || 18
+
               setLatestTransfers(
                 _.orderBy(
                   _.uniqBy(
@@ -1385,21 +1393,11 @@ export default () => {
                         origin_chain: source_chain_data?.chain_id,
                         origin_domain: xcallParams.origin,
                         origin_transacting_asset: xcallParams.asset,
-                        origin_transacting_amount: Number(utils.parseUnits((amount || 0).toString(), source_contract_data?.decimals || 18).toString()),
+                        origin_transacting_amount: Number(utils.parseUnits((amount || 0).toString(), source_decimals).toString()),
                         destination_chain: destination_chain_data?.chain_id,
                         destination_domain: xcallParams.destination,
                         destination_transacting_asset,
-                        destination_transacting_amount:
-                          estimatedValues?.amountReceived ?
-                            utils.parseUnits(
-                              estimatedValues.amountReceived.toString(),
-                              (equalsIgnoreCase(destination_transacting_asset, destination_contract_data?.next_asset?.contract_address) && destination_contract_data?.next_asset ?
-                                destination_contract_data.next_asset?.decimals :
-                                destination_contract_data?.decimals
-                              ) || 18,
-                            )
-                            .toString() :
-                            undefined,
+                        destination_transacting_amount: estimatedValues?.amountReceived ? utils.parseUnits((estimatedValues.amountReceived - (relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? Number(relayerFee) : 0)).toFixed(source_decimals), destination_decimals).toString() : undefined,
                         to: xcallParams.to || (xcallParams.unwrapNativeOnDestination ? destination_chain_data?.unwrapper_contract : undefined),
                         force_slow: forceSlow,
                         receive_local: receiveLocal || estimatedValues?.isNextAsset,
@@ -1480,6 +1478,7 @@ export default () => {
     to,
     infiniteApprove,
     slippage,
+    relayerFeeAssetType,
     forceSlow,
     receiveLocal,
     showNextAssets,
@@ -1577,7 +1576,8 @@ export default () => {
   const min_amount = 0
   const max_amount = source_amount && utils.formatUnits(utils.parseUnits(source_amount, source_decimals).toBigInt() - utils.parseUnits(relayer_fee && source_contract_data?.contract_address === constants.AddressZero ? relayer_fee : '0', source_decimals).toBigInt(), source_decimals)
 
-  const estimated_received = estimatedValues?.amountReceived ? estimatedValues.amountReceived : Number(amount) > 0 && typeof router_fee === 'number' ? Number(amount) - router_fee : null
+  const relayer_fee_to_deduct = relayerFeeAssetType === 'transacting' && Number(relayer_fee) > 0 ? relayer_fee : 0
+  const estimated_received = estimatedValues?.amountReceived ? estimatedValues.amountReceived - relayer_fee_to_deduct : Number(amount) > 0 && typeof router_fee === 'number' ? Number(amount) - router_fee - relayer_fee_to_deduct : null
   const estimated_slippage = estimatedValues?.destinationSlippage && estimatedValues?.originSlippage ? (Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100 : null
   const recipient_address = to || address
 
@@ -1857,7 +1857,7 @@ export default () => {
 
                                     setOptions(o)
 
-                                    if ((receiveLocal && !options?.receiveLocal) || (!receiveLocal && options?.receiveLocal)) {
+                                    if ((receiveLocal && !options?.receiveLocal) || (!receiveLocal && options?.receiveLocal) || o?.relayerFeeAssetType !== relayerFeeAssetType) {
                                       if (amount && !['0', '0.0'].includes(amount)) {
                                         calculateAmountReceived(amount, receiveLocal)
                                         checkApprovedNeeded(amount)
@@ -1873,6 +1873,10 @@ export default () => {
                                         setIsApproveNeeded(false)
                                       }
 
+                                      if (o?.relayerFeeAssetType !== relayerFeeAssetType) {
+                                        setEstimateFeesTrigger(moment().valueOf())
+                                      }
+
                                       if (query?.receive_next && !receiveLocal) {
                                         const params = { amount, receive_next: receiveLocal }
                                         router.push(`/${source_chain && destination_chain ? `${asset ? `${asset.toUpperCase()}-` : ''}from-${source_chain}-to-${destination_chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
@@ -1883,6 +1887,7 @@ export default () => {
                                 showInfiniteApproval={isApproveNeeded}
                                 hasNextAsset={destination_contract_data?.next_asset}
                                 chainData={destination_chain_data}
+                                relayerFeeAssetTypes={RELAYER_FEE_ASSET_TYPES.map(t => { return { name: t === 'transacting' ? source_symbol : source_gas_native_token?.symbol, value: t } })}
                               />
                             )
                           }
@@ -2072,7 +2077,7 @@ export default () => {
                                             ...bridge,
                                             asset: a,
                                             symbol: s,
-                                            amount:  a !== asset || !equalsIgnoreCase(s, symbol) ? null : amount,
+                                            amount: a !== asset || !equalsIgnoreCase(s, symbol) ? null : amount,
                                           }
                                         )
 
@@ -2144,7 +2149,7 @@ export default () => {
                                       onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                                       className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg 3xl:text-2xl font-semibold text-right ${amount && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin ? 'py-0' : 'py-1.5'}`}
                                     />
-                                    {
+                                    {/*
                                       relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 &&
                                       (
                                         <div className="text-slate-400 dark:text-slate-500 text-right">
@@ -2157,7 +2162,7 @@ export default () => {
                                           />
                                         </div>
                                       )
-                                    }
+                                    */}
                                     {
                                       amount && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin &&
                                       (
@@ -2180,7 +2185,7 @@ export default () => {
                               </div> :
                               checkSupport() &&
                               (
-                                <div className="space-y-6">
+                                <div className="space-y-4">
                                   <div className="space-y-2.5">
                                     <div className="flex items-center justify-between space-x-2">
                                       <div className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
@@ -2244,8 +2249,8 @@ export default () => {
                                           <span className="text-lg font-semibold">
                                             {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimated_received) && !estimateResponse ?
                                               <DecimalsFormat
-                                                value={estimated_received}
-                                                className={`w-36 sm:w-48 bg-transparent ${['', undefined].includes(estimated_received) ? 'text-slate-500 dark:text-slate-500' : ''} text-lg 3xl:text-2xl font-semibold text-right py-1.5`}
+                                                value={estimated_received > 0 ? estimated_received : 0}
+                                                className={`w-36 sm:w-48 bg-transparent ${['', undefined].includes(estimated_received) || estimated_received <= 0 ? 'text-slate-500 dark:text-slate-500' : ''} text-lg 3xl:text-2xl font-semibold text-right py-1.5`}
                                               /> :
                                               '-'
                                             }
@@ -2259,115 +2264,44 @@ export default () => {
                                       </div>
                                     </div>
                                   </div>
-                                  <div className={`space-y-2.5 ${['string', 'number'].includes(typeof estimated_received) || !collapse > 0 ? 'mt-2' : 'mt-0'}`}>
-                                    {
-                                      !collapse &&
-                                      (
-                                        <div className="space-y-2.5">
-                                          {
-                                            'to' in options && to &&
-                                            (
-                                              <div className="flex items-center justify-between space-x-2">
-                                                <Tooltip
-                                                  placement="top"
-                                                  content="The destination address that you want to send asset to."
-                                                  className="z-50 bg-dark text-white text-xs"
-                                                >
-                                                  <div className="flex items-center">
-                                                    <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-medium">
-                                                      Recipient address
-                                                    </div>
-                                                    <BiInfoCircle
-                                                      size={14}
-                                                      className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                                    />
-                                                  </div>
-                                                </Tooltip>
-                                                <div className="flex flex-col sm:items-end space-y-1.5">
-                                                  {recipientEditing ?
-                                                    <div className="flex items-center justify-end space-x-1.5">
-                                                      <DebounceInput
-                                                        debounceTimeout={750}
-                                                        size="small"
-                                                        type="text"
-                                                        placeholder={address}
-                                                        value={to}
-                                                        onChange={
-                                                          e => {
-                                                            let value = e.target.value
-
-                                                            try {
-                                                              value = split(value, 'normal', ' ').join('')
-                                                              value = utils.getAddress(value)
-                                                            } catch (error) {
-                                                              value = address
-                                                            }
-
-                                                            setOptions(
-                                                              {
-                                                                ...options,
-                                                                to: value,
-                                                              }
-                                                            )
-                                                          }
-                                                        }
-                                                        className={`w-40 sm:w-56 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm 3xl:text-xl font-semibold text-right py-1.5 px-2`}
-                                                      />
-                                                      <button
-                                                        onClick={() => setRecipientEditing(false)}
-                                                        className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
-                                                      >
-                                                        <BiCheckCircle
-                                                          size={16}
-                                                          className="3xl:w-5 3xl:h-5"
-                                                        />
-                                                      </button>
-                                                    </div> :
-                                                    <div className="flex items-center space-x-1.5">
-                                                      <Tooltip
-                                                        placement="top"
-                                                        content={to}
-                                                        className="z-50 bg-dark text-white text-xs"
-                                                      >
-                                                        <span className="text-sm font-semibold">
-                                                          {ellipse(to, 8)}
-                                                        </span>
-                                                      </Tooltip>
-                                                      <button
-                                                        disabled={disabled}
-                                                        onClick={
-                                                          () => {
-                                                            if (!disabled) {
-                                                              setRecipientEditing(true)
-                                                            }
-                                                          }
-                                                        }
-                                                        className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
-                                                      >
-                                                        <BiEditAlt
-                                                          size={16}
-                                                          className="3xl:w-5 3xl:h-5"
-                                                        />
-                                                      </button>
-                                                    </div>
-                                                  }
-                                                </div>
-                                              </div>
-                                            )
+                                  <div className={`space-y-2.5 ${['string', 'number'].includes(typeof estimated_received) || !collapse ? 'mt-2.5' : 'mt-0'}`}>
+                                    <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-2.5 py-4 px-3">
+                                      <div
+                                        onClick={() => setCollapse(!collapse)}
+                                        className="cursor-pointer flex items-center space-x-2 justify-between"
+                                      >
+                                        <div className={`${collapse ? 'text-slate-600 dark:text-slate-500 font-medium' : 'font-semibold'} text-sm 3xl:text-xl`}>
+                                          Transaction details
+                                        </div>
+                                        <div>
+                                          {collapse ?
+                                            <BiChevronDown
+                                              size={20}
+                                              className="3xl:w-5 3xl:h-5"
+                                            /> :
+                                            <BiChevronUp
+                                              size={20}
+                                              className="3xl:w-5 3xl:h-5"
+                                            />
                                           }
-                                          {
-                                            !['pool'].includes(source) &&
-                                            (
-                                              <div className="flex flex-col space-y-0.5">
-                                                <div className="flex items-start justify-between space-x-2">
+                                        </div>
+                                      </div>
+                                      {
+                                        !collapse &&
+                                        (
+                                          <div className="space-y-2.5">
+                                            {
+                                              'to' in options && to &&
+                                              (
+                                                <div className="flex items-center justify-between space-x-2">
                                                   <Tooltip
                                                     placement="top"
-                                                    content="The maximum percentage you are willing to lose due to market changes."
+                                                    content="The destination address that you want to send asset to."
                                                     className="z-50 bg-dark text-white text-xs"
                                                   >
                                                     <div className="flex items-center">
-                                                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                                        Slippage tolerance
+                                                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-medium">
+                                                        Recipient address
                                                       </div>
                                                       <BiInfoCircle
                                                         size={14}
@@ -2376,93 +2310,61 @@ export default () => {
                                                     </div>
                                                   </Tooltip>
                                                   <div className="flex flex-col sm:items-end space-y-1.5">
-                                                    {slippageEditing ?
-                                                      <>
-                                                        <div className="flex items-center justify-end space-x-1.5">
-                                                          <DebounceInput
-                                                            debounceTimeout={750}
-                                                            size="small"
-                                                            type="number"
-                                                            placeholder="0.00"
-                                                            value={typeof slippage === 'number' && slippage >= 0 ? slippage : ''}
-                                                            onChange={
-                                                              e => {
-                                                                const regex = /^[0-9.\b]+$/
-                                                                let value
+                                                    {recipientEditing ?
+                                                      <div className="flex items-center justify-end space-x-1.5">
+                                                        <DebounceInput
+                                                          debounceTimeout={750}
+                                                          size="small"
+                                                          type="text"
+                                                          placeholder={address}
+                                                          value={to}
+                                                          onChange={
+                                                            e => {
+                                                              let value = e.target.value
 
-                                                                if (e.target.value === '' || regex.test(e.target.value)) {
-                                                                  value = e.target.value
-                                                                }
-
-                                                                if (typeof value === 'string') {
-                                                                  if (value.startsWith('.')) {
-                                                                    value = `0${value}`
-                                                                  }
-
-                                                                  if (!isNaN(value)) {
-                                                                    value = Number(value)
-                                                                  }
-                                                                }
-
-                                                                value = value && !isNaN(value) ? parseFloat(Number(value).toFixed(2)) : value
-                                                                value = value <= 0 ? 0.01 : value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
-
-                                                                setOptions(
-                                                                  {
-                                                                    ...options,
-                                                                    slippage: value,
-                                                                  }
-                                                                )
+                                                              try {
+                                                                value = split(value, 'normal', ' ').join('')
+                                                                value = utils.getAddress(value)
+                                                              } catch (error) {
+                                                                value = address
                                                               }
+
+                                                              setOptions(
+                                                                {
+                                                                  ...options,
+                                                                  to: value,
+                                                                }
+                                                              )
                                                             }
-                                                            onWheel={e => e.target.blur()}
-                                                            onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                                                            className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm 3xl:text-xl font-semibold text-right py-1 px-2`}
-                                                          />
-                                                          <button
-                                                            onClick={() => setSlippageEditing(false)}
-                                                            className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
-                                                          >
-                                                            <BiCheckCircle
-                                                              size={16}
-                                                              className="3xl:w-5 3xl:h-5"
-                                                            />
-                                                          </button>
-                                                        </div>
-                                                        <div className="flex items-center space-x-1.5 -mr-1.5">
-                                                          {[3.0, 1.0, 0.5].map((s, i) => (
-                                                            <div
-                                                              key={i}
-                                                              onClick={
-                                                                () => {
-                                                                  setOptions(
-                                                                    {
-                                                                      ...options,
-                                                                      slippage: s,
-                                                                    }
-                                                                  )
-                                                                  setSlippageEditing(false)
-                                                                }
-                                                              }
-                                                              className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs 3xl:text-xl py-1 px-1.5`}
-                                                            >
-                                                              {s} %
-                                                            </div>
-                                                          ))}
-                                                        </div>
-                                                      </> :
-                                                      <div className="flex items-center space-x-1.5">
-                                                        <DecimalsFormat
-                                                          value={slippage}
-                                                          suffix="%"
-                                                          className="text-sm 3xl:text-xl font-semibold"
+                                                          }
+                                                          className={`w-40 sm:w-56 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm 3xl:text-xl font-semibold text-right py-1.5 px-2`}
                                                         />
+                                                        <button
+                                                          onClick={() => setRecipientEditing(false)}
+                                                          className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                                                        >
+                                                          <BiCheckCircle
+                                                            size={16}
+                                                            className="3xl:w-5 3xl:h-5"
+                                                          />
+                                                        </button>
+                                                      </div> :
+                                                      <div className="flex items-center space-x-1.5">
+                                                        <Tooltip
+                                                          placement="top"
+                                                          content={to}
+                                                          className="z-50 bg-dark text-white text-xs"
+                                                        >
+                                                          <span className="text-sm font-semibold">
+                                                            {ellipse(to, 8)}
+                                                          </span>
+                                                        </Tooltip>
                                                         <button
                                                           disabled={disabled}
                                                           onClick={
                                                             () => {
                                                               if (!disabled) {
-                                                                setSlippageEditing(true)
+                                                                setRecipientEditing(true)
                                                               }
                                                             }
                                                           }
@@ -2477,221 +2379,37 @@ export default () => {
                                                     }
                                                   </div>
                                                 </div>
-                                                {
-                                                  typeof slippage === 'number' && (estimated_slippage > slippage || slippage < 0.2 || slippage > 5.0) &&
-                                                  (
-                                                    <div className="flex items-start space-x-1">
-                                                      <IoWarning
-                                                        size={14}
-                                                        className="min-w-max 3xl:w-5 3xl:h-5 text-yellow-500 dark:text-yellow-400 mt-0.5"
-                                                      />
-                                                      <div className="text-yellow-500 dark:text-yellow-400 text-xs 3xl:text-xl">
-                                                        {estimated_slippage > slippage ?
-                                                          <>
-                                                            Slippage tolerance is too low
-                                                            <br />
-                                                            (use a larger amount or set tolerance higher)
-                                                          </> :
-                                                          slippage < 0.2 ?
-                                                            'Your transfer may not complete due to low slippage tolerance.' :
-                                                            'Your transfer may be frontrun due to high slippage tolerance.'
-                                                        }
-                                                      </div>
-                                                    </div>
-                                                  )
-                                                }
-                                              </div>
-                                            )
-                                          }
-                                          {
-                                            isApproveNeeded &&
-                                            (
-                                              <div className="flex flex-col space-y-0.5">
-                                                <div className="flex items-center justify-between space-x-2">
-                                                  <Tooltip
-                                                    placement="top"
-                                                    content="We need your approval to execute this transaction on your behalf."
-                                                    className="z-50 bg-dark text-white text-xs"
-                                                  >
-                                                    <div className="flex items-center">
-                                                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                                        Infinite approval
-                                                      </div>
-                                                      <BiInfoCircle
-                                                        size={14}
-                                                        className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                                      />
-                                                    </div>
-                                                  </Tooltip>
-                                                  <Tooltip
-                                                    placement="top"
-                                                    content={isApproveNeeded ? 'We need your approval to execute this transaction on your behalf.' : 'Approval sufficient. If you need to, please revoke using other tools.'}
-                                                    className="z-50 bg-dark text-white text-xs"
-                                                  >
-                                                    <div className="w-fit flex items-center">
-                                                      <Switch
-                                                        disabled={disabled || !isApproveNeeded}
-                                                        width={32}
-                                                        height={16}
-                                                        checked={typeof infiniteApprove === 'boolean' ? infiniteApprove : false}
-                                                        onChange={
-                                                          e => {
-                                                            setOptions(
-                                                              {
-                                                                ...options,
-                                                                infiniteApprove: !infiniteApprove,
-                                                              }
-                                                            )
-                                                          }
-                                                        }
-                                                        checkedIcon={false}
-                                                        uncheckedIcon={false}
-                                                        onColor={switchColor(theme).on}
-                                                        onHandleColor="#f8fafc"
-                                                        offColor={switchColor(theme).off}
-                                                        offHandleColor="#f8fafc"
-                                                      />
-                                                    </div>
-                                                  </Tooltip>
-                                                </div>
-                                                {
-                                                  typeof slippage === 'number' && (estimated_slippage > slippage || slippage < 0.2 || slippage > 5.0) &&
-                                                  (
-                                                    <div className="flex items-start space-x-1">
-                                                      <IoWarning
-                                                        size={14}
-                                                        className="min-w-max 3xl:w-5 3xl:h-5 text-yellow-500 dark:text-yellow-400 mt-0.5"
-                                                      />
-                                                      <div className="text-yellow-500 dark:text-yellow-400 text-xs 3xl:text-xl">
-                                                        {estimated_slippage > slippage ?
-                                                          <>
-                                                            Slippage tolerance is too low
-                                                            <br />
-                                                            (use a larger amount or set tolerance higher)
-                                                          </> :
-                                                          slippage < 0.2 ?
-                                                            'Your transfer may not complete due to low slippage tolerance.' :
-                                                            'Your transfer may be frontrun due to high slippage tolerance.'
-                                                        }
-                                                      </div>
-                                                    </div>
-                                                  )
-                                                }
-                                              </div>
-                                            )
-                                          }
-                                          <div className="flex items-center justify-between space-x-2">
-                                            <Tooltip
-                                              placement="top"
-                                              content="This supports our router users providing fast liquidity."
-                                              className="z-50 bg-dark text-white text-xs"
-                                            >
-                                              <div className="flex items-center">
-                                                <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                                  Bridge fee
-                                                </div>
-                                                <BiInfoCircle
-                                                  size={14}
-                                                  className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                                />
-                                              </div>
-                                            </Tooltip>
-                                            {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.routerFee) || estimateResponse ?
-                                              <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                                {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimatedValues?.routerFee) && !estimateResponse ?
-                                                  <DecimalsFormat
-                                                    value={Number(router_fee) <= 0 ? 0 : router_fee}
-                                                    className="text-sm 3xl:text-xl"
-                                                  /> :
-                                                  <span>
-                                                    -
-                                                  </span>
-                                                }
-                                                <span>
-                                                  {source_symbol}
-                                                </span>
-                                              </span> :
-                                              <Oval
-                                                width="14"
-                                                height="14"
-                                                color={loaderColor(theme)}
-                                              />
+                                              )
                                             }
-                                          </div>
-                                          <div className="flex items-center justify-between space-x-2">
-                                            <Tooltip
-                                              placement="top"
-                                              content="This covers costs to execute your transfer on the destination chain."
-                                              className="z-50 bg-dark text-white text-xs"
-                                            >
-                                              <div className="flex items-center">
-                                                <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                                  Destination gas fee
-                                                </div>
-                                                <BiInfoCircle
-                                                  size={14}
-                                                  className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                                />
-                                              </div>
-                                            </Tooltip>
-                                            {fees ?
-                                              <div className="flex items-center space-x-1.5">
-                                                <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                                  <DecimalsFormat
-                                                    value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
-                                                    className="text-sm 3xl:text-xl"
+                                            <div className="flex items-center justify-between space-x-2">
+                                              <Tooltip
+                                                placement="top"
+                                                content="This supports our router users providing fast liquidity."
+                                                className="z-50 bg-dark text-white text-xs"
+                                              >
+                                                <div className="flex items-center">
+                                                  <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                                    Router fee
+                                                  </div>
+                                                  <BiInfoCircle
+                                                    size={14}
+                                                    className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
                                                   />
-                                                  {is_staging || true ?
-                                                    <select
-                                                      disabled={disabled}
-                                                      value={relayerFeeAssetType}
-                                                      onChange={
-                                                        e => {
-                                                          setRelayerFeeAssetType(e.target.value)
-                                                          setEstimateFeesTrigger(moment().valueOf())
-                                                          checkApprovedNeeded(amount)
-                                                        }
-                                                      }
-                                                      className="bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0"
-                                                    >
-                                                      {RELAYER_FEE_ASSET_TYPES.map((t, i) => {
-                                                        return (
-                                                          <option
-                                                            key={i}
-                                                            title={`${t} asset`}
-                                                            value={t}
-                                                          >
-                                                            {t === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
-                                                          </option>
-                                                        )
-                                                      })}
-                                                    </select> :
+                                                </div>
+                                              </Tooltip>
+                                              {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.routerFee) || estimateResponse ?
+                                                <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
+                                                  {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimatedValues?.routerFee) && !estimateResponse ?
+                                                    <DecimalsFormat
+                                                      value={Number(router_fee) <= 0 ? 0 : router_fee}
+                                                      className="text-sm 3xl:text-xl"
+                                                    /> :
                                                     <span>
-                                                      {relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
+                                                      -
                                                     </span>
                                                   }
-                                                </span>
-                                                <button
-                                                  disabled={disabled}
-                                                  onClick={
-                                                    () => {
-                                                      if (!disabled) {
-                                                        setEstimateFeesTrigger(moment().valueOf())
-                                                      }
-                                                    }
-                                                  }
-                                                  className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
-                                                >
-                                                  <MdRefresh
-                                                    size={16}
-                                                    className="3xl:w-5 3xl:h-5"
-                                                  />
-                                                </button>
-                                              </div> :
-                                              !browser_provider ?
-                                                <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
                                                   <span>
-                                                    -
+                                                    {source_symbol}
                                                   </span>
                                                 </span> :
                                                 <Oval
@@ -2699,122 +2417,425 @@ export default () => {
                                                   height="14"
                                                   color={loaderColor(theme)}
                                                 />
+                                              }
+                                            </div>
+                                            <div className="flex items-center justify-between space-x-2">
+                                              <Tooltip
+                                                placement="top"
+                                                content="Fee fluctuates with destination chain gas cost. You can change the asset to pay this in advanced settings."
+                                                className="z-50 bg-dark text-white text-xs"
+                                              >
+                                                <div className="flex items-center">
+                                                  <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                                    Gas on destination
+                                                  </div>
+                                                  <BiInfoCircle
+                                                    size={14}
+                                                    className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                                  />
+                                                </div>
+                                              </Tooltip>
+                                              {fees ?
+                                                <div className="flex items-center space-x-1.5">
+                                                  <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
+                                                    <DecimalsFormat
+                                                      value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
+                                                      className="text-sm 3xl:text-xl"
+                                                    />
+                                                    {false ?
+                                                      <select
+                                                        disabled={disabled}
+                                                        value={relayerFeeAssetType}
+                                                        onChange={
+                                                          e => {
+                                                            // setRelayerFeeAssetType(e.target.value)
+                                                            setEstimateFeesTrigger(moment().valueOf())
+                                                            checkApprovedNeeded(amount)
+                                                          }
+                                                        }
+                                                        className="bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0"
+                                                      >
+                                                        {RELAYER_FEE_ASSET_TYPES.map((t, i) => {
+                                                          return (
+                                                            <option
+                                                              key={i}
+                                                              title={`${t} asset`}
+                                                              value={t}
+                                                            >
+                                                              {t === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
+                                                            </option>
+                                                          )
+                                                        })}
+                                                      </select> :
+                                                      <span>
+                                                        {relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
+                                                      </span>
+                                                    }
+                                                  </span>
+                                                  <button
+                                                    disabled={disabled}
+                                                    onClick={
+                                                      () => {
+                                                        if (!disabled) {
+                                                          setEstimateFeesTrigger(moment().valueOf())
+                                                        }
+                                                      }
+                                                    }
+                                                    className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                                                  >
+                                                    <MdRefresh
+                                                      size={16}
+                                                      className="3xl:w-5 3xl:h-5"
+                                                    />
+                                                  </button>
+                                                </div> :
+                                                <Oval
+                                                  width="14"
+                                                  height="14"
+                                                  color={loaderColor(theme)}
+                                                />
+                                              }
+                                            </div>
+                                            {/*
+                                              <WarningGasVsAmount
+                                                amount={amount}
+                                                assetPrice={source_asset_data?.price}
+                                                gasFee={relayer_fee}
+                                                gasSymbol={relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
+                                              />
+                                            */}
+                                            {
+                                              provider && isApproveNeeded &&
+                                              (
+                                                <div className="flex flex-col space-y-0.5">
+                                                  <div className="flex items-center justify-between space-x-2">
+                                                    <Tooltip
+                                                      placement="top"
+                                                      content="We need your approval to execute this transaction on your behalf."
+                                                      className="z-50 bg-dark text-white text-xs"
+                                                    >
+                                                      <div className="flex items-center">
+                                                        <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                                          Infinite approval
+                                                        </div>
+                                                        <BiInfoCircle
+                                                          size={14}
+                                                          className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                                        />
+                                                      </div>
+                                                    </Tooltip>
+                                                    <Tooltip
+                                                      placement="top"
+                                                      content={isApproveNeeded ? 'We need your approval to execute this transaction on your behalf.' : 'Approval sufficient. If you need to, please revoke using other tools.'}
+                                                      className="z-50 bg-dark text-white text-xs"
+                                                    >
+                                                      <div className="w-fit flex items-center">
+                                                        <Switch
+                                                          disabled={disabled || !isApproveNeeded}
+                                                          width={32}
+                                                          height={16}
+                                                          checked={typeof infiniteApprove === 'boolean' ? infiniteApprove : false}
+                                                          onChange={
+                                                            e => {
+                                                              setOptions(
+                                                                {
+                                                                  ...options,
+                                                                  infiniteApprove: !infiniteApprove,
+                                                                }
+                                                              )
+                                                            }
+                                                          }
+                                                          checkedIcon={false}
+                                                          uncheckedIcon={false}
+                                                          onColor={switchColor(theme).on}
+                                                          onHandleColor="#f8fafc"
+                                                          offColor={switchColor(theme).off}
+                                                          offHandleColor="#f8fafc"
+                                                        />
+                                                      </div>
+                                                    </Tooltip>
+                                                  </div>
+                                                  {
+                                                    typeof slippage === 'number' && (estimated_slippage > slippage || slippage < 0.2 || slippage > 5.0) &&
+                                                    (
+                                                      <div className="flex items-start space-x-1">
+                                                        <IoWarning
+                                                          size={14}
+                                                          className="min-w-max 3xl:w-5 3xl:h-5 text-yellow-500 dark:text-yellow-400 mt-0.5"
+                                                        />
+                                                        <div className="text-yellow-500 dark:text-yellow-400 text-xs 3xl:text-xl">
+                                                          {estimated_slippage > slippage ?
+                                                            <>
+                                                              Slippage tolerance is too low
+                                                              <br />
+                                                              (use a larger amount or set tolerance higher)
+                                                            </> :
+                                                            slippage < 0.2 ?
+                                                              'Your transfer may not complete due to low slippage tolerance.' :
+                                                              'Your transfer may be frontrun due to high slippage tolerance.'
+                                                          }
+                                                        </div>
+                                                      </div>
+                                                    )
+                                                  }
+                                                </div>
+                                              )
+                                            }
+                                            {
+                                              !['pool'].includes(source) &&
+                                              (
+                                                <div className="flex flex-col space-y-0.5">
+                                                  <div className="flex items-start justify-between space-x-2">
+                                                    <Tooltip
+                                                      placement="top"
+                                                      content="The maximum percentage you are willing to lose due to market changes."
+                                                      className="z-50 bg-dark text-white text-xs"
+                                                    >
+                                                      <div className="flex items-center">
+                                                        <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                                          Slippage tolerance
+                                                        </div>
+                                                        <BiInfoCircle
+                                                          size={14}
+                                                          className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                                        />
+                                                      </div>
+                                                    </Tooltip>
+                                                    <div className="flex flex-col sm:items-end space-y-1.5">
+                                                      {slippageEditing ?
+                                                        <>
+                                                          <div className="flex items-center justify-end space-x-1.5">
+                                                            <DebounceInput
+                                                              debounceTimeout={750}
+                                                              size="small"
+                                                              type="number"
+                                                              placeholder="0.00"
+                                                              value={typeof slippage === 'number' && slippage >= 0 ? slippage : ''}
+                                                              onChange={
+                                                                e => {
+                                                                  const regex = /^[0-9.\b]+$/
+                                                                  let value
+
+                                                                  if (e.target.value === '' || regex.test(e.target.value)) {
+                                                                    value = e.target.value
+                                                                  }
+
+                                                                  if (typeof value === 'string') {
+                                                                    if (value.startsWith('.')) {
+                                                                      value = `0${value}`
+                                                                    }
+
+                                                                    if (!isNaN(value)) {
+                                                                      value = Number(value)
+                                                                    }
+                                                                  }
+
+                                                                  value = value && !isNaN(value) ? parseFloat(Number(value).toFixed(2)) : value
+                                                                  value = value <= 0 ? 0.01 : value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
+
+                                                                  setOptions(
+                                                                    {
+                                                                      ...options,
+                                                                      slippage: value,
+                                                                    }
+                                                                  )
+                                                                }
+                                                              }
+                                                              onWheel={e => e.target.blur()}
+                                                              onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                                                              className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm 3xl:text-xl font-semibold text-right py-1 px-2`}
+                                                            />
+                                                            <button
+                                                              onClick={() => setSlippageEditing(false)}
+                                                              className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                                                            >
+                                                              <BiCheckCircle
+                                                                size={16}
+                                                                className="3xl:w-5 3xl:h-5"
+                                                              />
+                                                            </button>
+                                                          </div>
+                                                          <div className="flex items-center space-x-1.5 -mr-1.5">
+                                                            {[3.0, 1.0, 0.5].map((s, i) => (
+                                                              <div
+                                                                key={i}
+                                                                onClick={
+                                                                  () => {
+                                                                    setOptions(
+                                                                      {
+                                                                        ...options,
+                                                                        slippage: s,
+                                                                      }
+                                                                    )
+                                                                    setSlippageEditing(false)
+                                                                  }
+                                                                }
+                                                                className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs 3xl:text-xl py-1 px-1.5`}
+                                                              >
+                                                                {s} %
+                                                              </div>
+                                                            ))}
+                                                          </div>
+                                                        </> :
+                                                        <div className="flex items-center space-x-1.5">
+                                                          <DecimalsFormat
+                                                            value={slippage}
+                                                            suffix="%"
+                                                            className="text-sm 3xl:text-xl font-semibold"
+                                                          />
+                                                          <button
+                                                            disabled={disabled}
+                                                            onClick={
+                                                              () => {
+                                                                if (!disabled) {
+                                                                  setSlippageEditing(true)
+                                                                }
+                                                              }
+                                                            }
+                                                            className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
+                                                          >
+                                                            <BiEditAlt
+                                                              size={16}
+                                                              className="3xl:w-5 3xl:h-5"
+                                                            />
+                                                          </button>
+                                                        </div>
+                                                      }
+                                                    </div>
+                                                  </div>
+                                                  {
+                                                    typeof slippage === 'number' && (estimated_slippage > slippage || slippage < 0.2 || slippage > 5.0) &&
+                                                    (
+                                                      <div className="flex items-start space-x-1">
+                                                        <IoWarning
+                                                          size={14}
+                                                          className="min-w-max 3xl:w-5 3xl:h-5 text-yellow-500 dark:text-yellow-400 mt-0.5"
+                                                        />
+                                                        <div className="text-yellow-500 dark:text-yellow-400 text-xs 3xl:text-xl">
+                                                          {estimated_slippage > slippage ?
+                                                            <>
+                                                              Slippage tolerance is too low
+                                                              <br />
+                                                              (use a larger amount or set tolerance higher)
+                                                            </> :
+                                                            slippage < 0.2 ?
+                                                              'Your transfer may not complete due to low slippage tolerance.' :
+                                                              'Your transfer may be frontrun due to high slippage tolerance.'
+                                                          }
+                                                        </div>
+                                                      </div>
+                                                    )
+                                                  }
+                                                </div>
+                                              )
+                                            }
+                                            <div className="flex items-center justify-between space-x-2">
+                                              <Tooltip
+                                                placement="top"
+                                                content={`Minimum amount received after slippage${typeof slippage === 'number' && slippage >= 0 ? ` ${slippage}%` : ''}`}
+                                                className="z-50 bg-dark text-white text-xs"
+                                              >
+                                                <div className="flex items-center">
+                                                  <div className="sm:whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                                    Minimum received after slippage
+                                                  </div>
+                                                  <BiInfoCircle
+                                                    size={14}
+                                                    className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                                  />
+                                                </div>
+                                              </Tooltip>
+                                              {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.amountReceived) || estimateResponse ?
+                                                <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
+                                                  {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimated_received) && !estimateResponse ?
+                                                    <DecimalsFormat
+                                                      value={((estimated_received > 0 ? estimated_received : 0) * ((100 - (typeof slippage === 'number' && slippage >= 0 ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)) / 100)).toFixed(estimated_received <= 0 ? 0 : destination_decimals)}
+                                                      className="text-sm 3xl:text-xl"
+                                                    /> :
+                                                    <span>
+                                                      -
+                                                    </span>
+                                                  }
+                                                  <span>
+                                                    {destination_symbol}
+                                                  </span>
+                                                </span> :
+                                                <Oval
+                                                  width="14"
+                                                  height="14"
+                                                  color={loaderColor(theme)}
+                                                />
+                                              }
+                                            </div>
+                                            {
+                                              typeof price_impact === 'number' &&
+                                              (
+                                                <div className="flex items-center justify-between space-x-2">
+                                                  <Tooltip
+                                                    placement="top"
+                                                    content="Price impact"
+                                                    className="z-50 bg-dark text-white text-xs"
+                                                  >
+                                                    <div className="flex items-center">
+                                                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                                        Price impact
+                                                      </div>
+                                                      <BiInfoCircle
+                                                        size={14}
+                                                        className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                                      />
+                                                    </div>
+                                                  </Tooltip>
+                                                  <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
+                                                    <DecimalsFormat
+                                                      value={price_impact}
+                                                      suffix="%"
+                                                      className="text-sm 3xl:text-xl"
+                                                    />
+                                                  </span>
+                                                </div>
+                                              )
                                             }
                                           </div>
-                                          {/*
-                                            <WarningGasVsAmount
-                                              amount={amount}
-                                              assetPrice={source_asset_data?.price}
-                                              gasFee={relayer_fee}
-                                              gasSymbol={relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
-                                            />
-                                          */}
-                                          <div className="flex items-center justify-between space-x-2">
+                                        )
+                                      }
+                                      {
+                                        Number(amount) > 0 && ['string', 'number'].includes(typeof estimated_received) && estimated_received > 0 && (Number(amount) < routers_liquidity_amount || router_asset_balances_data) &&
+                                        (
+                                          <div className="flex items-center justify-between space-x-1">
+                                            <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                              Estimated time
+                                            </div>
                                             <Tooltip
                                               placement="top"
-                                              content={`Minimum amount received after slippage${typeof slippage === 'number' && slippage >= 0 ? ` ${slippage}%` : ''}`}
+                                              content={
+                                                Number(amount) > routers_liquidity_amount || forceSlow || estimatedValues?.isFastPath === false ?
+                                                  'Unable to leverage fast liquidity. Your transfer will still complete.' :
+                                                  'Fast transfer enabled by Connext router network.'
+                                              }
                                               className="z-50 bg-dark text-white text-xs"
                                             >
                                               <div className="flex items-center">
-                                                <div className="sm:whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                                  Min amount received (with max slippage)
-                                                </div>
+                                                <span className="whitespace-nowrap text-sm 3xl:text-xl font-semibold space-x-1.5">
+                                                  {Number(amount) > routers_liquidity_amount || forceSlow || estimatedValues?.isFastPath === false ?
+                                                    <span className="text-yellow-500 dark:text-yellow-400">
+                                                      90 minutes
+                                                    </span> :
+                                                    <span className="text-green-500 dark:text-green-500">
+                                                      4 minutes
+                                                    </span>
+                                                  }
+                                                </span>
                                                 <BiInfoCircle
                                                   size={14}
                                                   className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
                                                 />
                                               </div>
                                             </Tooltip>
-                                            {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.amountReceived) || estimateResponse ?
-                                              <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                                {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimated_received) && !estimateResponse ?
-                                                  <DecimalsFormat
-                                                    value={(estimated_received * ((100 - (typeof slippage === 'number' && slippage >= 0 ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)) / 100)).toFixed(destination_decimals)}
-                                                    className="text-sm 3xl:text-xl"
-                                                  /> :
-                                                  <span>
-                                                    -
-                                                  </span>
-                                                }
-                                                <span>
-                                                  {destination_symbol}
-                                                </span>
-                                              </span> :
-                                              <Oval
-                                                width="14"
-                                                height="14"
-                                                color={loaderColor(theme)}
-                                              />
-                                            }
                                           </div>
-                                          {
-                                            typeof price_impact === 'number' &&
-                                            (
-                                              <div className="flex items-center justify-between space-x-2">
-                                                <Tooltip
-                                                  placement="top"
-                                                  content="Price impact"
-                                                  className="z-50 bg-dark text-white text-xs"
-                                                >
-                                                  <div className="flex items-center">
-                                                    <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                                      Price impact
-                                                    </div>
-                                                    <BiInfoCircle
-                                                      size={14}
-                                                      className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                                    />
-                                                  </div>
-                                                </Tooltip>
-                                                <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                                  <DecimalsFormat
-                                                    value={price_impact}
-                                                    suffix="%"
-                                                    className="text-sm 3xl:text-xl"
-                                                  />
-                                                </span>
-                                              </div>
-                                            )
-                                          }
-                                        </div>
-                                      )
-                                    }
-                                    {
-                                      Number(amount) > 0 && ['string', 'number'].includes(typeof estimated_received) && (Number(amount) < routers_liquidity_amount || router_asset_balances_data) &&
-                                      (
-                                        <div className="flex items-center justify-between space-x-1">
-                                          <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                            Estimated time
-                                          </div>
-                                          <Tooltip
-                                            placement="top"
-                                            content={
-                                              Number(amount) > routers_liquidity_amount || forceSlow || estimatedValues?.isFastPath === false ?
-                                                'Unable to leverage fast liquidity. Your transfer will still complete.' :
-                                                'Fast transfer enabled by Connext router network.'
-                                            }
-                                            className="z-50 bg-dark text-white text-xs"
-                                          >
-                                            <div className="flex items-center">
-                                              <span className="whitespace-nowrap text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                                {Number(amount) > routers_liquidity_amount || forceSlow || estimatedValues?.isFastPath === false ?
-                                                  <span className="text-yellow-500 dark:text-yellow-400">
-                                                    90 minutes
-                                                  </span> :
-                                                  <span className="text-green-500 dark:text-green-500">
-                                                    4 minutes
-                                                  </span>
-                                                }
-                                              </span>
-                                              <BiInfoCircle
-                                                size={14}
-                                                className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                              />
-                                            </div>
-                                          </Tooltip>
-                                        </div>
-                                      )
-                                    }
+                                        )
+                                      }
+                                    </div>
                                   </div>
                                 </div>
                               )
@@ -2852,7 +2873,8 @@ export default () => {
                             Number(amount) < 0 || Number(amount) < min_amount ||
                             (typeof pool_amount === 'number' && Number(amount) > pool_amount) ||
                             (fees && (!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') ||
-                            (fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'native' && source_gas_amount && utils.parseEther(source_gas_amount).toBigInt() < utils.parseEther(relayer_fee).toBigInt() + utils.parseEther(source_contract_data?.contract_address === constants.AddressZero ? amount : '0').toBigInt())
+                            (fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'native' && source_gas_amount && utils.parseEther(source_gas_amount).toBigInt() < utils.parseEther(relayer_fee).toBigInt() + utils.parseEther(source_contract_data?.contract_address === constants.AddressZero ? amount : '0').toBigInt()) ||
+                            (fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'transacting' && estimated_received <= 0)
                           ) ?
                             <Alert
                               color="bg-red-400 dark:bg-red-500 text-white text-sm 3xl:text-xl font-medium"
@@ -2878,13 +2900,15 @@ export default () => {
                                           'Cannot estimate the relayer fee at the moment. Please try again later.' :
                                           fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'native' && source_gas_amount && utils.parseEther(source_gas_amount).toBigInt() < utils.parseEther(relayer_fee).toBigInt() + utils.parseEther(source_contract_data?.contract_address === constants.AddressZero ? amount : '0').toBigInt() ?
                                             'Insufficient gas for the destination gas fee.' :
-                                            ''
+                                            fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'transacting' && estimated_received <= 0 ?
+                                              'Fees greater than estimate received.' :
+                                              ''
                                 }
                               </span>
                             </Alert> :
                             !xcall && !xcallResponse && !estimateResponse ?
                               <button
-                                disabled={disabled || ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet')}
+                                disabled={disabled || ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') || estimated_received <= 0}
                                 onClick={
                                   () => {
                                     setRecipientEditing(false)
@@ -2896,7 +2920,7 @@ export default () => {
                                   `w-full ${
                                     disabled ?
                                       'bg-blue-400 dark:bg-blue-500' :
-                                      ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') ?
+                                      ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') || estimated_received <= 0 ?
                                         'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' :
                                         'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
                                   } rounded flex items-center ${
