@@ -1172,7 +1172,7 @@ export default () => {
       const source_decimals = source_contract_data?.decimals || 18
       const relayer_fee_field = `relayerFee${relayerFeeAssetType === 'transacting' ? 'InTransactingAsset' : ''}`
       const relayer_fee_decimals = relayerFeeAssetType === 'transacting' ? source_decimals : 18
-      const _amount = (amount || 0) - (relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? relayerFee : 0)
+      const _amount = (amount || 0) - (relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? Number(relayerFee) : 0)
 
       const xcallParams = {
         origin: source_chain_data?.domain_id,
@@ -1377,6 +1377,12 @@ export default () => {
                   destination_contract_data?.next_asset?.contract_address || destination_contract_data?.contract_address :
                   destination_contract_data?.contract_address
 
+              const destination_decimals =
+                (equalsIgnoreCase(destination_transacting_asset, destination_contract_data?.next_asset?.contract_address) && destination_contract_data?.next_asset ?
+                  destination_contract_data.next_asset?.decimals :
+                  destination_contract_data?.decimals
+                ) || 18
+
               setLatestTransfers(
                 _.orderBy(
                   _.uniqBy(
@@ -1391,17 +1397,7 @@ export default () => {
                         destination_chain: destination_chain_data?.chain_id,
                         destination_domain: xcallParams.destination,
                         destination_transacting_asset,
-                        destination_transacting_amount:
-                          estimatedValues?.amountReceived ?
-                            utils.parseUnits(
-                              estimatedValues.amountReceived.toString(),
-                              (equalsIgnoreCase(destination_transacting_asset, destination_contract_data?.next_asset?.contract_address) && destination_contract_data?.next_asset ?
-                                destination_contract_data.next_asset?.decimals :
-                                destination_contract_data?.decimals
-                              ) || 18,
-                            )
-                            .toString() :
-                            undefined,
+                        destination_transacting_amount: estimatedValues?.amountReceived ? utils.parseUnits((estimatedValues.amountReceived - (relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? Number(relayerFee) : 0)).toFixed(source_decimals), destination_decimals).toString() : undefined,
                         to: xcallParams.to || (xcallParams.unwrapNativeOnDestination ? destination_chain_data?.unwrapper_contract : undefined),
                         force_slow: forceSlow,
                         receive_local: receiveLocal || estimatedValues?.isNextAsset,
