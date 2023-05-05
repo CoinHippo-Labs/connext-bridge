@@ -5,33 +5,33 @@ import Swap from '../../components/swap'
 import meta from '../../lib/meta'
 import { getChains, getAssets } from '../../lib/api/config'
 
-// export async function getStaticPaths() {
-//   const chains = getChains().map(c => c?.id)
-//   const assets = _.concat(getAssets().map(a => a?.id), '')
+export async function getStaticPaths() {
+  const chains = getChains().map(c => c?.id)
+  const assets = _.concat(getAssets().map(a => a?.id), '')
 
-//   return {
-//     paths: assets.flatMap(a => chains.map(c => `/swap/${a ? `${a.toUpperCase()}-` : ''}on-${c}`)),
-//     fallback: false,
-//   }
-// }
+  return {
+    paths: assets.flatMap(a => chains.map(c => `/swap/${a ? `${a.toUpperCase()}-` : ''}on-${c}`)),
+    fallback: false,
+  }
+}
 
-// export async function getStaticProps(
-//   {
-//     params,
-//   },
-// ) {
-//   const {
-//     swap,
-//   } = { ...params }
+export async function getStaticProps(
+  {
+    params,
+  },
+) {
+  const {
+    swap,
+  } = { ...params }
 
-//   const asPath = `/swap/${swap}`
+  const asPath = `/swap/${swap}`
 
-//   return {
-//     props: {
-//       headMeta: meta(asPath, null, getChains(), getAssets()),
-//     },
-//   }
-// }
+  return {
+    props: {
+      headMeta: meta(asPath, null, getChains(), getAssets()),
+    },
+  }
+}
 
 export default (
   {
