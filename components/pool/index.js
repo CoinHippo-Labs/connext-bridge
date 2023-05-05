@@ -93,7 +93,6 @@ export default () => {
       let updated = false
 
       const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-
       let path = !asPath ? '/' : asPath.toLowerCase()
       path = path.includes('?') ? path.substring(0, path.indexOf('?')) : path
 
@@ -170,13 +169,7 @@ export default () => {
         delete params.chain
         delete params.asset
 
-        router.push(
-          `/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`,
-          undefined,
-          {
-            shallow: true,
-          },
-        )
+        router.push(`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
       }
     },
     [address, pool],
@@ -246,12 +239,7 @@ export default () => {
 
       getData()
 
-      const interval =
-        setInterval(
-          () => getData(),
-          0.25 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(), 0.25 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [rpcs],
@@ -261,12 +249,7 @@ export default () => {
   useEffect(
     () => {
       if (pools_data) {
-        _.uniq(
-          toArray(
-            pools_data.map(p => p?.chain_data?.id)
-          )
-        )
-        .forEach(c => getBalances(c))
+        _.uniq(toArray(pools_data.map(p => p?.chain_data?.id))).forEach(c => getBalances(c))
       }
     },
     [pools_data],
@@ -280,12 +263,7 @@ export default () => {
           chain,
         } = { ...pool }
 
-        if (
-          sdk &&
-          address &&
-          chain &&
-          poolsTrigger
-        ) {
+        if (sdk && address && chain && poolsTrigger) {
           const chain_data = getChain(chain, chains_data)
 
           const {
@@ -315,78 +293,53 @@ export default () => {
 
             if (Array.isArray(response)) {
               setUserPools(
-                response
-                  .map(p => {
+                response.map(p => {
+                  const {
+                    info,
+                    lpTokenBalance,
+                    poolTokenBalances,
+                  } = { ...p }
+
+                  const {
+                    adopted,
+                    local,
+                    symbol,
+                  } = { ...info }
+
+                  if (adopted) {
                     const {
-                      info,
-                      lpTokenBalance,
-                      poolTokenBalances,
-                    } = { ...p }
+                      balance,
+                      decimals,
+                    } = { ...adopted }
 
+                    adopted.balance = utils.formatUnits(BigInt(balance || '0'), decimals || 18)
+                    info.adopted = adopted
+                  }
+
+                  if (local) {
                     const {
-                      adopted,
-                      local,
-                      symbol,
-                    } = { ...info }
+                      balance,
+                      decimals,
+                    } = { ...local }
 
-                    if (adopted) {
-                      const {
-                        balance,
-                        decimals,
-                      } = { ...adopted }
+                    local.balance = utils.formatUnits(BigInt(balance || '0'), decimals || 18)
+                    info.local = local
+                  }
 
-                      adopted.balance =
-                        utils.formatUnits(
-                          BigInt(balance || '0'),
-                          decimals || 18,
-                        )
+                  const symbols = split(symbol, 'normal', '-')
+                  const asset_data = getAsset(null, pool_assets_data, chain_id, undefined, symbols)
 
-                      info.adopted = adopted
-                    }
-
-                    if (local) {
-                      const {
-                        balance,
-                        decimals,
-                      } = { ...local }
-
-                      local.balance =
-                        utils.formatUnits(
-                          BigInt(balance || '0'),
-                          decimals || 18,
-                        )
-
-                      info.local = local
-                    }
-
-                    const symbols = split(symbol, 'normal', '-')
-
-                    const asset_data = getAsset(null, pool_assets_data, chain_id, undefined, symbols)
-
-                    return {
-                      ...p,
-                      id: `${chain_data.id}_${asset_data?.id}`,
-                      chain_data,
-                      asset_data,
-                      ...info,
-                      symbols,
-                      lpTokenBalance: utils.formatEther(BigInt(lpTokenBalance || '0')),
-                      poolTokenBalances:
-                        toArray(poolTokenBalances)
-                          .map((b, i) =>
-                            Number(
-                              utils.formatUnits(
-                                BigInt(b || '0'),
-                                adopted?.index === i ?
-                                  adopted.decimals :
-                                  local?.index === i ?
-                                    local.decimals :
-                                    18,
-                              )
-                            )
-                          ),
-                    }
-                  })
+                  return {
+                    ...p,
+                    id: `${chain_data.id}_${asset_data?.id}`,
+                    chain_data,
+                    asset_data,
+                    ...info,
+                    symbols,
+                    lpTokenBalance: utils.formatEther(BigInt(lpTokenBalance || '0')),
+                    poolTokenBalances: toArray(poolTokenBalances).map((b, i) => Number(utils.formatUnits(BigInt(b || '0'), adopted?.index === i ? adopted.decimals : local?.index === i ? local.decimals : 18))),
+                  }
+                })
               )
             }
             else {
@@ -414,11 +367,7 @@ export default () => {
     const reset_pool = origin !== 'address'
 
     if (reset_pool) {
-      setPool(
-        {
-          ...pool,
-        }
-      )
+      setPool({ ...pool })
     }
 
     setPoolsTrigger(moment().valueOf())
@@ -456,9 +405,7 @@ export default () => {
   } = { ...explorer }
 
   const selected = !!(chain && asset)
-
   const no_pool = selected && !getAsset(asset, pool_assets_data, chain_data?.chain_id)
-
   const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
 
   const {
