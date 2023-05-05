@@ -1310,8 +1310,8 @@ export default () => {
             xcallParams.asset = _source_contract_data?.contract_address
             xcallParams.wrapNativeOnOrigin = source_contract_data?.contract_address === constants.AddressZero
             // use the native asset as the relayer fee instead of wrapping
-            xcallParams.relayerFee = xcallParams.relayerFeeInTransactingAsset;
-            xcallParams.relayerFeeInTransactingAsset = "0";
+            xcallParams.relayerFee = xcallParams.relayerFeeInTransactingAsset
+            xcallParams.relayerFeeInTransactingAsset = '0'
           }
 
           const CANONICAL_ASSET_SYMBOL = NATIVE_WRAPPABLE_SYMBOLS.find(s => s === source_asset_data?.symbol)
@@ -1324,12 +1324,11 @@ export default () => {
             '[xcall]',
             { xcallParams },
           )
-          console.warn("amount", xcallParams.amount)
-          console.warn("relayerFeeInTransactingAsset", xcallParams.relayerFeeInTransactingAsset)
-          console.warn("total to wrap", BigNumber.from(xcallParams.amount).add(xcallParams.relayerFeeInTransactingAsset).toString())
+          console.warn('amount', xcallParams.amount)
+          console.warn('relayerFeeInTransactingAsset', xcallParams.relayerFeeInTransactingAsset)
+          console.warn('total to wrap', BigNumber.from(xcallParams.amount).add(xcallParams.relayerFeeInTransactingAsset).toString())
 
           const xcall_request = await sdk.sdkBase.xcall(xcallParams)
-          console.warn("xcall_request.value", xcall_request.value.toString())
 
           if (xcall_request) {
             try {
