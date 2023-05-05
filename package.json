@@ -27,7 +27,7 @@
     "@material-tailwind/react": "^1.4.2",
     "@portis/web3": "^4.0.7",
     "@redux-devtools/extension": "^3.2.5",
-    "@tanstack/react-query": "4.29.3",
+    "@tanstack/react-query": "^4.29.3",
     "@wagmi/chains": "^0.2.18",
     "@walletconnect/web3-provider": "^1.8.0",
     "@web3modal/ethereum": "^2.3.0",
