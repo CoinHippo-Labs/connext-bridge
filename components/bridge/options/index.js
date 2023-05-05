@@ -21,6 +21,7 @@ export default (
     showInfiniteApproval = true,
     hasNextAsset = false,
     chainData,
+    relayerFeeAssetTypes,
   },
 ) => {
   const {
@@ -50,33 +51,47 @@ export default (
 
   const receiveLocalTooltip = !hasNextAsset && `Unavailable on ${chainData?.name || 'Ethereum'}`
 
-  const fields =
-    [
-      {
-        label: 'Recipient Address',
-        tooltip: 'Allows you to transfer to a different address than your connected wallet address.',
-        name: 'to',
-        type: 'text',
-        placeholder: 'target recipient address',
-      },
-      {
-        label: 'Infinite Approval',
-        tooltip: showInfiniteApproval ? 'This allows you to only need to pay for approval on your first transfer.' : 'Approval sufficient. If you need to, please revoke using other tools.',
-        name: 'infiniteApprove',
-        type: 'switch',
-      },
-      {
-        label: 'Receive NextAsset',
-        tooltip: receiveLocalTooltip,
-        name: 'receiveLocal',
-        type: 'switch',
-      },
-      {
-        label: 'Show NextAsset',
-        name: 'showNextAssets',
-        type: 'switch',
-      },
-    ]
+  const fields = [
+    {
+      label: 'Recipient Address',
+      tooltip: 'Allows you to transfer to a different address than your connected wallet address.',
+      name: 'to',
+      type: 'text',
+      placeholder: 'target recipient address',
+    },
+    {
+      label: 'Infinite Approval',
+      tooltip: showInfiniteApproval ? 'This allows you to only need to pay for approval on your first transfer.' : 'Approval sufficient. If you need to, please revoke using other tools.',
+      name: 'infiniteApprove',
+      type: 'switch',
+    },
+    {
+      label: 'Slippage Tolerance',
+      tooltip: 'The maximum percentage you are willing to lose due to market changes.',
+      name: 'slippage',
+      type: 'number',
+      presets: [3.0, 1.0, 0.5],
+      postfix: '%',
+    },
+    {
+      label: 'Asset for Gas on destination',
+      tooltip: 'This covers costs to execute your transfer on the destination chain.',
+      name: 'relayerFeeAssetType',
+      type: 'select',
+      options: toArray(relayerFeeAssetTypes),
+    },
+    {
+      label: 'Receive NextAsset',
+      tooltip: receiveLocalTooltip,
+      name: 'receiveLocal',
+      type: 'switch',
+    },
+    {
+      label: 'Show NextAsset',
+      name: 'showNextAssets',
+      type: 'switch',
+    },
+  ]
 
   const changed = !_.isEqual(data, initialData)
 
@@ -154,7 +169,8 @@ export default (
                         )
                       }
                     }
-                    className="form-select bg-slate-50 rounded border-0 focus:ring-0"
+                    className="form-select min-w-fit bg-slate-50 rounded border-0 focus:ring-0"
+                    style={{ width: '124px' }}
                   >
                     {toArray(options)
                       .map((o, j) => {
@@ -283,7 +299,6 @@ export default (
                             onChange={
                               e => {
                                 const regex = /^[0-9.\b]+$/
-
                                 let value
 
                                 if (e.target.value === '' || regex.test(e.target.value)) {
@@ -300,12 +315,13 @@ export default (
                                   }
                                 }
 
+                                value = value && !isNaN(value) ? parseFloat(Number(value).toFixed(['slippage'].includes(name) ? 2 : 6)) : value
                                 value = ['slippage'].includes(name) && (value <= 0 || value > 100) ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
 
                                 setData(
                                   {
                                     ...data,
-                                    [name]: value && !isNaN(value) ? parseFloat(Number(value).toFixed(6)) : value,
+                                    [name]: value,
                                   }
                                 )
                               }

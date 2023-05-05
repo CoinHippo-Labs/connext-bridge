@@ -43,6 +43,7 @@ export default () => {
     ens,
     router_asset_balances,
     pools,
+    pools_daily_stats,
     rpc_providers,
     dev,
     wallet,
@@ -58,6 +59,7 @@ export default () => {
         ens: state.ens,
         router_asset_balances: state.router_asset_balances,
         pools: state.pools,
+        pools_daily_stats: state.pools_daily_stats,
         rpc_providers: state.rpc_providers,
         dev: state.dev,
         wallet: state.wallet,
@@ -92,6 +94,9 @@ export default () => {
   const {
     pools_data,
   } = { ...pools }
+  const {
+    pools_daily_stats_data,
+  } = { ...pools_daily_stats }
   const {
     rpcs,
   } = { ...rpc_providers }
@@ -236,12 +241,7 @@ export default () => {
 
       getData()
 
-      const interval =
-        setInterval(
-          () => getData(true),
-          5 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(true), 5 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [page_visible, assets_data],
@@ -292,12 +292,7 @@ export default () => {
 
       getData()
 
-      const interval =
-        setInterval(
-          () => getData(true),
-          5 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(true), 5 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [page_visible, chains_data, gas_tokens_price_data],
@@ -533,12 +528,7 @@ export default () => {
 
       getData()
 
-      const interval =
-        setInterval(
-          () => getData(),
-          1 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(), 1 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [page_visible, sdk, chains_data, assets_data],
@@ -811,12 +801,7 @@ export default () => {
 
       getData()
 
-      const interval =
-        setInterval(
-          () => getData(),
-          1 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(), 1 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [page_visible, sdk, chains_data, pool_assets_data, pathname],
@@ -954,12 +939,7 @@ export default () => {
 
       getData()
 
-      const interval =
-        setInterval(
-          () => getData(),
-          1 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(), 1 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [page_visible, sdk, chains_data, pool_assets_data, address, pathname],
@@ -968,32 +948,29 @@ export default () => {
   // pools daily stats
   useEffect(
     () => {
-      const getData = async () => {
-        const tvls = toArray(await daily_swap_tvl())
-        const volumes = toArray(await daily_swap_volume())
+      const getData = async is_interval => {
+        if (['/pools', '/pool/[pool]'].includes(pathname) && (is_interval || !pools_daily_stats_data)) {
+          const tvls = toArray(await daily_swap_tvl())
+          const volumes = toArray(await daily_swap_volume())
 
-        dispatch(
-          {
-            type: POOLS_DAILY_STATS_DATA,
-            value: {
-              tvls,
-              volumes,
-            },
-          }
-        )
+          dispatch(
+            {
+              type: POOLS_DAILY_STATS_DATA,
+              value: {
+                tvls,
+                volumes,
+              },
+            }
+          )
+        }
       }
 
       getData()
 
-      const interval =
-        setInterval(
-          () => getData(),
-          5 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(true), 5 * 60 * 1000)
       return () => clearInterval(interval)
     },
-    [],
+    [pathname],
   )
 
   // balances
@@ -1098,12 +1075,7 @@ export default () => {
 
       getData()
 
-      const interval =
-        setInterval(
-          () => getData(true),
-          1 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(true), 1 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [page_visible, chains_data, assets_data, rpcs, address, get_balances_data],
