@@ -173,8 +173,8 @@ export default (
                 {
                   ...contract_data,
                   contract_address: constants.AddressZero,
-                  symbol,
-                  image,
+                  symbol: ['DAI'].includes(symbol) ? `X${symbol}` : symbol,
+                  image: image?.replace('/dai.', '/xdai.'),
                 },
                 (!showOnlyWrapable || wrapable) &&
                 {
@@ -239,14 +239,8 @@ export default (
           }
         })
         .filter(a => a.max_score > 1 / 10),
-      [
-        'group',
-        'max_score',
-      ],
-      [
-        'asc',
-        'desc',
-      ],
+      ['group', 'max_score'],
+      ['asc', 'desc'],
     )
 
   const preset_assets_data = _.uniqBy(toArray(_assets_data).filter(a => a.preset), 'id')
@@ -375,14 +369,7 @@ export default (
               </div>
             )
 
-          const className =
-            `dropdown-item ${
-              disabled ?
-                'cursor-not-allowed' :
-                selected ?
-                  'bg-slate-100 dark:bg-slate-800 cursor-pointer' :
-                  'hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'
-            } rounded flex items-center justify-between space-x-2 my-1 p-2`
+          const className = `dropdown-item ${disabled ? 'cursor-not-allowed' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'} rounded flex items-center justify-between space-x-2 my-1 p-2`
 
           return (
             <div key={i}>
