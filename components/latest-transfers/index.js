@@ -51,42 +51,24 @@ export default (
   useEffect(
     () => {
       const getData = async () => {
-        if (
-          page_visible &&
-          sdk &&
-          address
-        ) {
+        if (page_visible && sdk && address) {
           try {
-            let response = toArray(await sdk.sdkUtils.getTransfers({ userAddress: address }))
+            if (toArray(transfers).findIndex(t => ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(t.status)) > -1) {
+              let response = toArray(await sdk.sdkUtils.getTransfers({ userAddress: address }))
 
-            response =
-              _.orderBy(
-                _.uniqBy(
-                  toArray(
-                    _.concat(response, data)
-                  ),
-                  'xcall_transaction_hash',
-                ),
-                ['xcall_timestamp'],
-                ['desc'],
-              )
+              response =
+                _.orderBy(
+                  _.uniqBy(toArray(_.concat(response, data)), 'xcall_transaction_hash'),
+                  ['xcall_timestamp'],
+                  ['desc'],
+                )
 
-            if (
-              response
-                .findIndex(t =>
-                  toArray(transfers).findIndex(_t => _t?.transfer_id) < 0 &&
-                  ![
-                    XTransferStatus.Executed,
-                    XTransferStatus.CompletedFast,
-                    XTransferStatus.CompletedSlow,
-                  ]
-                  .includes(t.status)
-                ) > -1
-            ) {
-              setCollapse(false)
+              if (response.findIndex(t => toArray(transfers).findIndex(_t => _t?.transfer_id) < 0 && ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(t.status)) > -1) {
+                setCollapse(false)
+              }
+
+              setTransfers(response)
             }
-
-            setTransfers(response)
           } catch (error) {
             setTransfers(null)
           }
@@ -98,12 +80,7 @@ export default (
 
       getData()
 
-      const interval =
-        setInterval(
-          () => getData(),
-          10 * 1000,
-        )
-
+      const interval = setInterval(() => getData(), 10 * 1000)
       return () => clearInterval(interval)
     },
     [page_visible, sdk, address, trigger],
@@ -136,7 +113,7 @@ export default (
     )
 
   return (
-    transfers?.length > 0 &&
+    toArray(transfers).length > 0 &&
     (
       <div className="lg:max-w-xs 2xl:max-w-sm xl:ml-auto">
         <button
