@@ -5,40 +5,40 @@ import Bridge from '../components/bridge'
 import meta from '../lib/meta'
 import { getChains, getAssets } from '../lib/api/config'
 
-export async function getStaticPaths() {
-  const chains = getChains().map(c => c?.id)
-  const assets = _.concat(getAssets().map(a => a?.id), '')
+// export async function getStaticPaths() {
+//   const chains = getChains().map(c => c?.id)
+//   const assets = _.concat(getAssets().map(a => a?.id), '')
 
-  return {
-    paths:
-      assets.flatMap(a =>
-        chains.flatMap(c =>
-          chains
-            .filter(_c => _c !== c)
-            .map(_c => `/${a ? `${a.toUpperCase()}-` : ''}from-${c}-to-${_c}`)
-        )
-      ),
-    fallback: false,
-  }
-}
+//   return {
+//     paths:
+//       assets.flatMap(a =>
+//         chains.flatMap(c =>
+//           chains
+//             .filter(_c => _c !== c)
+//             .map(_c => `/${a ? `${a.toUpperCase()}-` : ''}from-${c}-to-${_c}`)
+//         )
+//       ),
+//     fallback: false,
+//   }
+// }
 
-export async function getStaticProps(
-  {
-    params,
-  },
-) {
-  const {
-    bridge,
-  } = { ...params }
+// export async function getStaticProps(
+//   {
+//     params,
+//   },
+// ) {
+//   const {
+//     bridge,
+//   } = { ...params }
 
-  const asPath = `/${bridge}`
+//   const asPath = `/${bridge}`
 
-  return {
-    props: {
-      headMeta: meta(asPath, null, getChains(), getAssets()),
-    },
-  }
-}
+//   return {
+//     props: {
+//       headMeta: meta(asPath, null, getChains(), getAssets()),
+//     },
+//   }
+// }
 
 export default (
   {
