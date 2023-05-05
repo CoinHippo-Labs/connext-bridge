@@ -1329,6 +1329,7 @@ export default () => {
           console.warn('total to wrap', BigNumber.from(xcallParams.amount).add(xcallParams.relayerFeeInTransactingAsset).toString())
 
           const xcall_request = await sdk.sdkBase.xcall(xcallParams)
+          console.warn('xcall_request.value', xcall_request?.value?.toString())
 
           if (xcall_request) {
             try {
