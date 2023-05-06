@@ -53,7 +53,7 @@ export default (
       const getData = async () => {
         if (page_visible && sdk && address) {
           try {
-            if ((!transfers && data) || toArray(transfers).findIndex(t => ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(t.status)) > -1) {
+            if (!transfers || (data && toArray(data).findIndex(d => toArray(transfers).findIndex(t => t.transfer_id === d.transfer_id) < 0) > -1) || toArray(transfers).findIndex(t => ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(t.status)) > -1) {
               let response = toArray(await sdk.sdkUtils.getTransfers({ userAddress: address }))
 
               response =
