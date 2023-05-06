@@ -12,7 +12,7 @@ const NUM_TRANSFER_DISPLAY = 3
 
 export default (
   {
-    data = [],
+    data,
     trigger,
     onUpdateSize,
   },
@@ -53,7 +53,7 @@ export default (
       const getData = async () => {
         if (page_visible && sdk && address) {
           try {
-            if (toArray(transfers).findIndex(t => ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(t.status)) > -1) {
+            if ((!transfers && data) || toArray(transfers).findIndex(t => ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(t.status)) > -1) {
               let response = toArray(await sdk.sdkUtils.getTransfers({ userAddress: address }))
 
               response =
