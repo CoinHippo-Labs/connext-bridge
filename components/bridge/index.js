@@ -927,7 +927,7 @@ export default () => {
         setEstimatedValues(null)
         setEstimateResponse(null)
 
-        if (amount > 0 && toArray(_.concat(source_chain_data?.id, destination_chain_data?.id)).findIndex(chain => toArray(pools_data).find(p => p?.chain_data?.id === chain && !p.tvl)) < 0) {
+        if (amount > 0 && toArray(_.concat(source_chain_data?.id, destination_chain_data?.id)).findIndex(chain => toArray(pools_data).find(p => p?.chain_data?.id === chain && !p.tvl)) < 0 && !['linea'].includes(destination_chain_data?.id)) {
           console.log(
             '[calculateAmountReceived]',
             {
@@ -1005,7 +1005,7 @@ export default () => {
           message,
         } = { ...response }
 
-        if (includesStringList(message, ['reverted', 'invalid BigNumber value'])) {
+        if (includesStringList(message, ['reverted', 'invalid BigNumber value']) || (destination_chain_data?.id === 'linea' && includesStringList(message, ['Api Request failed']))) {
           manual = true
         }
         else {
