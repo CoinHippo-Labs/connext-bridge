@@ -2,6 +2,7 @@ import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
+import moment from 'moment'
 import { create } from '@connext/sdk'
 import { Contract, providers, constants, utils } from 'ethers'
 import Linkify from 'react-linkify'
@@ -31,6 +32,7 @@ import { split, toArray, ellipse, equalsIgnoreCase, sleep } from '../../lib/util
 import { STATUS_MESSAGE, CHAINS_DATA, GAS_TOKENS_PRICE_DATA, ASSETS_DATA, POOL_ASSETS_DATA, ENS_DATA, ROUTER_ASSET_BALANCES_DATA, POOLS_DATA, USER_POOLS_DATA, POOLS_DAILY_STATS_DATA, SDK, RPCS, BALANCES_DATA } from '../../reducers/types'
 
 const is_staging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' || process.env.NEXT_PUBLIC_APP_URL?.includes('staging')
+const NUM_STATS_DAYS = Number(process.env.NEXT_PUBLIC_NUM_STATS_DAYS)
 
 export default () => {
   const dispatch = useDispatch()
@@ -949,9 +951,11 @@ export default () => {
   useEffect(
     () => {
       const getData = async is_interval => {
-        if (['/pools', '/pool/[pool]'].includes(pathname) && (is_interval || !pools_daily_stats_data)) {
-          const tvls = toArray(await daily_swap_tvl())
-          const volumes = toArray(await daily_swap_volume())
+        if ([/*'/pools', */'/pool/[pool]'].includes(pathname) && (is_interval || !pools_daily_stats_data)) {
+          const day = `gt.${moment().subtract(NUM_STATS_DAYS, 'days').startOf('day').format('YYYY-MM-DD')}`
+
+          const tvls = toArray(await daily_swap_tvl({ day }))
+          const volumes = toArray(await daily_swap_volume({ swap_day: day }))
 
           dispatch(
             {
