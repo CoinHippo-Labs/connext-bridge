@@ -321,7 +321,7 @@ a {
 }
 
 .status-message a {
-  @apply text-blue-500 dark:text-blue-600;
+  @apply underline font-extrabold;
 }
 
 .loadButton {
