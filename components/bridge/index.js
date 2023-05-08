@@ -3044,46 +3044,61 @@ export default () => {
                                       rounded={true}
                                       className="rounded p-4.5"
                                     >
-                                      <div className="flex items-center justify-between space-x-2">
-                                        <span className="break-all text-sm 3xl:text-xl font-medium">
-                                          {ellipse(
-                                            split(message, 'normal', ' ')
-                                              .join(' ')
-                                              .substring(0, status === 'failed' && errorPatterns.findIndex(c => message?.indexOf(c) > -1) > -1 ? message.indexOf(errorPatterns.find(c => message.indexOf(c) > -1)) : undefined) ||
-                                            message,
-                                            128,
-                                          )}
-                                        </span>
-                                        <div className="flex items-center space-x-1">
-                                          {
-                                            status === 'failed' && message &&
-                                            (
-                                              <Copy
-                                                value={message}
-                                                className="cursor-pointer text-slate-200 hover:text-white"
-                                              />
-                                            )
-                                          }
-                                          {status === 'failed' ?
-                                            <button
-                                              onClick={() => reset(code)}
-                                              className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                                            >
-                                              <MdClose
-                                                size={14}
-                                              />
-                                            </button> :
-                                            status === 'success' ?
+                                      <div className="space-y-2">
+                                        <div className="flex items-center justify-between space-x-2">
+                                          <span className="break-all text-sm 3xl:text-xl font-medium">
+                                            {ellipse(
+                                              split(message, 'normal', ' ')
+                                                .join(' ')
+                                                .substring(0, status === 'failed' && errorPatterns.findIndex(c => message?.indexOf(c) > -1) > -1 ? message.indexOf(errorPatterns.find(c => message.indexOf(c) > -1)) : undefined) ||
+                                              message,
+                                              128,
+                                            )}
+                                          </span>
+                                          <div className="flex items-center space-x-1">
+                                            {
+                                              status === 'failed' && message &&
+                                              (
+                                                <Copy
+                                                  value={message}
+                                                  className="cursor-pointer text-slate-200 hover:text-white"
+                                                />
+                                              )
+                                            }
+                                            {status === 'failed' ?
                                               <button
-                                                onClick={() => reset()}
-                                                className={`${xcallResponse ? 'bg-blue-600 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
+                                                onClick={() => reset(code)}
+                                                className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
                                               >
                                                 <MdClose
                                                   size={14}
                                                 />
                                               </button> :
-                                              null
-                                          }
+                                              status === 'success' ?
+                                                <button
+                                                  onClick={() => reset()}
+                                                  className={`${xcallResponse ? 'bg-blue-600 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
+                                                >
+                                                  <MdClose
+                                                    size={14}
+                                                  />
+                                                </button> :
+                                                null
+                                            }
+                                          </div>
+                                        </div>
+                                        <div className="text-sm 3xl:text-xl font-bold">
+                                          <span className="mr-1">
+                                            To file a support request, please create a ticket on our discord
+                                          </span>
+                                          <a
+                                            href={process.env.NEXT_PUBLIC_FEEDBACK_URL}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="underline"
+                                          >
+                                            here
+                                          </a>.
                                         </div>
                                       </div>
                                     </Alert>
