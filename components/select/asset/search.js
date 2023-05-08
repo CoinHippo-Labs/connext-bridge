@@ -8,7 +8,7 @@ export default (
     value,
     onSelect,
     chain,
-    othersChains,
+    destinationChain,
     isBridge = false,
     isPool = false,
     showNextAssets = false,
@@ -46,7 +46,7 @@ export default (
               }
             }
             chain={chain}
-            othersChains={othersChains}
+            destinationChain={destinationChain}
             isBridge={isBridge}
             isPool={isPool}
             showNextAssets={showNextAssets}

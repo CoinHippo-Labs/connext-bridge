@@ -245,7 +245,8 @@
       }
     ],
     "color": "#f4b333",
-    "preset": true
+    "preset": true,
+    "exclude_source_chains": ["binance"]
   },
   {
     "id": "eth",

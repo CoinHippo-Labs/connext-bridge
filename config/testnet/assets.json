@@ -39,9 +39,7 @@
         "chain_id": 59140,
         "decimals": 18,
         "symbol": "TEST",
-        "mintable": true,
-        "is_bridge": false,
-        "exclude_chains": ["linea"]
+        "mintable": true
       },
       {
         "contract_address": "0x7C1412e456ad60B8ee458c4eb3A9852C3e389353",
@@ -51,7 +49,9 @@
         "mintable": true
       }
     ],
-    "color": "#2675c8"
+    "color": "#2675c8",
+    "exclude_source_chains": ["linea"],
+    "exclude_destination_chains": ["linea"]
   },
   {
     "id": "eth",

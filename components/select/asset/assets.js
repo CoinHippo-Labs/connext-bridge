@@ -17,7 +17,7 @@ export default (
     inputSearch,
     onSelect,
     chain,
-    othersChains,
+    destinationChain,
     isBridge = false,
     isPool = false,
     showNextAssets = false,
@@ -144,7 +144,14 @@ export default (
             }),
         )
       ) :
-      toArray(assets_data).filter(a => !isBridge || (toArray(a.contracts).findIndex(c => c.chain_id === chain_id && c.is_bridge !== false) > -1 && toArray(othersChains).length === toArray(othersChains).filter(c => toArray(a.contracts).findIndex(_c => _c.chain_id === getChain(c, chains_data)?.chain_id && _c.is_bridge !== false && !toArray(_c.exclude_chains).includes(c)) > -1).length))
+      toArray(assets_data)
+        .filter(a =>
+          !isBridge ||
+          (
+            toArray(a.contracts).findIndex(c => c.chain_id === chain_id && c.is_bridge !== false) > -1 &&
+            (!destinationChain || (!toArray(a.exclude_destination_chains).includes(destinationChain) && !toArray(a.exclude_source_chains).includes(chain)))
+          )
+        )
     )
     .filter(a => !a.disabled)
 

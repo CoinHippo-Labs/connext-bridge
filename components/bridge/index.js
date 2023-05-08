@@ -2095,7 +2095,7 @@ export default () => {
                                       }
                                     }
                                     chain={source_chain}
-                                    othersChains={destination_chain}
+                                    destinationChain={destination_chain}
                                     isBridge={true}
                                     showNextAssets={showNextAssets}
                                     showNativeAssets={true}

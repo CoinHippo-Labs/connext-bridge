@@ -17,7 +17,7 @@ export default (
     value,
     onSelect,
     chain,
-    othersChains,
+    destinationChain,
     origin = '',
     isBridge = false,
     isPool = false,
@@ -193,7 +193,7 @@ export default (
           value={value}
           onSelect={(a, c) => onClick(a, c)}
           chain={chain}
-          othersChains={othersChains}
+          destinationChain={destinationChain}
           isBridge={isBridge}
           isPool={isPool}
           showNextAssets={showNextAssets}
