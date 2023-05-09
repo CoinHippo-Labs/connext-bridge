@@ -161,7 +161,8 @@
       }
     ],
     "color": "#039f74",
-    "preset": true
+    "preset": true,
+    "exclude_source_chains": ["binance"]
   },
   {
     "id": "dai",

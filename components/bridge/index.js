@@ -1914,13 +1914,15 @@ export default () => {
                                   c => {
                                     const _source_chain = c
                                     const _destination_chain = c === destination_chain ? source_chain : destination_chain
+                                    const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(a => a.id !== asset))?.id : asset
 
                                     setBridge(
                                       {
                                         ...bridge,
                                         source_chain: _source_chain,
                                         destination_chain: _destination_chain,
-                                        symbol: equalsIgnoreCase(_source_chain, source_chain) ? symbol : undefined,
+                                        asset: _asset,
+                                        symbol: equalsIgnoreCase(_source_chain, source_chain) && _asset === asset ? symbol : undefined,
                                       }
                                     )
 
@@ -1940,11 +1942,16 @@ export default () => {
                                 onClick={
                                   () => {
                                     if (!disabled) {
+                                      const _source_chain = destination_chain
+                                      const _destination_chain = source_chain
+                                      const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(a => a.id !== asset))?.id : asset
+
                                       setBridge(
                                         {
                                           ...bridge,
-                                          source_chain: destination_chain,
-                                          destination_chain: source_chain,
+                                          source_chain: _source_chain,
+                                          destination_chain: _destination_chain,
+                                          asset: _asset,
                                           amount: null,
                                         }
                                       )
@@ -1976,12 +1983,14 @@ export default () => {
                                   c => {
                                     const _source_chain = c === source_chain ? destination_chain : source_chain
                                     const _destination_chain = c
+                                    const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(a => a.id !== asset))?.id : asset
 
                                     setBridge(
                                       {
                                         ...bridge,
                                         source_chain: _source_chain,
                                         destination_chain: _destination_chain,
+                                        asset: _asset,
                                       }
                                     )
 
