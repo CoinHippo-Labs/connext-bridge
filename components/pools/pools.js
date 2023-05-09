@@ -10,7 +10,7 @@ import Datatable from '../datatable'
 import DecimalsFormat from '../decimals-format'
 import Image from '../image'
 import { ProgressBar } from '../progress-bars'
-import { currency_symbol } from '../../lib/object/currency'
+import { currency, currency_symbol } from '../../lib/object/currency'
 import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
 import { getPool } from '../../lib/object/pool'
@@ -85,9 +85,7 @@ export default (
     view === 'my_positions' ?
       userPoolsData ?
         userPoolsData
-          .filter(d =>
-            Number(d?.lpTokenBalance) > 0
-          )
+          .filter(d => Number(d?.lpTokenBalance) > 0)
           .map(d => {
             const {
               chain_data,
@@ -115,108 +113,77 @@ export default (
               price,
             } = { ...getAsset(asset_data?.id, assets_data) }
 
-            const tvl =
-              Number(
-                supply ||
-                _.sum(
-                  toArray(
-                    _.concat(adopted, local)
-                  )
-                  .map(a => Number(a.balance))
-                )
-              ) * (price || 0)
+            const tvl = Number(supply || _.sum(toArray(_.concat(adopted, local)).map(a => Number(a.balance)))) * (price || 0)
 
             return {
               ...d,
               share,
+              price,
               tvl,
             }
           }) :
           null :
       pools_data || pool_assets_data?.length === 0 ?
         _.orderBy(
-          Object.entries(
-            _.groupBy(
-              toArray(pools_data),
-              'asset_data.id',
-            )
-          )
-          .map(([k, v]) => {
-            return {
-              id: k,
-              asset_data: _.head(v)?.asset_data,
-              i: toArray(pool_assets_data).findIndex(a => equalsIgnoreCase(a?.id, k)),
-              pools:
-                _.orderBy(
-                  toArray(
-                    _.concat(
-                      v,
-                      toArray(pool_assets_data)
-                        .filter(a =>
-                          equalsIgnoreCase(
-                            a?.id,
-                            getAsset(k, pool_assets_data)?.id,
-                          )
-                        )
-                        .flatMap(a =>
-                          toArray(a.contracts)
-                            .filter(c =>
-                              v.findIndex(d => d.chain_data?.chain_id === c?.chain_id) < 0
-                            )
-                        )
-                        .map(d => {
-                          const chain_data = getChain(d.chain_id, chains_data)
-                          const asset_data = getAsset(k, pool_assets_data)
+          Object.entries(_.groupBy(toArray(pools_data), 'asset_data.id'))
+            .map(([k, v]) => {
+              return {
+                id: k,
+                asset_data: _.head(v)?.asset_data,
+                i: toArray(pool_assets_data).findIndex(a => equalsIgnoreCase(a?.id, k)),
+                pools:
+                  _.orderBy(
+                    toArray(
+                      _.concat(
+                        v,
+                        toArray(pool_assets_data)
+                          .filter(a => equalsIgnoreCase(a?.id, getAsset(k, pool_assets_data)?.id))
+                          .flatMap(a => toArray(a.contracts).filter(c => v.findIndex(d => d.chain_data?.chain_id === c?.chain_id) < 0))
+                          .map(d => {
+                            const chain_data = getChain(d.chain_id, chains_data)
+                            const asset_data = getAsset(k, pool_assets_data)
 
-                          if (chain_data && asset_data) {
-                            const {
-                              chain_id,
-                            } = { ...chain_data }
+                            if (chain_data && asset_data) {
+                              const {
+                                chain_id,
+                              } = { ...chain_data }
 
-                            const contract_data = d
+                              const contract_data = d
 
-                            return {
-                              id: `${chain_data.id}_${asset_data.id}`,
-                              name: `${contract_data.symbol || asset_data.symbol} Pool`,
-                              chain_id,
-                              chain_data,
-                              asset_data,
-                              contract_data,
+                              return {
+                                id: `${chain_data.id}_${asset_data.id}`,
+                                name: `${contract_data.symbol || asset_data.symbol} Pool`,
+                                chain_id,
+                                chain_data,
+                                asset_data,
+                                contract_data,
+                              }
                             }
-                          }
-                          else {
-                            return null
-                          }
-                        }),
+                            else {
+                              return null
+                            }
+                          }),
+                      )
                     )
-                  )
-                  .map(d => {
-                    const {
-                      chain_data,
-                      tvl,
-                      apy,
-                    } = { ...d }
+                    .map(d => {
+                      const {
+                        chain_data,
+                        tvl,
+                        apy,
+                      } = { ...d }
 
-                    return {
-                      ...d,
-                      i: toArray(chains_data).findIndex(c => equalsIgnoreCase(c?.id, chain_data?.id)),
-                      _tvl: !isNaN(tvl) ? tvl : -1,
-                      _apy: !isNaN(apy) ? apy : -1,
-                    }
-                  }),
-                  [
-                    'i',
-                    '_tvl',
-                    '_apy',
-                  ],
-                  [
-                    'asc',
-                    'desc',
-                    'desc',
-                  ],
-                ),
-            }
-          }),
+                      return {
+                        ...d,
+                        i: toArray(chains_data).findIndex(c => equalsIgnoreCase(c?.id, chain_data?.id)),
+                        _tvl: !isNaN(tvl) ? tvl : -1,
+                        _apy: !isNaN(apy) ? apy : -1,
+                      }
+                    }),
+                    ['i', '_tvl', '_apy'],
+                    ['asc', 'desc', 'desc'],
+                  ),
+              }
+            }),
           ['i'],
           ['asc'],
         ) :
@@ -229,7 +196,6 @@ export default (
   } = { ...chain_data }
 
   const boxShadow = `${color || '#e53f3f'}${theme === 'light' ? '44' : '33'} 0px 32px 128px 64px`
-
   const no_positions = view === 'my_positions' && data && data.length < 1
 
   return (
@@ -1151,7 +1117,6 @@ export default (
                         chain_data,
                         asset_data,
                         symbol,
-                        price,
                       } = { ...row.original }
 
                       const chain = chain_data?.id
@@ -1176,25 +1141,13 @@ export default (
                               )
                             }
                           </div>
-                          {
-                            price > 0 &&
-                            (
-                              <div className="text-slate-800 dark:text-slate-200 text-sm 3xl:text-2xl text-right">
-                                <DecimalsFormat
-                                  value={value * price}
-                                  prefix={currency_symbol}
-                                  className="uppercase 3xl:text-2xl"
-                                />
-                              </div>
-                            )
-                          }
                         </Link>
                       )
                     },
                     headerClassName: 'whitespace-nowrap 3xl:text-xl 3xl:py-2',
                   },
                   {
-                    Header: 'Pooled Tokens',
+                    Header: `Value ${currency.toUpperCase()}`,
                     accessor: 'balances',
                     sortType: (a, b) => a.original.tvl > b.original.tvl ? 1 : -1,
                     Cell: props => {
@@ -1205,8 +1158,10 @@ export default (
                       const {
                         chain_data,
                         asset_data,
-                        adopted,
-                        local,
+                        // adopted,
+                        // local,
+                        lpTokenBalance,
+                        price,
                       } = { ...row.original }
 
                       const chain = chain_data?.id
@@ -1217,37 +1172,44 @@ export default (
                           href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
                           className="h-6 3xl:h-12 flex items-center justify-end space-x-1.5"
                         >
-                          <div className="flex items-center text-sm 3xl:text-2xl font-medium space-x-1">
-                            <DecimalsFormat
-                              value={adopted?.balance}
-                              className="uppercase 3xl:text-2xl"
-                            />
-                            {
-                              adopted?.symbol &&
-                              (
-                                <span>
-                                  {adopted.symbol}
-                                </span>
-                              )
-                            }
-                          </div>
-                          <span className="text-sm 3xl:text-2xl font-medium">
-                            /
-                          </span>
-                          <div className="flex items-center text-sm 3xl:text-2xl font-medium space-x-1">
-                            <DecimalsFormat
-                              value={local?.balance}
-                              className="uppercase 3xl:text-2xl"
-                            />
-                            {
-                              local?.symbol &&
-                              (
-                                <span>
-                                  {local.symbol}
-                                </span>
-                              )
-                            }
-                          </div>
+                          <DecimalsFormat
+                            value={(lpTokenBalance || '0') * price}
+                            prefix={currency_symbol}
+                            className="uppercase 3xl:text-2xl"
+                          />
+                          {/*
+                            <div className="flex items-center text-sm 3xl:text-2xl font-medium space-x-1">
+                              <DecimalsFormat
+                                value={adopted?.balance}
+                                className="uppercase 3xl:text-2xl"
+                              />
+                              {
+                                adopted?.symbol &&
+                                (
+                                  <span>
+                                    {adopted.symbol}
+                                  </span>
+                                )
+                              }
+                            </div>
+                            <span className="text-sm 3xl:text-2xl font-medium">
+                              /
+                            </span>
+                            <div className="flex items-center text-sm 3xl:text-2xl font-medium space-x-1">
+                              <DecimalsFormat
+                                value={local?.balance}
+                                className="uppercase 3xl:text-2xl"
+                              />
+                              {
+                                local?.symbol &&
+                                (
+                                  <span>
+                                    {local.symbol}
+                                  </span>
+                                )
+                              }
+                            </div>
+                          */}
                         </Link>
                       )
                     },
