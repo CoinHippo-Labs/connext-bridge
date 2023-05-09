@@ -1405,7 +1405,7 @@ export default () => {
                         destination_domain: xcallParams.destination,
                         destination_transacting_asset,
                         destination_transacting_amount: estimatedValues?.amountReceived ? utils.parseUnits((estimatedValues.amountReceived - (relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? Number(relayerFee) : 0)).toFixed(source_decimals), destination_decimals).toString() : undefined,
-                        to: xcallParams.to || (xcallParams.unwrapNativeOnDestination ? destination_chain_data?.unwrapper_contract : undefined),
+                        to: xcallParams.unwrapNativeOnDestination ? destination_chain_data?.unwrapper_contract : xcallParams.to,
                         force_slow: forceSlow,
                         receive_local: receiveLocal || estimatedValues?.isNextAsset,
                       },
