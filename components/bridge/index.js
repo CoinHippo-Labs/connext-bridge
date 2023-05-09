@@ -1145,7 +1145,7 @@ export default () => {
           }
         }
         // native asset
-        else if (source_contract_data?.wrapable && equalsIgnoreCase(source_asset_data?.symbol, symbol)) {
+        else if (source_contract_data?.wrapable && (equalsIgnoreCase(source_asset_data?.symbol, symbol) || equalsIgnoreCase(_.head(source_chain_data?.provider_params)?.nativeCurrency?.symbol, symbol))) {
           source_contract_data = {
             ...source_contract_data,
             contract_address: constants.AddressZero,
@@ -1510,7 +1510,7 @@ export default () => {
       }
     }
     // native asset
-    else if (source_contract_data?.wrapable && equalsIgnoreCase(source_asset_data?.symbol, symbol)) {
+    else if (source_contract_data?.wrapable && (equalsIgnoreCase(source_asset_data?.symbol, symbol) || equalsIgnoreCase(_.head(source_chain_data?.provider_params)?.nativeCurrency?.symbol, symbol))) {
       source_contract_data = {
         ...source_contract_data,
         contract_address: constants.AddressZero,
