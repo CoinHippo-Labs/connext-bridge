@@ -1551,7 +1551,6 @@ export default (
                         onChange={
                           e => {
                             const regex = /^[0-9.\b]+$/
-
                             let value
 
                             if (e.target.value === '' || regex.test(e.target.value)) {
@@ -1562,7 +1561,6 @@ export default (
                               if (value.startsWith('.')) {
                                 value = `0${value}`
                               }
-
                               value = numberToFixed(value, x_asset_data?.decimals || 18)
                             }
 
@@ -1686,7 +1684,6 @@ export default (
                         onChange={
                           e => {
                             const regex = /^[0-9.\b]+$/
-
                             let value
 
                             if (e.target.value === '' || regex.test(e.target.value)) {
@@ -1697,7 +1694,6 @@ export default (
                               if (value.startsWith('.')) {
                                 value = `0${value}`
                               }
-
                               value = numberToFixed(value, y_asset_data?.decimals || 18)
                             }
 
@@ -2094,7 +2090,7 @@ export default (
                         LP Token Balance:
                       </div>
                       {
-                        browser_provider && user_pool_data &&
+                        browser_provider &&
                         (
                           <div className="flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs 3xl:text-lg space-x-1">
                             {['string', 'number'].includes(typeof lpTokenBalance) ?
@@ -2102,9 +2098,9 @@ export default (
                                 value={lpTokenBalance}
                                 className="3xl:text-lg font-semibold"
                               /> :
-                              typeof lpTokenBalance === 'string' ?
+                              !user_pool_data && !position_loading ?
                                 <span>
-                                  n/a
+                                  0
                                 </span> :
                                 <RotatingSquare
                                   width="16"
@@ -2129,7 +2125,6 @@ export default (
                         onChange={
                           e => {
                             const regex = /^[0-9.\b]+$/
-
                             let value
 
                             if (e.target.value === '' || regex.test(e.target.value)) {
@@ -2140,7 +2135,6 @@ export default (
                               if (value.startsWith('.')) {
                                 value = `0${value}`
                               }
-
                               if (value) {
                                 if (Number(value) < 0) {
                                   value = '0'
@@ -2149,7 +2143,6 @@ export default (
                                   value = '100'
                                 }
                               }
-
                               value = numberToFixed(value, 2)
                             }
 
@@ -2269,7 +2262,6 @@ export default (
                           title = title.replace('{x}', x_asset_data.symbol).replace('{y}', y_asset_data.symbol)
 
                           const selected = value === withdrawOption
-
                           const _disabled = disabled || (is_staging && !mode)
 
                           return (
@@ -2285,7 +2277,7 @@ export default (
                               className={`${_disabled ? 'cursor-not-allowed' : 'cursor-pointer'} inline-flex items-center space-x-2`}
                             >
                               <input
-                                disabled={_disabled}
+                                disabled={_disabled && false}
                                 type="radio"
                                 value={value}
                                 checked={selected}
@@ -2365,7 +2357,6 @@ export default (
                                   onChange={
                                     e => {
                                       const regex = /^[0-9.\b]+$/
-
                                       let value
 
                                       if (e.target.value === '' || regex.test(e.target.value)) {
@@ -2376,7 +2367,6 @@ export default (
                                         if (value.startsWith('.')) {
                                           value = `0${value}`
                                         }
-
                                         value = numberToFixed(value, x_asset_data?.decimals || 18)
                                       }
 
@@ -2478,7 +2468,6 @@ export default (
                                   onChange={
                                     e => {
                                       const regex = /^[0-9.\b]+$/
-
                                       let value
 
                                       if (e.target.value === '' || regex.test(e.target.value)) {
@@ -2489,7 +2478,6 @@ export default (
                                         if (value.startsWith('.')) {
                                           value = `0${value}`
                                         }
-
                                         value = numberToFixed(value, y_asset_data?.decimals || 18)
                                       }
 
