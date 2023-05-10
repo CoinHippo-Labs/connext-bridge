@@ -157,7 +157,7 @@ export default (
                     <Web3Modal
                       projectId={WALLETCONNECT_PROJECT_ID}
                       ethereumClient={ethereumClient}
-                      defaultChain={EVM_CHAIN_CONFIGS.find(c => equalsIgnoreCase(c._id, chain)) || _.head(EVM_CHAIN_CONFIGS)}
+                      // defaultChain={EVM_CHAIN_CONFIGS.find(c => equalsIgnoreCase(c._id, chain)) || _.head(EVM_CHAIN_CONFIGS)}
                       termsOfServiceUrl={process.env.NEXT_PUBLIC_TERMS_URL}
                       privacyPolicyUrl={process.env.NEXT_PUBLIC_PRIVACY_POLICY_URL}
                       explorerRecommendedWalletIds={
