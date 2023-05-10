@@ -15,7 +15,8 @@ import { BiMessageError, BiMessageCheck, BiMessageDetail, BiEditAlt, BiCheckCirc
 import { IoInformationCircleOutline, IoWarning } from 'react-icons/io5'
 
 import Options from './options'
-import WarningGasVsAmount from './warning-gas-vs-amount'
+// import WarningGasVsAmount from './warning-gas-vs-amount'
+import WarningSend from './warning-send'
 import ActionRequired from '../action-required'
 import Alert from '../alerts'
 import Balance from '../balance'
@@ -2021,179 +2022,182 @@ export default () => {
                         chains_data && assets_data &&
                         (
                           <>
-                            <div className="space-y-2.5">
-                              <div className="flex items-center justify-between space-x-2">
-                                <div className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                  You send
-                                </div>
-                                {
-                                  source_chain_data && asset &&
-                                  (
-                                    <div className="flex items-center justify-between space-x-2">
-                                      <div className="flex items-center space-x-1">
-                                        <div className="text-slate-400 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                          Balance:
-                                        </div>
-                                        <button
-                                          disabled={disabled || (source_contract_data?.contract_address === constants.AddressZero ? !fees : false)}
-                                          onClick={
-                                            () => {
-                                              if (utils.parseUnits(max_amount || '0', source_decimals).toBigInt() > 0) {
-                                                setBridge(
-                                                  {
-                                                    ...bridge,
-                                                    amount: max_amount,
-                                                  }
-                                                )
+                            <div className="space-y-2">
+                              <div className="space-y-2.5">
+                                <div className="flex items-center justify-between space-x-2">
+                                  <div className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                    You send
+                                  </div>
+                                  {
+                                    source_chain_data && asset &&
+                                    (
+                                      <div className="flex items-center justify-between space-x-2">
+                                        <div className="flex items-center space-x-1">
+                                          <div className="text-slate-400 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                            Balance:
+                                          </div>
+                                          <button
+                                            disabled={disabled || (source_contract_data?.contract_address === constants.AddressZero ? !fees : false)}
+                                            onClick={
+                                              () => {
+                                                if (utils.parseUnits(max_amount || '0', source_decimals).toBigInt() > 0) {
+                                                  setBridge(
+                                                    {
+                                                      ...bridge,
+                                                      amount: max_amount,
+                                                    }
+                                                  )
 
-                                                if (['string', 'number'].includes(typeof max_amount)) {
-                                                  if (max_amount && !['0', '0.0'].includes(max_amount)) {
-                                                    calculateAmountReceived(max_amount)
-                                                    checkApprovedNeeded(max_amount)
-                                                  }
-                                                  else {
-                                                    setEstimatedValues(
-                                                      {
-                                                        amountReceived: '0',
-                                                        routerFee: '0',
-                                                        isNextAsset: receiveLocal,
-                                                      }
-                                                    )
-                                                    setIsApproveNeeded(false)
+                                                  if (['string', 'number'].includes(typeof max_amount)) {
+                                                    if (max_amount && !['0', '0.0'].includes(max_amount)) {
+                                                      calculateAmountReceived(max_amount)
+                                                      checkApprovedNeeded(max_amount)
+                                                    }
+                                                    else {
+                                                      setEstimatedValues(
+                                                        {
+                                                          amountReceived: '0',
+                                                          routerFee: '0',
+                                                          isNextAsset: receiveLocal,
+                                                        }
+                                                      )
+                                                      setIsApproveNeeded(false)
+                                                    }
                                                   }
                                                 }
                                               }
                                             }
-                                          }
-                                        >
-                                          <Balance
-                                            chainId={source_chain_data.chain_id}
-                                            asset={asset}
-                                            contractAddress={source_contract_data?.contract_address}
-                                            decimals={source_decimals}
-                                            symbol={source_symbol}
-                                            hideSymbol={false}
-                                            trigger={balanceTrigger}
-                                          />
-                                        </button>
+                                          >
+                                            <Balance
+                                              chainId={source_chain_data.chain_id}
+                                              asset={asset}
+                                              contractAddress={source_contract_data?.contract_address}
+                                              decimals={source_decimals}
+                                              symbol={source_symbol}
+                                              hideSymbol={false}
+                                              trigger={balanceTrigger}
+                                            />
+                                          </button>
+                                        </div>
                                       </div>
-                                    </div>
-                                  )
-                                }
-                              </div>
-                              <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-0.5 py-2.5 px-3">
-                                <div className="flex items-center justify-between space-x-2">
-                                  <SelectAsset
-                                    disabled={disabled}
-                                    value={asset}
-                                    onSelect={
-                                      (a, s) => {
-                                        setBridge(
-                                          {
-                                            ...bridge,
-                                            asset: a,
-                                            symbol: s,
-                                            amount: a !== asset || !equalsIgnoreCase(s, symbol) ? null : amount,
-                                          }
-                                        )
-
-                                        if (a !== asset) {
-                                          getBalances(source_chain)
-                                          getBalances(destination_chain)
-                                        }
-                                      }
-                                    }
-                                    chain={source_chain}
-                                    destinationChain={destination_chain}
-                                    isBridge={true}
-                                    showNextAssets={showNextAssets}
-                                    showNativeAssets={true}
-                                    fixed={['pool'].includes(source)}
-                                    data={{ ...source_asset_data, ...source_contract_data }}
-                                    className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
-                                  />
-                                  <div className="space-y-0">
-                                    <DebounceInput
-                                      debounceTimeout={750}
-                                      size="small"
-                                      type="number"
-                                      placeholder="0.00"
-                                      disabled={disabled || !asset}
-                                      value={['string', 'number'].includes(typeof amount) && ![''].includes(amount) && !isNaN(amount) ? amount : ''}
-                                      onChange={
-                                        e => {
-                                          const regex = /^[0-9.\b]+$/
-                                          let value
-
-                                          if (e.target.value === '' || regex.test(e.target.value)) {
-                                            value = e.target.value
-                                          }
-
-                                          if (typeof value === 'string') {
-                                            if (value.startsWith('.')) {
-                                              value = `0${value}`
-                                            }
-                                            value = numberToFixed(value, source_decimals || 18)
-                                          }
-
+                                    )
+                                  }
+                                </div>
+                                <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-0.5 py-2.5 px-3">
+                                  <div className="flex items-center justify-between space-x-2">
+                                    <SelectAsset
+                                      disabled={disabled}
+                                      value={asset}
+                                      onSelect={
+                                        (a, s) => {
                                           setBridge(
                                             {
                                               ...bridge,
-                                              amount: value,
+                                              asset: a,
+                                              symbol: s,
+                                              amount: a !== asset || !equalsIgnoreCase(s, symbol) ? null : amount,
                                             }
                                           )
 
-                                          if (['string', 'number'].includes(typeof value)) {
-                                            if (value && !['0', '0.0'].includes(value)) {
-                                              calculateAmountReceived(value)
-                                              checkApprovedNeeded(value)
-                                            }
-                                            else {
-                                              setEstimatedValues(
-                                                {
-                                                  amountReceived: '0',
-                                                  routerFee: '0',
-                                                  isNextAsset: receiveLocal,
-                                                }
-                                              )
-                                              setIsApproveNeeded(false)
-                                            }
+                                          if (a !== asset) {
+                                            getBalances(source_chain)
+                                            getBalances(destination_chain)
                                           }
                                         }
                                       }
-                                      onWheel={e => e.target.blur()}
-                                      onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                                      className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg 3xl:text-2xl font-semibold text-right ${amount && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin ? 'py-0' : 'py-1.5'}`}
+                                      chain={source_chain}
+                                      destinationChain={destination_chain}
+                                      isBridge={true}
+                                      showNextAssets={showNextAssets}
+                                      showNativeAssets={true}
+                                      fixed={['pool'].includes(source)}
+                                      data={{ ...source_asset_data, ...source_contract_data }}
+                                      className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
                                     />
-                                    {/*
-                                      relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 &&
-                                      (
-                                        <div className="text-slate-400 dark:text-slate-500 text-right">
-                                          <span className="text-xs 3xl:text-xl font-medium mr-1.5">
-                                            + Relayer fee
-                                          </span>
-                                          <DecimalsFormat
-                                            value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
-                                            className="text-xs 3xl:text-xl font-medium"
-                                          />
-                                        </div>
-                                      )
-                                    */}
-                                    {
-                                      amount && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin &&
-                                      (
-                                        <div className="text-slate-400 dark:text-slate-500 text-right">
-                                          <DecimalsFormat
-                                            value={(Number(amount) + (relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? Number(relayer_fee) : 0)) * source_asset_data.price}
-                                            prefix={currency_symbol}
-                                            className="text-xs 3xl:text-xl font-medium"
-                                          />
-                                        </div>
-                                      )
-                                    }
+                                    <div className="space-y-0">
+                                      <DebounceInput
+                                        debounceTimeout={750}
+                                        size="small"
+                                        type="number"
+                                        placeholder="0.00"
+                                        disabled={disabled || !asset}
+                                        value={['string', 'number'].includes(typeof amount) && ![''].includes(amount) && !isNaN(amount) ? amount : ''}
+                                        onChange={
+                                          e => {
+                                            const regex = /^[0-9.\b]+$/
+                                            let value
+
+                                            if (e.target.value === '' || regex.test(e.target.value)) {
+                                              value = e.target.value
+                                            }
+
+                                            if (typeof value === 'string') {
+                                              if (value.startsWith('.')) {
+                                                value = `0${value}`
+                                              }
+                                              value = numberToFixed(value, source_decimals || 18)
+                                            }
+
+                                            setBridge(
+                                              {
+                                                ...bridge,
+                                                amount: value,
+                                              }
+                                            )
+
+                                            if (['string', 'number'].includes(typeof value)) {
+                                              if (value && !['0', '0.0'].includes(value)) {
+                                                calculateAmountReceived(value)
+                                                checkApprovedNeeded(value)
+                                              }
+                                              else {
+                                                setEstimatedValues(
+                                                  {
+                                                    amountReceived: '0',
+                                                    routerFee: '0',
+                                                    isNextAsset: receiveLocal,
+                                                  }
+                                                )
+                                                setIsApproveNeeded(false)
+                                              }
+                                            }
+                                          }
+                                        }
+                                        onWheel={e => e.target.blur()}
+                                        onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                                        className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg 3xl:text-2xl font-semibold text-right ${amount && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin ? 'py-0' : 'py-1.5'}`}
+                                      />
+                                      {/*
+                                        relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 &&
+                                        (
+                                          <div className="text-slate-400 dark:text-slate-500 text-right">
+                                            <span className="text-xs 3xl:text-xl font-medium mr-1.5">
+                                              + Relayer fee
+                                            </span>
+                                            <DecimalsFormat
+                                              value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
+                                              className="text-xs 3xl:text-xl font-medium"
+                                            />
+                                          </div>
+                                        )
+                                      */}
+                                      {
+                                        amount && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin &&
+                                        (
+                                          <div className="text-slate-400 dark:text-slate-500 text-right">
+                                            <DecimalsFormat
+                                              value={(Number(amount) + (relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? Number(relayer_fee) : 0)) * source_asset_data.price}
+                                              prefix={currency_symbol}
+                                              className="text-xs 3xl:text-xl font-medium"
+                                            />
+                                          </div>
+                                        )
+                                      }
+                                    </div>
                                   </div>
                                 </div>
                               </div>
+                              <WarningSend data={bridge} />
                             </div>
                             {source_chain && destination_chain && asset && !checkSupport() ?
                               <div className="text-slate-400 dark:text-slate-200 3xl:text-2xl font-medium text-center">
