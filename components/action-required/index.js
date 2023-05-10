@@ -205,14 +205,7 @@ export default (
   const source_asset_image = source_contract_data?.image || source_asset_data?.image
   const source_gas_native_token = _.head(source_chain_data?.provider_params)?.nativeCurrency
   const source_gas_decimals = source_gas_native_token?.decimals || 18
-  const source_amount =
-    origin_transacting_amount &&
-    Number(
-      utils.formatUnits(
-        BigInt(origin_transacting_amount).toString(),
-        source_decimals,
-      )
-    )
+  const source_amount = origin_transacting_amount && Number(utils.formatUnits(BigInt(origin_transacting_amount).toString(), source_decimals))
 
   const destination_chain_data = getChain(destination_domain, chains_data)
   const _asset_data = getAsset(source_asset_data?.id, assets_data, destination_chain_data?.chain_id)
@@ -252,15 +245,7 @@ export default (
   const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol
   const destination_decimals = destination_contract_data?.decimals || 18
   const destination_asset_image = destination_contract_data?.image || destination_asset_data?.image
-  const destination_amount =
-    destination_transacting_amount ?
-      Number(
-        utils.formatUnits(
-          BigInt(destination_transacting_amount).toString(),
-          destination_decimals,
-        )
-      ) :
-      source_amount * (1 - ROUTER_FEE_PERCENT / 100)
+  const destination_amount = destination_transacting_amount ? Number(utils.formatUnits(BigInt(destination_transacting_amount).toString(), destination_decimals)) : source_amount * (1 - ROUTER_FEE_PERCENT / 100)
 
   const _slippage = slippage / 100
 
@@ -271,10 +256,6 @@ export default (
 
   const gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, source_gas_native_token?.symbol))
 
-  const {
-    price,
-  } = { ...gas_token_data }
-
   relayer_fee =
     relayer_fees ?
       _.sum(
@@ -282,15 +263,15 @@ export default (
           .map(([k, v]) =>
             Number(utils.formatUnits(v, k === constants.AddressZero ? source_gas_decimals : source_decimals)) *
             (relayerFeeAssetType === 'transacting' ?
-              k === constants.AddressZero ? price / source_asset_data?.price : 1 :
-              k === constants.AddressZero ? 1 : source_asset_data?.price / price
+              k === constants.AddressZero ? gas_token_data?.price / source_asset_data?.price : 1 :
+              k === constants.AddressZero ? 1 : source_asset_data?.price / gas_token_data?.price
             )
           )
       )
       .toFixed(relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals) :
       utils.formatUnits(relayer_fee || '0', source_gas_decimals)
 
-  const relayer_fee_to_bump = relayer_fee && newRelayerFee ? Number(newRelayerFee) - Number(relayer_fee) : null
+  const relayer_fee_to_bump = relayer_fee && newRelayerFee ? (Number(newRelayerFee) - Number(relayer_fee)).toFixed(relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals) : null
 
   if (error_status === XTransferErrorStatus.LowRelayerFee) {
     console.log(
@@ -435,14 +416,10 @@ export default (
         destinationTokenAddress = _destination_contract_data?.next_asset?.contract_address || destinationTokenAddress
       }
 
-      const amount =
-        utils.parseUnits(
-          (_amount || 0).toString(),
-          source_decimals,
-        )
-        .toBigInt()
+      const amount = utils.parseUnits((_amount || 0).toString(), source_decimals).toBigInt()
 
-      let manual, _estimatedValues
+      let manual
+      let _estimatedValues
 
       try {
         setEstimatedValues(null)
@@ -495,12 +472,7 @@ export default (
                       )
                   } catch (error) {}
 
-                  return (
-                    [
-                      k,
-                      v,
-                    ]
-                  )
+                  return [k, v]
                 })
             )
 
@@ -546,14 +518,13 @@ export default (
       if (manual) {
         const routerFee = parseFloat((Number(_amount) * ROUTER_FEE_PERCENT / 100).toFixed(source_decimals))
 
-        _estimatedValues =
-          {
-            amountReceived: Number(_amount) - routerFee,
-            routerFee,
-            destinationSlippage: '0',
-            originSlippage: '0',
-            isNextAsset: typeof receive_local === 'boolean' ? receive_local : false,
-          }
+        _estimatedValues = {
+          amountReceived: Number(_amount) - routerFee,
+          routerFee,
+          destinationSlippage: '0',
+          originSlippage: '0',
+          isNextAsset: typeof receive_local === 'boolean' ? receive_local : false,
+        }
 
         setEstimatedValues(_estimatedValues)
       }
@@ -673,7 +644,7 @@ export default (
           break
         case XTransferErrorStatus.LowRelayerFee:
           try {
-            const relayer_fee_to_bump = relayer_fee && newRelayerFee ? (Number(newRelayerFee) - Number(relayer_fee)).toFixed(18) : null
+            const relayer_fee_to_bump = relayer_fee && newRelayerFee ? (Number(newRelayerFee) - Number(relayer_fee)).toFixed(relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals) : null
 
             params = {
               domainId: origin_domain,
@@ -801,11 +772,8 @@ export default (
   }
 
   const disabled = forceDisabled || updating
-
   const chain_data = error_status === XTransferErrorStatus.LowSlippage ? destination_chain_data : source_chain_data
-
   const wrong_chain = chain_id !== chain_data?.chain_id && !updateResponse
-
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
 
   return (
@@ -882,7 +850,6 @@ export default (
                                 onChange={
                                   e => {
                                     const regex = /^[0-9.\b]+$/
-
                                     let value
 
                                     if (e.target.value === '' || regex.test(e.target.value)) {
@@ -893,22 +860,13 @@ export default (
                                       if (value.startsWith('.')) {
                                         value = `0${value}`
                                       }
-
                                       if (!isNaN(value)) {
                                         value = Number(value)
                                       }
                                     }
 
-                                    value =
-                                      value <= 0 || value > 100 ?
-                                        DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE :
-                                        value
-
-                                    setNewSlippage(
-                                      value && !isNaN(value) ?
-                                        parseFloat(Number(value).toFixed(2)) :
-                                        value
-                                    )
+                                    value = value <= 0 || value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
+                                    setNewSlippage(value && !isNaN(value) ? parseFloat(Number(value).toFixed(2)) : value)
                                   }
                                 }
                                 onWheel={e => e.target.blur()}
@@ -1209,15 +1167,7 @@ export default (
                           return (
                             <Alert
                               key={i}
-                              color={
-                                `${
-                                  status === 'failed' ?
-                                    'bg-red-400 dark:bg-red-500' :
-                                    status === 'success' ?
-                                      'bg-green-400 dark:bg-green-500' :
-                                      'bg-blue-400 dark:bg-blue-500'
-                                } text-white text-base`
-                              }
+                              color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
                               icon={
                                 status === 'failed' ?
                                   <BiMessageError
