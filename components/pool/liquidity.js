@@ -155,7 +155,12 @@ export default (
 
   const [responses, setResponses] = useState([])
 
-  useEffect(() => reset(), [action, pool])
+  useEffect(
+    () => {
+      reset()
+    },
+    [action, pool],
+  )
 
   useEffect(
     () => {
