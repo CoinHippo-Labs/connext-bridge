@@ -6,10 +6,11 @@ import moment from 'moment'
 import { FixedNumber, utils } from 'ethers'
 import { DebounceInput } from 'react-debounce-input'
 import { TailSpin, Watch, RotatingSquare, Oval } from 'react-loader-spinner'
-import { Tooltip } from '@material-tailwind/react'
+import { Tooltip, Alert as AlertNotification } from '@material-tailwind/react'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
 import { BiPlus, BiMessageError, BiMessageCheck, BiMessageDetail, BiInfoCircle } from 'react-icons/bi'
+import { HiOutlineCheckCircle } from 'react-icons/hi'
 import { IoWarning } from 'react-icons/io5'
 import { BsArrowRight } from 'react-icons/bs'
 
@@ -152,12 +153,9 @@ export default (
   const [callProcessing, setCallProcessing] = useState(null)
   const [callResponse, setCallResponse] = useState(null)
 
-  useEffect(
-    () => {
-      reset()
-    },
-    [action, pool],
-  )
+  const [responses, setResponses] = useState([])
+
+  useEffect(() => reset(), [action, pool])
 
   useEffect(
     () => {
@@ -172,7 +170,6 @@ export default (
         } = { ...pool }
 
         const chain_data = getChain(chain, chains_data)
-
         const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
 
         const {
@@ -287,7 +284,6 @@ export default (
           } = { ...pool }
 
           const chain_data = getChain(chain, chains_data)
-
           const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
 
           const {
@@ -469,8 +465,11 @@ export default (
                       }
                   )
 
-                  failed = !status
+                  if (status) {
+                    setResponses(_.uniqBy(_.concat(responses, { message: `Approve ${x_asset_data?.symbol} successful`, tx_hash: hash }), 'tx_hash'))
+                  }
 
+                  failed = !status
                   setApproveProcessing(false)
                   setApproving(false)
                 }
@@ -532,8 +531,11 @@ export default (
                         }
                     )
 
-                    failed = !status
+                    if (status) {
+                      setResponses(_.uniqBy(_.concat(responses, { message: `Approve ${y_asset_data?.symbol} successful`, tx_hash: hash }), 'tx_hash'))
+                    }
 
+                    failed = !status
                     setApproveProcessing(false)
                     setApproving(false)
                   }
@@ -630,16 +632,18 @@ export default (
                     status,
                   } = { ...add_receipt }
 
+                  const response = {
+                    status: failed ? 'failed' : 'success',
+                    message: failed ? `Failed to add ${symbol} liquidity` : `Add ${symbol} liquidity successful`,
+                    tx_hash: hash,
+                  }
+
+                  if (response.status === 'success') {
+                    setResponses(_.uniqBy(_.concat(responses, response), 'tx_hash'))
+                  }
+
                   failed = !status
-
-                  setCallResponse(
-                    {
-                      status: failed ? 'failed' : 'success',
-                      message: failed ? `Failed to add ${symbol} liquidity` : `Add ${symbol} liquidity successful`,
-                      tx_hash: hash,
-                    }
-                  )
-
+                  setCallResponse(response)
                   success = true
                 }
               } catch (error) {
@@ -685,7 +689,6 @@ export default (
             }
 
             const is_one_token_withdraw = withdrawOption?.endsWith('_only')
-
             const _amount = utils.parseUnits((amount || 0).toString(), 18).toString()
 
             let _amounts =
@@ -744,8 +747,11 @@ export default (
                       }
                   )
 
-                  failed = !status
+                  if (status) {
+                    setResponses(_.uniqBy(_.concat(responses, { message: `Approve ${symbol} successful`, tx_hash: hash }), 'tx_hash'))
+                  }
 
+                  failed = !status
                   setApproveProcessing(false)
                   setApproving(false)
                 }
@@ -827,16 +833,18 @@ export default (
                     status,
                   } = { ...remove_receipt }
 
+                  const response = {
+                    status: failed ? 'failed' : 'success',
+                    message: failed ? `Failed to remove ${symbol} liquidity` : `Remove ${symbol} liquidity successful`,
+                    tx_hash: hash,
+                  }
+
+                  if (response.status === 'success') {
+                    setResponses(_.uniqBy(_.concat(responses, response), 'tx_hash'))
+                  }
+
                   failed = !status
-
-                  setCallResponse(
-                    {
-                      status: failed ? 'failed' : 'success',
-                      message: failed ? `Failed to remove ${symbol} liquidity` : `Remove ${symbol} liquidity successful`,
-                      tx_hash: hash,
-                    }
-                  )
-
+                  setCallResponse(response)
                   success = true
                 }
               } catch (error) {
@@ -932,7 +940,6 @@ export default (
         } = { ...pool }
 
         const chain_data = getChain(chain, chains_data)
-
         const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
 
         const {
@@ -1265,9 +1272,7 @@ export default (
   } = { ...options }
 
   const selected = !!(chain && asset)
-
   const no_pool = selected && !getAsset(asset, pool_assets_data, chain_id)
-
   const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
 
   const {
@@ -1359,7 +1364,6 @@ export default (
   const y_balance_amount = y_asset_data && getBalance(chain_id, y_asset_data.contract_address, balances_data)?.amount
 
   const pool_loading = selected && !no_pool && !error && !pool_data
-
   const user_pool_data = pool_data && toArray(userPoolsData).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
 
   const {
@@ -1367,7 +1371,6 @@ export default (
   } = { ...user_pool_data }
 
   const x_remove_amount = equalsIgnoreCase(adopted?.address, contract_address) ? _.head(removeAmounts) : _.last(removeAmounts)
-
   const y_remove_amount = equalsIgnoreCase(adopted?.address, contract_address) ? _.last(removeAmounts) : _.head(removeAmounts)
 
   const position_loading = selected && !no_pool && !error && (!userPoolsData || pool_loading)
@@ -1402,13 +1405,9 @@ export default (
   local = { ...local, asset_data: _.last(pool_tokens_data) }
 
   const native_asset = !adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local
-
   const wrapped_asset = adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local
-
   const native_amount = Number(native_asset?.balance || '0')
-
   const wrapped_amount = Number(wrapped_asset?.balance || '0')
-
   const total_amount = native_amount + wrapped_amount
 
   const {
@@ -1433,9 +1432,7 @@ export default (
       'y'
 
   const disabled = !pool_data || error || calling || approving
-
   const wrong_chain = wallet_chain_id !== chain_id && !callResponse
-
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
 
   return (
@@ -2738,6 +2735,54 @@ export default (
               </div>
             </>
           }
+          {toArray(responses).length > 0 && (
+            <div className="flex flex-col space-y-1">
+              {toArray(responses).map((d, i) => {
+                const {
+                  message,
+                  tx_hash,
+                } = { ...d }
+
+                return (
+                  <AlertNotification
+                    key={i}
+                    icon={
+                      <HiOutlineCheckCircle
+                        size={26}
+                        className="mb-0.5"
+                      />
+                    }
+                    animate={{ mount: { y: 0 }, unmount: { y: 32 } }}
+                    dismissible={{ onClose: () => setResponses(responses.filter(d => d.tx_hash !== tx_hash)) }}
+                    className="alert-box flex"
+                  >
+                    <div className="flex items-center justify-between space-x-2">
+                      <span className="leading-5 break-words text-sm 3xl:text-xl font-medium">
+                        {ellipse(split(message, 'normal', ' ').join(' '), 128)}
+                      </span>
+                      <div className="flex items-center space-x-1 mt-0.5">
+                        {
+                          url && tx_hash &&
+                          (
+                            <a
+                              href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <TiArrowRight
+                                size={24}
+                                className="transform -rotate-45"
+                              />
+                            </a>
+                          )
+                        }
+                      </div>
+                    </div>
+                  </AlertNotification>
+                )
+              })}
+            </div>
+          )}
           {
             (_x_asset_data?.mintable || _x_asset_data?.wrapable || _x_asset_data?.wrapped) &&
             (
