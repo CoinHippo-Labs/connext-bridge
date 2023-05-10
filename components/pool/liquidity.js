@@ -2283,6 +2283,7 @@ export default (
                                 type="radio"
                                 value={value}
                                 checked={selected}
+                                onChange={() => {}}
                                 className={`w-4 3xl:w-5 h-4 3xl:h-5 ${_disabled ? 'cursor-not-allowed' : 'cursor-pointer'} text-blue-500 mt-0.5`}
                               />
                               <span className={`${selected ? 'font-bold' : 'text-slate-400 dark:text-slate-500 font-medium'} 3xl:text-xl`}>
