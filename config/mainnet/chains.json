@@ -87,7 +87,7 @@
     "chain_id": 137,
     "domain_id": "1886350457",
     "name": "Polygon",
-    "short_name": "MATIC",
+    "short_name": "POLY",
     "provider_params": [
       {
         "chainId": "0x89",

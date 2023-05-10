@@ -44,7 +44,7 @@
     "chain_id": 80001,
     "domain_id": "9991",
     "name": "Polygon",
-    "short_name": "MATIC",
+    "short_name": "POLY",
     "provider_params": [
       {
         "chainId": "0x13881",
