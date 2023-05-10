@@ -269,7 +269,7 @@ export default (
       Number(((Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100).toFixed(2)) :
       null
 
-  const gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d?.symbol, source_gas_native_token?.symbol))
+  const gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, source_gas_native_token?.symbol))
 
   const {
     price,
