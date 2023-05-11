@@ -175,7 +175,7 @@ export default (
         } = { ...pool }
 
         const chain_data = getChain(chain, chains_data)
-        const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
+        const pool_data = toArray(pools_data).find(p => p.chain_data?.id === chain && p.asset_data?.id === asset)
 
         const {
           contract_data,
@@ -192,7 +192,8 @@ export default (
           setPriceImpactAdd(true)
           setCallResponse(null)
 
-          let _amountX, _amountY
+          let _amountX
+          let _amountY
 
           try {
             _amountX = utils.parseUnits((amountX || 0).toString(), adopted?.decimals || 18).toString()
@@ -424,9 +425,28 @@ export default (
               break
             }
 
+            let _amountX
+            let _amountY
+            const x_decimals = x_asset_data?.decimals || 18
+            const y_decimals = y_asset_data?.decimals || 18
+
+            if (amountX && typeof amountX === 'string' && x_decimals === 18 && _.last(split(amountX, 'normal', '.')).length === x_decimals) {
+              _amountX = amountX.substring(0, amountX.length - 1)
+            }
+            else {
+              _amountX = amountX
+            }
+
+            if (amountY && typeof amountY === 'string' && y_decimals === 18 && _.last(split(amountY, 'normal', '.')).length === y_decimals) {
+              _amountY = amountY.substring(0, amountY.length - 1)
+            }
+            else {
+              _amountY = amountY
+            }
+
             let amounts = [
-              utils.parseUnits((amountX || 0).toString(), x_asset_data?.decimals || 18).toString(),
-              utils.parseUnits((amountY || 0).toString(), y_asset_data?.decimals || 18).toString(),
+              utils.parseUnits((_amountX || 0).toString(), x_decimals).toString(),
+              utils.parseUnits((_amountY || 0).toString(), y_decimals).toString(),
             ]
 
             const minToMint = '0'
@@ -694,7 +714,16 @@ export default (
             }
 
             const is_one_token_withdraw = withdrawOption?.endsWith('_only')
-            const _amount = utils.parseUnits((amount || 0).toString(), 18).toString()
+            let _amount
+
+            if (amount && typeof amount === 'string' && _.last(split(amount, 'normal', '.')).length === 18) {
+              _amount = amount.substring(0, amount.length - 1)
+            }
+            else {
+              _amount = amount
+            }
+
+            _amount = utils.parseUnits((_amount || 0).toString(), 18).toString()
 
             let _amounts =
               removeAmounts?.length > 1 &&
@@ -1940,6 +1969,7 @@ export default (
                     </Wallet> :
                     callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse ?
                       toArray(callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse)
+                        .filter(r => !['success'].includes(r.status))
                         .map((r, i) => {
                           const {
                             status,
@@ -2600,6 +2630,7 @@ export default (
                     </Wallet> :
                     callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse ?
                       toArray(callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse)
+                        .filter(r => !['success'].includes(r.status))
                         .map((r, i) => {
                           const {
                             status,
@@ -2762,7 +2793,7 @@ export default (
                     dismissible={{ onClose: () => setResponses(responses.filter(d => d.tx_hash !== tx_hash)) }}
                     className="alert-box flex"
                   >
-                    <div className="flex items-center justify-between space-x-2">
+                    <div className="flex items-start justify-between space-x-2">
                       <span className="leading-5 break-words text-sm 3xl:text-xl font-medium">
                         {ellipse(split(message, 'normal', ' ').join(' '), 128)}
                       </span>

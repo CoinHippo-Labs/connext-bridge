@@ -17,6 +17,7 @@ import { IoInformationCircleOutline, IoWarning } from 'react-icons/io5'
 import Options from './options'
 // import WarningGasVsAmount from './warning-gas-vs-amount'
 import WarningSend from './warning-send'
+import WarningFeeRatio from './warning-fee-ratio'
 import ActionRequired from '../action-required'
 import Alert from '../alerts'
 import Balance from '../balance'
@@ -1585,6 +1586,7 @@ export default () => {
   const max_amount = source_amount && utils.formatUnits(utils.parseUnits(source_amount, source_decimals).toBigInt() - utils.parseUnits(relayer_fee && source_contract_data?.contract_address === constants.AddressZero ? relayer_fee : '0', source_decimals).toBigInt(), source_decimals)
 
   const relayer_fee_to_deduct = relayerFeeAssetType === 'transacting' && Number(relayer_fee) > 0 ? relayer_fee : 0
+  const fee_amount_ratio = relayer_fee_to_deduct > 0 && Number(amount) > 0 ? ((router_fee || 0) + relayer_fee_to_deduct) / Number(amount) : 0
   const estimated_received = estimatedValues?.amountReceived ? estimatedValues.amountReceived - relayer_fee_to_deduct : Number(amount) > 0 && typeof router_fee === 'number' ? Number(amount) - router_fee - relayer_fee_to_deduct : null
   const estimated_slippage = estimatedValues?.destinationSlippage && estimatedValues?.originSlippage ? (Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100 : null
   const recipient_address = to || address
@@ -2617,29 +2619,6 @@ export default () => {
                                                       </div>
                                                     </Tooltip>
                                                   </div>
-                                                  {
-                                                    typeof slippage === 'number' && (estimated_slippage > slippage || slippage < 0.2 || slippage > 5.0) &&
-                                                    (
-                                                      <div className="flex items-start space-x-1">
-                                                        <IoWarning
-                                                          size={14}
-                                                          className="min-w-max 3xl:w-5 3xl:h-5 text-yellow-500 dark:text-yellow-400 mt-0.5"
-                                                        />
-                                                        <div className="text-yellow-500 dark:text-yellow-400 text-xs 3xl:text-xl">
-                                                          {estimated_slippage > slippage ?
-                                                            <>
-                                                              Slippage tolerance is too low
-                                                              <br />
-                                                              (use a larger amount or set tolerance higher)
-                                                            </> :
-                                                            slippage < 0.2 ?
-                                                              'Your transfer may not complete due to low slippage tolerance.' :
-                                                              'Your transfer may be frontrun due to high slippage tolerance.'
-                                                          }
-                                                        </div>
-                                                      </div>
-                                                    )
-                                                  }
                                                 </div>
                                               )
                                             }
@@ -2969,56 +2948,61 @@ export default () => {
                               </span>
                             </Alert> :
                             !xcall && !xcallResponse && !estimateResponse ?
-                              <button
-                                disabled={disabled || ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') || estimated_received <= 0}
-                                onClick={
-                                  () => {
-                                    setRecipientEditing(false)
-                                    setSlippageEditing(false)
-                                    call(relayer_fee)
-                                  }
-                                }
-                                className={
-                                  `w-full ${
-                                    disabled ?
-                                      'bg-blue-400 dark:bg-blue-500' :
-                                      ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') || estimated_received <= 0 ?
-                                        'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' :
-                                        'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
-                                  } rounded flex items-center ${
-                                    calling && !approving && callProcessing ?
-                                      'justify-center' :
-                                      'justify-center'
-                                  } text-white text-base 3xl:text-2xl py-3 sm:py-4 px-2 sm:px-3`
-                                }
-                              >
-                                <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
-                                  {
-                                    disabled &&
-                                    (
-                                      <TailSpin
-                                        width="20"
-                                        height="20"
-                                        color="white"
-                                      />
-                                    )
-                                  }
-                                  <span>
-                                    {calling ?
-                                      approving ?
-                                        approveProcessing ?
-                                          'Approving' :
-                                          'Please Approve' :
-                                        callProcessing ?
-                                          'Transfer in progress ...' :
-                                          typeof approving === 'boolean' ?
-                                            'Please Confirm' :
-                                            'Checking Approval' :
-                                      'Send'
+                              <div className="space-y-2">
+                                <button
+                                  disabled={disabled || ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') || estimated_received <= 0}
+                                  onClick={
+                                    () => {
+                                      setRecipientEditing(false)
+                                      setSlippageEditing(false)
+                                      call(relayer_fee)
                                     }
+                                  }
+                                  className={
+                                    `w-full ${
+                                      disabled ?
+                                        'bg-blue-400 dark:bg-blue-500' :
+                                        ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') || estimated_received <= 0 ?
+                                          'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' :
+                                          'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
+                                    } rounded flex items-center ${
+                                      calling && !approving && callProcessing ?
+                                        'justify-center' :
+                                        'justify-center'
+                                    } text-white text-base 3xl:text-2xl py-3 sm:py-4 px-2 sm:px-3`
+                                  }
+                                >
+                                  <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
+                                    {
+                                      disabled &&
+                                      (
+                                        <TailSpin
+                                          width="20"
+                                          height="20"
+                                          color="white"
+                                        />
+                                      )
+                                    }
+                                    <span>
+                                      {calling ?
+                                        approving ?
+                                          approveProcessing ?
+                                            'Approving' :
+                                            'Please Approve' :
+                                          callProcessing ?
+                                            'Transfer in progress ...' :
+                                            typeof approving === 'boolean' ?
+                                              'Please Confirm' :
+                                              'Checking Approval' :
+                                        'Send'
+                                      }
+                                    </span>
                                   </span>
-                                </span>
-                              </button> :
+                                </button>
+                                {!calling && (
+                                  <WarningFeeRatio ratio={fee_amount_ratio} />
+                                )}
+                              </div> :
                               (xcallResponse || (!xcall && approveResponse) || estimateResponse) &&
                               (toArray(xcallResponse || approveResponse || estimateResponse)
                                 .map((r, i) => {
