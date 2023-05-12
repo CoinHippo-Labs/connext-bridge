@@ -108,7 +108,7 @@ export default (
       }
       buttonClassName={`min-w-max ${disabled ? 'cursor-not-allowed' : ''} ${applied ? 'border border-blue-400 dark:border-blue-500' : ''} rounded flex items-center justify-center`}
       title={
-        <span className="normal-case text-base 3xl:text-lg">
+        <span className="normal-case text-lg 3xl:text-2xl">
           Advanced options
         </span>
       }
