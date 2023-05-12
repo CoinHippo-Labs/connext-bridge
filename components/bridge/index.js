@@ -1761,6 +1761,19 @@ export default () => {
                               }
                             }
                           />
+                          <div className="flex flex-wrap items-center justify-center">
+                            <span className="mr-1">
+                              To file a support request, please create a ticket on our discord
+                            </span>
+                            <a
+                              href={process.env.NEXT_PUBLIC_FEEDBACK_URL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline"
+                            >
+                              here
+                            </a>.
+                          </div>
                         </div> :
                         <div className="flex flex-col items-center space-y-1">
                           {time_spent_seconds > estimated_time_seconds ?
@@ -2877,6 +2890,9 @@ export default () => {
                                         )
                                       }
                                     </div>
+                                    {!calling && (
+                                      <WarningFeeRatio ratio={fee_amount_ratio} />
+                                    )}
                                   </div>
                                 </div>
                               )
@@ -2948,61 +2964,56 @@ export default () => {
                               </span>
                             </Alert> :
                             !xcall && !xcallResponse && !estimateResponse ?
-                              <div className="space-y-2">
-                                <button
-                                  disabled={disabled || ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') || estimated_received <= 0}
-                                  onClick={
-                                    () => {
-                                      setRecipientEditing(false)
-                                      setSlippageEditing(false)
-                                      call(relayer_fee)
-                                    }
+                              <button
+                                disabled={disabled || ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') || estimated_received <= 0}
+                                onClick={
+                                  () => {
+                                    setRecipientEditing(false)
+                                    setSlippageEditing(false)
+                                    call(relayer_fee)
                                   }
-                                  className={
-                                    `w-full ${
-                                      disabled ?
-                                        'bg-blue-400 dark:bg-blue-500' :
-                                        ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') || estimated_received <= 0 ?
-                                          'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' :
-                                          'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
-                                    } rounded flex items-center ${
-                                      calling && !approving && callProcessing ?
-                                        'justify-center' :
-                                        'justify-center'
-                                    } text-white text-base 3xl:text-2xl py-3 sm:py-4 px-2 sm:px-3`
+                                }
+                                className={
+                                  `w-full ${
+                                    disabled ?
+                                      'bg-blue-400 dark:bg-blue-500' :
+                                      ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') || estimated_received <= 0 ?
+                                        'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' :
+                                        'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
+                                  } rounded flex items-center ${
+                                    calling && !approving && callProcessing ?
+                                      'justify-center' :
+                                      'justify-center'
+                                  } text-white text-base 3xl:text-2xl py-3 sm:py-4 px-2 sm:px-3`
+                                }
+                              >
+                                <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
+                                  {
+                                    disabled &&
+                                    (
+                                      <TailSpin
+                                        width="20"
+                                        height="20"
+                                        color="white"
+                                      />
+                                    )
                                   }
-                                >
-                                  <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
-                                    {
-                                      disabled &&
-                                      (
-                                        <TailSpin
-                                          width="20"
-                                          height="20"
-                                          color="white"
-                                        />
-                                      )
+                                  <span>
+                                    {calling ?
+                                      approving ?
+                                        approveProcessing ?
+                                          'Approving' :
+                                          'Please Approve' :
+                                        callProcessing ?
+                                          'Transfer in progress ...' :
+                                          typeof approving === 'boolean' ?
+                                            'Please Confirm' :
+                                            'Checking Approval' :
+                                      'Send'
                                     }
-                                    <span>
-                                      {calling ?
-                                        approving ?
-                                          approveProcessing ?
-                                            'Approving' :
-                                            'Please Approve' :
-                                          callProcessing ?
-                                            'Transfer in progress ...' :
-                                            typeof approving === 'boolean' ?
-                                              'Please Confirm' :
-                                              'Checking Approval' :
-                                        'Send'
-                                      }
-                                    </span>
                                   </span>
-                                </button>
-                                {!calling && (
-                                  <WarningFeeRatio ratio={fee_amount_ratio} />
-                                )}
-                              </div> :
+                                </span>
+                              </button> :
                               (xcallResponse || (!xcall && approveResponse) || estimateResponse) &&
                               (toArray(xcallResponse || approveResponse || estimateResponse)
                                 .map((r, i) => {

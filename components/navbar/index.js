@@ -1195,8 +1195,8 @@ export default () => {
       {
         status_message &&
         (
-          <div className="w-full bg-blue-600 dark:bg-blue-700 overflow-x-auto flex items-center py-2 sm:py-3 px-2 sm:px-4 3xl:py-4 3xl:px-6">
-            <div className="flex flex-wrap items-center text-white text-2xs xl:text-sm font-bold space-x-1.5 xl:space-x-2 mx-auto 3xl:text-3xl 3xl:space-x-3">
+          <div className="w-full bg-blue-600 dark:bg-blue-700 overflow-x-auto flex items-center py-2 sm:py-3 px-2 sm:px-4 3xl:py-6 3xl:px-6">
+            <div className="flex flex-wrap items-center text-white text-xs xl:text-sm font-bold space-x-1.5 xl:space-x-2 mx-auto 3xl:text-2xl 3xl:space-x-3">
               <span className="status-message">
                 <Linkify>
                   {parse(status_message)}
