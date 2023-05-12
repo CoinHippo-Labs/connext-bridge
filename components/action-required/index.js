@@ -26,7 +26,7 @@ const is_staging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' || process.
 const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT)
 const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT)
 const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)
-const RELAYER_FEE_ASSET_TYPES = ['native', 'transacting']
+const RELAYER_FEE_ASSET_TYPES = ['transacting', 'native']
 
 export default (
   {
@@ -105,7 +105,9 @@ export default (
       }
       else if (data && !loaded) {
         const {
+          origin_transacting_asset,
           origin_transacting_amount,
+          relayer_fees,
         } = { ...data }
 
         switch (error_status) {
@@ -113,6 +115,7 @@ export default (
             calculateAmountReceived(origin_transacting_amount)
             break
           case XTransferErrorStatus.LowRelayerFee:
+            setRelayerFeeAssetType(relayer_fees?.[origin_transacting_asset] ? 'transacting' : 'native')
             estimate()
             break
           default:
@@ -1021,7 +1024,7 @@ export default (
                             value={relayer_fee_to_bump && relayer_fee_to_bump > 0 ? relayer_fee_to_bump : 0}
                             className="text-sm"
                           />
-                          {is_staging || true ?
+                          {is_staging ?
                             <select
                               disabled={disabled}
                               value={relayerFeeAssetType}
