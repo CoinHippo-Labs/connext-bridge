@@ -1586,7 +1586,7 @@ export default () => {
   const max_amount = source_amount && utils.formatUnits(utils.parseUnits(source_amount, source_decimals).toBigInt() - utils.parseUnits(relayer_fee && source_contract_data?.contract_address === constants.AddressZero ? relayer_fee : '0', source_decimals).toBigInt(), source_decimals)
 
   const relayer_fee_to_deduct = relayerFeeAssetType === 'transacting' && Number(relayer_fee) > 0 ? relayer_fee : 0
-  const fee_amount_ratio = relayer_fee_to_deduct > 0 && Number(amount) > 0 ? ((router_fee || 0) + relayer_fee_to_deduct) / Number(amount) : 0
+  const fee_amount_ratio = relayer_fee_to_deduct > 0 && Number(amount) > 0 ? (Number(router_fee || 0) + Number(relayer_fee_to_deduct)) / Number(amount) : 0
   const estimated_received = estimatedValues?.amountReceived ? estimatedValues.amountReceived - relayer_fee_to_deduct : Number(amount) > 0 && typeof router_fee === 'number' ? Number(amount) - router_fee - relayer_fee_to_deduct : null
   const estimated_slippage = estimatedValues?.destinationSlippage && estimatedValues?.originSlippage ? (Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100 : null
   const recipient_address = to || address
