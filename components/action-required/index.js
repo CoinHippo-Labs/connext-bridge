@@ -161,16 +161,6 @@ export default (
   } = { ...data }
 
   const source_chain_data = getChain(origin_domain, chains_data)
-
-  const {
-    explorer,
-  } = { ...source_chain_data }
-
-  const {
-    url,
-    transaction_path,
-  } = { ...explorer }
-
   const source_asset_data = getAsset(null, assets_data, source_chain_data?.chain_id, origin_transacting_asset)
 
   let source_contract_data = getContract(source_chain_data?.chain_id, source_asset_data?.contracts)
@@ -545,7 +535,8 @@ export default (
     setUpdating(true)
 
     if (sdk && signer) {
-      let failed, params
+      let failed
+      let params
 
       switch (error_status) {
         case XTransferErrorStatus.LowSlippage:
@@ -776,6 +767,16 @@ export default (
 
   const disabled = forceDisabled || updating
   const chain_data = error_status === XTransferErrorStatus.LowSlippage ? destination_chain_data : source_chain_data
+
+  const {
+    explorer,
+  } = { ...chain_data }
+
+  const {
+    url,
+    transaction_path,
+  } = { ...explorer }
+
   const wrong_chain = chain_id !== chain_data?.chain_id && !updateResponse
   const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
 
