@@ -2179,7 +2179,6 @@ export default (
                             }
 
                             setWithdrawPercent(value)
-
                             let _amount
 
                             try {
@@ -2227,55 +2226,39 @@ export default (
                       )
                     }
                   </div>
-                  {
-                    ['string', 'number'].includes(typeof lpTokenBalance) && utils.parseUnits((lpTokenBalance || 0).toString(), 18).toBigInt() > 0 &&
-                    (
-                      <div className="flex items-center justify-end space-x-2.5">
-                        {[0.25, 0.5, 0.75, 1.0].map((p, i) => (
-                          <div
-                            key={i}
-                            onClick={
-                              () => {
-                                setWithdrawPercent(p * 100)
+                  {['string', 'number'].includes(typeof lpTokenBalance) && utils.parseUnits((lpTokenBalance || 0).toString(), 18).toBigInt() > 0 && (
+                    <div className="flex items-center justify-end space-x-2.5">
+                      {[0.25, 0.5, 0.75, 1.0].map((p, i) => (
+                        <div
+                          key={i}
+                          onClick={
+                            () => {
+                              setWithdrawPercent(p * 100)
+                              let _amount
 
-                                let _amount
-
-                                try {
-                                  _amount =
-                                    p === 1 ?
-                                      (lpTokenBalance || 0).toString() :
-                                      FixedNumber.fromString((lpTokenBalance || 0).toString())
-                                        .mulUnsafe(
-                                          FixedNumber.fromString(p.toString())
-                                        )
-                                        .toString()
-                                } catch (error) {
-                                  _amount = '0'
-                                }
-
-                                setAmount(_amount)
+                              try {
+                                _amount = p === 1 ? (lpTokenBalance || 0).toString() : FixedNumber.fromString((lpTokenBalance || 0).toString()).mulUnsafe(FixedNumber.fromString(p.toString())).toString()
+                              } catch (error) {
+                                _amount = '0'
                               }
+
+                              setAmount(_amount)
                             }
-                            className={
-                              `${
-                                disabled || !['string', 'number'].includes(typeof lpTokenBalance) ?
-                                  'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' :
-                                  FixedNumber.fromString((lpTokenBalance || 0).toString())
-                                    .mulUnsafe(
-                                      FixedNumber.fromString(p.toString())
-                                    )
-                                    .toString() === amount ?
-                                    'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' :
-                                    'bg-slate-100 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white 3xl:text-xl font-medium'
-                              } rounded text-xs py-0.5 px-1.5`
-                            }
-                          >
-                            {p * 100} %
-                          </div>
-                        ))}
-                      </div>
-                    )
-                  }
+                          }
+                          className={
+                            `${disabled || !['string', 'number'].includes(typeof lpTokenBalance) ?
+                              'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' :
+                              FixedNumber.fromString((lpTokenBalance || 0).toString()).mulUnsafe(FixedNumber.fromString(p.toString())).toString() === amount ?
+                                'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' :
+                                'bg-slate-100 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white 3xl:text-xl font-medium'
+                            } rounded text-xs py-0.5 px-1.5`
+                          }
+                        >
+                          {p * 100} %
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 {
                   x_asset_data && y_asset_data &&
