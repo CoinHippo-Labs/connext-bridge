@@ -99,7 +99,7 @@ export default (
   } = { ...wallet }
   const {
     chain_id,
-    provider,
+    ethereum_provider,
     signer,
     address,
   } = { ...wallet_data }
@@ -422,7 +422,7 @@ export default (
 
   const disabled = minting || withdrawing
 
-  const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
+  const is_walletconnect = ethereum_provider?.constructor?.name === 'WalletConnectProvider'
 
   return (
     asset_data &&
