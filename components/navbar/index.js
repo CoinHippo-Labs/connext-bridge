@@ -112,7 +112,7 @@ export default () => {
     default_chain_id,
     chain_id,
     provider,
-    browser_provider,
+    ethereum_provider,
     signer,
     address,
   } = { ...wallet_data }
@@ -472,7 +472,7 @@ export default () => {
 
       update()
     },
-    [sdk, provider, browser_provider, signer, address, currentAddress],
+    [sdk, provider, provider, signer, address, currentAddress],
   )
 
   // router asset balances
@@ -1088,8 +1088,8 @@ export default () => {
   let walletImageName
   let walletImageClassName = ''
 
-  if (provider) {
-    const wallet_name = provider.constructor?.name?.toLowerCase()
+  if (ethereum_provider) {
+    const wallet_name = ethereum_provider.constructor?.name?.toLowerCase()
 
     if (wallet_name.includes('walletconnect')) {
       walletImageName = 'walletconnect.png'
@@ -1102,7 +1102,7 @@ export default () => {
       walletImageName = 'coinbase.png'
       walletImageClassName = 'rounded-lg'
     }
-    else if (provider.isMetaMask) {
+    else if (ethereum_provider.isMetaMask) {
       walletImageName = 'metamask.png'
       walletImageClassName = 'w-4 h-4'
     }
@@ -1121,7 +1121,7 @@ export default () => {
           </div>
           <div className="flex items-center justify-end 3xl:space-x-4">
             {
-              browser_provider &&
+              provider &&
               (
                 <Chains
                   chain_id={chain_id}
@@ -1129,7 +1129,7 @@ export default () => {
               )
             }
             {
-              browser_provider && address &&
+              provider && address &&
               (
                 <div className={`hidden sm:flex lg:hidden xl:flex items-center border border-slate-200 dark:border-slate-800 rounded-sm cursor-pointer whitespace-nowrap tracking-tight text-slate-500 dark:text-slate-500 font-semibold space-x-1.5 mx-2 pr-1.5 ${walletImageName ? 'rounded-l-full pl-0' : 'pl-2'}`}>
                   {
@@ -1170,11 +1170,8 @@ export default () => {
               )
             }
             <div className="mx-0">
-              <Wallet
-                mainController={true}
-                connectChainId={default_chain_id}
-              >
-                {!browser_provider ?
+              <Wallet connectChainId={default_chain_id}>
+                {!provider ?
                   <div className="border border-slate-400 dark:border-slate-600 rounded whitespace-nowrap text-slate-500 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300 3xl:text-xl font-bold mx-2 py-1.5 px-2.5 3xl:py-2 3xl:px-3">
                     Connect Wallet
                   </div> :

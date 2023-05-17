@@ -79,7 +79,7 @@ export default (
   } = { ...dev }
   const {
     chain_id,
-    provider,
+    ethereum_provider,
     signer,
     address,
   } = { ...wallet_data }
@@ -778,7 +778,7 @@ export default (
   } = { ...explorer }
 
   const wrong_chain = chain_id !== chain_data?.chain_id && !updateResponse
-  const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
+  const is_walletconnect = ethereum_provider?.constructor?.name === 'WalletConnectProvider'
 
   return (
     data && buttonTitle &&
@@ -1056,7 +1056,7 @@ export default (
                 null
             }
             {
-              provider &&
+              ethereum_provider &&
               (
                 (
                   ['string', 'number'].includes(typeof (error_status === XTransferErrorStatus.LowSlippage ? newSlippage : error_status === XTransferErrorStatus.LowRelayerFee ? newRelayerFee : null)) &&
@@ -1246,7 +1246,7 @@ export default (
                             </Alert>
                           )
                         }) :
-                provider ?
+                ethereum_provider ?
                   <button
                     disabled={true}
                     className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base text-center py-3 sm:py-4 px-2 sm:px-3"

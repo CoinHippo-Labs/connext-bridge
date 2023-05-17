@@ -119,7 +119,7 @@ export default () => {
   const {
     chain_id,
     provider,
-    browser_provider,
+    ethereum_provider,
     signer,
     address,
   } = { ...wallet_data }
@@ -1600,7 +1600,7 @@ export default () => {
 
   const disabled = calling || approving
   const wrong_chain = source_chain_data && wallet_chain_id !== source_chain_data.chain_id && !xcall
-  const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
+  const is_walletconnect = ethereum_provider?.constructor?.name === 'WalletConnectProvider'
   const boxShadow = color && `${color}${theme === 'light' ? '44' : '33'} 0px 16px 128px 64px`
 
   return (
@@ -2582,7 +2582,7 @@ export default () => {
                                               />
                                             */}
                                             {
-                                              provider && isApproveNeeded &&
+                                              ethereum_provider && isApproveNeeded &&
                                               (
                                                 <div className="flex flex-col space-y-0.5">
                                                   <div className="flex items-center justify-between space-x-2">
@@ -2900,7 +2900,7 @@ export default () => {
                           </>
                         )
                       }
-                      {browser_provider && checkSupport() && (xcall || source_amount) && (wrong_chain || (['string', 'number'].includes(typeof amount) && ![''].includes(amount))) ?
+                      {provider && checkSupport() && (xcall || source_amount) && (wrong_chain || (['string', 'number'].includes(typeof amount) && ![''].includes(amount))) ?
                         wrong_chain ?
                           <Wallet
                             connectChainId={source_chain_data?.chain_id}
@@ -3113,7 +3113,7 @@ export default () => {
                                   )
                                 })
                               ) :
-                        browser_provider ?
+                        provider ?
                           <button
                             disabled={true}
                             className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base 3xl:text-2xl text-center py-3 sm:py-4 px-2 sm:px-3"

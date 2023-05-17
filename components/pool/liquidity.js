@@ -112,7 +112,7 @@ export default (
   } = { ...wallet }
   const {
     provider,
-    browser_provider,
+    ethereum_provider,
     signer,
     address,
   } = { ...wallet_data }
@@ -1467,7 +1467,7 @@ export default (
 
   const disabled = !pool_data || error || calling || approving
   const wrong_chain = wallet_chain_id !== chain_id && !callResponse
-  const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
+  const is_walletconnect = ethereum_provider?.constructor?.name === 'WalletConnectProvider'
 
   return (
     <div className="order-1 lg:order-2 space-y-3">
@@ -1507,7 +1507,7 @@ export default (
                         Balance:
                       </div>
                       {
-                        x_asset_data?.contract_address && browser_provider &&
+                        x_asset_data?.contract_address && provider &&
                         (
                           <button
                             disabled={disabled}
@@ -1640,7 +1640,7 @@ export default (
                         Balance:
                       </div>
                       {
-                        y_asset_data?.contract_address && browser_provider &&
+                        y_asset_data?.contract_address && provider &&
                         (
                           <button
                             disabled={disabled}
@@ -1944,7 +1944,7 @@ export default (
                       </span>
                     </span>
                   </button> :
-                  chain && browser_provider && wrong_chain ?
+                  chain && provider && wrong_chain ?
                     <Wallet
                       connectChainId={chain_id}
                       className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base 3xl:text-2xl font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
@@ -2063,7 +2063,7 @@ export default (
                             </Alert>
                           )
                         }) :
-                        browser_provider ?
+                        provider ?
                           <button
                             disabled={disabled || !valid_amount}
                             onClick={() => call(pool_data)}
@@ -2122,7 +2122,7 @@ export default (
                         LP Token Balance:
                       </div>
                       {
-                        browser_provider &&
+                        provider &&
                         (
                           <div className="flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs 3xl:text-lg space-x-1">
                             {['string', 'number'].includes(typeof lpTokenBalance) ?
@@ -2588,7 +2588,7 @@ export default (
                       </span>
                     </span>
                   </button> :
-                  browser_provider && wrong_chain ?
+                  provider && wrong_chain ?
                     <Wallet
                       connectChainId={chain_id}
                       className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base 3xl:text-2xl font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
@@ -2707,7 +2707,7 @@ export default (
                             </Alert>
                           )
                         }) :
-                        browser_provider ?
+                        provider ?
                           <button
                             disabled={disabled || !valid_amount}
                             onClick={() => call(pool_data)}

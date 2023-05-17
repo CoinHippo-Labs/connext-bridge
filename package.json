@@ -22,14 +22,11 @@
   },
   "homepage": "https://github.com/CoinHippo-Labs/connext-bridge#readme",
   "dependencies": {
-    "@coinbase/wallet-sdk": "^3.6.5",
     "@connext/sdk": "2.0.3-alpha.11",
     "@material-tailwind/react": "^1.4.2",
-    "@portis/web3": "^4.0.7",
     "@redux-devtools/extension": "^3.2.5",
     "@tanstack/react-query": "^4.29.3",
     "@wagmi/chains": "^0.2.18",
-    "@walletconnect/web3-provider": "^1.8.0",
     "@web3modal/ethereum": "^2.3.0",
     "@web3modal/react": "^2.3.0",
     "env-cmd": "^10.1.0",
@@ -59,8 +56,7 @@
     "react-table": "^7.8.0",
     "recharts": "2.1.11",
     "redux": "^4.2.1",
-    "wagmi": "^0.12.10",
-    "web3modal": "1.9.7"
+    "wagmi": "^0.12.10"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.14",

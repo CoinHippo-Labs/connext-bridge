@@ -1,10 +1,9 @@
 import { WALLET_DATA, WALLET_RESET } from './types'
 
 const INITIAL_WALLET_DATA = {
-  default_chain_id: null,
   chain_id: null,
   provider: null,
-  browser_provider: null,
+  ethereum_provider: null,
   signer: null,
   address: null,
 }

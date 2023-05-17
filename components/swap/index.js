@@ -93,7 +93,7 @@ export default () => {
   } = { ...wallet }
   const {
     provider,
-    browser_provider,
+    ethereum_provider,
     signer,
     address,
   } = { ...wallet_data }
@@ -1338,11 +1338,8 @@ export default () => {
     .toBigInt()
 
   const disabled = swapAmount === true || calling || approving
-
   const wrong_chain = chain_data && wallet_chain_id !== chain_id && !callResponse
-
-  const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
-
+  const is_walletconnect = ethereum_provider?.constructor?.name === 'WalletConnectProvider'
   const boxShadow = color && `${color}${theme === 'light' ? '44' : '33'} 0px 16px 128px 64px`
 
   return (
@@ -1871,7 +1868,7 @@ export default () => {
                   </div>
                 )
               }
-              {browser_provider && wrong_chain ?
+              {provider && wrong_chain ?
                 <Wallet
                   connectChainId={chain_id}
                   className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base 3xl:text-2xl font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
@@ -1895,7 +1892,7 @@ export default () => {
                   </span>
                 </Wallet> :
                 chain && asset && (origin === 'x' ? x_balance_amount : y_balance_amount) &&
-                ((['string', 'number'].includes(typeof amount) && ![''].includes(amount)) || browser_provider) ?
+                ((['string', 'number'].includes(typeof amount) && ![''].includes(amount)) || provider) ?
                   !callResponse && !calling && ['string', 'number'].includes(typeof amount) && ![''].includes(amount) &&
                   (
                     Number(amount) < 0 ||
@@ -2072,7 +2069,7 @@ export default () => {
                             </Alert>
                           )
                         }) :
-                  browser_provider ?
+                  provider ?
                     <button
                       disabled={true}
                       onClick={() => call()}
