@@ -11,7 +11,7 @@ export default ({ ratio = 0 }) => {
           className="min-w-max 3xl:w-5 3xl:h-5 text-yellow-600 dark:text-yellow-400"
         />
         <div className="text-yellow-600 dark:text-yellow-400 text-xs 3xl:text-xl">
-          {`Fees are >${RATIO_THRESHOLD * 100}% of the sending amount.`}
+          {`Fees are >${RATIO_THRESHOLD * 100}% of the sending amount. Please ensure you would like to proceed.`}
         </div>
       </div>
     )
