@@ -1328,7 +1328,7 @@ export default () => {
           )
           console.warn('amount', xcallParams.amount)
           console.warn('relayerFeeInTransactingAsset', xcallParams.relayerFeeInTransactingAsset)
-          console.warn('total to wrap', BigNumber.from(xcallParams.amount).add(xcallParams.relayerFeeInTransactingAsset).toString())
+          console.warn('total to wrap', BigNumber.from(xcallParams.amount).add(xcallParams.relayerFeeInTransactingAsset || '0').toString())
 
           const xcall_request = await sdk.sdkBase.xcall(xcallParams)
           console.warn('xcall_request.value', xcall_request?.value?.toString())
