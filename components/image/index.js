@@ -10,13 +10,7 @@ const loader = (
     quality = 75,
   },
 ) =>
-  `${
-    IMAGE_OPTIMIZER_URL ? `${IMAGE_OPTIMIZER_URL}/_next` : ''
-  }${
-    src?.startsWith('/') ? '' : '/'
-  }${src}${
-    IMAGE_OPTIMIZER_URL ? `?url=${src?.startsWith('/') ? process.env.NEXT_PUBLIC_APP_URL : ''}${src}&w=${width}&q=${quality}` : ''
-  }`
+  `${IMAGE_OPTIMIZER_URL ? `${IMAGE_OPTIMIZER_URL}/_next` : ''}${src?.startsWith('/') ? '' : '/'}${src}${IMAGE_OPTIMIZER_URL ? `?url=${src?.startsWith('/') ? process.env.NEXT_PUBLIC_APP_URL : ''}${src}&w=${width}&q=${quality}` : ''}`
 
 export default (
   {
@@ -32,12 +26,7 @@ export default (
 
   useEffect(
     () => {
-      const timeout =
-        setTimeout(
-          () => setTimer(timer + 1),
-          1 * 1000,
-        )
-
+      const timeout = setTimeout(() => setTimer(timer + 1), 1 * 1000)
       return () => clearTimeout(timeout)
     },
     [timer],
@@ -75,15 +64,7 @@ export default (
       alt={alt}
       { ...rest }
       src={imageSrc}
-      loader={
-        () =>
-          loader(
-            {
-              ...rest,
-              src: imageSrc,
-            }
-          )
-      }
+      loader={() => loader({ ...rest, src: imageSrc })}
     />
   )
 }
