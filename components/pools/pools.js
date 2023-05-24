@@ -179,7 +179,7 @@ export default ({ view, userPoolsData }) => {
           ['i'], ['asc'],
         ) :
         null
-console.log(data)
+
   const chain_data = address && getChain(chain_id, chains_data)
 
   const {
