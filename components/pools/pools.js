@@ -114,7 +114,8 @@ export default ({ view, userPoolsData }) => {
                 tvl,
                 value,
               }
-            }),
+            })
+            .filter(d => typeof d.value !== 'number' || d.value > 0.001),
             ['value', 'tvl'], ['desc', 'desc'],
           ) :
           null :
