@@ -162,7 +162,6 @@ export default (
 
   const source_chain_data = getChain(origin_domain, chains_data)
   const source_asset_data = getAsset(null, assets_data, source_chain_data?.chain_id, origin_transacting_asset)
-
   let source_contract_data = getContract(source_chain_data?.chain_id, source_asset_data?.contracts)
   const _source_contract_data = _.cloneDeep(source_contract_data)
   // next asset
@@ -171,7 +170,6 @@ export default (
       ...source_contract_data,
       ...source_contract_data.next_asset,
     }
-
     delete source_contract_data.next_asset
   }
   // native asset
@@ -185,7 +183,6 @@ export default (
     } = { ...nativeCurrency }
 
     const _source_asset_data = getAsset(symbol, assets_data)
-
     source_contract_data = {
       ...getContract(source_chain_data?.chain_id, _source_asset_data?.contracts),
       ...nativeCurrency,
@@ -204,7 +201,6 @@ export default (
   const _asset_data = getAsset(source_asset_data?.id, assets_data, destination_chain_data?.chain_id)
   const _contract_data = getContract(destination_chain_data?.chain_id, _asset_data?.contracts)
   const destination_asset_data = getAsset(null, assets_data, destination_chain_data?.chain_id, [destination_transacting_asset, _asset_data ? receive_local ? _contract_data?.next_asset?.contract_address : _contract_data?.contract_address : destination_local_asset])
-
   let destination_contract_data = getContract(destination_chain_data?.chain_id, destination_asset_data?.contracts)
   const _destination_contract_data = _.cloneDeep(destination_contract_data)
   // next asset
@@ -213,7 +209,6 @@ export default (
       ...destination_contract_data,
       ...destination_contract_data.next_asset,
     }
-
     delete destination_contract_data.next_asset
   }
   // native asset
@@ -227,7 +222,6 @@ export default (
     } = { ...nativeCurrency }
 
     const _destination_asset_data = getAsset(symbol, assets_data)
-
     destination_contract_data = {
       ...getContract(destination_chain_data?.chain_id, _destination_asset_data?.contracts),
       ...nativeCurrency,
@@ -241,29 +235,25 @@ export default (
   const destination_amount = destination_transacting_amount ? Number(utils.formatUnits(BigInt(destination_transacting_amount).toString(), destination_decimals)) : source_amount * (1 - ROUTER_FEE_PERCENT / 100)
 
   const _slippage = slippage / 100
-
   const estimated_slippage =
     estimatedValues?.destinationSlippage && estimatedValues?.originSlippage ?
       Number(((Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100).toFixed(2)) :
       null
 
   const gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, source_gas_native_token?.symbol))
-
   relayer_fee =
     relayer_fees ?
       _.sum(
-        Object.entries(relayer_fees)
-          .map(([k, v]) =>
-            Number(utils.formatUnits(v, k === constants.AddressZero ? source_gas_decimals : source_decimals)) *
-            (relayerFeeAssetType === 'transacting' ?
-              k === constants.AddressZero ? gas_token_data?.price / source_asset_data?.price : 1 :
-              k === constants.AddressZero ? 1 : source_asset_data?.price / gas_token_data?.price
-            )
+        Object.entries(relayer_fees).map(([k, v]) =>
+          Number(utils.formatUnits(v, k === constants.AddressZero ? source_gas_decimals : source_decimals)) *
+          (relayerFeeAssetType === 'transacting' ?
+            k === constants.AddressZero ? gas_token_data?.price / source_asset_data?.price : 1 :
+            k === constants.AddressZero ? 1 : source_asset_data?.price / gas_token_data?.price
           )
+        )
       )
       .toFixed(relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals) :
       utils.formatUnits(relayer_fee || '0', source_gas_decimals)
-
   const relayer_fee_to_bump = relayer_fee && newRelayerFee ? (Number(newRelayerFee) - Number(relayer_fee)).toFixed(relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals) : null
 
   if (error_status === XTransferErrorStatus.LowRelayerFee) {
@@ -296,10 +286,7 @@ export default (
 
   const estimate = async () => {
     if (!updateResponse) {
-      if (
-        (source_contract_data || destination_contract_data) &&
-        ['string', 'number'].includes(typeof source_amount) && ![''].includes(source_amount) && !isNaN(source_amount)
-      ) {
+      if ((source_contract_data || destination_contract_data) && ['string', 'number'].includes(typeof source_amount) && ![''].includes(source_amount) && !isNaN(source_amount)) {
         if (sdk) {
           setNewRelayerFee(null)
           setUpdating(null)
@@ -366,9 +353,7 @@ export default (
                 '[action required]',
                 '[estimateRelayerFee error]',
                 params,
-                {
-                  error,
-                },
+                { error },
               )
 
               setEstimateResponse(
@@ -387,28 +372,16 @@ export default (
     }
   }
 
-  const calculateAmountReceived = async (
-    _amount,
-  ) => {
+  const calculateAmountReceived = async _amount => {
     if (sdk) {
       const originDomain = source_chain_data?.domain_id
       const destinationDomain = destination_chain_data?.domain_id
-
       const originTokenAddress = (equalsIgnoreCase(source_contract_data?.contract_address, constants.AddressZero) ? _source_contract_data : source_contract_data)?.contract_address
       let destinationTokenAddress = _destination_contract_data?.contract_address
-
-      const isNextAsset =
-        typeof receive_local === 'boolean' ?
-          receive_local :
-          equalsIgnoreCase(
-            destination_contract_data?.contract_address,
-            _destination_contract_data?.next_asset?.contract_address,
-          )
-
+      const isNextAsset = typeof receive_local === 'boolean' ? receive_local : equalsIgnoreCase(destination_contract_data?.contract_address, _destination_contract_data?.next_asset?.contract_address)
       if (isNextAsset) {
         destinationTokenAddress = _destination_contract_data?.next_asset?.contract_address || destinationTokenAddress
       }
-
       const amount = utils.parseUnits((_amount || 0).toString(), source_decimals).toBigInt()
 
       let manual
@@ -450,23 +423,18 @@ export default (
 
           _estimatedValues =
             Object.fromEntries(
-              Object.entries({ ...response })
-                .map(([k, v]) => {
-                  try {
-                    v =
-                      utils.formatUnits(
-                        v,
-                        ['amountReceived'].includes(k) ?
-                          (isNextAsset && _destination_contract_data?.next_asset ?
-                            _destination_contract_data?.next_asset?.decimals :
-                            destination_contract_data?.decimals
-                          ) || 18 :
-                          source_decimals,
-                      )
-                  } catch (error) {}
-
-                  return [k, v]
-                })
+              Object.entries({ ...response }).map(([k, v]) => {
+                try {
+                  v =
+                    utils.formatUnits(
+                      v,
+                      ['amountReceived'].includes(k) ?
+                        (isNextAsset && _destination_contract_data?.next_asset ? _destination_contract_data?.next_asset?.decimals : destination_contract_data?.decimals) || 18 :
+                        source_decimals,
+                    )
+                } catch (error) {}
+                return [k, v]
+              })
             )
 
           setEstimatedValues(_estimatedValues)
@@ -510,7 +478,6 @@ export default (
 
       if (manual) {
         const routerFee = parseFloat((Number(_amount) * ROUTER_FEE_PERCENT / 100).toFixed(source_decimals))
-
         _estimatedValues = {
           amountReceived: Number(_amount) - routerFee,
           routerFee,
@@ -518,7 +485,6 @@ export default (
           originSlippage: '0',
           isNextAsset: typeof receive_local === 'boolean' ? receive_local : false,
         }
-
         setEstimatedValues(_estimatedValues)
       }
 
@@ -526,7 +492,6 @@ export default (
         _estimatedValues?.destinationSlippage && _estimatedValues?.originSlippage ?
           Number(((Number(_estimatedValues.destinationSlippage) + Number(_estimatedValues.originSlippage)) * 100).toFixed(2)) :
           null
-
       setNewSlippage(!_newSlippage || _newSlippage < 0 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : _newSlippage)
     }
   }
@@ -542,7 +507,6 @@ export default (
         case XTransferErrorStatus.LowSlippage:
           try {
             const newSlippageInBps = newSlippage * 100
-
             params = {
               domainId: destination_domain,
               transferId: transfer_id,
@@ -551,9 +515,7 @@ export default (
 
             console.log(
               '[updateSlippage]',
-              {
-                params,
-              },
+              { params },
             )
 
             const request = await sdk.sdkBase.updateSlippage(params)
@@ -583,7 +545,6 @@ export default (
               } = { ...response }
 
               setUpdateProcessing(true)
-
               const receipt = await signer.provider.waitForTransaction(hash)
 
               const {
@@ -632,14 +593,12 @@ export default (
                 )
                 break
             }
-
             failed = true
           }
           break
         case XTransferErrorStatus.LowRelayerFee:
           try {
             const relayer_fee_to_bump = relayer_fee && newRelayerFee ? (Number(newRelayerFee) - Number(relayer_fee)).toFixed(relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals) : null
-
             params = {
               domainId: origin_domain,
               transferId: transfer_id,
@@ -647,74 +606,122 @@ export default (
               relayerFee: utils.parseEther(relayer_fee_to_bump || '0').toString(),
             }
 
-            console.log(
-              '[bumpTransfer]',
-              {
-                params,
-              },
-            )
+            try {
+              if (relayerFeeAssetType === 'transacting') {
+                const domain_id = params.domainId
+                const contract_address = (equalsIgnoreCase(source_contract_data?.contract_address, constants.AddressZero) ? _source_contract_data : source_contract_data)?.contract_address
+                const amount = params.relayerFee
+                const infinite_approve = false
 
-            const request = await sdk.sdkBase.bumpTransfer(params)
+                console.log(
+                  '[approveIfNeeded before bumpTransfer]',
+                  {
+                    domain_id,
+                    contract_address,
+                    amount,
+                    infinite_approve,
+                  },
+                )
 
-            if (request) {
-              try {
-                let gasLimit = await signer.estimateGas(request)
+                const approve_request = await sdk.sdkBase.approveIfNeeded(domain_id, contract_address, amount, infinite_approve)
 
-                if (gasLimit) {
-                  gasLimit =
-                    FixedNumber.fromString(gasLimit.toString())
-                      .mulUnsafe(
-                        FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
-                      )
-                      .round(0)
-                      .toString()
-                      .replace('.0', '')
+                if (approve_request) {
+                  const approve_response = await signer.sendTransaction(approve_request)
 
-                  request.gasLimit = gasLimit
+                  const {
+                    hash,
+                  } = { ...approve_response }
+
+                  setUpdateResponse(
+                    {
+                      status: 'pending',
+                      message: 'Waiting for token approval',
+                      tx_hash: hash,
+                    }
+                  )
+
+                  const approve_receipt = await signer.provider.waitForTransaction(hash)
+
+                  const {
+                    status,
+                  } = { ...approve_receipt }
+
+                  setUpdateResponse(
+                    status ?
+                      null :
+                      {
+                        status: 'failed',
+                        message: 'Failed to approve',
+                        tx_hash: hash,
+                      }
+                  )
+
+                  failed = !status
                 }
-              } catch (error) {}
+              }
+            } catch (error) {}
 
-              const response = await signer.sendTransaction(request)
-
-              const {
-                hash,
-              } = { ...response }
-
-              setUpdateProcessing(true)
-
-              const receipt = await signer.provider.waitForTransaction(hash)
-
-              const {
-                transactionHash,
-                status,
-              } = { ...receipt }
-
-              failed = !status
-
-              setUpdateResponse(
-                {
-                  status: failed ? 'failed' : 'success',
-                  message: failed ? 'Failed to send transaction' : 'Bump transfer successful',
-                  tx_hash: hash,
-                }
+            if (!failed) {
+              console.log(
+                '[bumpTransfer]',
+                { params },
               )
 
-              if (!failed && onTransferBumped) {
-                dispatch(
+              const request = await sdk.sdkBase.bumpTransfer(params)
+
+              if (request) {
+                try {
+                  let gasLimit = await signer.estimateGas(request)
+
+                  if (gasLimit) {
+                    gasLimit =
+                      FixedNumber.fromString(gasLimit.toString())
+                        .mulUnsafe(
+                          FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
+                        )
+                        .round(0)
+                        .toString()
+                        .replace('.0', '')
+
+                    request.gasLimit = gasLimit
+                  }
+                } catch (error) {}
+
+                const response = await signer.sendTransaction(request)
+
+                const {
+                  hash,
+                } = { ...response }
+
+                setUpdateProcessing(true)
+                const receipt = await signer.provider.waitForTransaction(hash)
+
+                const {
+                  transactionHash,
+                  status,
+                } = { ...receipt }
+
+                failed = !status
+
+                setUpdateResponse(
                   {
-                    type: LATEST_BUMPED_TRANSFERS_DATA,
-                    value: transfer_id,
+                    status: failed ? 'failed' : 'success',
+                    message: failed ? 'Failed to send transaction' : 'Bump transfer successful',
+                    tx_hash: hash,
                   }
                 )
 
-                onTransferBumped(
-                  {
-                    relayer_fee: params.relayerFee,
-                    relayer_fees: {
-                      [params.asset]: params.relayerFee,
-                    },
-                  }
-                )
+                if (!failed && onTransferBumped) {
+                  dispatch({ type: LATEST_BUMPED_TRANSFERS_DATA, value: transfer_id })
+                  onTransferBumped(
+                    {
+                      relayer_fee: params.relayerFee,
+                      relayer_fees: {
+                        [params.asset]: params.relayerFee,
+                      },
+                    }
+                  )
+                }
               }
             }
           } catch (error) {
@@ -752,7 +759,6 @@ export default (
                 )
                 break
             }
-
             failed = true
           }
           break
@@ -780,496 +786,443 @@ export default (
   const wrong_chain = chain_id !== chain_data?.chain_id && !updateResponse
   const is_walletconnect = ethereum_provider?.constructor?.name === 'WalletConnectProvider'
 
-  return (
-    data && buttonTitle &&
-    // (error_status !== XTransferErrorStatus.LowRelayerFee || relayer_fee_to_bump > 0) &&
-    (
-      <Modal
-        hidden={hidden || ![XTransferErrorStatus.LowRelayerFee, XTransferErrorStatus.LowSlippage].includes(error_status)}
-        disabled={disabled}
-        onClick={() => setHidden(false)}
-        buttonTitle={buttonTitle}
-        buttonClassName="rounded flex items-center justify-center"
-        title={
-          <div className="flex items-center justify-between">
-            <span className="normal-case">
-              Action Required: {
-                error_status === XTransferErrorStatus.LowSlippage ?
-                  'Slippage exceeded' :
-                  error_status === XTransferErrorStatus.LowRelayerFee ?
-                    'Relayer fee insufficient' :
-                    error_status
-              }
-            </span>
-            <div
-              onClick={() => reset()}
-              className="hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer rounded-full p-2"
-            >
-              <BiX
-                size={18}
-              />
-            </div>
+  return data && buttonTitle && (
+    <Modal
+      hidden={hidden || ![XTransferErrorStatus.LowRelayerFee, XTransferErrorStatus.LowSlippage].includes(error_status)}
+      disabled={disabled}
+      onClick={() => setHidden(false)}
+      buttonTitle={buttonTitle}
+      buttonClassName="rounded flex items-center justify-center"
+      title={
+        <div className="flex items-center justify-between">
+          <span className="normal-case">
+            Action Required: {
+              error_status === XTransferErrorStatus.LowSlippage ?
+                'Slippage exceeded' :
+                error_status === XTransferErrorStatus.LowRelayerFee ?
+                  'Relayer fee insufficient' :
+                  error_status
+            }
+          </span>
+          <div
+            onClick={() => reset()}
+            className="hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer rounded-full p-2"
+          >
+            <BiX size={18} />
           </div>
-        }
-        body={
-          <div className="space-y-8 mt-4">
-            {error_status === XTransferErrorStatus.LowSlippage ?
+        </div>
+      }
+      body={
+        <div className="space-y-8 mt-4">
+          {error_status === XTransferErrorStatus.LowSlippage ?
+            <>
+              <div className="space-y-3">
+                <div className="text-slate-600 dark:text-slate-400 text-sm">
+                  Your slippage tolerance is too low for this transfer to complete under current market conditions.
+                </div>
+                <div className="text-slate-600 dark:text-slate-400 text-sm">
+                  You may increase your slippage tolerance below. If you take no action, the transfer will continue to retry with your current slippage tolerance.
+                </div>
+              </div>
+              <div className="flex flex-col space-y-3">
+                <div className="flex items-center justify-between space-x-1">
+                  <div className="whitespace-nowrap text-slate-800 dark:text-slate-200 text-sm font-medium">
+                    Current slippage tolerance
+                  </div>
+                  <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
+                    <DecimalsFormat
+                      value={_slippage}
+                      suffix="%"
+                      className="text-sm"
+                    />
+                  </span>
+                </div>
+                <div className="flex flex-col space-y-0.5">
+                  <div className="flex items-start justify-between space-x-1">
+                    <div className="whitespace-nowrap text-slate-800 dark:text-slate-200 text-sm font-medium">
+                      New slippage tolerance (recommended)
+                    </div>
+                    <div className="flex flex-col sm:items-end space-y-1.5">
+                      {slippageEditing ?
+                        <>
+                          <div className="flex items-center justify-end space-x-1.5">
+                            <DebounceInput
+                              debounceTimeout={750}
+                              size="small"
+                              type="number"
+                              placeholder="0.00"
+                              value={typeof newSlippage === 'number' && newSlippage >= 0 ? newSlippage : ''}
+                              onChange={
+                                e => {
+                                  const regex = /^[0-9.\b]+$/
+                                  let value
+
+                                  if (e.target.value === '' || regex.test(e.target.value)) {
+                                    value = e.target.value
+                                  }
+                                  if (typeof value === 'string') {
+                                    if (value.startsWith('.')) {
+                                      value = `0${value}`
+                                    }
+                                    if (!isNaN(value)) {
+                                      value = Number(value)
+                                    }
+                                  }
+
+                                  value = value <= 0 || value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
+                                  setNewSlippage(value && !isNaN(value) ? parseFloat(Number(value).toFixed(2)) : value)
+                                }
+                              }
+                              onWheel={e => e.target.blur()}
+                              onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                              className="w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm font-semibold text-right py-1 px-2"
+                            />
+                            <button
+                              onClick={() => setSlippageEditing(false)}
+                              className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                            >
+                              <BiCheckCircle size={16} />
+                            </button>
+                          </div>
+                          <div className="flex items-center space-x-1.5 -mr-1.5">
+                            {[3.0, 1.0, 0.5].map((s, i) => (
+                              <div
+                                key={i}
+                                onClick={
+                                  () => {
+                                    setNewSlippage(s)
+                                    setSlippageEditing(false)
+                                  }
+                                }
+                                className={`${newSlippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
+                              >
+                                {s} %
+                              </div>
+                            ))}
+                          </div>
+                        </> :
+                        <div className="flex items-center space-x-1.5">
+                          {!newSlippage && !estimateResponse ?
+                            <Oval
+                              width="20"
+                              height="20"
+                              color={loaderColor(theme)}
+                            /> :
+                            <>
+                              <DecimalsFormat
+                                value={newSlippage}
+                                suffix="%"
+                                className="text-sm font-semibold"
+                              />
+                              <button
+                                disabled={disabled}
+                                onClick={
+                                  () => {
+                                    if (!disabled) {
+                                      setSlippageEditing(true)
+                                    }
+                                  }
+                                }
+                                className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
+                              >
+                                <BiEditAlt size={16} />
+                              </button>
+                            </>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                  {typeof newSlippage === 'number' && (estimated_slippage > newSlippage || newSlippage < 0.2 || newSlippage > 5.0) && (
+                    <div className="flex items-start space-x-1">
+                      <IoWarning
+                        size={14}
+                        className="min-w-max text-yellow-500 dark:text-yellow-400 mt-0.5"
+                      />
+                      <div className="text-yellow-500 dark:text-yellow-400 text-xs">
+                        {estimated_slippage > newSlippage ?
+                          <>
+                            Slippage tolerance is too low
+                            <br />
+                            (use a larger amount or set tolerance higher)
+                          </> :
+                          newSlippage < 0.2 ?
+                            'Your transfer may not complete due to low slippage tolerance.' :
+                            'Your transfer may be frontrun due to high slippage tolerance.'
+                        }
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </> :
+            error_status === XTransferErrorStatus.LowRelayerFee ?
               <>
                 <div className="space-y-3">
                   <div className="text-slate-600 dark:text-slate-400 text-sm">
-                    Your slippage tolerance is too low for this transfer to complete under current market conditions.
+                    The destination gas paid to complete this trade is currently too low.
                   </div>
                   <div className="text-slate-600 dark:text-slate-400 text-sm">
-                    You may increase your slippage tolerance below. If you take no action, the transfer will continue to retry with your current slippage tolerance.
+                    You may bump the amount of gas below for the relayer to execute your transfer. If you take no action, the transfer will continue to retry with the current amount.
                   </div>
                 </div>
                 <div className="flex flex-col space-y-3">
                   <div className="flex items-center justify-between space-x-1">
                     <div className="whitespace-nowrap text-slate-800 dark:text-slate-200 text-sm font-medium">
-                      Current slippage tolerance
+                      Current relayer fee
                     </div>
-                    <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
-                      <DecimalsFormat
-                        value={_slippage}
-                        suffix="%"
-                        className="text-sm"
-                      />
-                    </span>
-                  </div>
-                  <div className="flex flex-col space-y-0.5">
-                    <div className="flex items-start justify-between space-x-1">
-                      <div className="whitespace-nowrap text-slate-800 dark:text-slate-200 text-sm font-medium">
-                        New slippage tolerance (recommended)
-                      </div>
-                      <div className="flex flex-col sm:items-end space-y-1.5">
-                        {slippageEditing ?
-                          <>
-                            <div className="flex items-center justify-end space-x-1.5">
-                              <DebounceInput
-                                debounceTimeout={750}
-                                size="small"
-                                type="number"
-                                placeholder="0.00"
-                                value={typeof newSlippage === 'number' && newSlippage >= 0 ? newSlippage : ''}
-                                onChange={
-                                  e => {
-                                    const regex = /^[0-9.\b]+$/
-                                    let value
-
-                                    if (e.target.value === '' || regex.test(e.target.value)) {
-                                      value = e.target.value
-                                    }
-
-                                    if (typeof value === 'string') {
-                                      if (value.startsWith('.')) {
-                                        value = `0${value}`
-                                      }
-                                      if (!isNaN(value)) {
-                                        value = Number(value)
-                                      }
-                                    }
-
-                                    value = value <= 0 || value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
-                                    setNewSlippage(value && !isNaN(value) ? parseFloat(Number(value).toFixed(2)) : value)
-                                  }
-                                }
-                                onWheel={e => e.target.blur()}
-                                onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                                className="w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm font-semibold text-right py-1 px-2"
+                    {Object.keys({ ...relayer_fees }).length > 0 ?
+                      <div className="flex flex-col space-y-2">
+                        {Object.entries(relayer_fees).map(([k, v]) => {
+                          return (
+                            <span key={k} className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
+                              <DecimalsFormat
+                                value={utils.formatUnits(v || '0', k === constants.AddressZero ? source_gas_decimals : source_decimals)}
+                                className="text-sm"
                               />
-                              <button
-                                onClick={() => setSlippageEditing(false)}
-                                className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
-                              >
-                                <BiCheckCircle
-                                  size={16}
-                                />
-                              </button>
-                            </div>
-                            <div className="flex items-center space-x-1.5 -mr-1.5">
-                              {[3.0, 1.0, 0.5].map((s, i) => (
-                                <div
-                                  key={i}
-                                  onClick={
-                                    () => {
-                                      setNewSlippage(s)
-                                      setSlippageEditing(false)
-                                    }
-                                  }
-                                  className={`${newSlippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs py-1 px-1.5`}
-                                >
-                                  {s} %
-                                </div>
-                              ))}
-                            </div>
-                          </> :
-                          <div className="flex items-center space-x-1.5">
-                            {!newSlippage && !estimateResponse ?
-                              <Oval
-                                width="20"
-                                height="20"
-                                color={loaderColor(theme)}
-                              /> :
-                              <>
-                                <DecimalsFormat
-                                  value={newSlippage}
-                                  suffix="%"
-                                  className="text-sm font-semibold"
-                                />
-                                <button
-                                  disabled={disabled}
-                                  onClick={
-                                    () => {
-                                      if (!disabled) {
-                                        setSlippageEditing(true)
-                                      }
-                                    }
-                                  }
-                                  className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
-                                >
-                                  <BiEditAlt
-                                    size={16}
-                                  />
-                                </button>
-                              </>
-                            }
-                          </div>
-                        }
-                      </div>
+                              <span>{k === constants.AddressZero ? source_gas_native_token?.symbol : source_symbol}</span>
+                            </span>
+                          )
+                        })}
+                      </div> :
+                      <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
+                        <DecimalsFormat
+                          value={relayer_fee}
+                          className="text-sm"
+                        />
+                        <span>{source_gas_native_token?.symbol}</span>
+                      </span>
+                    }
+                  </div>
+                  <div className="flex items-center justify-between space-x-1">
+                    <div className="whitespace-nowrap text-slate-800 dark:text-slate-200 text-sm font-medium">
+                      Additional required relayer fee
                     </div>
-                    {
-                      typeof newSlippage === 'number' && (estimated_slippage > newSlippage || newSlippage < 0.2 || newSlippage > 5.0) &&
-                      (
-                        <div className="flex items-start space-x-1">
-                          <IoWarning
-                            size={14}
-                            className="min-w-max text-yellow-500 dark:text-yellow-400 mt-0.5"
-                          />
-                          <div className="text-yellow-500 dark:text-yellow-400 text-xs">
-                            {estimated_slippage > newSlippage ?
-                              <>
-                                Slippage tolerance is too low
-                                <br />
-                                (use a larger amount or set tolerance higher)
-                              </> :
-                              newSlippage < 0.2 ?
-                                'Your transfer may not complete due to low slippage tolerance.' :
-                                'Your transfer may be frontrun due to high slippage tolerance.'
-                            }
-                          </div>
-                        </div>
-                      )
+                    {!newRelayerFee && !estimateResponse ?
+                      <Oval
+                        width="20"
+                        height="20"
+                        color={loaderColor(theme)}
+                      /> :
+                      <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
+                        <DecimalsFormat
+                          value={relayer_fee_to_bump && relayer_fee_to_bump > 0 ? relayer_fee_to_bump : 0}
+                          className="text-sm"
+                        />
+                        {is_staging ?
+                          <select
+                            disabled={disabled}
+                            value={relayerFeeAssetType}
+                            onChange={e => setRelayerFeeAssetType(e.target.value)}
+                            className="bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0"
+                          >
+                            {RELAYER_FEE_ASSET_TYPES.map((t, i) => {
+                              return (
+                                <option
+                                  key={i}
+                                  title={`${t} asset`}
+                                  value={t}
+                                >
+                                  {t === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
+                                </option>
+                              )
+                            })}
+                          </select> :
+                          <span>{relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}</span>
+                        }
+                      </span>
                     }
                   </div>
                 </div>
               </> :
-              error_status === XTransferErrorStatus.LowRelayerFee ?
-                <>
-                  <div className="space-y-3">
-                    <div className="text-slate-600 dark:text-slate-400 text-sm">
-                      The destination gas paid to complete this trade is currently too low.
-                    </div>
-                    <div className="text-slate-600 dark:text-slate-400 text-sm">
-                      You may bump the amount of gas below for the relayer to execute your transfer. If you take no action, the transfer will continue to retry with the current amount.
-                    </div>
-                  </div>
-                  <div className="flex flex-col space-y-3">
-                    <div className="flex items-center justify-between space-x-1">
-                      <div className="whitespace-nowrap text-slate-800 dark:text-slate-200 text-sm font-medium">
-                        Current relayer fee
-                      </div>
-                      {Object.keys({ ...relayer_fees }).length > 0 ?
-                        <div className="flex flex-col space-y-2">
-                          {Object.entries(relayer_fees)
-                            .map(([k, v]) => {
-                              return (
-                                <span
-                                  key={k}
-                                  className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5"
-                                >
-                                  <DecimalsFormat
-                                    value={utils.formatUnits(v || '0', k === constants.AddressZero ? source_gas_decimals : source_decimals)}
-                                    className="text-sm"
-                                  />
-                                  <span>
-                                    {k === constants.AddressZero ? source_gas_native_token?.symbol : source_symbol}
-                                  </span>
-                                </span>
-                              )
-                            })
-                          }
-                        </div> :
-                        <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
-                          <DecimalsFormat
-                            value={relayer_fee}
-                            className="text-sm"
-                          />
-                          <span>
-                            {source_gas_native_token?.symbol}
-                          </span>
-                        </span>
-                      }
-                    </div>
-                    <div className="flex items-center justify-between space-x-1">
-                      <div className="whitespace-nowrap text-slate-800 dark:text-slate-200 text-sm font-medium">
-                        Additional required relayer fee
-                      </div>
-                      {!newRelayerFee && !estimateResponse ?
-                        <Oval
-                          width="20"
-                          height="20"
-                          color={loaderColor(theme)}
-                        /> :
-                        <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
-                          <DecimalsFormat
-                            value={relayer_fee_to_bump && relayer_fee_to_bump > 0 ? relayer_fee_to_bump : 0}
-                            className="text-sm"
-                          />
-                          {is_staging ?
-                            <select
-                              disabled={disabled}
-                              value={relayerFeeAssetType}
-                              onChange={e => setRelayerFeeAssetType(e.target.value)}
-                              className="bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0"
-                            >
-                              {RELAYER_FEE_ASSET_TYPES.map((t, i) => {
-                                return (
-                                  <option
-                                    key={i}
-                                    title={`${t} asset`}
-                                    value={t}
-                                  >
-                                    {t === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
-                                  </option>
-                                )
-                              })}
-                            </select> :
-                            <span>
-                              {relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
-                            </span>
-                          }
-                        </span>
-                      }
-                    </div>
-                  </div>
-                </> :
-                null
-            }
-            {
-              ethereum_provider &&
-              (
-                (
-                  ['string', 'number'].includes(typeof (error_status === XTransferErrorStatus.LowSlippage ? newSlippage : error_status === XTransferErrorStatus.LowRelayerFee ? newRelayerFee : null)) &&
-                  ![''].includes(error_status === XTransferErrorStatus.LowSlippage ? newSlippage : error_status === XTransferErrorStatus.LowRelayerFee ? newRelayerFee : null)
-                ) ||
-                wrong_chain
-              ) ?
-                wrong_chain ?
-                  <Wallet
-                    connectChainId={chain_data?.chain_id}
-                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
-                  >
-                    <span>
-                      {is_walletconnect ? 'Reconnect' : 'Switch'} to
-                    </span>
-                    {
-                      chain_data?.image &&
-                      (
-                        <Image
-                          src={chain_data.image}
-                          width={28}
-                          height={28}
-                          className="rounded-full"
-                        />
-                      )
+              null
+          }
+          {ethereum_provider && (
+            (
+              ['string', 'number'].includes(typeof (error_status === XTransferErrorStatus.LowSlippage ? newSlippage : error_status === XTransferErrorStatus.LowRelayerFee ? newRelayerFee : null)) &&
+              ![''].includes(error_status === XTransferErrorStatus.LowSlippage ? newSlippage : error_status === XTransferErrorStatus.LowRelayerFee ? newRelayerFee : null)
+            ) ||
+            wrong_chain
+          ) ?
+            wrong_chain ?
+              <Wallet
+                connectChainId={chain_data?.chain_id}
+                className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+              >
+                <span>{is_walletconnect ? 'Reconnect' : 'Switch'} to</span>
+                {chain_data?.image && (
+                  <Image
+                    src={chain_data.image}
+                    width={28}
+                    height={28}
+                    className="rounded-full"
+                  />
+                )}
+                <span className="font-semibold">
+                  {chain_data?.name}
+                </span>
+              </Wallet> :
+              !updateResponse && !updating &&
+              ['string', 'number'].includes(typeof (error_status === XTransferErrorStatus.LowSlippage ? newSlippage : error_status === XTransferErrorStatus.LowRelayerFee ? newRelayerFee : null)) &&
+              ![''].includes(error_status === XTransferErrorStatus.LowSlippage ? newSlippage : error_status === XTransferErrorStatus.LowRelayerFee ? newRelayerFee : null) &&
+              (error_status === XTransferErrorStatus.LowSlippage ? newSlippage <= _slippage : error_status === XTransferErrorStatus.LowRelayerFee ? !newRelayerFee : null) ?
+                <Alert
+                  color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
+                  icon={
+                    <BiMessageError
+                      className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                    />
+                  }
+                  closeDisabled={true}
+                  rounded={true}
+                  className="rounded p-4.5"
+                >
+                  <span>
+                    {error_status === XTransferErrorStatus.LowSlippage && newSlippage <= _slippage ?
+                      'New amount must be higher than existing slippage tolerance' :
+                      error_status === XTransferErrorStatus.LowRelayerFee && !newRelayerFee ?
+                        'Cannot estimate the relayer fee at the moment. Please try again later.' :
+                        ''
                     }
-                    <span className="font-semibold">
-                      {chain_data?.name}
-                    </span>
-                  </Wallet> :
-                  !updateResponse && !updating &&
-                  ['string', 'number'].includes(typeof (error_status === XTransferErrorStatus.LowSlippage ? newSlippage : error_status === XTransferErrorStatus.LowRelayerFee ? newRelayerFee : null)) &&
-                  ![''].includes(error_status === XTransferErrorStatus.LowSlippage ? newSlippage : error_status === XTransferErrorStatus.LowRelayerFee ? newRelayerFee : null) &&
-                  (error_status === XTransferErrorStatus.LowSlippage ? newSlippage <= _slippage : error_status === XTransferErrorStatus.LowRelayerFee ? !newRelayerFee : null) ?
+                  </span>
+                </Alert> :
+                !updateResponse && !estimateResponse ?
+                  error_status === XTransferErrorStatus.LowRelayerFee && relayer_fee && newRelayerFee && relayer_fee_to_bump <= 0 ?
                     <Alert
-                      color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
-                      icon={
-                        <BiMessageError
-                          className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                        />
-                      }
+                      color="bg-blue-400 dark:bg-blue-500 text-white text-base"
+                      icon={null}
                       closeDisabled={true}
                       rounded={true}
                       className="rounded p-4.5"
                     >
-                      <span>
-                        {error_status === XTransferErrorStatus.LowSlippage && newSlippage <= _slippage ?
-                          'New amount must be higher than existing slippage tolerance' :
-                          error_status === XTransferErrorStatus.LowRelayerFee && !newRelayerFee ?
-                            'Cannot estimate the relayer fee at the moment. Please try again later.' :
-                            ''
-                        }
-                      </span>
+                      <div className="flex items-center justify-center space-x-2">
+                        <span className="break-all text-sm font-medium text-center">
+                          Waiting for bump ...
+                        </span>
+                      </div>
                     </Alert> :
-                    !updateResponse && !estimateResponse ?
-                      error_status === XTransferErrorStatus.LowRelayerFee && relayer_fee && newRelayerFee && relayer_fee_to_bump <= 0 ?
-                        <Alert
-                          color="bg-blue-400 dark:bg-blue-500 text-white text-base"
-                          icon={null}
-                          closeDisabled={true}
-                          rounded={true}
-                          className="rounded p-4.5"
-                        >
-                          <div className="flex items-center justify-center space-x-2">
-                            <span className="break-all text-sm font-medium text-center">
-                              Waiting for bump ...
-                            </span>
-                          </div>
-                        </Alert> :
-                        <button
-                          disabled={disabled}
-                          onClick={
-                            () => {
-                              setSlippageEditing(false)
-                              update()
-                            }
-                          }
-                          className={
-                            `w-full ${
-                              disabled ?
-                                'bg-blue-400 dark:bg-blue-500' :
-                                'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
-                            } rounded flex items-center justify-center text-white text-base py-3 sm:py-4 px-2 sm:px-3`
-                          }
-                        >
-                          <span className={`flex items-center justify-center ${updating && updateProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
-                            {
-                              disabled &&
-                              (
-                                <TailSpin
-                                  width="20"
-                                  height="20"
-                                  color="white"
-                                />
-                              )
-                            }
-                            <span>
-                              {updating ? updateProcessing ? 'Update in progress ...' : 'Please Confirm' : 'Apply'}
-                            </span>
-                          </span>
-                        </button> :
-                      (updateResponse || estimateResponse) &&
-                      toArray(updateResponse || estimateResponse)
-                        .map((r, i) => {
-                          const {
-                            status,
-                            message,
-                            code,
-                            tx_hash,
-                          } = { ...r }
+                    <button
+                      disabled={disabled}
+                      onClick={
+                        () => {
+                          setSlippageEditing(false)
+                          update()
+                        }
+                      }
+                      className={`w-full ${disabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'} rounded flex items-center justify-center text-white text-base py-3 sm:py-4 px-2 sm:px-3`}
+                    >
+                      <span className={`flex items-center justify-center ${updating && updateProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
+                        {disabled && (
+                          <TailSpin
+                            width="20"
+                            height="20"
+                            color="white"
+                          />
+                        )}
+                        <span>{updating ? updateProcessing ? 'Update in progress ...' : 'Please Confirm' : 'Apply'}</span>
+                      </span>
+                    </button> :
+                  (updateResponse || estimateResponse) &&
+                  toArray(updateResponse || estimateResponse).map((r, i) => {
+                    const {
+                      status,
+                      message,
+                      code,
+                      tx_hash,
+                    } = { ...r }
 
-                          return (
-                            <Alert
-                              key={i}
-                              color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
-                              icon={
-                                status === 'failed' ?
-                                  <BiMessageError
-                                    className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                  /> :
-                                  status === 'success' ?
-                                    <BiMessageCheck
-                                      className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                    /> :
-                                    <BiMessageDetail
-                                      className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                    />
-                              }
-                              closeDisabled={true}
-                              rounded={true}
-                              className="rounded p-4.5"
-                            >
-                              <div className="flex items-center justify-between space-x-2">
-                                <span className="break-all text-sm font-medium">
-                                  {ellipse(
-                                    split(message, 'normal', ' ')
-                                      .join(' ')
-                                      .substring(0, status === 'failed' && errorPatterns.findIndex(c => message?.indexOf(c) > -1) > -1 ? message.indexOf(errorPatterns.find(c => message.indexOf(c) > -1)) : undefined) ||
-                                    message,
-                                    128,
-                                  )}
-                                </span>
-                                <div className="flex items-center space-x-1">
-                                  {
-                                    url && tx_hash &&
-                                    (
-                                      <a
-                                        href={`${url}${transaction_path?.replace('{tx}', r.tx_hash)}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                      >
-                                        <TiArrowRight
-                                          size={20}
-                                          className="transform -rotate-45"
-                                        />
-                                      </a>
-                                    )
-                                  }
-                                  {status === 'failed' ?
-                                    <>
-                                      <Copy
-                                        value={message}
-                                        className="cursor-pointer text-slate-200 hover:text-white"
-                                      />
-                                      <button
-                                        onClick={() => reset()}
-                                        className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                                      >
-                                        <MdClose
-                                          size={14}
-                                        />
-                                      </button>
-                                    </> :
-                                    status === 'success' ?
-                                      <button
-                                        onClick={() => reset()}
-                                        className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
-                                      >
-                                        <MdClose
-                                          size={14}
-                                        />
-                                      </button> :
-                                      null
-                                  }
-                                </div>
-                              </div>
-                            </Alert>
-                          )
-                        }) :
-                ethereum_provider ?
-                  <button
-                    disabled={true}
-                    className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base text-center py-3 sm:py-4 px-2 sm:px-3"
-                  >
-                    Apply
-                  </button> :
-                  <Wallet
-                    connectChainId={chain_data?.chain_id}
-                    buttonConnectTitle="Connect Wallet"
-                    className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
-                  >
-                    <span>
-                      Connect Wallet
-                    </span>
-                  </Wallet>
-            }
-          </div>
-        }
-        noCancelOnClickOutside={true}
-        noButtons={true}
-        onClose={() => reset()}
-        modalClassName="max-w-md"
-      />
-    )
+                    return (
+                      <Alert
+                        key={i}
+                        color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                        icon={
+                          status === 'failed' ?
+                            <BiMessageError
+                              className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                            /> :
+                            status === 'success' ?
+                              <BiMessageCheck
+                                className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                              /> :
+                              <BiMessageDetail
+                                className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
+                              />
+                        }
+                        closeDisabled={true}
+                        rounded={true}
+                        className="rounded p-4.5"
+                      >
+                        <div className="flex items-center justify-between space-x-2">
+                          <span className="break-all text-sm font-medium">
+                            {ellipse(
+                              split(message, 'normal', ' ')
+                                .join(' ')
+                                .substring(0, status === 'failed' && errorPatterns.findIndex(c => message?.indexOf(c) > -1) > -1 ? message.indexOf(errorPatterns.find(c => message.indexOf(c) > -1)) : undefined) ||
+                              message,
+                              128,
+                            )}
+                          </span>
+                          <div className="flex items-center space-x-1">
+                            {url && tx_hash && (
+                              <a
+                                href={`${url}${transaction_path?.replace('{tx}', r.tx_hash)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <TiArrowRight
+                                  size={20}
+                                  className="transform -rotate-45"
+                                />
+                              </a>
+                            )}
+                            {status === 'failed' ?
+                              <>
+                                <Copy
+                                  value={message}
+                                  className="cursor-pointer text-slate-200 hover:text-white"
+                                />
+                                <button
+                                  onClick={() => reset()}
+                                  className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
+                                >
+                                  <MdClose size={14} />
+                                </button>
+                              </> :
+                              status === 'success' ?
+                                <button
+                                  onClick={() => reset()}
+                                  className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
+                                >
+                                  <MdClose size={14} />
+                                </button> :
+                                null
+                            }
+                          </div>
+                        </div>
+                      </Alert>
+                    )
+                  }) :
+            ethereum_provider ?
+              <button
+                disabled={true}
+                className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base text-center py-3 sm:py-4 px-2 sm:px-3"
+              >
+                Apply
+              </button> :
+              <Wallet
+                connectChainId={chain_data?.chain_id}
+                buttonConnectTitle="Connect Wallet"
+                className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+              >
+                <span>Connect Wallet</span>
+              </Wallet>
+          }
+        </div>
+      }
+      noCancelOnClickOutside={true}
+      noButtons={true}
+      onClose={() => reset()}
+      modalClassName="max-w-md"
+    />
   )
 }
