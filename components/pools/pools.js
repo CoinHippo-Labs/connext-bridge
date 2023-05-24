@@ -105,15 +105,17 @@ export default ({ view, userPoolsData }) => {
               } = { ...getAsset(asset_data?.id, assets_data) }
 
               const tvl = Number(supply || _.sum(toArray(_.concat(adopted, local)).map(a => Number(a.balance)))) * (price || 0)
+              const value = (lpTokenBalance || '0') * price
 
               return {
                 ...d,
                 share,
                 price,
                 tvl,
+                value,
               }
             }),
-            ['tvl'], ['desc'],
+            ['value', 'tvl'], ['desc', 'desc'],
           ) :
           null :
       pools_data || pool_assets_data?.length === 0 ?
@@ -177,7 +179,7 @@ export default ({ view, userPoolsData }) => {
           ['i'], ['asc'],
         ) :
         null
-
+console.log(data)
   const chain_data = address && getChain(chain_id, chains_data)
 
   const {
@@ -1042,7 +1044,7 @@ export default ({ view, userPoolsData }) => {
                 {
                   Header: `Value ${currency.toUpperCase()}`,
                   accessor: 'balances',
-                  sortType: (a, b) => a.original.tvl > b.original.tvl ? 1 : -1,
+                  sortType: (a, b) => a.original.value > b.original.value ? 1 : -1,
                   Cell: props => {
                     const {
                       row,
