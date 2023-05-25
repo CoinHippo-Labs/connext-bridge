@@ -603,7 +603,7 @@ export default (
               domainId: origin_domain,
               transferId: transfer_id,
               asset: ['transacting'].includes(relayerFeeAssetType) ? origin_transacting_asset : constants.AddressZero,
-              relayerFee: utils.parseEther(relayer_fee_to_bump || '0').toString(),
+              relayerFee: utils.parseUnits(relayer_fee_to_bump || '0', relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals).toString(),
             }
 
             try {
