@@ -1381,46 +1381,52 @@ export default () => {
             success = true
 
             if (!failed) {
-              const destination_transacting_asset =
-                receiveLocal || estimatedValues?.isNextAsset ?
-                  destination_contract_data?.next_asset?.contract_address || destination_contract_data?.contract_address :
-                  destination_contract_data?.contract_address
+              try {
+                const destination_transacting_asset =
+                  receiveLocal || estimatedValues?.isNextAsset ?
+                    destination_contract_data?.next_asset?.contract_address || destination_contract_data?.contract_address :
+                    destination_contract_data?.contract_address
 
-              const destination_decimals =
-                (equalsIgnoreCase(destination_transacting_asset, destination_contract_data?.next_asset?.contract_address) && destination_contract_data?.next_asset ?
-                  destination_contract_data.next_asset?.decimals :
-                  destination_contract_data?.decimals
-                ) || 18
+                const destination_decimals =
+                  (equalsIgnoreCase(destination_transacting_asset, destination_contract_data?.next_asset?.contract_address) && destination_contract_data?.next_asset ?
+                    destination_contract_data.next_asset?.decimals :
+                    destination_contract_data?.decimals
+                  ) || 18
 
-              setLatestTransfers(
-                _.orderBy(
-                  _.uniqBy(
-                    _.concat(
-                      {
-                        xcall_transaction_hash: transactionHash || hash,
-                        xcall_timestamp:  moment().unix(),
-                        origin_chain: source_chain_data?.chain_id,
-                        origin_domain: xcallParams.origin,
-                        origin_transacting_asset: xcallParams.asset,
-                        origin_transacting_amount: Number(utils.parseUnits((amount || 0).toString(), source_decimals).toString()),
-                        destination_chain: destination_chain_data?.chain_id,
-                        destination_domain: xcallParams.destination,
-                        destination_transacting_asset,
-                        destination_transacting_amount: estimatedValues?.amountReceived ? utils.parseUnits((estimatedValues.amountReceived - (relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? Number(relayerFee) : 0)).toFixed(source_decimals), destination_decimals).toString() : undefined,
-                        to: xcallParams.unwrapNativeOnDestination ? destination_chain_data?.unwrapper_contract : xcallParams.to,
-                        force_slow: forceSlow,
-                        receive_local: receiveLocal || estimatedValues?.isNextAsset,
-                      },
-                      latestTransfers,
+                setLatestTransfers(
+                  _.orderBy(
+                    _.uniqBy(
+                      _.concat(
+                        {
+                          xcall_transaction_hash: transactionHash || hash,
+                          xcall_timestamp:  moment().unix(),
+                          origin_chain: source_chain_data?.chain_id,
+                          origin_domain: xcallParams.origin,
+                          origin_transacting_asset: xcallParams.asset,
+                          origin_transacting_amount: Number(utils.parseUnits((amount || 0).toFixed(source_decimals), source_decimals).toString()),
+                          destination_chain: destination_chain_data?.chain_id,
+                          destination_domain: xcallParams.destination,
+                          destination_transacting_asset,
+                          destination_transacting_amount: estimatedValues?.amountReceived ? utils.parseUnits((estimatedValues.amountReceived - (relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? Number(relayerFee) : 0)).toFixed(destination_decimals), destination_decimals).toString() : undefined,
+                          to: xcallParams.unwrapNativeOnDestination ? destination_chain_data?.unwrapper_contract : xcallParams.to,
+                          force_slow: forceSlow,
+                          receive_local: receiveLocal || estimatedValues?.isNextAsset,
+                        },
+                        latestTransfers,
+                      ),
+                      'xcall_transaction_hash',
                     ),
-                    'xcall_transaction_hash',
-                  ),
-                  ['xcall_timestamp'],
-                  ['desc'],
+                    ['xcall_timestamp'], ['desc'],
+                  )
                 )
-              )
 
-              setOpenTransferStatus(true)
+                setOpenTransferStatus(true)
+              } catch (error) {
+                console.log(
+                  '[xcall setLatestTransfers error]',
+                  { xcallParams, error },
+                )
+              }
             }
           }
         } catch (error) {
