@@ -101,7 +101,6 @@ export default () => {
 
         const chain = paths[paths.indexOf('on') + 1]
         const asset = _.head(paths) !== 'on' ? _.head(paths) : null
-
         const chain_data = getChain(chain, chains_data)
         const asset_data = getAsset(asset, pool_assets_data)
 
@@ -143,7 +142,6 @@ export default () => {
 
         if (chain_data) {
           params.chain = chain
-
           if (asset && getAsset(asset, pool_assets_data, chain_id)) {
             params.asset = asset
           }
@@ -168,7 +166,6 @@ export default () => {
 
         delete params.chain
         delete params.asset
-
         router.push(`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
       }
     },
@@ -184,16 +181,9 @@ export default () => {
 
       if (asPath && id) {
         const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-
         if (!params?.chain && !asPath.includes('on-') && getChain(id, chains_data, true)) {
-          setPool(
-            {
-              ...pool,
-              chain: id,
-            }
-          )
+          setPool({ ...pool, chain: id })
         }
-
         getBalances(id)
       }
     },
@@ -203,12 +193,7 @@ export default () => {
   // update balances
   useEffect(
     () => {
-      dispatch(
-        {
-          type: BALANCES_DATA,
-          value: null,
-        }
-      )
+      dispatch({ type: BALANCES_DATA, value: null })
 
       if (address) {
         const {
@@ -238,7 +223,6 @@ export default () => {
       }
 
       getData()
-
       const interval = setInterval(() => getData(), 0.25 * 60 * 1000)
       return () => clearInterval(interval)
     },
@@ -357,7 +341,6 @@ export default () => {
           }
         }
       }
-
       getData()
     },
     [sdk, address, poolsTrigger],
@@ -379,14 +362,7 @@ export default () => {
     getBalances(chain)
   }
 
-  const getBalances = chain => {
-    dispatch(
-      {
-        type: GET_BALANCES_DATA,
-        value: { chain },
-      }
-    )
-  }
+  const getBalances = chain => dispatch({ type: GET_BALANCES_DATA, value: { chain } })
 
   const {
     chain,
@@ -422,10 +398,7 @@ export default () => {
         <div className="w-full flex flex-col space-y-3.5 3xl:space-y-6 my-4 sm:my-12 mx-1 sm:mx-4">
           <Link href="/pools">
             <div className="w-fit rounded border dark:border-slate-800 flex items-center text-slate-600 dark:text-slate-500 space-x-1 3xl:space-x-2 py-0.5 px-2.5">
-              <TiArrowLeft
-                size={18}
-                className="3xl:w-6 3xl:h-6 -ml-0.5"
-              />
+              <TiArrowLeft size={18} className="3xl:w-6 3xl:h-6 -ml-0.5" />
               <span className="text-base 3xl:text-2xl font-semibold">
                 Back to pools
               </span>
@@ -436,17 +409,14 @@ export default () => {
               <div className="flex flex-wrap items-center justify-between space-y-4 lg:space-y-0 sm:space-x-2">
                 <div className="flex items-center space-x-1">
                   <div className="flex items-center space-x-3 sm:space-x-4 3xl:space-x-6">
-                    {
-                      chain_data?.image &&
-                      (
-                        <Image
-                          src={chain_data.image}
-                          width={48}
-                          height={48}
-                          className="3xl:w-16 3xl:h-16 rounded-full"
-                        />
-                      )
-                    }
+                    {chain_data?.image && (
+                      <Image
+                        src={chain_data.image}
+                        width={48}
+                        height={48}
+                        className="3xl:w-16 3xl:h-16 rounded-full"
+                      />
+                    )}
                     <span className="tracking-tighter text-xl sm:text-5xl font-semibold">
                       <span className="mr-1">
                         {chainName(chain_data)}
@@ -495,14 +465,11 @@ export default () => {
                   </div>
                 </Tooltip>
               </div>
-              {
-                error &&
-                (
-                  <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-100 dark:bg-opacity-50 rounded break-all tracking-tighter text-red-600 dark:text-red-400 text-base 3xl:text-xl font-medium py-1.5 px-4">
-                    {error.message}
-                  </div>
-                )
-              }
+              {error && (
+                <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-100 dark:bg-opacity-50 rounded break-all tracking-tighter text-red-600 dark:text-red-400 text-base 3xl:text-xl font-medium py-1.5 px-4">
+                  {error.message}
+                </div>
+              )}
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
               <div className="order-2 lg:order-1 lg:col-span-2">
