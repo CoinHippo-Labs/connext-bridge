@@ -1099,7 +1099,7 @@ export default () => {
         let approve_amount
 
         try {
-          approve_amount = BigNumber.from(amount || '0').toString()
+          approve_amount = utils.parseUnits(amount || '0', source_decimals).toString()
 
           console.log(
             '[approveIfNeeded before xcall]',
