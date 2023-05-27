@@ -38,14 +38,12 @@ import { getBalance } from '../../lib/object/balance'
 import { split, toArray, includesStringList, paramsToObj, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, loaderColor, switchColor, sleep, errorPatterns, parseError } from '../../lib/utils'
 import { BALANCES_DATA, GET_BALANCES_DATA } from '../../reducers/types'
 
-const is_staging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' || process.env.NEXT_PUBLIC_APP_URL?.includes('staging')
 const WRAPPED_PREFIX = process.env.NEXT_PUBLIC_WRAPPED_PREFIX
 const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT)
 const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT)
 const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)
 const RELAYER_FEE_ASSET_TYPES = ['transacting', 'native']
 const NATIVE_WRAPPABLE_SYMBOLS = ['ETH', 'MATIC', 'DAI']
-
 const DEFAULT_OPTIONS = {
   to: '',
   infiniteApprove: false,
@@ -196,7 +194,6 @@ export default () => {
         const source_chain = paths[paths.indexOf('from') + 1]
         const destination_chain = paths[paths.indexOf('to') + 1]
         const asset = _.head(paths) !== 'from' ? _.head(paths) : process.env.NEXT_PUBLIC_NETWORK === 'testnet' ? [source_chain, destination_chain].findIndex(c => ['linea'].includes(c)) > -1 ? 'matic' : 'test' : 'usdc'
-
         const source_chain_data = getChain(source_chain, chains_data)
         const destination_chain_data = getChain(destination_chain, chains_data)
         const asset_data = getAsset(asset, assets_data)
@@ -227,7 +224,6 @@ export default () => {
 
           if (sdk) {
             calculateAmountReceived(bridge.amount)
-
             if (isApproveNeeded === undefined) {
               checkApprovedNeeded(bridge.amount)
             }
@@ -252,24 +248,12 @@ export default () => {
       if ([true, 'true'].includes(receive_next)) {
         bridge.receive_next = true
         updated = true
-
-        setOptions(
-          {
-            ...options,
-            receiveLocal: true,
-          }
-        )
+        setOptions({ ...options, receiveLocal: true })
       }
       else if ([false, 'false'].includes(receive_next)) {
         bridge.receive_next = false
         updated = true
-
-        setOptions(
-          {
-            ...options,
-            receiveLocal: false,
-          }
-        )
+        setOptions({ ...options, receiveLocal: false })
       }
 
       if (updated) {
@@ -294,20 +278,16 @@ export default () => {
         } = { ...bridge }
 
         const source_chain_data = getChain(source_chain, chains_data, true)
-
         if (source_chain_data) {
           params.source_chain = source_chain
-
           if (asset && getAsset(asset, assets_data, source_chain_data.chain_id)) {
             params.asset = asset
           }
         }
 
         const destination_chain_data = getChain(destination_chain, chains_data, true)
-
         if (destination_chain_data) {
           params.destination_chain = destination_chain
-
           if (asset && getAsset(asset, assets_data, destination_chain_data.chain_id)) {
             params.asset = asset
           }
@@ -317,7 +297,6 @@ export default () => {
           if (!isNaN(amount) && Number(amount) > 0) {
             params.amount = amount
           }
-
           if (symbol && getAsset(asset, assets_data, source_chain_data.chain_id, symbol)) {
             params.symbol = symbol
           }
@@ -335,13 +314,11 @@ export default () => {
         if (receiveLocal) {
           bridge._receiveLocal = receiveLocal
         }
-
         receiveLocal = false
 
         if (bridge.receive_next) {
           bridge.receive_next = undefined
         }
-
         setDisplayReceiveNextInfo(true)
       }
       else {
@@ -370,7 +347,6 @@ export default () => {
         delete params.source_chain
         delete params.destination_chain
         delete params.asset
-
         if (!symbol) {
           delete params.symbol
         }
@@ -394,12 +370,11 @@ export default () => {
         symbol,
       } = { ...params }
 
-      const routers_liquidity_amount =
-        _.sum(
-          toArray(router_asset_balances_data?.[chain_id])
-            .filter(a => toArray(_.concat(contract_address, next_asset?.contract_address)).findIndex(_a => equalsIgnoreCase(a?.contract_address, _a)) > -1)
-            .map(a => Number(utils.formatUnits(BigInt(a?.amount || '0'), equalsIgnoreCase(a?.contract_address, next_asset?.contract_address) && next_asset ? next_asset?.decimals || 18 : destination_decimals)))
-        )
+      const routers_liquidity_amount = _.sum(
+        toArray(router_asset_balances_data?.[chain_id])
+          .filter(a => toArray(_.concat(contract_address, next_asset?.contract_address)).findIndex(_a => equalsIgnoreCase(a?.contract_address, _a)) > -1)
+          .map(a => Number(utils.formatUnits(BigInt(a?.amount || '0'), equalsIgnoreCase(a?.contract_address, next_asset?.contract_address) && next_asset ? next_asset?.decimals || 18 : destination_decimals)))
+      )
 
       setOptions(
         {
@@ -434,7 +409,6 @@ export default () => {
       if (asPath && id) {
         if (!(source_chain && destination_chain) && !equalsIgnoreCase(id, destination_chain)) {
           const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-
           if (!params?.source_chain && !asPath.includes('from-') && getChain(id, chains_data, true)) {
             source_chain = id
           }
@@ -442,7 +416,6 @@ export default () => {
         else if (!asPath.includes('from-') && !equalsIgnoreCase(id, source_chain)) {
           source_chain = id
         }
-
         getBalances(id)
       }
 
@@ -456,13 +429,7 @@ export default () => {
               getChain(null, chains_data, true, false, true, source_chain)?.id
       }
 
-      setBridge(
-        {
-          ...bridge,
-          source_chain,
-          destination_chain,
-        }
-      )
+      setBridge({ ...bridge, source_chain, destination_chain })
     },
     [asPath, chains_data, wallet_chain_id],
   )
@@ -470,12 +437,7 @@ export default () => {
   // update balances
   useEffect(
     () => {
-      dispatch(
-        {
-          type: BALANCES_DATA,
-          value: null,
-        }
-      )
+      dispatch({ type: BALANCES_DATA, value: null })
 
       if (address) {
         const {
@@ -513,7 +475,6 @@ export default () => {
       }
 
       getData()
-
       const interval = setInterval(() => getData(), 10 * 1000)
       return () => clearInterval(interval)
     },
@@ -549,7 +510,6 @@ export default () => {
       }
 
       update()
-
       const interval = setInterval(() => update(), 60 * 1000)
       return () => clearInterval(interval)
     },
@@ -588,33 +548,16 @@ export default () => {
 
             if (status || error_status) {
               if (transfer_data.transfer_id) {
-                setXcall(
-                  {
-                    ...xcall,
-                    transfer_id: transfer_data.transfer_id,
-                  }
-                )
+                setXcall({ ...xcall, transfer_id: transfer_data.transfer_id })
               }
-
-              setLatestTransfers(
-                _.orderBy(
-                  _.uniqBy(_.concat(transfer_data, latestTransfers), 'xcall_transaction_hash'),
-                  ['xcall_timestamp'],
-                  ['desc'],
-                )
-              )
+              setLatestTransfers(_.orderBy(_.uniqBy(_.concat(transfer_data, latestTransfers), 'xcall_transaction_hash'), ['xcall_timestamp'], ['desc']))
 
               if ([XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(status)) {
                 reset('finish')
               }
             }
             else if (transfer_data?.transfer_id) {
-              setXcall(
-                {
-                  ...xcall,
-                  transfer_id: transfer_data.transfer_id,
-                }
-              )
+              setXcall({ ...xcall, transfer_id: transfer_data.transfer_id })
             }
           }
           else if (transfer_id) {
@@ -630,7 +573,6 @@ export default () => {
 
             if (status || error_status) {
               let updated
-
               if (latest_transfer?.error_status === null) {
                 switch (error_status) {
                   case XTransferErrorStatus.LowSlippage:
@@ -649,13 +591,7 @@ export default () => {
               }
 
               if (updated) {
-                setLatestTransfers(
-                  _.orderBy(
-                    _.uniqBy(_.concat(transfer_data, latestTransfers), 'xcall_transaction_hash'),
-                    ['xcall_timestamp'],
-                    ['desc'],
-                  )
-                )
+                setLatestTransfers(_.orderBy(_.uniqBy(_.concat(transfer_data, latestTransfers), 'xcall_transaction_hash'), ['xcall_timestamp'], ['desc']))
               }
 
               if ([XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(status)) {
@@ -667,7 +603,6 @@ export default () => {
       }
 
       update()
-
       const interval = setInterval(() => update(), 7.5 * 1000)
       return () => clearInterval(interval)
     },
@@ -692,7 +627,6 @@ export default () => {
       }
 
       update()
-
       const interval = setInterval(() => update(true), 1 * 1000)
       return () => clearInterval(interval)
     },
@@ -707,14 +641,12 @@ export default () => {
           setInterval(
             () => {
               setReceiveNextInfoTimeout((receiveNextInfoTimeout || 5) - 1)
-
               if (receiveNextInfoTimeout === 1) {
                 setDisplayReceiveNextInfo(false)
               }
             },
             1000,
           )
-
         return () => clearInterval(interval)
       }
     },
@@ -725,13 +657,7 @@ export default () => {
     const reset_bridge = !['address', 'user_rejected'].includes(origin)
 
     if (reset_bridge) {
-      setBridge(
-        {
-          ...bridge,
-          amount: null,
-        }
-      )
-
+      setBridge({ ...bridge, amount: null })
       setXcall(null)
       setEstimatedValues(null)
       setEstimateResponse(null)
@@ -768,14 +694,7 @@ export default () => {
     getBalances(destination_chain)
   }
 
-  const getBalances = chain => {
-    dispatch(
-      {
-        type: GET_BALANCES_DATA,
-        value: { chain },
-      }
-    )
-  }
+  const getBalances = chain => dispatch({ type: GET_BALANCES_DATA, value: { chain } })
 
   const checkSupport = () => {
     const {
@@ -786,7 +705,6 @@ export default () => {
 
     const source_chain_data = getChain(source_chain, chains_data)
     const destination_chain_data = getChain(destination_chain, chains_data)
-
     const source_asset_data = getAsset(asset, assets_data)
     const destination_asset_data = getAsset(asset, assets_data)
 
@@ -808,10 +726,8 @@ export default () => {
 
       const source_chain_data = getChain(source_chain, chains_data)
       const destination_chain_data = getChain(destination_chain, chains_data)
-
       const source_asset_data = getAsset(asset, assets_data)
       const destination_asset_data = getAsset(asset, assets_data)
-
       const source_contract_data = getContract(source_chain_data.chain_id, source_asset_data?.contracts)
       const destination_contract_data = getContract(destination_chain_data.chain_id, destination_asset_data?.contracts)
 
@@ -841,9 +757,7 @@ export default () => {
             } = { ...nativeCurrency }
 
             decimals = decimals || 18
-
             const routerFee = forceSlow ? 0 : parseFloat((Number(amount) * ROUTER_FEE_PERCENT / 100).toFixed(source_contract_data.decimals))
-
             const params = {
               originDomain: source_chain_data?.domain_id,
               destinationDomain: destination_chain_data?.domain_id,
@@ -880,12 +794,7 @@ export default () => {
                 },
               )
 
-              setFees(
-                {
-                  routerFee,
-                  relayerFee,
-                }
-              )
+              setFees({ routerFee, relayerFee })
             } catch (error) {
               console.log(
                 '[estimateRelayerFee error]',
@@ -904,19 +813,14 @@ export default () => {
     }
   }
 
-  const calculateAmountReceived = async (
-    _amount,
-    receive_local,
-  ) => {
+  const calculateAmountReceived = async (_amount, receive_local) => {
     if (sdk) {
       const originDomain = source_chain_data?.domain_id
       const destinationDomain = destination_chain_data?.domain_id
-
       const originTokenAddress = (equalsIgnoreCase(source_contract_data?.contract_address, constants.AddressZero) ? _source_contract_data : source_contract_data)?.contract_address
       let destinationTokenAddress = _destination_contract_data?.contract_address
 
       const isNextAsset = typeof receive_local === 'boolean' ? receive_local : receiveLocal || equalsIgnoreCase(destination_contract_data?.contract_address, _destination_contract_data?.next_asset?.contract_address)
-
       if (isNextAsset) {
         destinationTokenAddress = _destination_contract_data?.next_asset?.contract_address || destinationTokenAddress
       }
@@ -963,23 +867,12 @@ export default () => {
 
           setEstimatedValues(
             Object.fromEntries(
-              Object.entries({ ...response })
-                .map(([k, v]) => {
-                  try {
-                    v =
-                      utils.formatUnits(
-                        v,
-                        ['amountReceived'].includes(k) ?
-                          (isNextAsset && _destination_contract_data?.next_asset ?
-                            _destination_contract_data?.next_asset?.decimals :
-                            destination_contract_data?.decimals
-                          ) || 18 :
-                          source_decimals,
-                      )
-                  } catch (error) {}
-
-                  return [k, v]
-                })
+              Object.entries({ ...response }).map(([k, v]) => {
+                try {
+                  v = utils.formatUnits(v, ['amountReceived'].includes(k) ? (isNextAsset && _destination_contract_data?.next_asset ? _destination_contract_data?.next_asset?.decimals : destination_contract_data?.decimals) || 18 : source_decimals)
+                } catch (error) {}
+                return [k, v]
+              })
             )
           )
         }
@@ -1011,18 +904,12 @@ export default () => {
           manual = true
         }
         else {
-          setEstimateResponse(
-            {
-              status: 'failed',
-              ...response,
-            }
-          )
+          setEstimateResponse({ status: 'failed', ...response })
         }
       }
 
       if (manual) {
         const routerFee = parseFloat((Number(_amount) * ROUTER_FEE_PERCENT / 100).toFixed(source_decimals))
-
         setEstimatedValues(
           {
             amountReceived: Number(_amount) - routerFee,
@@ -1050,7 +937,7 @@ export default () => {
 
       const amount = utils.parseUnits((_amount || 0).toString(), source_decimals).toBigInt()
       const decimals = source_contract_data?.decimals || 18
-      const approve_amount = BigNumber.from(amount.toString()).add(BigNumber.from(relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? utils.parseUnits(Number(relayer_fee).toFixed(decimals), decimals).toString() : '0')).toString()
+      const approve_amount = amount.toString()
 
       try {
         setIsApproveNeeded(undefined)
@@ -1104,14 +991,11 @@ export default () => {
     }
   }
 
-  const call = async (
-    relayerFee = fees?.relayerFee,
-  ) => {
+  const call = async (relayerFee = fees?.relayerFee) => {
     setApproving(null)
     setCalling(true)
 
     let success = false
-
     if (sdk) {
       const {
         source_chain,
@@ -1156,7 +1040,6 @@ export default () => {
           }
         }
       }
-
       symbol = source_contract_data?.symbol || source_asset_data?.symbol
 
       const destination_chain_data = getChain(destination_chain, chains_data)
@@ -1174,7 +1057,7 @@ export default () => {
       const source_decimals = source_contract_data?.decimals || 18
       const relayer_fee_field = `relayerFee${relayerFeeAssetType === 'transacting' ? 'InTransactingAsset' : ''}`
       const relayer_fee_decimals = relayerFeeAssetType === 'transacting' ? source_decimals : 18
-      const _amount = (amount || 0) - (relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? Number(relayerFee) : 0)
+      const _amount = numberToFixed((amount || 0) - (relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? Number(relayerFee) : 0), source_decimals)
 
       const xcallParams = {
         origin: source_chain_data?.domain_id,
@@ -1182,11 +1065,11 @@ export default () => {
         asset: source_contract_data?.contract_address,
         to: to || address,
         delegate: to || address,
-        amount: utils.parseUnits(_amount.toFixed(source_decimals), source_decimals).toString(),
+        amount: utils.parseUnits(_amount, source_decimals).toString(),
         slippage: ((typeof slippage === 'number' ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE) * 100).toString(),
         receiveLocal: receiveLocal || false,
         callData: callData || '0x',
-        [relayer_fee_field]: relayerFee && Number(relayerFee) > 0 ? utils.parseUnits(Number(relayerFee).toFixed(relayer_fee_decimals), relayer_fee_decimals).toString() : undefined,
+        [relayer_fee_field]: relayerFee && Number(relayerFee) > 0 ? utils.parseUnits(numberToFixed(Number(relayerFee), relayer_fee_decimals), relayer_fee_decimals).toString() : undefined,
       }
 
       console.log(
@@ -1209,7 +1092,6 @@ export default () => {
             code: XTransferErrorStatus.LowRelayerFee,
           }
         )
-
         failed = true
       }
 
@@ -1217,7 +1099,7 @@ export default () => {
         let approve_amount
 
         try {
-          approve_amount = BigNumber.from(xcallParams.amount).add(BigNumber.from(relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? utils.parseUnits(Number(relayer_fee).toFixed(source_decimals), source_decimals).toString() : '0')).toString()
+          approve_amount = BigNumber.from(amount || '0').toString()
 
           console.log(
             '[approveIfNeeded before xcall]',
@@ -1234,7 +1116,6 @@ export default () => {
 
           if (approve_request) {
             setApproving(true)
-
             const approve_response = await signer.sendTransaction(approve_request)
 
             const {
@@ -1250,7 +1131,6 @@ export default () => {
             )
 
             setApproveProcessing(true)
-
             const approve_receipt = await signer.provider.waitForTransaction(hash)
 
             const {
@@ -1268,7 +1148,6 @@ export default () => {
             )
 
             failed = !status
-
             setApproveProcessing(false)
             setApproving(false)
           }
@@ -1277,7 +1156,6 @@ export default () => {
           }
         } catch (error) {
           failed = true
-
           const response = parseError(error)
 
           console.log(
@@ -1292,13 +1170,7 @@ export default () => {
             },
           )
 
-          setApproveResponse(
-            {
-              status: 'failed',
-              ...response,
-            }
-          )
-
+          setApproveResponse({ status: 'failed', ...response })
           setApproveProcessing(false)
           setApproving(false)
         }
@@ -1317,7 +1189,6 @@ export default () => {
           }
 
           const CANONICAL_ASSET_SYMBOL = NATIVE_WRAPPABLE_SYMBOLS.find(s => s === source_asset_data?.symbol)
-
           if (CANONICAL_ASSET_SYMBOL && _.head(destination_chain_data?.provider_params)?.nativeCurrency?.symbol?.endsWith(CANONICAL_ASSET_SYMBOL)) {
             xcallParams.unwrapNativeOnDestination = xcallParams.receiveLocal || receive_wrap ? false : true
           }
@@ -1326,11 +1197,13 @@ export default () => {
             '[xcall]',
             { xcallParams },
           )
+
           console.warn('amount', xcallParams.amount)
           console.warn('relayerFeeInTransactingAsset', xcallParams.relayerFeeInTransactingAsset)
           console.warn('total to wrap', BigNumber.from(xcallParams.amount).add(xcallParams.relayerFeeInTransactingAsset || '0').toString())
 
           const xcall_request = await sdk.sdkBase.xcall(xcallParams)
+
           console.warn('xcall_request.value', xcall_request?.value?.toString())
 
           if (xcall_request) {
@@ -1358,7 +1231,6 @@ export default () => {
             } = { ...xcall_response }
 
             setCallProcessing(true)
-
             const xcall_receipt = await signer.provider.waitForTransaction(hash)
 
             setXcall(xcall_receipt)
@@ -1369,7 +1241,6 @@ export default () => {
             } = { ...xcall_receipt }
 
             failed = !status
-
             setXcallResponse(
               {
                 status: failed ? 'failed' : 'success',
@@ -1377,7 +1248,6 @@ export default () => {
                 tx_hash: hash,
               }
             )
-
             success = true
 
             if (!failed) {
@@ -1450,15 +1320,9 @@ export default () => {
               reset(response.code)
               break
             default:
-              setXcallResponse(
-                {
-                  status: 'failed',
-                  ...response,
-                }
-              )
+              setXcallResponse({ status: 'failed', ...response })
               break
           }
-
           failed = true
         }
       }
@@ -1473,7 +1337,6 @@ export default () => {
 
     if (sdk && address && success) {
       await sleep(1 * 1000)
-
       setBalanceTrigger(moment().valueOf())
       setTransfersTrigger(moment().valueOf())
     }
@@ -1544,7 +1407,6 @@ export default () => {
   // native asset
   else if (destination_contract_data?.wrapable && (!symbol || equalsIgnoreCase(destination_asset_data?.symbol, symbol) || equalsIgnoreCase(destination_contract_data?.symbol, symbol))) {
     is_wrapable_asset = true
-
     if (!receive_wrap) {
       destination_contract_data = {
         ...destination_contract_data,
@@ -1558,7 +1420,6 @@ export default () => {
   const source_decimals = source_contract_data?.decimals || 18
   const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
   const source_amount = getBalance(source_chain_data?.chain_id, source_contract_data?.contract_address, balances_data)?.amount
-
   const source_gas_native_token = _.head(source_chain_data?.provider_params)?.nativeCurrency
   const source_gas_amount = getBalance(source_chain_data?.chain_id, constants.AddressZero, balances_data)?.amount
 
@@ -1570,13 +1431,11 @@ export default () => {
   const router_fee = estimatedValues?.routerFee ? estimatedValues.routerFee : fees && (forceSlow ? 0 : fees.routerFee || 0)
   const price_impact = null
 
-  const routers_liquidity_amount =
-    _.sum(
-      toArray(router_asset_balances_data?.[destination_chain_data?.chain_id])
-        .filter(a => toArray(_.concat(destination_contract_data?.contract_address, destination_contract_data?.next_asset?.contract_address)).findIndex(_a => equalsIgnoreCase(a?.contract_address, _a)) > -1)
-        .map(a => Number(utils.formatUnits(BigInt(a?.amount || '0'), equalsIgnoreCase(a?.contract_address, destination_contract_data?.next_asset?.contract_address) && destination_contract_data?.next_asset ? destination_contract_data.next_asset?.decimals || 18 : destination_decimals)))
-    )
-
+  const routers_liquidity_amount = _.sum(
+    toArray(router_asset_balances_data?.[destination_chain_data?.chain_id])
+      .filter(a => toArray(_.concat(destination_contract_data?.contract_address, destination_contract_data?.next_asset?.contract_address)).findIndex(_a => equalsIgnoreCase(a?.contract_address, _a)) > -1)
+      .map(a => Number(utils.formatUnits(BigInt(a?.amount || '0'), equalsIgnoreCase(a?.contract_address, destination_contract_data?.next_asset?.contract_address) && destination_contract_data?.next_asset ? destination_contract_data.next_asset?.decimals || 18 : destination_decimals)))
+  )
   const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === destination_chain && p.asset_data?.id === asset)
 
   const {
@@ -1630,10 +1489,7 @@ export default () => {
                       }
                     }
                   >
-                    <MdClose
-                      size={20}
-                      className="-mr-1"
-                    />
+                    <MdClose size={20} className="-mr-1" />
                   </button>
                 </div>
                 <div className="flex items-center justify-center">
@@ -1677,14 +1533,12 @@ export default () => {
                       relayer_fee_data => {
                         if (latestTransfers) {
                           const index = latestTransfers.findIndex(t => (t?.transfer_id && t.transfer_id === latest_transfer?.transfer_id) || (t?.xcall_transaction_hash && t.xcall_transaction_hash === latest_transfer?.transaction_hash))
-
                           if (index > -1) {
                             latestTransfers[index] = {
                               ...latestTransfers[index],
                               ...relayer_fee_data,
                               error_status: null,
                             }
-
                             setLatestTransfers(latestTransfers)
                           }
                         }
@@ -1694,14 +1548,12 @@ export default () => {
                       slippage => {
                         if (latestTransfers) {
                           const index = latestTransfers.findIndex(t => (t?.transfer_id && t.transfer_id === latest_transfer?.transfer_id) || (t?.xcall_transaction_hash && t.xcall_transaction_hash === latest_transfer?.transaction_hash))
-
                           if (index > -1) {
                             latestTransfers[index] = {
                               ...latestTransfers[index],
                               slippage,
                               error_status: null,
                             }
-
                             setLatestTransfers(latestTransfers)
                           }
                         }
@@ -1736,14 +1588,12 @@ export default () => {
                               relayer_fee_data => {
                                 if (latestTransfers) {
                                   const index = latestTransfers.findIndex(t => (t?.transfer_id && t.transfer_id === latest_transfer?.transfer_id) || (t?.xcall_transaction_hash && t.xcall_transaction_hash === latest_transfer?.transaction_hash))
-
                                   if (index > -1) {
                                     latestTransfers[index] = {
                                       ...latestTransfers[index],
                                       ...relayer_fee_data,
                                       error_status: null,
                                     }
-
                                     setLatestTransfers(latestTransfers)
                                   }
                                 }
@@ -1753,14 +1603,12 @@ export default () => {
                               slippage => {
                                 if (latestTransfers) {
                                   const index = latestTransfers.findIndex(t => (t?.transfer_id && t.transfer_id === latest_transfer?.transfer_id) || (t?.xcall_transaction_hash && t.xcall_transaction_hash === latest_transfer?.transaction_hash))
-
                                   if (index > -1) {
                                     latestTransfers[index] = {
                                       ...latestTransfers[index],
                                       slippage,
                                       error_status: null,
                                     }
-
                                     setLatestTransfers(latestTransfers)
                                   }
                                 }
@@ -1807,369 +1655,224 @@ export default () => {
                 </div>
               </div> :
               <div className="space-y-3 3xl:space-y-4">
-                {
-                  bridge._receiveLocal && destination_contract_data && !destination_contract_data.next_asset &&
-                  (
-                    <AlertNotification
-                      show={typeof displayReceiveNextInfo !== 'boolean' || displayReceiveNextInfo}
-                      icon={
-                        <IoInformationCircleOutline
-                          size={26}
-                          className="mb-0.5"
-                        />
-                      }
-                      animate={{ mount: { y: 0 }, unmount: { y: 32 } }}
-                      dismissible={{ onClose: () => setDisplayReceiveNextInfo(false) }}
-                      className="alert-box flex"
-                    >
-                      <span className="text-sm">
-                        Receive NextAsset setting turned off for {destination_chain_data?.name}.
-                      </span>
-                    </AlertNotification>
-                  )
-                }
-                {
-                  chains_data && assets_data &&
-                  (
-                    <div
-                      className="bg-white dark:bg-slate-900 rounded border dark:border-slate-700 space-y-8 3xl:space-y-10 pt-5 sm:pt-6 3xl:pt-8 pb-6 sm:pb-7 3xl:pb-10 px-4 sm:px-6 3xl:px-8"
-                      style={
-                        checkSupport() && boxShadow ?
-                          {
-                            boxShadow,
-                            WebkitBoxShadow: boxShadow,
-                            MozBoxShadow: boxShadow,
-                          } :
-                          undefined
-                      }
-                    >
-                      <div className="space-y-7 3xl:space-y-10">
-                        <div className="flex items-center justify-between space-x-2">
-                          <h1 className="text-xl 3xl:text-2xl font-semibold">
-                            Bridge
-                            {
-                              receive_next &&
-                              (
-                                <span className="ml-1 3xl:ml-2">
-                                  into nextAsset
-                                </span>
+                {bridge._receiveLocal && destination_contract_data && !destination_contract_data.next_asset && (
+                  <AlertNotification
+                    show={typeof displayReceiveNextInfo !== 'boolean' || displayReceiveNextInfo}
+                    icon={<IoInformationCircleOutline size={26} className="mb-0.5" />}
+                    animate={{ mount: { y: 0 }, unmount: { y: 32 } }}
+                    dismissible={{ onClose: () => setDisplayReceiveNextInfo(false) }}
+                    className="alert-box flex"
+                  >
+                    <span className="text-sm">
+                      Receive NextAsset setting turned off for {destination_chain_data?.name}.
+                    </span>
+                  </AlertNotification>
+                )}
+                {chains_data && assets_data && (
+                  <div
+                    className="bg-white dark:bg-slate-900 rounded border dark:border-slate-700 space-y-8 3xl:space-y-10 pt-5 sm:pt-6 3xl:pt-8 pb-6 sm:pb-7 3xl:pb-10 px-4 sm:px-6 3xl:px-8"
+                    style={checkSupport() && boxShadow ? { boxShadow, WebkitBoxShadow: boxShadow, MozBoxShadow: boxShadow } : undefined}
+                  >
+                    <div className="space-y-7 3xl:space-y-10">
+                      <div className="flex items-center justify-between space-x-2">
+                        <h1 className="text-xl 3xl:text-2xl font-semibold">
+                          Bridge
+                          {receive_next && (
+                            <span className="ml-1 3xl:ml-2">
+                              into nextAsset
+                            </span>
+                          )}
+                        </h1>
+                        {!['pool'].includes(source) && (
+                          <Options
+                            disabled={disabled}
+                            applied={
+                              !_.isEqual(
+                                Object.fromEntries(Object.entries(options).filter(([k, v]) => !toArray(['slippage', 'forceSlow', 'showNextAssets', isApproveNeeded !== false && 'infiniteApprove']).includes(k))),
+                                Object.fromEntries(Object.entries(DEFAULT_OPTIONS).filter(([k, v]) => !toArray(['slippage', 'forceSlow', 'showNextAssets', isApproveNeeded !== false && 'infiniteApprove']).includes(k))),
                               )
                             }
-                          </h1>
-                          {
-                            !['pool'].includes(source) &&
-                            (
-                              <Options
-                                disabled={disabled}
-                                applied={
-                                  !_.isEqual(
-                                    Object.fromEntries(
-                                      Object.entries(options)
-                                        .filter(([k, v]) =>
-                                          !toArray(['slippage', 'forceSlow', 'showNextAssets', isApproveNeeded !== false && 'infiniteApprove']).includes(k)
-                                        )
-                                    ),
-                                    Object.fromEntries(
-                                      Object.entries(DEFAULT_OPTIONS)
-                                        .filter(([k, v]) =>
-                                          !toArray(['slippage', 'forceSlow', 'showNextAssets', isApproveNeeded !== false && 'infiniteApprove']).includes(k)
-                                        )
-                                    ),
-                                  )
-                                }
-                                initialData={options}
-                                onChange={
-                                  o => {
-                                    const {
-                                      receiveLocal,
-                                    } = { ...o }
+                            initialData={options}
+                            onChange={
+                              o => {
+                                const {
+                                  receiveLocal,
+                                } = { ...o }
 
-                                    setOptions(o)
+                                setOptions(o)
 
-                                    if ((receiveLocal && !options?.receiveLocal) || (!receiveLocal && options?.receiveLocal) || o?.relayerFeeAssetType !== relayerFeeAssetType) {
-                                      if (amount && !['0', '0.0'].includes(amount)) {
-                                        calculateAmountReceived(amount, receiveLocal)
-                                        checkApprovedNeeded(amount)
-                                      }
-                                      else {
-                                        setEstimatedValues(
-                                          {
-                                            amountReceived: '0',
-                                            routerFee: '0',
-                                            isNextAsset: receiveLocal,
-                                          }
-                                        )
-                                        setIsApproveNeeded(false)
-                                      }
-
-                                      if (o?.relayerFeeAssetType !== relayerFeeAssetType) {
-                                        setEstimateFeesTrigger(moment().valueOf())
-                                      }
-
-                                      if (query?.receive_next && !receiveLocal) {
-                                        const params = { amount, receive_next: receiveLocal }
-                                        router.push(`/${source_chain && destination_chain ? `${asset ? `${asset.toUpperCase()}-` : ''}from-${source_chain}-to-${destination_chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
-                                      }
-                                    }
+                                if ((receiveLocal && !options?.receiveLocal) || (!receiveLocal && options?.receiveLocal) || o?.relayerFeeAssetType !== relayerFeeAssetType) {
+                                  if (amount && !['0', '0.0'].includes(amount)) {
+                                    calculateAmountReceived(amount, receiveLocal)
+                                    checkApprovedNeeded(amount)
                                   }
-                                }
-                                showInfiniteApproval={isApproveNeeded}
-                                hasNextAsset={destination_contract_data?.next_asset}
-                                chainData={destination_chain_data}
-                                relayerFeeAssetTypes={RELAYER_FEE_ASSET_TYPES.map(t => { return { name: t === 'transacting' ? source_symbol : source_gas_native_token?.symbol, value: t } })}
-                              />
-                            )
-                          }
-                        </div>
-                        {chains_data && assets_data ?
-                          <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
-                            <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start space-y-0.5 sm:space-y-2">
-                              <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
-                                <span className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium text-left">
-                                  From
-                                </span>
-                              </div>
-                              <SelectChain
-                                disabled={disabled}
-                                value={source_chain}
-                                onSelect={
-                                  c => {
-                                    const _source_chain = c
-                                    const _destination_chain = c === destination_chain ? source_chain : destination_chain
-                                    const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(a => a.id !== asset))?.id : asset
-
-                                    setBridge(
+                                  else {
+                                    setEstimatedValues(
                                       {
-                                        ...bridge,
-                                        source_chain: _source_chain,
-                                        destination_chain: _destination_chain,
-                                        asset: _asset,
-                                        symbol: equalsIgnoreCase(_source_chain, source_chain) && _asset === asset ? symbol : undefined,
+                                        amountReceived: '0',
+                                        routerFee: '0',
+                                        isNextAsset: receiveLocal,
                                       }
                                     )
-
-                                    getBalances(_source_chain)
-                                    getBalances(_destination_chain)
+                                    setIsApproveNeeded(false)
+                                  }
+                                  if (o?.relayerFeeAssetType !== relayerFeeAssetType) {
+                                    setEstimateFeesTrigger(moment().valueOf())
+                                  }
+                                  if (query?.receive_next && !receiveLocal) {
+                                    const params = { amount, receive_next: receiveLocal }
+                                    router.push(`/${source_chain && destination_chain ? `${asset ? `${asset.toUpperCase()}-` : ''}from-${source_chain}-to-${destination_chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
                                   }
                                 }
-                                source={source_chain}
-                                destination={destination_chain}
-                                origin="from"
-                                fixed={['pool'].includes(source)}
-                              />
-                            </div>
-                            <div className="flex items-center justify-center mt-5.5 sm:mt-7">
-                              <button
-                                disabled={disabled}
-                                onClick={
-                                  () => {
-                                    if (!disabled) {
-                                      const _source_chain = destination_chain
-                                      const _destination_chain = source_chain
-                                      const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(a => a.id !== asset))?.id : asset
-
-                                      setBridge(
-                                        {
-                                          ...bridge,
-                                          source_chain: _source_chain,
-                                          destination_chain: _destination_chain,
-                                          asset: _asset,
-                                          amount: null,
-                                        }
-                                      )
-                                      setButtonDirection(buttonDirection * -1)
-
-                                      getBalances(source_chain)
-                                      getBalances(destination_chain)
-                                    }
-                                  }
-                                }
-                                className={`bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} ${['pool'].includes(source) ? 'pointer-events-none dark:border-slate-800' : 'dark:border-slate-700'} rounded border flex items-center justify-center p-1 sm:p-1.5`}
-                              >
-                                <HiArrowRight
-                                  size={18}
-                                  className="3xl:w-6 3xl:h-6"
-                                />
-                              </button>
-                            </div>
-                            <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end space-y-0.5 sm:space-y-2">
-                              <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
-                                <span className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium text-left">
-                                  To
-                                </span>
-                              </div>
-                              <SelectChain
-                                disabled={disabled}
-                                value={destination_chain}
-                                onSelect={
-                                  c => {
-                                    const _source_chain = c === source_chain ? destination_chain : source_chain
-                                    const _destination_chain = c
-                                    const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(a => a.id !== asset))?.id : asset
-
-                                    setBridge(
-                                      {
-                                        ...bridge,
-                                        source_chain: _source_chain,
-                                        destination_chain: _destination_chain,
-                                        asset: _asset,
-                                      }
-                                    )
-
-                                    getBalances(_source_chain)
-                                    getBalances(_destination_chain)
-                                  }
-                                }
-                                source={source_chain}
-                                destination={destination_chain}
-                                origin="to"
-                                fixed={['pool'].includes(source)}
-                              />
-                            </div>
-                          </div> :
-                          <div className="h-64 sm:h-96 flex flex-col items-center justify-center space-y-3">
-                            <TailSpin
-                              width="36"
-                              height="36"
-                              color={loaderColor(theme)}
-                            />
-                            <span className="text-slate-400 dark:text-slate-500 text-base 3xl:text-xl">
-                              Loading configuration
-                            </span>
-                          </div>
-                        }
+                              }
+                            }
+                            showInfiniteApproval={isApproveNeeded}
+                            hasNextAsset={destination_contract_data?.next_asset}
+                            chainData={destination_chain_data}
+                            relayerFeeAssetTypes={RELAYER_FEE_ASSET_TYPES.map(t => { return { name: t === 'transacting' ? source_symbol : source_gas_native_token?.symbol, value: t } })}
+                          />
+                        )}
                       </div>
-                      {
-                        chains_data && assets_data &&
-                        (
-                          <>
-                            <div className="space-y-2">
-                              <div className="space-y-2.5">
-                                <div className="flex items-center justify-between space-x-2">
-                                  <div className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                    You send
-                                  </div>
-                                  {
-                                    source_chain_data && asset &&
-                                    (
-                                      <div className="flex items-center justify-between space-x-2">
-                                        <div className="flex items-center space-x-1">
-                                          <div className="text-slate-400 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                            Balance:
-                                          </div>
-                                          <button
-                                            disabled={disabled || (source_contract_data?.contract_address === constants.AddressZero ? !fees : false)}
-                                            onClick={
-                                              () => {
-                                                if (utils.parseUnits(max_amount || '0', source_decimals).toBigInt() > 0) {
-                                                  setBridge(
-                                                    {
-                                                      ...bridge,
-                                                      amount: max_amount,
-                                                    }
-                                                  )
+                      {chains_data && assets_data ?
+                        <div className="grid grid-cols-5 sm:grid-cols-5 gap-3 sm:gap-6">
+                          <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-start space-y-0.5 sm:space-y-2">
+                            <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
+                              <span className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium text-left">
+                                From
+                              </span>
+                            </div>
+                            <SelectChain
+                              disabled={disabled}
+                              value={source_chain}
+                              onSelect={
+                                c => {
+                                  const _source_chain = c
+                                  const _destination_chain = c === destination_chain ? source_chain : destination_chain
+                                  const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(a => a.id !== asset))?.id : asset
 
-                                                  if (['string', 'number'].includes(typeof max_amount)) {
-                                                    if (max_amount && !['0', '0.0'].includes(max_amount)) {
-                                                      calculateAmountReceived(max_amount)
-                                                      checkApprovedNeeded(max_amount)
-                                                    }
-                                                    else {
-                                                      setEstimatedValues(
-                                                        {
-                                                          amountReceived: '0',
-                                                          routerFee: '0',
-                                                          isNextAsset: receiveLocal,
-                                                        }
-                                                      )
-                                                      setIsApproveNeeded(false)
-                                                    }
-                                                  }
-                                                }
-                                              }
-                                            }
-                                          >
-                                            <Balance
-                                              chainId={source_chain_data.chain_id}
-                                              asset={asset}
-                                              contractAddress={source_contract_data?.contract_address}
-                                              decimals={source_decimals}
-                                              symbol={source_symbol}
-                                              hideSymbol={false}
-                                              trigger={balanceTrigger}
-                                            />
-                                          </button>
-                                        </div>
-                                      </div>
-                                    )
-                                  }
-                                </div>
-                                <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-0.5 py-2.5 px-3">
-                                  <div className="flex items-center justify-between space-x-2">
-                                    <SelectAsset
-                                      disabled={disabled}
-                                      value={asset}
-                                      onSelect={
-                                        (a, s) => {
-                                          setBridge(
-                                            {
-                                              ...bridge,
-                                              asset: a,
-                                              symbol: s,
-                                              amount: a !== asset || !equalsIgnoreCase(s, symbol) ? null : amount,
-                                            }
-                                          )
+                                  setBridge(
+                                    {
+                                      ...bridge,
+                                      source_chain: _source_chain,
+                                      destination_chain: _destination_chain,
+                                      asset: _asset,
+                                      symbol: equalsIgnoreCase(_source_chain, source_chain) && _asset === asset ? symbol : undefined,
+                                    }
+                                  )
 
-                                          if (a !== asset) {
-                                            getBalances(source_chain)
-                                            getBalances(destination_chain)
-                                          }
-                                        }
+                                  getBalances(_source_chain)
+                                  getBalances(_destination_chain)
+                                }
+                              }
+                              source={source_chain}
+                              destination={destination_chain}
+                              origin="from"
+                              fixed={['pool'].includes(source)}
+                            />
+                          </div>
+                          <div className="flex items-center justify-center mt-5.5 sm:mt-7">
+                            <button
+                              disabled={disabled}
+                              onClick={
+                                () => {
+                                  if (!disabled) {
+                                    const _source_chain = destination_chain
+                                    const _destination_chain = source_chain
+                                    const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(a => a.id !== asset))?.id : asset
+
+                                    setBridge(
+                                      {
+                                        ...bridge,
+                                        source_chain: _source_chain,
+                                        destination_chain: _destination_chain,
+                                        asset: _asset,
+                                        amount: null,
                                       }
-                                      chain={source_chain}
-                                      destinationChain={destination_chain}
-                                      isBridge={true}
-                                      showNextAssets={showNextAssets}
-                                      showNativeAssets={true}
-                                      fixed={['pool'].includes(source)}
-                                      data={{ ...source_asset_data, ...source_contract_data }}
-                                      className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
-                                    />
-                                    <div className="space-y-0">
-                                      <DebounceInput
-                                        debounceTimeout={750}
-                                        size="small"
-                                        type="number"
-                                        placeholder="0.00"
-                                        disabled={disabled || !asset}
-                                        value={['string', 'number'].includes(typeof amount) && ![''].includes(amount) && !isNaN(amount) ? amount : ''}
-                                        onChange={
-                                          e => {
-                                            const regex = /^[0-9.\b]+$/
-                                            let value
+                                    )
+                                    setButtonDirection(buttonDirection * -1)
 
-                                            if (e.target.value === '' || regex.test(e.target.value)) {
-                                              value = e.target.value
-                                            }
+                                    getBalances(source_chain)
+                                    getBalances(destination_chain)
+                                  }
+                                }
+                              }
+                              className={`bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} ${['pool'].includes(source) ? 'pointer-events-none dark:border-slate-800' : 'dark:border-slate-700'} rounded border flex items-center justify-center p-1 sm:p-1.5`}
+                            >
+                              <HiArrowRight size={18} className="3xl:w-6 3xl:h-6" />
+                            </button>
+                          </div>
+                          <div className="col-span-2 sm:col-span-2 flex flex-col items-center sm:items-end space-y-0.5 sm:space-y-2">
+                            <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
+                              <span className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium text-left">
+                                To
+                              </span>
+                            </div>
+                            <SelectChain
+                              disabled={disabled}
+                              value={destination_chain}
+                              onSelect={
+                                c => {
+                                  const _source_chain = c === source_chain ? destination_chain : source_chain
+                                  const _destination_chain = c
+                                  const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(a => a.id !== asset))?.id : asset
 
-                                            if (typeof value === 'string') {
-                                              if (value.startsWith('.')) {
-                                                value = `0${value}`
-                                              }
-                                              value = numberToFixed(value, source_decimals || 18)
-                                            }
+                                  setBridge(
+                                    {
+                                      ...bridge,
+                                      source_chain: _source_chain,
+                                      destination_chain: _destination_chain,
+                                      asset: _asset,
+                                    }
+                                  )
 
-                                            setBridge(
-                                              {
-                                                ...bridge,
-                                                amount: value,
-                                              }
-                                            )
+                                  getBalances(_source_chain)
+                                  getBalances(_destination_chain)
+                                }
+                              }
+                              source={source_chain}
+                              destination={destination_chain}
+                              origin="to"
+                              fixed={['pool'].includes(source)}
+                            />
+                          </div>
+                        </div> :
+                        <div className="h-64 sm:h-96 flex flex-col items-center justify-center space-y-3">
+                          <TailSpin
+                            width="36"
+                            height="36"
+                            color={loaderColor(theme)}
+                          />
+                          <span className="text-slate-400 dark:text-slate-500 text-base 3xl:text-xl">
+                            Loading configuration
+                          </span>
+                        </div>
+                      }
+                    </div>
+                    {chains_data && assets_data && (
+                      <>
+                        <div className="space-y-2">
+                          <div className="space-y-2.5">
+                            <div className="flex items-center justify-between space-x-2">
+                              <div className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                You send
+                              </div>
+                              {source_chain_data && asset && (
+                                <div className="flex items-center justify-between space-x-2">
+                                  <div className="flex items-center space-x-1">
+                                    <div className="text-slate-400 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                      Balance:
+                                    </div>
+                                    <button
+                                      disabled={disabled || (source_contract_data?.contract_address === constants.AddressZero ? !fees : false)}
+                                      onClick={
+                                        () => {
+                                          if (utils.parseUnits(max_amount || '0', source_decimals).toBigInt() > 0) {
+                                            setBridge({ ...bridge, amount: max_amount })
 
-                                            if (['string', 'number'].includes(typeof value)) {
-                                              if (value && !['0', '0.0'].includes(value)) {
-                                                calculateAmountReceived(value)
-                                                checkApprovedNeeded(value)
+                                            if (['string', 'number'].includes(typeof max_amount)) {
+                                              if (max_amount && !['0', '0.0'].includes(max_amount)) {
+                                                calculateAmountReceived(max_amount)
+                                                checkApprovedNeeded(max_amount)
                                               }
                                               else {
                                                 setEstimatedValues(
@@ -2184,973 +1887,904 @@ export default () => {
                                             }
                                           }
                                         }
-                                        onWheel={e => e.target.blur()}
-                                        onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                                        className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg 3xl:text-2xl font-semibold text-right ${amount && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin ? 'py-0' : 'py-1.5'}`}
-                                      />
-                                      {/*
-                                        relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 &&
-                                        (
-                                          <div className="text-slate-400 dark:text-slate-500 text-right">
-                                            <span className="text-xs 3xl:text-xl font-medium mr-1.5">
-                                              + Relayer fee
-                                            </span>
-                                            <DecimalsFormat
-                                              value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
-                                              className="text-xs 3xl:text-xl font-medium"
-                                            />
-                                          </div>
-                                        )
-                                      */}
-                                      {
-                                        amount && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin &&
-                                        (
-                                          <div className="text-slate-400 dark:text-slate-500 text-right">
-                                            <DecimalsFormat
-                                              value={(Number(amount) + (relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? Number(relayer_fee) : 0)) * source_asset_data.price}
-                                              prefix={currency_symbol}
-                                              className="text-xs 3xl:text-xl font-medium"
-                                            />
-                                          </div>
-                                        )
                                       }
+                                    >
+                                      <Balance
+                                        chainId={source_chain_data.chain_id}
+                                        asset={asset}
+                                        contractAddress={source_contract_data?.contract_address}
+                                        decimals={source_decimals}
+                                        symbol={source_symbol}
+                                        hideSymbol={false}
+                                        trigger={balanceTrigger}
+                                      />
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 space-y-0.5 py-2.5 px-3">
+                              <div className="flex items-center justify-between space-x-2">
+                                <SelectAsset
+                                  disabled={disabled}
+                                  value={asset}
+                                  onSelect={
+                                    (a, s) => {
+                                      setBridge(
+                                        {
+                                          ...bridge,
+                                          asset: a,
+                                          symbol: s,
+                                          amount: a !== asset || !equalsIgnoreCase(s, symbol) ? null : amount,
+                                        }
+                                      )
+
+                                      if (a !== asset) {
+                                        getBalances(source_chain)
+                                        getBalances(destination_chain)
+                                      }
+                                    }
+                                  }
+                                  chain={source_chain}
+                                  destinationChain={destination_chain}
+                                  isBridge={true}
+                                  showNextAssets={showNextAssets}
+                                  showNativeAssets={true}
+                                  fixed={['pool'].includes(source)}
+                                  data={{ ...source_asset_data, ...source_contract_data }}
+                                  className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
+                                />
+                                <div className="space-y-0">
+                                  <DebounceInput
+                                    debounceTimeout={750}
+                                    size="small"
+                                    type="number"
+                                    placeholder="0.00"
+                                    disabled={disabled || !asset}
+                                    value={['string', 'number'].includes(typeof amount) && ![''].includes(amount) && !isNaN(amount) ? amount : ''}
+                                    onChange={
+                                      e => {
+                                        const regex = /^[0-9.\b]+$/
+                                        let value
+
+                                        if (e.target.value === '' || regex.test(e.target.value)) {
+                                          value = e.target.value
+                                        }
+                                        if (typeof value === 'string') {
+                                          if (value.startsWith('.')) {
+                                            value = `0${value}`
+                                          }
+                                          value = numberToFixed(value, source_decimals || 18)
+                                        }
+
+                                        setBridge({ ...bridge, amount: value })
+
+                                        if (['string', 'number'].includes(typeof value)) {
+                                          if (value && !['0', '0.0'].includes(value)) {
+                                            calculateAmountReceived(value)
+                                            checkApprovedNeeded(value)
+                                          }
+                                          else {
+                                            setEstimatedValues(
+                                              {
+                                                amountReceived: '0',
+                                                routerFee: '0',
+                                                isNextAsset: receiveLocal,
+                                              }
+                                            )
+                                            setIsApproveNeeded(false)
+                                          }
+                                        }
+                                      }
+                                    }
+                                    onWheel={e => e.target.blur()}
+                                    onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                                    className={`w-36 sm:w-48 bg-transparent ${disabled ? 'cursor-not-allowed' : ''} rounded border-0 focus:ring-0 sm:text-lg 3xl:text-2xl font-semibold text-right ${amount && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin ? 'py-0' : 'py-1.5'}`}
+                                  />
+                                  {/*relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 && (
+                                    <div className="text-slate-400 dark:text-slate-500 text-right">
+                                      <span className="text-xs 3xl:text-xl font-medium mr-1.5">
+                                        + Relayer fee
+                                      </span>
+                                      <DecimalsFormat
+                                        value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
+                                        className="text-xs 3xl:text-xl font-medium"
+                                      />
                                     </div>
+                                  )*/}
+                                  {amount && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin && (
+                                    <div className="text-slate-400 dark:text-slate-500 text-right">
+                                      <DecimalsFormat
+                                        value={(Number(amount) + (relayerFeeAssetType === 'transacting' && fees && Number(relayer_fee) > 0 ? Number(relayer_fee) : 0)) * source_asset_data.price}
+                                        prefix={currency_symbol}
+                                        className="text-xs 3xl:text-xl font-medium"
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <WarningSend data={bridge} />
+                        </div>
+                        {source_chain && destination_chain && asset && !checkSupport() ?
+                          <div className="text-slate-400 dark:text-slate-200 3xl:text-2xl font-medium text-center">
+                            Route not supported
+                          </div> :
+                          checkSupport() && (
+                            <div className="space-y-4">
+                              <div className="space-y-2.5">
+                                <div className="flex items-center justify-between space-x-2">
+                                  <div className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                    You receive
+                                  </div>
+                                  {destination_chain_data && asset && (
+                                    <div className="flex items-center justify-between space-x-2">
+                                      <div className="flex items-center space-x-1">
+                                        <div className="text-slate-400 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                          Balance:
+                                        </div>
+                                        <Balance
+                                          chainId={destination_chain_data.chain_id}
+                                          asset={asset}
+                                          contractAddress={destination_contract_data?.contract_address}
+                                          decimals={destination_decimals}
+                                          symbol={destination_symbol}
+                                          hideSymbol={false}
+                                          trigger={balanceTrigger}
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-0.5 py-4 px-3">
+                                  <div className="flex items-center justify-between space-x-2">
+                                    <SelectAsset
+                                      disabled={disabled}
+                                      value={asset}
+                                      onSelect={
+                                        (a, s) => {
+                                          if (!(['pool'].includes(source) || !is_wrapable_asset)) {
+                                            setBridge({ ...bridge, asset: a, receive_wrap: s?.startsWith('W') })
+
+                                            if (a !== asset) {
+                                              getBalances(source_chain)
+                                              getBalances(destination_chain)
+                                            }
+                                          }
+                                        }
+                                      }
+                                      chain={destination_chain}
+                                      isBridge={true}
+                                      showNextAssets={!is_wrapable_asset}
+                                      showNativeAssets={true}
+                                      showOnlyWrapable={is_wrapable_asset}
+                                      fixed={['pool'].includes(source) || !is_wrapable_asset}
+                                      data={{ ...destination_asset_data, ...destination_contract_data }}
+                                      className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
+                                    />
+                                    {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.amountReceived) || estimateResponse ?
+                                      <span className="text-lg font-semibold">
+                                        {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimated_received) && !estimateResponse ?
+                                          <DecimalsFormat
+                                            value={estimated_received > 0 ? estimated_received : 0}
+                                            className={`w-36 sm:w-48 bg-transparent ${['', undefined].includes(estimated_received) || estimated_received <= 0 ? 'text-slate-500 dark:text-slate-500' : ''} text-lg 3xl:text-2xl font-semibold text-right py-1.5`}
+                                          /> :
+                                          '-'
+                                        }
+                                      </span> :
+                                      <Oval
+                                        width="20"
+                                        height="20"
+                                        color={loaderColor(theme)}
+                                      />
+                                    }
                                   </div>
                                 </div>
                               </div>
-                              <WarningSend data={bridge} />
-                            </div>
-                            {source_chain && destination_chain && asset && !checkSupport() ?
-                              <div className="text-slate-400 dark:text-slate-200 3xl:text-2xl font-medium text-center">
-                                Route not supported
-                              </div> :
-                              checkSupport() &&
-                              (
-                                <div className="space-y-4">
-                                  <div className="space-y-2.5">
-                                    <div className="flex items-center justify-between space-x-2">
-                                      <div className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                        You receive
-                                      </div>
-                                      {
-                                        destination_chain_data && asset &&
-                                        (
-                                          <div className="flex items-center justify-between space-x-2">
-                                            <div className="flex items-center space-x-1">
-                                              <div className="text-slate-400 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                                Balance:
-                                              </div>
-                                              <Balance
-                                                chainId={destination_chain_data.chain_id}
-                                                asset={asset}
-                                                contractAddress={destination_contract_data?.contract_address}
-                                                decimals={destination_decimals}
-                                                symbol={destination_symbol}
-                                                hideSymbol={false}
-                                                trigger={balanceTrigger}
-                                              />
-                                            </div>
-                                          </div>
-                                        )
-                                      }
+                              <div className={`space-y-2.5 ${['string', 'number'].includes(typeof estimated_received) || !collapse ? 'mt-2.5' : 'mt-0'}`}>
+                                <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-2.5 py-4 px-3">
+                                  <div
+                                    onClick={() => setCollapse(!collapse)}
+                                    className="cursor-pointer flex items-center space-x-2 justify-between"
+                                  >
+                                    <div className={`${collapse ? 'text-slate-600 dark:text-slate-500 font-medium' : 'font-semibold'} text-sm 3xl:text-xl`}>
+                                      Estimated Fees
                                     </div>
-                                    <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-0.5 py-4 px-3">
-                                      <div className="flex items-center justify-between space-x-2">
-                                        <SelectAsset
-                                          disabled={disabled}
-                                          value={asset}
-                                          onSelect={
-                                            (a, s) => {
-                                              if (!(['pool'].includes(source) || !is_wrapable_asset)) {
-                                                setBridge(
-                                                  {
-                                                    ...bridge,
-                                                    asset: a,
-                                                    receive_wrap: s?.startsWith('W'),
-                                                  }
-                                                )
-
-                                                if (a !== asset) {
-                                                  getBalances(source_chain)
-                                                  getBalances(destination_chain)
-                                                }
-                                              }
-                                            }
-                                          }
-                                          chain={destination_chain}
-                                          isBridge={true}
-                                          showNextAssets={!is_wrapable_asset}
-                                          showNativeAssets={true}
-                                          showOnlyWrapable={is_wrapable_asset}
-                                          fixed={['pool'].includes(source) || !is_wrapable_asset}
-                                          data={{ ...destination_asset_data, ...destination_contract_data }}
-                                          className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
-                                        />
-                                        {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.amountReceived) || estimateResponse ?
-                                          <span className="text-lg font-semibold">
-                                            {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimated_received) && !estimateResponse ?
+                                    <div className="flex items-center space-x-2">
+                                      <div>
+                                        {(!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.routerFee) || estimateResponse) && fees ?
+                                          <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
+                                            {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimatedValues?.routerFee) && !estimateResponse ?
                                               <DecimalsFormat
-                                                value={estimated_received > 0 ? estimated_received : 0}
-                                                className={`w-36 sm:w-48 bg-transparent ${['', undefined].includes(estimated_received) || estimated_received <= 0 ? 'text-slate-500 dark:text-slate-500' : ''} text-lg 3xl:text-2xl font-semibold text-right py-1.5`}
+                                                value={(Number(router_fee) <= 0 ? 0 : Number(router_fee)) + (relayerFeeAssetType === 'native' || Number(relayer_fee) <= 0 ? 0 : Number(relayer_fee))}
+                                                className="text-sm 3xl:text-xl"
                                               /> :
-                                              '-'
+                                              <span>-</span>
                                             }
+                                            <span>{source_symbol}</span>
+                                            {relayerFeeAssetType === 'native' && (
+                                              <>
+                                                <span>+</span>
+                                                <DecimalsFormat
+                                                  value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
+                                                  className="text-sm 3xl:text-xl"
+                                                />
+                                                <span>{source_gas_native_token?.symbol}</span>
+                                              </>
+                                            )}
                                           </span> :
                                           <Oval
-                                            width="20"
-                                            height="20"
+                                            width="14"
+                                            height="14"
                                             color={loaderColor(theme)}
                                           />
                                         }
                                       </div>
+                                      <div>
+                                        {collapse ? <BiChevronDown size={20} className="3xl:w-5 3xl:h-5" /> : <BiChevronUp size={20} className="3xl:w-5 3xl:h-5" />}
+                                      </div>
                                     </div>
                                   </div>
-                                  <div className={`space-y-2.5 ${['string', 'number'].includes(typeof estimated_received) || !collapse ? 'mt-2.5' : 'mt-0'}`}>
-                                    <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-2.5 py-4 px-3">
-                                      <div
-                                        onClick={() => setCollapse(!collapse)}
-                                        className="cursor-pointer flex items-center space-x-2 justify-between"
-                                      >
-                                        <div className={`${collapse ? 'text-slate-600 dark:text-slate-500 font-medium' : 'font-semibold'} text-sm 3xl:text-xl`}>
-                                          Estimated Fees
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                          <div>
-                                            {(!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.routerFee) || estimateResponse) && fees ?
-                                              <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                                {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimatedValues?.routerFee) && !estimateResponse ?
-                                                  <DecimalsFormat
-                                                    value={(Number(router_fee) <= 0 ? 0 : Number(router_fee)) + (relayerFeeAssetType === 'native' || Number(relayer_fee) <= 0 ? 0 : Number(relayer_fee))}
-                                                    className="text-sm 3xl:text-xl"
-                                                  /> :
-                                                  <span>
-                                                    -
-                                                  </span>
-                                                }
-                                                <span>
-                                                  {source_symbol}
-                                                </span>
-                                                {
-                                                  relayerFeeAssetType === 'native' &&
-                                                  (
-                                                    <>
-                                                      <span>
-                                                        +
-                                                      </span>
-                                                      <DecimalsFormat
-                                                        value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
-                                                        className="text-sm 3xl:text-xl"
-                                                      />
-                                                      <span>
-                                                        {source_gas_native_token?.symbol}
-                                                      </span>
-                                                    </>
-                                                  )
-                                                }
-                                              </span> :
-                                              <Oval
-                                                width="14"
-                                                height="14"
-                                                color={loaderColor(theme)}
+                                  {!collapse && (
+                                    <div className="space-y-2.5">
+                                      {'to' in options && to && (
+                                        <div className="flex items-center justify-between space-x-2">
+                                          <Tooltip
+                                            placement="top"
+                                            content="The destination address that you want to send asset to."
+                                            className="z-50 bg-dark text-white text-xs"
+                                          >
+                                            <div className="flex items-center">
+                                              <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-medium">
+                                                Recipient address
+                                              </div>
+                                              <BiInfoCircle
+                                                size={14}
+                                                className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
                                               />
-                                            }
-                                          </div>
-                                          <div>
-                                            {collapse ?
-                                              <BiChevronDown
-                                                size={20}
-                                                className="3xl:w-5 3xl:h-5"
-                                              /> :
-                                              <BiChevronUp
-                                                size={20}
-                                                className="3xl:w-5 3xl:h-5"
-                                              />
-                                            }
-                                          </div>
-                                        </div>
-                                      </div>
-                                      {
-                                        !collapse &&
-                                        (
-                                          <div className="space-y-2.5">
-                                            {
-                                              'to' in options && to &&
-                                              (
-                                                <div className="flex items-center justify-between space-x-2">
-                                                  <Tooltip
-                                                    placement="top"
-                                                    content="The destination address that you want to send asset to."
-                                                    className="z-50 bg-dark text-white text-xs"
-                                                  >
-                                                    <div className="flex items-center">
-                                                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-medium">
-                                                        Recipient address
-                                                      </div>
-                                                      <BiInfoCircle
-                                                        size={14}
-                                                        className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                                      />
-                                                    </div>
-                                                  </Tooltip>
-                                                  <div className="flex flex-col sm:items-end space-y-1.5">
-                                                    {recipientEditing ?
-                                                      <div className="flex items-center justify-end space-x-1.5">
-                                                        <DebounceInput
-                                                          debounceTimeout={750}
-                                                          size="small"
-                                                          type="text"
-                                                          placeholder={address}
-                                                          value={to}
-                                                          onChange={
-                                                            e => {
-                                                              let value = e.target.value
-
-                                                              try {
-                                                                value = split(value, 'normal', ' ').join('')
-                                                                value = utils.getAddress(value)
-                                                              } catch (error) {
-                                                                value = address
-                                                              }
-
-                                                              setOptions(
-                                                                {
-                                                                  ...options,
-                                                                  to: value,
-                                                                }
-                                                              )
-                                                            }
-                                                          }
-                                                          className={`w-40 sm:w-56 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm 3xl:text-xl font-semibold text-right py-1.5 px-2`}
-                                                        />
-                                                        <button
-                                                          onClick={() => setRecipientEditing(false)}
-                                                          className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
-                                                        >
-                                                          <BiCheckCircle
-                                                            size={16}
-                                                            className="3xl:w-5 3xl:h-5"
-                                                          />
-                                                        </button>
-                                                      </div> :
-                                                      <div className="flex items-center space-x-1.5">
-                                                        <Tooltip
-                                                          placement="top"
-                                                          content={to}
-                                                          className="z-50 bg-dark text-white text-xs"
-                                                        >
-                                                          <span className="text-sm font-semibold">
-                                                            {ellipse(to, 8)}
-                                                          </span>
-                                                        </Tooltip>
-                                                        <button
-                                                          disabled={disabled}
-                                                          onClick={
-                                                            () => {
-                                                              if (!disabled) {
-                                                                setRecipientEditing(true)
-                                                              }
-                                                            }
-                                                          }
-                                                          className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
-                                                        >
-                                                          <BiEditAlt
-                                                            size={16}
-                                                            className="3xl:w-5 3xl:h-5"
-                                                          />
-                                                        </button>
-                                                      </div>
-                                                    }
-                                                  </div>
-                                                </div>
-                                              )
-                                            }
-                                            <div className="flex items-center justify-between space-x-2">
-                                              <Tooltip
-                                                placement="top"
-                                                content="This supports our router users providing fast liquidity."
-                                                className="z-50 bg-dark text-white text-xs"
-                                              >
-                                                <div className="flex items-center">
-                                                  <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                                    Router fee
-                                                  </div>
-                                                  <BiInfoCircle
-                                                    size={14}
-                                                    className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                                  />
-                                                </div>
-                                              </Tooltip>
-                                              {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.routerFee) || estimateResponse ?
-                                                <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                                  {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimatedValues?.routerFee) && !estimateResponse ?
-                                                    <DecimalsFormat
-                                                      value={Number(router_fee) <= 0 ? 0 : router_fee}
-                                                      className="text-sm 3xl:text-xl"
-                                                    /> :
-                                                    <span>
-                                                      -
-                                                    </span>
-                                                  }
-                                                  <span>
-                                                    {source_symbol}
-                                                  </span>
-                                                </span> :
-                                                <Oval
-                                                  width="14"
-                                                  height="14"
-                                                  color={loaderColor(theme)}
-                                                />
-                                              }
                                             </div>
-                                            <div className="flex items-center justify-between space-x-2">
-                                              <Tooltip
-                                                placement="top"
-                                                content="Fee fluctuates with destination chain gas cost. You can change the asset to pay this in advanced settings."
-                                                className="z-50 bg-dark text-white text-xs"
-                                              >
-                                                <div className="flex items-center">
-                                                  <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                                    Gas on destination
-                                                  </div>
-                                                  <BiInfoCircle
-                                                    size={14}
-                                                    className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                                  />
-                                                </div>
-                                              </Tooltip>
-                                              {fees ?
-                                                <div className="flex items-center space-x-1.5">
-                                                  <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                                    <DecimalsFormat
-                                                      value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
-                                                      className="text-sm 3xl:text-xl"
-                                                    />
-                                                    {false ?
-                                                      <select
-                                                        disabled={disabled}
-                                                        value={relayerFeeAssetType}
-                                                        onChange={
-                                                          e => {
-                                                            // setRelayerFeeAssetType(e.target.value)
-                                                            setEstimateFeesTrigger(moment().valueOf())
-                                                            checkApprovedNeeded(amount)
-                                                          }
-                                                        }
-                                                        className="bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0"
-                                                      >
-                                                        {RELAYER_FEE_ASSET_TYPES.map((t, i) => {
-                                                          return (
-                                                            <option
-                                                              key={i}
-                                                              title={`${t} asset`}
-                                                              value={t}
-                                                            >
-                                                              {t === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
-                                                            </option>
-                                                          )
-                                                        })}
-                                                      </select> :
-                                                      <span>
-                                                        {relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
-                                                      </span>
+                                          </Tooltip>
+                                          <div className="flex flex-col sm:items-end space-y-1.5">
+                                            {recipientEditing ?
+                                              <div className="flex items-center justify-end space-x-1.5">
+                                                <DebounceInput
+                                                  debounceTimeout={750}
+                                                  size="small"
+                                                  type="text"
+                                                  placeholder={address}
+                                                  value={to}
+                                                  onChange={
+                                                    e => {
+                                                      let value = e.target.value
+                                                      try {
+                                                        value = split(value, 'normal', ' ').join('')
+                                                        value = utils.getAddress(value)
+                                                      } catch (error) {
+                                                        value = address
+                                                      }
+
+                                                      setOptions({ ...options, to: value })
                                                     }
+                                                  }
+                                                  className={`w-40 sm:w-56 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm 3xl:text-xl font-semibold text-right py-1.5 px-2`}
+                                                />
+                                                <button
+                                                  onClick={() => setRecipientEditing(false)}
+                                                  className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                                                >
+                                                  <BiCheckCircle size={16} className="3xl:w-5 3xl:h-5" />
+                                                </button>
+                                              </div> :
+                                              <div className="flex items-center space-x-1.5">
+                                                <Tooltip
+                                                  placement="top"
+                                                  content={to}
+                                                  className="z-50 bg-dark text-white text-xs"
+                                                >
+                                                  <span className="text-sm font-semibold">
+                                                    {ellipse(to, 8)}
                                                   </span>
-                                                  <button
-                                                    disabled={disabled}
-                                                    onClick={
-                                                      () => {
-                                                        if (!disabled) {
-                                                          setEstimateFeesTrigger(moment().valueOf())
-                                                        }
+                                                </Tooltip>
+                                                <button
+                                                  disabled={disabled}
+                                                  onClick={
+                                                    () => {
+                                                      if (!disabled) {
+                                                        setRecipientEditing(true)
                                                       }
                                                     }
-                                                    className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
-                                                  >
-                                                    <MdRefresh
-                                                      size={16}
-                                                      className="3xl:w-5 3xl:h-5"
-                                                    />
-                                                  </button>
-                                                </div> :
-                                                <Oval
-                                                  width="14"
-                                                  height="14"
-                                                  color={loaderColor(theme)}
-                                                />
-                                              }
-                                            </div>
-                                            {/*
-                                              <WarningGasVsAmount
-                                                amount={amount}
-                                                assetPrice={source_asset_data?.price}
-                                                gasFee={relayer_fee}
-                                                gasSymbol={relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
-                                              />
-                                            */}
-                                            {
-                                              ethereum_provider && isApproveNeeded &&
-                                              (
-                                                <div className="flex flex-col space-y-0.5">
-                                                  <div className="flex items-center justify-between space-x-2">
-                                                    <Tooltip
-                                                      placement="top"
-                                                      content="We need your approval to execute this transaction on your behalf."
-                                                      className="z-50 bg-dark text-white text-xs"
-                                                    >
-                                                      <div className="flex items-center">
-                                                        <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                                          Infinite approval
-                                                        </div>
-                                                        <BiInfoCircle
-                                                          size={14}
-                                                          className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                                        />
-                                                      </div>
-                                                    </Tooltip>
-                                                    <Tooltip
-                                                      placement="top"
-                                                      content={isApproveNeeded ? 'We need your approval to execute this transaction on your behalf.' : 'Approval sufficient. If you need to, please revoke using other tools.'}
-                                                      className="z-50 bg-dark text-white text-xs"
-                                                    >
-                                                      <div className="w-fit flex items-center">
-                                                        <Switch
-                                                          disabled={disabled || !isApproveNeeded}
-                                                          width={32}
-                                                          height={16}
-                                                          checked={typeof infiniteApprove === 'boolean' ? infiniteApprove : false}
-                                                          onChange={
-                                                            e => {
-                                                              setOptions(
-                                                                {
-                                                                  ...options,
-                                                                  infiniteApprove: !infiniteApprove,
-                                                                }
-                                                              )
-                                                            }
-                                                          }
-                                                          checkedIcon={false}
-                                                          uncheckedIcon={false}
-                                                          onColor={switchColor(theme).on}
-                                                          onHandleColor="#f8fafc"
-                                                          offColor={switchColor(theme).off}
-                                                          offHandleColor="#f8fafc"
-                                                        />
-                                                      </div>
-                                                    </Tooltip>
-                                                  </div>
-                                                </div>
-                                              )
-                                            }
-                                            {
-                                              !['pool'].includes(source) &&
-                                              (
-                                                <div className="flex flex-col space-y-0.5">
-                                                  <div className="flex items-start justify-between space-x-2">
-                                                    <Tooltip
-                                                      placement="top"
-                                                      content="The maximum percentage you are willing to lose due to market changes."
-                                                      className="z-50 bg-dark text-white text-xs"
-                                                    >
-                                                      <div className="flex items-center">
-                                                        <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                                          Slippage tolerance
-                                                        </div>
-                                                        <BiInfoCircle
-                                                          size={14}
-                                                          className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                                        />
-                                                      </div>
-                                                    </Tooltip>
-                                                    <div className="flex flex-col sm:items-end space-y-1.5">
-                                                      {slippageEditing ?
-                                                        <>
-                                                          <div className="flex items-center justify-end space-x-1.5">
-                                                            <DebounceInput
-                                                              debounceTimeout={750}
-                                                              size="small"
-                                                              type="number"
-                                                              placeholder="0.00"
-                                                              value={typeof slippage === 'number' && slippage >= 0 ? slippage : ''}
-                                                              onChange={
-                                                                e => {
-                                                                  const regex = /^[0-9.\b]+$/
-                                                                  let value
-
-                                                                  if (e.target.value === '' || regex.test(e.target.value)) {
-                                                                    value = e.target.value
-                                                                  }
-
-                                                                  if (typeof value === 'string') {
-                                                                    if (value.startsWith('.')) {
-                                                                      value = `0${value}`
-                                                                    }
-
-                                                                    if (!isNaN(value)) {
-                                                                      value = Number(value)
-                                                                    }
-                                                                  }
-
-                                                                  value = value && !isNaN(value) ? parseFloat(Number(value).toFixed(2)) : value
-                                                                  value = value <= 0 ? 0.01 : value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
-
-                                                                  setOptions(
-                                                                    {
-                                                                      ...options,
-                                                                      slippage: value,
-                                                                    }
-                                                                  )
-                                                                }
-                                                              }
-                                                              onWheel={e => e.target.blur()}
-                                                              onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                                                              className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm 3xl:text-xl font-semibold text-right py-1 px-2`}
-                                                            />
-                                                            <button
-                                                              onClick={() => setSlippageEditing(false)}
-                                                              className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
-                                                            >
-                                                              <BiCheckCircle
-                                                                size={16}
-                                                                className="3xl:w-5 3xl:h-5"
-                                                              />
-                                                            </button>
-                                                          </div>
-                                                          <div className="flex items-center space-x-1.5 -mr-1.5">
-                                                            {[3.0, 1.0, 0.5].map((s, i) => (
-                                                              <div
-                                                                key={i}
-                                                                onClick={
-                                                                  () => {
-                                                                    setOptions(
-                                                                      {
-                                                                        ...options,
-                                                                        slippage: s,
-                                                                      }
-                                                                    )
-                                                                    setSlippageEditing(false)
-                                                                  }
-                                                                }
-                                                                className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs 3xl:text-xl py-1 px-1.5`}
-                                                              >
-                                                                {s} %
-                                                              </div>
-                                                            ))}
-                                                          </div>
-                                                        </> :
-                                                        <div className="flex items-center space-x-1.5">
-                                                          <DecimalsFormat
-                                                            value={slippage}
-                                                            suffix="%"
-                                                            className="text-sm 3xl:text-xl font-semibold"
-                                                          />
-                                                          <button
-                                                            disabled={disabled}
-                                                            onClick={
-                                                              () => {
-                                                                if (!disabled) {
-                                                                  setSlippageEditing(true)
-                                                                }
-                                                              }
-                                                            }
-                                                            className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
-                                                          >
-                                                            <BiEditAlt
-                                                              size={16}
-                                                              className="3xl:w-5 3xl:h-5"
-                                                            />
-                                                          </button>
-                                                        </div>
-                                                      }
-                                                    </div>
-                                                  </div>
-                                                  {
-                                                    typeof slippage === 'number' && (estimated_slippage > slippage || slippage < 0.2 || slippage > 5.0) &&
-                                                    (
-                                                      <div className="flex items-start space-x-1">
-                                                        <IoWarning
-                                                          size={14}
-                                                          className="min-w-max 3xl:w-5 3xl:h-5 text-yellow-500 dark:text-yellow-400 mt-0.5"
-                                                        />
-                                                        <div className="text-yellow-500 dark:text-yellow-400 text-xs 3xl:text-xl">
-                                                          {estimated_slippage > slippage ?
-                                                            <>
-                                                              Slippage tolerance is too low
-                                                              <br />
-                                                              (use a larger amount or set tolerance higher)
-                                                            </> :
-                                                            slippage < 0.2 ?
-                                                              'Your transfer may not complete due to low slippage tolerance.' :
-                                                              'Your transfer may be frontrun due to high slippage tolerance.'
-                                                          }
-                                                        </div>
-                                                      </div>
-                                                    )
                                                   }
-                                                </div>
-                                              )
-                                            }
-                                            <div className="flex items-center justify-between space-x-2">
-                                              <Tooltip
-                                                placement="top"
-                                                content={`Minimum amount received after slippage${typeof slippage === 'number' && slippage >= 0 ? ` ${slippage}%` : ''}`}
-                                                className="z-50 bg-dark text-white text-xs"
-                                              >
-                                                <div className="flex items-center">
-                                                  <div className="sm:whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                                    Minimum received after slippage
-                                                  </div>
-                                                  <BiInfoCircle
-                                                    size={14}
-                                                    className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                                  />
-                                                </div>
-                                              </Tooltip>
-                                              {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.amountReceived) || estimateResponse ?
-                                                <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                                  {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimated_received) && !estimateResponse ?
-                                                    <DecimalsFormat
-                                                      value={((estimated_received > 0 ? estimated_received : 0) * ((100 - (typeof slippage === 'number' && slippage >= 0 ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)) / 100)).toFixed(estimated_received <= 0 ? 0 : destination_decimals)}
-                                                      className="text-sm 3xl:text-xl"
-                                                    /> :
-                                                    <span>
-                                                      -
-                                                    </span>
-                                                  }
-                                                  <span>
-                                                    {destination_symbol}
-                                                  </span>
-                                                </span> :
-                                                <Oval
-                                                  width="14"
-                                                  height="14"
-                                                  color={loaderColor(theme)}
-                                                />
-                                              }
-                                            </div>
-                                            {
-                                              typeof price_impact === 'number' &&
-                                              (
-                                                <div className="flex items-center justify-between space-x-2">
-                                                  <Tooltip
-                                                    placement="top"
-                                                    content="Price impact"
-                                                    className="z-50 bg-dark text-white text-xs"
-                                                  >
-                                                    <div className="flex items-center">
-                                                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                                        Price impact
-                                                      </div>
-                                                      <BiInfoCircle
-                                                        size={14}
-                                                        className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                                      />
-                                                    </div>
-                                                  </Tooltip>
-                                                  <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                                    <DecimalsFormat
-                                                      value={price_impact}
-                                                      suffix="%"
-                                                      className="text-sm 3xl:text-xl"
-                                                    />
-                                                  </span>
-                                                </div>
-                                              )
+                                                  className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
+                                                >
+                                                  <BiEditAlt size={16} className="3xl:w-5 3xl:h-5" />
+                                                </button>
+                                              </div>
                                             }
                                           </div>
-                                        )
-                                      }
-                                      {
-                                        Number(amount) > 0 && ['string', 'number'].includes(typeof estimated_received) && estimated_received > 0 && (Number(amount) < routers_liquidity_amount || router_asset_balances_data) &&
-                                        (
-                                          <div className="flex items-center justify-between space-x-1">
+                                        </div>
+                                      )}
+                                      <div className="flex items-center justify-between space-x-2">
+                                        <Tooltip
+                                          placement="top"
+                                          content="This supports our router users providing fast liquidity."
+                                          className="z-50 bg-dark text-white text-xs"
+                                        >
+                                          <div className="flex items-center">
                                             <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                              Estimated Time
+                                              Router fee
                                             </div>
+                                            <BiInfoCircle
+                                              size={14}
+                                              className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                            />
+                                          </div>
+                                        </Tooltip>
+                                        {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.routerFee) || estimateResponse ?
+                                          <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
+                                            {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimatedValues?.routerFee) && !estimateResponse ?
+                                              <DecimalsFormat
+                                                value={Number(router_fee) <= 0 ? 0 : router_fee}
+                                                className="text-sm 3xl:text-xl"
+                                              /> :
+                                              <span>-</span>
+                                            }
+                                            <span>{source_symbol}</span>
+                                          </span> :
+                                          <Oval
+                                            width="14"
+                                            height="14"
+                                            color={loaderColor(theme)}
+                                          />
+                                        }
+                                      </div>
+                                      <div className="flex items-center justify-between space-x-2">
+                                        <Tooltip
+                                          placement="top"
+                                          content="Fee fluctuates with destination chain gas cost. You can change the asset to pay this in advanced settings."
+                                          className="z-50 bg-dark text-white text-xs"
+                                        >
+                                          <div className="flex items-center">
+                                            <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                              Gas on destination
+                                            </div>
+                                            <BiInfoCircle
+                                              size={14}
+                                              className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                            />
+                                          </div>
+                                        </Tooltip>
+                                        {fees ?
+                                          <div className="flex items-center space-x-1.5">
+                                            <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
+                                              <DecimalsFormat
+                                                value={Number(relayer_fee) <= 0 ? 0 : relayer_fee}
+                                                className="text-sm 3xl:text-xl"
+                                              />
+                                              {false ?
+                                                <select
+                                                  disabled={disabled}
+                                                  value={relayerFeeAssetType}
+                                                  onChange={
+                                                    e => {
+                                                      // setRelayerFeeAssetType(e.target.value)
+                                                      setEstimateFeesTrigger(moment().valueOf())
+                                                      checkApprovedNeeded(amount)
+                                                    }
+                                                  }
+                                                  className="bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0"
+                                                >
+                                                  {RELAYER_FEE_ASSET_TYPES.map((t, i) => {
+                                                    return (
+                                                      <option
+                                                        key={i}
+                                                        title={`${t} asset`}
+                                                        value={t}
+                                                      >
+                                                        {t === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
+                                                      </option>
+                                                    )
+                                                  })}
+                                                </select> :
+                                                <span>{relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}</span>
+                                              }
+                                            </span>
+                                            <button
+                                              disabled={disabled}
+                                              onClick={
+                                                () => {
+                                                  if (!disabled) {
+                                                    setEstimateFeesTrigger(moment().valueOf())
+                                                  }
+                                                }
+                                              }
+                                              className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                                            >
+                                              <MdRefresh size={16} className="3xl:w-5 3xl:h-5" />
+                                            </button>
+                                          </div> :
+                                          <Oval
+                                            width="14"
+                                            height="14"
+                                            color={loaderColor(theme)}
+                                          />
+                                        }
+                                      </div>
+                                      {/*<WarningGasVsAmount
+                                        amount={amount}
+                                        assetPrice={source_asset_data?.price}
+                                        gasFee={relayer_fee}
+                                        gasSymbol={relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
+                                      />*/}
+                                      {ethereum_provider && isApproveNeeded && (
+                                        <div className="flex flex-col space-y-0.5">
+                                          <div className="flex items-center justify-between space-x-2">
                                             <Tooltip
                                               placement="top"
-                                              content={
-                                                Number(amount) > routers_liquidity_amount || forceSlow || estimatedValues?.isFastPath === false ?
-                                                  'Unable to leverage fast liquidity. Your transfer will still complete.' :
-                                                  'Fast transfer enabled by Connext router network.'
-                                              }
+                                              content="We need your approval to execute this transaction on your behalf."
                                               className="z-50 bg-dark text-white text-xs"
                                             >
                                               <div className="flex items-center">
-                                                <span className="whitespace-nowrap text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                                  {Number(amount) > routers_liquidity_amount || forceSlow || estimatedValues?.isFastPath === false ?
-                                                    <span className="text-yellow-500 dark:text-yellow-400">
-                                                      90 minutes
-                                                    </span> :
-                                                    <span className="text-green-500 dark:text-green-500">
-                                                      {'<4 minutes'}
-                                                    </span>
-                                                  }
-                                                </span>
+                                                <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                                  Infinite approval
+                                                </div>
                                                 <BiInfoCircle
                                                   size={14}
                                                   className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
                                                 />
                                               </div>
                                             </Tooltip>
+                                            <Tooltip
+                                              placement="top"
+                                              content={isApproveNeeded ? 'We need your approval to execute this transaction on your behalf.' : 'Approval sufficient. If you need to, please revoke using other tools.'}
+                                              className="z-50 bg-dark text-white text-xs"
+                                            >
+                                              <div className="w-fit flex items-center">
+                                                <Switch
+                                                  disabled={disabled || !isApproveNeeded}
+                                                  width={32}
+                                                  height={16}
+                                                  checked={typeof infiniteApprove === 'boolean' ? infiniteApprove : false}
+                                                  onChange={e => setOptions({ ...options, infiniteApprove: !infiniteApprove })}
+                                                  checkedIcon={false}
+                                                  uncheckedIcon={false}
+                                                  onColor={switchColor(theme).on}
+                                                  onHandleColor="#f8fafc"
+                                                  offColor={switchColor(theme).off}
+                                                  offHandleColor="#f8fafc"
+                                                />
+                                              </div>
+                                            </Tooltip>
                                           </div>
-                                        )
-                                      }
-                                    </div>
-                                    {!calling && (
-                                      <WarningFeeRatio ratio={fee_amount_ratio} />
-                                    )}
-                                  </div>
-                                </div>
-                              )
-                            }
-                          </>
-                        )
-                      }
-                      {provider && checkSupport() && (xcall || source_amount) && (wrong_chain || (['string', 'number'].includes(typeof amount) && ![''].includes(amount))) ?
-                        wrong_chain ?
-                          <Wallet
-                            connectChainId={source_chain_data?.chain_id}
-                            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base 3xl:text-2xl font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
-                          >
-                            <span>
-                              {is_walletconnect ? 'Reconnect' : 'Switch'} to
-                            </span>
-                            {
-                              source_chain_data?.image &&
-                              (
-                                <Image
-                                  src={source_chain_data.image}
-                                  width={28}
-                                  height={28}
-                                  className="3xl:w-8 3xl:h-8 rounded-full"
-                                />
-                              )
-                            }
-                            <span className="font-medium">
-                              {source_chain_data?.name}
-                            </span>
-                          </Wallet> :
-                          !xcall && !xcallResponse && !calling && ['string', 'number'].includes(typeof amount) && ![''].includes(amount) &&
-                          (
-                            (utils.parseUnits(amount || '0', source_decimals).toBigInt() > utils.parseUnits(source_amount || '0', source_decimals).toBigInt() && ['string', 'number'].includes(typeof source_amount)) ||
-                            Number(amount) < 0 || Number(amount) < min_amount ||
-                            (typeof pool_amount === 'number' && Number(amount) > pool_amount) ||
-                            (fees && (!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') ||
-                            (fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'native' && source_gas_amount && utils.parseEther(source_gas_amount).toBigInt() < utils.parseEther(relayer_fee).toBigInt() + utils.parseEther(source_contract_data?.contract_address === constants.AddressZero ? amount : '0').toBigInt()) ||
-                            (fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'transacting' && estimated_received <= 0)
-                          ) ?
-                            <Alert
-                              color="bg-red-400 dark:bg-red-500 text-white text-sm 3xl:text-xl font-medium"
-                              icon={
-                                <BiMessageError
-                                  className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                />
-                              }
-                              closeDisabled={true}
-                              rounded={true}
-                              className="rounded p-4.5"
-                            >
-                              <span>
-                                {utils.parseUnits(amount || '0', source_decimals).toBigInt() > utils.parseUnits(source_amount || '0', source_decimals).toBigInt() && ['string', 'number'].includes(typeof source_amount) ?
-                                  'Insufficient Balance' :
-                                  Number(amount) < min_amount ?
-                                    'The amount cannot be less than the transfer fee.' :
-                                    Number(amount) < 0 ?
-                                      'The amount cannot be equal to or less than 0.' :
-                                      typeof pool_amount === 'number' && Number(amount) > pool_amount ?
-                                        `Exceed Pool Balances: ${pool_amount >= 1000 ? numberFormat(pool_amount, '0,0.00') : pool_amount}` :
-                                        fees && (!relayer_fee || Number(relayer_fee) <= 0) ?
-                                          'Cannot estimate the relayer fee at the moment. Please try again later.' :
-                                          fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'native' && source_gas_amount && utils.parseEther(source_gas_amount).toBigInt() < utils.parseEther(relayer_fee).toBigInt() + utils.parseEther(source_contract_data?.contract_address === constants.AddressZero ? amount : '0').toBigInt() ?
-                                            'Insufficient gas for the destination gas fee.' :
-                                            fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'transacting' && estimated_received <= 0 ?
-                                              'Fees greater than estimate received.' :
-                                              ''
-                                }
-                              </span>
-                            </Alert> :
-                            !xcall && !xcallResponse && !estimateResponse ?
-                              <button
-                                disabled={disabled || ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') || estimated_received <= 0}
-                                onClick={
-                                  () => {
-                                    setRecipientEditing(false)
-                                    setSlippageEditing(false)
-                                    call(relayer_fee)
-                                  }
-                                }
-                                className={
-                                  `w-full ${
-                                    disabled ?
-                                      'bg-blue-400 dark:bg-blue-500' :
-                                      ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') || estimated_received <= 0 ?
-                                        'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' :
-                                        'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
-                                  } rounded flex items-center ${
-                                    calling && !approving && callProcessing ?
-                                      'justify-center' :
-                                      'justify-center'
-                                  } text-white text-base 3xl:text-2xl py-3 sm:py-4 px-2 sm:px-3`
-                                }
-                              >
-                                <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
-                                  {
-                                    disabled &&
-                                    (
-                                      <TailSpin
-                                        width="20"
-                                        height="20"
-                                        color="white"
-                                      />
-                                    )
-                                  }
-                                  <span>
-                                    {calling ?
-                                      approving ?
-                                        approveProcessing ?
-                                          'Approving' :
-                                          'Please Approve' :
-                                        callProcessing ?
-                                          'Transfer in progress ...' :
-                                          typeof approving === 'boolean' ?
-                                            'Please Confirm' :
-                                            'Checking Approval' :
-                                      'Send'
-                                    }
-                                  </span>
-                                </span>
-                              </button> :
-                              (xcallResponse || (!xcall && approveResponse) || estimateResponse) &&
-                              (toArray(xcallResponse || approveResponse || estimateResponse)
-                                .map((r, i) => {
-                                  const {
-                                    status,
-                                    message,
-                                    code,
-                                  } = { ...r }
-
-                                  return (
-                                    <Alert
-                                      key={i}
-                                      color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? xcallResponse ? 'bg-blue-500 dark:bg-blue-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
-                                      icon={
-                                        status === 'failed' ?
-                                          <BiMessageError
-                                            className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                          /> :
-                                          status === 'success' ?
-                                            xcallResponse ?
-                                              <div className="mr-3">
-                                                <TailSpin
-                                                  width="20"
-                                                  height="20"
-                                                  color="white"
-                                                />
-                                              </div> :
-                                              <BiMessageCheck
-                                                className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                              /> :
-                                            <BiMessageDetail
-                                              className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                            />
-                                      }
-                                      closeDisabled={true}
-                                      rounded={true}
-                                      className="rounded p-4.5"
-                                    >
-                                      <div className="space-y-2">
-                                        <div className="flex items-center justify-between space-x-2">
-                                          <span className="break-all text-sm 3xl:text-xl font-medium">
-                                            {ellipse(
-                                              split(message, 'normal', ' ')
-                                                .join(' ')
-                                                .substring(0, status === 'failed' && errorPatterns.findIndex(c => message?.indexOf(c) > -1) > -1 ? message.indexOf(errorPatterns.find(c => message.indexOf(c) > -1)) : undefined) ||
-                                              message,
-                                              128,
-                                            )}
-                                          </span>
-                                          <div className="flex items-center space-x-1">
-                                            {
-                                              status === 'failed' && message &&
-                                              (
-                                                <Copy
-                                                  value={message}
-                                                  className="cursor-pointer text-slate-200 hover:text-white"
-                                                />
-                                              )
-                                            }
-                                            {status === 'failed' ?
-                                              <button
-                                                onClick={() => reset(code)}
-                                                className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                                              >
-                                                <MdClose
+                                        </div>
+                                      )}
+                                      {!['pool'].includes(source) && (
+                                        <div className="flex flex-col space-y-0.5">
+                                          <div className="flex items-start justify-between space-x-2">
+                                            <Tooltip
+                                              placement="top"
+                                              content="The maximum percentage you are willing to lose due to market changes."
+                                              className="z-50 bg-dark text-white text-xs"
+                                            >
+                                              <div className="flex items-center">
+                                                <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                                  Slippage tolerance
+                                                </div>
+                                                <BiInfoCircle
                                                   size={14}
+                                                  className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
                                                 />
-                                              </button> :
-                                              status === 'success' ?
-                                                <button
-                                                  onClick={() => reset()}
-                                                  className={`${xcallResponse ? 'bg-blue-600 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
-                                                >
-                                                  <MdClose
-                                                    size={14}
+                                              </div>
+                                            </Tooltip>
+                                            <div className="flex flex-col sm:items-end space-y-1.5">
+                                              {slippageEditing ?
+                                                <>
+                                                  <div className="flex items-center justify-end space-x-1.5">
+                                                    <DebounceInput
+                                                      debounceTimeout={750}
+                                                      size="small"
+                                                      type="number"
+                                                      placeholder="0.00"
+                                                      value={typeof slippage === 'number' && slippage >= 0 ? slippage : ''}
+                                                      onChange={
+                                                        e => {
+                                                          const regex = /^[0-9.\b]+$/
+                                                          let value
+
+                                                          if (e.target.value === '' || regex.test(e.target.value)) {
+                                                            value = e.target.value
+                                                          }
+                                                          if (typeof value === 'string') {
+                                                            if (value.startsWith('.')) {
+                                                              value = `0${value}`
+                                                            }
+                                                            if (!isNaN(value)) {
+                                                              value = Number(value)
+                                                            }
+                                                          }
+
+                                                          value = value && !isNaN(value) ? parseFloat(Number(value).toFixed(2)) : value
+                                                          value = value <= 0 ? 0.01 : value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
+                                                          setOptions({ ...options, slippage: value })
+                                                        }
+                                                      }
+                                                      onWheel={e => e.target.blur()}
+                                                      onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                                                      className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm 3xl:text-xl font-semibold text-right py-1 px-2`}
+                                                    />
+                                                    <button
+                                                      onClick={() => setSlippageEditing(false)}
+                                                      className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                                                    >
+                                                      <BiCheckCircle size={16} className="3xl:w-5 3xl:h-5" />
+                                                    </button>
+                                                  </div>
+                                                  <div className="flex items-center space-x-1.5 -mr-1.5">
+                                                    {[3.0, 1.0, 0.5].map((s, i) => (
+                                                      <div
+                                                        key={i}
+                                                        onClick={
+                                                          () => {
+                                                            setOptions({ ...options, slippage: s })
+                                                            setSlippageEditing(false)
+                                                          }
+                                                        }
+                                                        className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs 3xl:text-xl py-1 px-1.5`}
+                                                      >
+                                                        {s} %
+                                                      </div>
+                                                    ))}
+                                                  </div>
+                                                </> :
+                                                <div className="flex items-center space-x-1.5">
+                                                  <DecimalsFormat
+                                                    value={slippage}
+                                                    suffix="%"
+                                                    className="text-sm 3xl:text-xl font-semibold"
                                                   />
-                                                </button> :
-                                                null
-                                            }
+                                                  <button
+                                                    disabled={disabled}
+                                                    onClick={
+                                                      () => {
+                                                        if (!disabled) {
+                                                          setSlippageEditing(true)
+                                                        }
+                                                      }
+                                                    }
+                                                    className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
+                                                  >
+                                                    <BiEditAlt size={16} className="3xl:w-5 3xl:h-5" />
+                                                  </button>
+                                                </div>
+                                              }
+                                            </div>
                                           </div>
+                                          {typeof slippage === 'number' && (estimated_slippage > slippage || slippage < 0.2 || slippage > 5.0) && (
+                                            <div className="flex items-start space-x-1">
+                                              <IoWarning size={14} className="min-w-max 3xl:w-5 3xl:h-5 text-yellow-500 dark:text-yellow-400 mt-0.5" />
+                                              <div className="text-yellow-500 dark:text-yellow-400 text-xs 3xl:text-xl">
+                                                {estimated_slippage > slippage ?
+                                                  <>
+                                                    Slippage tolerance is too low
+                                                    <br />
+                                                    (use a larger amount or set tolerance higher)
+                                                  </> :
+                                                  slippage < 0.2 ?
+                                                    'Your transfer may not complete due to low slippage tolerance.' :
+                                                    'Your transfer may be frontrun due to high slippage tolerance.'
+                                                }
+                                              </div>
+                                            </div>
+                                          )}
                                         </div>
-                                        <div className="text-sm 3xl:text-xl font-bold">
-                                          <span className="mr-1">
-                                            To file a support request, please create a ticket on our discord
-                                          </span>
-                                          <a
-                                            href={process.env.NEXT_PUBLIC_FEEDBACK_URL}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="underline"
-                                          >
-                                            here
-                                          </a>.
-                                        </div>
+                                      )}
+                                      <div className="flex items-center justify-between space-x-2">
+                                        <Tooltip
+                                          placement="top"
+                                          content={`Minimum amount received after slippage${typeof slippage === 'number' && slippage >= 0 ? ` ${slippage}%` : ''}`}
+                                          className="z-50 bg-dark text-white text-xs"
+                                        >
+                                          <div className="flex items-center">
+                                            <div className="sm:whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                              Minimum received after slippage
+                                            </div>
+                                            <BiInfoCircle
+                                              size={14}
+                                              className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                            />
+                                          </div>
+                                        </Tooltip>
+                                        {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.amountReceived) || estimateResponse ?
+                                          <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
+                                            {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimated_received) && !estimateResponse ?
+                                              <DecimalsFormat
+                                                value={((estimated_received > 0 ? estimated_received : 0) * ((100 - (typeof slippage === 'number' && slippage >= 0 ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)) / 100)).toFixed(estimated_received <= 0 ? 0 : destination_decimals)}
+                                                className="text-sm 3xl:text-xl"
+                                              /> :
+                                              <span>-</span>
+                                            }
+                                            <span>{destination_symbol}</span>
+                                          </span> :
+                                          <Oval
+                                            width="14"
+                                            height="14"
+                                            color={loaderColor(theme)}
+                                          />
+                                        }
                                       </div>
-                                    </Alert>
-                                  )
-                                })
-                              ) :
-                        provider ?
-                          <button
-                            disabled={true}
-                            className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base 3xl:text-2xl text-center py-3 sm:py-4 px-2 sm:px-3"
-                          >
-                            Send
-                          </button> :
-                          <Wallet
-                            connectChainId={source_chain_data?.chain_id}
-                            buttonConnectTitle="Connect Wallet"
-                            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base 3xl:text-2xl font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                                      {typeof price_impact === 'number' && (
+                                        <div className="flex items-center justify-between space-x-2">
+                                          <Tooltip
+                                            placement="top"
+                                            content="Price impact"
+                                            className="z-50 bg-dark text-white text-xs"
+                                          >
+                                            <div className="flex items-center">
+                                              <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                                Price impact
+                                              </div>
+                                              <BiInfoCircle
+                                                size={14}
+                                                className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                              />
+                                            </div>
+                                          </Tooltip>
+                                          <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
+                                            <DecimalsFormat
+                                              value={price_impact}
+                                              suffix="%"
+                                              className="text-sm 3xl:text-xl"
+                                            />
+                                          </span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                  {Number(amount) > 0 && ['string', 'number'].includes(typeof estimated_received) && estimated_received > 0 && (Number(amount) < routers_liquidity_amount || router_asset_balances_data) && (
+                                    <div className="flex items-center justify-between space-x-1">
+                                      <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                        Estimated Time
+                                      </div>
+                                      <Tooltip
+                                        placement="top"
+                                        content={Number(amount) > routers_liquidity_amount || forceSlow || estimatedValues?.isFastPath === false ? 'Unable to leverage fast liquidity. Your transfer will still complete.' : 'Fast transfer enabled by Connext router network.'}
+                                        className="z-50 bg-dark text-white text-xs"
+                                      >
+                                        <div className="flex items-center">
+                                          <span className="whitespace-nowrap text-sm 3xl:text-xl font-semibold space-x-1.5">
+                                            {Number(amount) > routers_liquidity_amount || forceSlow || estimatedValues?.isFastPath === false ?
+                                              <span className="text-yellow-500 dark:text-yellow-400">
+                                                90 minutes
+                                              </span> :
+                                              <span className="text-green-500 dark:text-green-500">
+                                                {'<4 minutes'}
+                                              </span>
+                                            }
+                                          </span>
+                                          <BiInfoCircle
+                                            size={14}
+                                            className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                          />
+                                        </div>
+                                      </Tooltip>
+                                    </div>
+                                  )}
+                                </div>
+                                {!calling && <WarningFeeRatio ratio={fee_amount_ratio} />}
+                              </div>
+                            </div>
+                          )
+                        }
+                      </>
+                    )}
+                    {provider && checkSupport() && (xcall || source_amount) && (wrong_chain || (['string', 'number'].includes(typeof amount) && ![''].includes(amount))) ?
+                      wrong_chain ?
+                        <Wallet
+                          connectChainId={source_chain_data?.chain_id}
+                          className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base 3xl:text-2xl font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                        >
+                          <span>{is_walletconnect ? 'Reconnect' : 'Switch'} to</span>
+                          {source_chain_data?.image && (
+                            <Image
+                              src={source_chain_data.image}
+                              width={28}
+                              height={28}
+                              className="3xl:w-8 3xl:h-8 rounded-full"
+                            />
+                          )}
+                          <span className="font-medium">
+                            {source_chain_data?.name}
+                          </span>
+                        </Wallet> :
+                        !xcall && !xcallResponse && !calling && ['string', 'number'].includes(typeof amount) && ![''].includes(amount) && (
+                          (utils.parseUnits(amount || '0', source_decimals).toBigInt() > utils.parseUnits(source_amount || '0', source_decimals).toBigInt() && ['string', 'number'].includes(typeof source_amount)) ||
+                          Number(amount) < 0 || Number(amount) < min_amount ||
+                          (typeof pool_amount === 'number' && Number(amount) > pool_amount) ||
+                          (fees && (!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') ||
+                          (fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'native' && source_gas_amount && utils.parseEther(source_gas_amount).toBigInt() < utils.parseEther(relayer_fee).toBigInt() + utils.parseEther(source_contract_data?.contract_address === constants.AddressZero ? amount : '0').toBigInt()) ||
+                          (fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'transacting' && estimated_received <= 0)
+                        ) ?
+                          <Alert
+                            color="bg-red-400 dark:bg-red-500 text-white text-sm 3xl:text-xl font-medium"
+                            icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
+                            closeDisabled={true}
+                            rounded={true}
+                            className="rounded p-4.5"
                           >
                             <span>
-                              Connect Wallet
+                              {utils.parseUnits(amount || '0', source_decimals).toBigInt() > utils.parseUnits(source_amount || '0', source_decimals).toBigInt() && ['string', 'number'].includes(typeof source_amount) ?
+                                'Insufficient Balance' :
+                                Number(amount) < min_amount ?
+                                  'The amount cannot be less than the transfer fee.' :
+                                  Number(amount) < 0 ?
+                                    'The amount cannot be equal to or less than 0.' :
+                                    typeof pool_amount === 'number' && Number(amount) > pool_amount ?
+                                      `Exceed Pool Balances: ${pool_amount >= 1000 ? numberFormat(pool_amount, '0,0.00') : pool_amount}` :
+                                      fees && (!relayer_fee || Number(relayer_fee) <= 0) ?
+                                        'Cannot estimate the relayer fee at the moment. Please try again later.' :
+                                        fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'native' && source_gas_amount && utils.parseEther(source_gas_amount).toBigInt() < utils.parseEther(relayer_fee).toBigInt() + utils.parseEther(source_contract_data?.contract_address === constants.AddressZero ? amount : '0').toBigInt() ?
+                                          'Insufficient gas for the destination gas fee.' :
+                                          fees && Number(relayer_fee) > 0 && relayerFeeAssetType === 'transacting' && estimated_received <= 0 ?
+                                            'Fees greater than estimate received.' :
+                                            ''
+                              }
                             </span>
-                          </Wallet>
-                      }
-                    </div>
-                  )
-                }
+                          </Alert> :
+                          !xcall && !xcallResponse && !estimateResponse ?
+                            <button
+                              disabled={disabled || ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') || estimated_received <= 0}
+                              onClick={
+                                () => {
+                                  setRecipientEditing(false)
+                                  setSlippageEditing(false)
+                                  call(relayer_fee)
+                                }
+                              }
+                              className={
+                                `w-full ${
+                                  disabled ?
+                                    'bg-blue-400 dark:bg-blue-500' :
+                                    ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') || estimated_received <= 0 ?
+                                      'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' :
+                                      'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
+                                } rounded flex items-center ${
+                                  calling && !approving && callProcessing ?
+                                    'justify-center' :
+                                    'justify-center'
+                                } text-white text-base 3xl:text-2xl py-3 sm:py-4 px-2 sm:px-3`
+                              }
+                            >
+                              <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
+                                {disabled && (
+                                  <TailSpin
+                                    width="20"
+                                    height="20"
+                                    color="white"
+                                  />
+                                )}
+                                <span>
+                                  {calling ?
+                                    approving ?
+                                      approveProcessing ?
+                                        'Approving' :
+                                        'Please Approve' :
+                                      callProcessing ?
+                                        'Transfer in progress ...' :
+                                        typeof approving === 'boolean' ?
+                                          'Please Confirm' :
+                                          'Checking Approval' :
+                                    'Send'
+                                  }
+                                </span>
+                              </span>
+                            </button> :
+                            (xcallResponse || (!xcall && approveResponse) || estimateResponse) &&
+                            (toArray(xcallResponse || approveResponse || estimateResponse).map((r, i) => {
+                              const {
+                                status,
+                                message,
+                                code,
+                              } = { ...r }
+
+                              return (
+                                <Alert
+                                  key={i}
+                                  color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? xcallResponse ? 'bg-blue-500 dark:bg-blue-500' : 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
+                                  icon={
+                                    status === 'failed' ?
+                                      <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
+                                      status === 'success' ?
+                                        xcallResponse ?
+                                          <div className="mr-3">
+                                            <TailSpin
+                                              width="20"
+                                              height="20"
+                                              color="white"
+                                            />
+                                          </div> :
+                                          <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
+                                        <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />
+                                  }
+                                  closeDisabled={true}
+                                  rounded={true}
+                                  className="rounded p-4.5"
+                                >
+                                  <div className="space-y-2">
+                                    <div className="flex items-center justify-between space-x-2">
+                                      <span className="break-all text-sm 3xl:text-xl font-medium">
+                                        {ellipse(
+                                          split(message, 'normal', ' ')
+                                            .join(' ')
+                                            .substring(0, status === 'failed' && errorPatterns.findIndex(c => message?.indexOf(c) > -1) > -1 ? message.indexOf(errorPatterns.find(c => message.indexOf(c) > -1)) : undefined) ||
+                                          message,
+                                          128,
+                                        )}
+                                      </span>
+                                      <div className="flex items-center space-x-1">
+                                        {status === 'failed' && message && (
+                                          <Copy
+                                            value={message}
+                                            className="cursor-pointer text-slate-200 hover:text-white"
+                                          />
+                                        )}
+                                        {status === 'failed' ?
+                                          <button
+                                            onClick={() => reset(code)}
+                                            className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
+                                          >
+                                            <MdClose size={14} />
+                                          </button> :
+                                          status === 'success' ?
+                                            <button
+                                              onClick={() => reset()}
+                                              className={`${xcallResponse ? 'bg-blue-600 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'} rounded-full flex items-center justify-center text-white p-1`}
+                                            >
+                                              <MdClose size={14} />
+                                            </button> :
+                                            null
+                                        }
+                                      </div>
+                                    </div>
+                                    <div className="text-sm 3xl:text-xl font-bold">
+                                      <span className="mr-1">
+                                        To file a support request, please create a ticket on our discord
+                                      </span>
+                                      <a
+                                        href={process.env.NEXT_PUBLIC_FEEDBACK_URL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="underline"
+                                      >
+                                        here
+                                      </a>.
+                                    </div>
+                                  </div>
+                                </Alert>
+                              )
+                            })) :
+                      provider ?
+                        <button
+                          disabled={true}
+                          className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base 3xl:text-2xl text-center py-3 sm:py-4 px-2 sm:px-3"
+                        >
+                          Send
+                        </button> :
+                        <Wallet
+                          connectChainId={source_chain_data?.chain_id}
+                          buttonConnectTitle="Connect Wallet"
+                          className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base 3xl:text-2xl font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
+                        >
+                          <span>
+                            Connect Wallet
+                          </span>
+                        </Wallet>
+                    }
+                  </div>
+                )}
               </div>
             }
           </div>
-          {
-            !openTransferStatus && _source_contract_data?.mintable &&
-            (
-              <Faucet
-                tokenId={asset}
-                contractData={_source_contract_data}
-              />
-            )
-          }
+          {!openTransferStatus && _source_contract_data?.mintable && <Faucet tokenId={asset} contractData={_source_contract_data} />}
         </div>
       </div>
       <div className={`col-span-1 ${has_latest_transfers ? 'lg:col-span-3' : ''} xl:col-span-2 3xl:mt-8`}>
