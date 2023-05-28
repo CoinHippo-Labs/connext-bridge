@@ -1273,7 +1273,7 @@ export default () => {
                           origin_chain: source_chain_data?.chain_id,
                           origin_domain: xcallParams.origin,
                           origin_transacting_asset: xcallParams.asset,
-                          origin_transacting_amount: Number(utils.parseUnits((amount || 0).toFixed(source_decimals), source_decimals).toString()),
+                          origin_transacting_amount: Number(utils.parseUnits(Number(amount || 0).toFixed(source_decimals), source_decimals).toString()),
                           destination_chain: destination_chain_data?.chain_id,
                           destination_domain: xcallParams.destination,
                           destination_transacting_asset,
