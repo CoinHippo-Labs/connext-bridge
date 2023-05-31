@@ -161,8 +161,7 @@
       }
     ],
     "color": "#039f74",
-    "preset": true,
-    "exclude_source_chains": ["binance"]
+    "preset": true
   },
   {
     "id": "dai",
@@ -246,8 +245,7 @@
       }
     ],
     "color": "#f4b333",
-    "preset": true,
-    "exclude_source_chains": ["binance"]
+    "preset": true
   },
   {
     "id": "eth",
