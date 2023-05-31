@@ -29,5 +29,4 @@ module.exports = {
   experimental: {
     appDir: false,
   },
-  swcMinify: false,
 }
