@@ -170,5 +170,28 @@
     ],
     "color": "#000000",
     "group": "other_tokens"
+  },
+  {
+    "id": "ixt",
+    "symbol": "IXT",
+    "name": "IXT",
+    "image": "/logos/assets/tkn.png",
+    "is_stablecoin": false,
+    "contracts": [
+      {
+        "contract_address": "0x9B11e38299F2E2094793640B67b5e29678792ab4",
+        "chain_id": 5,
+        "decimals": 18,
+        "symbol": "IXT"
+      },
+      {
+        "contract_address": "0xA24E850BB444586897226b7Bc4A3C338C995252f",
+        "chain_id": 80001,
+        "decimals": 18,
+        "symbol": "IXT"
+      }
+    ],
+    "color": "#ff6647",
+    "group": "other_tokens"
   }
 ]
