@@ -34,7 +34,7 @@
     "html-react-parser": "^3.0.13",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
-    "next": "13.2.4",
+    "next": "^13.2.4",
     "next-secure-headers": "^2.2.0",
     "nprogress": "^0.2.0",
     "numeral": "^2.0.6",
