@@ -1057,7 +1057,7 @@ export default () => {
       const source_decimals = source_contract_data?.decimals || 18
       const relayer_fee_field = `relayerFee${relayerFeeAssetType === 'transacting' ? 'InTransactingAsset' : ''}`
       const relayer_fee_decimals = relayerFeeAssetType === 'transacting' ? source_decimals : 18
-      const _amount = numberToFixed((amount || 0) - (relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? Number(relayerFee) : 0), source_decimals)
+      const _amount = numberToFixed((amount || 0) - (relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? Number(numberToFixed(Number(relayerFee), relayer_fee_decimals)) : 0), source_decimals - 2)
 
       const xcallParams = {
         origin: source_chain_data?.domain_id,
@@ -1069,7 +1069,7 @@ export default () => {
         slippage: ((typeof slippage === 'number' ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE) * 100).toString(),
         receiveLocal: receiveLocal || false,
         callData: callData || '0x',
-        [relayer_fee_field]: relayerFee && Number(relayerFee) > 0 ? utils.parseUnits(numberToFixed(Number(relayerFee), relayer_fee_decimals), relayer_fee_decimals).toString() : undefined,
+        [relayer_fee_field]: relayerFee && Number(relayerFee) > 0 ? utils.parseUnits(numberToFixed(Number(relayerFee), relayer_fee_decimals - 2), relayer_fee_decimals).toString() : undefined,
       }
 
       console.log(
