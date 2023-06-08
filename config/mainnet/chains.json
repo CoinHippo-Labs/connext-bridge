@@ -54,7 +54,6 @@
         "chainName": "BNB Chain",
         "rpcUrls": [
           "https://rpc.ankr.com/bsc",
-          "https://1rpc.io/bnb",
           "https://bscrpc.com"
         ],
         "nativeCurrency": {
@@ -96,8 +95,7 @@
           "https://polygon-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
           "https://matic-mainnet.chainstacklabs.com",
           "https://poly-rpc.gateway.pokt.network",
-          "https://polygon.blockpi.network/v1/rpc/public",
-          "https://1rpc.io/matic"
+          "https://polygon.blockpi.network/v1/rpc/public"
         ],
         "nativeCurrency": {
           "name": "Polygon",
@@ -139,8 +137,7 @@
         "chainName": "Optimism",
         "rpcUrls": [
           "https://optimism-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-          "https://optimism.blockpi.network/v1/rpc/public",
-          "https://1rpc.io/op"
+          "https://optimism.blockpi.network/v1/rpc/public"
         ],
         "nativeCurrency": {
           "name": "Ethereum",
@@ -183,8 +180,7 @@
         "rpcUrls": [
           "https://arbitrum-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
           "https://arbitrum.blockpi.network/v1/rpc/public",
-          "https://arb1.arbitrum.io/rpc",
-          "https://1rpc.io/arb"
+          "https://arb1.arbitrum.io/rpc"
         ],
         "nativeCurrency": {
           "name": "Ethereum",
