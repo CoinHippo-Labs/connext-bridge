@@ -57,7 +57,7 @@
     "react-table": "^7.8.0",
     "recharts": "2.1.11",
     "redux": "^4.2.1",
-    "wagmi": "^0.12.10"
+    "wagmi": "0.12.10"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.14",
