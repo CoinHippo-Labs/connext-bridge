@@ -193,5 +193,63 @@
     ],
     "color": "#ff6647",
     "group": "other_tokens"
+  },
+  {
+    "id": "alusd",
+    "symbol": "alUSD",
+    "name": "Alchemix USD",
+    "image": "/logos/assets/alusd.png",
+    "is_stablecoin": true,
+    "contracts": [
+      {
+        "contract_address": "0x990162AFaA06f591c03DD36ECBDa24A8A80F2D0c",
+        "chain_id": 5,
+        "decimals": 18,
+        "symbol": "alUSD"
+      },
+      {
+        "contract_address": "0x990162AFaA06f591c03DD36ECBDa24A8A80F2D0c",
+        "chain_id": 420,
+        "decimals": 18,
+        "symbol": "alUSD"
+      },
+      {
+        "contract_address": "0x990162AFaA06f591c03DD36ECBDa24A8A80F2D0c",
+        "chain_id": 421613,
+        "decimals": 18,
+        "symbol": "alUSD"
+      }
+    ],
+    "color": "#000000",
+    "group": "other_tokens"
+  },
+  {
+    "id": "aleth",
+    "symbol": "alETH",
+    "name": "Alchemix ETH",
+    "image": "/logos/assets/aleth.png",
+    "is_stablecoin": false,
+    "contracts": [
+      {
+        "contract_address": "0xF6DD52cdF1614Cd649077Aa283840657617faa07",
+        "chain_id": 5,
+        "decimals": 18,
+        "symbol": "alETH"
+      },
+      {
+        "contract_address": "0xF6DD52cdF1614Cd649077Aa283840657617faa07",
+        "chain_id": 420,
+        "decimals": 18,
+        "symbol": "alETH"
+      },
+      {
+        "contract_address": "0xF6DD52cdF1614Cd649077Aa283840657617faa07",
+        "chain_id": 421613,
+        "decimals": 18,
+        "symbol": "alETH"
+      }
+    ],
+    "color": "#000000",
+    "group": "other_tokens"
   }
 ]
