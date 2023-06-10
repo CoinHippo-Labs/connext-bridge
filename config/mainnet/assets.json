@@ -472,5 +472,37 @@
     ],
     "color": "#000000",
     "group": "other_tokens"
+  },
+  {
+    "id": "xoc",
+    "symbol": "XOC",
+    "name": "Xocolatl MXN Stablecoin",
+    "image": "/logos/assets/xoc.png",
+    "is_stablecoin": true,
+    "contracts": [
+      {
+        "contract_address": "0xa411c9Aa00E020e4f88Bc19996d29c5B7ADB4ACf",
+        "chain_id": 137,
+        "decimals": 18,
+        "symbol": "XOC",
+        "image": "/logos/assets/xoc.png"
+      },
+      {
+        "contract_address": "0xa411c9Aa00E020e4f88Bc19996d29c5B7ADB4ACf",
+        "chain_id": 100,
+        "decimals": 18,
+        "symbol": "XOC",
+        "image": "/logos/assets/xoc.png"
+      },
+      {
+        "contract_address": "0xa411c9Aa00E020e4f88Bc19996d29c5B7ADB4ACf",
+        "chain_id": 56,
+        "decimals": 18,
+        "symbol": "XOC",
+        "image": "/logos/assets/xoc.png"
+      }
+    ],
+    "color": "#000000",
+    "group": "other_tokens"
   }
 ]
