@@ -55,6 +55,7 @@
         "contract_address": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
         "chain_id": 42161,
         "decimals": 6,
+        "symbol": "USDC.e",
         "image": "/logos/assets/usdc.png",
         "next_asset": {
           "contract_address": "0x8c556cF37faa0eeDAC7aE665f1Bb0FbD4b2eae36",
