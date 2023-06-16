@@ -36,7 +36,7 @@
     "image": "/logos/chains/goerli.png",
     "color": "#636890",
     "unwrapper_contract": "0xa6633d369A9C4C8A442ef104E8e293DA7b352Acd",
-    "group" : "evm",
+    "group": "evm",
     "no_pool": true
   },
   {
@@ -77,7 +77,7 @@
     "image": "/logos/chains/polygon.png",
     "color": "#8247e5",
     "unwrapper_contract": "0x1e0Db00EB08ceC7FFdA03c0Dbf224193E1563844",
-    "group" : "evm"
+    "group": "evm"
   },
   {
     "id": "optimism",
@@ -116,7 +116,7 @@
     "image": "/logos/chains/optimism.png",
     "color": "#dc2626",
     "unwrapper_contract": "0x08bDeFD0e4878A814Cb2fd11C033F3947251689f",
-    "group" : "optimistic_rollups"
+    "group": "optimistic_rollups"
   },
   {
     "id": "arbitrum",
@@ -154,7 +154,7 @@
     "image": "/logos/chains/arbitrum.png",
     "color": "#28a0f0",
     "unwrapper_contract": "0x18BBF96BC8014aA93cbf1A5Bce005a485b5C2C4a",
-    "group" : "optimistic_rollups"
+    "group": "optimistic_rollups"
   },
   {
     "id": "linea",
@@ -192,7 +192,7 @@
     "image": "/logos/chains/linea.png",
     "color": "#1d1d1d",
     "unwrapper_contract": "0x2Eee7cB087c0430e40991f7E37De44Ec248a9F45",
-    "group" : "zk_rollups"
+    "group": "zk_rollups"
   },
   {
     "id": "zksync",
@@ -230,6 +230,6 @@
     "image": "/logos/chains/zksync.png",
     "color": "#12142b",
     "unwrapper_contract": "",
-    "group" : "zk_rollups"
+    "group": "zk_rollups"
   }
 ]
