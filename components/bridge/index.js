@@ -2207,7 +2207,7 @@ export default () => {
                                       <div className="flex items-center justify-between space-x-2">
                                         <Tooltip
                                           placement="top"
-                                          content="This supports our router users providing fast liquidity."
+                                          content={`Liquidity providers receive a ${process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT}% fee for supporting fast transfers`}
                                           className="z-50 bg-dark text-white text-xs"
                                         >
                                           <div className="flex items-center">
