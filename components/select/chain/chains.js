@@ -78,10 +78,12 @@ export default (
         .map((c, i) => {
           const {
             id,
-            disabled,
+            disabled_bridge,
             image,
             group,
           } = { ...c }
+          let { disabled } = { ...c }
+          disabled = disabled || disabled_bridge
 
           const selected = id === value
 
