@@ -5,6 +5,7 @@ import _ from 'lodash'
 import { TailSpin } from 'react-loader-spinner'
 import { Tooltip } from '@material-tailwind/react'
 import { MdKeyboardArrowUp, MdKeyboardArrowDown } from 'react-icons/md'
+import { FiExternalLink } from 'react-icons/fi'
 
 import Datatable from '../datatable'
 import DecimalsFormat from '../decimals-format'
@@ -18,7 +19,7 @@ import { toArray, equalsIgnoreCase, loaderColor } from '../../lib/utils'
 
 const WRAPPED_PREFIX = process.env.NEXT_PUBLIC_WRAPPED_PREFIX
 
-export default ({ view, userPoolsData }) => {
+export default ({ view, userPoolsData, groupPools = false }) => {
   const {
     preferences,
     chains,
@@ -71,7 +72,6 @@ export default ({ view, userPoolsData }) => {
 
               const { adopted, local, supply } = { ...getPool(id, pools_data) }
               share = !isNaN(supply) ? Number(lpTokenBalance) * 100 / Number(supply) : share
-
               const { price } = { ...getAsset(asset_data?.id, assets_data) }
               const tvl = Number(supply || _.sum(toArray(_.concat(adopted, local)).map(a => Number(a.balance)))) * (price || 0)
               const value = (lpTokenBalance || '0') * price
@@ -105,7 +105,6 @@ export default ({ view, userPoolsData }) => {
                       .map(d => {
                         const chain_data = getChain(d.chain_id, chains_data)
                         const asset_data = getAsset(k, pool_assets_data)
-
                         if (chain_data && asset_data) {
                           const { chain_id } = { ...chain_data }
                           const contract_data = d
@@ -138,7 +137,20 @@ export default ({ view, userPoolsData }) => {
             }
           }),
           ['i'], ['asc'],
-        ) :
+        )
+        .flatMap(d => {
+          const { pools } = { ...d }
+          return (
+            groupPools ?
+              [d] :
+              pools.map(p => {
+                return {
+                  ...d,
+                  pools: [p],
+                }
+              })
+          )
+        }) :
         null
 
   const chain_data = address && getChain(chain_id, chains_data)
@@ -156,13 +168,7 @@ export default ({ view, userPoolsData }) => {
           <>
             <div
               className="w-32 sm:w-64 3xl:w-96 mx-auto"
-              style={
-                {
-                  boxShadow,
-                  WebkitBoxShadow: boxShadow,
-                  MozBoxShadow: boxShadow,
-                }
-              }
+              style={{ boxShadow, WebkitBoxShadow: boxShadow, MozBoxShadow: boxShadow }}
             />
             <Datatable
               columns={[
@@ -181,7 +187,7 @@ export default ({ view, userPoolsData }) => {
                     const asset = asset_data?.id
 
                     return (
-                      <div className="flex flex-col space-y-3">
+                      <div className="flex flex-col space-y-3 p-3">
                         {view === 'my_positions' ?
                           <Link
                             href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
@@ -190,20 +196,22 @@ export default ({ view, userPoolsData }) => {
                             {name}
                           </Link> :
                           <>
-                            <div className="h-6 3xl:h-12 flex items-center space-x-2">
-                              {image && (
-                                <Image
-                                  src={image}
-                                  width={24}
-                                  height={24}
-                                  className="3xl:w-8 3xl:h-8 rounded-full"
-                                />
-                              )}
-                              <span className="text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium">
-                                {_symbol}
-                              </span>
-                            </div>
-                            {uncollapseAssetIds?.includes(id) && toArray(pools).map((p, i) => {
+                            {groupPools && (
+                              <div className="h-6 3xl:h-12 flex items-center space-x-2">
+                                {image && (
+                                  <Image
+                                    src={image}
+                                    width={24}
+                                    height={24}
+                                    className="3xl:w-8 3xl:h-8 rounded-full"
+                                  />
+                                )}
+                                <span className="text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium">
+                                  {_symbol}
+                                </span>
+                              </div>
+                            )}
+                            {(!groupPools || uncollapseAssetIds?.includes(id)) && toArray(pools).map((p, i) => {
                               const { chain_data, asset_data, contract_data } = { ...p }
                               let { name } = { ...p }
                               let { symbol } = { ...contract_data }
@@ -212,8 +220,13 @@ export default ({ view, userPoolsData }) => {
                               const chain = chain_data?.id
                               const asset = asset_data?.id
                               const component = (
-                                <div className="h-6 3xl:h-12 flex items-center 3xl:text-2xl font-medium ml-8">
-                                  {name}
+                                <div className="h-6 3xl:h-12 flex items-center ml-0">
+                                  <div className="h-full flex items-center 3xl:text-2xl font-medium mr-2">
+                                    {name}
+                                  </div>
+                                  <div className="h-full flex items-center 3xl:text-base">
+                                    <FiExternalLink size={14} />
+                                  </div>
                                 </div>
                               )
 
@@ -231,6 +244,7 @@ export default ({ view, userPoolsData }) => {
                     )
                   },
                   headerClassName: '3xl:text-xl 3xl:py-2',
+                  className: 'p-0',
                 },
                 {
                   Header: 'Chains',
@@ -245,12 +259,12 @@ export default ({ view, userPoolsData }) => {
 
                     const onClick = () => {
                       if (pools?.length > 0) {
-                        setUncollapseAssetIds(uncollapseAssetIds?.includes(id) ? uncollapseAssetIds.filter(_id => _id !== id) : _.concat(toArray(uncollapseAssetIds), id))
+                        setUncollapseAssetIds((!groupPools || uncollapseAssetIds?.includes(id)) ? uncollapseAssetIds.filter(_id => _id !== id) : _.concat(toArray(uncollapseAssetIds), id))
                       }
                     }
 
                     return (
-                      <div className="flex flex-col space-y-3">
+                      <div className="flex flex-col space-y-3 p-3">
                         {view === 'my_positions' ?
                           <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
                             <div className="min-w-max h-6 3xl:h-12 flex items-center space-x-2">
@@ -268,57 +282,56 @@ export default ({ view, userPoolsData }) => {
                             </div>
                           </Link> :
                           <>
-                            <div
-                              onClick={() => onClick()}
-                              className={`w-fit h-6 3xl:h-12 ${pools?.length > 0 ? 'cursor-pointer' : ''} flex items-center`}
-                            >
-                              {pools?.length > 0 ?
-                                <>
-                                  {_.slice(pools, 0, 3).map((p, i) => {
-                                    const { chain_data } = { ...p }
-                                    const { name, image } = { ...chain_data }
-                                    return (
-                                      <div
-                                        key={i}
-                                        title={name}
-                                        className="w-5 3xl:w-6 h-6 3xl:h-12 flex items-center mr-1.5"
-                                      >
-                                        {image && (
-                                          <Image
-                                            src={image}
-                                            width={20}
-                                            height={20}
-                                            className="3xl:w-6 3xl:h-6 rounded-full"
-                                          />
-                                        )}
+                            {groupPools && (
+                              <div
+                                onClick={() => onClick()}
+                                className={`w-fit h-6 3xl:h-12 ${pools?.length > 0 ? 'cursor-pointer' : ''} flex items-center`}
+                              >
+                                {pools?.length > 0 ?
+                                  <>
+                                    {_.slice(pools, 0, 3).map((p, i) => {
+                                      const { chain_data } = { ...p }
+                                      const { name, image } = { ...chain_data }
+                                      return (
+                                        <div
+                                          key={i}
+                                          title={name}
+                                          className="w-5 3xl:w-6 h-6 3xl:h-12 flex items-center mr-1.5"
+                                        >
+                                          {image && (
+                                            <Image
+                                              src={image}
+                                              width={20}
+                                              height={20}
+                                              className="3xl:w-6 3xl:h-6 rounded-full"
+                                            />
+                                          )}
+                                        </div>
+                                      )
+                                    })}
+                                    {pools.length > 3 && (
+                                      <div className="h-6 3xl:h-12 flex items-center">
+                                        <span className="text-slate-500 dark:text-slate-400 text-xs 3xl:text-xl font-medium">
+                                          (+{pools.length - 3})
+                                        </span>
                                       </div>
-                                    )
-                                  })}
-                                  {pools.length > 3 && (
-                                    <div className="h-6 3xl:h-12 flex items-center">
-                                      <span className="text-slate-500 dark:text-slate-400 text-xs 3xl:text-xl font-medium">
-                                        (+{pools.length - 3})
-                                      </span>
+                                    )}
+                                    <div className="mr-1.5">
+                                      <button
+                                        onClick={() => onClick()}
+                                        className="w-5 h-6 3xl:h-12 rounded-full flex items-center justify-center"
+                                      >
+                                        {(!groupPools || uncollapseAssetIds?.includes(id)) ? <MdKeyboardArrowUp size={16} className="3xl:w-5 3xl:h-5" /> : <MdKeyboardArrowDown size={16} className="3xl:w-5 3xl:h-5" />}
+                                      </button>
                                     </div>
-                                  )}
-                                  <div className="mr-1.5">
-                                    <button
-                                      onClick={() => onClick()}
-                                      className="w-5 h-6 3xl:h-12 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full flex items-center justify-center"
-                                    >
-                                      {uncollapseAssetIds?.includes(id) ?
-                                        <MdKeyboardArrowUp size={16} className="3xl:w-5 3xl:h-5" /> :
-                                        <MdKeyboardArrowDown size={16} className="3xl:w-5 3xl:h-5" />
-                                      }
-                                    </button>
-                                  </div>
-                                </> :
-                                <span className="text-slate-400 dark:text-slate-500 3xl:text-xl">
-                                  No chains supported
-                                </span>
-                              }
-                            </div>
-                            {uncollapseAssetIds?.includes(id) && toArray(pools).map((p, i) => {
+                                  </> :
+                                  <span className="text-slate-400 dark:text-slate-500 3xl:text-xl">
+                                    No chains supported
+                                  </span>
+                                }
+                              </div>
+                            )}
+                            {(!groupPools || uncollapseAssetIds?.includes(id)) && toArray(pools).map((p, i) => {
                               const { chain_data, asset_data } = { ...p }
                               const { name, image } = { ...chain_data }
                               const chain = chain_data?.id
@@ -353,6 +366,7 @@ export default ({ view, userPoolsData }) => {
                     )
                   },
                   headerClassName: '3xl:text-xl 3xl:py-2',
+                  className: 'p-0',
                 },
                 {
                   Header: 'Pool Ratio',
@@ -387,100 +401,101 @@ export default ({ view, userPoolsData }) => {
                     const { color } = { ...asset_data }
 
                     return (
-                      <div className="flex flex-col items-end space-y-3" style={{ minWidth: '8rem' }}>
-                        {total_amount > 0 ?
-                          <div className="w-full h-6 3xl:h-12 flex flex-col items-end justify-center space-y-0 3xl:space-y-1 pt-2 pb-1">
-                            <ProgressBar
-                              width={native_amount * 100 / total_amount}
-                              className="w-full 3xl:h-2 rounded-lg"
-                              backgroundClassName="3xl:h-2 rounded-lg"
-                              style={{ backgroundColor: color }}
-                              backgroundStyle={{ backgroundColor: `${color}33` }}
-                            />
-                            <div className="w-full flex items-center justify-between space-x-2">
-                              <div className="flex flex-col items-start space-y-0.5">
-                                <Tooltip
-                                  placement="top"
-                                  content={
-                                    <div className="flex flex-col items-end space-y-1">
-                                      <div className="flex items-center space-x-1">
-                                        {native_asset?.asset_data?.image && (
-                                          <Image
-                                            src={native_asset.asset_data.image}
-                                            width={14}
-                                            height={14}
-                                            className="rounded-full"
-                                          />
-                                        )}
-                                        <span className="leading-3 text-2xs font-medium">
-                                          {native_asset?.asset?.symbol || native_asset?.asset_data?.symbol}
-                                        </span>
+                      <div className="flex flex-col items-end space-y-3 p-3" style={{ minWidth: '8rem' }}>
+                        {groupPools && (
+                          total_amount > 0 ?
+                            <div className="w-full h-6 3xl:h-12 flex flex-col items-end justify-center space-y-0 3xl:space-y-1 pt-2 pb-1">
+                              <ProgressBar
+                                width={native_amount * 100 / total_amount}
+                                className="w-full 3xl:h-2 rounded-lg"
+                                backgroundClassName="3xl:h-2 rounded-lg"
+                                style={{ backgroundColor: color }}
+                                backgroundStyle={{ backgroundColor: `${color}33` }}
+                              />
+                              <div className="w-full flex items-center justify-between space-x-2">
+                                <div className="flex flex-col items-start space-y-0.5">
+                                  <Tooltip
+                                    placement="top"
+                                    content={
+                                      <div className="flex flex-col items-end space-y-1">
+                                        <div className="flex items-center space-x-1">
+                                          {native_asset?.asset_data?.image && (
+                                            <Image
+                                              src={native_asset.asset_data.image}
+                                              width={14}
+                                              height={14}
+                                              className="rounded-full"
+                                            />
+                                          )}
+                                          <span className="leading-3 text-2xs font-medium">
+                                            {native_asset?.asset?.symbol || native_asset?.asset_data?.symbol}
+                                          </span>
+                                        </div>
+                                        <DecimalsFormat
+                                          value={native_amount}
+                                          noTooltip={true}
+                                          className="leading-3 text-2xs font-medium"
+                                        />
                                       </div>
+                                    }
+                                    className="z-50 bg-dark text-white text-xs"
+                                  >
+                                    <div>
                                       <DecimalsFormat
-                                        value={native_amount}
+                                        value={native_amount * 100 / total_amount}
+                                        suffix="%"
                                         noTooltip={true}
-                                        className="leading-3 text-2xs font-medium"
+                                        className="leading-3 3xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 3xl:text-base font-medium"
                                       />
                                     </div>
-                                  }
-                                  className="z-50 bg-dark text-white text-xs"
-                                >
-                                  <div>
-                                    <DecimalsFormat
-                                      value={native_amount * 100 / total_amount}
-                                      suffix="%"
-                                      noTooltip={true}
-                                      className="leading-3 3xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 3xl:text-base font-medium"
-                                    />
-                                  </div>
-                                </Tooltip>
-                              </div>
-                              <div className="flex flex-col items-end space-y-0.5">
-                                <Tooltip
-                                  placement="top"
-                                  content={
-                                    <div className="flex flex-col items-end space-y-1">
-                                      <div className="flex items-center space-x-1">
-                                        {(wrapped_asset?.contract_data?.next_asset?.image || wrapped_asset?.asset_data?.image) && (
-                                          <Image
-                                            src={wrapped_asset?.contract_data?.next_asset?.image || wrapped_asset?.asset_data?.image}
-                                            width={14}
-                                            height={14}
-                                            className="rounded-full"
-                                          />
-                                        )}
-                                        <span className="leading-3 text-2xs font-medium">
-                                          {wrapped_asset?.asset?.symbol || wrapped_asset?.contract_data?.next_asset?.symbol}
-                                        </span>
+                                  </Tooltip>
+                                </div>
+                                <div className="flex flex-col items-end space-y-0.5">
+                                  <Tooltip
+                                    placement="top"
+                                    content={
+                                      <div className="flex flex-col items-end space-y-1">
+                                        <div className="flex items-center space-x-1">
+                                          {(wrapped_asset?.contract_data?.next_asset?.image || wrapped_asset?.asset_data?.image) && (
+                                            <Image
+                                              src={wrapped_asset?.contract_data?.next_asset?.image || wrapped_asset?.asset_data?.image}
+                                              width={14}
+                                              height={14}
+                                              className="rounded-full"
+                                            />
+                                          )}
+                                          <span className="leading-3 text-2xs font-medium">
+                                            {wrapped_asset?.asset?.symbol || wrapped_asset?.contract_data?.next_asset?.symbol}
+                                          </span>
+                                        </div>
+                                        <DecimalsFormat
+                                          value={wrapped_amount}
+                                          noTooltip={true}
+                                          className="leading-3 text-2xs font-medium"
+                                        />
                                       </div>
+                                    }
+                                    className="z-50 bg-dark text-white text-xs"
+                                  >
+                                    <div>
                                       <DecimalsFormat
-                                        value={wrapped_amount}
+                                        value={100 - (native_amount * 100 / total_amount)}
+                                        suffix="%"
                                         noTooltip={true}
-                                        className="leading-3 text-2xs font-medium"
+                                        className="leading-3 3xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 3xl:text-base font-medium"
                                       />
                                     </div>
-                                  }
-                                  className="z-50 bg-dark text-white text-xs"
-                                >
-                                  <div>
-                                    <DecimalsFormat
-                                      value={100 - (native_amount * 100 / total_amount)}
-                                      suffix="%"
-                                      noTooltip={true}
-                                      className="leading-3 3xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 3xl:text-base font-medium"
-                                    />
-                                  </div>
-                                </Tooltip>
+                                  </Tooltip>
+                                </div>
                               </div>
+                            </div> :
+                            <div className="h-6 3xl:h-12 flex items-center justify-end">
+                              <span className="text-slate-400 dark:text-slate-500 3xl:text-2xl">
+                                No liquidity
+                              </span>
                             </div>
-                          </div> :
-                          <div className="h-6 3xl:h-12 flex items-center justify-end">
-                            <span className="text-slate-400 dark:text-slate-500 3xl:text-2xl">
-                              No liquidity
-                            </span>
-                          </div>
-                        }
-                        {uncollapseAssetIds?.includes(id) && toArray(pools).map((p, i) => {
+                        )}
+                        {(!groupPools || uncollapseAssetIds?.includes(id)) && toArray(pools).map((p, i) => {
                           const { chain_data, asset_data, contract_data, adopted, local, lpTokenAddress, error } = { ...p }
                           const chain = chain_data?.id
                           const asset = asset_data?.id
@@ -610,6 +625,7 @@ export default ({ view, userPoolsData }) => {
                     )
                   },
                   headerClassName: 'whitespace-nowrap 3xl:text-xl justify-end text-right 3xl:py-2',
+                  className: 'p-0',
                 },
                 {
                   Header: 'Liquidity',
@@ -619,16 +635,19 @@ export default ({ view, userPoolsData }) => {
                     const { row } = { ...props }
                     const { id, pools } = { ...row.original }
                     const value = _.sumBy(pools, 'tvl')
+
                     return (
-                      <div className="flex flex-col space-y-3">
-                        <div className="h-6 3xl:h-12 flex items-center justify-end text-right">
-                          <DecimalsFormat
-                            value={value}
-                            prefix={currency_symbol}
-                            className="uppercase text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium"
-                          />
-                        </div>
-                        {uncollapseAssetIds?.includes(id) && toArray(pools).map((p, i) => {
+                      <div className="flex flex-col space-y-3 p-3">
+                        {groupPools && (
+                          <div className="h-6 3xl:h-12 flex items-center justify-end text-right">
+                            <DecimalsFormat
+                              value={value}
+                              prefix={currency_symbol}
+                              className="uppercase text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium"
+                            />
+                          </div>
+                        )}
+                        {(!groupPools || uncollapseAssetIds?.includes(id)) && toArray(pools).map((p, i) => {
                           const { chain_data, asset_data, tvl, lpTokenAddress, error } = { ...p }
                           const chain = chain_data?.id
                           const asset = asset_data?.id
@@ -664,6 +683,7 @@ export default ({ view, userPoolsData }) => {
                     )
                   },
                   headerClassName: 'whitespace-nowrap 3xl:text-xl justify-end text-right 3xl:py-2',
+                  className: 'p-0',
                 },
                 {
                   Header: 'Volume (7d)',
@@ -673,19 +693,22 @@ export default ({ view, userPoolsData }) => {
                     const { row } = { ...props }
                     const { id, pools } = { ...props.row.original }
                     const value = _.sumBy(pools, 'volume_value')
+
                     return (
-                      <div className="flex flex-col space-y-3">
-                        <div className="h-6 3xl:h-12 flex items-center justify-end text-right">
-                          {!isNaN(value) ?
-                            <DecimalsFormat
-                              value={value}
-                              prefix={currency_symbol}
-                              className="uppercase text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium"
-                            /> :
-                            'TBD'
-                          }
-                        </div>
-                        {uncollapseAssetIds?.includes(id) && toArray(pools).map((p, i) => {
+                      <div className="flex flex-col space-y-3 p-3">
+                        {groupPools && (
+                          <div className="h-6 3xl:h-12 flex items-center justify-end text-right">
+                            {!isNaN(value) ?
+                              <DecimalsFormat
+                                value={value}
+                                prefix={currency_symbol}
+                                className="uppercase text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium"
+                              /> :
+                              'TBD'
+                            }
+                          </div>
+                        )}
+                        {(!groupPools || uncollapseAssetIds?.includes(id)) && toArray(pools).map((p, i) => {
                           const { chain_data, asset_data, volume_value } = { ...p }
                           const chain = chain_data?.id
                           const asset = asset_data?.id
@@ -715,6 +738,7 @@ export default ({ view, userPoolsData }) => {
                     )
                   },
                   headerClassName: 'whitespace-nowrap 3xl:text-xl justify-end text-right 3xl:py-2',
+                  className: 'p-0',
                 },
                 {
                   Header: 'Fees (7d)',
@@ -724,19 +748,22 @@ export default ({ view, userPoolsData }) => {
                     const { row } = { ...props }
                     const { id, pools } = { ...row.original }
                     const value = _.sumBy(pools, 'fees_value')
+
                     return (
-                      <div className="flex flex-col space-y-3">
-                        <div className="h-6 3xl:h-12 flex items-center justify-end text-right">
-                          {!isNaN(value) ?
-                            <DecimalsFormat
-                              value={value}
-                              prefix={currency_symbol}
-                              className="uppercase text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium"
-                            /> :
-                            'TBD'
-                          }
-                        </div>
-                        {uncollapseAssetIds?.includes(id) && toArray(pools).map((p, i) => {
+                      <div className="flex flex-col space-y-3 p-3">
+                        {groupPools && (
+                          <div className="h-6 3xl:h-12 flex items-center justify-end text-right">
+                            {!isNaN(value) ?
+                              <DecimalsFormat
+                                value={value}
+                                prefix={currency_symbol}
+                                className="uppercase text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium"
+                              /> :
+                              'TBD'
+                            }
+                          </div>
+                        )}
+                        {(!groupPools || uncollapseAssetIds?.includes(id)) && toArray(pools).map((p, i) => {
                           const { chain_data, asset_data, fees_value } = { ...p }
                           const chain = chain_data?.id
                           const asset = asset_data?.id
@@ -766,6 +793,7 @@ export default ({ view, userPoolsData }) => {
                     )
                   },
                   headerClassName: 'whitespace-nowrap 3xl:text-xl justify-end text-right 3xl:py-2',
+                  className: 'p-0',
                 },
                 {
                   Header: (
@@ -794,19 +822,21 @@ export default ({ view, userPoolsData }) => {
                     ) / _.sumBy(pools, 'tvl')
 
                     return (
-                      <div className="flex flex-col space-y-3">
-                        <div className="h-6 3xl:h-12 flex items-center justify-end text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium text-right">
-                          {/*!isNaN(value) ?
-                            <DecimalsFormat
-                              value={value * 100}
-                              maxDecimals={2}
-                              suffix="%"
-                              className="uppercase 3xl:text-2xl"
-                            /> :
-                            'TBD'
-                          */}
-                        </div>
-                        {uncollapseAssetIds?.includes(id) && toArray(pools).map((p, i) => {
+                      <div className="flex flex-col space-y-3 p-3">
+                        {groupPools && (
+                          <div className="h-6 3xl:h-12 flex items-center justify-end text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium text-right">
+                            {/*!isNaN(value) ?
+                              <DecimalsFormat
+                                value={value * 100}
+                                maxDecimals={2}
+                                suffix="%"
+                                className="uppercase 3xl:text-2xl"
+                              /> :
+                              'TBD'
+                            */}
+                          </div>
+                        )}
+                        {(!groupPools || uncollapseAssetIds?.includes(id)) && toArray(pools).map((p, i) => {
                           const { chain_data, asset_data, apy } = { ...p }
                           const chain = chain_data?.id
                           const asset = asset_data?.id
@@ -837,6 +867,7 @@ export default ({ view, userPoolsData }) => {
                     )
                   },
                   headerClassName: 'whitespace-nowrap 3xl:text-xl justify-end text-right 3xl:py-2',
+                  className: 'p-0',
                 },
                 {
                   Header: 'Your Pool Tokens',
@@ -864,14 +895,18 @@ export default ({ view, userPoolsData }) => {
                     )
 
                     return (
-                      !chain_data?.disabled ?
-                        <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
-                          {component}
-                        </Link> :
-                        component
+                      <div className="p-3">
+                        {!chain_data?.disabled ?
+                          <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                            {component}
+                          </Link> :
+                          component
+                        }
+                      </div>
                     )
                   },
                   headerClassName: 'whitespace-nowrap 3xl:text-xl 3xl:py-2',
+                  className: 'p-0',
                 },
                 {
                   Header: `Value ${currency.toUpperCase()}`,
@@ -918,14 +953,18 @@ export default ({ view, userPoolsData }) => {
                     )
 
                     return (
-                      !chain_data?.disabled ?
-                        <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
-                          {component}
-                        </Link> :
-                        component
+                      <div className="p-3">
+                        {!chain_data?.disabled ?
+                          <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                            {component}
+                          </Link> :
+                          component
+                        }
+                      </div>
                     )
                   },
                   headerClassName: 'whitespace-nowrap 3xl:text-xl justify-end text-right 3xl:py-2',
+                  className: 'p-0',
                 },
                 {
                   Header: 'Pool Share',
@@ -947,17 +986,20 @@ export default ({ view, userPoolsData }) => {
                     )
 
                     return (
-                      !chain_data?.disabled ?
-                        <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
-                          {component}
-                        </Link> :
-                        component
+                      <div className="p-3">
+                        {!chain_data?.disabled ?
+                          <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                            {component}
+                          </Link> :
+                          component
+                        }
+                      </div>
                     )
                   },
                   headerClassName: 'whitespace-nowrap 3xl:text-xl justify-end text-right 3xl:py-2',
+                  className: 'p-0',
                 },
-              ]
-              .filter(c => !(view === 'my_positions' ? ['assets', 'tvl', 'volume_value', 'fees_value', 'apy'] : ['lpTokenBalance', 'balances', 'share']).includes(c.accessor))}
+              ].filter(c => !(view === 'my_positions' ? ['assets', 'tvl', 'volume_value', 'fees_value', 'apy'] : ['lpTokenBalance', 'balances', 'share']).includes(c.accessor))}
               data={data}
               noPagination={data.length <= 10}
               defaultPageSize={50}
