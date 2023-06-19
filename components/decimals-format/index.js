@@ -1,11 +1,14 @@
-import _ from 'lodash'
 import { Tooltip } from '@material-tailwind/react'
+import _ from 'lodash'
 
 import { split, numberFormat } from '../../lib/utils'
+
+const LARGE_NUMBER_THRESHOLD = 1000
 
 export default (
   {
     value,
+    format = '0,0.00',
     delimiter = '.',
     maxDecimals,
     prefix = '',
@@ -15,32 +18,12 @@ export default (
     className = 'whitespace-nowrap text-xs font-semibold',
   },
 ) => {
-  let _value =
-    typeof value === 'string' ?
-      value :
-      typeof value === 'number' ?
-        value.toString() :
-        undefined
+  let _value = typeof value === 'string' ? value : typeof value === 'number' ? value.toString() : undefined
 
-  if (
-    typeof _value === 'string' &&
-    _value.includes(delimiter) &&
-    !_value.endsWith(delimiter)
-  ) {
-    const decimals = _.last(_value.split(delimiter))
+  if (typeof _value === 'string' && _value.includes(delimiter) && !_value.endsWith(delimiter)) {
     const value_number = Number(split(_value).join(''))
-
-    if (typeof maxDecimals !== 'number') {
-      if (value_number >= 1000) {
-        maxDecimals = 0
-      }
-      else if (value_number >= 1) {
-        maxDecimals = 2
-      }
-      else {
-        maxDecimals = 6
-      }
-    }
+    const decimals = _.last(_value.split(delimiter))
+    maxDecimals = typeof maxDecimals !== 'number' ? value_number >= LARGE_NUMBER_THRESHOLD ? 0 : value_number >= 1 ? 2 : 6 : maxDecimals
 
     if (Math.abs(value_number) >= Math.pow(10, -maxDecimals)) {
       if (decimals.length > maxDecimals) {
@@ -52,31 +35,17 @@ export default (
     }
     else {
       if (decimals.length > maxDecimals) {
-        _value =
-          `<${
-            maxDecimals > 0 ?
-              `0${delimiter}${
-                _.range(maxDecimals - 1)
-                  .map(i => '0')
-                  .join('')
-              }` :
-              ''
-          }1`
+        _value = `<${maxDecimals > 0 ? `0${delimiter}${_.range(maxDecimals - 1).map(i => '0').join('')}` : ''}1`
       }
       else {
         _value = undefined
       }
     }
 
-    while (
-      _value?.includes(delimiter) &&
-      _value.endsWith('0') &&
-      !_value.endsWith(`${delimiter}00`)
-    ) {
+    while (_value?.includes(delimiter) && _value.endsWith('0') && !_value.endsWith(`${delimiter}00`)) {
       _value = _value.substring(0, _value.length - 1)
     }
-
-    if (_value?.endsWith(`${delimiter}0`)) {
+    if (_value?.endsWith(`${delimiter}0`) || _value?.endsWith(delimiter)) {
       _value = _.head(_value.split(delimiter))
     }
   }
@@ -87,12 +56,11 @@ export default (
   if (typeof value === 'string' && value.endsWith(`${delimiter}0`)) {
     value = _.head(value.split(delimiter))
   }
-
-  if (_value && Number(_value) >= 1000) {
-    _value = numberFormat(_value, '0,0.00', true)
+  if (_value && Number(_value) >= LARGE_NUMBER_THRESHOLD) {
+    _value = numberFormat(_value, format, true)
   }
-  else if (value && Number(value) >= 1000) {
-    value = numberFormat(value, '0,0.00', true)
+  else if (value && Number(value) >= LARGE_NUMBER_THRESHOLD) {
+    value = numberFormat(value, format, true)
   }
 
   return (
