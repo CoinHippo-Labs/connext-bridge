@@ -7,6 +7,8 @@ import { getChain } from '../../../lib/object/chain'
 import { getAsset } from '../../../lib/object/asset'
 import { toArray } from '../../../lib/utils'
 
+const DEFAULT_DESTINATION_CHAIN = 'arbitrum'
+
 export default () => {
   const {
     chains,
@@ -78,7 +80,7 @@ export default () => {
                   const source_chain_data = getChain(chain_id, chains_data, true, false, true)
                   source_chain = source_chain_data?.id
 
-                  const destination_chain_data = getChain(chain_id, chains_data, true, false, true, source_chain)
+                  const destination_chain_data = source_chain !== DEFAULT_DESTINATION_CHAIN && getChain(DEFAULT_DESTINATION_CHAIN, chains_data) ? DEFAULT_DESTINATION_CHAIN : getChain(chain_id, chains_data, true, false, true, source_chain)
                   destination_chain = destination_chain_data?.id
 
                   const chain_ids = [source_chain_data?.chain_id, destination_chain_data?.chain_id]

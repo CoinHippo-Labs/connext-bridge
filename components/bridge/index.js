@@ -38,6 +38,7 @@ import { getBalance } from '../../lib/object/balance'
 import { split, toArray, includesStringList, paramsToObj, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, loaderColor, switchColor, sleep, errorPatterns, parseError } from '../../lib/utils'
 import { BALANCES_DATA, GET_BALANCES_DATA } from '../../reducers/types'
 
+const DEFAULT_DESTINATION_CHAIN = 'arbitrum'
 const WRAPPED_PREFIX = process.env.NEXT_PUBLIC_WRAPPED_PREFIX
 const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT)
 const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT)
@@ -426,7 +427,9 @@ export default () => {
             destination_chain :
             bridge.source_chain && !equalsIgnoreCase(bridge.source_chain, source_chain) ?
               bridge.source_chain :
-              getChain(null, chains_data, true, false, true, source_chain)?.id
+              source_chain !== DEFAULT_DESTINATION_CHAIN && getChain(DEFAULT_DESTINATION_CHAIN, chains_data) ?
+                DEFAULT_DESTINATION_CHAIN : 
+                getChain(null, chains_data, true, false, true, source_chain)?.id
       }
 
       setBridge({ ...bridge, source_chain, destination_chain })
