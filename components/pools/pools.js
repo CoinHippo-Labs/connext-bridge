@@ -187,28 +187,29 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                     const asset = asset_data?.id
 
                     return (
-                      <div className="flex flex-col space-y-3 p-3">
+                      <div className="flex flex-col space-y-3">
                         {view === 'my_positions' ?
-                          <Link
-                            href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
-                            className="h-6 3xl:h-12 flex items-center 3xl:text-2xl font-medium"
-                          >
-                            {name}
+                          <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`} className="p-3">
+                            <div className="h-6 3xl:h-12 flex items-center 3xl:text-2xl font-medium">
+                              {name}
+                            </div>
                           </Link> :
                           <>
                             {groupPools && (
-                              <div className="h-6 3xl:h-12 flex items-center space-x-2">
-                                {image && (
-                                  <Image
-                                    src={image}
-                                    width={24}
-                                    height={24}
-                                    className="3xl:w-8 3xl:h-8 rounded-full"
-                                  />
-                                )}
-                                <span className="text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium">
-                                  {_symbol}
-                                </span>
+                              <div className="p-3 pb-0">
+                                <div className="h-6 3xl:h-12 flex items-center space-x-2">
+                                  {image && (
+                                    <Image
+                                      src={image}
+                                      width={24}
+                                      height={24}
+                                      className="3xl:w-8 3xl:h-8 rounded-full"
+                                    />
+                                  )}
+                                  <span className="text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium">
+                                    {_symbol}
+                                  </span>
+                                </div>
                               </div>
                             )}
                             {(!groupPools || uncollapseAssetIds?.includes(id)) && toArray(pools).map((p, i) => {
@@ -232,10 +233,16 @@ export default ({ view, userPoolsData, groupPools = false }) => {
 
                               return (
                                 !chain_data?.disabled ?
-                                  <Link key={i} href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                                  <Link
+                                    key={i}
+                                    href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                                    className={`${groupPools ? 'px-3' : 'p-3'}`}
+                                  >
                                     {component}
                                   </Link> :
-                                  component
+                                  <div key={i} className={`${groupPools ? 'px-3' : 'p-3'}`}>
+                                    {component}
+                                  </div>
                               )
                             })}
                           </>
@@ -264,9 +271,9 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                     }
 
                     return (
-                      <div className="flex flex-col space-y-3 p-3">
+                      <div className="flex flex-col space-y-3">
                         {view === 'my_positions' ?
-                          <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                          <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`} className="p-3">
                             <div className="min-w-max h-6 3xl:h-12 flex items-center space-x-2">
                               {image && (
                                 <Image
@@ -283,52 +290,54 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                           </Link> :
                           <>
                             {groupPools && (
-                              <div
-                                onClick={() => onClick()}
-                                className={`w-fit h-6 3xl:h-12 ${pools?.length > 0 ? 'cursor-pointer' : ''} flex items-center`}
-                              >
-                                {pools?.length > 0 ?
-                                  <>
-                                    {_.slice(pools, 0, 3).map((p, i) => {
-                                      const { chain_data } = { ...p }
-                                      const { name, image } = { ...chain_data }
-                                      return (
-                                        <div
-                                          key={i}
-                                          title={name}
-                                          className="w-5 3xl:w-6 h-6 3xl:h-12 flex items-center mr-1.5"
-                                        >
-                                          {image && (
-                                            <Image
-                                              src={image}
-                                              width={20}
-                                              height={20}
-                                              className="3xl:w-6 3xl:h-6 rounded-full"
-                                            />
-                                          )}
+                              <div className="p-3 pb-0">
+                                <div
+                                  onClick={() => onClick()}
+                                  className={`w-fit h-6 3xl:h-12 ${pools?.length > 0 ? 'cursor-pointer' : ''} flex items-center`}
+                                >
+                                  {pools?.length > 0 ?
+                                    <>
+                                      {_.slice(pools, 0, 3).map((p, i) => {
+                                        const { chain_data } = { ...p }
+                                        const { name, image } = { ...chain_data }
+                                        return (
+                                          <div
+                                            key={i}
+                                            title={name}
+                                            className="w-5 3xl:w-6 h-6 3xl:h-12 flex items-center mr-1.5"
+                                          >
+                                            {image && (
+                                              <Image
+                                                src={image}
+                                                width={20}
+                                                height={20}
+                                                className="3xl:w-6 3xl:h-6 rounded-full"
+                                              />
+                                            )}
+                                          </div>
+                                        )
+                                      })}
+                                      {pools.length > 3 && (
+                                        <div className="h-6 3xl:h-12 flex items-center">
+                                          <span className="text-slate-500 dark:text-slate-400 text-xs 3xl:text-xl font-medium">
+                                            (+{pools.length - 3})
+                                          </span>
                                         </div>
-                                      )
-                                    })}
-                                    {pools.length > 3 && (
-                                      <div className="h-6 3xl:h-12 flex items-center">
-                                        <span className="text-slate-500 dark:text-slate-400 text-xs 3xl:text-xl font-medium">
-                                          (+{pools.length - 3})
-                                        </span>
+                                      )}
+                                      <div className="mr-1.5">
+                                        <button
+                                          onClick={() => onClick()}
+                                          className="w-5 h-6 3xl:h-12 rounded-full flex items-center justify-center"
+                                        >
+                                          {(!groupPools || uncollapseAssetIds?.includes(id)) ? <MdKeyboardArrowUp size={16} className="3xl:w-5 3xl:h-5" /> : <MdKeyboardArrowDown size={16} className="3xl:w-5 3xl:h-5" />}
+                                        </button>
                                       </div>
-                                    )}
-                                    <div className="mr-1.5">
-                                      <button
-                                        onClick={() => onClick()}
-                                        className="w-5 h-6 3xl:h-12 rounded-full flex items-center justify-center"
-                                      >
-                                        {(!groupPools || uncollapseAssetIds?.includes(id)) ? <MdKeyboardArrowUp size={16} className="3xl:w-5 3xl:h-5" /> : <MdKeyboardArrowDown size={16} className="3xl:w-5 3xl:h-5" />}
-                                      </button>
-                                    </div>
-                                  </> :
-                                  <span className="text-slate-400 dark:text-slate-500 3xl:text-xl">
-                                    No chains supported
-                                  </span>
-                                }
+                                    </> :
+                                    <span className="text-slate-400 dark:text-slate-500 3xl:text-xl">
+                                      No chains supported
+                                    </span>
+                                  }
+                                </div>
                               </div>
                             )}
                             {(!groupPools || uncollapseAssetIds?.includes(id)) && toArray(pools).map((p, i) => {
@@ -354,10 +363,16 @@ export default ({ view, userPoolsData, groupPools = false }) => {
 
                               return (
                                 !chain_data?.disabled ?
-                                  <Link key={i} href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                                  <Link
+                                    key={i}
+                                    href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                                    className={`${groupPools ? 'px-3' : 'p-3'}`}
+                                  >
                                     {component}
                                   </Link> :
-                                  component
+                                  <div key={i} className={`${groupPools ? 'px-3' : 'p-3'}`}>
+                                    {component}
+                                  </div>
                               )
                             })}
                           </>
@@ -401,99 +416,102 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                     const { color } = { ...asset_data }
 
                     return (
-                      <div className="flex flex-col items-end space-y-3 p-3" style={{ minWidth: '8rem' }}>
+                      <div className="flex flex-col items-end space-y-3" style={{ minWidth: '8rem' }}>
                         {groupPools && (
-                          total_amount > 0 ?
-                            <div className="w-full h-6 3xl:h-12 flex flex-col items-end justify-center space-y-0 3xl:space-y-1 pt-2 pb-1">
-                              <ProgressBar
-                                width={native_amount * 100 / total_amount}
-                                className="w-full 3xl:h-2 rounded-lg"
-                                backgroundClassName="3xl:h-2 rounded-lg"
-                                style={{ backgroundColor: color }}
-                                backgroundStyle={{ backgroundColor: `${color}33` }}
-                              />
-                              <div className="w-full flex items-center justify-between space-x-2">
-                                <div className="flex flex-col items-start space-y-0.5">
-                                  <Tooltip
-                                    placement="top"
-                                    content={
-                                      <div className="flex flex-col items-end space-y-1">
-                                        <div className="flex items-center space-x-1">
-                                          {native_asset?.asset_data?.image && (
-                                            <Image
-                                              src={native_asset.asset_data.image}
-                                              width={14}
-                                              height={14}
-                                              className="rounded-full"
-                                            />
-                                          )}
-                                          <span className="leading-3 text-2xs font-medium">
-                                            {native_asset?.asset?.symbol || native_asset?.asset_data?.symbol}
-                                          </span>
+                          <div className="p-3 pb-0">
+                            {total_amount > 0 ?
+                              <div className="w-full h-6 3xl:h-12 flex flex-col items-end justify-center space-y-0 3xl:space-y-1 pt-2 pb-1">
+                                <ProgressBar
+                                  width={native_amount * 100 / total_amount}
+                                  className="w-full 3xl:h-2 rounded-lg"
+                                  backgroundClassName="3xl:h-2 rounded-lg"
+                                  style={{ backgroundColor: color }}
+                                  backgroundStyle={{ backgroundColor: `${color}33` }}
+                                />
+                                <div className="w-full flex items-center justify-between space-x-2">
+                                  <div className="flex flex-col items-start space-y-0.5">
+                                    <Tooltip
+                                      placement="top"
+                                      content={
+                                        <div className="flex flex-col items-end space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            {native_asset?.asset_data?.image && (
+                                              <Image
+                                                src={native_asset.asset_data.image}
+                                                width={14}
+                                                height={14}
+                                                className="rounded-full"
+                                              />
+                                            )}
+                                            <span className="leading-3 text-2xs font-medium">
+                                              {native_asset?.asset?.symbol || native_asset?.asset_data?.symbol}
+                                            </span>
+                                          </div>
+                                          <DecimalsFormat
+                                            value={native_amount}
+                                            noTooltip={true}
+                                            className="leading-3 text-2xs font-medium"
+                                          />
                                         </div>
+                                      }
+                                      className="z-50 bg-dark text-white text-xs"
+                                    >
+                                      <div>
                                         <DecimalsFormat
-                                          value={native_amount}
+                                          value={native_amount * 100 / total_amount}
+                                          suffix="%"
                                           noTooltip={true}
-                                          className="leading-3 text-2xs font-medium"
+                                          className="leading-3 3xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 3xl:text-base font-medium"
                                         />
                                       </div>
-                                    }
-                                    className="z-50 bg-dark text-white text-xs"
-                                  >
-                                    <div>
-                                      <DecimalsFormat
-                                        value={native_amount * 100 / total_amount}
-                                        suffix="%"
-                                        noTooltip={true}
-                                        className="leading-3 3xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 3xl:text-base font-medium"
-                                      />
-                                    </div>
-                                  </Tooltip>
-                                </div>
-                                <div className="flex flex-col items-end space-y-0.5">
-                                  <Tooltip
-                                    placement="top"
-                                    content={
-                                      <div className="flex flex-col items-end space-y-1">
-                                        <div className="flex items-center space-x-1">
-                                          {(wrapped_asset?.contract_data?.next_asset?.image || wrapped_asset?.asset_data?.image) && (
-                                            <Image
-                                              src={wrapped_asset?.contract_data?.next_asset?.image || wrapped_asset?.asset_data?.image}
-                                              width={14}
-                                              height={14}
-                                              className="rounded-full"
-                                            />
-                                          )}
-                                          <span className="leading-3 text-2xs font-medium">
-                                            {wrapped_asset?.asset?.symbol || wrapped_asset?.contract_data?.next_asset?.symbol}
-                                          </span>
+                                    </Tooltip>
+                                  </div>
+                                  <div className="flex flex-col items-end space-y-0.5">
+                                    <Tooltip
+                                      placement="top"
+                                      content={
+                                        <div className="flex flex-col items-end space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            {(wrapped_asset?.contract_data?.next_asset?.image || wrapped_asset?.asset_data?.image) && (
+                                              <Image
+                                                src={wrapped_asset?.contract_data?.next_asset?.image || wrapped_asset?.asset_data?.image}
+                                                width={14}
+                                                height={14}
+                                                className="rounded-full"
+                                              />
+                                            )}
+                                            <span className="leading-3 text-2xs font-medium">
+                                              {wrapped_asset?.asset?.symbol || wrapped_asset?.contract_data?.next_asset?.symbol}
+                                            </span>
+                                          </div>
+                                          <DecimalsFormat
+                                            value={wrapped_amount}
+                                            noTooltip={true}
+                                            className="leading-3 text-2xs font-medium"
+                                          />
                                         </div>
+                                      }
+                                      className="z-50 bg-dark text-white text-xs"
+                                    >
+                                      <div>
                                         <DecimalsFormat
-                                          value={wrapped_amount}
+                                          value={100 - (native_amount * 100 / total_amount)}
+                                          suffix="%"
                                           noTooltip={true}
-                                          className="leading-3 text-2xs font-medium"
+                                          className="leading-3 3xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 3xl:text-base font-medium"
                                         />
                                       </div>
-                                    }
-                                    className="z-50 bg-dark text-white text-xs"
-                                  >
-                                    <div>
-                                      <DecimalsFormat
-                                        value={100 - (native_amount * 100 / total_amount)}
-                                        suffix="%"
-                                        noTooltip={true}
-                                        className="leading-3 3xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 3xl:text-base font-medium"
-                                      />
-                                    </div>
-                                  </Tooltip>
+                                    </Tooltip>
+                                  </div>
                                 </div>
+                              </div> :
+                              <div className="h-6 3xl:h-12 flex items-center justify-end">
+                                <span className="text-slate-400 dark:text-slate-500 3xl:text-2xl">
+                                  No liquidity
+                                </span>
                               </div>
-                            </div> :
-                            <div className="h-6 3xl:h-12 flex items-center justify-end">
-                              <span className="text-slate-400 dark:text-slate-500 3xl:text-2xl">
-                                No liquidity
-                              </span>
-                            </div>
+                            }
+                          </div>
                         )}
                         {(!groupPools || uncollapseAssetIds?.includes(id)) && toArray(pools).map((p, i) => {
                           const { chain_data, asset_data, contract_data, adopted, local, lpTokenAddress, error } = { ...p }
@@ -506,119 +524,124 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                           const total_amount = native_amount + wrapped_amount
                           const { color } = { ...asset_data }
                           const component = (
-                            <div className="flex items-center justify-end text-sm font-medium text-right">
-                              {!lpTokenAddress && !error ?
-                                <div className="flex items-center justify-end">
-                                  <TailSpin
-                                    width="18"
-                                    height="18"
-                                    color={loaderColor(theme)}
-                                  />
-                                </div> :
-                                total_amount > 0 ?
-                                  <div className="w-full h-6 3xl:h-12 flex flex-col items-end justify-center space-y-0 3xl:space-y-1 pt-2 pb-1">
-                                    <ProgressBar
-                                      width={native_amount * 100 / total_amount}
-                                      className="w-full 3xl:h-2 rounded-lg"
-                                      backgroundClassName="3xl:h-2 rounded-lg"
-                                      style={{ backgroundColor: color }}
-                                      backgroundStyle={{ backgroundColor: `${color}33` }}
+                            <div className="w-full h-6 3xl:h-12">
+                              <div className="flex items-center justify-end text-sm font-medium text-right">
+                                {!lpTokenAddress && !error ?
+                                  <div className="flex items-center justify-end">
+                                    <TailSpin
+                                      width="18"
+                                      height="18"
+                                      color={loaderColor(theme)}
                                     />
-                                    <div className="w-full flex items-center justify-between space-x-2">
-                                      <div className="flex flex-col items-start space-y-0.5">
-                                        <Tooltip
-                                          placement="top"
-                                          content={
-                                            <div className="flex flex-col items-end space-y-1">
-                                              <div className="flex items-center space-x-1">
-                                                {asset_data?.image && (
-                                                  <Image
-                                                    src={asset_data.image}
-                                                    width={14}
-                                                    height={14}
-                                                    className="rounded-full"
-                                                  />
-                                                )}
-                                                <span className="leading-3 text-2xs font-medium">
-                                                  {native_asset?.symbol || asset_data?.symbol}
-                                                </span>
-                                              </div>
-                                              <DecimalsFormat
-                                                value={native_amount}
-                                                noTooltip={true}
-                                                className="leading-3 text-2xs font-medium"
-                                              />
-                                            </div>
-                                          }
-                                          className="z-50 bg-dark text-white text-xs"
-                                        >
-                                          <div>
-                                            <DecimalsFormat
-                                              value={native_amount * 100 / total_amount}
-                                              suffix="%"
-                                              noTooltip={true}
-                                              className="leading-3 3xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 3xl:text-base font-medium"
-                                            />
-                                          </div>
-                                        </Tooltip>
-                                      </div>
-                                      <div className="flex flex-col items-end space-y-0.5">
-                                        <Tooltip
-                                          placement="top"
-                                          content={
-                                            <div className="flex flex-col items-end space-y-1">
-                                              <div className="flex items-center space-x-1">
-                                                {(contract_data?.next_asset?.image || asset_data?.image) && (
-                                                  <Image
-                                                    src={contract_data?.next_asset?.image || asset_data?.image}
-                                                    width={14}
-                                                    height={14}
-                                                    className="rounded-full"
-                                                  />
-                                                )}
-                                                <span className="leading-3 text-2xs font-medium">
-                                                  {wrapped_asset?.symbol || contract_data?.next_asset?.symbol}
-                                                </span>
-                                              </div>
-                                              <DecimalsFormat
-                                                value={wrapped_amount}
-                                                noTooltip={true}
-                                                className="leading-3 text-2xs font-medium"
-                                              />
-                                            </div>
-                                          }
-                                          className="z-50 bg-dark text-white text-xs"
-                                        >
-                                          <div>
-                                            <DecimalsFormat
-                                              value={100 - (native_amount * 100 / total_amount)}
-                                              suffix="%"
-                                              noTooltip={true}
-                                              className="leading-3 3xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 3xl:text-base font-medium"
-                                            />
-                                          </div>
-                                        </Tooltip>
-                                      </div>
-                                    </div>
                                   </div> :
-                                  <div className="h-6 3xl:h-12 flex items-center justify-end">
-                                    <span className="text-slate-400 dark:text-slate-500 3xl:text-2xl">
-                                      No liquidity
-                                    </span>
-                                  </div>
-                              }
+                                  total_amount > 0 ?
+                                    <div className="w-full h-6 3xl:h-12 flex flex-col items-end justify-center space-y-0 3xl:space-y-1 pt-2 pb-1">
+                                      <ProgressBar
+                                        width={native_amount * 100 / total_amount}
+                                        className="w-full 3xl:h-2 rounded-lg"
+                                        backgroundClassName="3xl:h-2 rounded-lg"
+                                        style={{ backgroundColor: color }}
+                                        backgroundStyle={{ backgroundColor: `${color}33` }}
+                                      />
+                                      <div className="w-full flex items-center justify-between space-x-2">
+                                        <div className="flex flex-col items-start space-y-0.5">
+                                          <Tooltip
+                                            placement="top"
+                                            content={
+                                              <div className="flex flex-col items-end space-y-1">
+                                                <div className="flex items-center space-x-1">
+                                                  {asset_data?.image && (
+                                                    <Image
+                                                      src={asset_data.image}
+                                                      width={14}
+                                                      height={14}
+                                                      className="rounded-full"
+                                                    />
+                                                  )}
+                                                  <span className="leading-3 text-2xs font-medium">
+                                                    {native_asset?.symbol || asset_data?.symbol}
+                                                  </span>
+                                                </div>
+                                                <DecimalsFormat
+                                                  value={native_amount}
+                                                  noTooltip={true}
+                                                  className="leading-3 text-2xs font-medium"
+                                                />
+                                              </div>
+                                            }
+                                            className="z-50 bg-dark text-white text-xs"
+                                          >
+                                            <div>
+                                              <DecimalsFormat
+                                                value={native_amount * 100 / total_amount}
+                                                suffix="%"
+                                                noTooltip={true}
+                                                className="leading-3 3xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 3xl:text-base font-medium"
+                                              />
+                                            </div>
+                                          </Tooltip>
+                                        </div>
+                                        <div className="flex flex-col items-end space-y-0.5">
+                                          <Tooltip
+                                            placement="top"
+                                            content={
+                                              <div className="flex flex-col items-end space-y-1">
+                                                <div className="flex items-center space-x-1">
+                                                  {(contract_data?.next_asset?.image || asset_data?.image) && (
+                                                    <Image
+                                                      src={contract_data?.next_asset?.image || asset_data?.image}
+                                                      width={14}
+                                                      height={14}
+                                                      className="rounded-full"
+                                                    />
+                                                  )}
+                                                  <span className="leading-3 text-2xs font-medium">
+                                                    {wrapped_asset?.symbol || contract_data?.next_asset?.symbol}
+                                                  </span>
+                                                </div>
+                                                <DecimalsFormat
+                                                  value={wrapped_amount}
+                                                  noTooltip={true}
+                                                  className="leading-3 text-2xs font-medium"
+                                                />
+                                              </div>
+                                            }
+                                            className="z-50 bg-dark text-white text-xs"
+                                          >
+                                            <div>
+                                              <DecimalsFormat
+                                                value={100 - (native_amount * 100 / total_amount)}
+                                                suffix="%"
+                                                noTooltip={true}
+                                                className="leading-3 3xl:leading-4 text-slate-600 dark:text-slate-400 text-2xs 3xl:text-base font-medium"
+                                              />
+                                            </div>
+                                          </Tooltip>
+                                        </div>
+                                      </div>
+                                    </div> :
+                                    <div className="h-6 3xl:h-12 flex items-center justify-end">
+                                      <span className="text-slate-400 dark:text-slate-500 3xl:text-2xl">
+                                        No liquidity
+                                      </span>
+                                    </div>
+                                }
+                              </div>
                             </div>
                           )
 
                           return (
-                            <div key={i} className="w-full h-6 3xl:h-12">
-                              {!chain_data?.disabled ?
-                                <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
-                                  {component}
-                                </Link> :
-                                component
-                              }
-                            </div>
+                            !chain_data?.disabled ?
+                              <Link
+                                key={i}
+                                href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                                className={`w-full ${groupPools ? 'px-3' : 'p-3'}`}
+                              >
+                                {component}
+                              </Link> :
+                              <div key={i} className={`w-full ${groupPools ? 'px-3' : 'p-3'}`}>
+                                {component}
+                              </div>
                           )
                         })}
                       </div>
@@ -637,14 +660,16 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                     const value = _.sumBy(pools, 'tvl')
 
                     return (
-                      <div className="flex flex-col space-y-3 p-3">
+                      <div className="flex flex-col space-y-3">
                         {groupPools && (
-                          <div className="h-6 3xl:h-12 flex items-center justify-end text-right">
-                            <DecimalsFormat
-                              value={value}
-                              prefix={currency_symbol}
-                              className="uppercase text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium"
-                            />
+                          <div className="p-3 pb-0">
+                            <div className="h-6 3xl:h-12 flex items-center justify-end text-right">
+                              <DecimalsFormat
+                                value={value}
+                                prefix={currency_symbol}
+                                className="uppercase text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium"
+                              />
+                            </div>
                           </div>
                         )}
                         {(!groupPools || uncollapseAssetIds?.includes(id)) && toArray(pools).map((p, i) => {
@@ -673,10 +698,16 @@ export default ({ view, userPoolsData, groupPools = false }) => {
 
                           return (
                             !chain_data?.disabled ?
-                              <Link key={i} href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                              <Link
+                                key={i}
+                                href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                                className={`${groupPools ? 'px-3' : 'p-3'}`}
+                              >
                                 {component}
                               </Link> :
-                              component
+                              <div key={i} className={`${groupPools ? 'px-3' : 'p-3'}`}>
+                                {component}
+                              </div>
                           )
                         })}
                       </div>
@@ -695,17 +726,19 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                     const value = _.sumBy(pools, 'volume_value')
 
                     return (
-                      <div className="flex flex-col space-y-3 p-3">
+                      <div className="flex flex-col space-y-3">
                         {groupPools && (
-                          <div className="h-6 3xl:h-12 flex items-center justify-end text-right">
-                            {!isNaN(value) ?
-                              <DecimalsFormat
-                                value={value}
-                                prefix={currency_symbol}
-                                className="uppercase text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium"
-                              /> :
-                              'TBD'
-                            }
+                          <div className="p-3 pb-0">
+                            <div className="h-6 3xl:h-12 flex items-center justify-end text-right">
+                              {!isNaN(value) ?
+                                <DecimalsFormat
+                                  value={value}
+                                  prefix={currency_symbol}
+                                  className="uppercase text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium"
+                                /> :
+                                'TBD'
+                              }
+                            </div>
                           </div>
                         )}
                         {(!groupPools || uncollapseAssetIds?.includes(id)) && toArray(pools).map((p, i) => {
@@ -728,10 +761,16 @@ export default ({ view, userPoolsData, groupPools = false }) => {
 
                           return (
                             !chain_data?.disabled ?
-                              <Link key={i} href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                              <Link
+                                key={i}
+                                href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                                className={`${groupPools ? 'px-3' : 'p-3'}`}
+                              >
                                 {component}
                               </Link> :
-                              component
+                              <div key={i} className={`${groupPools ? 'px-3' : 'p-3'}`}>
+                                {component}
+                              </div>
                           )
                         })}
                       </div>
@@ -750,17 +789,19 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                     const value = _.sumBy(pools, 'fees_value')
 
                     return (
-                      <div className="flex flex-col space-y-3 p-3">
+                      <div className="flex flex-col space-y-3">
                         {groupPools && (
-                          <div className="h-6 3xl:h-12 flex items-center justify-end text-right">
-                            {!isNaN(value) ?
-                              <DecimalsFormat
-                                value={value}
-                                prefix={currency_symbol}
-                                className="uppercase text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium"
-                              /> :
-                              'TBD'
-                            }
+                          <div className="p-3 pb-0">
+                            <div className="h-6 3xl:h-12 flex items-center justify-end text-right">
+                              {!isNaN(value) ?
+                                <DecimalsFormat
+                                  value={value}
+                                  prefix={currency_symbol}
+                                  className="uppercase text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium"
+                                /> :
+                                'TBD'
+                              }
+                            </div>
                           </div>
                         )}
                         {(!groupPools || uncollapseAssetIds?.includes(id)) && toArray(pools).map((p, i) => {
@@ -783,10 +824,16 @@ export default ({ view, userPoolsData, groupPools = false }) => {
 
                           return (
                             !chain_data?.disabled ?
-                              <Link key={i} href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                              <Link
+                                key={i}
+                                href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                                className={`${groupPools ? 'px-3' : 'p-3'}`}
+                              >
                                 {component}
                               </Link> :
-                              component
+                              <div key={i} className={`${groupPools ? 'px-3' : 'p-3'}`}>
+                                {component}
+                              </div>
                           )
                         })}
                       </div>
@@ -822,18 +869,20 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                     ) / _.sumBy(pools, 'tvl')
 
                     return (
-                      <div className="flex flex-col space-y-3 p-3">
+                      <div className="flex flex-col space-y-3">
                         {groupPools && (
-                          <div className="h-6 3xl:h-12 flex items-center justify-end text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium text-right">
-                            {/*!isNaN(value) ?
-                              <DecimalsFormat
-                                value={value * 100}
-                                maxDecimals={2}
-                                suffix="%"
-                                className="uppercase 3xl:text-2xl"
-                              /> :
-                              'TBD'
-                            */}
+                          <div className="p-3 pb-0">
+                            <div className="h-6 3xl:h-12 flex items-center justify-end text-slate-600 dark:text-slate-400 text-sm 3xl:text-2xl font-medium text-right">
+                              {/*!isNaN(value) ?
+                                <DecimalsFormat
+                                  value={value * 100}
+                                  maxDecimals={2}
+                                  suffix="%"
+                                  className="uppercase 3xl:text-2xl"
+                                /> :
+                                'TBD'
+                              */}
+                            </div>
                           </div>
                         )}
                         {(!groupPools || uncollapseAssetIds?.includes(id)) && toArray(pools).map((p, i) => {
@@ -857,10 +906,16 @@ export default ({ view, userPoolsData, groupPools = false }) => {
 
                           return (
                             !chain_data?.disabled ?
-                              <Link key={i} href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                              <Link
+                                key={i}
+                                href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}
+                                className={`${groupPools ? 'px-3' : 'p-3'}`}
+                              >
                                 {component}
                               </Link> :
-                              component
+                              <div key={i} className={`${groupPools ? 'px-3' : 'p-3'}`}>
+                                {component}
+                              </div>
                           )
                         })}
                       </div>
@@ -895,14 +950,15 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                     )
 
                     return (
-                      <div className="p-3">
-                        {!chain_data?.disabled ?
-                          <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                      !chain_data?.disabled ?
+                        <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                          <div className="p-3">
                             {component}
-                          </Link> :
-                          component
-                        }
-                      </div>
+                          </div>
+                        </Link> :
+                        <div className="p-3">
+                          {component}
+                        </div>
                     )
                   },
                   headerClassName: 'whitespace-nowrap 3xl:text-xl 3xl:py-2',
@@ -953,14 +1009,15 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                     )
 
                     return (
-                      <div className="p-3">
-                        {!chain_data?.disabled ?
-                          <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                      !chain_data?.disabled ?
+                        <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                          <div className="p-3">
                             {component}
-                          </Link> :
-                          component
-                        }
-                      </div>
+                          </div>
+                        </Link> :
+                        <div className="p-3">
+                          {component}
+                        </div>
                     )
                   },
                   headerClassName: 'whitespace-nowrap 3xl:text-xl justify-end text-right 3xl:py-2',
@@ -986,14 +1043,15 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                     )
 
                     return (
-                      <div className="p-3">
-                        {!chain_data?.disabled ?
-                          <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                      !chain_data?.disabled ?
+                        <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
+                          <div className="p-3">
                             {component}
-                          </Link> :
-                          component
-                        }
-                      </div>
+                          </div>
+                        </Link> :
+                        <div className="p-3">
+                          {component}
+                        </div>
                     )
                   },
                   headerClassName: 'whitespace-nowrap 3xl:text-xl justify-end text-right 3xl:py-2',
