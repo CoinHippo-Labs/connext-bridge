@@ -324,6 +324,10 @@ a {
   @apply underline font-extrabold;
 }
 
+.linkify a {
+  @apply text-blue-500 dark:text-blue-600 font-semibold;
+}
+
 .loadButton {
   bottom: 2.5rem !important;
 }

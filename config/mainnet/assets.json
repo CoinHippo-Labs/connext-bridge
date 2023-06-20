@@ -57,6 +57,7 @@
         "decimals": 6,
         "symbol": "USDC.e",
         "image": "/logos/assets/usdc.png",
+        "tooltip": "Circle has renamed bridged USDC to USDC.e on Arbitrum network. For more information please see this <a href=\"https://www.circle.com/blog/arbitrum-usdc-now-available\" target=\"_blank\">link</a>.",
         "next_asset": {
           "contract_address": "0x8c556cF37faa0eeDAC7aE665f1Bb0FbD4b2eae36",
           "decimals": 6,
