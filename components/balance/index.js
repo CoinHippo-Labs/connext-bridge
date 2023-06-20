@@ -107,7 +107,7 @@ export default (
       {['string', 'number'].includes(typeof amount) && !isNaN(amount) ?
         <>
           <DecimalsFormat
-            value={1456.34535 || amount}
+            value={amount}
             format="0,0.000000"
             maxDecimals={6}
             className="font-semibold"
