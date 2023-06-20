@@ -222,6 +222,24 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                               const asset = asset_data?.id
                               const component = (
                                 <div className="h-6 3xl:h-12 flex items-center ml-0">
+                                  <div className="flex items-center space-x-0.5 mr-2">
+                                    {image && (
+                                      <Image
+                                        src={image}
+                                        width={24}
+                                        height={24}
+                                        className="3xl:w-8 3xl:h-8 rounded-full"
+                                      />
+                                    )}
+                                    {(contract_data?.next_asset?.image || image) && (
+                                      <Image
+                                        src={(contract_data?.next_asset?.image || image)}
+                                        width={24}
+                                        height={24}
+                                        className="3xl:w-8 3xl:h-8 rounded-full"
+                                      />
+                                    )}
+                                  </div>
                                   <div className="h-full flex items-center 3xl:text-2xl font-medium mr-2">
                                     {name}
                                   </div>
