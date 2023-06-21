@@ -656,6 +656,20 @@ export default () => {
     [displayReceiveNextInfo, receiveNextInfoTimeout],
   )
 
+  useEffect(
+    () => {
+      const { asset } = { ...bridge }
+      const source_asset_data = getAsset(asset, assets_data)
+      if (source_asset_data) {
+        DEFAULT_OPTIONS.relayerFeeAssetType = !source_asset_data.allow_paying_gas ? 'native' : _.head(RELAYER_FEE_ASSET_TYPES)
+        if (!source_asset_data.allow_paying_gas) {
+          setOptions({ ...options, relayerFeeAssetType: 'native' })
+        }
+      }
+    },
+    [bridge, assets_data],
+  )
+
   const reset = async origin => {
     const reset_bridge = !['address', 'user_rejected'].includes(origin)
 
@@ -765,7 +779,7 @@ export default () => {
               originDomain: source_chain_data?.domain_id,
               destinationDomain: destination_chain_data?.domain_id,
               isHighPriority: !forceSlow,
-              priceIn: ['transacting'].includes(relayerFeeAssetType) ? 'usd' : 'native',
+              priceIn: relayerFeeAssetType === 'transacting' ? 'usd' : 'native',
               destinationGasPrice: destination_chain_data?.gas_price || undefined,
             }
 
@@ -1732,7 +1746,7 @@ export default () => {
                             showInfiniteApproval={isApproveNeeded}
                             hasNextAsset={destination_contract_data?.next_asset}
                             chainData={destination_chain_data}
-                            relayerFeeAssetTypes={RELAYER_FEE_ASSET_TYPES.map(t => { return { name: t === 'transacting' ? source_symbol : source_gas_native_token?.symbol, value: t } })}
+                            relayerFeeAssetTypes={RELAYER_FEE_ASSET_TYPES.filter(t => source_asset_data?.allow_paying_gas || t !== 'transacting').map(t => { return { name: t === 'transacting' ? source_symbol : source_gas_native_token?.symbol, value: t } })}
                           />
                         )}
                       </div>
@@ -2279,7 +2293,7 @@ export default () => {
                                                   }
                                                   className="bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0"
                                                 >
-                                                  {RELAYER_FEE_ASSET_TYPES.map((t, i) => {
+                                                  {RELAYER_FEE_ASSET_TYPES.filter(t => source_asset_data?.allow_paying_gas || t !== 'transacting').map((t, i) => {
                                                     return (
                                                       <option
                                                         key={i}

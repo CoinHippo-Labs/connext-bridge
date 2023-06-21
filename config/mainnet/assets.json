@@ -5,6 +5,7 @@
     "name": "USD Coin",
     "image": "/logos/assets/usdc.png",
     "is_stablecoin": true,
+    "allow_paying_gas": true,
     "contracts": [
       {
         "contract_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
@@ -89,6 +90,7 @@
     "name": "Tether",
     "image": "/logos/assets/usdt.png",
     "is_stablecoin": true,
+    "allow_paying_gas": true,
     "contracts": [
       {
         "contract_address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
@@ -171,6 +173,7 @@
     "name": "Dai",
     "image": "/logos/assets/dai.png",
     "is_stablecoin": true,
+    "allow_paying_gas": true,
     "contracts": [
       {
         "contract_address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
@@ -336,6 +339,7 @@
         "is_pool": true
       }
     ],
+    "allow_paying_gas": true,
     "color": "#636890",
     "preset": true
   },
