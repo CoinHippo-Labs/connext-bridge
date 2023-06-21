@@ -2207,40 +2207,42 @@ export default () => {
                                           </div>
                                         </div>
                                       )}
-                                      <div className="flex items-center justify-between space-x-2">
-                                        <Tooltip
-                                          placement="top"
-                                          content={`Liquidity providers receive a ${process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT}% fee for supporting fast transfers`}
-                                          className="z-50 bg-dark text-white text-xs"
-                                        >
-                                          <div className="flex items-center">
-                                            <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                              Router fee
+                                      {!forceSlow && (
+                                        <div className="flex items-center justify-between space-x-2">
+                                          <Tooltip
+                                            placement="top"
+                                            content={`Liquidity providers receive a ${process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT}% fee for supporting fast transfers`}
+                                            className="z-50 bg-dark text-white text-xs"
+                                          >
+                                            <div className="flex items-center">
+                                              <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                                Router fee
+                                              </div>
+                                              <BiInfoCircle
+                                                size={14}
+                                                className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                              />
                                             </div>
-                                            <BiInfoCircle
-                                              size={14}
-                                              className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                          </Tooltip>
+                                          {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.routerFee) || estimateResponse ?
+                                            <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
+                                              {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimatedValues?.routerFee) && !estimateResponse ?
+                                                <DecimalsFormat
+                                                  value={Number(router_fee) <= 0 ? 0 : router_fee}
+                                                  className="text-sm 3xl:text-xl"
+                                                /> :
+                                                <span>-</span>
+                                              }
+                                              <span>{source_symbol}</span>
+                                            </span> :
+                                            <Oval
+                                              width="14"
+                                              height="14"
+                                              color={loaderColor(theme)}
                                             />
-                                          </div>
-                                        </Tooltip>
-                                        {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.routerFee) || estimateResponse ?
-                                          <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                            {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimatedValues?.routerFee) && !estimateResponse ?
-                                              <DecimalsFormat
-                                                value={Number(router_fee) <= 0 ? 0 : router_fee}
-                                                className="text-sm 3xl:text-xl"
-                                              /> :
-                                              <span>-</span>
-                                            }
-                                            <span>{source_symbol}</span>
-                                          </span> :
-                                          <Oval
-                                            width="14"
-                                            height="14"
-                                            color={loaderColor(theme)}
-                                          />
-                                        }
-                                      </div>
+                                          }
+                                        </div>
+                                      )}
                                       <div className="flex items-center justify-between space-x-2">
                                         <Tooltip
                                           placement="top"

@@ -12,7 +12,7 @@ import Modal from '../../modals'
 import { getChain, chainName } from '../../../lib/object/chain'
 import { getAsset } from '../../../lib/object/asset'
 import { getContract } from '../../../lib/object/contract'
-import { loaderColor } from '../../../lib/utils'
+import { equalsIgnoreCase, loaderColor } from '../../../lib/utils'
 
 export default (
   {
@@ -183,7 +183,7 @@ export default (
   )
 
   return (
-    tooltip ?
+    tooltip && equalsIgnoreCase(asset_data?.contract_address, contract_data?.contract_address) ?
       <Popover open={openPopover} handler={setOpenPopover}>
         <PopoverHandler {...triggers}>
           <div>
