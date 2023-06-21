@@ -1431,7 +1431,7 @@ export default () => {
   const destination_amount = getBalance(destination_chain_data?.chain_id, destination_contract_data?.contract_address, balances_data)?.amount
 
   const relayer_fee = fees && (fees.relayerFee || 0)
-  const router_fee = estimatedValues?.routerFee ? estimatedValues.routerFee : fees && (forceSlow ? 0 : fees.routerFee || 0)
+  const router_fee = estimatedValues?.routerFee && !(forceSlow || estimatedValues?.isFastPath === false) ? estimatedValues.routerFee : fees && (forceSlow ? 0 : fees.routerFee || 0)
   const price_impact = null
 
   const routers_liquidity_amount = _.sum(
@@ -2207,7 +2207,7 @@ export default () => {
                                           </div>
                                         </div>
                                       )}
-                                      {!forceSlow && (
+                                      {!(forceSlow || estimatedValues?.isFastPath === false) && (
                                         <div className="flex items-center justify-between space-x-2">
                                           <Tooltip
                                             placement="top"
