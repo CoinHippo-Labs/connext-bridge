@@ -268,10 +268,7 @@ export default (
                   {item}
                   {balance}
                 </div> :
-                <div
-                  onClick={() => onSelect(id, isBridge ? symbol : contract_address)}
-                  className={className}
-                >
+                <div onClick={() => onSelect(id, isBridge ? symbol : contract_address)} className={className}>
                   {item}
                   {balance}
                 </div>
