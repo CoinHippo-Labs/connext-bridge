@@ -106,7 +106,7 @@ export default (
       ) :
       toArray(assets_data).filter(a =>
         !isBridge || (
-          toArray(a.contracts).findIndex(c => /*c.chain_id === chain_id && */c.is_bridge !== false) > -1 &&
+          toArray(a.contracts).findIndex(c => c.chain_id === chain_id && c.is_bridge !== false) > -1 &&
           (!destinationChain || (!toArray(a.exclude_destination_chains).includes(destinationChain) && !toArray(a.exclude_source_chains).includes(chain)))
         )
       )
