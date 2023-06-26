@@ -152,12 +152,10 @@ export default () => {
   useEffect(
     () => {
       const params = {}
-
       if (swap) {
         const { chain, asset, amount, origin } = { ...swap }
         const chain_data = getChain(chain, chains_data, true, true)
         const { chain_id } = { ...chain_data }
-
         if (chain_data) {
           params.chain = chain
           if (asset && getAsset(asset, pool_assets_data, chain_id)) {
@@ -181,7 +179,6 @@ export default () => {
         router.push(`/swap/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
         setBalanceTrigger(moment().valueOf())
       }
-
       setApproveResponse(null)
       setCallResponse(null)
     },

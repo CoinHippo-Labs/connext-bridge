@@ -46,42 +46,19 @@ export default () => {
     ),
     shallowEqual,
   )
-  const {
-    theme,
-  } = { ...preferences }
-  const {
-    chains_data,
-  } = { ...chains }
-  const {
-    assets_data,
-  } = { ...assets }
-  const {
-    pool_assets_data,
-  } = { ...pool_assets }
-  const {
-    pools_data,
-  } = { ..._pools }
-  const {
-    rpcs,
-  } = { ...rpc_providers }
-  const {
-    sdk,
-  } = { ...dev }
-  const {
-    wallet_data,
-  } = { ...wallet }
-  const {
-    chain_id,
-    address,
-  } = { ...wallet_data }
-  const {
-    balances_data,
-  } = { ...balances }
+  const { theme } = { ...preferences }
+  const { chains_data } = { ...chains }
+  const { assets_data } = { ...assets }
+  const { pool_assets_data } = { ...pool_assets }
+  const { pools_data } = { ..._pools }
+  const { rpcs } = { ...rpc_providers }
+  const { sdk } = { ...dev }
+  const { wallet_data } = { ...wallet }
+  const { chain_id, address } = { ...wallet_data }
+  const { balances_data } = { ...balances }
 
   const router = useRouter()
-  const {
-    asPath,
-  } = { ...router }
+  const { asPath } = { ...router }
 
   const [pool, setPool] = useState({})
   const [userPools, setUserPools] = useState(null)
@@ -91,24 +68,20 @@ export default () => {
   useEffect(
     () => {
       let updated = false
-
       const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       let path = !asPath ? '/' : asPath.toLowerCase()
       path = path.includes('?') ? path.substring(0, path.indexOf('?')) : path
 
       if (path.includes('on-')) {
         const paths = path.replace('/pool/', '').split('-')
-
         const chain = paths[paths.indexOf('on') + 1]
         const asset = _.head(paths) !== 'on' ? _.head(paths) : null
         const chain_data = getChain(chain, chains_data)
         const asset_data = getAsset(asset, pool_assets_data)
-
         if (chain_data) {
           pool.chain = chain
           updated = true
         }
-
         if (asset_data) {
           pool.asset = asset
           updated = true
@@ -126,20 +99,11 @@ export default () => {
   // set pool to path
   useEffect(
     () => {
-      const params = (paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))) || {}
-
+      const params = { ...paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1)) }
       if (pool) {
-        const {
-          chain,
-          asset,
-        } = { ...pool }
-
-        const chain_data = getChain(chain, chains_data, true, true)
-
-        const {
-          chain_id,
-        } = { ...chain_data }
-
+        const { chain, asset } = { ...pool }
+        const chain_data = getChain(chain, chains_data, false, true)
+        const { chain_id } = { ...chain_data }
         if (chain_data) {
           params.chain = chain
           if (asset && getAsset(asset, pool_assets_data, chain_id)) {
@@ -149,21 +113,12 @@ export default () => {
       }
 
       if (!(params.chain && params.asset) && pool_assets_data?.length > 0) {
-        const {
-          id,
-          contracts,
-        } = { ..._.head(pool_assets_data) }
-
+        const { id, contracts } = { ..._.head(pool_assets_data) }
         params.chain = params.chain || getChain(_.head(contracts)?.chain_id, chains_data)?.id
         params.asset = params.asset || id
       }
 
       if (Object.keys(params).length > 0) {
-        const {
-          chain,
-          asset,
-        } = { ...params }
-
         delete params.chain
         delete params.asset
         router.push(`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
@@ -175,13 +130,10 @@ export default () => {
   // update balances
   useEffect(
     () => {
-      const {
-        id,
-      } = { ...getChain(chain_id, chains_data) }
-
+      const { id } = { ...getChain(chain_id, chains_data) }
       if (asPath && id) {
         const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-        if (!params?.chain && !asPath.includes('on-') && getChain(id, chains_data, true)) {
+        if (!params?.chain && !asPath.includes('on-') && getChain(id, chains_data)) {
           setPool({ ...pool, chain: id })
         }
         getBalances(id)
@@ -194,12 +146,8 @@ export default () => {
   useEffect(
     () => {
       dispatch({ type: BALANCES_DATA, value: null })
-
       if (address) {
-        const {
-          chain,
-        } = { ...pool }
-
+        const { chain } = { ...pool }
         getBalances(chain)
       }
       else {
@@ -214,10 +162,7 @@ export default () => {
     () => {
       const getData = () => {
         if (address) {
-          const {
-            chain,
-          } = { ...pool }
-
+          const { chain } = { ...pool }
           getBalances(chain)
         }
       }
@@ -243,76 +188,35 @@ export default () => {
   useEffect(
     () => {
       const getData = async () => {
-        const {
-          chain,
-        } = { ...pool }
-
+        const { chain } = { ...pool }
         if (sdk && address && chain && poolsTrigger) {
           const chain_data = getChain(chain, chains_data)
-
-          const {
-            chain_id,
-            domain_id,
-          } = { ...chain_data }
+          const { chain_id, domain_id } = { ...chain_data }
 
           try {
-            console.log(
-              '[getUserPools]',
-              {
-                domain_id,
-                address,
-              },
-            )
-
+            console.log('[getUserPools]', { domain_id, address })
             const response = _.cloneDeep(await sdk.sdkPool.getUserPools(domain_id, address))
-
-            console.log(
-              '[UserPools]',
-              {
-                domain_id,
-                address,
-                response,
-              },
-            )
+            console.log('[UserPools]', { domain_id, address, response })
 
             if (Array.isArray(response)) {
               setUserPools(
                 response.map(p => {
-                  const {
-                    info,
-                    lpTokenBalance,
-                    poolTokenBalances,
-                  } = { ...p }
-
-                  const {
-                    adopted,
-                    local,
-                    symbol,
-                  } = { ...info }
+                  const { info, lpTokenBalance, poolTokenBalances } = { ...p }
+                  const { adopted, local, symbol } = { ...info }
 
                   if (adopted) {
-                    const {
-                      balance,
-                      decimals,
-                    } = { ...adopted }
-
+                    const { balance, decimals } = { ...adopted }
                     adopted.balance = utils.formatUnits(BigInt(balance || '0'), decimals || 18)
                     info.adopted = adopted
                   }
-
                   if (local) {
-                    const {
-                      balance,
-                      decimals,
-                    } = { ...local }
-
+                    const { balance, decimals } = { ...local }
                     local.balance = utils.formatUnits(BigInt(balance || '0'), decimals || 18)
                     info.local = local
                   }
 
                   const symbols = split(symbol, 'normal', '-')
                   const asset_data = getAsset(null, pool_assets_data, chain_id, undefined, symbols)
-
                   return {
                     ...p,
                     id: `${chain_data.id}_${asset_data?.id}`,
@@ -330,14 +234,7 @@ export default () => {
               setUserPools(toArray(userPools))
             }
           } catch (error) {
-            console.log(
-              '[getUserPools error]',
-              {
-                domain_id,
-                address,
-                error,
-              },
-            )
+            console.log('[getUserPools error]', { domain_id, address, error })
           }
         }
       }
@@ -348,48 +245,25 @@ export default () => {
 
   const reset = async origin => {
     const reset_pool = origin !== 'address'
-
     if (reset_pool) {
       setPool({ ...pool })
     }
-
     setPoolsTrigger(moment().valueOf())
-
-    const {
-      chain,
-    } = { ...pool }
-
+    const { chain } = { ...pool }
     getBalances(chain)
   }
 
   const getBalances = chain => dispatch({ type: GET_BALANCES_DATA, value: { chain } })
 
-  const {
-    chain,
-    asset,
-  } = { ...pool }
-
+  const { chain, asset } = { ...pool }
   const chain_data = getChain(chain, chains_data)
-
-  const {
-    explorer,
-  } = { ...chain_data }
-
-  const {
-    url,
-    contract_path,
-  } = { ...explorer }
+  const { explorer } = { ...chain_data }
+  const { url, contract_path } = { ...explorer }
 
   const selected = !!(chain && asset)
   const no_pool = selected && !getAsset(asset, pool_assets_data, chain_data?.chain_id)
   const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
-
-  const {
-    name,
-    apy,
-    error,
-  } = { ...pool_data }
-
+  const { name, apy, error } = { ...pool_data }
   const pool_loading = selected && !no_pool && !error && !pool_data
 
   return (
