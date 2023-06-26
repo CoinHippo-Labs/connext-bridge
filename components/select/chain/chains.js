@@ -19,7 +19,7 @@ export default (
 
   const chains_data_sorted = _.orderBy(
     toArray(chains_data)
-      .filter(c => (!isPool || !c.no_pool) && (!inputSearch || c) && !c.disabled_bridge)
+      .filter(c => (!isPool || !c.no_pool) && (!inputSearch || c) && (!c.disabled_bridge || isPool))
       .map(c => {
         return {
           ...c,
@@ -49,7 +49,7 @@ export default (
       {chains_data_sorted.map((c, i) => {
         const { id, disabled_bridge, image, group } = { ...c }
         let { disabled } = { ...c }
-        disabled = disabled || disabled_bridge
+        disabled = disabled || (disabled_bridge && !isPool)
 
         const selected = id === value
         const header = group && !equalsIgnoreCase(group, chains_data_sorted[i - 1]?.group) && (
