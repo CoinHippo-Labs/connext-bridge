@@ -328,9 +328,17 @@ export default () => {
 
       if (Object.keys(bridge).length > 0 || ['/'].includes(asPath)) {
         source_chain = source_chain || getChain(null, chains_data, true, false, true, destination_chain)?.id
+        const source_chain_data = { ...getChain(source_chain, chains_data) }
+        source_chain = source_chain_data?.disabled_bridge && source_chain_data.switch_to ? source_chain_data.switch_to : source_chain
+
+        const destination_chain_data = { ...getChain(destination_chain, chains_data) }
         destination_chain =
           destination_chain && !equalsIgnoreCase(destination_chain, source_chain) ?
-            destination_chain :
+            destination_chain_data?.disabled_bridge && destination_chain_data.switch_to ?
+              !equalsIgnoreCase(destination_chain_data.switch_to, source_chain) ?
+                destination_chain_data.switch_to :
+                getChain(null, chains_data, true, true, true, [destination_chain, destination_chain_data.switch_to])?.id :
+              destination_chain :
             bridge.source_chain && !equalsIgnoreCase(bridge.source_chain, source_chain) ?
               bridge.source_chain :
               source_chain !== DEFAULT_DESTINATION_CHAIN && getChain(DEFAULT_DESTINATION_CHAIN, chains_data) ?
