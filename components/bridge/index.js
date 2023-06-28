@@ -861,7 +861,7 @@ export default () => {
         slippage: ((typeof slippage === 'number' ? slippage : DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE) * 100).toString(),
         receiveLocal: receiveLocal || false,
         callData: callData || '0x',
-        [relayer_fee_field]: relayerFee && Number(relayerFee) > 0 ? utils.parseUnits(numberToFixed(Number(relayerFee), relayer_fee_decimals - 2), relayer_fee_decimals).toString() : undefined,
+        [relayer_fee_field]: relayerFee && Number(relayerFee) > 0 ? utils.parseUnits(numberToFixed(relayerFee, relayer_fee_decimals - 2), relayer_fee_decimals).toString() : undefined,
       }
       console.log('[xcall setup]', { relayerFeeAssetType, relayerFee, fees }, { xcallParams })
       let failed = false

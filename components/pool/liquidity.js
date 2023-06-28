@@ -45,13 +45,7 @@ const DEFAULT_OPTIONS = {
   deadline: DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES,
 }
 
-export default (
-  {
-    pool,
-    userPoolsData,
-    onFinish,
-  },
-) => {
+export default ({ pool, userPoolsData, onFinish }) => {
   const {
     preferences,
     chains,
@@ -74,43 +68,19 @@ export default (
     ),
     shallowEqual,
   )
-  const {
-    theme,
-  } = { ...preferences }
-  const {
-    chains_data,
-  } = { ...chains }
-  const {
-    pool_assets_data,
-  } = { ...pool_assets }
-  const {
-    pools_data,
-  } = { ...pools }
-  const {
-    sdk,
-  } = { ...dev }
-  const {
-    wallet_data,
-  } = { ...wallet }
-  const {
-    provider,
-    ethereum_provider,
-    signer,
-    address,
-  } = { ...wallet_data }
-  const {
-    balances_data,
-  } = { ...balances }
-
+  const { theme } = { ...preferences }
+  const { chains_data } = { ...chains }
+  const { pool_assets_data } = { ...pool_assets }
+  const { pools_data } = { ...pools }
+  const { sdk } = { ...dev }
+  const { wallet_data } = { ...wallet }
+  const { provider, ethereum_provider, signer, address } = { ...wallet_data }
+  const { balances_data } = { ...balances }
   const wallet_chain_id = wallet_data?.chain_id
 
   const router = useRouter()
-  const {
-    query,
-  } = { ...router }
-  const {
-    mode,
-  } = { ...query }
+  const { query } = { ...router }
+  const { mode } = { ...query }
 
   const [action, setAction] = useState(_.head(ACTIONS))
   const [amountX, setAmountX] = useState(null)
@@ -151,24 +121,11 @@ export default (
         setPriceImpactAddResponse(null)
         setApproveResponse(null)
 
-        const {
-          chain,
-          asset,
-        } = { ...pool }
-
+        const { chain, asset } = { ...pool }
         const chain_data = getChain(chain, chains_data)
         const pool_data = toArray(pools_data).find(p => p.chain_data?.id === chain && p.asset_data?.id === asset)
-
-        const {
-          contract_data,
-          domainId,
-          adopted,
-          local,
-        } = { ...pool_data }
-
-        const {
-          contract_address,
-        } = { ...contract_data }
+        const { contract_data, domainId, adopted, local } = { ...pool_data }
+        const { contract_address } = { ...contract_data }
 
         if (domainId && contract_address && typeof amountX === 'string' && !isNaN(amountX) && typeof amountY === 'string' && !isNaN(amountY)) {
           setPriceImpactAdd(true)
@@ -176,32 +133,18 @@ export default (
 
           let _amountX
           let _amountY
-
           try {
             _amountX = utils.parseUnits((amountX || 0).toString(), adopted?.decimals || 18).toString()
             _amountY = utils.parseUnits((amountY || 0).toString(), local?.decimals || 18).toString()
-
             if (adopted?.index === 1) {
               const _amount = _amountX
               _amountX = _amountY
               _amountY = _amount
             }
-
             calculateAddLiquidityPriceImpact(domainId, contract_address, _amountX, _amountY)
           } catch (error) {
             const response = parseError(error)
-
-            console.log(
-              '[calculateAddLiquidityPriceImpact error]',
-              {
-                domainId,
-                contract_address,
-                _amountX,
-                _amountY,
-                error,
-              },
-            )
-
+            console.log('[calculateAddLiquidityPriceImpact error]', { domainId, contract_address, _amountX, _amountY, error })
             setPriceImpactAdd(0)
             setPriceImpactAddResponse({ status: 'failed', ...response })
           }
@@ -241,34 +184,18 @@ export default (
     () => {
       const getData = async () => {
         if (removeAmounts?.length > 1) {
-          const {
-            chain,
-            asset,
-          } = { ...pool }
-
+          const { chain, asset } = { ...pool }
           const chain_data = getChain(chain, chains_data)
           const pool_data = toArray(pools_data).find(p => p.chain_data?.id === chain && p.asset_data?.id === asset)
-
-          const {
-            contract_data,
-            domainId,
-            local,
-          } = { ...pool_data }
-
-          const {
-            contract_address,
-          } = { ...contract_data }
-
-          let amounts =
-            _.cloneDeep(removeAmounts).map((a, i) => {
-              const decimals = (i === 0 ? adopted : local)?.decimals || 18
-              return utils.parseUnits(numberToFixed(Number(a), decimals), decimals)
-            })
-
+          const { contract_data, domainId, local } = { ...pool_data }
+          const { contract_address } = { ...contract_data }
+          let amounts = _.cloneDeep(removeAmounts).map((a, i) => {
+            const decimals = (i === 0 ? adopted : local)?.decimals || 18
+            return utils.parseUnits(numberToFixed(a, decimals), decimals)
+          })
           if (equalsIgnoreCase(contract_address, local?.address)) {
             amounts = _.reverse(amounts)
           }
-
           calculateRemoveLiquidityPriceImpact(domainId, contract_address, _.head(amounts), _.last(amounts))
         }
       }
@@ -279,7 +206,6 @@ export default (
 
   const reset = async origin => {
     const reset_pool = !['address', 'user_rejected'].includes(origin)
-
     if (reset_pool) {
       setAmountX(null)
       setAmountY(null)
@@ -312,22 +238,9 @@ export default (
 
     let success = false
     let failed = false
-
     if (sdk) {
-      const {
-        chain_data,
-        asset_data,
-        contract_data,
-        domainId,
-        symbol,
-        lpTokenAddress,
-        adopted,
-        local,
-      } = { ...pool_data }
-
-      const {
-        contract_address,
-      } = { ...contract_data }
+      const { chain_data, asset_data, contract_data, domainId, symbol, lpTokenAddress, adopted, local } = { ...pool_data }
+      const { contract_address } = { ...contract_data }
 
       const x_asset_data = adopted?.address && {
         ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
@@ -342,7 +255,6 @@ export default (
             }
         ),
       }
-
       const y_asset_data = local?.address && {
         ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
         ...(
@@ -357,14 +269,8 @@ export default (
         ),
       }
 
-      const {
-        infiniteApprove,
-        slippage,
-      } = { ...options }
-      let {
-        deadline,
-      } = { ...options }
-
+      const { infiniteApprove, slippage } = { ...options }
+      let { deadline } = { ...options }
       deadline = deadline && moment().add(deadline, 'minutes').valueOf()
 
       switch (action) {
@@ -380,14 +286,12 @@ export default (
             let _amountY
             const x_decimals = x_asset_data?.decimals || 18
             const y_decimals = y_asset_data?.decimals || 18
-
             if (amountX && typeof amountX === 'string' && x_decimals === 18 && _.last(split(amountX, 'normal', '.')).length === x_decimals) {
               _amountX = amountX.substring(0, amountX.length - 1)
             }
             else {
               _amountX = amountX
             }
-
             if (amountY && typeof amountY === 'string' && y_decimals === 18 && _.last(split(amountY, 'normal', '.')).length === y_decimals) {
               _amountY = amountY.substring(0, amountY.length - 1)
             }
@@ -399,50 +303,28 @@ export default (
               utils.parseUnits((_amountX || 0).toString(), x_decimals).toString(),
               utils.parseUnits((_amountY || 0).toString(), y_decimals).toString(),
             ]
-
             const minToMint = '0'
-
             if (!failed) {
               try {
                 const approve_request = await sdk.sdkBase.approveIfNeeded(domainId, x_asset_data?.contract_address, _.head(amounts), infiniteApprove)
-
                 if (approve_request) {
                   setApproving(true)
                   const approve_response = await signer.sendTransaction(approve_request)
-
-                  const {
-                    hash,
-                  } = { ...approve_response }
-
-                  setApproveResponse(
-                    {
-                      status: 'pending',
-                      message: `Waiting for ${x_asset_data?.symbol} approval`,
-                      tx_hash: hash,
-                    }
-                  )
-
+                  const { hash } = { ...approve_response }
+                  setApproveResponse({
+                    status: 'pending',
+                    message: `Waiting for ${x_asset_data?.symbol} approval`,
+                    tx_hash: hash,
+                  })
                   setApproveProcessing(true)
+
                   const approve_receipt = await signer.provider.waitForTransaction(hash)
-
-                  const {
-                    status,
-                  } = { ...approve_receipt }
-
-                  setApproveResponse(
-                    status ?
-                      null :
-                      {
-                        status: 'failed',
-                        message: `Failed to approve ${x_asset_data?.symbol}`,
-                        tx_hash: hash,
-                      }
-                  )
+                  const { status } = { ...approve_receipt }
+                  setApproveResponse(status ? null : { status: 'failed', message: `Failed to approve ${x_asset_data?.symbol}`, tx_hash: hash })
 
                   if (status) {
                     setResponses(_.uniqBy(_.concat(responses, { message: `Approve ${x_asset_data?.symbol} successful`, tx_hash: hash }), 'tx_hash'))
                   }
-
                   failed = !status
                   setApproveProcessing(false)
                   setApproving(false)
@@ -452,7 +334,6 @@ export default (
                 }
               } catch (error) {
                 const response = parseError(error)
-
                 setApproveResponse({ status: 'failed', ...response })
                 setApproveProcessing(false)
                 setApproving(false)
@@ -462,44 +343,24 @@ export default (
               if (!failed) {
                 try {
                   const approve_request = await sdk.sdkBase.approveIfNeeded(domainId, y_asset_data?.contract_address, _.last(amounts), infiniteApprove)
-
                   if (approve_request) {
                     setApproving(true)
                     const approve_response = await signer.sendTransaction(approve_request)
-
-                    const {
-                      hash,
-                    } = { ...approve_response }
-
-                    setApproveResponse(
-                      {
-                        status: 'pending',
-                        message: `Waiting for ${y_asset_data?.symbol} approval`,
-                        tx_hash: hash,
-                      }
-                    )
-
+                    const { hash } = { ...approve_response }
+                    setApproveResponse({
+                      status: 'pending',
+                      message: `Waiting for ${y_asset_data?.symbol} approval`,
+                      tx_hash: hash,
+                    })
                     setApproveProcessing(true)
+
                     const approve_receipt = await signer.provider.waitForTransaction(hash)
-
-                    const {
-                      status,
-                    } = { ...approve_receipt }
-
-                    setApproveResponse(
-                      status ?
-                        null :
-                        {
-                          status: 'failed',
-                          message: `Failed to approve ${y_asset_data?.symbol}`,
-                          tx_hash: hash,
-                        }
-                    )
+                    const { status } = { ...approve_receipt }
+                    setApproveResponse(status ? null : { status: 'failed', message: `Failed to approve ${y_asset_data?.symbol}`, tx_hash: hash })
 
                     if (status) {
                       setResponses(_.uniqBy(_.concat(responses, { message: `Approve ${y_asset_data?.symbol} successful`, tx_hash: hash }), 'tx_hash'))
                     }
-
                     failed = !status
                     setApproveProcessing(false)
                     setApproving(false)
@@ -509,7 +370,6 @@ export default (
                   }
                 } catch (error) {
                   const response = parseError(error)
-
                   setApproveResponse({ status: 'failed', ...response })
                   setApproveProcessing(false)
                   setApproving(false)
@@ -520,104 +380,49 @@ export default (
 
             if (!failed) {
               try {
-                console.log(
-                  '[getPoolTokenIndex]',
-                  {
-                    domainId,
-                    contract_address,
-                    tokenAddress: contract_address,
-                  },
-                )
-
+                console.log('[getPoolTokenIndex]', { domainId, contract_address, tokenAddress: contract_address })
                 const tokenIndex = await sdk.sdkPool.getPoolTokenIndex(domainId, contract_address, contract_address)
-
-                console.log(
-                  '[poolTokenIndex]',
-                  {
-                    domainId,
-                    contract_address,
-                    tokenAddress: contract_address,
-                    tokenIndex,
-                  },
-                )
-
+                console.log('[poolTokenIndex]', { domainId, contract_address, tokenAddress: contract_address, tokenIndex })
                 if (tokenIndex === 1) {
                   amounts = _.reverse(_.cloneDeep(amounts))
                 }
 
-                console.log(
-                  '[addLiquidity]',
-                  {
-                    domainId,
-                    contract_address,
-                    amounts,
-                    minToMint,
-                    deadline,
-                  },
-                )
-
+                console.log('[addLiquidity]', { domainId, contract_address, amounts, minToMint, deadline })
                 const add_request = await sdk.sdkPool.addLiquidity(domainId, contract_address, amounts, minToMint, deadline)
-
                 if (add_request) {
                   try {
                     let gasLimit = await signer.estimateGas(add_request)
-
                     if (gasLimit) {
-                      gasLimit =
-                        FixedNumber.fromString(gasLimit.toString())
-                          .mulUnsafe(
-                            FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
-                          )
-                          .round(0)
-                          .toString()
-                          .replace('.0', '')
-
+                      gasLimit = FixedNumber.fromString(gasLimit.toString())
+                        .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
+                        .round(0)
+                        .toString()
+                        .replace('.0', '')
                       add_request.gasLimit = gasLimit
                     }
                   } catch (error) {}
 
                   const add_response = await signer.sendTransaction(add_request)
-
-                  const {
-                    hash,
-                  } = { ...add_response }
-
+                  const { hash } = { ...add_response }
                   setCallProcessing(true)
                   const add_receipt = await signer.provider.waitForTransaction(hash)
-
-                  const {
-                    status,
-                  } = { ...add_receipt }
+                  const { status } = { ...add_receipt }
 
                   const response = {
                     status: failed ? 'failed' : 'success',
                     message: failed ? `Failed to add ${symbol} liquidity` : `Add ${symbol} liquidity successful`,
                     tx_hash: hash,
                   }
-
                   if (response.status === 'success') {
                     setResponses(_.uniqBy(_.concat(responses, response), 'tx_hash'))
                   }
-
                   failed = !status
                   setCallResponse(response)
                   success = true
                 }
               } catch (error) {
                 const response = parseError(error)
-
-                console.log(
-                  '[addLiquidity error]',
-                  {
-                    domainId,
-                    contract_address,
-                    amounts,
-                    minToMint,
-                    deadline,
-                    error,
-                  },
-                )
-
+                console.log('[addLiquidity error]', { domainId, contract_address, amounts, minToMint, deadline, error })
                 switch (response.code) {
                   case 'user_rejected':
                     reset(response.code)
@@ -649,13 +454,10 @@ export default (
             }
             _amount = utils.parseUnits((_amount || 0).toString(), 18).toString()
 
-            let _amounts =
-              removeAmounts?.length > 1 &&
-              removeAmounts.map((a, i) => {
-                const decimals = (i === 0 ? adopted : local)?.decimals || 18
-                return utils.parseUnits(numberToFixed(Number(a) * (1 - slippage / 100), decimals), decimals).toString()
-              })
-
+            let _amounts = removeAmounts?.length > 1 && removeAmounts.map((a, i) => {
+              const decimals = (i === 0 ? adopted : local)?.decimals || 18
+              return utils.parseUnits(numberToFixed(Number(a) * (1 - slippage / 100), decimals), decimals).toString()
+            })
             if (adopted?.index === 1) {
               _amounts = _.reverse(_amounts)
             }
@@ -669,44 +471,24 @@ export default (
             if (!failed) {
               try {
                 const approve_request = await sdk.sdkBase.approveIfNeeded(domainId, lpTokenAddress, _amount, infiniteApprove)
-
                 if (approve_request) {
                   setApproving(true)
                   const approve_response = await signer.sendTransaction(approve_request)
-
-                  const {
-                    hash,
-                  } = { ...approve_response }
-
-                  setApproveResponse(
-                    {
-                      status: 'pending',
-                      message: `Waiting for ${symbol} approval`,
-                      tx_hash: hash,
-                    }
-                  )
-
+                  const { hash } = { ...approve_response }
+                  setApproveResponse({
+                    status: 'pending',
+                    message: `Waiting for ${symbol} approval`,
+                    tx_hash: hash,
+                  })
                   setApproveProcessing(true)
+
                   const approve_receipt = await signer.provider.waitForTransaction(hash)
-
-                  const {
-                    status,
-                  } = { ...approve_receipt }
-
-                  setApproveResponse(
-                    status ?
-                      null :
-                      {
-                        status: 'failed',
-                        message: `Failed to approve ${symbol}`,
-                        tx_hash: hash,
-                      }
-                  )
+                  const { status } = { ...approve_receipt }
+                  setApproveResponse(status ? null : { status: 'failed', message: `Failed to approve ${symbol}`, tx_hash: hash })
 
                   if (status) {
                     setResponses(_.uniqBy(_.concat(responses, { message: `Approve ${symbol} successful`, tx_hash: hash }), 'tx_hash'))
                   }
-
                   failed = !status
                   setApproveProcessing(false)
                   setApproving(false)
@@ -716,7 +498,6 @@ export default (
                 }
               } catch (error) {
                 const response = parseError(error)
-
                 setApproveResponse({ status: 'failed', ...response })
                 setApproveProcessing(false)
                 setApproving(false)
@@ -728,21 +509,7 @@ export default (
               const method = is_one_token_withdraw ? 'removeLiquidityOneToken' : withdrawOption === 'custom_amounts' ? 'removeLiquidityImbalance' : 'removeLiquidity'
 
               try {
-                console.log(
-                  `[${method}]`,
-                  {
-                    domainId,
-                    contract_address,
-                    withdraw_contract_address,
-                    amount: _amount,
-                    minAmounts,
-                    minAmount,
-                    amounts,
-                    maxBurnAmount,
-                    deadline,
-                  },
-                )
-
+                console.log(`[${method}]`, { domainId, contract_address, withdraw_contract_address, amount: _amount, minAmounts, minAmount, amounts, maxBurnAmount, deadline })
                 const remove_request =
                   is_one_token_withdraw ?
                     await sdk.sdkPool.removeLiquidityOneToken(domainId, contract_address, withdraw_contract_address, _amount, minAmount, deadline) :
@@ -753,75 +520,41 @@ export default (
                 if (remove_request) {
                   try {
                     let gasLimit = await signer.estimateGas(remove_request)
-
                     if (gasLimit) {
-                      gasLimit =
-                        FixedNumber.fromString(gasLimit.toString())
-                          .mulUnsafe(
-                            FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
-                          )
-                          .round(0)
-                          .toString()
-                          .replace('.0', '')
-
+                      gasLimit = FixedNumber.fromString(gasLimit.toString())
+                        .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
+                        .round(0)
+                        .toString()
+                        .replace('.0', '')
                       remove_request.gasLimit = gasLimit
                     }
                   } catch (error) {}
 
                   const remove_response = await signer.sendTransaction(remove_request)
-
-                  const {
-                    hash,
-                  } = { ...remove_response }
-
+                  const { hash } = { ...remove_response }
                   setCallProcessing(true)
                   const remove_receipt = await signer.provider.waitForTransaction(hash)
-
-                  const {
-                    status,
-                  } = { ...remove_receipt }
+                  const { status } = { ...remove_receipt }
 
                   const response = {
                     status: failed ? 'failed' : 'success',
                     message: failed ? `Failed to remove ${symbol} liquidity` : `Remove ${symbol} liquidity successful`,
                     tx_hash: hash,
                   }
-
                   if (response.status === 'success') {
                     setResponses(_.uniqBy(_.concat(responses, response), 'tx_hash'))
                   }
-
                   failed = !status
                   setCallResponse(response)
                   success = true
                 }
               } catch (error) {
                 const response = parseError(error)
-
-                console.log(
-                  `[${method} error]`,
-                  {
-                    domainId,
-                    contract_address,
-                    withdraw_contract_address,
-                    amount: _amount,
-                    minAmounts,
-                    minAmount,
-                    amounts,
-                    maxBurnAmount,
-                    deadline,
-                    error,
-                  },
-                )
-
-                let {
-                  message,
-                } = { ...response }
-
+                console.log(`[${method} error]`, { domainId, contract_address, withdraw_contract_address, amount: _amount, minAmounts, minAmount, amounts, maxBurnAmount, deadline, error })
+                let { message } = { ...response }
                 if (message?.includes('exceed total supply')) {
                   message = 'Exceed Total Supply'
                 }
-
                 switch (response.code) {
                   case 'user_rejected':
                     reset(response.code)
@@ -842,14 +575,11 @@ export default (
 
     setCallProcessing(false)
     setCalling(false)
-
     if (sdk && address && success) {
       await sleep(1 * 1000)
-
       if (onFinish) {
         onFinish()
       }
-
       if (!failed) {
         switch (action) {
           case 'deposit':
@@ -869,31 +599,16 @@ export default (
 
   const calculateRemoveSwapLiquidity = async () => {
     setPriceImpactRemove(null)
-
     if (typeof amount === 'string') {
       if (utils.parseUnits(amount || '0', 18).toBigInt() <= 0) {
         setRemoveAmounts(['0', '0'])
       }
       else {
-        const {
-          chain,
-          asset,
-        } = { ...pool }
-
+        const { chain, asset } = { ...pool }
         const chain_data = getChain(chain, chains_data)
         const pool_data = toArray(pools_data).find(p => p.chain_data?.id === chain && p.asset_data?.id === asset)
-
-        const {
-          contract_data,
-          domainId,
-          adopted,
-          local,
-        } = { ...pool_data }
-
-        const {
-          contract_address,
-        } = { ...contract_data }
-
+        const { contract_data, domainId, adopted, local } = { ...pool_data }
+        const { contract_address } = { ...contract_data }
         const _amount = utils.parseUnits((amount || 0).toString(), 18).toString()
 
         try {
@@ -902,17 +617,7 @@ export default (
           let amounts
           if (withdrawOption?.endsWith('_only')) {
             const index = (withdrawOption === 'x_only' && adopted?.index === 1) || (withdrawOption === 'y_only' && local?.index === 1) ? 1 : 0
-
-            console.log(
-              '[calculateRemoveSwapLiquidityOneToken]',
-              {
-                domainId,
-                contract_address,
-                amount: _amount,
-                index,
-              },
-            )
-
+            console.log('[calculateRemoveSwapLiquidityOneToken]', { domainId, contract_address, amount: _amount, index })
             amounts = await sdk.sdkPool.calculateRemoveSwapLiquidityOneToken(domainId, contract_address, _amount, index)
             if (index === 1) {
               amounts = _.concat('0', amounts?.toString())
@@ -920,64 +625,19 @@ export default (
             else {
               amounts = _.concat(amounts?.toString(), '0')
             }
-
-            console.log(
-              '[amountsRemoveSwapLiquidityOneToken]',
-              {
-                domainId,
-                contract_address,
-                amount: _amount,
-                index,
-                amounts,
-              },
-            )
+            console.log('[amountsRemoveSwapLiquidityOneToken]', { domainId, contract_address, amount: _amount, index, amounts })
           }
           else {
-            console.log(
-              '[calculateRemoveSwapLiquidity]',
-              {
-                domainId,
-                contract_address,
-                amount: _amount,
-              },
-            )
-
+            console.log('[calculateRemoveSwapLiquidity]', { domainId, contract_address, amount: _amount })
             amounts = await sdk.sdkPool.calculateRemoveSwapLiquidity(domainId, contract_address, _amount)
-
-            console.log(
-              '[amountsRemoveSwapLiquidity]',
-              {
-                domainId,
-                contract_address,
-                amount: _amount,
-                amounts,
-              },
-            )
+            console.log('[amountsRemoveSwapLiquidity]', { domainId, contract_address, amount: _amount, amounts })
           }
 
           let _amounts
           if (amounts?.length > 1) {
-            console.log(
-              '[getPoolTokenIndex]',
-              {
-                domainId,
-                contract_address,
-                tokenAddress: contract_address,
-              },
-            )
-
+            console.log('[getPoolTokenIndex]', { domainId, contract_address, tokenAddress: contract_address })
             const tokenIndex = await sdk.sdkPool.getPoolTokenIndex(domainId, contract_address, contract_address)
-
-            console.log(
-              '[poolTokenIndex]',
-              {
-                domainId,
-                contract_address,
-                tokenAddress: contract_address,
-                tokenIndex,
-              },
-            )
-
+            console.log('[poolTokenIndex]', { domainId, contract_address, tokenAddress: contract_address, tokenIndex })
             if (tokenIndex === 1) {
               _amounts = _.reverse(_.cloneDeep(amounts))
             }
@@ -986,30 +646,15 @@ export default (
             }
             // calculateRemoveLiquidityPriceImpact(domainId, contract_address, _.head(amounts), _.last(amounts))
           }
-
           setRemoveAmounts(toArray(_amounts).map((a, i) => Number(utils.formatUnits(BigInt(a || '0'), (i === 0 ? adopted : local)?.decimals || 18))))
           setCallResponse(null)
         } catch (error) {
           const response = parseError(error)
-
-          console.log(
-            '[calculateRemoveSwapLiquidity error]',
-            {
-              domainId,
-              contract_address,
-              amount: _amount,
-              error,
-            },
-          )
-
-          let {
-            message,
-          } = { ...response }
-
+          console.log('[calculateRemoveSwapLiquidity error]', { domainId, contract_address, amount: _amount, error })
+          let { message } = { ...response }
           if (message?.includes('exceed total supply')) {
             message = 'Exceed Total Supply'
           }
-
           setCallResponse({ status: 'failed', ...response, message })
           setRemoveAmounts(null)
           setPriceImpactRemove(null)
@@ -1022,41 +667,14 @@ export default (
     }
   }
 
-  const calculateAddLiquidityPriceImpact = async (
-    domainId,
-    contractAddress,
-    amountX,
-    amountY,
-  ) => {
+  const calculateAddLiquidityPriceImpact = async (domainId, contractAddress, amountX, amountY) => {
     let manual
-
     try {
       setPriceImpactAdd(true)
-
       if ([chain_data?.id].includes(pool_data?.chain_data?.id) && pool_data?.tvl) {
-        console.log(
-          '[calculateAddLiquidityPriceImpact]',
-          {
-            domainId,
-            contractAddress,
-            amountX,
-            amountY,
-          },
-        )
-
+        console.log('[calculateAddLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY })
         const price_impact = await sdk.sdkPool.calculateAddLiquidityPriceImpact(domainId, contractAddress, amountX, amountY)
-
-        console.log(
-          '[addLiquidityPriceImpact]',
-          {
-            domainId,
-            contractAddress,
-            amountX,
-            amountY,
-            price_impact,
-          },
-        )
-
+        console.log('[addLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY, price_impact })
         setPriceImpactAdd(Number(utils.formatUnits(BigInt(price_impact || '0'), 18)) * 100)
       }
       else {
@@ -1064,22 +682,8 @@ export default (
       }
     } catch (error) {
       const response = parseError(error)
-
-      console.log(
-        '[calculateAddLiquidityPriceImpact error]',
-        {
-          domainId,
-          contractAddress,
-          amountX,
-          amountY,
-          error,
-        },
-      )
-
-      const {
-        message,
-      } = { ...response }
-
+      console.log('[calculateAddLiquidityPriceImpact error]', { domainId, contractAddress, amountX, amountY, error })
+      const { message } = { ...response }
       if (message?.includes('reverted')) {
         manual = true
       }
@@ -1088,47 +692,19 @@ export default (
         setPriceImpactAddResponse({ status: 'failed', ...response })
       }
     }
-
     if (manual) {
       setPriceImpactAdd(null)
     }
   }
 
-  const calculateRemoveLiquidityPriceImpact = async (
-    domainId,
-    contractAddress,
-    amountX,
-    amountY,
-  ) => {
+  const calculateRemoveLiquidityPriceImpact = async (domainId, contractAddress, amountX, amountY) => {
     let manual
-
     try {
       setPriceImpactRemove(true)
-
       if ([chain_data?.id].includes(pool_data?.chain_data?.id) && pool_data?.tvl) {
-        console.log(
-          '[calculateRemoveLiquidityPriceImpact]',
-          {
-            domainId,
-            contractAddress,
-            amountX,
-            amountY,
-          },
-        )
-
+        console.log('[calculateRemoveLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY })
         const price_impact = await sdk.sdkPool.calculateRemoveLiquidityPriceImpact(domainId, contractAddress, amountX, amountY)
-
-        console.log(
-          '[removeLiquidityPriceImpact]',
-          {
-            domainId,
-            contractAddress,
-            amountX,
-            amountY,
-            price_impact,
-          },
-        )
-
+        console.log('[removeLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY, price_impact })
         setPriceImpactRemove(Number(utils.formatUnits(BigInt(price_impact || '0'), 18)) * 100)
       }
       else {
@@ -1136,22 +712,8 @@ export default (
       }
     } catch (error) {
       const response = parseError(error)
-
-      console.log(
-        '[calculateRemoveLiquidityPriceImpact error]',
-        {
-          domainId,
-          contractAddress,
-          amountX,
-          amountY,
-          error,
-        },
-      )
-
-      const {
-        message,
-      } = { ...response }
-
+      console.log('[calculateRemoveLiquidityPriceImpact error]', { domainId, contractAddress, amountX, amountY, error })
+      const { message } = { ...response }
       if (message?.includes('reverted')) {
         manual = true
       }
@@ -1160,57 +722,24 @@ export default (
         setPriceImpactRemoveResponse({ status: 'failed', ...response })
       }
     }
-
     if (manual) {
       setPriceImpactRemove(null)
     }
   }
 
-  const {
-    chain,
-    asset,
-  } = { ...pool }
-
+  const { chain, asset } = { ...pool }
   const chain_data = getChain(chain, chains_data)
-
-  const {
-    chain_id,
-    name,
-    image,
-    explorer,
-  } = { ...chain_data }
-
-  const {
-    url,
-    contract_path,
-    transaction_path,
-  } = { ...explorer }
-
-  const {
-    infiniteApprove,
-    slippage,
-  } = { ...options }
+  const { chain_id, name, image, explorer } = { ...chain_data }
+  const { url, contract_path, transaction_path } = { ...explorer }
+  const { infiniteApprove, slippage } = { ...options }
 
   const selected = !!(chain && asset)
   const no_pool = selected && !getAsset(asset, pool_assets_data, chain_id)
   const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
-
-  const {
-    asset_data,
-    contract_data,
-    symbol,
-    lpTokenAddress,
-    error,
-  } = { ...pool_data }
-  let {
-    adopted,
-    local,
-  } = { ...pool_data }
-
-  const {
-    contract_address,
-    next_asset,
-  } = { ...contract_data }
+  const { asset_data, contract_data, symbol, lpTokenAddress, error } = { ...pool_data }
+  let { adopted, local } = { ...pool_data }
+  const { color } = { ...asset_data }
+  const { contract_address, next_asset } = { ...contract_data }
 
   const _image = contract_data?.image
   const image_paths = split(_image, 'normal', '/')
@@ -1276,52 +805,30 @@ export default (
 
   const pool_loading = selected && !no_pool && !error && !pool_data
   const user_pool_data = pool_data && toArray(userPoolsData).find(p => p.chain_data?.id === chain && p.asset_data?.id === asset)
-
-  const {
-    lpTokenBalance,
-  } = { ...user_pool_data }
+  const { lpTokenBalance } = { ...user_pool_data }
 
   const x_remove_amount = equalsIgnoreCase(adopted?.address, contract_address) ? _.head(removeAmounts) : _.last(removeAmounts)
   const y_remove_amount = equalsIgnoreCase(adopted?.address, contract_address) ? _.last(removeAmounts) : _.head(removeAmounts)
-
   const position_loading = selected && !no_pool && !error && (!userPoolsData || pool_loading)
-  const pool_tokens_data =
-    toArray(_.concat(adopted, local)).map((a, i) => {
-      const {
-        address,
-        symbol,
-        decimals,
-      } = { ...a }
-
-      return {
-        i,
-        contract_address: address,
-        chain_id,
-        symbol,
-        decimals,
-        image:
-          (equalsIgnoreCase(address, contract_address) ?
-            contract_data?.image :
-            equalsIgnoreCase(address, next_asset?.contract_address) ?
-              next_asset?.image || contract_data?.image :
-              null
-          ) ||
-          asset_data?.image,
-      }
-    })
+  const pool_tokens_data = toArray(_.concat(adopted, local)).map((a, i) => {
+    const { address, symbol, decimals } = { ...a }
+    return {
+      i,
+      contract_address: address,
+      chain_id,
+      symbol,
+      decimals,
+      image: (equalsIgnoreCase(address, contract_address) ? contract_data?.image : equalsIgnoreCase(address, next_asset?.contract_address) ? next_asset?.image || contract_data?.image : null) || asset_data?.image,
+    }
+  })
 
   adopted = { ...adopted, asset_data: _.head(pool_tokens_data) }
   local = { ...local, asset_data: _.last(pool_tokens_data) }
-
   const native_asset = !adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local
   const wrapped_asset = adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local
   const native_amount = Number(native_asset?.balance || '0')
   const wrapped_amount = Number(wrapped_asset?.balance || '0')
   const total_amount = native_amount + wrapped_amount
-
-  const {
-    color,
-  } = { ...asset_data }
 
   const valid_amount =
     action === 'withdraw' ?
@@ -1332,13 +839,7 @@ export default (
       utils.parseUnits(amountX || '0', x_asset_data?.decimals || 18).toBigInt() <= utils.parseUnits((x_balance_amount || 0).toString(), x_asset_data?.decimals || 18).toBigInt() &&
       utils.parseUnits(amountY || '0', y_asset_data?.decimals || 18).toBigInt() <= utils.parseUnits((y_balance_amount || 0).toString(), y_asset_data?.decimals || 18).toBigInt() &&
       (utils.parseUnits(amountX || '0', x_asset_data?.decimals || 18).toBigInt() > 0 || utils.parseUnits(amountY || '0', y_asset_data?.decimals || 18).toBigInt() > 0)
-
-  const overweighted_asset =
-    adopted && local &&
-    (Number(amountX) + Number((equalsIgnoreCase(adopted.address, x_asset_data?.contract_address) ? adopted : local).balance)) >
-    (Number(amountY) + Number((equalsIgnoreCase(adopted.address, y_asset_data?.contract_address) ? adopted : local).balance)) ?
-      'x' :
-      'y'
+  const overweighted_asset = adopted && local && (Number(amountX) + Number((equalsIgnoreCase(adopted.address, x_asset_data?.contract_address) ? adopted : local).balance)) > (Number(amountY) + Number((equalsIgnoreCase(adopted.address, y_asset_data?.contract_address) ? adopted : local).balance)) ? 'x' : 'y'
 
   const disabled = !pool_data || error || calling || approving
   const wrong_chain = wallet_chain_id !== chain_id && !callResponse
@@ -1448,7 +949,6 @@ export default (
                           e => {
                             const regex = /^[0-9.\b]+$/
                             let value
-
                             if (e.target.value === '' || regex.test(e.target.value)) {
                               value = e.target.value
                             }
@@ -1458,7 +958,6 @@ export default (
                               }
                               value = numberToFixed(value, x_asset_data?.decimals || 18)
                             }
-
                             setAmountX(value)
                             if (typeof amountY !== 'string' || !amountY) {
                               setAmountY('0')
@@ -1533,17 +1032,14 @@ export default (
                               rel="noopener noreferrer"
                               className="min-w-max flex items-center space-x-1.5"
                             >
-                              {
-                                y_asset_data.image &&
-                                (
-                                  <Image
-                                    src={y_asset_data.image}
-                                    width={20}
-                                    height={20}
-                                    className="3xl:w-5 3xl:h-5 rounded-full"
-                                  />
-                                )
-                              }
+                              {y_asset_data.image && (
+                                <Image
+                                  src={y_asset_data.image}
+                                  width={20}
+                                  height={20}
+                                  className="3xl:w-5 3xl:h-5 rounded-full"
+                                />
+                              )}
                               <span className="text-base 3xl:text-2xl font-semibold">
                                 {y_asset_data.symbol}
                               </span>
@@ -1562,7 +1058,6 @@ export default (
                           e => {
                             const regex = /^[0-9.\b]+$/
                             let value
-
                             if (e.target.value === '' || regex.test(e.target.value)) {
                               value = e.target.value
                             }
@@ -1572,7 +1067,6 @@ export default (
                               }
                               value = numberToFixed(value, y_asset_data?.decimals || 18)
                             }
-
                             setAmountY(value)
                             if (typeof amountX !== 'string' || !amountX) {
                               setAmountX('0')
@@ -1659,10 +1153,7 @@ export default (
                         <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs 3xl:text-xl font-medium">
                           {typeof priceImpactAdd === 'number' ? priceImpactAdd < 0 ? 'Slippage' : 'Bonus' : 'Price impact'}
                         </div>
-                        <BiInfoCircle
-                          size={14}
-                          className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                        />
+                        <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
                       </div>
                     </Tooltip>
                     <div className="flex items-center text-xs 3xl:text-xl font-semibold space-x-1">
@@ -1768,12 +1259,7 @@ export default (
                       toArray(callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse)
                         .filter(r => !['success'].includes(r.status))
                         .map((r, i) => {
-                          const {
-                            status,
-                            message,
-                            tx_hash,
-                          } = { ...r }
-
+                          const { status, message, tx_hash } = { ...r }
                           return (
                             <Alert
                               key={i}
@@ -1929,7 +1415,6 @@ export default (
                           e => {
                             const regex = /^[0-9.\b]+$/
                             let value
-
                             if (e.target.value === '' || regex.test(e.target.value)) {
                               value = e.target.value
                             }
@@ -1947,28 +1432,21 @@ export default (
                               }
                               value = numberToFixed(value, 2)
                             }
-
                             setWithdrawPercent(value)
 
                             let _amount
                             try {
                               if (value) {
-                                _amount =
-                                  Number(value) === 100 ?
-                                    (lpTokenBalance || 0).toString() :
-                                    FixedNumber.fromString((lpTokenBalance || 0).toString())
-                                      .mulUnsafe(
-                                        FixedNumber.fromString(value.toString())
-                                      )
-                                      .divUnsafe(
-                                        FixedNumber.fromString('100')
-                                      )
-                                      .toString()
+                                _amount = Number(value) === 100 ?
+                                  (lpTokenBalance || 0).toString() :
+                                  FixedNumber.fromString((lpTokenBalance || 0).toString())
+                                    .mulUnsafe(FixedNumber.fromString(value.toString()))
+                                    .divUnsafe(FixedNumber.fromString('100'))
+                                    .toString()
                               }
                             } catch (error) {
                               _amount = '0'
                             }
-
                             setAmount(_amount)
                           }
                         }
@@ -1996,14 +1474,12 @@ export default (
                           onClick={
                             () => {
                               setWithdrawPercent(p * 100)
-
                               let _amount
                               try {
                                 _amount = p === 1 ? (lpTokenBalance || 0).toString() : FixedNumber.fromString((lpTokenBalance || 0).toString()).mulUnsafe(FixedNumber.fromString(p.toString())).toString()
                               } catch (error) {
                                 _amount = '0'
                               }
-
                               setAmount(_amount)
                             }
                           }
@@ -2026,18 +1502,11 @@ export default (
                   <div className="space-y-4">
                     <div className="flex flex-col space-y-2">
                       {WITHDRAW_OPTIONS.map((o, i) => {
-                        const {
-                          value,
-                          is_staging,
-                        } = { ...o }
-                        let {
-                          title,
-                        } = { ...o }
-
+                        const { value, is_staging } = { ...o }
+                        let { title } = { ...o }
                         title = title.replace('{x}', x_asset_data.symbol).replace('{y}', y_asset_data.symbol)
                         const selected = value === withdrawOption
                         const _disabled = disabled || (is_staging && !mode)
-
                         return (
                           <div
                             key={i}
@@ -2126,7 +1595,6 @@ export default (
                                   e => {
                                     const regex = /^[0-9.\b]+$/
                                     let value
-
                                     if (e.target.value === '' || regex.test(e.target.value)) {
                                       value = e.target.value
                                     }
@@ -2144,7 +1612,6 @@ export default (
                                     else {
                                       value = '0'
                                     }
-
                                     setRemoveAmounts([value, amount - Number(value)].map((a, i) => isNaN(a) ? '' : removeDecimal(numberToFixed(Number(a), (i === 0 ? x_asset_data : y_asset_data)?.decimals || 18))))
                                   }
                                 }
@@ -2228,7 +1695,6 @@ export default (
                                   e => {
                                     const regex = /^[0-9.\b]+$/
                                     let value
-
                                     if (e.target.value === '' || regex.test(e.target.value)) {
                                       value = e.target.value
                                     }
@@ -2246,7 +1712,6 @@ export default (
                                     else {
                                       value = '0'
                                     }
-
                                     setRemoveAmounts([amount - Number(value), value].map((a, i) => isNaN(a) ? '' : removeDecimal(numberToFixed(Number(a), (i === 0 ? x_asset_data : y_asset_data)?.decimals || 18))))
                                   }
                                 }
@@ -2282,10 +1747,7 @@ export default (
                             <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs 3xl:text-xl font-medium">
                               Slippage
                             </div>
-                            <BiInfoCircle
-                              size={14}
-                              className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                            />
+                            <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
                           </div>
                         </Tooltip>
                         <div className="flex items-center text-xs 3xl:text-xl font-semibold space-x-1">
@@ -2344,12 +1806,7 @@ export default (
                       toArray(callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse)
                         .filter(r => !['success'].includes(r.status))
                         .map((r, i) => {
-                          const {
-                            status,
-                            message,
-                            tx_hash,
-                          } = { ...r }
-
+                          const { status, message, tx_hash } = { ...r }
                           return (
                             <Alert
                               key={i}
@@ -2466,11 +1923,7 @@ export default (
           {toArray(responses).length > 0 && (
             <div className="flex flex-col space-y-1">
               {toArray(responses).map((d, i) => {
-                const {
-                  message,
-                  tx_hash,
-                } = { ...d }
-
+                const { message, tx_hash } = { ...d }
                 return (
                   <AlertNotification
                     key={i}
