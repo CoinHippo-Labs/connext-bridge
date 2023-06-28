@@ -5,6 +5,7 @@
     "name": "USD Coin",
     "image": "/logos/assets/usdc.png",
     "is_stablecoin": true,
+    "allow_paying_gas": true,
     "contracts": [
       {
         "contract_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
@@ -55,7 +56,9 @@
         "contract_address": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
         "chain_id": 42161,
         "decimals": 6,
+        "symbol": "USDC.e",
         "image": "/logos/assets/usdc.png",
+        "tooltip": "Circle has renamed bridged USDC to USDC.e on Arbitrum network. For more information please see this <a href=\"https://www.circle.com/blog/arbitrum-usdc-now-available\" target=\"_blank\">link</a>.",
         "next_asset": {
           "contract_address": "0x8c556cF37faa0eeDAC7aE665f1Bb0FbD4b2eae36",
           "decimals": 6,
@@ -87,6 +90,7 @@
     "name": "Tether",
     "image": "/logos/assets/usdt.png",
     "is_stablecoin": true,
+    "allow_paying_gas": true,
     "contracts": [
       {
         "contract_address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
@@ -169,6 +173,7 @@
     "name": "Dai",
     "image": "/logos/assets/dai.png",
     "is_stablecoin": true,
+    "allow_paying_gas": true,
     "contracts": [
       {
         "contract_address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
@@ -334,6 +339,7 @@
         "is_pool": true
       }
     ],
+    "allow_paying_gas": true,
     "color": "#636890",
     "preset": true
   },
@@ -468,6 +474,38 @@
           "symbol": "nextKLP",
           "image": "/logos/assets/nextkp3r.png"
         }
+      }
+    ],
+    "color": "#000000",
+    "group": "other_tokens"
+  },
+  {
+    "id": "xoc",
+    "symbol": "XOC",
+    "name": "Xocolatl MXN Stablecoin",
+    "image": "/logos/assets/xoc.png",
+    "is_stablecoin": true,
+    "contracts": [
+      {
+        "contract_address": "0xa411c9Aa00E020e4f88Bc19996d29c5B7ADB4ACf",
+        "chain_id": 137,
+        "decimals": 18,
+        "symbol": "XOC",
+        "image": "/logos/assets/xoc.png"
+      },
+      {
+        "contract_address": "0xa411c9Aa00E020e4f88Bc19996d29c5B7ADB4ACf",
+        "chain_id": 100,
+        "decimals": 18,
+        "symbol": "XOC",
+        "image": "/logos/assets/xoc.png"
+      },
+      {
+        "contract_address": "0xa411c9Aa00E020e4f88Bc19996d29c5B7ADB4ACf",
+        "chain_id": 56,
+        "decimals": 18,
+        "symbol": "XOC",
+        "image": "/logos/assets/xoc.png"
       }
     ],
     "color": "#000000",

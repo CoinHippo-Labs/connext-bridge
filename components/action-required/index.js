@@ -141,6 +141,18 @@ export default (
     [loaded, relayerFeeAssetType],
   )
 
+  useEffect(
+    () => {
+      const { origin_domain, origin_transacting_asset } = { ...data }
+      const source_chain_data = getChain(origin_domain, chains_data)
+      const source_asset_data = getAsset(null, assets_data, source_chain_data?.chain_id, origin_transacting_asset)
+      if (source_asset_data && !source_asset_data.allow_paying_gas) {
+        setRelayerFeeAssetType('native')
+      }
+    },
+    [data, chains_data, assets_data],
+  )
+
   const {
     transfer_id,
     error_status,
@@ -276,7 +288,7 @@ export default (
     setLoaded(false)
     setNewSlippage(null)
     setSlippageEditing(false)
-    setRelayerFeeAssetType(_.head(RELAYER_FEE_ASSET_TYPES))
+    setRelayerFeeAssetType(source_asset_data?.allow_paying_gas ? _.head(RELAYER_FEE_ASSET_TYPES) : 'native')
     setNewRelayerFee(null)
     setEstimatedValues(undefined)
     setUpdating(null)
@@ -311,7 +323,7 @@ export default (
               originDomain: source_chain_data?.domain_id,
               destinationDomain: destination_chain_data?.domain_id,
               isHighPriority: true,
-              priceIn: ['transacting'].includes(relayerFeeAssetType) ? 'usd' : 'native',
+              priceIn: relayerFeeAssetType === 'transacting' ? 'usd' : 'native',
               destinationGasPrice: destination_chain_data?.gas_price || undefined,
             }
 
@@ -602,7 +614,7 @@ export default (
             params = {
               domainId: origin_domain,
               transferId: transfer_id,
-              asset: ['transacting'].includes(relayerFeeAssetType) ? origin_transacting_asset : constants.AddressZero,
+              asset: relayerFeeAssetType === 'transacting' ? origin_transacting_asset : constants.AddressZero,
               relayerFee: utils.parseUnits(relayer_fee_to_bump || '0', relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals).toString(),
             }
 
@@ -1016,7 +1028,7 @@ export default (
                             onChange={e => setRelayerFeeAssetType(e.target.value)}
                             className="bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0"
                           >
-                            {RELAYER_FEE_ASSET_TYPES.map((t, i) => {
+                            {RELAYER_FEE_ASSET_TYPES.filter(t => source_asset_data?.allow_paying_gas || t !== 'transacting').map((t, i) => {
                               return (
                                 <option
                                   key={i}

@@ -66,46 +66,20 @@ export default () => {
     ),
     shallowEqual,
   )
-  const {
-    theme,
-  } = { ...preferences }
-  const {
-    chains_data,
-  } = { ...chains }
-  const {
-    assets_data,
-  } = { ...assets }
-  const {
-    pool_assets_data,
-  } = { ...pool_assets }
-  const {
-    pools_data,
-  } = { ...pools }
-  const {
-    rpcs,
-  } = { ...rpc_providers }
-  const {
-    sdk,
-  } = { ...dev }
-  const {
-    wallet_data,
-  } = { ...wallet }
-  const {
-    provider,
-    ethereum_provider,
-    signer,
-    address,
-  } = { ...wallet_data }
-  const {
-    balances_data,
-  } = { ...balances }
-
+  const { theme } = { ...preferences }
+  const { chains_data } = { ...chains }
+  const { assets_data } = { ...assets }
+  const { pool_assets_data } = { ...pool_assets }
+  const { pools_data } = { ...pools }
+  const { rpcs } = { ...rpc_providers }
+  const { sdk } = { ...dev }
+  const { wallet_data } = { ...wallet }
+  const { provider, ethereum_provider, signer, address } = { ...wallet_data }
+  const { balances_data } = { ...balances }
   const wallet_chain_id = wallet_data?.chain_id
 
   const router = useRouter()
-  const {
-    asPath,
-  } = { ...router }
+  const { asPath } = { ...router }
 
   const [swap, setSwap] = useState({})
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
@@ -132,22 +106,15 @@ export default () => {
   useEffect(
     () => {
       let updated = false
-
       const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       let path = !asPath ? '/' : asPath.toLowerCase()
       path = path.includes('?') ? path.substring(0, path.indexOf('?')) : path
 
-      const {
-        amount,
-        from,
-      } = { ...params }
-
+      const { amount, from } = { ...params }
       if (path.includes('on-')) {
         const paths = path.replace('/swap/', '').split('-')
-
         const chain = paths[paths.indexOf('on') + 1]
         const asset = _.head(paths) !== 'on' ? _.head(paths) : process.env.NEXT_PUBLIC_NETWORK === 'testnet' ? 'eth' : 'usdc'
-
         const chain_data = getChain(chain, chains_data, false, true)
         const asset_data = getAsset(asset, pool_assets_data)
 
@@ -155,30 +122,25 @@ export default () => {
           swap.chain = chain
           updated = true
         }
-
         if (asset_data) {
           swap.asset = asset
           updated = true
         }
-
         if (swap.chain) {
           if (!isNaN(amount) && Number(amount) > 0) {
             swap.amount = amount
             updated = true
           }
-
           if (from) {
             swap.origin = 'y'
             updated = true
           }
         }
       }
-
       if ((!path.includes('on-') || !swap.chain) && !path.includes('[swap]') && getChain(null, chains_data, false, true, false, undefined, true)?.length > 0) {
         const _chain = getChain(null, chains_data, false, true, true)?.id
         router.push(`/swap/on-${_chain}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
       }
-
       if (updated) {
         setSwap(swap)
       }
@@ -190,34 +152,20 @@ export default () => {
   useEffect(
     () => {
       const params = {}
-
       if (swap) {
-        const {
-          chain,
-          asset,
-          amount,
-          origin,
-        } = { ...swap }
-
+        const { chain, asset, amount, origin } = { ...swap }
         const chain_data = getChain(chain, chains_data, true, true)
-
-        const {
-          chain_id,
-        } = { ...chain_data }
-
+        const { chain_id } = { ...chain_data }
         if (chain_data) {
           params.chain = chain
-
           if (asset && getAsset(asset, pool_assets_data, chain_id)) {
             params.asset = asset
           }
         }
-
         if (params.chain && params.asset) {
           if (!isNaN(amount) && Number(amount) > 0) {
             params.amount = amount
           }
-
           if (origin === 'y' && local?.symbol && getAsset(asset, pool_assets_data, chain_id, local.symbol)) {
             params.from = local.symbol
           }
@@ -225,18 +173,12 @@ export default () => {
       }
 
       if (Object.keys(params).length > 0) {
-        const {
-          chain,
-          asset,
-        } = { ...params }
-
+        const { chain, asset } = { ...params }
         delete params.chain
         delete params.asset
-
         router.push(`/swap/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
         setBalanceTrigger(moment().valueOf())
       }
-
       setApproveResponse(null)
       setCallResponse(null)
     },
@@ -246,28 +188,18 @@ export default () => {
   // update balances
   useEffect(
     () => {
-      let {
-        chain,
-      } = { ...swap }
-
-      const {
-        id,
-      } = { ...getChain(wallet_chain_id, chains_data) }
-
+      let { chain } = { ...swap }
+      const { id } = { ...getChain(wallet_chain_id, chains_data) }
       if (asPath && id) {
         const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-
         if (!chain && !params?.chain && getChain(id, chains_data, true)) {
           chain = id
         }
-
         getBalances(id)
       }
-
       if (Object.keys(swap).length > 0) {
         chain = chain || getChain(null, chains_data, true, true, true)?.id
       }
-
       setSwap({ ...swap, chain })
     },
     [asPath, wallet_chain_id, chains_data],
@@ -277,12 +209,8 @@ export default () => {
   useEffect(
     () => {
       dispatch({ type: BALANCES_DATA, value: null })
-
       if (address) {
-        const {
-          chain,
-        } = { ...swap }
-
+        const { chain } = { ...swap }
         getBalances(chain)
       }
       else {
@@ -296,15 +224,9 @@ export default () => {
   useEffect(
     () => {
       const getData = () => {
-        const {
-          status,
-        } = { ...approveResponse }
-
+        const { status } = { ...approveResponse }
         if (address && !calling && !['pending'].includes(status)) {
-          const {
-            chain,
-          } = { ...swap }
-
+          const { chain } = { ...swap }
           getBalances(chain)
         }
       }
@@ -330,15 +252,10 @@ export default () => {
   useEffect(
     () => {
       const getData = async () => {
-        const {
-          chain,
-          asset,
-          amount,
-        } = { ...swap }
+        const { chain, asset, amount } = { ...swap }
 
         let failed
         let _pair
-
         if (sdk && chain) {
           if (['string', 'number'].includes(typeof amount) && ![''].includes(amount)) {
             setSwapAmount(true)
@@ -349,146 +266,64 @@ export default () => {
 
           const chain_changed = !equalsIgnoreCase(chain, pair?.chain_data?.id)
           const asset_changed = !equalsIgnoreCase(asset, pair?.asset_data?.id)
-
           if (chain_changed || asset_changed || !pair?.updated_at || moment().diff(moment(pair.updated_at), 'seconds') > 30) {
             try {
-              const {
-                chain,
-                asset,
-                amount,
-              } = { ...swap }
-
+              const { chain, asset, amount } = { ...swap }
               if (pair === undefined || pair?.error || chain_changed || asset_changed) {
                 setPair(getPool(`${chain}_${asset}`, pools_data))
               }
 
               const chain_data = getChain(chain, chains_data)
-
-              const {
-                chain_id,
-                domain_id,
-              } = { ...chain_data }
-
+              const { chain_id, domain_id } = { ...chain_data }
               const asset_data = getAsset(asset, pool_assets_data)
-
-              const {
-                contracts,
-              } = { ...asset_data }
-
+              const { contracts } = { ...asset_data }
               const contract_data = getContract(chain_id, contracts)
-
-              const {
-                contract_address,
-                is_pool,
-              } = { ...contract_data }
+              const { contract_address, is_pool } = { ...contract_data }
 
               const pool = is_pool && _.cloneDeep(await sdk.sdkPool.getPool(domain_id, contract_address))
-
-              const {
-                lpTokenAddress,
-                adopted,
-                local,
-              } = { ...pool }
+              const { lpTokenAddress, adopted, local } = { ...pool }
 
               if (adopted) {
-                const {
-                  balance,
-                  decimals,
-                } = { ...adopted }
-
+                const { balance, decimals } = { ...adopted }
                 adopted.balance = utils.formatUnits(BigInt(balance || '0'), decimals || 18)
                 pool.adopted = adopted
               }
-
               if (local) {
-                const {
-                  balance,
-                  decimals,
-                } = { ...local }
-
+                const { balance, decimals } = { ...local }
                 local.balance = utils.formatUnits(BigInt(balance || '0'), decimals || 18)
                 pool.local = local
               }
 
               let supply
               let rate
-
               if (lpTokenAddress) {
-                console.log(
-                  '[getTokenSupply]',
-                  {
-                    domain_id,
-                    lpTokenAddress,
-                  },
-                )
-
+                console.log('[getTokenSupply]', { domain_id, lpTokenAddress })
                 try {
                   supply = await sdk.sdkPool.getTokenSupply(domain_id, lpTokenAddress)
                   supply = utils.formatUnits(BigInt(supply), 18)
-
-                  console.log(
-                    '[LPTokenSupply]',
-                    {
-                      domain_id,
-                      lpTokenAddress,
-                      supply,
-                    },
-                  )
+                  console.log('[LPTokenSupply]', { domain_id, lpTokenAddress, supply })
                 } catch (error) {
-                  console.log(
-                    '[getTokenSupply error]',
-                    {
-                      domain_id,
-                      lpTokenAddress,
-                      error,
-                    },
-                  )
+                  console.log('[getTokenSupply error]', { domain_id, lpTokenAddress, error })
                 }
               }
 
               if (pool) {
-                console.log(
-                  '[getVirtualPrice]',
-                  {
-                    domain_id,
-                    contract_address,
-                  },
-                )
-
+                console.log('[getVirtualPrice]', { domain_id, contract_address })
                 try {
                   rate = await sdk.sdkPool.getVirtualPrice(domain_id, contract_address)
                   rate = Number(utils.formatUnits(BigInt(rate || '0'), 18))
-
-                  console.log(
-                    '[virtualPrice]',
-                    {
-                      domain_id,
-                      contract_address,
-                      rate,
-                    },
-                  )
+                  console.log('[virtualPrice]', { domain_id, contract_address, rate })
                 } catch (error) {
-                  console.log(
-                    '[getVirtualPrice error]',
-                    {
-                      domain_id,
-                      contract_address,
-                      error,
-                    },
-                  )
+                  console.log('[getVirtualPrice error]', { domain_id, contract_address, error })
                 }
               }
 
               _pair =
                 (pool ?
                   toArray(pool).map(p => {
-                    const {
-                      symbol,
-                    } = { ...p }
-
+                    const { symbol } = { ...p }
                     const symbols = split(symbol, 'normal', '-')
                     const asset_data = getAsset(null, pool_assets_data, chain_id, undefined, symbols)
-
                     return {
                       ...p,
                       chain_data,
@@ -510,19 +345,11 @@ export default () => {
               }
 
               setPair(is_pool ? _pair : undefined)
-
               if (is_pool && _pair) {
                 dispatch({ type: POOLS_DATA, value: _pair })
               }
             } catch (error) {
-              console.log(
-                '[getPair error]',
-                {
-                  swap,
-                  error,
-                },
-              )
-
+              console.log('[getPair error]', { swap, error })
               setPair({ error })
               calculateSwap(null)
               failed = true
@@ -537,7 +364,6 @@ export default () => {
           }
         }
       }
-
       getData()
     },
     [sdk, swap, pairTrigger],
@@ -545,7 +371,6 @@ export default () => {
 
   const reset = async origin => {
     const reset_swap = !['address', 'user_rejected'].includes(origin)
-
     if (reset_swap) {
       setSwap({ ...swap, amount: null })
     }
@@ -564,10 +389,7 @@ export default () => {
     setPairTrigger(moment().valueOf())
     setBalanceTrigger(moment().valueOf())
 
-    const {
-      chain,
-    } = { ...swap }
-
+    const { chain } = { ...swap }
     getBalances(chain)
   }
 
@@ -581,27 +403,11 @@ export default () => {
     let success = false
 
     if (sdk) {
-      let {
-        amount,
-        origin,
-      } = { ...swap }
-
+      let { amount, origin } = { ...swap }
       origin = origin || 'x'
 
-      const {
-        chain_data,
-        asset_data,
-        contract_data,
-        domainId,
-        adopted,
-        local,
-        symbols,
-      } = { ...pair }
-
-      const {
-        contract_address,
-      } = { ...contract_data }
-
+      const { chain_data, asset_data, contract_data, domainId, adopted, local, symbols } = { ...pair }
+      const { contract_address } = { ...contract_data }
       const x_asset_data = adopted?.address && {
         ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
         ...(
@@ -615,7 +421,6 @@ export default () => {
             }
         ),
       }
-
       const y_asset_data = local?.address && {
         ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
         ...(
@@ -630,14 +435,8 @@ export default () => {
         ),
       }
 
-      const {
-        infiniteApprove,
-        slippage,
-      } = { ...options }
-      let {
-        deadline,
-      } = { ...options }
-
+      const { infiniteApprove, slippage } = { ...options }
+      let { deadline } = { ...options }
       deadline = deadline && moment().add(deadline, 'minutes').valueOf()
 
       let failed = false
@@ -653,46 +452,24 @@ export default () => {
         minDy = (Number(amount) * Number(((100 - (typeof slippage === 'number' ? slippage : DEFAULT_SWAP_SLIPPAGE_PERCENTAGE)) / 100).toFixed(recv_decimals))).toFixed(recv_decimals)
         amount = utils.parseUnits(((typeof amount === 'string' && amount.indexOf('.') > -1 ? amount.substring(0, amount.indexOf('.') + _decimals + 1) : amount) || 0).toString(), _decimals).toString()
       }
-
       minDy = utils.parseUnits((minDy || 0).toString(), recv_decimals).toString()
 
       if (!failed) {
         try {
           const approve_request = await sdk.sdkBase .approveIfNeeded(domainId, (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address, amount, infiniteApprove)
-
           if (approve_request) {
             setApproving(true)
             const approve_response = await signer.sendTransaction(approve_request)
-
-            const {
-              hash,
-            } = { ...approve_response }
-
-            setApproveResponse(
-              {
-                status: 'pending',
-                message: `Waiting for ${(origin === 'x' ? x_asset_data : y_asset_data)?.symbol} approval`,
-                tx_hash: hash,
-              }
-            )
-
+            const { hash } = { ...approve_response }
+            setApproveResponse({
+              status: 'pending',
+              message: `Waiting for ${(origin === 'x' ? x_asset_data : y_asset_data)?.symbol} approval`,
+              tx_hash: hash,
+            })
             setApproveProcessing(true)
             const approve_receipt = await signer.provider.waitForTransaction(hash)
-
-            const {
-              status,
-            } = { ...approve_receipt }
-
-            setApproveResponse(
-              status ?
-                null :
-                {
-                  status: 'failed',
-                  message: `Failed to approve ${(origin === 'x' ? x_asset_data : y_asset_data)?.symbol}`,
-                  tx_hash: hash,
-                }
-            )
-
+            const { status } = { ...approve_receipt }
+            setApproveResponse(status ? null : { status: 'failed', message: `Failed to approve ${(origin === 'x' ? x_asset_data : y_asset_data)?.symbol}`, tx_hash: hash })
             failed = !status
             setApproveProcessing(false)
             setApproving(false)
@@ -703,14 +480,7 @@ export default () => {
         } catch (error) {
           failed = true
           const response = parseError(error)
-
-          setApproveResponse(
-            {
-              status: 'failed',
-              ...response,
-            }
-          )
-
+          setApproveResponse({ status: 'failed', ...response })
           setApproveProcessing(false)
           setApproving(false)
         }
@@ -730,82 +500,51 @@ export default () => {
               deadline,
             },
           )
-
           const swap_request = await sdk.sdkPool.swap(domainId, contract_address, (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address, (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address, amount, minDy, deadline)
-
           if (swap_request) {
             try {
               let gasLimit = await signer.estimateGas(swap_request)
-
               if (gasLimit) {
-                gasLimit =
-                  FixedNumber.fromString(gasLimit.toString())
-                    .mulUnsafe(
-                      FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
-                    )
-                    .round(0)
-                    .toString()
-                    .replace('.0', '')
-
+                gasLimit = FixedNumber.fromString(gasLimit.toString())
+                  .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
+                  .round(0)
+                  .toString()
+                  .replace('.0', '')
                 swap_request.gasLimit = gasLimit
               }
             } catch (error) {}
 
             const swap_response = await signer.sendTransaction(swap_request)
-
-            const {
-              hash,
-            } = { ...swap_response }
-
+            const { hash } = { ...swap_response }
             setCallProcessing(true)
             const swap_receipt = await signer.provider.waitForTransaction(hash)
-
-            const {
-              status,
-            } = { ...swap_receipt }
-
+            const { status } = { ...swap_receipt }
             failed = !status
             const _symbol = (origin === 'x' ? symbols : _.reverse(_.cloneDeep(symbols))).join('/')
-
-            setCallResponse(
-              {
-                status: failed ? 'failed' : 'success',
-                message: failed ? `Failed to swap ${_symbol}` : `Swap ${_symbol} successful`,
-                tx_hash: hash,
-              }
-            )
-
+            setCallResponse({
+              status: failed ? 'failed' : 'success',
+              message: failed ? `Failed to swap ${_symbol}` : `Swap ${_symbol} successful`,
+              tx_hash: hash,
+            })
             success = true
           }
         } catch (error) {
           const response = parseError(error)
-
-          let {
-            message,
-          } = { ...response }
-
+          let { message } = { ...response }
           if (message?.includes('cannot estimate gas')) {
             message = 'Slippage exceeded. Please try increasing slippage tolerance and resubmitting your transfer.'
           }
           else if (message?.includes('dy < minDy')) {
             message = 'Exceeded slippage tolerance. Please increase tolerance and try again.'
           }
-
           switch (response.code) {
             case 'user_rejected':
               reset(response.code)
               break
             default:
-              setCallResponse(
-                {
-                  status: 'failed',
-                  ...response,
-                  message,
-                }
-              )
+              setCallResponse({ status: 'failed', ...response, message })
               break
           }
-
           failed = true
         }
       }
@@ -813,7 +552,6 @@ export default () => {
 
     setCallProcessing(false)
     setCalling(false)
-
     if (sdk && address && success) {
       await sleep(1 * 1000)
       setPairTrigger(moment().valueOf())
@@ -822,33 +560,14 @@ export default () => {
   }
 
   const calculateSwap = async _pair => {
-    const {
-      amount,
-    } = { ...swap }
-
+    const { amount } = { ...swap }
     setCalculateSwapResponse(null)
 
     if (_pair && ['string', 'number'].includes(typeof amount) && ![''].includes(amount)) {
-      let {
-        amount,
-        origin,
-      } = { ...swap }
-
+      let { amount, origin } = { ...swap }
       origin = origin || 'x'
-
-      const {
-        asset_data,
-        contract_data,
-        domainId,
-        lpTokenAddress,
-        adopted,
-        local,
-      } = { ..._pair }
-
-      const {
-        contract_address,
-      } = { ...contract_data }
-
+      const { asset_data, contract_data, domainId, lpTokenAddress, adopted, local } = { ..._pair }
+      const { contract_address } = { ...contract_data }
       const x_asset_data = adopted?.address && {
         ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
         ...(
@@ -862,7 +581,6 @@ export default () => {
             }
         ),
       }
-
       const y_asset_data = local?.address && {
         ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
         ...(
@@ -889,14 +607,7 @@ export default () => {
         try {
           const _decimals = (origin === 'x' ? x_asset_data : y_asset_data)?.decimals || 18
           amount = utils.parseUnits(((typeof amount === 'string' && amount.indexOf('.') > -1 ? amount.substring(0, amount.indexOf('.') + _decimals + 1) : amount) || 0).toString(), _decimals).toString()
-
-          calculateSwapPriceImpact(
-            domainId,
-            amount,
-            (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address,
-            (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address,
-          )
-
+          calculateSwapPriceImpact(domainId, amount, (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address, (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address)
           console.log(
             '[getPoolTokenIndex]',
             {
@@ -905,9 +616,7 @@ export default () => {
               tokenAddress: (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address,
             },
           )
-
           const tokenIndexFrom = await sdk.sdkPool.getPoolTokenIndex(domainId, contract_address, (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address)
-
           console.log(
             '[getPoolTokenIndex]',
             {
@@ -916,9 +625,7 @@ export default () => {
               tokenAddress: (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address,
             },
           )
-
           const tokenIndexTo = await sdk.sdkPool.getPoolTokenIndex(domainId, contract_address, (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address)
-
           console.log(
             '[calculateSwap]',
             {
@@ -929,9 +636,7 @@ export default () => {
               amount,
             },
           )
-
           const _amount = await sdk.sdkPool.calculateSwap(domainId, contract_address, tokenIndexFrom, tokenIndexTo, amount)
-
           console.log(
             '[amountToReceive]',
             {
@@ -942,22 +647,11 @@ export default () => {
               amount: _amount,
             },
           )
-
           setSwapAmount(utils.formatUnits(BigInt(_amount || '0'), (origin === 'x' ? y_asset_data : x_asset_data)?.decimals || 18))
         } catch (error) {
           const response = parseError(error)
-
-          console.log(
-            '[calculateSwap]',
-            { error },
-          )
-
-          setCalculateSwapResponse(
-            {
-              status: 'failed',
-              ...response,
-            }
-          )
+          console.log('[calculateSwap]', { error })
+          setCalculateSwapResponse({ status: 'failed', ...response })
           setSwapAmount(null)
         }
       }
@@ -968,79 +662,24 @@ export default () => {
     }
   }
 
-  const calculateSwapPriceImpact = async (
-    domainId,
-    amount,
-    x_contract_address,
-    y_contract_address,
-  ) => {
-    console.log(
-      '[calculateSwapPriceImpact]',
-      {
-        domainId,
-        amount,
-        x_contract_address,
-        y_contract_address,
-      },
-    )
-
+  const calculateSwapPriceImpact = async (domainId, amount, x_contract_address, y_contract_address) => {
+    console.log('[calculateSwapPriceImpact]', { domainId, amount, x_contract_address, y_contract_address })
     const price_impact = await sdk.sdkPool.calculateSwapPriceImpact(domainId, amount, x_contract_address, y_contract_address)
-
-    console.log(
-      '[swapPriceImpact]',
-      {
-        domainId,
-        amount,
-        x_contract_address,
-        y_contract_address,
-        price_impact,
-      },
-    )
-
+    console.log('[swapPriceImpact]', { domainId, amount, x_contract_address, y_contract_address, price_impact })
     setPriceImpact(Number(utils.formatUnits(BigInt(price_impact || '0'), 18)) * 100)
   }
 
-  const {
-    chain,
-    asset,
-    amount,
-  } = { ...swap }
-  let {
-    origin,
-  } = { ...swap }
-
+  const { chain, asset, amount } = { ...swap }
+  let { origin } = { ...swap }
   origin = origin || 'x'
 
   const chain_data = getChain(chain, chains_data)
+  const { chain_id, name, image, explorer, color } = { ...chain_data }
+  const { url, transaction_path } = { ...explorer }
 
-  const {
-    chain_id,
-    name,
-    image,
-    explorer,
-    color,
-  } = { ...chain_data }
-
-  const {
-    url,
-    transaction_path,
-  } = { ...explorer }
-
-  const {
-    slippage,
-  } = { ...options }
-
-  const {
-    asset_data,
-    contract_data,
-    adopted,
-    local,
-    rate,
-  } = { ...pair }
-
-  const {
-    contract_address,
-  } = { ...contract_data }
+  const { slippage } = { ...options }
+  const { asset_data, contract_data, adopted, local, rate } = { ...pair }
+  const { contract_address } = { ...contract_data }
 
   const _image = contract_data?.image
   const image_paths = split(_image, 'normal', '/')
@@ -1115,15 +754,7 @@ export default () => {
           <div className="w-full max-w-md 3xl:max-w-xl space-y-3">
             <div
               className="bg-white dark:bg-slate-900 rounded border dark:border-slate-700 space-y-8 3xl:space-y-10 pt-5 sm:pt-6 3xl:pt-8 pb-6 sm:pb-7 3xl:pb-10 px-4 sm:px-6 3xl:px-8"
-              style={
-                chain && boxShadow ?
-                  {
-                    boxShadow,
-                    WebkitBoxShadow: boxShadow,
-                    MozBoxShadow: boxShadow,
-                  } :
-                  undefined
-              }
+              style={chain && boxShadow ? { boxShadow, WebkitBoxShadow: boxShadow, MozBoxShadow: boxShadow } : undefined}
             >
               <div className="flex items-center justify-between space-x-2">
                 <div className="flex items-center space-x-0">
@@ -1195,23 +826,21 @@ export default () => {
                         value={asset}
                         onSelect={
                           (a, c) => {
-                            setSwap(
-                              {
-                                ...swap,
-                                asset: a,
-                                amount: null,
-                                origin:
-                                  [x_asset_data?.contract_address, y_asset_data?.contract_address].findIndex(_c => equalsIgnoreCase(_c, c)) > -1 ?
-                                    origin === 'x' ?
-                                      equalsIgnoreCase(c, y_asset_data?.contract_address) ?
-                                        'y' :
-                                        origin :
-                                      equalsIgnoreCase(c, x_asset_data?.contract_address) ?
-                                        'x' :
-                                        origin :
-                                    origin,
-                              }
-                            )
+                            setSwap({
+                              ...swap,
+                              asset: a,
+                              amount: null,
+                              origin:
+                                [x_asset_data?.contract_address, y_asset_data?.contract_address].findIndex(_c => equalsIgnoreCase(_c, c)) > -1 ?
+                                  origin === 'x' ?
+                                    equalsIgnoreCase(c, y_asset_data?.contract_address) ?
+                                      'y' :
+                                      origin :
+                                    equalsIgnoreCase(c, x_asset_data?.contract_address) ?
+                                      'x' :
+                                      origin :
+                                  origin,
+                            })
                             getBalances(chain)
                           }
                         }
@@ -1231,7 +860,6 @@ export default () => {
                           e => {
                             const regex = /^[0-9.\b]+$/
                             let value
-
                             if (e.target.value === '' || regex.test(e.target.value)) {
                               value = e.target.value
                             }
@@ -1241,7 +869,6 @@ export default () => {
                               }
                               value = numberToFixed(value, _decimals)
                             }
-
                             setSwap({ ...swap, amount: value })
                             setSwapAmount(true)
                           }
@@ -1282,10 +909,7 @@ export default () => {
                           <div className="text-slate-400 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                             Balance:
                           </div>
-                          <button
-                            disabled={disabled}
-                            className="cursor-default"
-                          >
+                          <button disabled={disabled} className="cursor-default">
                             <Balance
                               chainId={chain_id}
                               asset={asset}
@@ -1307,23 +931,21 @@ export default () => {
                         value={asset}
                         onSelect={
                           (a, c) => {
-                            setSwap(
-                              {
-                                ...swap,
-                                asset: a,
-                                amount: null,
-                                origin:
-                                  [x_asset_data?.contract_address, y_asset_data?.contract_address].findIndex(_c => equalsIgnoreCase(_c, c)) > -1 ?
-                                    origin === 'x' ?
-                                      equalsIgnoreCase(c, x_asset_data?.contract_address) ?
-                                        'y' :
-                                        origin :
-                                      equalsIgnoreCase(c, y_asset_data?.contract_address) ?
-                                        'x' :
-                                        origin :
-                                    origin,
-                              }
-                            )
+                            setSwap({
+                              ...swap,
+                              asset: a,
+                              amount: null,
+                              origin:
+                                [x_asset_data?.contract_address, y_asset_data?.contract_address].findIndex(_c => equalsIgnoreCase(_c, c)) > -1 ?
+                                  origin === 'x' ?
+                                    equalsIgnoreCase(c, x_asset_data?.contract_address) ?
+                                      'y' :
+                                      origin :
+                                    equalsIgnoreCase(c, y_asset_data?.contract_address) ?
+                                      'x' :
+                                      origin :
+                                  origin,
+                            })
                             getBalances(chain)
                           }
                         }
@@ -1375,10 +997,7 @@ export default () => {
                           <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                             Slippage Tolerance
                           </div>
-                          <BiInfoCircle
-                            size={14}
-                            className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                          />
+                          <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
                         </div>
                       </Tooltip>
                       <div className="flex flex-col sm:items-end space-y-1.5">
@@ -1395,7 +1014,6 @@ export default () => {
                                   e => {
                                     const regex = /^[0-9.\b]+$/
                                     let value
-
                                     if (e.target.value === '' || regex.test(e.target.value)) {
                                       value = e.target.value
                                     }
@@ -1408,13 +1026,7 @@ export default () => {
                                       }
                                     }
                                     value = value <= 0 || value > 100 ? DEFAULT_SWAP_SLIPPAGE_PERCENTAGE : value
-
-                                    setOptions(
-                                      {
-                                        ...options,
-                                        slippage: value && !isNaN(value) ? parseFloat(Number(value).toFixed(6)) : value,
-                                      }
-                                    )
+                                    setOptions({ ...options, slippage: value && !isNaN(value) ? parseFloat(Number(value).toFixed(6)) : value })
                                   }
                                 }
                                 onWheel={e => e.target.blur()}
@@ -1470,10 +1082,7 @@ export default () => {
                     </div>
                     {typeof slippage === 'number' && (slippage < 0.2 || slippage > 5.0) && (
                       <div className="flex items-center space-x-1">
-                        <IoWarning
-                          size={16}
-                          className="min-w-max 3xl:w-5 3xl:h-5 text-yellow-500 dark:text-yellow-400 mt-0.5"
-                        />
+                        <IoWarning size={16} className="min-w-max 3xl:w-5 3xl:h-5 text-yellow-500 dark:text-yellow-400 mt-0.5" />
                         <div className="text-yellow-500 dark:text-yellow-400 3xl:text-xl text-xs">
                           {slippage < 0.2 ?
                             'Your transfer may not complete due to low slippage tolerance.' :
@@ -1494,10 +1103,7 @@ export default () => {
                           <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                             Price Impact
                           </div>
-                          <BiInfoCircle
-                            size={14}
-                            className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                          />
+                          <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
                         </div>
                       </Tooltip>
                       <DecimalsFormat
@@ -1534,11 +1140,7 @@ export default () => {
                   ) ?
                     <Alert
                       color="bg-red-400 dark:bg-red-500 text-white text-sm 3xl:text-xl font-medium"
-                      icon={
-                        <BiMessageError
-                          className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                        />
-                      }
+                      icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
                       closeDisabled={true}
                       rounded={true}
                       className="rounded p-4.5"
@@ -1588,26 +1190,16 @@ export default () => {
                       </button> :
                       (callResponse || approveResponse || calculateSwapResponse) &&
                       toArray(callResponse || approveResponse || calculateSwapResponse).map((r, i) => {
-                        const {
-                          status,
-                          message,
-                          code,
-                          tx_hash,
-                        } = { ...r }
-
+                        const { status, message, code, tx_hash } = { ...r }
                         return (
                           <Alert
                             key={i}
                             color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
                             icon={
                               status === 'failed' ?
-                                <BiMessageError
-                                  className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                /> :
+                                <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
                                 status === 'success' ?
-                                  <BiMessageCheck
-                                    className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                  /> :
+                                  <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
                                   status === 'pending' ?
                                     <div className="mr-3">
                                       <Watch
@@ -1616,9 +1208,7 @@ export default () => {
                                         color="white"
                                       />
                                     </div> :
-                                    <BiMessageDetail
-                                      className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                                    />
+                                    <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />
                             }
                             closeDisabled={true}
                             rounded={true}

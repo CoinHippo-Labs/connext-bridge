@@ -16,14 +16,7 @@ import { toArray, name, equalsIgnoreCase, loaderColor } from '../../lib/utils'
 const WRAPPED_PREFIX = process.env.NEXT_PUBLIC_WRAPPED_PREFIX
 const DAILY_METRICS = ['tvl', 'volume']
 
-export default (
-  {
-    pool,
-    userPoolsData,
-    disabled = false,
-    onSelect,
-  },
-) => {
+export default ({ pool, userPoolsData, onSelect }) => {
   const {
     preferences,
     chains,
@@ -46,124 +39,59 @@ export default (
     ),
     shallowEqual,
   )
-  const {
-    theme,
-  } = { ...preferences }
-  const {
-    chains_data,
-  } = { ...chains }
-  const {
-    assets_data,
-  } = { ...assets }
-  const {
-    pool_assets_data,
-  } = { ...pool_assets }
-  const {
-    pools_data,
-  } = { ...pools }
-  const {
-    pools_daily_stats_data,
-  } = { ...pools_daily_stats }
-  const {
-    wallet_data,
-  } = { ...wallet }
-  const {
-    address,
-  } = { ...wallet_data }
+  const { theme } = { ...preferences }
+  const { chains_data } = { ...chains }
+  const { assets_data } = { ...assets }
+  const { pool_assets_data } = { ...pool_assets }
+  const { pools_data } = { ...pools }
+  const { pools_daily_stats_data } = { ...pools_daily_stats }
+  const { wallet_data } = { ...wallet }
+  const { address } = { ...wallet_data }
 
   const [dailyMetric, setDailyMetric] = useState(_.head(DAILY_METRICS))
 
-  const {
-    chain,
-    asset,
-  } = { ...pool }
-
+  const { chain, asset } = { ...pool }
   const chain_data = getChain(chain, chains_data)
-
-  const {
-    chain_id,
-    explorer,
-    color,
-  } = { ...chain_data }
-
-  const {
-    url,
-    contract_path,
-  } = { ...explorer }
+  const { chain_id, explorer, color } = { ...chain_data }
+  const { url, contract_path } = { ...explorer }
 
   const selected = !!(chain && asset)
   const no_pool = selected && !getAsset(asset, pool_assets_data, chain_id)
   const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
 
-  const {
-    asset_data,
-    contract_data,
-    domainId,
-    canonicalHash,
-    lpTokenAddress,
-    supply,
-    volume_value,
-    error,
-  } = { ...pool_data }
-  let {
-    adopted,
-    local,
-  } = { ...pool_data }
-
-  const {
-    contract_address,
-    next_asset,
-  } = { ...contract_data }
+  const { asset_data, contract_data, domainId, canonicalHash, lpTokenAddress, supply, volume_value, error } = { ...pool_data }
+  let { adopted, local } = { ...pool_data }
+  const { contract_address, next_asset } = { ...contract_data }
 
   const pool_loading = selected && !no_pool && !error && !pool_data
   const user_pool_data = pool_data && toArray(userPoolsData).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
-
-  const {
-    lpTokenBalance,
-  } = { ...user_pool_data }
+  const { lpTokenBalance } = { ...user_pool_data }
 
   const share = parseFloat((Number(lpTokenBalance || '0') * 100 / (Number(supply) || 1)).toFixed(18))
   const position_loading = address && selected && !no_pool && !error && (!userPoolsData || pool_loading)
-  const pool_tokens_data =
-    toArray(_.concat(adopted, local)).map((a, i) => {
-      const {
-        address,
-        symbol,
-        balance,
-        decimals,
-      } = { ...a }
-
-      return {
-        i,
-        contract_address: address,
-        chain_id,
-        symbol,
-        decimals,
-        image:
-          (equalsIgnoreCase(address, contract_address) ?
-            contract_data?.image :
-            equalsIgnoreCase(address, next_asset?.contract_address) ?
-              next_asset?.image || contract_data?.image :
-              null
-          ) || asset_data?.image,
-        balance,
-      }
-    })
+  const pool_tokens_data = toArray(_.concat(adopted, local)).map((a, i) => {
+    const { address, symbol, balance, decimals } = { ...a }
+    return {
+      i,
+      contract_address: address,
+      chain_id,
+      symbol,
+      decimals,
+      image: (equalsIgnoreCase(address, contract_address) ? contract_data?.image : equalsIgnoreCase(address, next_asset?.contract_address) ? next_asset?.image || contract_data?.image : null) || asset_data?.image,
+      balance,
+    }
+  })
 
   adopted = { ...adopted, asset_data: _.head(pool_tokens_data) }
   local = { ...local, asset_data: _.last(pool_tokens_data) }
 
   const native_asset = !adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local
   const wrapped_asset = adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local
-
   const native_amount = Number(native_asset?.balance || '0')
   const wrapped_amount = Number(wrapped_asset?.balance || '0')
   const total_amount = native_amount + wrapped_amount
 
-  const {
-    price,
-  } = { ...getAsset(asset, assets_data) }
-
+  const { price } = { ...getAsset(asset, assets_data) }
   const tvl = Number(supply || _.sum(toArray(_.concat(adopted, local)).map(a => Number(a.balance)))) * (price || 0)
   const chartData = !pool_loading && pools_daily_stats_data?.[`${dailyMetric}s`] && {
     data:
@@ -172,7 +100,6 @@ export default (
         .map(d => {
           let time
           let value
-
           switch (dailyMetric) {
             case 'tvl':
               time = d.day
@@ -184,7 +111,6 @@ export default (
               value = d.volume
               break
           }
-
           return {
             ...d,
             timestamp: moment(time).valueOf(),
@@ -206,10 +132,7 @@ export default (
     <div className="sm:min-h-full bg-transparent">
       <div className="space-y-6">
         <div className="space-y-0 3xl:space-y-2">
-          <div
-            className="w-32 sm:w-64 3xl:w-96 mx-auto sm:mr-8"
-            style={{ boxShadow, WebkitBoxShadow: boxShadow, MozBoxShadow: boxShadow }}
-          />
+          <div className="w-32 sm:w-64 3xl:w-96 mx-auto sm:mr-8" style={{ boxShadow, WebkitBoxShadow: boxShadow, MozBoxShadow: boxShadow }} />
           <div className="grid grid-cols-2 lg:grid-cols-2 gap-2">
             <div className={`${metricClassName} col-span-2 pt-6 pb-1`}>
               <LineChart
@@ -316,13 +239,7 @@ export default (
                       </div>
                     </div> :
                     pool_tokens_data.map((p, i) => {
-                      const {
-                        contract_address,
-                        symbol,
-                        image,
-                        balance,
-                      } = { ...p }
-
+                      const { contract_address, symbol, image, balance } = { ...p }
                       return (
                         <div key={i} className="flex flex-col space-y-1">
                           <a

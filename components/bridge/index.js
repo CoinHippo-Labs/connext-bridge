@@ -38,6 +38,7 @@ import { getBalance } from '../../lib/object/balance'
 import { split, toArray, includesStringList, paramsToObj, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, loaderColor, switchColor, sleep, errorPatterns, parseError } from '../../lib/utils'
 import { BALANCES_DATA, GET_BALANCES_DATA } from '../../reducers/types'
 
+const DEFAULT_DESTINATION_CHAIN = 'arbitrum'
 const WRAPPED_PREFIX = process.env.NEXT_PUBLIC_WRAPPED_PREFIX
 const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT)
 const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT)
@@ -87,57 +88,23 @@ export default () => {
     ),
     shallowEqual,
   )
-  const {
-    theme,
-  } = { ...preferences }
-  const {
-    chains_data,
-  } = { ...chains }
-  const {
-    assets_data,
-  } = { ...assets }
-  const {
-    gas_tokens_price_data,
-  } = { ...gas_tokens_price }
-  const {
-    router_asset_balances_data,
-  } = { ...router_asset_balances }
-  const {
-    pools_data,
-  } = { ...pools }
-  const {
-    rpcs,
-  } = { ...rpc_providers }
-  const {
-    sdk,
-  } = { ...dev }
-  const {
-    wallet_data,
-  } = { ...wallet }
-  const {
-    chain_id,
-    provider,
-    ethereum_provider,
-    signer,
-    address,
-  } = { ...wallet_data }
-  const {
-    balances_data,
-  } = { ...balances }
-  const {
-    latest_bumped_transfers_data,
-  } = { ...latest_bumped_transfers }
-
+  const { theme } = { ...preferences }
+  const { chains_data } = { ...chains }
+  const { assets_data } = { ...assets }
+  const { gas_tokens_price_data } = { ...gas_tokens_price }
+  const { router_asset_balances_data } = { ...router_asset_balances }
+  const { pools_data } = { ...pools }
+  const { rpcs } = { ...rpc_providers }
+  const { sdk } = { ...dev }
+  const { wallet_data } = { ...wallet }
+  const { chain_id, provider, ethereum_provider, signer, address } = { ...wallet_data }
+  const { balances_data } = { ...balances }
+  const { latest_bumped_transfers_data } = { ...latest_bumped_transfers }
   const wallet_chain_id = wallet_data?.chain_id
 
   const router = useRouter()
-  const {
-    asPath,
-    query,
-  } = { ...router }
-  const {
-    source,
-  } = { ...query }
+  const { asPath, query } = { ...router }
+  const { source } = { ...query }
 
   const [bridge, setBridge] = useState({})
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
@@ -149,7 +116,6 @@ export default () => {
   const [estimateResponse, setEstimateResponse] = useState(null)
   const [isApproveNeeded, setIsApproveNeeded] = useState(undefined)
 
-  // const [relayerFeeAssetType, setRelayerFeeAssetType] = useState(_.head(RELAYER_FEE_ASSET_TYPES))
   const [fees, setFees] = useState(null)
   const [estimateFeesTrigger, setEstimateFeesTrigger] = useState(null)
 
@@ -177,20 +143,13 @@ export default () => {
   useEffect(
     () => {
       let updated = false
-
       const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       let path = !asPath ? '/' : asPath.toLowerCase()
       path = path.includes('?') ? path.substring(0, path.indexOf('?')) : path
 
-      const {
-        symbol,
-        amount,
-        receive_next,
-      } = { ...params }
-
+      const { symbol, amount, receive_next } = { ...params }
       if (path.includes('from-') && path.includes('to-')) {
         const paths = path.replace('/', '').split('-')
-
         const source_chain = paths[paths.indexOf('from') + 1]
         const destination_chain = paths[paths.indexOf('to') + 1]
         const asset = _.head(paths) !== 'from' ? _.head(paths) : process.env.NEXT_PUBLIC_NETWORK === 'testnet' ? [source_chain, destination_chain].findIndex(c => ['linea'].includes(c)) > -1 ? 'matic' : 'test' : 'usdc'
@@ -202,26 +161,21 @@ export default () => {
           bridge.source_chain = source_chain
           updated = true
         }
-
         if (destination_chain_data) {
           bridge.destination_chain = destination_chain
           updated = true
         }
-
         if (asset_data) {
           bridge.asset = asset
           updated = true
         }
-
         if (symbol) {
           bridge.symbol = symbol
           updated = true
         }
-
         if (bridge.source_chain && !isNaN(amount) && Number(amount) > 0) {
           bridge.amount = amount
           updated = true
-
           if (sdk) {
             calculateAmountReceived(bridge.amount)
             if (isApproveNeeded === undefined) {
@@ -231,13 +185,11 @@ export default () => {
         }
         else if (estimatedValues) {
           if (['', '0', '0.0'].includes(amount)) {
-            setEstimatedValues(
-              {
-                amountReceived: '0',
-                routerFee: '0',
-                isNextAsset: [true, 'true'].includes(receive_next),
-              }
-            )
+            setEstimatedValues({
+              amountReceived: '0',
+              routerFee: '0',
+              isNextAsset: [true, 'true'].includes(receive_next),
+            })
           }
           else {
             setEstimatedValues(undefined)
@@ -269,14 +221,7 @@ export default () => {
       const params = {}
 
       if (bridge) {
-        const {
-          source_chain,
-          destination_chain,
-          asset,
-          symbol,
-          amount,
-        } = { ...bridge }
-
+        const { source_chain, destination_chain, asset, symbol, amount } = { ...bridge }
         const source_chain_data = getChain(source_chain, chains_data, true)
         if (source_chain_data) {
           params.source_chain = source_chain
@@ -284,7 +229,6 @@ export default () => {
             params.asset = asset
           }
         }
-
         const destination_chain_data = getChain(destination_chain, chains_data, true)
         if (destination_chain_data) {
           params.destination_chain = destination_chain
@@ -292,7 +236,6 @@ export default () => {
             params.asset = asset
           }
         }
-
         if (params.source_chain && params.asset) {
           if (!isNaN(amount) && Number(amount) > 0) {
             params.amount = amount
@@ -303,19 +246,13 @@ export default () => {
         }
       }
 
-      const {
-        slippage,
-      } = { ...options }
-      let {
-        receiveLocal,
-      } = { ...options }
-
+      const { slippage } = { ...options }
+      let { receiveLocal } = { ...options }
       if (!destination_contract_data?.next_asset) {
         if (receiveLocal) {
           bridge._receiveLocal = receiveLocal
         }
         receiveLocal = false
-
         if (bridge.receive_next) {
           bridge.receive_next = undefined
         }
@@ -327,64 +264,41 @@ export default () => {
           bridge._receiveLocal = receiveLocal
         }
       }
-
       if (receiveLocal || bridge.receive_next) {
         params.receive_next = true
       }
-
       if (source) {
         params.source = source
       }
 
       if (Object.keys(params).length > 0) {
-        const {
-          source_chain,
-          destination_chain,
-          asset,
-          symbol,
-        } = { ...params }
-
+        const { source_chain, destination_chain, asset, symbol } = { ...params }
         delete params.source_chain
         delete params.destination_chain
         delete params.asset
         if (!symbol) {
           delete params.symbol
         }
-
         router.push(`/${source_chain && destination_chain ? `${asset ? `${asset.toUpperCase()}-` : ''}from-${source_chain}-to-${destination_chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
         setBalanceTrigger(moment().valueOf())
       }
 
       const destination_chain_data = getChain(destination_chain, chains_data)
-
-      const {
-        chain_id,
-      } = { ...destination_chain_data }
-
-      const {
-        contract_address,
-        next_asset,
-      } = { ...destination_contract_data }
-
-      const {
-        symbol,
-      } = { ...params }
-
+      const { chain_id } = { ...destination_chain_data }
+      const { contract_address, next_asset } = { ...destination_contract_data }
+      const { symbol } = { ...params }
       const routers_liquidity_amount = _.sum(
         toArray(router_asset_balances_data?.[chain_id])
           .filter(a => toArray(_.concat(contract_address, next_asset?.contract_address)).findIndex(_a => equalsIgnoreCase(a?.contract_address, _a)) > -1)
           .map(a => Number(utils.formatUnits(BigInt(a?.amount || '0'), equalsIgnoreCase(a?.contract_address, next_asset?.contract_address) && next_asset ? next_asset?.decimals || 18 : destination_decimals)))
       )
 
-      setOptions(
-        {
-          ...options,
-          slippage,
-          forceSlow: destination_chain_data && router_asset_balances_data ? Number(amount) > routers_liquidity_amount : false,
-          receiveLocal,
-        }
-      )
-
+      setOptions({
+        ...options,
+        slippage,
+        forceSlow: destination_chain_data && router_asset_balances_data ? Number(amount) > routers_liquidity_amount : false,
+        receiveLocal,
+      })
       setEstimateResponse(null)
       setEstimateFeesTrigger(moment().valueOf())
       setApproveResponse(null)
@@ -397,15 +311,8 @@ export default () => {
   // update balances
   useEffect(
     () => {
-      let {
-        source_chain,
-        destination_chain,
-      } = { ...bridge }
-
-      const {
-        id,
-      } = { ...getChain(wallet_chain_id, chains_data) }
-
+      let { source_chain, destination_chain } = { ...bridge }
+      const { id } = { ...getChain(wallet_chain_id, chains_data) }
       if (asPath && id) {
         if (!(source_chain && destination_chain) && !equalsIgnoreCase(id, destination_chain)) {
           const params = paramsToObj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
@@ -421,14 +328,23 @@ export default () => {
 
       if (Object.keys(bridge).length > 0 || ['/'].includes(asPath)) {
         source_chain = source_chain || getChain(null, chains_data, true, false, true, destination_chain)?.id
+        const source_chain_data = { ...getChain(source_chain, chains_data) }
+        source_chain = source_chain_data?.disabled_bridge && source_chain_data.switch_to ? source_chain_data.switch_to : source_chain
+
+        const destination_chain_data = { ...getChain(destination_chain, chains_data) }
         destination_chain =
           destination_chain && !equalsIgnoreCase(destination_chain, source_chain) ?
-            destination_chain :
+            destination_chain_data?.disabled_bridge && destination_chain_data.switch_to ?
+              !equalsIgnoreCase(destination_chain_data.switch_to, source_chain) ?
+                destination_chain_data.switch_to :
+                getChain(null, chains_data, true, true, true, [destination_chain, destination_chain_data.switch_to])?.id :
+              destination_chain :
             bridge.source_chain && !equalsIgnoreCase(bridge.source_chain, source_chain) ?
               bridge.source_chain :
-              getChain(null, chains_data, true, false, true, source_chain)?.id
+              source_chain !== DEFAULT_DESTINATION_CHAIN && getChain(DEFAULT_DESTINATION_CHAIN, chains_data) ?
+                DEFAULT_DESTINATION_CHAIN : 
+                getChain(null, chains_data, true, false, true, source_chain)?.id
       }
-
       setBridge({ ...bridge, source_chain, destination_chain })
     },
     [asPath, chains_data, wallet_chain_id],
@@ -438,13 +354,8 @@ export default () => {
   useEffect(
     () => {
       dispatch({ type: BALANCES_DATA, value: null })
-
       if (address) {
-        const {
-          source_chain,
-          destination_chain,
-        } = { ...bridge }
-
+        const { source_chain, destination_chain } = { ...bridge }
         getBalances(source_chain)
         getBalances(destination_chain)
       }
@@ -459,16 +370,9 @@ export default () => {
   useEffect(
     () => {
       const getData = () => {
-        const {
-          status,
-        } = { ...approveResponse }
-
+        const { status } = { ...approveResponse }
         if (address && !xcall && !calling && !['pending'].includes(status)) {
-          const {
-            source_chain,
-            destination_chain,
-          } = { ...bridge }
-
+          const { source_chain, destination_chain } = { ...bridge }
           getBalances(source_chain)
           getBalances(destination_chain)
         }
@@ -484,15 +388,8 @@ export default () => {
   // trigger estimate fees
   useEffect(
     () => {
-      const {
-        source_chain,
-        amount,
-      } = { ...bridge }
-
-      const {
-        chain_id,
-      } = { ...getChain(source_chain, chains_data) }
-
+      const { source_chain, amount } = { ...bridge }
+      const { chain_id } = { ...getChain(source_chain, chains_data) }
       if (false && chain_id && Object.keys({ ...balances_data }).length >= chains_data.length && balances_data[chain_id] && amount) {
         setEstimateFeesTrigger(moment().valueOf())
       }
@@ -521,37 +418,26 @@ export default () => {
     () => {
       const update = async () => {
         if (sdk && address && xcall) {
-          const {
-            transfer_id,
-            transactionHash,
-          } = { ...xcall }
-
+          const { transfer_id, transactionHash } = { ...xcall }
           if (!transfer_id && transactionHash) {
             let transfer_data
-
             try {
               const response = toArray(await sdk.sdkUtils.getTransfers({ transactionHash }))
               transfer_data = response.find(t => equalsIgnoreCase(t?.xcall_transaction_hash, transactionHash))
             } catch (error) {}
-
             if (!transfer_data && address) {
               try {
                 const response = toArray(await sdk.sdkUtils.getTransfers({ userAddress: address }))
                 transfer_data = response.find(t => equalsIgnoreCase(t?.xcall_transaction_hash, transactionHash))
               } catch (error) {}
             }
-
-            const {
-              status,
-              error_status,
-            } = { ...transfer_data }
+            const { status, error_status } = { ...transfer_data }
 
             if (status || error_status) {
               if (transfer_data.transfer_id) {
                 setXcall({ ...xcall, transfer_id: transfer_data.transfer_id })
               }
               setLatestTransfers(_.orderBy(_.uniqBy(_.concat(transfer_data, latestTransfers), 'xcall_transaction_hash'), ['xcall_timestamp'], ['desc']))
-
               if ([XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(status)) {
                 reset('finish')
               }
@@ -563,14 +449,7 @@ export default () => {
           else if (transfer_id) {
             const response = toArray(await sdk.sdkUtils.getTransfers({ transferId: transfer_id }))
             const transfer_data = response.find(t => equalsIgnoreCase(t?.transfer_id, transfer_id))
-
-            const {
-              relayer_fee,
-              slippage,
-              status,
-              error_status,
-            } = { ...transfer_data }
-
+            const { relayer_fee, slippage, status, error_status } = { ...transfer_data }
             if (status || error_status) {
               let updated
               if (latest_transfer?.error_status === null) {
@@ -589,11 +468,9 @@ export default () => {
               else {
                 updated = true
               }
-
               if (updated) {
                 setLatestTransfers(_.orderBy(_.uniqBy(_.concat(transfer_data, latestTransfers), 'xcall_transaction_hash'), ['xcall_timestamp'], ['desc']))
               }
-
               if ([XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(status)) {
                 reset('finish')
               }
@@ -637,25 +514,37 @@ export default () => {
   useEffect(
     () => {
       if (displayReceiveNextInfo) {
-        const interval =
-          setInterval(
-            () => {
-              setReceiveNextInfoTimeout((receiveNextInfoTimeout || 5) - 1)
-              if (receiveNextInfoTimeout === 1) {
-                setDisplayReceiveNextInfo(false)
-              }
-            },
-            1000,
-          )
+        const interval = setInterval(
+          () => {
+            setReceiveNextInfoTimeout((receiveNextInfoTimeout || 5) - 1)
+            if (receiveNextInfoTimeout === 1) {
+              setDisplayReceiveNextInfo(false)
+            }
+          },
+          1000,
+        )
         return () => clearInterval(interval)
       }
     },
     [displayReceiveNextInfo, receiveNextInfoTimeout],
   )
 
+  useEffect(
+    () => {
+      const { asset } = { ...bridge }
+      const source_asset_data = getAsset(asset, assets_data)
+      if (source_asset_data) {
+        DEFAULT_OPTIONS.relayerFeeAssetType = !source_asset_data.allow_paying_gas ? 'native' : _.head(RELAYER_FEE_ASSET_TYPES)
+        if (!source_asset_data.allow_paying_gas) {
+          setOptions({ ...options, relayerFeeAssetType: 'native' })
+        }
+      }
+    },
+    [bridge, assets_data],
+  )
+
   const reset = async origin => {
     const reset_bridge = !['address', 'user_rejected'].includes(origin)
-
     if (reset_bridge) {
       setBridge({ ...bridge, amount: null })
       setXcall(null)
@@ -667,9 +556,7 @@ export default () => {
     if (!['finish'].includes(origin) && reset_bridge) {
       setOptions(DEFAULT_OPTIONS)
     }
-
     if (reset_bridge) {
-      // setRelayerFeeAssetType(_.head(RELAYER_FEE_ASSET_TYPES))
       setFees(null)
       setEstimateFeesTrigger(null)
     }
@@ -685,11 +572,7 @@ export default () => {
     setBalanceTrigger(moment().valueOf())
     setTransfersTrigger(moment().valueOf())
 
-    const {
-      source_chain,
-      destination_chain,
-    } = { ...bridge }
-
+    const { source_chain, destination_chain } = { ...bridge }
     getBalances(source_chain)
     getBalances(destination_chain)
   }
@@ -697,17 +580,11 @@ export default () => {
   const getBalances = chain => dispatch({ type: GET_BALANCES_DATA, value: { chain } })
 
   const checkSupport = () => {
-    const {
-      source_chain,
-      destination_chain,
-      asset,
-    } = { ...bridge }
-
+    const { source_chain, destination_chain, asset } = { ...bridge }
     const source_chain_data = getChain(source_chain, chains_data)
     const destination_chain_data = getChain(destination_chain, chains_data)
     const source_asset_data = getAsset(asset, assets_data)
     const destination_asset_data = getAsset(asset, assets_data)
-
     return (
       source_chain_data && destination_chain_data && source_asset_data && destination_asset_data &&
       getContract(destination_chain_data.chain_id, source_asset_data.contracts) &&
@@ -717,13 +594,7 @@ export default () => {
 
   const estimateFees = async () => {
     if (checkSupport() && !xcall && !xcallResponse) {
-      const {
-        source_chain,
-        destination_chain,
-        asset,
-        amount,
-      } = { ...bridge }
-
+      const { source_chain, destination_chain, asset, amount } = { ...bridge }
       const source_chain_data = getChain(source_chain, chains_data)
       const destination_chain_data = getChain(destination_chain, chains_data)
       const source_asset_data = getAsset(asset, assets_data)
@@ -740,68 +611,34 @@ export default () => {
           setXcallResponse(null)
 
           try {
-            const {
-              forceSlow,
-            } = { ...options }
-
-            const {
-              provider_params,
-            } = { ...source_chain_data }
-
-            const {
-              nativeCurrency,
-            } = { ..._.head(provider_params) }
-
-            let {
-              decimals,
-            } = { ...nativeCurrency }
-
+            const { forceSlow } = { ...options }
+            const { provider_params } = { ...source_chain_data }
+            const { nativeCurrency } = { ..._.head(provider_params) }
+            let { decimals } = { ...nativeCurrency }
             decimals = decimals || 18
             const routerFee = forceSlow ? 0 : parseFloat((Number(amount) * ROUTER_FEE_PERCENT / 100).toFixed(source_contract_data.decimals))
             const params = {
               originDomain: source_chain_data?.domain_id,
               destinationDomain: destination_chain_data?.domain_id,
               isHighPriority: !forceSlow,
-              priceIn: ['transacting'].includes(relayerFeeAssetType) ? 'usd' : 'native',
+              priceIn: relayerFeeAssetType === 'transacting' ? 'usd' : 'native',
               destinationGasPrice: destination_chain_data?.gas_price || undefined,
             }
 
             try {
-              console.log(
-                '[estimateRelayerFee]',
-                params,
-              )
-
+              console.log('[estimateRelayerFee]', params)
               const response = await sdk.sdkBase.estimateRelayerFee(params)
               let relayerFee = response && utils.formatUnits(response, decimals)
-
               if (relayerFee && params.priceIn === 'usd') {
-                const {
-                  price,
-                } = { ...source_asset_data }
-
+                const { price } = { ...source_asset_data }
                 if (price) {
                   relayerFee = (Number(relayerFee) / price).toFixed(decimals)
                 }
               }
-
-              console.log(
-                '[relayerFee]',
-                {
-                  params,
-                  response,
-                  relayerFee,
-                },
-              )
-
+              console.log('[relayerFee]', { params, response, relayerFee })
               setFees({ routerFee, relayerFee })
             } catch (error) {
-              console.log(
-                '[estimateRelayerFee error]',
-                params,
-                { error },
-              )
-
+              console.log('[estimateRelayerFee error]', params, { error })
               setFees({ routerFee })
             }
           } catch (error) {}
@@ -819,7 +656,6 @@ export default () => {
       const destinationDomain = destination_chain_data?.domain_id
       const originTokenAddress = (equalsIgnoreCase(source_contract_data?.contract_address, constants.AddressZero) ? _source_contract_data : source_contract_data)?.contract_address
       let destinationTokenAddress = _destination_contract_data?.contract_address
-
       const isNextAsset = typeof receive_local === 'boolean' ? receive_local : receiveLocal || equalsIgnoreCase(destination_contract_data?.contract_address, _destination_contract_data?.next_asset?.contract_address)
       if (isNextAsset) {
         destinationTokenAddress = _destination_contract_data?.next_asset?.contract_address || destinationTokenAddress
@@ -828,7 +664,6 @@ export default () => {
       const amount = utils.parseUnits((_amount || 0).toString(), source_decimals).toBigInt()
       const checkFastLiquidity = true
       let manual
-
       try {
         setEstimatedValues(null)
         setEstimateResponse(null)
@@ -846,9 +681,7 @@ export default () => {
               checkFastLiquidity,
             },
           )
-
           const response = await sdk.sdkBase.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount.toString(), isNextAsset, checkFastLiquidity)
-
           console.log(
             '[amountReceived]',
             {
@@ -862,9 +695,7 @@ export default () => {
               ...response,
             },
           )
-
           const destination_contract_data = getContract(destination_chain_data?.chain_id, destination_asset_data?.contracts)
-
           setEstimatedValues(
             Object.fromEntries(
               Object.entries({ ...response }).map(([k, v]) => {
@@ -881,7 +712,6 @@ export default () => {
         }
       } catch (error) {
         const response = parseError(error)
-
         console.log(
           '[calculateAmountReceived error]',
           {
@@ -895,11 +725,7 @@ export default () => {
             error,
           },
         )
-
-        const {
-          message,
-        } = { ...response }
-
+        const { message } = { ...response }
         if (includesStringList(message, ['reverted', 'invalid BigNumber value']) || (destination_chain_data?.id === 'linea' && includesStringList(message, ['Api Request failed']))) {
           manual = true
         }
@@ -910,38 +736,26 @@ export default () => {
 
       if (manual) {
         const routerFee = parseFloat((Number(_amount) * ROUTER_FEE_PERCENT / 100).toFixed(source_decimals))
-        setEstimatedValues(
-          {
-            amountReceived: Number(_amount) - routerFee,
-            routerFee,
-            isNextAsset: typeof receive_local === 'boolean' ? receive_local : receiveLocal,
-          }
-        )
+        setEstimatedValues({
+          amountReceived: Number(_amount) - routerFee,
+          routerFee,
+          isNextAsset: typeof receive_local === 'boolean' ? receive_local : receiveLocal,
+        })
       }
     }
   }
 
   const checkApprovedNeeded = async _amount => {
     if (sdk) {
-      let {
-        symbol,
-      } = { ...bridge }
-
-      const {
-        domain_id,
-      } = { ...source_chain_data }
-
-      const {
-        contract_address,
-      } = { ...source_contract_data }
-
+      let { symbol } = { ...bridge }
+      const { domain_id } = { ...source_chain_data }
+      const { contract_address } = { ...source_contract_data }
       const amount = utils.parseUnits((_amount || 0).toString(), source_decimals).toBigInt()
       const decimals = source_contract_data?.decimals || 18
       const approve_amount = amount.toString()
 
       try {
         setIsApproveNeeded(undefined)
-
         if (amount > 0) {
           console.log(
             '[approveIfNeeded]',
@@ -952,10 +766,8 @@ export default () => {
               approve_amount,
             },
           )
-
           const response = await sdk.sdkBase.approveIfNeeded(domain_id, contract_address, approve_amount)
           const _isApproveNeeded = !!response
-
           console.log(
             '[isApproveNeeded]',
             {
@@ -967,7 +779,6 @@ export default () => {
               response,
             },
           )
-
           setIsApproveNeeded(_isApproveNeeded)
         }
         else {
@@ -975,7 +786,6 @@ export default () => {
         }
       } catch (error) {
         const response = parseError(error)
-
         console.log(
           '[approveIfNeeded error]',
           {
@@ -997,31 +807,14 @@ export default () => {
 
     let success = false
     if (sdk) {
-      const {
-        source_chain,
-        destination_chain,
-        asset,
-        amount,
-        receive_wrap,
-      } = { ...bridge }
-      let {
-        symbol,
-      } = { ...bridge }
-
-      const {
-        to,
-        infiniteApprove,
-        callData,
-        slippage,
-        forceSlow,
-        receiveLocal,
-      } = { ...options }
+      const { source_chain, destination_chain, asset, amount, receive_wrap } = { ...bridge }
+      let { symbol } = { ...bridge }
+      const { to, infiniteApprove, callData, slippage, forceSlow, receiveLocal } = { ...options }
 
       const source_chain_data = getChain(source_chain, chains_data)
       const source_asset_data = getAsset(asset, assets_data)
       let source_contract_data = getContract(source_chain_data?.chain_id, source_asset_data?.contracts)
       const _source_contract_data = _.cloneDeep(source_contract_data)
-
       if (symbol) {
         // next asset
         if (equalsIgnoreCase(source_contract_data?.next_asset?.symbol, symbol)) {
@@ -1045,7 +838,6 @@ export default () => {
       const destination_chain_data = getChain(destination_chain, chains_data)
       const destination_asset_data = getAsset(asset, assets_data)
       let destination_contract_data = getContract(destination_chain_data?.chain_id, destination_asset_data?.contracts)
-
       // next asset
       if ((receiveLocal || estimatedValues?.isNextAsset) && destination_contract_data?.next_asset) {
         destination_contract_data = {
@@ -1071,36 +863,21 @@ export default () => {
         callData: callData || '0x',
         [relayer_fee_field]: relayerFee && Number(relayerFee) > 0 ? utils.parseUnits(numberToFixed(Number(relayerFee), relayer_fee_decimals - 2), relayer_fee_decimals).toString() : undefined,
       }
-
-      console.log(
-        '[xcall setup]',
-        {
-          relayerFeeAssetType,
-          relayerFee,
-          fees,
-        },
-        { xcallParams },
-      )
-
+      console.log('[xcall setup]', { relayerFeeAssetType, relayerFee, fees }, { xcallParams })
       let failed = false
-
       if (!xcallParams[relayer_fee_field] && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') {
-        setXcallResponse(
-          {
-            status: 'failed',
-            message: 'Cannot estimate the relayer fee at the moment. Please try again later.',
-            code: XTransferErrorStatus.LowRelayerFee,
-          }
-        )
+        setXcallResponse({
+          status: 'failed',
+          message: 'Cannot estimate the relayer fee at the moment. Please try again later.',
+          code: XTransferErrorStatus.LowRelayerFee,
+        })
         failed = true
       }
 
       if (!failed) {
         let approve_amount
-
         try {
           approve_amount = utils.parseUnits(amount || '0', source_decimals).toString()
-
           console.log(
             '[approveIfNeeded before xcall]',
             {
@@ -1111,43 +888,21 @@ export default () => {
               infiniteApprove,
             },
           )
-
           const approve_request = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xcallParams.asset, approve_amount, infiniteApprove)
-
           if (approve_request) {
             setApproving(true)
             const approve_response = await signer.sendTransaction(approve_request)
-
-            const {
-              hash,
-            } = { ...approve_response }
-
-            setApproveResponse(
-              {
-                status: 'pending',
-                message: `Waiting for ${symbol} approval`,
-                tx_hash: hash,
-              }
-            )
-
+            const { hash } = { ...approve_response }
+            setApproveResponse({
+              status: 'pending',
+              message: `Waiting for ${symbol} approval`,
+              tx_hash: hash,
+            })
             setApproveProcessing(true)
             const approve_receipt = await signer.provider.waitForTransaction(hash)
-
-            const {
-              status,
-            } = { ...approve_receipt }
-
-            setApproveResponse(
-              status ?
-                null :
-                {
-                  status: 'failed',
-                  message: `Failed to approve ${symbol}`,
-                  tx_hash: hash,
-                }
-            )
-
+            const { status } = { ...approve_receipt }
             failed = !status
+            setApproveResponse(status ? null : { status: 'failed', message: `Failed to approve ${symbol}`, tx_hash: hash })
             setApproveProcessing(false)
             setApproving(false)
           }
@@ -1157,7 +912,6 @@ export default () => {
         } catch (error) {
           failed = true
           const response = parseError(error)
-
           console.log(
             '[approveIfNeeded error before xcall]',
             {
@@ -1169,7 +923,6 @@ export default () => {
               ...response,
             },
           )
-
           setApproveResponse({ status: 'failed', ...response })
           setApproveProcessing(false)
           setApproving(false)
@@ -1178,7 +931,6 @@ export default () => {
 
       if (!failed) {
         const is_wrap_native = (equalsIgnoreCase(source_contract_data?.contract_address, constants.AddressZero) || (source_contract_data?.wrapable && !source_contract_data.symbol?.startsWith(WRAPPED_PREFIX))) && NATIVE_WRAPPABLE_SYMBOLS.includes(source_asset_data?.symbol)
-
         try {
           if (is_wrap_native) {
             xcallParams.asset = _source_contract_data?.contract_address
@@ -1187,67 +939,44 @@ export default () => {
             xcallParams.relayerFee = xcallParams.relayerFeeInTransactingAsset
             xcallParams.relayerFeeInTransactingAsset = '0'
           }
-
           const CANONICAL_ASSET_SYMBOL = NATIVE_WRAPPABLE_SYMBOLS.find(s => s === source_asset_data?.symbol)
           if (CANONICAL_ASSET_SYMBOL && _.head(destination_chain_data?.provider_params)?.nativeCurrency?.symbol?.endsWith(CANONICAL_ASSET_SYMBOL)) {
             xcallParams.unwrapNativeOnDestination = xcallParams.receiveLocal || receive_wrap ? false : true
           }
 
-          console.log(
-            '[xcall]',
-            { xcallParams },
-          )
-
+          console.log('[xcall]', { xcallParams })
           console.warn('amount', xcallParams.amount)
           console.warn('relayerFeeInTransactingAsset', xcallParams.relayerFeeInTransactingAsset)
           console.warn('total to wrap', BigNumber.from(xcallParams.amount).add(xcallParams.relayerFeeInTransactingAsset || '0').toString())
-
           const xcall_request = await sdk.sdkBase.xcall(xcallParams)
-
           console.warn('xcall_request.value', xcall_request?.value?.toString())
-
           if (xcall_request) {
             try {
               let gasLimit = await signer.estimateGas(xcall_request)
-
               if (gasLimit) {
                 gasLimit =
                   FixedNumber.fromString(gasLimit.toString())
-                    .mulUnsafe(
-                      FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
-                    )
+                    .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
                     .round(0)
                     .toString()
                     .replace('.0', '')
-
                 xcall_request.gasLimit = gasLimit
               }
             } catch (error) {}
 
             const xcall_response = await signer.sendTransaction(xcall_request)
-
-            const {
-              hash,
-            } = { ...xcall_response }
+            const { hash } = { ...xcall_response }
 
             setCallProcessing(true)
             const xcall_receipt = await signer.provider.waitForTransaction(hash)
-
             setXcall(xcall_receipt)
-
-            const {
-              transactionHash,
-              status,
-            } = { ...xcall_receipt }
-
+            const { transactionHash, status } = { ...xcall_receipt }
             failed = !status
-            setXcallResponse(
-              {
-                status: failed ? 'failed' : 'success',
-                message: failed ? 'Failed to send transaction' : `Transferring ${symbol}. (It's ok to close the browser)`,
-                tx_hash: hash,
-              }
-            )
+            setXcallResponse({
+              status: failed ? 'failed' : 'success',
+              message: failed ? 'Failed to send transaction' : `Transferring ${symbol}. (It's ok to close the browser)`,
+              tx_hash: hash,
+            })
             success = true
 
             if (!failed) {
@@ -1256,7 +985,6 @@ export default () => {
                   receiveLocal || estimatedValues?.isNextAsset ?
                     destination_contract_data?.next_asset?.contract_address || destination_contract_data?.contract_address :
                     destination_contract_data?.contract_address
-
                 const destination_decimals =
                   (equalsIgnoreCase(destination_transacting_asset, destination_contract_data?.next_asset?.contract_address) && destination_contract_data?.next_asset ?
                     destination_contract_data.next_asset?.decimals :
@@ -1289,32 +1017,19 @@ export default () => {
                     ['xcall_timestamp'], ['desc'],
                   )
                 )
-
                 setOpenTransferStatus(true)
               } catch (error) {
-                console.log(
-                  '[xcall setLatestTransfers error]',
-                  { xcallParams, error },
-                )
+                console.log('[xcall setLatestTransfers error]', { xcallParams, error })
               }
             }
           }
         } catch (error) {
           const response = parseError(error)
-
-          console.log(
-            '[xcall error]',
-            { xcallParams, error },
-          )
-
-          let {
-            message,
-          } = { ...response }
-
+          console.log('[xcall error]', { xcallParams, error })
+          let { message } = { ...response }
           if (message?.includes('insufficient funds for gas')) {
             message = 'Insufficient gas for the destination gas fee.'
           }
-
           switch (response.code) {
             case 'user_rejected':
               reset(response.code)
@@ -1334,7 +1049,6 @@ export default () => {
 
     setCallProcessing(false)
     setCalling(false)
-
     if (sdk && address && success) {
       await sleep(1 * 1000)
       setBalanceTrigger(moment().valueOf())
@@ -1363,15 +1077,11 @@ export default () => {
   } = { ...options }
 
   const source_chain_data = getChain(source_chain, chains_data)
-
-  const {
-    color,
-  } = { ...source_chain_data }
+  const { color } = { ...source_chain_data }
 
   const source_asset_data = getAsset(asset, assets_data)
   let source_contract_data = getContract(source_chain_data?.chain_id, source_asset_data?.contracts)
   const _source_contract_data = _.cloneDeep(source_contract_data)
-
   if (symbol) {
     // next asset
     if (equalsIgnoreCase(source_contract_data?.next_asset?.symbol, symbol)) {
@@ -1428,7 +1138,7 @@ export default () => {
   const destination_amount = getBalance(destination_chain_data?.chain_id, destination_contract_data?.contract_address, balances_data)?.amount
 
   const relayer_fee = fees && (fees.relayerFee || 0)
-  const router_fee = estimatedValues?.routerFee ? estimatedValues.routerFee : fees && (forceSlow ? 0 : fees.routerFee || 0)
+  const router_fee = estimatedValues?.routerFee && !(forceSlow || estimatedValues?.isFastPath === false) ? estimatedValues.routerFee : fees && (forceSlow ? 0 : fees.routerFee || 0)
   const price_impact = null
 
   const routers_liquidity_amount = _.sum(
@@ -1437,14 +1147,8 @@ export default () => {
       .map(a => Number(utils.formatUnits(BigInt(a?.amount || '0'), equalsIgnoreCase(a?.contract_address, destination_contract_data?.next_asset?.contract_address) && destination_contract_data?.next_asset ? destination_contract_data.next_asset?.decimals || 18 : destination_decimals)))
   )
   const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === destination_chain && p.asset_data?.id === asset)
-
-  const {
-    adopted,
-    local,
-  } = { ...pool_data }
-
+  const { adopted, local } = { ...pool_data }
   const next_asset_data = adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local?.symbol?.startsWith(WRAPPED_PREFIX) ? local : local
-
   const pool_amounts = toArray(_.concat(adopted, local)).filter(a => ['string', 'number'].includes(typeof a.balance)).map(a => Number(a.balance))
   const pool_amount = receiveLocal || estimatedValues?.isNextAsset ? null : Number(next_asset_data?.balance) > -1 ? Number(next_asset_data.balance) : _.min(pool_amounts)
   const min_amount = 0
@@ -1695,10 +1399,7 @@ export default () => {
                             initialData={options}
                             onChange={
                               o => {
-                                const {
-                                  receiveLocal,
-                                } = { ...o }
-
+                                const { receiveLocal } = { ...o }
                                 setOptions(o)
 
                                 if ((receiveLocal && !options?.receiveLocal) || (!receiveLocal && options?.receiveLocal) || o?.relayerFeeAssetType !== relayerFeeAssetType) {
@@ -1707,13 +1408,11 @@ export default () => {
                                     checkApprovedNeeded(amount)
                                   }
                                   else {
-                                    setEstimatedValues(
-                                      {
-                                        amountReceived: '0',
-                                        routerFee: '0',
-                                        isNextAsset: receiveLocal,
-                                      }
-                                    )
+                                    setEstimatedValues({
+                                      amountReceived: '0',
+                                      routerFee: '0',
+                                      isNextAsset: receiveLocal,
+                                    })
                                     setIsApproveNeeded(false)
                                   }
                                   if (o?.relayerFeeAssetType !== relayerFeeAssetType) {
@@ -1729,7 +1428,7 @@ export default () => {
                             showInfiniteApproval={isApproveNeeded}
                             hasNextAsset={destination_contract_data?.next_asset}
                             chainData={destination_chain_data}
-                            relayerFeeAssetTypes={RELAYER_FEE_ASSET_TYPES.map(t => { return { name: t === 'transacting' ? source_symbol : source_gas_native_token?.symbol, value: t } })}
+                            relayerFeeAssetTypes={RELAYER_FEE_ASSET_TYPES.filter(t => source_asset_data?.allow_paying_gas || t !== 'transacting').map(t => { return { name: t === 'transacting' ? source_symbol : source_gas_native_token?.symbol, value: t } })}
                           />
                         )}
                       </div>
@@ -1749,17 +1448,13 @@ export default () => {
                                   const _source_chain = c
                                   const _destination_chain = c === destination_chain ? source_chain : destination_chain
                                   const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(a => a.id !== asset))?.id : asset
-
-                                  setBridge(
-                                    {
-                                      ...bridge,
-                                      source_chain: _source_chain,
-                                      destination_chain: _destination_chain,
-                                      asset: _asset,
-                                      symbol: equalsIgnoreCase(_source_chain, source_chain) && _asset === asset ? symbol : undefined,
-                                    }
-                                  )
-
+                                  setBridge({
+                                    ...bridge,
+                                    source_chain: _source_chain,
+                                    destination_chain: _destination_chain,
+                                    asset: _asset,
+                                    symbol: equalsIgnoreCase(_source_chain, source_chain) && _asset === asset ? symbol : undefined,
+                                  })
                                   getBalances(_source_chain)
                                   getBalances(_destination_chain)
                                 }
@@ -1779,18 +1474,14 @@ export default () => {
                                     const _source_chain = destination_chain
                                     const _destination_chain = source_chain
                                     const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(a => a.id !== asset))?.id : asset
-
-                                    setBridge(
-                                      {
-                                        ...bridge,
-                                        source_chain: _source_chain,
-                                        destination_chain: _destination_chain,
-                                        asset: _asset,
-                                        amount: null,
-                                      }
-                                    )
+                                    setBridge({
+                                      ...bridge,
+                                      source_chain: _source_chain,
+                                      destination_chain: _destination_chain,
+                                      asset: _asset,
+                                      amount: null,
+                                    })
                                     setButtonDirection(buttonDirection * -1)
-
                                     getBalances(source_chain)
                                     getBalances(destination_chain)
                                   }
@@ -1814,17 +1505,16 @@ export default () => {
                                 c => {
                                   const _source_chain = c === source_chain ? destination_chain : source_chain
                                   const _destination_chain = c
-                                  const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(a => a.id !== asset))?.id : asset
-
-                                  setBridge(
-                                    {
-                                      ...bridge,
-                                      source_chain: _source_chain,
-                                      destination_chain: _destination_chain,
-                                      asset: _asset,
-                                    }
-                                  )
-
+                                  const _destination_chain_data = getChain(_destination_chain, chains_data)
+                                  const source_asset_data = getAsset(asset, assets_data)
+                                  const destination_contract_data = getContract(_destination_chain_data?.chain_id, source_asset_data?.contracts)
+                                  const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(a => a.id !== asset))?.id : source_asset_data && !destination_contract_data && process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ? 'eth' : asset
+                                  setBridge({
+                                    ...bridge,
+                                    source_chain: _source_chain,
+                                    destination_chain: _destination_chain,
+                                    asset: _asset,
+                                  })
                                   getBalances(_source_chain)
                                   getBalances(_destination_chain)
                                 }
@@ -1868,20 +1558,17 @@ export default () => {
                                         () => {
                                           if (utils.parseUnits(max_amount || '0', source_decimals).toBigInt() > 0) {
                                             setBridge({ ...bridge, amount: max_amount })
-
                                             if (['string', 'number'].includes(typeof max_amount)) {
                                               if (max_amount && !['0', '0.0'].includes(max_amount)) {
                                                 calculateAmountReceived(max_amount)
                                                 checkApprovedNeeded(max_amount)
                                               }
                                               else {
-                                                setEstimatedValues(
-                                                  {
-                                                    amountReceived: '0',
-                                                    routerFee: '0',
-                                                    isNextAsset: receiveLocal,
-                                                  }
-                                                )
+                                                setEstimatedValues({
+                                                  amountReceived: '0',
+                                                  routerFee: '0',
+                                                  isNextAsset: receiveLocal,
+                                                })
                                                 setIsApproveNeeded(false)
                                               }
                                             }
@@ -1910,15 +1597,16 @@ export default () => {
                                   value={asset}
                                   onSelect={
                                     (a, s) => {
-                                      setBridge(
-                                        {
-                                          ...bridge,
-                                          asset: a,
-                                          symbol: s,
-                                          amount: a !== asset || !equalsIgnoreCase(s, symbol) ? null : amount,
-                                        }
-                                      )
-
+                                      const source_asset_data = getAsset(a, assets_data)
+                                      const destination_contract_data = getContract(destination_chain_data?.chain_id, source_asset_data?.contracts)
+                                      const _destination_chain = destination_chain ? destination_contract_data ? destination_chain : _.head(toArray(chains_data).filter(c => c.id !== 'source_chain' && getContract(c.chain_id, source_asset_data?.contracts)))?.id : destination_chain
+                                      setBridge({
+                                        ...bridge,
+                                        destination_chain: _destination_chain,
+                                        asset: a,
+                                        symbol: s,
+                                        amount: a !== asset || !equalsIgnoreCase(s, symbol) ? null : amount,
+                                      })
                                       if (a !== asset) {
                                         getBalances(source_chain)
                                         getBalances(destination_chain)
@@ -1946,7 +1634,6 @@ export default () => {
                                       e => {
                                         const regex = /^[0-9.\b]+$/
                                         let value
-
                                         if (e.target.value === '' || regex.test(e.target.value)) {
                                           value = e.target.value
                                         }
@@ -1956,22 +1643,18 @@ export default () => {
                                           }
                                           value = numberToFixed(value, source_decimals || 18)
                                         }
-
                                         setBridge({ ...bridge, amount: value })
-
                                         if (['string', 'number'].includes(typeof value)) {
                                           if (value && !['0', '0.0'].includes(value)) {
                                             calculateAmountReceived(value)
                                             checkApprovedNeeded(value)
                                           }
                                           else {
-                                            setEstimatedValues(
-                                              {
-                                                amountReceived: '0',
-                                                routerFee: '0',
-                                                isNextAsset: receiveLocal,
-                                              }
-                                            )
+                                            setEstimatedValues({
+                                              amountReceived: '0',
+                                              routerFee: '0',
+                                              isNextAsset: receiveLocal,
+                                            })
                                             setIsApproveNeeded(false)
                                           }
                                         }
@@ -2046,7 +1729,6 @@ export default () => {
                                         (a, s) => {
                                           if (!(['pool'].includes(source) || !is_wrapable_asset)) {
                                             setBridge({ ...bridge, asset: a, receive_wrap: s?.startsWith('W') })
-
                                             if (a !== asset) {
                                               getBalances(source_chain)
                                               getBalances(destination_chain)
@@ -2139,10 +1821,7 @@ export default () => {
                                               <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm font-medium">
                                                 Recipient address
                                               </div>
-                                              <BiInfoCircle
-                                                size={14}
-                                                className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                              />
+                                              <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
                                             </div>
                                           </Tooltip>
                                           <div className="flex flex-col sm:items-end space-y-1.5">
@@ -2163,7 +1842,6 @@ export default () => {
                                                       } catch (error) {
                                                         value = address
                                                       }
-
                                                       setOptions({ ...options, to: value })
                                                     }
                                                   }
@@ -2204,40 +1882,39 @@ export default () => {
                                           </div>
                                         </div>
                                       )}
-                                      <div className="flex items-center justify-between space-x-2">
-                                        <Tooltip
-                                          placement="top"
-                                          content="This supports our router users providing fast liquidity."
-                                          className="z-50 bg-dark text-white text-xs"
-                                        >
-                                          <div className="flex items-center">
-                                            <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                              Router fee
+                                      {!(forceSlow || estimatedValues?.isFastPath === false) && (
+                                        <div className="flex items-center justify-between space-x-2">
+                                          <Tooltip
+                                            placement="top"
+                                            content={`Liquidity providers receive a ${process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT}% fee for supporting fast transfers`}
+                                            className="z-50 bg-dark text-white text-xs"
+                                          >
+                                            <div className="flex items-center">
+                                              <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                                Router fee
+                                              </div>
+                                              <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
                                             </div>
-                                            <BiInfoCircle
-                                              size={14}
-                                              className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
+                                          </Tooltip>
+                                          {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.routerFee) || estimateResponse ?
+                                            <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
+                                              {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimatedValues?.routerFee) && !estimateResponse ?
+                                                <DecimalsFormat
+                                                  value={Number(router_fee) <= 0 ? 0 : router_fee}
+                                                  className="text-sm 3xl:text-xl"
+                                                /> :
+                                                <span>-</span>
+                                              }
+                                              <span>{source_symbol}</span>
+                                            </span> :
+                                            <Oval
+                                              width="14"
+                                              height="14"
+                                              color={loaderColor(theme)}
                                             />
-                                          </div>
-                                        </Tooltip>
-                                        {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.routerFee) || estimateResponse ?
-                                          <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                            {['string', 'number'].includes(typeof amount) && ['string', 'number'].includes(typeof estimatedValues?.routerFee) && !estimateResponse ?
-                                              <DecimalsFormat
-                                                value={Number(router_fee) <= 0 ? 0 : router_fee}
-                                                className="text-sm 3xl:text-xl"
-                                              /> :
-                                              <span>-</span>
-                                            }
-                                            <span>{source_symbol}</span>
-                                          </span> :
-                                          <Oval
-                                            width="14"
-                                            height="14"
-                                            color={loaderColor(theme)}
-                                          />
-                                        }
-                                      </div>
+                                          }
+                                        </div>
+                                      )}
                                       <div className="flex items-center justify-between space-x-2">
                                         <Tooltip
                                           placement="top"
@@ -2248,10 +1925,7 @@ export default () => {
                                             <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                                               Gas on destination
                                             </div>
-                                            <BiInfoCircle
-                                              size={14}
-                                              className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                            />
+                                            <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
                                           </div>
                                         </Tooltip>
                                         {fees ?
@@ -2267,14 +1941,13 @@ export default () => {
                                                   value={relayerFeeAssetType}
                                                   onChange={
                                                     e => {
-                                                      // setRelayerFeeAssetType(e.target.value)
                                                       setEstimateFeesTrigger(moment().valueOf())
                                                       checkApprovedNeeded(amount)
                                                     }
                                                   }
                                                   className="bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0"
                                                 >
-                                                  {RELAYER_FEE_ASSET_TYPES.map((t, i) => {
+                                                  {RELAYER_FEE_ASSET_TYPES.filter(t => source_asset_data?.allow_paying_gas || t !== 'transacting').map((t, i) => {
                                                     return (
                                                       <option
                                                         key={i}
@@ -2328,10 +2001,7 @@ export default () => {
                                                 <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                                                   Infinite approval
                                                 </div>
-                                                <BiInfoCircle
-                                                  size={14}
-                                                  className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                                />
+                                                <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
                                               </div>
                                             </Tooltip>
                                             <Tooltip
@@ -2370,10 +2040,7 @@ export default () => {
                                                 <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                                                   Slippage tolerance
                                                 </div>
-                                                <BiInfoCircle
-                                                  size={14}
-                                                  className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                                />
+                                                <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
                                               </div>
                                             </Tooltip>
                                             <div className="flex flex-col sm:items-end space-y-1.5">
@@ -2390,7 +2057,6 @@ export default () => {
                                                         e => {
                                                           const regex = /^[0-9.\b]+$/
                                                           let value
-
                                                           if (e.target.value === '' || regex.test(e.target.value)) {
                                                             value = e.target.value
                                                           }
@@ -2402,7 +2068,6 @@ export default () => {
                                                               value = Number(value)
                                                             }
                                                           }
-
                                                           value = value && !isNaN(value) ? parseFloat(Number(value).toFixed(2)) : value
                                                           value = value <= 0 ? 0.01 : value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
                                                           setOptions({ ...options, slippage: value })
@@ -2488,10 +2153,7 @@ export default () => {
                                             <div className="sm:whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                                               Minimum received after slippage
                                             </div>
-                                            <BiInfoCircle
-                                              size={14}
-                                              className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                            />
+                                            <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
                                           </div>
                                         </Tooltip>
                                         {!['string', 'number'].includes(typeof amount) || [''].includes(amount) || ['string', 'number'].includes(typeof estimatedValues?.amountReceived) || estimateResponse ?
@@ -2523,10 +2185,7 @@ export default () => {
                                               <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                                                 Price impact
                                               </div>
-                                              <BiInfoCircle
-                                                size={14}
-                                                className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                              />
+                                              <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
                                             </div>
                                           </Tooltip>
                                           <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
@@ -2561,10 +2220,7 @@ export default () => {
                                               </span>
                                             }
                                           </span>
-                                          <BiInfoCircle
-                                            size={14}
-                                            className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0"
-                                          />
+                                          <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
                                         </div>
                                       </Tooltip>
                                     </div>
@@ -2647,11 +2303,7 @@ export default () => {
                                     ['', '0', '0.0'].includes(amount) || ((!relayer_fee || Number(relayer_fee) <= 0) && process.env.NEXT_PUBLIC_NETWORK !== 'testnet') || estimated_received <= 0 ?
                                       'bg-slate-200 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' :
                                       'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'
-                                } rounded flex items-center ${
-                                  calling && !approving && callProcessing ?
-                                    'justify-center' :
-                                    'justify-center'
-                                } text-white text-base 3xl:text-2xl py-3 sm:py-4 px-2 sm:px-3`
+                                } rounded flex items-center justify-center text-white text-base 3xl:text-2xl py-3 sm:py-4 px-2 sm:px-3`
                               }
                             >
                               <span className={`flex items-center justify-center ${calling && !approving && callProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
@@ -2680,12 +2332,7 @@ export default () => {
                             </button> :
                             (xcallResponse || (!xcall && approveResponse) || estimateResponse) &&
                             (toArray(xcallResponse || approveResponse || estimateResponse).map((r, i) => {
-                              const {
-                                status,
-                                message,
-                                code,
-                              } = { ...r }
-
+                              const { status, message, code } = { ...r }
                               return (
                                 <Alert
                                   key={i}
@@ -2712,13 +2359,7 @@ export default () => {
                                   <div className="space-y-2">
                                     <div className="flex items-center justify-between space-x-2">
                                       <span className="break-all text-sm 3xl:text-xl font-medium">
-                                        {ellipse(
-                                          split(message, 'normal', ' ')
-                                            .join(' ')
-                                            .substring(0, status === 'failed' && errorPatterns.findIndex(c => message?.indexOf(c) > -1) > -1 ? message.indexOf(errorPatterns.find(c => message.indexOf(c) > -1)) : undefined) ||
-                                          message,
-                                          128,
-                                        )}
+                                        {ellipse(split(message, 'normal', ' ').join(' ').substring(0, status === 'failed' && errorPatterns.findIndex(c => message?.indexOf(c) > -1) > -1 ? message.indexOf(errorPatterns.find(c => message.indexOf(c) > -1)) : undefined) || message, 128)}
                                       </span>
                                       <div className="flex items-center space-x-1">
                                         {status === 'failed' && message && (
@@ -2774,9 +2415,7 @@ export default () => {
                           buttonConnectTitle="Connect Wallet"
                           className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base 3xl:text-2xl font-medium text-center sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                         >
-                          <span>
-                            Connect Wallet
-                          </span>
+                          <span>Connect Wallet</span>
                         </Wallet>
                     }
                   </div>

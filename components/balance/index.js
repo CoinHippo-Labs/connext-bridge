@@ -41,24 +41,12 @@ export default (
     ),
     shallowEqual,
   )
-  const {
-    theme,
-  } = { ...preferences }
-  const {
-    assets_data,
-  } = { ...assets }
-  const {
-    rpcs,
-  } = { ...rpc_providers }
-  const {
-    wallet_data,
-  } = { ...wallet }
-  const {
-    signer,
-  } = { ...wallet_data }
-  const {
-    balances_data,
-  } = { ...balances }
+  const { theme } = { ...preferences }
+  const { assets_data } = { ...assets }
+  const { rpcs } = { ...rpc_providers }
+  const { wallet_data } = { ...wallet }
+  const { signer } = { ...wallet_data }
+  const { balances_data } = { ...balances }
 
   const [balance, setBalance] = useState(null)
   const [_trigger, setTrigger] = useState(null)
@@ -67,35 +55,18 @@ export default (
     () => {
       const getData = () => {
         if (chainId && contractAddress && (trigger || _trigger)) {
-          const contract_data =
-            {
-              contract_address: contractAddress,
-              chain_id: chainId,
-              decimals,
-              symbol,
-            }
-
-          dispatch(
-            {
-              type: GET_BALANCES_DATA,
-              value:
-                {
-                  chain: chainId,
-                  contract_data,
-                },
-            }
-          )
+          const contract_data = {
+            contract_address: contractAddress,
+            chain_id: chainId,
+            decimals,
+            symbol,
+          }
+          dispatch({ type: GET_BALANCES_DATA, value: { chain: chainId, contract_data } })
         }
       }
 
       getData()
-
-      const interval =
-        setInterval(
-          () => getData(),
-          30 * 1000,
-        )
-
+      const interval = setInterval(() => getData(), 30 * 1000)
       return () => clearInterval(interval)
     },
     [trigger, _trigger],
@@ -104,12 +75,8 @@ export default (
   useEffect(
     () => {
       const balance_data = getBalance(chainId, contractAddress, balances_data)
-
       if (balance_data) {
-        const {
-          amount,
-        } = { ...balance_data }
-
+        const { amount } = { ...balance_data }
         setBalance(amount)
       }
     },
@@ -127,63 +94,40 @@ export default (
   )
 
   const asset_data = getAsset(asset, assets_data)
-
-  const {
-    contracts,
-  } = { ...asset_data }
-
+  const { contracts } = { ...asset_data }
   const contract_data = getContract(chainId, contracts)
+  const { contract_address } = { ...contract_data }
 
-  const {
-    contract_address,
-  } = { ...contract_data }
-
-  let {
-    amount,
-  } = { ...getBalance(chainId, contractAddress || contract_address, balances_data) }
-
-  amount =
-    trigger ?
-      balance :
-      ['string', 'number'].includes(typeof amount) && !isNaN(amount) ?
-        amount :
-        null
-
+  let { amount } = { ...getBalance(chainId, contractAddress || contract_address, balances_data) }
+  amount = trigger ? balance : ['string', 'number'].includes(typeof amount) && !isNaN(amount) ? amount : null
   symbol = symbol || contract_data?.symbol || asset_data?.symbol
 
-  return (
-    chainId && asset &&
-    (
-      <div className={`flex items-center justify-center text-slate-600 dark:text-slate-50 text-sm 3xl:text-xl space-x-1 3xl:space-x-2 ${className}`}>
-        {['string', 'number'].includes(typeof amount) && !isNaN(amount) ?
-          <>
-            <DecimalsFormat
-              value={amount}
-              className="font-semibold"
+  return chainId && asset && (
+    <div className={`flex items-center justify-center text-slate-600 dark:text-slate-50 text-sm 3xl:text-xl space-x-1 3xl:space-x-2 ${className}`}>
+      {['string', 'number'].includes(typeof amount) && !isNaN(amount) ?
+        <>
+          <DecimalsFormat
+            value={amount}
+            format="0,0.000000"
+            maxDecimals={6}
+            className="font-semibold"
+          />
+          {!hideSymbol && (
+            <span className="hidden sm:block font-semibold">
+              {symbol}
+            </span>
+          )}
+        </> :
+        typeof amount === 'string' ?
+          <span>n/a</span> :
+          signer && (
+            <RotatingSquare
+              width="16"
+              height="16"
+              color={loaderColor(theme)}
             />
-            {
-              !hideSymbol &&
-              (
-                <span className="hidden sm:block font-semibold">
-                  {symbol}
-                </span>
-              )
-            }
-          </> :
-          typeof amount === 'string' ?
-            <span>
-              n/a
-            </span> :
-            signer &&
-            (
-              <RotatingSquare
-                width="16"
-                height="16"
-                color={loaderColor(theme)}
-              />
-            )
-        }
-      </div>
-    )
+          )
+      }
+    </div>
   )
 }

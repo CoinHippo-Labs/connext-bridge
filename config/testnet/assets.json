@@ -5,6 +5,7 @@
     "name": "Test",
     "image": "/logos/assets/test.png",
     "is_stablecoin": true,
+    "allow_paying_gas": true,
     "contracts": [
       {
         "contract_address": "0x7ea6eA49B0b0Ae9c5db7907d139D9Cd3439862a1",
@@ -58,6 +59,7 @@
     "symbol": "ETH",
     "name": "Ethereum",
     "image": "/logos/assets/eth.png",
+    "allow_paying_gas": true,
     "contracts": [
       {
         "contract_address": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
@@ -127,6 +129,7 @@
     "symbol": "MATIC",
     "name": "Polygon",
     "image": "/logos/assets/matic.png",
+    "allow_paying_gas": true,
     "contracts": [
       {
         "contract_address": "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889",
@@ -192,6 +195,64 @@
       }
     ],
     "color": "#ff6647",
+    "group": "other_tokens"
+  },
+  {
+    "id": "alusd",
+    "symbol": "alUSD",
+    "name": "Alchemix USD",
+    "image": "/logos/assets/alusd.png",
+    "is_stablecoin": true,
+    "contracts": [
+      {
+        "contract_address": "0x990162AFaA06f591c03DD36ECBDa24A8A80F2D0c",
+        "chain_id": 5,
+        "decimals": 18,
+        "symbol": "alUSD"
+      },
+      {
+        "contract_address": "0xFDd72CB8477d3Ae2D00a6F9516324c529dfC395A",
+        "chain_id": 420,
+        "decimals": 18,
+        "symbol": "nextAlUSD"
+      },
+      {
+        "contract_address": "0xF87510F1E63E29BB69d9D35D0365E8CaCe609a8C",
+        "chain_id": 421613,
+        "decimals": 18,
+        "symbol": "nextAlUSD"
+      }
+    ],
+    "color": "#000000",
+    "group": "other_tokens"
+  },
+  {
+    "id": "aleth",
+    "symbol": "alETH",
+    "name": "Alchemix ETH",
+    "image": "/logos/assets/aleth.png",
+    "is_stablecoin": false,
+    "contracts": [
+      {
+        "contract_address": "0xF6DD52cdF1614Cd649077Aa283840657617faa07",
+        "chain_id": 5,
+        "decimals": 18,
+        "symbol": "alETH"
+      },
+      {
+        "contract_address": "0x40E4b6A2D89fF4206dB843B614bBe2694876D640",
+        "chain_id": 420,
+        "decimals": 18,
+        "symbol": "nextAlETH"
+      },
+      {
+        "contract_address": "0x1F563a8BE28acdCc5546543a227aFb9373586eD0",
+        "chain_id": 421613,
+        "decimals": 18,
+        "symbol": "nextAlETH"
+      }
+    ],
+    "color": "#000000",
     "group": "other_tokens"
   }
 ]
