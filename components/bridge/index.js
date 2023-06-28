@@ -1163,7 +1163,7 @@ export default () => {
   const latest_transfer = _.head(latestTransfers)
   const estimated_time_seconds = (latest_transfer?.routers && latest_transfer.routers.length < 1) || latest_transfer?.force_slow ? 5400 : 240
   const time_spent_seconds = moment().diff(moment(latest_transfer?.xcall_timestamp ? latest_transfer.xcall_timestamp * 1000 : undefined), 'seconds')
-  const errored = latest_transfer?.error_status && !latest_transfer.execute_transaction_hash && [XTransferStatus.XCalled, XTransferStatus.Reconciled].includes(latest_transfer.status)
+  const errored = latest_transfer?.error_status && ![XTransferErrorStatus.NoBidsReceived].includes(latest_transfer.error_status) && !latest_transfer.execute_transaction_hash && [XTransferStatus.XCalled, XTransferStatus.Reconciled].includes(latest_transfer.status)
   const bumped = [XTransferErrorStatus.LowRelayerFee, XTransferErrorStatus.ExecutionError].includes(latest_transfer?.error_status) && toArray(latest_bumped_transfers_data).findIndex(t => equalsIgnoreCase(t.transfer_id, latest_transfer.transfer_id) && moment().diff(moment(t.updated), 'minutes', true) <= 5) > -1
   const has_latest_transfers = typeof latestTransfersSize === 'number' && latestTransfersSize > 0
 
