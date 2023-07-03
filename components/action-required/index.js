@@ -494,7 +494,7 @@ export default (
 
   const disabled = forceDisabled || updating
   const wrong_chain = chain_id !== chain_data?.chain_id && !updateResponse
-  const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
+  const is_walletconnect = ethereum_provider?.constructor?.name === 'WalletConnectProvider'
 
   return data && buttonTitle && (
     <Modal
