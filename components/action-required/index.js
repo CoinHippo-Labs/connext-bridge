@@ -39,50 +39,14 @@ export default (
   },
 ) => {
   const dispatch = useDispatch()
-  const {
-    preferences,
-    chains,
-    assets,
-    gas_tokens_price,
-    dev,
-    wallet,
-  } = useSelector(
-    state => (
-      {
-        preferences: state.preferences,
-        chains: state.chains,
-        assets: state.assets,
-        gas_tokens_price: state.gas_tokens_price,
-        dev: state.dev,
-        wallet: state.wallet,
-      }
-    ),
-    shallowEqual,
-  )
-  const {
-    theme,
-  } = { ...preferences }
-  const {
-    chains_data,
-  } = { ...chains }
-  const {
-    assets_data,
-  } = { ...assets }
-  const {
-    gas_tokens_price_data,
-  } = { ...gas_tokens_price }
-  const {
-    wallet_data,
-  } = { ...wallet }
-  const {
-    sdk,
-  } = { ...dev }
-  const {
-    chain_id,
-    ethereum_provider,
-    signer,
-    address,
-  } = { ...wallet_data }
+  const { preferences, chains, assets, gas_tokens_price, dev, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, gas_tokens_price: state.gas_tokens_price, dev: state.dev, wallet: state.wallet }), shallowEqual)
+  const { theme } = { ...preferences }
+  const { chains_data } = { ...chains }
+  const { assets_data } = { ...assets }
+  const { gas_tokens_price_data } = { ...gas_tokens_price }
+  const { wallet_data } = { ...wallet }
+  const { sdk } = { ...dev }
+  const { chain_id, ethereum_provider, signer, address } = { ...wallet_data }
 
   const [hidden, setHidden] = useState(initialHidden)
   const [data, setData] = useState(null)
@@ -104,12 +68,7 @@ export default (
         setData(transferData)
       }
       else if (data && !loaded) {
-        const {
-          origin_transacting_asset,
-          origin_transacting_amount,
-          relayer_fees,
-        } = { ...data }
-
+        const { origin_transacting_asset, origin_transacting_amount, relayer_fees } = { ...data }
         switch (error_status) {
           case XTransferErrorStatus.LowSlippage:
             calculateAmountReceived(origin_transacting_amount)
@@ -121,7 +80,6 @@ export default (
           default:
             break
         }
-
         setLoaded(true)
       }
     },
@@ -168,9 +126,7 @@ export default (
     receive_local,
     relayer_fees,
   } = { ...data }
-  let {
-    relayer_fee,
-  } = { ...data }
+  let { relayer_fee } = { ...data }
 
   const source_chain_data = getChain(origin_domain, chains_data)
   const source_asset_data = getAsset(null, assets_data, source_chain_data?.chain_id, origin_transacting_asset)
@@ -186,14 +142,8 @@ export default (
   }
   // native asset
   if (!source_contract_data && equalsIgnoreCase(constants.AddressZero, origin_transacting_asset)) {
-    const {
-      nativeCurrency,
-    } = { ..._.head(source_chain_data?.provider_params) }
-
-    const {
-      symbol,
-    } = { ...nativeCurrency }
-
+    const { nativeCurrency } = { ..._.head(source_chain_data?.provider_params) }
+    const { symbol } = { ...nativeCurrency }
     const _source_asset_data = getAsset(symbol, assets_data)
     source_contract_data = {
       ...getContract(source_chain_data?.chain_id, _source_asset_data?.contracts),
@@ -201,7 +151,6 @@ export default (
       contract_address: origin_transacting_asset,
     }
   }
-
   const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
   const source_decimals = source_contract_data?.decimals || 18
   const source_asset_image = source_contract_data?.image || source_asset_data?.image
@@ -225,14 +174,8 @@ export default (
   }
   // native asset
   if (!destination_contract_data && equalsIgnoreCase(constants.AddressZero, destination_transacting_asset)) {
-    const {
-      nativeCurrency,
-    } = { ..._.head(destination_chain_data?.provider_params) }
-
-    const {
-      symbol,
-    } = { ...nativeCurrency }
-
+    const { nativeCurrency } = { ..._.head(destination_chain_data?.provider_params) }
+    const { symbol } = { ...nativeCurrency }
     const _destination_asset_data = getAsset(symbol, assets_data)
     destination_contract_data = {
       ...getContract(destination_chain_data?.chain_id, _destination_asset_data?.contracts),
@@ -240,46 +183,30 @@ export default (
       contract_address: destination_transacting_asset,
     }
   }
-
   const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol
   const destination_decimals = destination_contract_data?.decimals || 18
   const destination_asset_image = destination_contract_data?.image || destination_asset_data?.image
   const destination_amount = destination_transacting_amount ? Number(utils.formatUnits(BigInt(destination_transacting_amount).toString(), destination_decimals)) : source_amount * (1 - ROUTER_FEE_PERCENT / 100)
 
   const _slippage = slippage / 100
-  const estimated_slippage =
-    estimatedValues?.destinationSlippage && estimatedValues?.originSlippage ?
-      Number(((Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100).toFixed(2)) :
-      null
+  const estimated_slippage = estimatedValues?.destinationSlippage && estimatedValues?.originSlippage ? Number(((Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100).toFixed(2)) : null
 
   const gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, source_gas_native_token?.symbol))
-  relayer_fee =
-    relayer_fees ?
-      _.sum(
-        Object.entries(relayer_fees).map(([k, v]) =>
-          Number(utils.formatUnits(v, k === constants.AddressZero ? source_gas_decimals : source_decimals)) *
-          (relayerFeeAssetType === 'transacting' ?
-            k === constants.AddressZero ? gas_token_data?.price / source_asset_data?.price : 1 :
-            k === constants.AddressZero ? 1 : source_asset_data?.price / gas_token_data?.price
-          )
+  relayer_fee = relayer_fees ?
+    _.sum(
+      Object.entries(relayer_fees).map(([k, v]) =>
+        Number(utils.formatUnits(v, k === constants.AddressZero ? source_gas_decimals : source_decimals)) *
+        (relayerFeeAssetType === 'transacting' ?
+          k === constants.AddressZero ? gas_token_data?.price / (origin_transacting_asset === constants.AddressZero ? gas_token_data : source_asset_data)?.price : 1 :
+          k === constants.AddressZero ? 1 : (origin_transacting_asset === constants.AddressZero ? gas_token_data : source_asset_data)?.price / gas_token_data?.price
         )
       )
-      .toFixed(relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals) :
-      utils.formatUnits(relayer_fee || '0', source_gas_decimals)
+    ).toFixed(relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals) :
+    utils.formatUnits(relayer_fee || '0', source_gas_decimals)
   const relayer_fee_to_bump = relayer_fee && newRelayerFee ? (Number(newRelayerFee) - Number(relayer_fee)).toFixed(relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals) : null
 
   if (error_status === XTransferErrorStatus.LowRelayerFee) {
-    console.log(
-      '[debug]',
-      '[relayerFee]',
-      {
-        relayerFeeAssetType,
-        relayer_fees,
-        relayer_fee,
-        newRelayerFee,
-        relayer_fee_to_bump,
-      },
-    )
+    console.log('[debug]', '[relayerFee]', { relayerFeeAssetType, relayer_fees, relayer_fee, newRelayerFee, relayer_fee_to_bump })
   }
 
   const reset = () => {
@@ -305,18 +232,9 @@ export default (
           setUpdateResponse(null)
 
           try {
-            const {
-              provider_params,
-            } = { ...source_chain_data }
-
-            const {
-              nativeCurrency,
-            } = { ..._.head(provider_params) }
-
-            let {
-              decimals,
-            } = { ...nativeCurrency }
-
+            const { provider_params } = { ...source_chain_data }
+            const { nativeCurrency } = { ..._.head(provider_params) }
+            let { decimals } = { ...nativeCurrency }
             decimals = decimals || 18
 
             const params = {
@@ -328,52 +246,21 @@ export default (
             }
 
             try {
-              console.log(
-                '[action required]',
-                '[estimateRelayerFee]',
-                params,
-              )
-
+              console.log('[action required]', '[estimateRelayerFee]', params)
               const response = await sdk.sdkBase.estimateRelayerFee(params)
               let relayerFee = response && utils.formatUnits(response, decimals)
-
               if (relayerFee && params.priceIn === 'usd') {
-                const {
-                  price,
-                } = { ...source_asset_data }
-
+                const { price } = { ...(origin_transacting_asset === constants.AddressZero ? gas_token_data : source_asset_data) }
                 if (price) {
                   relayerFee = (Number(relayerFee) / price).toFixed(decimals)
                 }
               }
-
-              console.log(
-                '[action required]',
-                '[relayerFee]',
-                {
-                  params,
-                  response,
-                  relayerFee,
-                },
-              )
-
+              console.log('[action required]', '[relayerFee]', { params, response, relayerFee })
               setNewRelayerFee(relayerFee)
             } catch (error) {
               const response = parseError(error)
-
-              console.log(
-                '[action required]',
-                '[estimateRelayerFee error]',
-                params,
-                { error },
-              )
-
-              setEstimateResponse(
-                {
-                  status: 'failed',
-                  ...response,
-                }
-              )
+              console.log('[action required]', '[estimateRelayerFee error]', params, { error })
+              setEstimateResponse({ status: 'failed', ...response })
             }
           } catch (error) {}
         }
@@ -398,57 +285,22 @@ export default (
 
       let manual
       let _estimatedValues
-
       try {
         setEstimatedValues(null)
         setEstimateResponse(null)
 
         if (amount > 0) {
-          console.log(
-            '[action required]',
-            '[calculateAmountReceived]',
-            {
-              originDomain,
-              destinationDomain,
-              originTokenAddress,
-              destinationTokenAddress,
-              amount,
-              isNextAsset,
-            },
-          )
-
+          console.log('[action required]', '[calculateAmountReceived]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset })
           const response = await sdk.sdkBase.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount.toString(), isNextAsset)
-
-          console.log(
-            '[action required]',
-            '[amountReceived]',
-            {
-              originDomain,
-              destinationDomain,
-              originTokenAddress,
-              destinationTokenAddress,
-              amount,
-              isNextAsset,
-              ...response,
-            },
+          console.log('[action required]', '[amountReceived]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, ...response })
+          _estimatedValues = Object.fromEntries(
+            Object.entries({ ...response }).map(([k, v]) => {
+              try {
+                v = utils.formatUnits(v, ['amountReceived'].includes(k) ? (isNextAsset && _destination_contract_data?.next_asset ? _destination_contract_data?.next_asset?.decimals : destination_contract_data?.decimals) || 18 : source_decimals)
+              } catch (error) {}
+              return [k, v]
+            })
           )
-
-          _estimatedValues =
-            Object.fromEntries(
-              Object.entries({ ...response }).map(([k, v]) => {
-                try {
-                  v =
-                    utils.formatUnits(
-                      v,
-                      ['amountReceived'].includes(k) ?
-                        (isNextAsset && _destination_contract_data?.next_asset ? _destination_contract_data?.next_asset?.decimals : destination_contract_data?.decimals) || 18 :
-                        source_decimals,
-                    )
-                } catch (error) {}
-                return [k, v]
-              })
-            )
-
           setEstimatedValues(_estimatedValues)
         }
         else {
@@ -456,35 +308,13 @@ export default (
         }
       } catch (error) {
         const response = parseError(error)
-
-        console.log(
-          '[action required]',
-          '[calculateAmountReceived error]',
-          {
-            originDomain,
-            destinationDomain,
-            originTokenAddress,
-            destinationTokenAddress,
-            amount,
-            isNextAsset,
-            error,
-          },
-        )
-
-        const {
-          message,
-        } = { ...response }
-
+        console.log('[action required]', '[calculateAmountReceived error]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, error })
+        const { message } = { ...response }
         if (includesStringList(message, ['reverted', 'invalid BigNumber value'])) {
           manual = true
         }
         else {
-          setEstimateResponse(
-            {
-              status: 'failed',
-              ...response,
-            }
-          )
+          setEstimateResponse({ status: 'failed', ...response })
         }
       }
 
@@ -500,10 +330,7 @@ export default (
         setEstimatedValues(_estimatedValues)
       }
 
-      const _newSlippage =
-        _estimatedValues?.destinationSlippage && _estimatedValues?.originSlippage ?
-          Number(((Number(_estimatedValues.destinationSlippage) + Number(_estimatedValues.originSlippage)) * 100).toFixed(2)) :
-          null
+      const _newSlippage = _estimatedValues?.destinationSlippage && _estimatedValues?.originSlippage ? Number(((Number(_estimatedValues.destinationSlippage) + Number(_estimatedValues.originSlippage)) * 100).toFixed(2)) : null
       setNewSlippage(!_newSlippage || _newSlippage < 0 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : _newSlippage)
     }
   }
@@ -514,7 +341,6 @@ export default (
     if (sdk && signer) {
       let failed
       let params
-
       switch (error_status) {
         case XTransferErrorStatus.LowSlippage:
           try {
@@ -525,84 +351,44 @@ export default (
               slippage: newSlippageInBps.toString(),
             }
 
-            console.log(
-              '[updateSlippage]',
-              { params },
-            )
-
+            console.log('[updateSlippage]', { params })
             const request = await sdk.sdkBase.updateSlippage(params)
-
             if (request) {
               try {
                 let gasLimit = await signer.estimateGas(request)
-
                 if (gasLimit) {
-                  gasLimit =
-                    FixedNumber.fromString(gasLimit.toString())
-                      .mulUnsafe(
-                        FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
-                      )
-                      .round(0)
-                      .toString()
-                      .replace('.0', '')
-
+                  gasLimit = FixedNumber.fromString(gasLimit.toString())
+                    .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
+                    .round(0)
+                    .toString()
+                    .replace('.0', '')
                   request.gasLimit = gasLimit
                 }
               } catch (error) {}
-
               const response = await signer.sendTransaction(request)
-
-              const {
-                hash,
-              } = { ...response }
-
+              const { hash } = { ...response }
               setUpdateProcessing(true)
               const receipt = await signer.provider.waitForTransaction(hash)
-
-              const {
-                transactionHash,
-                status,
-              } = { ...receipt }
-
+              const { transactionHash, status } = { ...receipt }
               failed = !status
-
-              setUpdateResponse(
-                {
-                  status: failed ? 'failed' : 'success',
-                  message: failed ? 'Failed to send transaction' : 'Update slippage successful',
-                  tx_hash: hash,
-                }
-              )
-
+              setUpdateResponse({
+                status: failed ? 'failed' : 'success',
+                message: failed ? 'Failed to send transaction' : 'Update slippage successful',
+                tx_hash: hash,
+              })
               if (!failed && onSlippageUpdated) {
                 onSlippageUpdated(params.slippage)
               }
             }
           } catch (error) {
             const response = parseError(error)
-
-            console.log(
-              '[updateSlippage error]',
-              {
-                params,
-                error,
-              },
-            )
-
-            const {
-              code,
-            } = { ...response }
-
+            console.log('[updateSlippage error]', { params, error })
+            const { code } = { ...response }
             switch (code) {
               case 'user_rejected':
                 break
               default:
-                setUpdateResponse(
-                  {
-                    status: 'failed',
-                    ...response,
-                  }
-                )
+                setUpdateResponse({ status: 'failed', ...response })
                 break
             }
             failed = true
@@ -624,151 +410,70 @@ export default (
                 const contract_address = (equalsIgnoreCase(source_contract_data?.contract_address, constants.AddressZero) ? _source_contract_data : source_contract_data)?.contract_address
                 const amount = params.relayerFee
                 const infinite_approve = false
-
-                console.log(
-                  '[approveIfNeeded before bumpTransfer]',
-                  {
-                    domain_id,
-                    contract_address,
-                    amount,
-                    infinite_approve,
-                  },
-                )
-
+                console.log('[approveIfNeeded before bumpTransfer]', { domain_id, contract_address, amount, infinite_approve })
                 const approve_request = await sdk.sdkBase.approveIfNeeded(domain_id, contract_address, amount, infinite_approve)
-
                 if (approve_request) {
                   const approve_response = await signer.sendTransaction(approve_request)
-
-                  const {
-                    hash,
-                  } = { ...approve_response }
-
-                  setUpdateResponse(
-                    {
-                      status: 'pending',
-                      message: 'Waiting for token approval',
-                      tx_hash: hash,
-                    }
-                  )
-
+                  const { hash } = { ...approve_response }
+                  setUpdateResponse({ status: 'pending', message: 'Waiting for token approval', tx_hash: hash })
                   const approve_receipt = await signer.provider.waitForTransaction(hash)
-
-                  const {
-                    status,
-                  } = { ...approve_receipt }
-
-                  setUpdateResponse(
-                    status ?
-                      null :
-                      {
-                        status: 'failed',
-                        message: 'Failed to approve',
-                        tx_hash: hash,
-                      }
-                  )
-
+                  const { status } = { ...approve_receipt }
+                  setUpdateResponse(status ? null : { status: 'failed', message: 'Failed to approve', tx_hash: hash })
                   failed = !status
                 }
               }
             } catch (error) {}
 
             if (!failed) {
-              console.log(
-                '[bumpTransfer]',
-                { params },
-              )
-
+              console.log('[bumpTransfer]', { params })
               const request = await sdk.sdkBase.bumpTransfer(params)
-
               if (request) {
                 try {
                   let gasLimit = await signer.estimateGas(request)
-
                   if (gasLimit) {
-                    gasLimit =
-                      FixedNumber.fromString(gasLimit.toString())
-                        .mulUnsafe(
-                          FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString())
-                        )
-                        .round(0)
-                        .toString()
-                        .replace('.0', '')
-
+                    gasLimit = FixedNumber.fromString(gasLimit.toString())
+                      .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
+                      .round(0)
+                      .toString()
+                      .replace('.0', '')
                     request.gasLimit = gasLimit
                   }
                 } catch (error) {}
-
                 const response = await signer.sendTransaction(request)
-
-                const {
-                  hash,
-                } = { ...response }
-
+                const { hash } = { ...response }
                 setUpdateProcessing(true)
                 const receipt = await signer.provider.waitForTransaction(hash)
-
-                const {
-                  transactionHash,
-                  status,
-                } = { ...receipt }
-
+                const { transactionHash, status } = { ...receipt }
                 failed = !status
-
-                setUpdateResponse(
-                  {
-                    status: failed ? 'failed' : 'success',
-                    message: failed ? 'Failed to send transaction' : 'Bump transfer successful',
-                    tx_hash: hash,
-                  }
-                )
-
+                setUpdateResponse({
+                  status: failed ? 'failed' : 'success',
+                  message: failed ? 'Failed to send transaction' : 'Bump transfer successful',
+                  tx_hash: hash,
+                })
                 if (!failed && onTransferBumped) {
                   dispatch({ type: LATEST_BUMPED_TRANSFERS_DATA, value: transfer_id })
-                  onTransferBumped(
-                    {
-                      relayer_fee: params.relayerFee,
-                      relayer_fees: {
-                        [params.asset]: params.relayerFee,
-                      },
-                    }
-                  )
+                  onTransferBumped({
+                    relayer_fee: params.relayerFee,
+                    relayer_fees: {
+                      [params.asset]: params.relayerFee,
+                    },
+                  })
                 }
               }
             }
           } catch (error) {
             const response = parseError(error)
-
-            console.log(
-              '[bumpTransfer error]',
-              {
-                params,
-                error,
-              },
-            )
-
-            const {
-              code,
-            } = { ...response }
-            let {
-              message,
-            } = { ...response }
-
+            console.log('[bumpTransfer error]', { params, error })
+            const { code } = { ...response }
+            let { message } = { ...response }
             if (message?.includes('insufficient funds')) {
               message = 'Insufficient Balance'
             }
-
             switch (code) {
               case 'user_rejected':
                 break
               default:
-                setUpdateResponse(
-                  {
-                    status: 'failed',
-                    ...response,
-                    message,
-                  }
-                )
+                setUpdateResponse({ status: 'failed', ...response, message })
                 break
             }
             failed = true
@@ -783,20 +488,13 @@ export default (
     setUpdating(false)
   }
 
-  const disabled = forceDisabled || updating
   const chain_data = error_status === XTransferErrorStatus.LowSlippage ? destination_chain_data : source_chain_data
+  const { explorer } = { ...chain_data }
+  const { url, transaction_path } = { ...explorer }
 
-  const {
-    explorer,
-  } = { ...chain_data }
-
-  const {
-    url,
-    transaction_path,
-  } = { ...explorer }
-
+  const disabled = forceDisabled || updating
   const wrong_chain = chain_id !== chain_data?.chain_id && !updateResponse
-  const is_walletconnect = ethereum_provider?.constructor?.name === 'WalletConnectProvider'
+  const is_walletconnect = provider?.constructor?.name === 'WalletConnectProvider'
 
   return data && buttonTitle && (
     <Modal
@@ -868,7 +566,6 @@ export default (
                                 e => {
                                   const regex = /^[0-9.\b]+$/
                                   let value
-
                                   if (e.target.value === '' || regex.test(e.target.value)) {
                                     value = e.target.value
                                   }
@@ -880,7 +577,6 @@ export default (
                                       value = Number(value)
                                     }
                                   }
-
                                   value = value <= 0 || value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
                                   setNewSlippage(value && !isNaN(value) ? parseFloat(Number(value).toFixed(2)) : value)
                                 }
@@ -947,10 +643,7 @@ export default (
                   </div>
                   {typeof newSlippage === 'number' && (estimated_slippage > newSlippage || newSlippage < 0.2 || newSlippage > 5.0) && (
                     <div className="flex items-start space-x-1">
-                      <IoWarning
-                        size={14}
-                        className="min-w-max text-yellow-500 dark:text-yellow-400 mt-0.5"
-                      />
+                      <IoWarning size={14} className="min-w-max text-yellow-500 dark:text-yellow-400 mt-0.5" />
                       <div className="text-yellow-500 dark:text-yellow-400 text-xs">
                         {estimated_slippage > newSlippage ?
                           <>
@@ -1080,11 +773,7 @@ export default (
               (error_status === XTransferErrorStatus.LowSlippage ? newSlippage <= _slippage : error_status === XTransferErrorStatus.LowRelayerFee ? !newRelayerFee : null) ?
                 <Alert
                   color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
-                  icon={
-                    <BiMessageError
-                      className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                    />
-                  }
+                  icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
                   closeDisabled={true}
                   rounded={true}
                   className="rounded p-4.5"
@@ -1136,29 +825,17 @@ export default (
                     </button> :
                   (updateResponse || estimateResponse) &&
                   toArray(updateResponse || estimateResponse).map((r, i) => {
-                    const {
-                      status,
-                      message,
-                      code,
-                      tx_hash,
-                    } = { ...r }
-
+                    const { status, message, code, tx_hash } = { ...r }
                     return (
                       <Alert
                         key={i}
                         color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
                         icon={
                           status === 'failed' ?
-                            <BiMessageError
-                              className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                            /> :
+                            <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
                             status === 'success' ?
-                              <BiMessageCheck
-                                className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                              /> :
-                              <BiMessageDetail
-                                className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3"
-                              />
+                              <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
+                              <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />
                         }
                         closeDisabled={true}
                         rounded={true}
@@ -1181,10 +858,7 @@ export default (
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
-                                <TiArrowRight
-                                  size={20}
-                                  className="transform -rotate-45"
-                                />
+                                <TiArrowRight size={20} className="transform -rotate-45" />
                               </a>
                             )}
                             {status === 'failed' ?
