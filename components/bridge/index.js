@@ -1688,7 +1688,7 @@ export default () => {
                               </div>
                             </div>
                           </div>
-                          <WarningSend data={bridge} />
+                          {/*<WarningSend data={bridge} />*/}
                         </div>
                         {source_chain && destination_chain && asset && !checkSupport() ?
                           <div className="text-slate-400 dark:text-slate-200 3xl:text-2xl font-medium text-center">
