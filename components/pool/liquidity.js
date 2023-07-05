@@ -405,33 +405,43 @@ export default ({ pool, userPoolsData, onFinish }) => {
                   const add_response = await signer.sendTransaction(add_request)
                   const { hash } = { ...add_response }
                   setCallProcessing(true)
+                  success = hash
                   const add_receipt = await signer.provider.waitForTransaction(hash)
                   const { status } = { ...add_receipt }
 
+                  failed = !status
                   const response = {
                     status: failed ? 'failed' : 'success',
-                    message: failed ? `Failed to add ${symbol} liquidity` : `Add ${symbol} liquidity successful`,
+                    message: failed ? `Failed to add ${symbol}` : `Add ${symbol} successful`,
                     tx_hash: hash,
                   }
                   if (response.status === 'success') {
                     setResponses(_.uniqBy(_.concat(responses, response), 'tx_hash'))
                   }
-                  failed = !status
                   setCallResponse(response)
                   success = true
                 }
               } catch (error) {
                 const response = parseError(error)
                 console.log('[addLiquidity error]', { domainId, contract_address, amounts, minToMint, deadline, error })
+                let { message } = { ...response }
+                if (message?.includes('eth_sendRawTransaction')) {
+                  message = 'Failed to send transaction'
+                }
                 switch (response.code) {
                   case 'user_rejected':
                     reset(response.code)
                     break
                   default:
-                    setCallResponse({ status: 'failed', ...response })
+                    if (success) {
+                      setCallResponse({ status: 'success', message: `Add ${symbol} successful`, tx_hash: typeof success === 'string' ? success : undefined })
+                    }
+                    else {
+                      setCallResponse({ status: 'failed', ...response, message })
+                    }
                     break
                 }
-                failed = true
+                failed = !success
               }
             }
           } catch (error) {}
@@ -510,12 +520,11 @@ export default ({ pool, userPoolsData, onFinish }) => {
 
               try {
                 console.log(`[${method}]`, { domainId, contract_address, withdraw_contract_address, amount: _amount, minAmounts, minAmount, amounts, maxBurnAmount, deadline })
-                const remove_request =
-                  is_one_token_withdraw ?
-                    await sdk.sdkPool.removeLiquidityOneToken(domainId, contract_address, withdraw_contract_address, _amount, minAmount, deadline) :
-                    withdrawOption === 'custom_amounts' ?
-                      await sdk.sdkPool.removeLiquidityImbalance(domainId, contract_address, amounts, maxBurnAmount, deadline) :
-                      await sdk.sdkPool.removeLiquidity(domainId, contract_address, _amount, minAmounts, deadline)
+                const remove_request = is_one_token_withdraw ?
+                  await sdk.sdkPool.removeLiquidityOneToken(domainId, contract_address, withdraw_contract_address, _amount, minAmount, deadline) :
+                  withdrawOption === 'custom_amounts' ?
+                    await sdk.sdkPool.removeLiquidityImbalance(domainId, contract_address, amounts, maxBurnAmount, deadline) :
+                    await sdk.sdkPool.removeLiquidity(domainId, contract_address, _amount, minAmounts, deadline)
 
                 if (remove_request) {
                   try {
@@ -532,19 +541,20 @@ export default ({ pool, userPoolsData, onFinish }) => {
 
                   const remove_response = await signer.sendTransaction(remove_request)
                   const { hash } = { ...remove_response }
+                  success = hash
                   setCallProcessing(true)
                   const remove_receipt = await signer.provider.waitForTransaction(hash)
                   const { status } = { ...remove_receipt }
 
+                  failed = !status
                   const response = {
                     status: failed ? 'failed' : 'success',
-                    message: failed ? `Failed to remove ${symbol} liquidity` : `Remove ${symbol} liquidity successful`,
+                    message: failed ? `Failed to remove ${symbol}` : `Remove ${symbol} successful`,
                     tx_hash: hash,
                   }
                   if (response.status === 'success') {
                     setResponses(_.uniqBy(_.concat(responses, response), 'tx_hash'))
                   }
-                  failed = !status
                   setCallResponse(response)
                   success = true
                 }
@@ -555,15 +565,23 @@ export default ({ pool, userPoolsData, onFinish }) => {
                 if (message?.includes('exceed total supply')) {
                   message = 'Exceed Total Supply'
                 }
+                else if (message?.includes('eth_sendRawTransaction')) {
+                  message = 'Failed to send transaction'
+                }
                 switch (response.code) {
                   case 'user_rejected':
                     reset(response.code)
                     break
                   default:
-                    setCallResponse({ status: 'failed', message, ...response })
+                    if (success) {
+                      setCallResponse({ status: 'success', message: `Remove ${symbol} successful`, tx_hash: typeof success === 'string' ? success : undefined })
+                    }
+                    else {
+                      setCallResponse({ status: 'failed', ...response, message })
+                    }
                     break
                 }
-                failed = true
+                failed = !success
               }
             }
           } catch (error) {}
@@ -1927,7 +1945,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
                 return (
                   <AlertNotification
                     key={i}
-                    icon={<HiOutlineCheckCircle size={26} className="mb-0.5" />}
+                    icon={null/*<HiOutlineCheckCircle size={20} className="mb-0.5" />*/}
                     animate={{ mount: { y: 0 }, unmount: { y: 32 } }}
                     dismissible={{ onClose: () => setResponses(responses.filter(d => d.tx_hash !== tx_hash)) }}
                     className="alert-box flex"
@@ -1936,7 +1954,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
                       <span className="leading-5 break-words text-sm 3xl:text-xl font-medium">
                         {ellipse(split(message, 'normal', ' ').join(' '), 128)}
                       </span>
-                      <div className="flex items-center space-x-1 mt-0.5">
+                      <div className="flex items-center space-x-1">
                         {url && tx_hash && (
                           <a
                             href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}

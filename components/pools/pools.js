@@ -18,28 +18,10 @@ import { getPool } from '../../lib/object/pool'
 import { toArray, equalsIgnoreCase, loaderColor } from '../../lib/utils'
 
 const WRAPPED_PREFIX = process.env.NEXT_PUBLIC_WRAPPED_PREFIX
+const MIN_DEPOSITED = 0.001
 
 export default ({ view, userPoolsData, groupPools = false }) => {
-  const {
-    preferences,
-    chains,
-    assets,
-    pool_assets,
-    pools,
-    wallet,
-  } = useSelector(
-    state => (
-      {
-        preferences: state.preferences,
-        chains: state.chains,
-        assets: state.assets,
-        pool_assets: state.pool_assets,
-        pools: state.pools,
-        wallet: state.wallet,
-      }
-    ),
-    shallowEqual,
-  )
+  const { preferences, chains, assets, pool_assets, pools, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, pool_assets: state.pool_assets, pools: state.pools, wallet: state.wallet }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
@@ -69,22 +51,14 @@ export default ({ view, userPoolsData, groupPools = false }) => {
               const { chain_data, asset_data, lpTokenBalance } = { ...d }
               let { id, share } = { ...d }
               id = id || `${chain_data?.id}_${asset_data?.id}`
-
               const { adopted, local, supply } = { ...getPool(id, pools_data) }
               share = !isNaN(supply) ? Number(lpTokenBalance) * 100 / Number(supply) : share
               const { price } = { ...getAsset(asset_data?.id, assets_data) }
               const tvl = Number(supply || _.sum(toArray(_.concat(adopted, local)).map(a => Number(a.balance)))) * (price || 0)
               const value = (lpTokenBalance || '0') * price
-
-              return {
-                ...d,
-                share,
-                price,
-                tvl,
-                value,
-              }
+              return { ...d, share, price, tvl, value }
             })
-            .filter(d => typeof d.value !== 'number' || d.value > 0.001),
+            .filter(d => typeof d.value !== 'number' || d.value > MIN_DEPOSITED),
             ['value', 'tvl'], ['desc', 'desc'],
           ) :
           null :
@@ -140,16 +114,7 @@ export default ({ view, userPoolsData, groupPools = false }) => {
         )
         .flatMap(d => {
           const { pools } = { ...d }
-          return (
-            groupPools ?
-              [d] :
-              pools.map(p => {
-                return {
-                  ...d,
-                  pools: [p],
-                }
-              })
-          )
+          return groupPools ? [d] : pools.map(p => { return { ...d, pools: [p] } })
         }) :
         null
 
@@ -166,10 +131,7 @@ export default ({ view, userPoolsData, groupPools = false }) => {
             You currently don't have any positions.
           </div> :
           <>
-            <div
-              className="w-32 sm:w-64 3xl:w-96 mx-auto"
-              style={{ boxShadow, WebkitBoxShadow: boxShadow, MozBoxShadow: boxShadow }}
-            />
+            <div className="w-32 sm:w-64 3xl:w-96 mx-auto" style={{ boxShadow, WebkitBoxShadow: boxShadow, MozBoxShadow: boxShadow }} />
             <Datatable
               columns={[
                 {
@@ -185,7 +147,6 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                     name = name || _symbol
                     const chain = chain_data?.id
                     const asset = asset_data?.id
-
                     return (
                       <div className="flex flex-col space-y-3">
                         {view === 'my_positions' ?
@@ -248,7 +209,6 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                                   </div>
                                 </div>
                               )
-
                               return (
                                 !chain_data?.disabled ?
                                   <Link
@@ -281,13 +241,11 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                     const { name, image } = { ...value }
                     const chain = chain_data?.id
                     const asset = asset_data?.id
-
                     const onClick = () => {
                       if (pools?.length > 0) {
                         setUncollapseAssetIds((!groupPools || uncollapseAssetIds?.includes(id)) ? uncollapseAssetIds.filter(_id => _id !== id) : _.concat(toArray(uncollapseAssetIds), id))
                       }
                     }
-
                     return (
                       <div className="flex flex-col space-y-3">
                         {view === 'my_positions' ?
@@ -378,7 +336,6 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                                   </span>
                                 </div>
                               )
-
                               return (
                                 !chain_data?.disabled ?
                                   <Link
@@ -408,31 +365,22 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                   Cell: props => {
                     const { row } = { ...props }
                     const { id, asset_data, pools } = { ...row.original }
-
                     const native_assets = toArray(pools).map(p => {
                       const { adopted, local } = { ...p }
                       const asset = !adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local
-                      return {
-                        ...p,
-                        asset,
-                      }
+                      return { ...p, asset }
                     })
                     const wrapped_assets = toArray(pools).map(p => {
                       const { adopted, local } = { ...p }
                       const asset = adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local
-                      return {
-                        ...p,
-                        asset,
-                      }
+                      return { ...p, asset }
                     })
-
                     const native_asset = _.head(native_assets)
                     const wrapped_asset = _.head(wrapped_assets)
                     const native_amount = _.sum(native_assets.map(a => Number(a.asset?.balance || '0')))
                     const wrapped_amount = _.sum(wrapped_assets.map(a => Number(a?.asset?.balance || '0')))
                     const total_amount = native_amount + wrapped_amount
                     const { color } = { ...asset_data }
-
                     return (
                       <div className="flex flex-col items-end space-y-3" style={{ minWidth: '8rem' }}>
                         {groupPools && (
@@ -647,7 +595,6 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                               </div>
                             </div>
                           )
-
                           return (
                             !chain_data?.disabled ?
                               <Link
@@ -676,7 +623,6 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                     const { row } = { ...props }
                     const { id, pools } = { ...row.original }
                     const value = _.sumBy(pools, 'tvl')
-
                     return (
                       <div className="flex flex-col space-y-3">
                         {groupPools && (
@@ -713,7 +659,6 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                               }
                             </div>
                           )
-
                           return (
                             !chain_data?.disabled ?
                               <Link
@@ -742,7 +687,6 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                     const { row } = { ...props }
                     const { id, pools } = { ...props.row.original }
                     const value = _.sumBy(pools, 'volume_value')
-
                     return (
                       <div className="flex flex-col space-y-3">
                         {groupPools && (
@@ -776,7 +720,6 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                               }
                             </div>
                           )
-
                           return (
                             !chain_data?.disabled ?
                               <Link
@@ -805,7 +748,6 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                     const { row } = { ...props }
                     const { id, pools } = { ...row.original }
                     const value = _.sumBy(pools, 'fees_value')
-
                     return (
                       <div className="flex flex-col space-y-3">
                         {groupPools && (
@@ -839,7 +781,6 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                               }
                             </div>
                           )
-
                           return (
                             !chain_data?.disabled ?
                               <Link
@@ -885,7 +826,6 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                       }),
                       'weighted_apy',
                     ) / _.sumBy(pools, 'tvl')
-
                     return (
                       <div className="flex flex-col space-y-3">
                         {groupPools && (
@@ -921,7 +861,6 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                               }
                             </div>
                           )
-
                           return (
                             !chain_data?.disabled ?
                               <Link
@@ -966,7 +905,6 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                         </div>
                       </div>
                     )
-
                     return (
                       !chain_data?.disabled ?
                         <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
@@ -1025,7 +963,6 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                         */}
                       </div>
                     )
-
                     return (
                       !chain_data?.disabled ?
                         <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>
@@ -1059,7 +996,6 @@ export default ({ view, userPoolsData, groupPools = false }) => {
                         />
                       </div>
                     )
-
                     return (
                       !chain_data?.disabled ?
                         <Link href={`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`}>

@@ -313,9 +313,11 @@ a {
 .alert-box {
   .transition-all {
     @apply relative right-0 ml-auto;
-
-    svg {
-      @apply w-5 h-5;
+    [role=button] {
+      @apply -mr-1.5 pt-0.5 pb-0 px-0;
+      svg {
+        @apply w-5 h-5;
+      }
     }
   }
 }

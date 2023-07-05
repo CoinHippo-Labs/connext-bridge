@@ -15,30 +15,10 @@ import { toArray, name, equalsIgnoreCase, loaderColor } from '../../lib/utils'
 
 const WRAPPED_PREFIX = process.env.NEXT_PUBLIC_WRAPPED_PREFIX
 const DAILY_METRICS = ['tvl', 'volume']
+const MIN_DEPOSITED = 0.001
 
 export default ({ pool, userPoolsData, onSelect }) => {
-  const {
-    preferences,
-    chains,
-    assets,
-    pool_assets,
-    pools,
-    pools_daily_stats,
-    wallet,
-  } = useSelector(
-    state => (
-      {
-        preferences: state.preferences,
-        chains: state.chains,
-        assets: state.assets,
-        pool_assets: state.pool_assets,
-        pools: state.pools,
-        pools_daily_stats: state.pools_daily_stats,
-        wallet: state.wallet,
-      }
-    ),
-    shallowEqual,
-  )
+  const { preferences, chains, assets, pool_assets, pools, pools_daily_stats, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, pool_assets: state.pool_assets, pools: state.pools, pools_daily_stats: state.pools_daily_stats, wallet: state.wallet }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
@@ -65,7 +45,8 @@ export default ({ pool, userPoolsData, onSelect }) => {
 
   const pool_loading = selected && !no_pool && !error && !pool_data
   const user_pool_data = pool_data && toArray(userPoolsData).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
-  const { lpTokenBalance } = { ...user_pool_data }
+  let { lpTokenBalance } = { ...user_pool_data }
+  lpTokenBalance = lpTokenBalance > MIN_DEPOSITED ? lpTokenBalance : 0
 
   const share = parseFloat((Number(lpTokenBalance || '0') * 100 / (Number(supply) || 1)).toFixed(18))
   const position_loading = address && selected && !no_pool && !error && (!userPoolsData || pool_loading)
@@ -94,29 +75,26 @@ export default ({ pool, userPoolsData, onSelect }) => {
   const { price } = { ...getAsset(asset, assets_data) }
   const tvl = Number(supply || _.sum(toArray(_.concat(adopted, local)).map(a => Number(a.balance)))) * (price || 0)
   const chartData = !pool_loading && pools_daily_stats_data?.[`${dailyMetric}s`] && {
-    data:
-      toArray(pools_daily_stats_data[`${dailyMetric}s`])
-        .filter(d => equalsIgnoreCase(d.pool_id, canonicalHash) && d.domain === domainId)
-        .map(d => {
-          let time
-          let value
-          switch (dailyMetric) {
-            case 'tvl':
-              time = d.day
-              value = _.sum(d.balances)
-              break
-            case 'volume':
-            default:
-              time = d.swap_day
-              value = d.volume
-              break
-          }
-          return {
-            ...d,
-            timestamp: moment(time).valueOf(),
-            value,
-          }
-        }),
+    data: toArray(pools_daily_stats_data[`${dailyMetric}s`]).filter(d => equalsIgnoreCase(d.pool_id, canonicalHash) && d.domain === domainId).map(d => {
+      let time
+      let value
+      switch (dailyMetric) {
+        case 'tvl':
+          time = d.day
+          value = _.sum(d.balances)
+          break
+        case 'volume':
+        default:
+          time = d.swap_day
+          value = d.volume
+          break
+      }
+      return {
+        ...d,
+        timestamp: moment(time).valueOf(),
+        value,
+      }
+    }),
     chain_data,
     asset_data: getAsset(asset, assets_data),
     pool_data,
