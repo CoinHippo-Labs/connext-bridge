@@ -664,7 +664,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
             }
             // calculateRemoveLiquidityPriceImpact(domainId, contract_address, _.head(amounts), _.last(amounts))
           }
-          setRemoveAmounts(toArray(_amounts).map((a, i) => Number(utils.formatUnits(BigInt(a || '0'), (i === 0 ? adopted : local)?.decimals || 18))))
+          setRemoveAmounts(toArray(_amounts).map((a, i) => utils.formatUnits(BigInt(a || '0'), (i === 0 ? adopted : local)?.decimals || 18)))
           setCallResponse(null)
         } catch (error) {
           const response = parseError(error)
