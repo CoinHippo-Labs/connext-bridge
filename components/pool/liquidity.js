@@ -794,7 +794,7 @@ export default ({ pool, userPools, onFinish }) => {
 
   const valid_amount = action === 'withdraw' ?
     isNumber(amount) && !isZero(amount) && isNumber(lpTokenBalance) && BigInt(parseUnits(amount)) > 0 && BigInt(parseUnits(amount)) <= BigInt(parseUnits(lpTokenBalance)) :
-    isNumber(amountX) && isNumber(amountY) && !(isZero(amountX) && isZero(amountY)) && x_balance_amount && y_balance_amount && (BigInt(parseUnits(amountX, x_decimals)) > 0 || BigInt(parseUnits(amountY, y_decimals)) > 0) && BigInt(parseUnits(amountX, x_decimals)) <= BigInt(parseUnits(x_balance_amount, x_decimals)) && BigInt(parseUnits(amountY, y_decimals)) <= BigInt(parseUnits(y_balance_amount, y_decimals))
+    isNumber(amountX) && isNumber(amountY) && !(isZero(amountX) && isZero(amountY)) && isNumber(x_balance_amount) && isNumber(y_balance_amount) && (BigInt(parseUnits(amountX, x_decimals)) > 0 || BigInt(parseUnits(amountY, y_decimals)) > 0) && BigInt(parseUnits(amountX, x_decimals)) <= BigInt(parseUnits(x_balance_amount, x_decimals)) && BigInt(parseUnits(amountY, y_decimals)) <= BigInt(parseUnits(y_balance_amount, y_decimals))
   const disabled = !pool_data || error || approving || calling
   const response = callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse
   const wrong_chain = wallet_chain_id !== chain_id && !callResponse
@@ -827,7 +827,7 @@ export default ({ pool, userPools, onFinish }) => {
           </div>
           {action === 'deposit' ?
             <>
-              <div className="3xl:space-y-4 pt-1 px-0">
+              <div className="3xl:space-y-4 pt-2 px-0">
                 <div className="space-y-1">
                   <div className="flex items-center justify-between space-x-2">
                     <div className="text-slate-400 dark:text-slate-500 text-xs 3xl:text-xl font-medium">
@@ -844,7 +844,7 @@ export default ({ pool, userPools, onFinish }) => {
                             () => {
                               if (isNumber(x_balance_amount)) {
                                 setAmountX(x_balance_amount.toString())
-                                if (!isNumber(amountY) && !isZero(amountY)) {
+                                if (!isNumber(amountY) || isZero(amountY)) {
                                   setAmountY('0')
                                 }
                               }
@@ -907,7 +907,7 @@ export default ({ pool, userPools, onFinish }) => {
                               value = numberToFixed(value, x_decimals)
                             }
                             setAmountX(value)
-                            if (!isNumber(amountY) && !isZero(amountY)) {
+                            if (!isNumber(amountY) || isZero(amountY)) {
                               setAmountY('0')
                             }
                           }
@@ -946,7 +946,7 @@ export default ({ pool, userPools, onFinish }) => {
                             () => {
                               if (isNumber(y_balance_amount)) {
                                 setAmountY(y_balance_amount.toString())
-                                if (!isNumber(amountX) && !isZero(amountX)) {
+                                if (!isNumber(amountX) || isZero(amountX)) {
                                   setAmountX('0')
                                 }
                               }
@@ -1009,7 +1009,7 @@ export default ({ pool, userPools, onFinish }) => {
                               value = numberToFixed(value, y_decimals)
                             }
                             setAmountY(value)
-                            if (!isNumber(amountX) && !isZero(amountX)) {
+                            if (!isNumber(amountX) || isZero(amountX)) {
                               setAmountX('0')
                             }
                           }
@@ -1172,7 +1172,7 @@ export default ({ pool, userPools, onFinish }) => {
               </div>
             </> :
             <>
-              <div className="space-y-6 py-3 px-0">
+              <div className="space-y-6 py-2 px-0">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between space-x-2">
                     <span className="text-xs 3xl:text-lg font-medium">
@@ -1276,7 +1276,7 @@ export default ({ pool, userPools, onFinish }) => {
                               setAmount(_amount)
                             }
                           }
-                          className={`${disabled || !isNumber(pTokenBalance) ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : toFixedNumber(lpTokenBalance).mulUnsafe(toFixedNumber(d)).toString() === amount ? 'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white 3xl:text-xl font-medium'} rounded text-xs py-0.5 px-1.5`}
+                          className={`${disabled || !isNumber(lpTokenBalance) ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : toFixedNumber(lpTokenBalance).mulUnsafe(toFixedNumber(d)).toString() === amount ? 'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white 3xl:text-xl font-medium'} rounded text-xs py-0.5 px-1.5`}
                         >
                           {d * 100} %
                         </div>
@@ -1657,7 +1657,7 @@ export default ({ pool, userPools, onFinish }) => {
                     className="alert-box flex"
                   >
                     <div className="flex items-start justify-between space-x-2">
-                      <span className="leading-5 break-words text-sm 3xl:text-xl font-medium">
+                      <span className="min-w-fit leading-5 break-words text-sm 3xl:text-xl font-medium">
                         {ellipse(split(message, 'normal', ' ').join(' '), 128)}
                       </span>
                       <div className="flex items-center space-x-1">
