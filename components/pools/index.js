@@ -72,7 +72,7 @@ export default () => {
                         const asset_data = getAssetData(undefined, pool_assets_data, { chain_id, symbols })
                         return {
                           ...d,
-                          id: [id, assets_data?.id].join('_'),
+                          id: [id, asset_data?.id].join('_'),
                           chain_data,
                           asset_data,
                           ...info,
