@@ -1,32 +1,27 @@
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
-import _ from 'lodash'
-import { FixedNumber, constants, utils } from 'ethers'
 import { XTransferErrorStatus } from '@connext/nxtp-utils'
-import { TailSpin, Oval } from 'react-loader-spinner'
 import { DebounceInput } from 'react-debounce-input'
+import { constants } from 'ethers'
+const { AddressZero: ZeroAddress } = { ...constants }
+import _ from 'lodash'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
-import { BiX, BiMessageError, BiMessageCheck, BiMessageDetail, BiEditAlt, BiCheckCircle } from 'react-icons/bi'
-import { IoWarning } from 'react-icons/io5'
+import { BiX, BiEditAlt, BiCheckCircle } from 'react-icons/bi'
 
-import Alert from '../alerts'
-import Copy from '../copy'
-import DecimalsFormat from '../decimals-format'
+import WarningSlippage from '../bridge/warning/slippage'
+import Spinner from '../spinner'
+import Alert from '../alert'
 import Image from '../image'
-import Modal from '../modals'
+import NumberDisplay from '../number'
+import Copy from '../copy'
+import Modal from '../modal'
 import Wallet from '../wallet'
-import { getChain } from '../../lib/object/chain'
-import { getAsset } from '../../lib/object/asset'
-import { getContract } from '../../lib/object/contract'
-import { split, toArray, includesStringList, ellipse, equalsIgnoreCase, loaderColor, errorPatterns, parseError } from '../../lib/utils'
+import { RELAYER_FEE_ASSET_TYPES, PERCENT_ROUTER_FEE, GAS_LIMIT_ADJUSTMENT, DEFAULT_PERCENT_BRIDGE_SLIPPAGE } from '../../lib/config'
+import { getChainData, getAssetData, getContractData } from '../../lib/object'
+import { toBigNumber, toFixedNumber, formatUnits, parseUnits, isNumber } from '../../lib/number'
+import { toArray, includesStringList, numberToFixed, ellipse, equalsIgnoreCase, normalizeMessage, parseError } from '../../lib/utils'
 import { LATEST_BUMPED_TRANSFERS_DATA } from '../../reducers/types'
-
-const is_staging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' || process.env.NEXT_PUBLIC_APP_URL?.includes('staging')
-const ROUTER_FEE_PERCENT = Number(process.env.NEXT_PUBLIC_ROUTER_FEE_PERCENT)
-const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT)
-const DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE)
-const RELAYER_FEE_ASSET_TYPES = ['transacting', 'native']
 
 export default (
   {
@@ -39,13 +34,12 @@ export default (
   },
 ) => {
   const dispatch = useDispatch()
-  const { preferences, chains, assets, gas_tokens_price, dev, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, gas_tokens_price: state.gas_tokens_price, dev: state.dev, wallet: state.wallet }), shallowEqual)
-  const { theme } = { ...preferences }
+  const { chains, assets, gas_tokens_price, dev, wallet } = useSelector(state => ({ chains: state.chains, assets: state.assets, gas_tokens_price: state.gas_tokens_price, dev: state.dev, wallet: state.wallet }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { gas_tokens_price_data } = { ...gas_tokens_price }
-  const { wallet_data } = { ...wallet }
   const { sdk } = { ...dev }
+  const { wallet_data } = { ...wallet }
   const { chain_id, ethereum_provider, signer, address } = { ...wallet_data }
 
   const [hidden, setHidden] = useState(initialHidden)
@@ -102,111 +96,85 @@ export default (
   useEffect(
     () => {
       const { origin_domain, origin_transacting_asset } = { ...data }
-      const source_chain_data = getChain(origin_domain, chains_data)
-      const source_asset_data = getAsset(null, assets_data, source_chain_data?.chain_id, origin_transacting_asset)
-      if (source_asset_data && !source_asset_data.allow_paying_gas) {
+      const { chain_id } = { ...getChainData(origin_domain, chains_data) }
+      const source_asset_data = getAssetData(undefined, assets_data, { chain_id, contract_address: origin_transacting_asset })
+      const { allow_paying_gas } = { ...source_asset_data }
+      if (source_asset_data && !allow_paying_gas) {
         setRelayerFeeAssetType('native')
       }
     },
     [data, chains_data, assets_data],
   )
 
-  const {
-    transfer_id,
-    error_status,
-    origin_domain,
-    origin_transacting_asset,
-    origin_transacting_amount,
-    origin_bridged_asset,
-    destination_domain,
-    destination_transacting_asset,
-    destination_transacting_amount,
-    destination_local_asset,
-    slippage,
-    receive_local,
-    relayer_fees,
-  } = { ...data }
+  const { transfer_id, error_status, origin_domain, origin_transacting_asset, origin_transacting_amount, destination_domain, destination_transacting_asset, destination_transacting_amount, destination_local_asset, slippage, relayer_fees, receive_local } = { ...data }
   let { relayer_fee } = { ...data }
 
-  const source_chain_data = getChain(origin_domain, chains_data)
-  const source_asset_data = getAsset(null, assets_data, source_chain_data?.chain_id, origin_transacting_asset)
-  let source_contract_data = getContract(source_chain_data?.chain_id, source_asset_data?.contracts)
+  const source_chain_data = getChainData(origin_domain, chains_data)
+  const source_asset_data = getAssetData(undefined, assets_data, { chain_id: source_chain_data?.chain_id, contract_address: origin_transacting_asset })
+  let source_contract_data = getContractData(source_chain_data?.chain_id, source_asset_data?.contracts)
   const _source_contract_data = _.cloneDeep(source_contract_data)
   // next asset
   if (source_contract_data?.next_asset && equalsIgnoreCase(source_contract_data.next_asset.contract_address, origin_transacting_asset)) {
-    source_contract_data = {
-      ...source_contract_data,
-      ...source_contract_data.next_asset,
-    }
+    source_contract_data = { ...source_contract_data, ...source_contract_data.next_asset }
     delete source_contract_data.next_asset
   }
   // native asset
-  if (!source_contract_data && equalsIgnoreCase(constants.AddressZero, origin_transacting_asset)) {
-    const { nativeCurrency } = { ..._.head(source_chain_data?.provider_params) }
-    const { symbol } = { ...nativeCurrency }
-    const _source_asset_data = getAsset(symbol, assets_data)
-    source_contract_data = {
-      ...getContract(source_chain_data?.chain_id, _source_asset_data?.contracts),
-      ...nativeCurrency,
-      contract_address: origin_transacting_asset,
-    }
+  if (!source_contract_data && equalsIgnoreCase(ZeroAddress, origin_transacting_asset)) {
+    const { chain_id, native_token } = { ...source_chain_data }
+    const { symbol } = { ...native_token }
+    const { contracts } = { ...getAssetData(symbol, assets_data) }
+    source_contract_data = { ...getContractData(chain_id, contracts), ...native_token, contract_address: origin_transacting_asset }
   }
   const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
   const source_decimals = source_contract_data?.decimals || 18
   const source_asset_image = source_contract_data?.image || source_asset_data?.image
-  const source_gas_native_token = _.head(source_chain_data?.provider_params)?.nativeCurrency
-  const source_gas_decimals = source_gas_native_token?.decimals || 18
-  const source_amount = origin_transacting_amount && Number(utils.formatUnits(BigInt(origin_transacting_amount).toString(), source_decimals))
+  const source_gas = source_chain_data?.native_token
+  const source_gas_decimals = source_gas?.decimals || 18
+  const source_amount = formatUnits(origin_transacting_amount, source_decimals)
 
-  const destination_chain_data = getChain(destination_domain, chains_data)
-  const _asset_data = getAsset(source_asset_data?.id, assets_data, destination_chain_data?.chain_id)
-  const _contract_data = getContract(destination_chain_data?.chain_id, _asset_data?.contracts)
-  const destination_asset_data = getAsset(null, assets_data, destination_chain_data?.chain_id, [destination_transacting_asset, _asset_data ? receive_local ? _contract_data?.next_asset?.contract_address : _contract_data?.contract_address : destination_local_asset])
-  let destination_contract_data = getContract(destination_chain_data?.chain_id, destination_asset_data?.contracts)
+  const destination_chain_data = getChainData(destination_domain, chains_data)
+  const _asset_data = getAssetData(source_asset_data?.id, assets_data, { chain_id: destination_chain_data?.chain_id })
+  const _contract_data = getContractData(destination_chain_data?.chain_id, _asset_data?.contracts)
+  const destination_asset_data = getAssetData(undefined, assets_data, { chain_id: destination_chain_data?.chain_id, contract_addresses: [destination_transacting_asset, _asset_data ? (receive_local ? _contract_data?.next_asset : _contract_data)?.contract_address : destination_local_asset] })
+  let destination_contract_data = getContractData(destination_chain_data?.chain_id, destination_asset_data?.contracts)
   const _destination_contract_data = _.cloneDeep(destination_contract_data)
   // next asset
   if (destination_contract_data?.next_asset && (equalsIgnoreCase(destination_contract_data.next_asset.contract_address, destination_transacting_asset) || receive_local)) {
-    destination_contract_data = {
-      ...destination_contract_data,
-      ...destination_contract_data.next_asset,
-    }
+    destination_contract_data = { ...destination_contract_data, ...destination_contract_data.next_asset }
     delete destination_contract_data.next_asset
   }
   // native asset
-  if (!destination_contract_data && equalsIgnoreCase(constants.AddressZero, destination_transacting_asset)) {
-    const { nativeCurrency } = { ..._.head(destination_chain_data?.provider_params) }
-    const { symbol } = { ...nativeCurrency }
-    const _destination_asset_data = getAsset(symbol, assets_data)
-    destination_contract_data = {
-      ...getContract(destination_chain_data?.chain_id, _destination_asset_data?.contracts),
-      ...nativeCurrency,
-      contract_address: destination_transacting_asset,
-    }
+  if (!destination_contract_data && equalsIgnoreCase(ZeroAddress, destination_transacting_asset)) {
+    const { chain_id, native_token } = { ...destination_chain_data }
+    const { symbol } = { ...native_token }
+    const { contracts } = { ...getAssetData(symbol, assets_data) }
+    destination_contract_data = { ...getContractData(chain_id, contracts), ...native_token, contract_address: destination_transacting_asset }
   }
   const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol
   const destination_decimals = destination_contract_data?.decimals || 18
   const destination_asset_image = destination_contract_data?.image || destination_asset_data?.image
-  const destination_amount = destination_transacting_amount ? Number(utils.formatUnits(BigInt(destination_transacting_amount).toString(), destination_decimals)) : source_amount * (1 - ROUTER_FEE_PERCENT / 100)
+  const destination_amount = destination_transacting_amount ? formatUnits(destination_transacting_amount, destination_decimals) : source_amount * (1 - PERCENT_ROUTER_FEE / 100)
 
   const _slippage = slippage / 100
-  const estimated_slippage = estimatedValues?.destinationSlippage && estimatedValues?.originSlippage ? Number(((Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100).toFixed(2)) : null
+  const estimatedSlippage = estimatedValues?.destinationSlippage && estimatedValues.originSlippage ? Number(numberToFixed((Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100, 2)) : null
 
-  const gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, source_gas_native_token?.symbol))
+  const gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, source_gas?.symbol))
+  const relayer_fee_decimals = relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals
   relayer_fee = relayer_fees ?
-    _.sum(
-      Object.entries(relayer_fees).map(([k, v]) =>
-        Number(utils.formatUnits(v, k === constants.AddressZero ? source_gas_decimals : source_decimals)) *
-        (relayerFeeAssetType === 'transacting' ?
-          k === constants.AddressZero ? gas_token_data?.price / (origin_transacting_asset === constants.AddressZero ? gas_token_data : source_asset_data)?.price : 1 :
-          k === constants.AddressZero ? 1 : (origin_transacting_asset === constants.AddressZero ? gas_token_data : source_asset_data)?.price / gas_token_data?.price
+    numberToFixed(
+      _.sum(Object.entries(relayer_fees).map(([k, v]) =>
+        formatUnits(v, k === ZeroAddress ? source_gas_decimals : source_decimals) * (
+          relayerFeeAssetType === 'transacting' ?
+            k === ZeroAddress ? gas_token_data?.price / (origin_transacting_asset === ZeroAddress ? gas_token_data : source_asset_data)?.price : 1 :
+            k === ZeroAddress ? 1 : (origin_transacting_asset === ZeroAddress ? gas_token_data : source_asset_data)?.price / gas_token_data?.price
         )
-      )
-    ).toFixed(relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals) :
-    utils.formatUnits(relayer_fee || '0', source_gas_decimals)
-  const relayer_fee_to_bump = relayer_fee && newRelayerFee ? (Number(newRelayerFee) - Number(relayer_fee)).toFixed(relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals) : null
-
+      )),
+      relayer_fee_decimals,
+    ) :
+    formatUnits(relayer_fee || '0', source_gas_decimals)
+  const relayerFeeToBump = relayer_fee && newRelayerFee ? numberToFixed(Number(newRelayerFee) - Number(relayer_fee), relayer_fee_decimals) : null
   if (error_status === XTransferErrorStatus.LowRelayerFee) {
-    console.log('[debug]', '[relayerFee]', { relayerFeeAssetType, relayer_fees, relayer_fee, newRelayerFee, relayer_fee_to_bump })
+    console.log('[debug]', '[relayerFee]', { relayerFeeAssetType, relayer_fees, relayer_fee, newRelayerFee, relayerFeeToBump })
   }
 
   const reset = () => {
@@ -225,16 +193,16 @@ export default (
 
   const estimate = async () => {
     if (!updateResponse) {
-      if ((source_contract_data || destination_contract_data) && ['string', 'number'].includes(typeof source_amount) && ![''].includes(source_amount) && !isNaN(source_amount)) {
+      if ((source_contract_data || destination_contract_data) && isNumber(source_amount)) {
         if (sdk) {
           setNewRelayerFee(null)
           setUpdating(null)
           setUpdateResponse(null)
 
           try {
-            const { provider_params } = { ...source_chain_data }
-            const { nativeCurrency } = { ..._.head(provider_params) }
-            let { decimals } = { ...nativeCurrency }
+            const { native_token } = { ...source_chain_data }
+            const { gas_price } = { ...destination_chain_data }
+            let { decimals } = { ...native_token }
             decimals = decimals || 18
 
             const params = {
@@ -242,24 +210,21 @@ export default (
               destinationDomain: destination_chain_data?.domain_id,
               isHighPriority: true,
               priceIn: relayerFeeAssetType === 'transacting' ? 'usd' : 'native',
-              destinationGasPrice: destination_chain_data?.gas_price || undefined,
+              destinationGasPrice: gas_price,
             }
-
             try {
               console.log('[action required]', '[estimateRelayerFee]', params)
               const response = await sdk.sdkBase.estimateRelayerFee(params)
-              let relayerFee = response && utils.formatUnits(response, decimals)
-              if (relayerFee && params.priceIn === 'usd') {
-                const { price } = { ...(origin_transacting_asset === constants.AddressZero ? gas_token_data : source_asset_data) }
-                if (price) {
-                  relayerFee = (Number(relayerFee) / price).toFixed(decimals)
-                }
+              let relayerFee = formatUnits(response, decimals)
+              const { price } = { ...(origin_transacting_asset === ZeroAddress ? gas_token_data : source_asset_data) }
+              if (isNumber(relayerFee)) {
+                relayerFee = params.priceIn === 'usd' && price > 0 ? numberToFixed(relayerFee / price, decimals) : relayerFee.toString()
               }
               console.log('[action required]', '[relayerFee]', { params, response, relayerFee })
               setNewRelayerFee(relayerFee)
             } catch (error) {
               const response = parseError(error)
-              console.log('[action required]', '[estimateRelayerFee error]', params, { error })
+              console.log('[action required]', '[estimateRelayerFee error]', params, error)
               setEstimateResponse({ status: 'failed', ...response })
             }
           } catch (error) {}
@@ -275,28 +240,27 @@ export default (
     if (sdk) {
       const originDomain = source_chain_data?.domain_id
       const destinationDomain = destination_chain_data?.domain_id
-      const originTokenAddress = (equalsIgnoreCase(source_contract_data?.contract_address, constants.AddressZero) ? _source_contract_data : source_contract_data)?.contract_address
+      const originTokenAddress = (equalsIgnoreCase(source_contract_data?.contract_address, ZeroAddress) ? _source_contract_data : source_contract_data)?.contract_address
       let destinationTokenAddress = _destination_contract_data?.contract_address
       const isNextAsset = typeof receive_local === 'boolean' ? receive_local : equalsIgnoreCase(destination_contract_data?.contract_address, _destination_contract_data?.next_asset?.contract_address)
       if (isNextAsset) {
         destinationTokenAddress = _destination_contract_data?.next_asset?.contract_address || destinationTokenAddress
       }
-      const amount = utils.parseUnits((_amount || 0).toString(), source_decimals).toBigInt()
+      const amount = parseUnits(_amount, source_decimals)
 
       let manual
       let _estimatedValues
       try {
         setEstimatedValues(null)
         setEstimateResponse(null)
-
-        if (amount > 0) {
+        if (BigInt(amount) > 0) {
           console.log('[action required]', '[calculateAmountReceived]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset })
-          const response = await sdk.sdkBase.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount.toString(), isNextAsset)
-          console.log('[action required]', '[amountReceived]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, ...response })
+          const response = await sdk.sdkBase.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount, isNextAsset)
+          console.log('[action required]', '[amountReceived]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, response })
           _estimatedValues = Object.fromEntries(
             Object.entries({ ...response }).map(([k, v]) => {
               try {
-                v = utils.formatUnits(v, ['amountReceived'].includes(k) ? (isNextAsset && _destination_contract_data?.next_asset ? _destination_contract_data?.next_asset?.decimals : destination_contract_data?.decimals) || 18 : source_decimals)
+                v = formatUnits(v, ['amountReceived'].includes(k) ? (isNextAsset && _destination_contract_data?.next_asset ? _destination_contract_data.next_asset : destination_contract_data)?.decimals || 18 : source_decimals)
               } catch (error) {}
               return [k, v]
             })
@@ -308,7 +272,7 @@ export default (
         }
       } catch (error) {
         const response = parseError(error)
-        console.log('[action required]', '[calculateAmountReceived error]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, error })
+        console.log('[action required]', '[calculateAmountReceived error]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset }, error)
         const { message } = { ...response }
         if (includesStringList(message, ['reverted', 'invalid BigNumber value'])) {
           manual = true
@@ -319,9 +283,9 @@ export default (
       }
 
       if (manual) {
-        const routerFee = parseFloat((Number(_amount) * ROUTER_FEE_PERCENT / 100).toFixed(source_decimals))
+        const routerFee = parseFloat(numberToFixed(_amount * PERCENT_ROUTER_FEE / 100, source_decimals))
         _estimatedValues = {
-          amountReceived: Number(_amount) - routerFee,
+          amountReceived: _amount - routerFee,
           routerFee,
           destinationSlippage: '0',
           originSlippage: '0',
@@ -330,8 +294,8 @@ export default (
         setEstimatedValues(_estimatedValues)
       }
 
-      const _newSlippage = _estimatedValues?.destinationSlippage && _estimatedValues?.originSlippage ? Number(((Number(_estimatedValues.destinationSlippage) + Number(_estimatedValues.originSlippage)) * 100).toFixed(2)) : null
-      setNewSlippage(!_newSlippage || _newSlippage < 0 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : _newSlippage)
+      const _newSlippage = _estimatedValues?.destinationSlippage && _estimatedValues.originSlippage ? Number(numberToFixed((Number(_estimatedValues.destinationSlippage) + Number(_estimatedValues.originSlippage)) * 100, 2)) : null
+      setNewSlippage(_newSlippage > 0 ? _newSlippage : DEFAULT_PERCENT_BRIDGE_SLIPPAGE)
     }
   }
 
@@ -344,29 +308,23 @@ export default (
       switch (error_status) {
         case XTransferErrorStatus.LowSlippage:
           try {
-            const newSlippageInBps = newSlippage * 100
             params = {
               domainId: destination_domain,
               transferId: transfer_id,
-              slippage: newSlippageInBps.toString(),
+              slippage: numberToFixed(newSlippage, 2) * 100,
             }
-
             console.log('[updateSlippage]', { params })
             const request = await sdk.sdkBase.updateSlippage(params)
             if (request) {
               try {
-                let gasLimit = await signer.estimateGas(request)
+                const gasLimit = await signer.estimateGas(request)
                 if (gasLimit) {
-                  gasLimit = FixedNumber.fromString(gasLimit.toString())
-                    .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
-                    .round(0)
-                    .toString()
-                    .replace('.0', '')
-                  request.gasLimit = gasLimit
+                  request.gasLimit = toBigNumber(toFixedNumber(gasLimit).mulUnsafe(toFixedNumber(GAS_LIMIT_ADJUSTMENT)))
                 }
               } catch (error) {}
               const response = await signer.sendTransaction(request)
               const { hash } = { ...response }
+
               setUpdateProcessing(true)
               const receipt = await signer.provider.waitForTransaction(hash)
               const { transactionHash, status } = { ...receipt }
@@ -376,13 +334,14 @@ export default (
                 message: failed ? 'Failed to send transaction' : 'Update slippage successful',
                 tx_hash: hash,
               })
+
               if (!failed && onSlippageUpdated) {
                 onSlippageUpdated(params.slippage)
               }
             }
           } catch (error) {
             const response = parseError(error)
-            console.log('[updateSlippage error]', { params, error })
+            console.log('[updateSlippage error]', params, error)
             const { code } = { ...response }
             switch (code) {
               case 'user_rejected':
@@ -396,51 +355,48 @@ export default (
           break
         case XTransferErrorStatus.LowRelayerFee:
           try {
-            const relayer_fee_to_bump = relayer_fee && newRelayerFee ? (Number(newRelayerFee) - Number(relayer_fee)).toFixed(relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals) : null
+            const relayerFeeToBump = relayer_fee && newRelayerFee ? numberToFixed(Number(newRelayerFee) - Number(relayer_fee), relayer_fee_decimals) : null
             params = {
               domainId: origin_domain,
               transferId: transfer_id,
-              asset: relayerFeeAssetType === 'transacting' ? origin_transacting_asset : constants.AddressZero,
-              relayerFee: utils.parseUnits(relayer_fee_to_bump || '0', relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals).toString(),
+              asset: relayerFeeAssetType === 'transacting' ? origin_transacting_asset : ZeroAddress,
+              relayerFee: parseUnits(relayerFeeToBump, relayer_fee_decimals),
             }
-
             try {
               if (relayerFeeAssetType === 'transacting') {
                 const domain_id = params.domainId
-                const contract_address = (equalsIgnoreCase(source_contract_data?.contract_address, constants.AddressZero) ? _source_contract_data : source_contract_data)?.contract_address
+                const contract_address = (equalsIgnoreCase(source_contract_data?.contract_address, ZeroAddress) ? _source_contract_data : source_contract_data)?.contract_address
                 const amount = params.relayerFee
                 const infinite_approve = false
+    
                 console.log('[approveIfNeeded before bumpTransfer]', { domain_id, contract_address, amount, infinite_approve })
-                const approve_request = await sdk.sdkBase.approveIfNeeded(domain_id, contract_address, amount, infinite_approve)
-                if (approve_request) {
-                  const approve_response = await signer.sendTransaction(approve_request)
-                  const { hash } = { ...approve_response }
+                const request = await sdk.sdkBase.approveIfNeeded(domain_id, contract_address, amount, infinite_approve)
+                if (request) {
+                  const response = await signer.sendTransaction(request)
+                  const { hash } = { ...response }
                   setUpdateResponse({ status: 'pending', message: 'Waiting for token approval', tx_hash: hash })
-                  const approve_receipt = await signer.provider.waitForTransaction(hash)
-                  const { status } = { ...approve_receipt }
-                  setUpdateResponse(status ? null : { status: 'failed', message: 'Failed to approve', tx_hash: hash })
+
+                  const receipt = await signer.provider.waitForTransaction(hash)
+                  const { status } = { ...receipt }
                   failed = !status
+                  setUpdateResponse(!failed ? null : { status: 'failed', message: 'Failed to approve', tx_hash: hash })
                 }
               }
             } catch (error) {}
 
             if (!failed) {
-              console.log('[bumpTransfer]', { params })
+              console.log('[bumpTransfer]', params)
               const request = await sdk.sdkBase.bumpTransfer(params)
               if (request) {
                 try {
-                  let gasLimit = await signer.estimateGas(request)
+                  const gasLimit = await signer.estimateGas(request)
                   if (gasLimit) {
-                    gasLimit = FixedNumber.fromString(gasLimit.toString())
-                      .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
-                      .round(0)
-                      .toString()
-                      .replace('.0', '')
-                    request.gasLimit = gasLimit
+                    request.gasLimit = toBigNumber(toFixedNumber(gasLimit).mulUnsafe(toFixedNumber(GAS_LIMIT_ADJUSTMENT)))
                   }
                 } catch (error) {}
                 const response = await signer.sendTransaction(request)
                 const { hash } = { ...response }
+
                 setUpdateProcessing(true)
                 const receipt = await signer.provider.waitForTransaction(hash)
                 const { transactionHash, status } = { ...receipt }
@@ -450,6 +406,7 @@ export default (
                   message: failed ? 'Failed to send transaction' : 'Bump transfer successful',
                   tx_hash: hash,
                 })
+
                 if (!failed && onTransferBumped) {
                   dispatch({ type: LATEST_BUMPED_TRANSFERS_DATA, value: transfer_id })
                   onTransferBumped({
@@ -463,7 +420,7 @@ export default (
             }
           } catch (error) {
             const response = parseError(error)
-            console.log('[bumpTransfer error]', { params, error })
+            console.log('[bumpTransfer error]', params, error)
             const { code } = { ...response }
             let { message } = { ...response }
             if (message?.includes('insufficient funds')) {
@@ -506,13 +463,7 @@ export default (
       title={
         <div className="flex items-center justify-between">
           <span className="normal-case">
-            Action Required: {
-              error_status === XTransferErrorStatus.LowSlippage ?
-                'Slippage exceeded' :
-                error_status === XTransferErrorStatus.LowRelayerFee ?
-                  'Relayer fee insufficient' :
-                  error_status
-            }
+            Action Required: {error_status === XTransferErrorStatus.LowSlippage ? 'Slippage exceeded' : error_status === XTransferErrorStatus.LowRelayerFee ? 'Relayer fee insufficient' : error_status}
           </span>
           <div
             onClick={() => reset()}
@@ -539,13 +490,11 @@ export default (
                   <div className="whitespace-nowrap text-slate-800 dark:text-slate-200 text-sm font-medium">
                     Current slippage tolerance
                   </div>
-                  <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
-                    <DecimalsFormat
-                      value={_slippage}
-                      suffix="%"
-                      className="text-sm"
-                    />
-                  </span>
+                  <NumberDisplay
+                    value={_slippage}
+                    suffix=" %"
+                    className="whitespace-nowrap text-slate-800 dark:text-slate-200 text-sm font-semibold"
+                  />
                 </div>
                 <div className="flex flex-col space-y-0.5">
                   <div className="flex items-start justify-between space-x-1">
@@ -573,12 +522,12 @@ export default (
                                     if (value.startsWith('.')) {
                                       value = `0${value}`
                                     }
-                                    if (!isNaN(value)) {
+                                    if (isNumber(value)) {
                                       value = Number(value)
                                     }
                                   }
-                                  value = value <= 0 || value > 100 ? DEFAULT_BRIDGE_SLIPPAGE_PERCENTAGE : value
-                                  setNewSlippage(value && !isNaN(value) ? parseFloat(Number(value).toFixed(2)) : value)
+                                  value = value <= 0 || value > 100 ? DEFAULT_PERCENT_BRIDGE_SLIPPAGE : value
+                                  setNewSlippage(value && isNumber(value) ? parseFloat(numberToFixed(Number(value), 2)) : value)
                                 }
                               }
                               onWheel={e => e.target.blur()}
@@ -611,16 +560,12 @@ export default (
                         </> :
                         <div className="flex items-center space-x-1.5">
                           {!newSlippage && !estimateResponse ?
-                            <Oval
-                              width="20"
-                              height="20"
-                              color={loaderColor(theme)}
-                            /> :
+                            <div><Spinner width={20} height={20} /></div> :
                             <>
-                              <DecimalsFormat
+                              <NumberDisplay
                                 value={newSlippage}
-                                suffix="%"
-                                className="text-sm font-semibold"
+                                suffix=" %"
+                                className="whitespace-nowrap text-sm font-semibold"
                               />
                               <button
                                 disabled={disabled}
@@ -641,23 +586,7 @@ export default (
                       }
                     </div>
                   </div>
-                  {typeof newSlippage === 'number' && (estimated_slippage > newSlippage || newSlippage < 0.2 || newSlippage > 5.0) && (
-                    <div className="flex items-start space-x-1">
-                      <IoWarning size={14} className="min-w-max text-yellow-500 dark:text-yellow-400 mt-0.5" />
-                      <div className="text-yellow-500 dark:text-yellow-400 text-xs">
-                        {estimated_slippage > newSlippage ?
-                          <>
-                            Slippage tolerance is too low
-                            <br />
-                            (use a larger amount or set tolerance higher)
-                          </> :
-                          newSlippage < 0.2 ?
-                            'Your transfer may not complete due to low slippage tolerance.' :
-                            'Your transfer may be frontrun due to high slippage tolerance.'
-                        }
-                      </div>
-                    </div>
-                  )}
+                  <WarningSlippage value={newSlippage} estimatedValue={estimatedSlippage} />
                 </div>
               </div>
             </> :
@@ -681,21 +610,18 @@ export default (
                         {Object.entries(relayer_fees).map(([k, v]) => {
                           return (
                             <span key={k} className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
-                              <DecimalsFormat
-                                value={utils.formatUnits(v || '0', k === constants.AddressZero ? source_gas_decimals : source_decimals)}
+                              <NumberDisplay
+                                value={utils.formatUnits(v || '0', k === ZeroAddress ? source_gas_decimals : source_decimals)}
                                 className="text-sm"
                               />
-                              <span>{k === constants.AddressZero ? source_gas_native_token?.symbol : source_symbol}</span>
+                              <span>{k === ZeroAddress ? source_gas?.symbol : source_symbol}</span>
                             </span>
                           )
                         })}
                       </div> :
                       <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
-                        <DecimalsFormat
-                          value={relayer_fee}
-                          className="text-sm"
-                        />
-                        <span>{source_gas_native_token?.symbol}</span>
+                        <NumberDisplay value={relayer_fee} className="text-sm" />
+                        <span>{source_gas?.symbol}</span>
                       </span>
                     }
                   </div>
@@ -710,31 +636,8 @@ export default (
                         color={loaderColor(theme)}
                       /> :
                       <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
-                        <DecimalsFormat
-                          value={relayer_fee_to_bump && relayer_fee_to_bump > 0 ? relayer_fee_to_bump : 0}
-                          className="text-sm"
-                        />
-                        {is_staging ?
-                          <select
-                            disabled={disabled}
-                            value={relayerFeeAssetType}
-                            onChange={e => setRelayerFeeAssetType(e.target.value)}
-                            className="bg-slate-100 dark:bg-slate-800 rounded border-0 focus:ring-0"
-                          >
-                            {RELAYER_FEE_ASSET_TYPES.filter(t => source_asset_data?.allow_paying_gas || t !== 'transacting').map((t, i) => {
-                              return (
-                                <option
-                                  key={i}
-                                  title={`${t} asset`}
-                                  value={t}
-                                >
-                                  {t === 'transacting' ? source_symbol : source_gas_native_token?.symbol}
-                                </option>
-                              )
-                            })}
-                          </select> :
-                          <span>{relayerFeeAssetType === 'transacting' ? source_symbol : source_gas_native_token?.symbol}</span>
-                        }
+                        <NumberDisplay value={relayerFeeToBump && relayerFeeToBump > 0 ? relayerFeeToBump : 0} className="text-sm" />
+                        <span>{relayerFeeAssetType === 'transacting' ? source_symbol : source_gas?.symbol}</span>
                       </span>
                     }
                   </div>
@@ -742,13 +645,7 @@ export default (
               </> :
               null
           }
-          {ethereum_provider && (
-            (
-              ['string', 'number'].includes(typeof (error_status === XTransferErrorStatus.LowSlippage ? newSlippage : error_status === XTransferErrorStatus.LowRelayerFee ? newRelayerFee : null)) &&
-              ![''].includes(error_status === XTransferErrorStatus.LowSlippage ? newSlippage : error_status === XTransferErrorStatus.LowRelayerFee ? newRelayerFee : null)
-            ) ||
-            wrong_chain
-          ) ?
+          {ethereum_provider && (wrong_chain || isNumber(error_status === XTransferErrorStatus.LowSlippage ? newSlippage : error_status === XTransferErrorStatus.LowRelayerFee ? newRelayerFee : null)) ?
             wrong_chain ?
               <Wallet
                 connectChainId={chain_data?.chain_id}
@@ -767,17 +664,8 @@ export default (
                   {chain_data?.name}
                 </span>
               </Wallet> :
-              !updateResponse && !updating &&
-              ['string', 'number'].includes(typeof (error_status === XTransferErrorStatus.LowSlippage ? newSlippage : error_status === XTransferErrorStatus.LowRelayerFee ? newRelayerFee : null)) &&
-              ![''].includes(error_status === XTransferErrorStatus.LowSlippage ? newSlippage : error_status === XTransferErrorStatus.LowRelayerFee ? newRelayerFee : null) &&
-              (error_status === XTransferErrorStatus.LowSlippage ? newSlippage <= _slippage : error_status === XTransferErrorStatus.LowRelayerFee ? !newRelayerFee : null) ?
-                <Alert
-                  color="bg-red-400 dark:bg-red-500 text-white text-sm font-medium"
-                  icon={<BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />}
-                  closeDisabled={true}
-                  rounded={true}
-                  className="rounded p-4.5"
-                >
+              !updateResponse && !updating && isNumber(error_status === XTransferErrorStatus.LowSlippage ? newSlippage : error_status === XTransferErrorStatus.LowRelayerFee ? newRelayerFee : null) && (error_status === XTransferErrorStatus.LowSlippage ? newSlippage <= _slippage : error_status === XTransferErrorStatus.LowRelayerFee ? !newRelayerFee : null) ?
+                <Alert status="failed" closeDisabled={true}>
                   <span>
                     {error_status === XTransferErrorStatus.LowSlippage && newSlippage <= _slippage ?
                       'New amount must be higher than existing slippage tolerance' :
@@ -788,15 +676,9 @@ export default (
                   </span>
                 </Alert> :
                 !updateResponse && !estimateResponse ?
-                  error_status === XTransferErrorStatus.LowRelayerFee && relayer_fee && newRelayerFee && relayer_fee_to_bump <= 0 ?
-                    <Alert
-                      color="bg-blue-400 dark:bg-blue-500 text-white text-base"
-                      icon={null}
-                      closeDisabled={true}
-                      rounded={true}
-                      className="rounded p-4.5"
-                    >
-                      <div className="flex items-center justify-center space-x-2">
+                  error_status === XTransferErrorStatus.LowRelayerFee && relayer_fee && newRelayerFee && relayerFeeToBump <= 0 ?
+                    <Alert closeDisabled={true}>
+                      <div className="flex items-center justify-center">
                         <span className="break-all text-sm font-medium text-center">
                           Waiting for bump ...
                         </span>
@@ -813,48 +695,22 @@ export default (
                       className={`w-full ${disabled ? 'bg-blue-400 dark:bg-blue-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700'} rounded flex items-center justify-center text-white text-base py-3 sm:py-4 px-2 sm:px-3`}
                     >
                       <span className={`flex items-center justify-center ${updating && updateProcessing ? 'space-x-3 ml-1.5' : 'space-x-3'}`}>
-                        {disabled && (
-                          <TailSpin
-                            width="20"
-                            height="20"
-                            color="white"
-                          />
-                        )}
+                        {disabled && <div><Spinner width={20} height={20} color="white" /></div>}
                         <span>{updating ? updateProcessing ? 'Update in progress ...' : 'Please Confirm' : 'Apply'}</span>
                       </span>
                     </button> :
-                  (updateResponse || estimateResponse) &&
-                  toArray(updateResponse || estimateResponse).map((r, i) => {
-                    const { status, message, code, tx_hash } = { ...r }
+                  toArray(updateResponse || estimateResponse).map((d, i) => {
+                    const { status, message, tx_hash } = { ...d }
                     return (
-                      <Alert
-                        key={i}
-                        color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white text-base`}
-                        icon={
-                          status === 'failed' ?
-                            <BiMessageError className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
-                            status === 'success' ?
-                              <BiMessageCheck className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" /> :
-                              <BiMessageDetail className="w-4 sm:w-6 h-4 sm:h-6 stroke-current mr-3" />
-                        }
-                        closeDisabled={true}
-                        rounded={true}
-                        className="rounded p-4.5"
-                      >
+                      <Alert key={i} status={status} closeDisabled={true}>
                         <div className="flex items-center justify-between space-x-2">
                           <span className="break-all text-sm font-medium">
-                            {ellipse(
-                              split(message, 'normal', ' ')
-                                .join(' ')
-                                .substring(0, status === 'failed' && errorPatterns.findIndex(c => message?.indexOf(c) > -1) > -1 ? message.indexOf(errorPatterns.find(c => message.indexOf(c) > -1)) : undefined) ||
-                              message,
-                              128,
-                            )}
+                            {ellipse(normalizeMessage(message, status), 128)}
                           </span>
                           <div className="flex items-center space-x-1">
                             {url && tx_hash && (
                               <a
-                                href={`${url}${transaction_path?.replace('{tx}', r.tx_hash)}`}
+                                href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
@@ -893,7 +749,7 @@ export default (
                 disabled={true}
                 className="w-full bg-slate-100 dark:bg-slate-800 cursor-not-allowed rounded text-slate-400 dark:text-slate-500 text-base text-center py-3 sm:py-4 px-2 sm:px-3"
               >
-                Apply
+                <span>Apply</span>
               </button> :
               <Wallet
                 connectChainId={chain_data?.chain_id}

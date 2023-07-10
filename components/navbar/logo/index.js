@@ -1,14 +1,14 @@
 import Image from '../../image'
+import { NETWORK } from '../../../lib/config'
 
 export default () => {
   return (
     <div className="logo flex flex-col items-start ml-3 mr-0.5 sm:mr-3 3xl:mx-6">
       <a
         title="Cross-Chain Bridge"
-        href={process.env.NEXT_PUBLIC_PROTOCOL_URL}
+        href={process.env.NEXT_PUBLIC_WEBSITE_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="w-full flex flex-col items-start"
       >
         <div className="min-w-max flex items-center space-x-1 sm:mr-3">
           <div className="flex dark:hidden items-center">
@@ -52,14 +52,11 @@ export default () => {
       </a>
       <div className="flex items-center space-x-2 ml-0 sm:ml-11 3xl:ml-14">
         <div className="hidden sm:block">
-          {
-            process.env.NEXT_PUBLIC_NETWORK === 'testnet' &&
-            (
-              <div className="max-w-min whitespace-nowrap lowercase text-slate-400 dark:text-slate-500 text-xs 3xl:text-xl">
-                {process.env.NEXT_PUBLIC_NETWORK}
-              </div>
-            )
-          }
+          {NETWORK === 'testnet' && (
+            <div className="lowercase text-slate-400 dark:text-slate-500 text-xs 3xl:text-xl">
+              {NETWORK}
+            </div>
+          )}
         </div>
       </div>
     </div>

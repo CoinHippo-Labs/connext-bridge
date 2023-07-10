@@ -1,16 +1,15 @@
 // preferences
 export const THEME = 'theme'
 export const PAGE_VISIBLE = 'page_visible'
-export const STATUS_MESSAGE = 'status_message'
 export const TERMS_AGREED = 'terms_agreed'
 
 // chains
 export const CHAINS_DATA = 'chains_data'
-export const GAS_TOKENS_PRICE_DATA = 'gas_tokens_price_data'
 
 // assets
 export const ASSETS_DATA = 'assets_data'
 export const POOL_ASSETS_DATA = 'pool_assets_data'
+export const GAS_TOKENS_PRICE_DATA = 'gas_tokens_price_data'
 
 // ens
 export const ENS_DATA = 'ens_data'
@@ -23,7 +22,7 @@ export const POOLS_DATA = 'pools_data'
 export const USER_POOLS_DATA = 'user_pools_data'
 export const POOLS_DAILY_STATS_DATA = 'pools_daily_stats_data'
 
-// rpc
+// rpcs
 export const RPCS = 'rpcs'
 
 // sdk

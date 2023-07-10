@@ -3,48 +3,29 @@ import _ from 'lodash'
 
 import Pool from '../../components/pool'
 import meta from '../../lib/meta'
-import { getChains, getAssets } from '../../lib/api/config'
+import { getChainsData, getAssetsData } from '../../lib/config'
+import { toArray } from '../../lib/utils'
 
 export async function getStaticPaths() {
-  const chains = getChains().map(c => c?.id)
-  const assets = _.concat(getAssets().map(a => a?.id), '')
-
+  const chains = toArray(getChainsData().map(c => c.id))
+  const assets = _.concat(toArray(getAssetsData().map(a => a.id)), '')
   return {
     paths: assets.flatMap(a => chains.map(c => `/pool/${a ? `${a.toUpperCase()}-` : ''}on-${c}`)),
     fallback: false,
   }
 }
 
-export async function getStaticProps(
-  {
-    params,
-  },
-) {
-  const {
-    pool,
-  } = { ...params }
-
-  const asPath = `/pool/${pool}`
-
+export async function getStaticProps({ params }) {
+  const { pool } = { ...params }
   return {
     props: {
-      headMeta: meta(asPath, null, getChains(), getAssets()),
+      headMeta: meta(`/pool/${pool}`, undefined, getChainsData(), getAssetsData()),
     },
   }
 }
 
-export default (
-  {
-    headMeta,
-  },
-) => {
-  const {
-    title,
-    description,
-    image,
-    url,
-  } = { ...headMeta }
-
+export default ({ headMeta }) => {
+  const { title, description, image, url } = { ...headMeta }
   return (
     <>
       <Head>
@@ -136,9 +117,7 @@ export default (
           href={url}
         />
       </Head>
-      <div className="min-h-screen max-w-6.5xl 3xl:max-w-screen-2xl 3xl:flex 3xl:justify-center 3xl:mt-12 mx-auto">
-        <Pool />
-      </div>
+      <Pool />
     </>
   )
 }

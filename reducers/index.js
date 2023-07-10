@@ -16,22 +16,20 @@ import wallet from './wallet'
 import balances from './balances'
 import latest_bumped_transfers from './latest-bumped-transfers'
 
-export default combineReducers(
-  {
-    preferences,
-    chains,
-    assets,
-    pool_assets,
-    gas_tokens_price,
-    ens,
-    router_asset_balances,
-    pools,
-    user_pools,
-    pools_daily_stats,
-    rpc_providers,
-    dev,
-    wallet,
-    balances,
-    latest_bumped_transfers,
-  },
-)
+export default combineReducers({
+  preferences,
+  chains,
+  assets,
+  pool_assets,
+  gas_tokens_price,
+  ens,
+  router_asset_balances,
+  pools,
+  user_pools,
+  pools_daily_stats,
+  rpc_providers,
+  dev,
+  wallet,
+  balances,
+  latest_bumped_transfers,
+})

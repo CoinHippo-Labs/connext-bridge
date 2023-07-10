@@ -13,7 +13,7 @@ export default (
     isPool = false,
     showNextAssets = false,
     showNativeAssets = false,
-    showOnlyWrapable = false,
+    showOnlyWrappable = false,
     data,
   },
 ) => {
@@ -49,7 +49,7 @@ export default (
             isPool={isPool}
             showNextAssets={showNextAssets}
             showNativeAssets={showNativeAssets}
-            showOnlyWrapable={showOnlyWrapable}
+            showOnlyWrappable={showOnlyWrappable}
             data={data}
           />
         </div>

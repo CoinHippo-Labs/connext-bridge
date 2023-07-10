@@ -1,86 +1,51 @@
-import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
+import { Tooltip, Alert as AlertNotification } from '@material-tailwind/react'
+import { DebounceInput } from 'react-debounce-input'
 import _ from 'lodash'
 import moment from 'moment'
-import { FixedNumber, utils } from 'ethers'
-import { DebounceInput } from 'react-debounce-input'
-import { TailSpin, Watch, RotatingSquare, Oval } from 'react-loader-spinner'
-import { Tooltip, Alert as AlertNotification } from '@material-tailwind/react'
 import { TiArrowRight } from 'react-icons/ti'
 import { MdClose } from 'react-icons/md'
-import { BiPlus, BiMessageError, BiMessageCheck, BiMessageDetail, BiInfoCircle } from 'react-icons/bi'
-import { HiOutlineCheckCircle } from 'react-icons/hi'
-import { IoWarning } from 'react-icons/io5'
+import { BiPlus, BiMessageError, BiInfoCircle } from 'react-icons/bi'
 import { BsArrowRight } from 'react-icons/bs'
 
-import Alert from '../alerts'
+import Spinner from '../spinner'
+import NumberDisplay from '../number'
+import Alert from '../alert'
 import Balance from '../balance'
-import Copy from '../copy'
-import DecimalsFormat from '../decimals-format'
 import Faucet from '../faucet'
 import GasPrice from '../gas-price'
+import Copy from '../copy'
 import Image from '../image'
-import { ProgressBar } from '../progress-bars'
 import Wallet from '../wallet'
-import { getChain } from '../../lib/object/chain'
-import { getAsset } from '../../lib/object/asset'
-import { getBalance } from '../../lib/object/balance'
-import { split, toArray, removeDecimal, numberToFixed, ellipse, equalsIgnoreCase, loaderColor, sleep, errorPatterns, parseError } from '../../lib/utils'
+import { WRAPPED_PREFIX, GAS_LIMIT_ADJUSTMENT, DEFAULT_PERCENT_POOL_SLIPPAGE, DEFAULT_MINUTES_POOL_TRANSACTION_DEADLINE } from '../../lib/config'
+import { getChainData, getAssetData, getBalanceData } from '../../lib/object'
+import { toBigNumber, toFixedNumber, formatUnits, parseUnits, isNumber, isZero } from '../../lib/number'
+import { split, toArray, removeDecimal, numberToFixed, ellipse, equalsIgnoreCase, sleep, normalizeMessage, parseError } from '../../lib/utils'
 
-const WRAPPED_PREFIX = process.env.NEXT_PUBLIC_WRAPPED_PREFIX
-const GAS_LIMIT_ADJUSTMENT = Number(process.env.NEXT_PUBLIC_GAS_LIMIT_ADJUSTMENT)
-const DEFAULT_POOL_SLIPPAGE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_DEFAULT_POOL_SLIPPAGE_PERCENTAGE)
-const DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES = 60
 const ACTIONS = ['deposit', 'withdraw']
 const WITHDRAW_OPTIONS = [
   { title: 'Balanced amounts', value: 'balanced_amounts' },
-  { title: '{x} only', value: 'x_only', is_staging: false },
-  { title: '{y} only', value: 'y_only', is_staging: false },
-  { title: 'Custom amounts', value: 'custom_amounts', is_staging: false },
+  { title: '{x} only', value: 'x_only' },
+  { title: '{y} only', value: 'y_only' },
+  { title: 'Custom amounts', value: 'custom_amounts' },
 ]
 const DEFAULT_OPTIONS = {
   infiniteApprove: true,
-  slippage: DEFAULT_POOL_SLIPPAGE_PERCENTAGE,
-  deadline: DEFAULT_POOL_TRANSACTION_DEADLINE_MINUTES,
+  slippage: DEFAULT_PERCENT_POOL_SLIPPAGE,
+  deadline: DEFAULT_MINUTES_POOL_TRANSACTION_DEADLINE,
 }
 
-export default ({ pool, userPoolsData, onFinish }) => {
-  const {
-    preferences,
-    chains,
-    pool_assets,
-    pools,
-    dev,
-    wallet,
-    balances,
-  } = useSelector(
-    state => (
-      {
-        preferences: state.preferences,
-        chains: state.chains,
-        pool_assets: state.pool_assets,
-        pools: state.pools,
-        dev: state.dev,
-        wallet: state.wallet,
-        balances: state.balances,
-      }
-    ),
-    shallowEqual,
-  )
-  const { theme } = { ...preferences }
+export default ({ pool, userPools, onFinish }) => {
+  const { chains, pool_assets, pools, dev, wallet, balances } = useSelector(state => ({ chains: state.chains, pool_assets: state.pool_assets, pools: state.pools, dev: state.dev, wallet: state.wallet, balances: state.balances }), shallowEqual)
   const { chains_data } = { ...chains }
   const { pool_assets_data } = { ...pool_assets }
   const { pools_data } = { ...pools }
   const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
   const { provider, ethereum_provider, signer, address } = { ...wallet_data }
-  const { balances_data } = { ...balances }
   const wallet_chain_id = wallet_data?.chain_id
-
-  const router = useRouter()
-  const { query } = { ...router }
-  const { mode } = { ...query }
+  const { balances_data } = { ...balances }
 
   const [action, setAction] = useState(_.head(ACTIONS))
   const [amountX, setAmountX] = useState(null)
@@ -122,20 +87,18 @@ export default ({ pool, userPoolsData, onFinish }) => {
         setApproveResponse(null)
 
         const { chain, asset } = { ...pool }
-        const chain_data = getChain(chain, chains_data)
-        const pool_data = toArray(pools_data).find(p => p.chain_data?.id === chain && p.asset_data?.id === asset)
+        const chain_data = getChainData(chain, chains_data)
+        const pool_data = toArray(pools_data).find(d => d.chain_data?.id === chain && d.asset_data?.id === asset)
         const { contract_data, domainId, adopted, local } = { ...pool_data }
         const { contract_address } = { ...contract_data }
 
-        if (domainId && contract_address && typeof amountX === 'string' && !isNaN(amountX) && typeof amountY === 'string' && !isNaN(amountY)) {
-          setPriceImpactAdd(true)
+        if (domainId && contract_address && isNumber(amountX) && isNumber(amountY)) {
           setCallResponse(null)
-
           let _amountX
           let _amountY
           try {
-            _amountX = utils.parseUnits((amountX || 0).toString(), adopted?.decimals || 18).toString()
-            _amountY = utils.parseUnits((amountY || 0).toString(), local?.decimals || 18).toString()
+            _amountX = parseUnits(amountX, adopted?.decimals)
+            _amountY = parseUnits(amountY, local?.decimals)
             if (adopted?.index === 1) {
               const _amount = _amountX
               _amountX = _amountY
@@ -144,7 +107,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
             calculateAddLiquidityPriceImpact(domainId, contract_address, _amountX, _amountY)
           } catch (error) {
             const response = parseError(error)
-            console.log('[calculateAddLiquidityPriceImpact error]', { domainId, contract_address, _amountX, _amountY, error })
+            console.log('[calculateAddLiquidityPriceImpact error]', { domainId, contract_address, _amountX, _amountY }, error)
             setPriceImpactAdd(0)
             setPriceImpactAddResponse({ status: 'failed', ...response })
           }
@@ -185,13 +148,14 @@ export default ({ pool, userPoolsData, onFinish }) => {
       const getData = async () => {
         if (removeAmounts?.length > 1) {
           const { chain, asset } = { ...pool }
-          const chain_data = getChain(chain, chains_data)
-          const pool_data = toArray(pools_data).find(p => p.chain_data?.id === chain && p.asset_data?.id === asset)
+          const chain_data = getChainData(chain, chains_data)
+          const pool_data = toArray(pools_data).find(d => d.chain_data?.id === chain && d.asset_data?.id === asset)
           const { contract_data, domainId, local } = { ...pool_data }
           const { contract_address } = { ...contract_data }
+
           let amounts = _.cloneDeep(removeAmounts).map((a, i) => {
             const decimals = (i === 0 ? adopted : local)?.decimals || 18
-            return utils.parseUnits(numberToFixed(a, decimals), decimals)
+            return parseUnits(a, decimals)
           })
           if (equalsIgnoreCase(contract_address, local?.address)) {
             amounts = _.reverse(amounts)
@@ -244,28 +208,26 @@ export default ({ pool, userPoolsData, onFinish }) => {
 
       const x_asset_data = adopted?.address && {
         ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
-        ...(
-          equalsIgnoreCase(adopted.address, contract_address) ?
-            contract_data :
-            {
-              chain_id,
-              contract_address: adopted.address,
-              decimals: adopted.decimals,
-              symbol: adopted.symbol,
-            }
+        ...(equalsIgnoreCase(adopted.address, contract_address) ?
+          contract_data :
+          {
+            chain_id,
+            contract_address: adopted.address,
+            decimals: adopted.decimals,
+            symbol: adopted.symbol,
+          }
         ),
       }
       const y_asset_data = local?.address && {
         ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
-        ...(
-          equalsIgnoreCase(local.address, contract_address) ?
-            contract_data :
-            {
-              chain_id,
-              contract_address: local.address,
-              decimals: local.decimals,
-              symbol: local.symbol,
-            }
+        ...(equalsIgnoreCase(local.address, contract_address) ?
+          contract_data :
+          {
+            chain_id,
+            contract_address: local.address,
+            decimals: local.decimals,
+            symbol: local.symbol,
+          }
         ),
       }
 
@@ -276,7 +238,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
       switch (action) {
         case 'deposit':
           try {
-            if (!(typeof amountX === 'string' && !isNaN(amountX) && typeof amountY === 'string' && !isNaN(amountY)) || !(amountX || amountY)) {
+            if (!(isNumber(amountX) && isNumber(amountY)) || !(!isZero(amountX) || !isZero(amountY))) {
               failed = true
               setApproving(false)
               break
@@ -286,52 +248,46 @@ export default ({ pool, userPoolsData, onFinish }) => {
             let _amountY
             const x_decimals = x_asset_data?.decimals || 18
             const y_decimals = y_asset_data?.decimals || 18
-            if (amountX && typeof amountX === 'string' && x_decimals === 18 && _.last(split(amountX, 'normal', '.')).length === x_decimals) {
+            if (isNumber(amountX) && x_decimals === 18 && typeof amountX === 'string' && _.last(split(amountX, 'normal', '.')).length === x_decimals) {
               _amountX = amountX.substring(0, amountX.length - 1)
             }
             else {
               _amountX = amountX
             }
-            if (amountY && typeof amountY === 'string' && y_decimals === 18 && _.last(split(amountY, 'normal', '.')).length === y_decimals) {
+            if (isNumber(amountY) && y_decimals === 18 && typeof amountY === 'string' && _.last(split(amountY, 'normal', '.')).length === y_decimals) {
               _amountY = amountY.substring(0, amountY.length - 1)
             }
             else {
               _amountY = amountY
             }
 
-            let amounts = [
-              utils.parseUnits((_amountX || 0).toString(), x_decimals).toString(),
-              utils.parseUnits((_amountY || 0).toString(), y_decimals).toString(),
-            ]
+            let amounts = [parseUnits(_amountX, x_decimals), parseUnits(_amountY, y_decimals)]
             const minToMint = '0'
             if (!failed) {
               try {
-                const approve_request = await sdk.sdkBase.approveIfNeeded(domainId, x_asset_data?.contract_address, _.head(amounts), infiniteApprove)
-                if (approve_request) {
+                const request = await sdk.sdkBase.approveIfNeeded(domainId, x_asset_data?.contract_address, _.head(amounts), infiniteApprove)
+                if (request) {
                   setApproving(true)
-                  const approve_response = await signer.sendTransaction(approve_request)
-                  const { hash } = { ...approve_response }
+                  const response = await signer.sendTransaction(request)
+                  const { hash } = { ...response }
                   setApproveResponse({
                     status: 'pending',
                     message: `Waiting for ${x_asset_data?.symbol} approval`,
                     tx_hash: hash,
                   })
+
                   setApproveProcessing(true)
+                  const receipt = await signer.provider.waitForTransaction(hash)
+                  const { status } = { ...receipt }
+                  failed = !status
+                  setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to approve ${x_asset_data?.symbol}`, tx_hash: hash })
 
-                  const approve_receipt = await signer.provider.waitForTransaction(hash)
-                  const { status } = { ...approve_receipt }
-                  setApproveResponse(status ? null : { status: 'failed', message: `Failed to approve ${x_asset_data?.symbol}`, tx_hash: hash })
-
-                  if (status) {
+                  if (!failed) {
                     setResponses(_.uniqBy(_.concat(responses, { message: `Approve ${x_asset_data?.symbol} successful`, tx_hash: hash }), 'tx_hash'))
                   }
-                  failed = !status
                   setApproveProcessing(false)
-                  setApproving(false)
                 }
-                else {
-                  setApproving(false)
-                }
+                setApproving(false)
               } catch (error) {
                 const response = parseError(error)
                 setApproveResponse({ status: 'failed', ...response })
@@ -342,32 +298,29 @@ export default ({ pool, userPoolsData, onFinish }) => {
 
               if (!failed) {
                 try {
-                  const approve_request = await sdk.sdkBase.approveIfNeeded(domainId, y_asset_data?.contract_address, _.last(amounts), infiniteApprove)
-                  if (approve_request) {
+                  const request = await sdk.sdkBase.approveIfNeeded(domainId, y_asset_data?.contract_address, _.last(amounts), infiniteApprove)
+                  if (request) {
                     setApproving(true)
-                    const approve_response = await signer.sendTransaction(approve_request)
-                    const { hash } = { ...approve_response }
+                    const response = await signer.sendTransaction(request)
+                    const { hash } = { ...response }
                     setApproveResponse({
                       status: 'pending',
                       message: `Waiting for ${y_asset_data?.symbol} approval`,
                       tx_hash: hash,
                     })
+
                     setApproveProcessing(true)
+                    const receipt = await signer.provider.waitForTransaction(hash)
+                    const { status } = { ...receipt }
+                    failed = !status
+                    setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to approve ${y_asset_data?.symbol}`, tx_hash: hash })
 
-                    const approve_receipt = await signer.provider.waitForTransaction(hash)
-                    const { status } = { ...approve_receipt }
-                    setApproveResponse(status ? null : { status: 'failed', message: `Failed to approve ${y_asset_data?.symbol}`, tx_hash: hash })
-
-                    if (status) {
+                    if (!failed) {
                       setResponses(_.uniqBy(_.concat(responses, { message: `Approve ${y_asset_data?.symbol} successful`, tx_hash: hash }), 'tx_hash'))
                     }
-                    failed = !status
                     setApproveProcessing(false)
-                    setApproving(false)
                   }
-                  else {
-                    setApproving(false)
-                  }
+                  setApproving(false)
                 } catch (error) {
                   const response = parseError(error)
                   setApproveResponse({ status: 'failed', ...response })
@@ -388,49 +341,45 @@ export default ({ pool, userPoolsData, onFinish }) => {
                 }
 
                 console.log('[addLiquidity]', { domainId, contract_address, amounts, minToMint, deadline })
-                const add_request = await sdk.sdkPool.addLiquidity(domainId, contract_address, amounts, minToMint, deadline)
-                if (add_request) {
+                const request = await sdk.sdkPool.addLiquidity(domainId, contract_address, amounts, minToMint, deadline)
+                if (request) {
                   try {
-                    let gasLimit = await signer.estimateGas(add_request)
+                    const gasLimit = await signer.estimateGas(request)
                     if (gasLimit) {
-                      gasLimit = FixedNumber.fromString(gasLimit.toString())
-                        .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
-                        .round(0)
-                        .toString()
-                        .replace('.0', '')
-                      add_request.gasLimit = gasLimit
+                      request.gasLimit = toBigNumber(toFixedNumber(gasLimit).mulUnsafe(toFixedNumber(GAS_LIMIT_ADJUSTMENT)))
                     }
                   } catch (error) {}
+                  const response = await signer.sendTransaction(request)
+                  const { hash } = { ...response }
 
-                  const add_response = await signer.sendTransaction(add_request)
-                  const { hash } = { ...add_response }
                   setCallProcessing(true)
                   success = hash
-                  const add_receipt = await signer.provider.waitForTransaction(hash)
-                  const { status } = { ...add_receipt }
-
+                  const receipt = await signer.provider.waitForTransaction(hash)
+                  const { status } = { ...receipt }
                   failed = !status
-                  const response = {
+                  const _response = {
                     status: failed ? 'failed' : 'success',
                     message: failed ? `Failed to add ${symbol}` : `Add ${symbol} successful`,
                     tx_hash: hash,
                   }
-                  if (response.status === 'success') {
-                    setResponses(_.uniqBy(_.concat(responses, response), 'tx_hash'))
+                  setCallResponse(_response)
+
+                  if (!failed) {
+                    setResponses(_.uniqBy(_.concat(responses, _response), 'tx_hash'))
                   }
-                  setCallResponse(response)
                   success = true
                 }
               } catch (error) {
                 const response = parseError(error)
-                console.log('[addLiquidity error]', { domainId, contract_address, amounts, minToMint, deadline, error })
+                console.log('[addLiquidity error]', { domainId, contract_address, amounts, minToMint, deadline }, error)
+                const { code } = { ...response }
                 let { message } = { ...response }
                 if (message?.includes('eth_sendRawTransaction')) {
                   message = 'Failed to send transaction'
                 }
-                switch (response.code) {
+                switch (code) {
                   case 'user_rejected':
-                    reset(response.code)
+                    reset(code)
                     break
                   default:
                     if (success) {
@@ -448,64 +397,60 @@ export default ({ pool, userPoolsData, onFinish }) => {
           break
         case 'withdraw':
           try {
-            if (!amount || ['0', '0.0'].includes(amount)) {
+            if (isZero(amount)) {
               failed = true
               setApproving(false)
               break
             }
 
-            const is_one_token_withdraw = withdrawOption?.endsWith('_only')
+            const isOneToken = withdrawOption?.endsWith('_only')
             let _amount
-            if (amount && typeof amount === 'string' && _.last(split(amount, 'normal', '.')).length === 18) {
+            if (isNumber(amount) && typeof amount === 'string' && _.last(split(amount, 'normal', '.')).length === 18) {
               _amount = amount.substring(0, amount.length - 1)
             }
             else {
               _amount = amount
             }
-            _amount = utils.parseUnits((_amount || 0).toString(), 18).toString()
+            _amount = parseUnits(_amount)
 
             let _amounts = removeAmounts?.length > 1 && removeAmounts.map((a, i) => {
               const decimals = (i === 0 ? adopted : local)?.decimals || 18
-              return utils.parseUnits(numberToFixed(Number(a) * (1 - slippage / 100), decimals), decimals).toString()
+              return parseUnits(a * (1 - slippage / 100), decimals)
             })
             if (adopted?.index === 1) {
               _amounts = _.reverse(_amounts)
             }
 
-            const withdraw_contract_address = is_one_token_withdraw ? (withdrawOption === 'x_only' ? x_asset_data : y_asset_data)?.contract_address : undefined
+            const withdrawContractAddress = isOneToken ? (withdrawOption === 'x_only' ? x_asset_data : y_asset_data)?.contract_address : undefined
             const minAmounts = withdrawOption !== 'custom_amounts' ? _amounts || ['0', '0'] : undefined
-            const minAmount = is_one_token_withdraw ? _.head(toArray(minAmounts).filter(a => a !== '0')) : undefined
+            const minAmount = isOneToken ? _.head(toArray(minAmounts).filter(a => a !== '0')) : undefined
             const amounts = withdrawOption === 'custom_amounts' ? _amounts || ['0', '0'] : undefined
             const maxBurnAmount = withdrawOption === 'custom_amounts' ? '0' : undefined
-
             if (!failed) {
               try {
-                const approve_request = await sdk.sdkBase.approveIfNeeded(domainId, lpTokenAddress, _amount, infiniteApprove)
-                if (approve_request) {
+                const request = await sdk.sdkBase.approveIfNeeded(domainId, lpTokenAddress, _amount, infiniteApprove)
+                if (request) {
                   setApproving(true)
-                  const approve_response = await signer.sendTransaction(approve_request)
-                  const { hash } = { ...approve_response }
+                  const response = await signer.sendTransaction(request)
+                  const { hash } = { ...response }
                   setApproveResponse({
                     status: 'pending',
                     message: `Waiting for ${symbol} approval`,
                     tx_hash: hash,
                   })
+
                   setApproveProcessing(true)
+                  const receipt = await signer.provider.waitForTransaction(hash)
+                  const { status } = { ...receipt }
+                  failed = !status
+                  setApproveResponse(!failed ? null : { status: 'failed', message: `Failed to approve ${symbol}`, tx_hash: hash })
 
-                  const approve_receipt = await signer.provider.waitForTransaction(hash)
-                  const { status } = { ...approve_receipt }
-                  setApproveResponse(status ? null : { status: 'failed', message: `Failed to approve ${symbol}`, tx_hash: hash })
-
-                  if (status) {
+                  if (!failed) {
                     setResponses(_.uniqBy(_.concat(responses, { message: `Approve ${symbol} successful`, tx_hash: hash }), 'tx_hash'))
                   }
-                  failed = !status
                   setApproveProcessing(false)
-                  setApproving(false)
                 }
-                else {
-                  setApproving(false)
-                }
+                setApproving(false)
               } catch (error) {
                 const response = parseError(error)
                 setApproveResponse({ status: 'failed', ...response })
@@ -516,51 +461,45 @@ export default ({ pool, userPoolsData, onFinish }) => {
             }
 
             if (!failed) {
-              const method = is_one_token_withdraw ? 'removeLiquidityOneToken' : withdrawOption === 'custom_amounts' ? 'removeLiquidityImbalance' : 'removeLiquidity'
-
+              const method = isOneToken ? 'removeLiquidityOneToken' : withdrawOption === 'custom_amounts' ? 'removeLiquidityImbalance' : 'removeLiquidity'
               try {
-                console.log(`[${method}]`, { domainId, contract_address, withdraw_contract_address, amount: _amount, minAmounts, minAmount, amounts, maxBurnAmount, deadline })
-                const remove_request = is_one_token_withdraw ?
-                  await sdk.sdkPool.removeLiquidityOneToken(domainId, contract_address, withdraw_contract_address, _amount, minAmount, deadline) :
+                console.log(`[${method}]`, { domainId, contract_address, withdrawContractAddress, amount: _amount, minAmounts, minAmount, amounts, maxBurnAmount, deadline })
+                const request = isOneToken ?
+                  await sdk.sdkPool.removeLiquidityOneToken(domainId, contract_address, withdrawContractAddress, _amount, minAmount, deadline) :
                   withdrawOption === 'custom_amounts' ?
                     await sdk.sdkPool.removeLiquidityImbalance(domainId, contract_address, amounts, maxBurnAmount, deadline) :
                     await sdk.sdkPool.removeLiquidity(domainId, contract_address, _amount, minAmounts, deadline)
-
-                if (remove_request) {
+                if (request) {
                   try {
-                    let gasLimit = await signer.estimateGas(remove_request)
+                    const gasLimit = await signer.estimateGas(request)
                     if (gasLimit) {
-                      gasLimit = FixedNumber.fromString(gasLimit.toString())
-                        .mulUnsafe(FixedNumber.fromString(GAS_LIMIT_ADJUSTMENT.toString()))
-                        .round(0)
-                        .toString()
-                        .replace('.0', '')
-                      remove_request.gasLimit = gasLimit
+                      request.gasLimit = toBigNumber(toFixedNumber(gasLimit).mulUnsafe(toFixedNumber(GAS_LIMIT_ADJUSTMENT)))
                     }
                   } catch (error) {}
-
-                  const remove_response = await signer.sendTransaction(remove_request)
-                  const { hash } = { ...remove_response }
-                  success = hash
+                  const response = await signer.sendTransaction(request)
+                  const { hash } = { ...response }
+ 
                   setCallProcessing(true)
-                  const remove_receipt = await signer.provider.waitForTransaction(hash)
-                  const { status } = { ...remove_receipt }
-
+                  success = hash
+                  const receipt = await signer.provider.waitForTransaction(hash)
+                  const { status } = { ...receipt }
                   failed = !status
-                  const response = {
+                  const _response = {
                     status: failed ? 'failed' : 'success',
                     message: failed ? `Failed to remove ${symbol}` : `Remove ${symbol} successful`,
                     tx_hash: hash,
                   }
-                  if (response.status === 'success') {
-                    setResponses(_.uniqBy(_.concat(responses, response), 'tx_hash'))
+                  setCallResponse(_response)
+
+                  if (!failed) {
+                    setResponses(_.uniqBy(_.concat(responses, _response), 'tx_hash'))
                   }
-                  setCallResponse(response)
                   success = true
                 }
               } catch (error) {
                 const response = parseError(error)
-                console.log(`[${method} error]`, { domainId, contract_address, withdraw_contract_address, amount: _amount, minAmounts, minAmount, amounts, maxBurnAmount, deadline, error })
+                console.log(`[${method} error]`, { domainId, contract_address, withdrawContractAddress, amount: _amount, minAmounts, minAmount, amounts, maxBurnAmount, deadline }, error)
+                const { code } = { ...response }
                 let { message } = { ...response }
                 if (message?.includes('exceed total supply')) {
                   message = 'Exceed Total Supply'
@@ -568,9 +507,9 @@ export default ({ pool, userPoolsData, onFinish }) => {
                 else if (message?.includes('eth_sendRawTransaction')) {
                   message = 'Failed to send transaction'
                 }
-                switch (response.code) {
+                switch (code) {
                   case 'user_rejected':
-                    reset(response.code)
+                    reset(code)
                     break
                   default:
                     if (success) {
@@ -593,6 +532,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
 
     setCallProcessing(false)
     setCalling(false)
+
     if (sdk && address && success) {
       await sleep(1 * 1000)
       if (onFinish) {
@@ -617,21 +557,21 @@ export default ({ pool, userPoolsData, onFinish }) => {
 
   const calculateRemoveSwapLiquidity = async () => {
     setPriceImpactRemove(null)
-    if (typeof amount === 'string') {
-      if (utils.parseUnits(amount || '0', 18).toBigInt() <= 0) {
+    if (isNumber(amount)) {
+      if (BigInt(parseUnits(amount)) <= 0) {
         setRemoveAmounts(['0', '0'])
       }
       else {
         const { chain, asset } = { ...pool }
-        const chain_data = getChain(chain, chains_data)
-        const pool_data = toArray(pools_data).find(p => p.chain_data?.id === chain && p.asset_data?.id === asset)
+        const chain_data = getChainData(chain, chains_data)
+        const pool_data = toArray(pools_data).find(d => d.chain_data?.id === chain && d.asset_data?.id === asset)
         const { contract_data, domainId, adopted, local } = { ...pool_data }
         const { contract_address } = { ...contract_data }
-        const _amount = utils.parseUnits((amount || 0).toString(), 18).toString()
 
         try {
           setPriceImpactRemove(true)
 
+          const _amount = parseUnits(amount)
           let amounts
           if (withdrawOption?.endsWith('_only')) {
             const index = (withdrawOption === 'x_only' && adopted?.index === 1) || (withdrawOption === 'y_only' && local?.index === 1) ? 1 : 0
@@ -662,13 +602,13 @@ export default ({ pool, userPoolsData, onFinish }) => {
             else {
               _amounts = _.cloneDeep(amounts)
             }
-            // calculateRemoveLiquidityPriceImpact(domainId, contract_address, _.head(amounts), _.last(amounts))
           }
-          setRemoveAmounts(toArray(_amounts).map((a, i) => utils.formatUnits(BigInt(a || '0'), (i === 0 ? adopted : local)?.decimals || 18)))
+
+          setRemoveAmounts(toArray(_amounts).map((a, i) => formatUnits(a, (i === 0 ? adopted : local)?.decimals).toString()))
           setCallResponse(null)
         } catch (error) {
           const response = parseError(error)
-          console.log('[calculateRemoveSwapLiquidity error]', { domainId, contract_address, amount: _amount, error })
+          console.log('[calculateRemoveSwapLiquidity error]', { domainId, contract_address, amount: _amount }, error)
           let { message } = { ...response }
           if (message?.includes('exceed total supply')) {
             message = 'Exceed Total Supply'
@@ -686,148 +626,87 @@ export default ({ pool, userPoolsData, onFinish }) => {
   }
 
   const calculateAddLiquidityPriceImpact = async (domainId, contractAddress, amountX, amountY) => {
-    let manual
+    let failed
     try {
       setPriceImpactAdd(true)
-      if ([chain_data?.id].includes(pool_data?.chain_data?.id) && pool_data?.tvl) {
+      const { id } = { ...chain_data }
+      const { tvl } = { ...pool_data }
+      if (pool_data && pool_data.chain_data?.id === id && tvl) {
         console.log('[calculateAddLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY })
-        const price_impact = await sdk.sdkPool.calculateAddLiquidityPriceImpact(domainId, contractAddress, amountX, amountY)
-        console.log('[addLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY, price_impact })
-        setPriceImpactAdd(Number(utils.formatUnits(BigInt(price_impact || '0'), 18)) * 100)
+        const priceImpact = await sdk.sdkPool.calculateAddLiquidityPriceImpact(domainId, contractAddress, amountX, amountY)
+        console.log('[addLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY, priceImpact })
+        setPriceImpactAdd(formatUnits(priceImpact) * 100)
       }
       else {
-        manual = true
+        failed = true
       }
     } catch (error) {
       const response = parseError(error)
-      console.log('[calculateAddLiquidityPriceImpact error]', { domainId, contractAddress, amountX, amountY, error })
+      console.log('[calculateAddLiquidityPriceImpact error]', { domainId, contractAddress, amountX, amountY }, error)
       const { message } = { ...response }
       if (message?.includes('reverted')) {
-        manual = true
+        failed = true
       }
       else {
         setPriceImpactAdd(0)
         setPriceImpactAddResponse({ status: 'failed', ...response })
       }
     }
-    if (manual) {
+    if (failed) {
       setPriceImpactAdd(null)
     }
   }
 
   const calculateRemoveLiquidityPriceImpact = async (domainId, contractAddress, amountX, amountY) => {
-    let manual
+    let failed
     try {
       setPriceImpactRemove(true)
-      if ([chain_data?.id].includes(pool_data?.chain_data?.id) && pool_data?.tvl) {
+      const { id } = { ...chain_data }
+      const { tvl } = { ...pool_data }
+      if (pool_data && pool_data.chain_data?.id === id && tvl) {
         console.log('[calculateRemoveLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY })
-        const price_impact = await sdk.sdkPool.calculateRemoveLiquidityPriceImpact(domainId, contractAddress, amountX, amountY)
-        console.log('[removeLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY, price_impact })
-        setPriceImpactRemove(Number(utils.formatUnits(BigInt(price_impact || '0'), 18)) * 100)
+        const priceImpact = await sdk.sdkPool.calculateRemoveLiquidityPriceImpact(domainId, contractAddress, amountX, amountY)
+        console.log('[removeLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY, priceImpact })
+        setPriceImpactRemove(formatUnits(priceImpact) * 100)
       }
       else {
-        manual = true
+        failed = true
       }
     } catch (error) {
       const response = parseError(error)
-      console.log('[calculateRemoveLiquidityPriceImpact error]', { domainId, contractAddress, amountX, amountY, error })
+      console.log('[calculateRemoveLiquidityPriceImpact error]', { domainId, contractAddress, amountX, amountY }, error)
       const { message } = { ...response }
       if (message?.includes('reverted')) {
-        manual = true
+        failed = true
       }
       else {
         setPriceImpactRemove(0)
         setPriceImpactRemoveResponse({ status: 'failed', ...response })
       }
     }
-    if (manual) {
+    if (failed) {
       setPriceImpactRemove(null)
     }
   }
 
   const { chain, asset } = { ...pool }
-  const chain_data = getChain(chain, chains_data)
+  const chain_data = getChainData(chain, chains_data)
   const { chain_id, name, image, explorer } = { ...chain_data }
   const { url, contract_path, transaction_path } = { ...explorer }
   const { infiniteApprove, slippage } = { ...options }
 
   const selected = !!(chain && asset)
-  const no_pool = selected && !getAsset(asset, pool_assets_data, chain_id)
-  const pool_data = toArray(pools_data).find(p => p?.chain_data?.id === chain && p.asset_data?.id === asset)
+  const no_pool = selected && !getAssetData(asset, pool_assets_data, { chain_id })
+  const pool_data = toArray(pools_data).find(d => d.chain_data?.id === chain && d.asset_data?.id === asset)
   const { asset_data, contract_data, symbol, lpTokenAddress, error } = { ...pool_data }
   let { adopted, local } = { ...pool_data }
-  const { color } = { ...asset_data }
   const { contract_address, next_asset } = { ...contract_data }
-
-  const _image = contract_data?.image
-  const image_paths = split(_image, 'normal', '/')
-  const image_name = _.last(image_paths)
-
-  const x_asset_data = adopted?.address && {
-    ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
-    ...(
-      equalsIgnoreCase(adopted.address, contract_address) ?
-        contract_data :
-        {
-          chain_id,
-          contract_address: adopted.address,
-          decimals: adopted.decimals,
-          symbol: adopted.symbol,
-          image:
-            _image ?
-              !adopted.symbol ?
-                _image :
-                adopted.symbol.startsWith(WRAPPED_PREFIX) ?
-                  !image_name.startsWith(WRAPPED_PREFIX) ?
-                    image_paths.map((s, i) => i === image_paths.length - 1 ? `${WRAPPED_PREFIX}${s}` : s).join('/') :
-                    _image :
-                  !image_name.startsWith(WRAPPED_PREFIX) ?
-                    _image :
-                    image_paths.map((s, i) => i === image_paths.length - 1 ? s.substring(WRAPPED_PREFIX.length) : s).join('/') :
-              undefined,
-        }
-    ),
-  }
-  const _x_asset_data = adopted?.address && {
-    ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
-    ...contract_data,
-  }
-  const x_balance_amount = x_asset_data && getBalance(chain_id, x_asset_data.contract_address, balances_data)?.amount
-
-  const y_asset_data = local?.address && {
-    ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
-    ...(
-      equalsIgnoreCase(local.address, contract_address) ?
-        contract_data :
-        {
-          chain_id,
-          contract_address: local.address,
-          decimals: local.decimals,
-          symbol: local.symbol,
-          image:
-            _image ?
-              !local.symbol ?
-                _image :
-                local.symbol.startsWith(WRAPPED_PREFIX) ?
-                  !image_name.startsWith(WRAPPED_PREFIX) ?
-                    image_paths.map((s, i) => i === image_paths.length - 1 ? `${WRAPPED_PREFIX}${s}` : s).join('/') :
-                    _image :
-                  !image_name.startsWith(WRAPPED_PREFIX) ?
-                    _image :
-                    image_paths.map((s, i) => i === image_paths.length - 1 ? s.substring(WRAPPED_PREFIX.length) : s).join('/') :
-              undefined,
-        }
-    ),
-  }
-  const y_balance_amount = y_asset_data && getBalance(chain_id, y_asset_data.contract_address, balances_data)?.amount
-
   const pool_loading = selected && !no_pool && !error && !pool_data
-  const user_pool_data = pool_data && toArray(userPoolsData).find(p => p.chain_data?.id === chain && p.asset_data?.id === asset)
-  const { lpTokenBalance } = { ...user_pool_data }
 
-  const x_remove_amount = equalsIgnoreCase(adopted?.address, contract_address) ? _.head(removeAmounts) : _.last(removeAmounts)
-  const y_remove_amount = equalsIgnoreCase(adopted?.address, contract_address) ? _.last(removeAmounts) : _.head(removeAmounts)
-  const position_loading = selected && !no_pool && !error && (!userPoolsData || pool_loading)
+  const user_pool_data = pool_data && toArray(userPools).find(d => d.chain_data?.id === chain && d.asset_data?.id === asset)
+  const { lpTokenBalance } = { ...user_pool_data }
+  const position_loading = selected && !no_pool && !error && (!userPools || pool_loading)
+
   const pool_tokens_data = toArray(_.concat(adopted, local)).map((a, i) => {
     const { address, symbol, decimals } = { ...a }
     return {
@@ -839,33 +718,91 @@ export default ({ pool, userPoolsData, onFinish }) => {
       image: (equalsIgnoreCase(address, contract_address) ? contract_data?.image : equalsIgnoreCase(address, next_asset?.contract_address) ? next_asset?.image || contract_data?.image : null) || asset_data?.image,
     }
   })
-
   adopted = { ...adopted, asset_data: _.head(pool_tokens_data) }
   local = { ...local, asset_data: _.last(pool_tokens_data) }
+
   const native_asset = !adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local
   const wrapped_asset = adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local
-  const native_amount = Number(native_asset?.balance || '0')
-  const wrapped_amount = Number(wrapped_asset?.balance || '0')
+  const native_amount = Number(native_asset?.balance) || 0
+  const wrapped_amount = Number(wrapped_asset?.balance) || 0
   const total_amount = native_amount + wrapped_amount
 
-  const valid_amount =
-    action === 'withdraw' ?
-      typeof amount === 'string' && !isNaN(amount) && amount &&
-      utils.parseUnits(amount, 18).toBigInt() <= utils.parseUnits((lpTokenBalance || 0).toString(), 18).toBigInt() &&
-      utils.parseUnits(amount, 18).toBigInt() > 0 :
-      typeof amountX === 'string' && !isNaN(amountX) && typeof amountY === 'string' && !isNaN(amountY) && (amountX || amountY) &&
-      utils.parseUnits(amountX || '0', x_asset_data?.decimals || 18).toBigInt() <= utils.parseUnits((x_balance_amount || 0).toString(), x_asset_data?.decimals || 18).toBigInt() &&
-      utils.parseUnits(amountY || '0', y_asset_data?.decimals || 18).toBigInt() <= utils.parseUnits((y_balance_amount || 0).toString(), y_asset_data?.decimals || 18).toBigInt() &&
-      (utils.parseUnits(amountX || '0', x_asset_data?.decimals || 18).toBigInt() > 0 || utils.parseUnits(amountY || '0', y_asset_data?.decimals || 18).toBigInt() > 0)
-  const overweighted_asset = adopted && local && (Number(amountX) + Number((equalsIgnoreCase(adopted.address, x_asset_data?.contract_address) ? adopted : local).balance)) > (Number(amountY) + Number((equalsIgnoreCase(adopted.address, y_asset_data?.contract_address) ? adopted : local).balance)) ? 'x' : 'y'
+  const _image = contract_data?.image
+  const image_paths = split(_image, 'normal', '/', false)
+  const image_name = _.last(image_paths)
 
-  const disabled = !pool_data || error || calling || approving
+  const x_asset_data = adopted?.address && {
+    ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
+    ...(equalsIgnoreCase(adopted.address, contract_address) ?
+      contract_data :
+      {
+        chain_id,
+        contract_address: adopted.address,
+        decimals: adopted.decimals,
+        symbol: adopted.symbol,
+        image: _image ?
+          !adopted.symbol ?
+            _image :
+            adopted.symbol.startsWith(WRAPPED_PREFIX) ?
+              !image_name.startsWith(WRAPPED_PREFIX) ?
+                image_paths.map((s, i) => i === image_paths.length - 1 ? `${WRAPPED_PREFIX}${s}` : s).join('/') :
+                _image :
+              !image_name.startsWith(WRAPPED_PREFIX) ?
+                _image :
+                image_paths.map((s, i) => i === image_paths.length - 1 ? s.substring(WRAPPED_PREFIX.length) : s).join('/') :
+          undefined,
+      }
+    ),
+  }
+  const _x_asset_data = adopted?.address && {
+    ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
+    ...contract_data,
+  }
+  const { mintable, wrappable, wrapped } = { ..._x_asset_data }
+  const y_asset_data = local?.address && {
+    ...Object.fromEntries(Object.entries({ ...asset_data }).filter(([k, v]) => !['contracts'].includes(k))),
+    ...(equalsIgnoreCase(local.address, contract_address) ?
+      contract_data :
+      {
+        chain_id,
+        contract_address: local.address,
+        decimals: local.decimals,
+        symbol: local.symbol,
+        image: _image ?
+          !local.symbol ?
+            _image :
+            local.symbol.startsWith(WRAPPED_PREFIX) ?
+              !image_name.startsWith(WRAPPED_PREFIX) ?
+                image_paths.map((s, i) => i === image_paths.length - 1 ? `${WRAPPED_PREFIX}${s}` : s).join('/') :
+                _image :
+              !image_name.startsWith(WRAPPED_PREFIX) ?
+                _image :
+                image_paths.map((s, i) => i === image_paths.length - 1 ? s.substring(WRAPPED_PREFIX.length) : s).join('/') :
+          undefined,
+      }
+    ),
+  }
+
+  const x_decimals = x_asset_data?.decimals || 18
+  const y_decimals = y_asset_data?.decimals || 18
+  const x_balance_amount = x_asset_data && getBalanceData(chain_id, x_asset_data.contract_address, balances_data)?.amount
+  const y_balance_amount = y_asset_data && getBalanceData(chain_id, y_asset_data.contract_address, balances_data)?.amount
+  const x_remove_amount = equalsIgnoreCase(adopted?.address, contract_address) ? _.head(removeAmounts) : _.last(removeAmounts)
+  const y_remove_amount = equalsIgnoreCase(adopted?.address, contract_address) ? _.last(removeAmounts) : _.head(removeAmounts)
+  const x_url = x_asset_data?.contract_address && url && `${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}${address ? `?a=${address}` : ''}`
+  const y_url = y_asset_data?.contract_address && url && `${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}${address ? `?a=${address}` : ''}`
+
+  const valid_amount = action === 'withdraw' ?
+    isNumber(amount) && !isZero(amount) && lpTokenBalance && BigInt(parseUnits(amount)) > 0 && BigInt(parseUnits(amount)) <= BigInt(parseUnits(lpTokenBalance)) :
+    isNumber(amountX) && isNumber(amountY) && !(isZero(amountX) && isZero(amountY)) && x_balance_amount && y_balance_amount && (BigInt(parseUnits(amountX, x_decimals)) > 0 || BigInt(parseUnits(amountY, y_decimals)) > 0) && BigInt(parseUnits(amountX, x_decimals)) <= BigInt(parseUnits(x_balance_amount, x_decimals)) && BigInt(parseUnits(amountY, y_decimals)) <= BigInt(parseUnits(y_balance_amount, y_decimals))
+  const disabled = !pool_data || error || approving || calling
+  const response = callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse
   const wrong_chain = wallet_chain_id !== chain_id && !callResponse
   const is_walletconnect = ethereum_provider?.constructor?.name === 'WalletConnectProvider'
 
   return (
     <div className="order-1 lg:order-2 space-y-3">
-      <div className="bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-3 pt-4 3xl: pt-6 pb-5 3xl:pb-7 px-4 3xl:px-6">
+      <div className="bg-slate-50 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-3 pt-4 3xl:pt-6 pb-5 3xl:pb-7 px-4 3xl:px-6">
         <div className="flex items-center justify-between space-x-2">
           <span className="text-lg 3xl:text-2xl font-semibold">
             Manage Balance
@@ -882,7 +819,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
               <div
                 key={i}
                 onClick={() => setAction(a)}
-                className={`w-fit border-b-2 ${action === a ? 'border-slate-300 dark:border-slate-200 font-semibold' : 'border-transparent text-slate-400 dark:text-slate-500 font-semibold'} cursor-pointer capitalize text-sm 3xl:text-xl text-left py-3 px-0`}
+                className={`w-fit cursor-pointer border-b-2 ${action === a ? 'border-slate-300 dark:border-slate-200' : 'border-transparent text-slate-400 dark:text-slate-500'} capitalize text-sm 3xl:text-xl font-semibold text-left py-3 px-0`}
               >
                 {a}
               </div>
@@ -897,7 +834,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
                       Token 1
                     </div>
                     <div className="flex items-center space-x-1">
-                      <div className="text-slate-400 dark:text-slate-500 text-xs 3xl:text-xl font-medium">
+                      <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs 3xl:text-xl font-medium">
                         Balance:
                       </div>
                       {x_asset_data?.contract_address && provider && (
@@ -905,15 +842,15 @@ export default ({ pool, userPoolsData, onFinish }) => {
                           disabled={disabled}
                           onClick={
                             () => {
-                              if (['string', 'number'].includes(typeof x_balance_amount)) {
+                              if (isNumber(x_balance_amount)) {
                                 setAmountX(x_balance_amount.toString())
-                                if (typeof amountY !== 'string' || !amountY) {
+                                if (!isNumber(amountY) && !isZero(amountY)) {
                                   setAmountY('0')
                                 }
                               }
                             }
                           }
-                          className="flex items-center space-x-1.5"
+                          className="flex items-center"
                         >
                           <Balance
                             chainId={chain_id}
@@ -923,38 +860,31 @@ export default ({ pool, userPoolsData, onFinish }) => {
                             hideSymbol={true}
                             className="text-xs 3xl:text-xl"
                           />
-                          <span className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-xs 3xl:text-xl font-medium`}>
-                            Max
-                          </span>
                         </button>
                       )}
                     </div>
                   </div>
                   <div className="space-y-1">
                     <div className="rounded border dark:border-slate-800 flex items-center justify-between space-x-2 py-2.5 px-3">
-                      {x_asset_data?.contract_address && (
-                        <div className="flex items-center justify-between space-x-2">
-                          <div className="flex items-center space-x-1.5">
-                            <a
-                              href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}${address ? `?a=${address}` : ''}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="min-w-max flex items-center space-x-1.5"
-                            >
-                              {x_asset_data.image && (
-                                <Image
-                                  src={x_asset_data.image}
-                                  width={20}
-                                  height={20}
-                                  className="3xl:w-6 3xl:h-6 rounded-full"
-                                />
-                              )}
-                              <span className="text-base 3xl:text-2xl font-semibold">
-                                {x_asset_data.symbol}
-                              </span>
-                            </a>
-                          </div>
-                        </div>
+                      {x_url && (
+                        <a
+                          href={x_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="min-w-max flex items-center space-x-1.5"
+                        >
+                          {x_asset_data.image && (
+                            <Image
+                              src={x_asset_data.image}
+                              width={20}
+                              height={20}
+                              className="3xl:w-6 3xl:h-6 rounded-full"
+                            />
+                          )}
+                          <span className="text-base 3xl:text-2xl font-semibold">
+                            {x_asset_data.symbol}
+                          </span>
+                        </a>
                       )}
                       <DebounceInput
                         debounceTimeout={750}
@@ -962,7 +892,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
                         type="number"
                         placeholder="0.00"
                         disabled={disabled}
-                        value={['string', 'number'].includes(typeof amountX) && !isNaN(amountX) ? amountX : ''}
+                        value={isNumber(amountX) ? amountX : ''}
                         onChange={
                           e => {
                             const regex = /^[0-9.\b]+$/
@@ -974,10 +904,10 @@ export default ({ pool, userPoolsData, onFinish }) => {
                               if (value.startsWith('.')) {
                                 value = `0${value}`
                               }
-                              value = numberToFixed(value, x_asset_data?.decimals || 18)
+                              value = numberToFixed(value, x_decimals)
                             }
                             setAmountX(value)
-                            if (typeof amountY !== 'string' || !amountY) {
+                            if (!isNumber(amountY) && !isZero(amountY)) {
                               setAmountY('0')
                             }
                           }
@@ -987,7 +917,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
                         className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base 3xl:text-2xl font-medium text-right`}
                       />
                     </div>
-                    {typeof amountX === 'string' && ['string', 'number'].includes(typeof x_balance_amount) && utils.parseUnits(amountX || '0', x_asset_data?.decimals || 18).toBigInt() > utils.parseUnits((x_balance_amount || 0).toString(), x_asset_data?.decimals || 18).toBigInt() && (
+                    {isNumber(amountX) && isNumber(x_balance_amount) && BigInt(parseUnits(amountX, x_decimals)) > BigInt(parseUnits(x_balance_amount, x_decimals)) && (
                       <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
                         <BiMessageError size={16} className="min-w-max 3xl:w-5 3xl:h-5" />
                         <span className="text-xs 3xl:text-lg font-medium">
@@ -1006,7 +936,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
                       Token 2
                     </div>
                     <div className="flex items-center space-x-1">
-                      <div className="text-slate-400 dark:text-slate-500 text-xs 3xl:text-xl font-medium">
+                      <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs 3xl:text-xl font-medium">
                         Balance:
                       </div>
                       {y_asset_data?.contract_address && provider && (
@@ -1014,15 +944,15 @@ export default ({ pool, userPoolsData, onFinish }) => {
                           disabled={disabled}
                           onClick={
                             () => {
-                              if (['string', 'number'].includes(typeof y_balance_amount)) {
+                              if (isNumber(y_balance_amount)) {
                                 setAmountY(y_balance_amount.toString())
-                                if (typeof amountX !== 'string' || !amountX) {
+                                if (!isNumber(amountX) && !isZero(amountX)) {
                                   setAmountX('0')
                                 }
                               }
                             }
                           }
-                          className="flex items-center space-x-1.5"
+                          className="flex items-center"
                         >
                           <Balance
                             chainId={chain_id}
@@ -1032,38 +962,31 @@ export default ({ pool, userPoolsData, onFinish }) => {
                             hideSymbol={true}
                             className="text-xs 3xl:text-xl"
                           />
-                          <span className={`${disabled ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : 'cursor-pointer text-blue-400 hover:text-blue-500 dark:text-blue-500 dark:hover:text-blue-400'} text-xs 3xl:text-xl font-medium`}>
-                            Max
-                          </span>
                         </button>
                       )}
                     </div>
                   </div>
                   <div className="space-y-1">
                     <div className="rounded border dark:border-slate-800 flex items-center justify-between space-x-2 py-2.5 px-3">
-                      {y_asset_data?.contract_address && (
-                        <div className="flex items-center justify-between space-x-2">
-                          <div className="flex items-center space-x-1.5">
-                            <a
-                              href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}${address ? `?a=${address}` : ''}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="min-w-max flex items-center space-x-1.5"
-                            >
-                              {y_asset_data.image && (
-                                <Image
-                                  src={y_asset_data.image}
-                                  width={20}
-                                  height={20}
-                                  className="3xl:w-5 3xl:h-5 rounded-full"
-                                />
-                              )}
-                              <span className="text-base 3xl:text-2xl font-semibold">
-                                {y_asset_data.symbol}
-                              </span>
-                            </a>
-                          </div>
-                        </div>
+                      {y_url && (
+                        <a
+                          href={y_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="min-w-max flex items-center space-x-1.5"
+                        >
+                          {y_asset_data.image && (
+                            <Image
+                              src={y_asset_data.image}
+                              width={20}
+                              height={20}
+                              className="3xl:w-6 3xl:h-6 rounded-full"
+                            />
+                          )}
+                          <span className="text-base 3xl:text-2xl font-semibold">
+                            {y_asset_data.symbol}
+                          </span>
+                        </a>
                       )}
                       <DebounceInput
                         debounceTimeout={750}
@@ -1071,7 +994,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
                         type="number"
                         placeholder="0.00"
                         disabled={disabled}
-                        value={['string', 'number'].includes(typeof amountY) && !isNaN(amountY) ? amountY : ''}
+                        value={isNumber(amountY) ? amountY : ''}
                         onChange={
                           e => {
                             const regex = /^[0-9.\b]+$/
@@ -1083,10 +1006,10 @@ export default ({ pool, userPoolsData, onFinish }) => {
                               if (value.startsWith('.')) {
                                 value = `0${value}`
                               }
-                              value = numberToFixed(value, y_asset_data?.decimals || 18)
+                              value = numberToFixed(value, y_decimals)
                             }
                             setAmountY(value)
-                            if (typeof amountX !== 'string' || !amountX) {
+                            if (!isNumber(amountX) && !isZero(amountX)) {
                               setAmountX('0')
                             }
                           }
@@ -1096,7 +1019,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
                         className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base 3xl:text-2xl font-medium text-right`}
                       />
                     </div>
-                    {typeof amountY === 'string' && ['string', 'number'].includes(typeof y_balance_amount) && utils.parseUnits(amountY || '0', y_asset_data?.decimals || 18).toBigInt() > utils.parseUnits((y_balance_amount || 0).toString(), y_asset_data?.decimals || 18).toBigInt() && (
+                    {isNumber(amountY) && isNumber(y_balance_amount) && BigInt(parseUnits(amountY, y_decimals)) > BigInt(parseUnits(y_balance_amount, y_decimals)) && (
                       <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
                         <BiMessageError size={16} className="min-w-max 3xl:w-5 3xl:h-5" />
                         <span className="text-xs 3xl:text-lg font-medium">
@@ -1107,158 +1030,49 @@ export default ({ pool, userPoolsData, onFinish }) => {
                   </div>
                 </div>
               </div>
-              <div className="space-y-4">
-                {pool_data && false && (
-                  <div className="flex flex-col space-y-3">
-                    <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs 3xl:text-xl font-medium">
-                      Pool Ratio
-                    </div>
-                    <div className="w-full h-6 flex flex-col items-end justify-center space-y-1.5">
-                      <ProgressBar
-                        width={native_amount * 100 / total_amount}
-                        className="w-full 3xl:h-2 rounded-lg"
-                        backgroundClassName="3xl: h-2 rounded-lg"
-                        style={{ backgroundColor: color }}
-                        backgroundStyle={{ backgroundColor: `${color}33` }}
-                      />
-                      <div className="w-full flex items-center justify-between space-x-2">
-                        <div className="flex flex-col items-start space-y-0.5">
-                          <div className="flex items-center space-x-1">
-                            {native_asset?.asset_data?.image && (
-                              <Image
-                                src={native_asset.asset_data.image}
-                                width={16}
-                                height={16}
-                                className="rounded-full"
-                              />
-                            )}
-                            <DecimalsFormat
-                              value={native_amount * 100 / total_amount}
-                              suffix="%"
-                              className="leading-4 text-xs 3xl:text-xl font-medium"
-                            />
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end space-y-0.5">
-                          <div className="flex items-center space-x-1">
-                            {(wrapped_asset?.contract_data?.next_asset?.image || wrapped_asset?.asset_data?.image) && (
-                              <Image
-                                src={wrapped_asset?.contract_data?.next_asset?.image || wrapped_asset?.asset_data?.image}
-                                width={16}
-                                height={16}
-                                className="rounded-full"
-                              />
-                            )}
-                            <DecimalsFormat
-                              value={100 - (native_amount * 100 / total_amount)}
-                              suffix="%"
-                              className="leading-4 text-xs 3xl:text-xl font-medium"
-                            />
-                          </div>
-                        </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between space-x-1">
+                  <Tooltip
+                    placement="top"
+                    content="The adjusted amount you are paying for LP tokens above or below current market prices."
+                    className="w-80"
+                  >
+                    <div className="flex items-center">
+                      <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs 3xl:text-xl font-medium">
+                        {typeof priceImpactAdd === 'number' ? priceImpactAdd < 0 ? 'Slippage' : 'Bonus' : 'Price impact'}
                       </div>
+                      <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
                     </div>
+                  </Tooltip>
+                  <div className="flex items-center text-xs 3xl:text-xl font-semibold">
+                    {priceImpactAdd === true && !priceImpactAddResponse ?
+                      <Spinner width={10} height={10} /> :
+                      <span className={`${isNumber(priceImpactAdd) && !isZero(priceImpactAdd) ? priceImpactAdd < 0 ? 'text-red-600 dark:text-red-500' : 'text-green-600 dark:text-green-500' : ''}`}>
+                        {isNumber(priceImpactAdd) || priceImpactAddResponse ?
+                          <NumberDisplay
+                            value={priceImpactAdd}
+                            suffix=" %"
+                            noTooltip={true}
+                            className="whitespace-nowrap"
+                          /> :
+                          <span>-</span>
+                        }
+                      </span>
+                    }
                   </div>
-                )}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between space-x-1">
-                    <Tooltip
-                      placement="top"
-                      content="The adjusted amount you are paying for LP tokens above or below current market prices."
-                      className="w-80 z-50 bg-dark text-white text-xs"
-                    >
-                      <div className="flex items-center">
-                        <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs 3xl:text-xl font-medium">
-                          {typeof priceImpactAdd === 'number' ? priceImpactAdd < 0 ? 'Slippage' : 'Bonus' : 'Price impact'}
-                        </div>
-                        <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
-                      </div>
-                    </Tooltip>
-                    <div className="flex items-center text-xs 3xl:text-xl font-semibold space-x-1">
-                      {priceImpactAdd === true && !priceImpactAddResponse ?
-                        <Oval
-                          width="10"
-                          height="10"
-                          color={loaderColor(theme)}
-                        /> :
-                        <span className={`${typeof priceImpactAdd === 'number' ? priceImpactAdd < 0 ? 'text-red-500 dark:text-red-500' : priceImpactAdd > 0 ? 'text-green-500 dark:text-green-500' : '' : ''}`}>
-                          {typeof priceImpactAdd === 'number' || priceImpactAddResponse ?
-                            <DecimalsFormat
-                              value={priceImpactAdd}
-                              className="whitespace-nowrap"
-                            /> :
-                            <span>-</span>
-                          }
-                          <span>%</span>
-                        </span>
-                      }
-                    </div>
-                  </div>
-                  {/*typeof priceImpactAdd === 'number' && priceImpactAdd < 0 && (
-                    <div className="bg-yellow-50 dark:bg-yellow-200 bg-opacity-50 dark:bg-opacity-10 rounded flex items-start space-x-2 pt-2 pb-3 px-2">
-                      <IoWarning size={18} className="min-w-max 3xl:w-6 3xl:h-6 text-yellow-500 dark:text-yellow-400 mt-1" />
-                      <div className="flex flex-col space-y-3">
-                        <div className="flex flex-col space-y-2.5">
-                          <span className="text-base 3xl:text-xl font-bold">
-                            Warning
-                          </span>
-                          <span className="flex flex-wrap items-center leading-4 text-xs 3xl:text-lg text-left">
-                            <span className="mr-1">You may have</span>
-                            <DecimalsFormat
-                              value={priceImpactAdd}
-                              className="font-bold mr-1"
-                              suffix="%"
-                            />
-                            <span className="mr-1">slippage because</span>
-                            <span className="font-bold mr-1">
-                              {(overweighted_asset === 'x' ? x_asset_data : y_asset_data)?.symbol}
-                            </span>
-                            <span>is currently overweighted in this pool.</span>
-                          </span>
-                          <div className="flex flex-col items-center space-y-1">
-                            <span className="leading-4 text-xs 3xl:text-lg text-left">
-                              <span className="mr-1">If you provide additional</span>
-                              <span className="font-bold mr-1">
-                                {(overweighted_asset === 'x' ? y_asset_data : x_asset_data)?.symbol}
-                              </span>
-                              <span className="mr-1">instead, you may receive</span>
-                              <span className="font-bold mr-1">bonus</span>
-                              <span>tokens.</span>
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex flex-col space-y-0">
-                          <div className="w-fit bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 rounded flex items-center space-x-1 pt-0.5 pb-1 px-2">
-                            <a
-                              href={`/${asset.toUpperCase()}-from-${_.head(chains_data)?.id}-to-${chain}?${asset_data?.symbol === _.head(_.head(chains_data)?.provider_params)?.nativeCurrency?.symbol ? `symbol=${asset_data?.symbol}&` : ''}${(overweighted_asset === 'x' ? y_asset_data : x_asset_data)?.symbol?.includes(WRAPPED_PREFIX) ? 'receive_next=true&' : ''}source=pool`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <span className="leading-3 3xl:leading-4 text-white text-xs 3xl:text-xl font-medium">
-                                Click here to get {(overweighted_asset === 'x' ? y_asset_data : x_asset_data)?.symbol}
-                              </span>
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )*/}
                 </div>
               </div>
               <div className="flex items-end">
                 {!valid_amount ?
-                  <button
-                    disabled={true}
-                    className="w-full bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500 rounded text-base 3xl:text-2xl text-center py-3 px-2 sm:px-3"
-                  >
-                    <span className="flex items-center justify-center space-x-1.5">
-                      <span>Enter amount</span>
+                  <button disabled={true} className="w-full bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed rounded flex items-center justify-center space-x-1.5 py-3 sm:py-4 px-2 sm:px-3">
+                    <span className="text-slate-400 dark:text-slate-500 text-base 3xl:text-2xl">
+                      Enter amount
                     </span>
                   </button> :
-                  chain && provider && wrong_chain ?
+                  provider && chain && wrong_chain ?
                     <Wallet
                       connectChainId={chain_id}
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base 3xl:text-2xl font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
+                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base 3xl:text-2xl font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                     >
                       <span>{is_walletconnect ? 'Reconnect' : 'Switch'} to</span>
                       {image && (
@@ -1266,127 +1080,94 @@ export default ({ pool, userPoolsData, onFinish }) => {
                           src={image}
                           width={28}
                           height={28}
-                          className="rounded-full"
+                          className="3xl:w-8 3xl:h-8 rounded-full"
                         />
                       )}
                       <span className="font-medium">
                         {name}
                       </span>
                     </Wallet> :
-                    callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse ?
-                      toArray(callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse)
-                        .filter(r => !['success'].includes(r.status))
-                        .map((r, i) => {
-                          const { status, message, tx_hash } = { ...r }
-                          return (
-                            <Alert
-                              key={i}
-                              color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
-                              icon={
-                                status === 'failed' ?
-                                  <BiMessageError className="w-4 h-4 stroke-current mr-2.5" /> :
-                                  status === 'success' ?
-                                    <BiMessageCheck className="w-4 h-4 stroke-current mr-2.5" /> :
-                                    status === 'pending' ?
-                                      <div className="mr-2.5">
-                                        <Watch
-                                          color="white"
-                                          width="16"
-                                          height="16"
-                                        />
-                                      </div> :
-                                      <BiMessageDetail className="w-4 h-4 stroke-current mr-2.5" />
-                              }
-                              closeDisabled={true}
-                              rounded={true}
-                              className="rounded p-3"
-                            >
-                              <div className="flex items-center justify-between space-x-2">
-                                <span className={`leading-5 ${status === 'failed' ? 'break-words text-xs' : 'break-words'} text-sm 3xl:text-xl font-medium`}>
-                                  {ellipse(
-                                    split(message, 'normal', ' ')
-                                      .join(' ')
-                                      .substring(0, status === 'failed' && errorPatterns.findIndex(c => message?.indexOf(c) > -1) > -1 ? message.indexOf(errorPatterns.find(c => message.indexOf(c) > -1)) : undefined) ||
-                                    message,
-                                    128,
-                                  )}
-                                </span>
-                                <div className="flex items-center space-x-1">
-                                  {url && tx_hash && (
-                                    <a
-                                      href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <TiArrowRight size={20} className="transform -rotate-45" />
-                                    </a>
-                                  )}
-                                  {status === 'failed' ?
-                                    <>
-                                      <Copy
-                                        value={message}
-                                        className="cursor-pointer text-slate-200 hover:text-white"
-                                      />
-                                      <button
-                                        onClick={() => reset()}
-                                        className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                                      >
-                                        <MdClose size={14} />
-                                      </button>
-                                    </> :
-                                    status === 'success' ?
-                                      <button
-                                        onClick={() => reset()}
-                                        className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
-                                      >
-                                        <MdClose size={14} />
-                                      </button> :
-                                      null
-                                  }
-                                </div>
+                    response ?
+                      toArray(response).filter(d => d.status !== 'success').map((d, i) => {
+                        const { status, message, tx_hash } = { ...d }
+
+                        let color
+                        switch (status) {
+                          case 'success':
+                            color = 'bg-green-500 dark:bg-green-400'
+                            break
+                          case 'success':
+                            color = 'bg-red-500 dark:bg-red-400'
+                            break
+                          default:
+                            break
+                        }
+                        const closeButton = color && (
+                          <button onClick={() => reset()} className={`${color} rounded-full flex items-center justify-center text-white p-1`}>
+                            <MdClose size={14} />
+                          </button>
+                        )
+
+                        return (
+                          <Alert
+                            key={i}
+                            status={status}
+                            icon={status === 'pending' && (
+                              <div className="mr-3">
+                                <Spinner name="Watch" width={16} height={16} color="white" />
                               </div>
-                            </Alert>
-                          )
-                        }) :
-                        provider ?
-                          <button
-                            disabled={disabled || !valid_amount}
-                            onClick={() => call(pool_data)}
-                            className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base 3xl:text-2xl text-center py-3 px-2 sm:px-3`}
+                            )}
+                            closeDisabled={true}
+                            className="p-3"
                           >
-                            <span className="flex items-center justify-center space-x-1.5">
-                              {(calling || approving) && (
-                                <TailSpin
-                                  width="20"
-                                  height="20"
-                                  color="white"
-                                />
-                              )}
-                              <span>
-                                {calling ?
-                                  approving ?
-                                    approveProcessing ?
-                                      'Approving' :
-                                      'Please Approve' :
-                                    callProcessing ?
-                                      'Depositing' :
-                                      typeof approving === 'boolean' ?
-                                        'Please Confirm' :
-                                        'Checking Approval' :
-                                  !valid_amount ?
-                                    'Enter amount' :
-                                    'Supply'
-                                }
+                            <div className="flex items-center justify-between space-x-2">
+                              <span className="leading-5 break-words text-sm 3xl:text-xl font-medium">
+                                {ellipse(normalizeMessage(message, status), 128)}
                               </span>
+                              <div className="flex items-center space-x-1">
+                                {url && tx_hash && (
+                                  <a
+                                    href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <TiArrowRight size={20} className="transform -rotate-45" />
+                                  </a>
+                                )}
+                                {status === 'failed' && <Copy value={message} className="cursor-pointer text-slate-200 hover:text-white" />}
+                                {closeButton}
+                              </div>
+                            </div>
+                          </Alert>
+                        )
+                      }) :
+                      provider ?
+                        <button
+                          disabled={disabled || !valid_amount}
+                          onClick={() => call(pool_data)}
+                          className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base 3xl:text-2xl text-center py-3 sm:py-4 px-2 sm:px-3`}
+                        >
+                          <span className="flex items-center justify-center space-x-1.5">
+                            {(calling || approving) && <div><Spinner width={20} height={20} color="white" /></div>}
+                            <span>
+                              {calling ?
+                                approving ?
+                                  approveProcessing ? 'Approving' : 'Please Approve' :
+                                  callProcessing ?
+                                    'Depositing' :
+                                    typeof approving === 'boolean' ? 'Please Confirm' : 'Checking Approval' :
+                                !valid_amount ? 'Enter amount' : 'Supply'
+                              }
                             </span>
-                          </button> :
-                          <Wallet
-                            connectChainId={chain_id}
-                            buttonConnectTitle="Connect Wallet"
-                            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base 3xl:text-2xl font-medium text-center py-3 px-2 sm:px-3"
-                          >
-                            <span>Connect Wallet</span>
-                          </Wallet>
+                          </span>
+                        </button> :
+                        <Wallet
+                          connectChainId={chain_id}
+                          buttonConnectTitle="Connect Wallet"
+                          className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base 3xl:text-2xl font-medium text-center py-3 sm:py-4 px-2 sm:px-3"
+                        >
+                          <span>Connect Wallet</span>
+                        </Wallet>
                 }
               </div>
             </> :
@@ -1402,19 +1183,17 @@ export default ({ pool, userPoolsData, onFinish }) => {
                         LP Token Balance:
                       </div>
                       {provider && (
-                        <div className="flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs 3xl:text-lg space-x-1">
-                          {['string', 'number'].includes(typeof lpTokenBalance) ?
-                            <DecimalsFormat
+                        <div className="flex items-center justify-center">
+                          {isNumber(lpTokenBalance) ?
+                            <NumberDisplay
                               value={lpTokenBalance}
-                              className="3xl:text-lg font-semibold"
+                              className="text-slate-400 dark:text-slate-500 text-xs 3xl:text-lg"
                             /> :
                             !user_pool_data && !position_loading ?
-                              <span>0</span> :
-                              <RotatingSquare
-                                width="16"
-                                height="16"
-                                color={loaderColor(theme)}
-                              />
+                              <span className="text-slate-400 dark:text-slate-500 text-xs 3xl:text-lg">
+                                0
+                              </span> :
+                              <Spinner name="RotatingSquare" width={16} height={16} />
                           }
                         </div>
                       )}
@@ -1428,7 +1207,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
                         type="number"
                         placeholder="0.00"
                         disabled={disabled}
-                        value={['string', 'number'].includes(typeof withdrawPercent) && !isNaN(withdrawPercent) ? withdrawPercent : ''}
+                        value={isNumber(withdrawPercent) ? withdrawPercent : ''}
                         onChange={
                           e => {
                             const regex = /^[0-9.\b]+$/
@@ -1455,12 +1234,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
                             let _amount
                             try {
                               if (value) {
-                                _amount = Number(value) === 100 ?
-                                  (lpTokenBalance || 0).toString() :
-                                  FixedNumber.fromString((lpTokenBalance || 0).toString())
-                                    .mulUnsafe(FixedNumber.fromString(value.toString()))
-                                    .divUnsafe(FixedNumber.fromString('100'))
-                                    .toString()
+                                _amount = Number(value) === 100 ? lpTokenBalance.toString() : toFixedNumber(lpTokenBalance).mulUnsafe(toFixedNumber(value)).divUnsafe(toFixedNumber('100')).toString()
                               }
                             } catch (error) {
                               _amount = '0'
@@ -1470,47 +1244,41 @@ export default ({ pool, userPoolsData, onFinish }) => {
                         }
                         onWheel={e => e.target.blur()}
                         onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                        className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base 3xl:text-2xl font-medium text-right`}
+                        className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-slate-400 dark:text-slate-500 text-base 3xl:text-2xl font-medium text-right`}
                       />
-                      <span className="text-slate-400 dark:text-slate-500 3xl:text-2xl">%</span>
+                      <span className="text-slate-400 dark:text-slate-500 3xl:text-2xl">
+                        %
+                      </span>
                     </div>
-                    {typeof amount === 'string' && ['string', 'number'].includes(typeof lpTokenBalance) && utils.parseUnits(amount || '0', 18).toBigInt() > utils.parseUnits((lpTokenBalance || 0).toString(), 18).toBigInt() && (
+                    {isNumber(amount) && isNumber(lpTokenBalance) && BigInt(parseUnits(amount)) > BigInt(parseUnits(lpTokenBalance)) && (
                       <div className="flex items-center justify-end text-red-600 dark:text-yellow-400 space-x-1 sm:mx-0">
-                        <BiMessageError size={16} className="min-w-max 3xl:w-5 3xl:h-5"
-                        />
+                        <BiMessageError size={16} className="min-w-max 3xl:w-5 3xl:h-5" />
                         <span className="text-xs 3xl:text-lg font-medium">
                           Not enough {symbol}
                         </span>
                       </div>
                     )}
                   </div>
-                  {['string', 'number'].includes(typeof lpTokenBalance) && utils.parseUnits((lpTokenBalance || 0).toString(), 18).toBigInt() > 0 && (
+                  {isNumber(lpTokenBalance) && BigInt(parseUnits(lpTokenBalance)) > 0 && (
                     <div className="flex items-center justify-end space-x-2.5">
-                      {[0.25, 0.5, 0.75, 1.0].map((p, i) => (
+                      {[0.25, 0.5, 0.75, 1.0].map((d, i) => (
                         <div
                           key={i}
                           onClick={
                             () => {
-                              setWithdrawPercent(p * 100)
+                              setWithdrawPercent(d * 100)
                               let _amount
                               try {
-                                _amount = p === 1 ? (lpTokenBalance || 0).toString() : FixedNumber.fromString((lpTokenBalance || 0).toString()).mulUnsafe(FixedNumber.fromString(p.toString())).toString()
+                                _amount = d === 1 ? lpTokenBalance.toString() : toFixedNumber(lpTokenBalance).mulUnsafe(toFixedNumber(d)).toString()
                               } catch (error) {
                                 _amount = '0'
                               }
                               setAmount(_amount)
                             }
                           }
-                          className={
-                            `${disabled || !['string', 'number'].includes(typeof lpTokenBalance) ?
-                              'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' :
-                              FixedNumber.fromString((lpTokenBalance || 0).toString()).mulUnsafe(FixedNumber.fromString(p.toString())).toString() === amount ?
-                                'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' :
-                                'bg-slate-100 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white 3xl:text-xl font-medium'
-                            } rounded text-xs py-0.5 px-1.5`
-                          }
+                          className={`${disabled || !isNumber(pTokenBalance) ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-blue-400 dark:text-slate-200 font-semibold' : toFixedNumber(lpTokenBalance).mulUnsafe(toFixedNumber(d)).toString() === amount ? 'bg-slate-300 dark:bg-slate-700 cursor-pointer text-blue-600 dark:text-white font-semibold' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 cursor-pointer text-blue-400 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white 3xl:text-xl font-medium'} rounded text-xs py-0.5 px-1.5`}
                         >
-                          {p * 100} %
+                          {d * 100} %
                         </div>
                       ))}
                     </div>
@@ -1519,34 +1287,32 @@ export default ({ pool, userPoolsData, onFinish }) => {
                 {x_asset_data && y_asset_data && (
                   <div className="space-y-4">
                     <div className="flex flex-col space-y-2">
-                      {WITHDRAW_OPTIONS.map((o, i) => {
-                        const { value, is_staging } = { ...o }
-                        let { title } = { ...o }
+                      {WITHDRAW_OPTIONS.map((d, i) => {
+                        const { value } = { ...d }
+                        let { title } = { ...d }
                         title = title.replace('{x}', x_asset_data.symbol).replace('{y}', y_asset_data.symbol)
                         const selected = value === withdrawOption
-                        const _disabled = disabled || (is_staging && !mode)
                         return (
                           <div
                             key={i}
                             onClick={
                               () => {
-                                if (!_disabled) {
+                                if (!disabled) {
                                   setWithdrawOption(value)
                                 }
                               }
                             }
-                            className={`${_disabled ? 'cursor-not-allowed' : 'cursor-pointer'} inline-flex items-center space-x-2`}
+                            className={`${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} inline-flex items-center space-x-2`}
                           >
                             <input
-                              disabled={_disabled && false}
                               type="radio"
                               value={value}
                               checked={selected}
                               onChange={() => {}}
-                              className={`w-4 3xl:w-5 h-4 3xl:h-5 ${_disabled ? 'cursor-not-allowed' : 'cursor-pointer'} text-blue-500 mt-0.5`}
+                              className={`w-4 3xl:w-5 h-4 3xl:h-5 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} text-blue-500 mt-0.5`}
                             />
                             <span className={`${selected ? 'font-bold' : 'text-slate-400 dark:text-slate-500 font-medium'} 3xl:text-xl`}>
-                              {title} {is_staging && !mode ? '(coming soon)' : ''}
+                              {title}
                             </span>
                           </div>
                         )
@@ -1558,33 +1324,27 @@ export default ({ pool, userPoolsData, onFinish }) => {
                           <span className="text-slate-600 dark:text-slate-500 text-xs 3xl:text-xl font-medium">
                             You Receive
                           </span>
-                          <div className="flex items-center justify-between space-x-2">
-                            <div className="flex items-center space-x-1">
-                              <div className="text-slate-400 dark:text-slate-500 text-xs 3xl:text-xl font-medium">
-                                Balance:
-                              </div>
-                              <button
-                                disabled={disabled}
-                                className="cursor-default"
-                              >
-                                <Balance
-                                  chainId={chain_id}
-                                  asset={asset}
-                                  contractAddress={x_asset_data.contract_address}
-                                  decimals={x_asset_data.decimals}
-                                  symbol={x_asset_data.symbol}
-                                  hideSymbol={false}
-                                  className="text-xs 3xl:text-xl"
-                                />
-                              </button>
+                          <div className="flex items-center space-x-1">
+                            <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs 3xl:text-xl font-medium">
+                              Balance:
                             </div>
+                            <button disabled={disabled} className="cursor-default">
+                              <Balance
+                                chainId={chain_id}
+                                asset={asset}
+                                contractAddress={x_asset_data.contract_address}
+                                decimals={x_asset_data.decimals}
+                                symbol={x_asset_data.symbol}
+                                className="text-xs 3xl:text-xl"
+                              />
+                            </button>
                           </div>
                         </div>
                         <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-0.5 py-2.5 px-3">
                           <div className="flex items-center justify-between space-x-2">
-                            {url && x_asset_data.contract_address ?
+                            {x_url ?
                               <a
-                                href={`${url}${contract_path?.replace('{address}', x_asset_data.contract_address)}${address ? `?a=${address}` : ''}`}
+                                href={x_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="min-w-max flex items-center space-x-1.5"
@@ -1597,9 +1357,13 @@ export default ({ pool, userPoolsData, onFinish }) => {
                                     className="3xl:w-6 3xl:h-6 rounded-full"
                                   />
                                 )}
-                                <span className="text-base 3xl:text-2xl font-semibold">{x_asset_data.symbol}</span>
+                                <span className="text-base 3xl:text-2xl font-semibold">
+                                  {x_asset_data.symbol}
+                                </span>
                               </a> :
-                              <span className="text-base 3xl:text-2xl font-semibold">{x_asset_data.symbol}</span>
+                              <span className="text-base 3xl:text-2xl font-semibold">
+                                {x_asset_data.symbol}
+                              </span>
                             }
                             {withdrawOption === 'custom_amounts' ?
                               <DebounceInput
@@ -1608,7 +1372,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
                                 type="number"
                                 placeholder="0.00"
                                 disabled={disabled}
-                                value={['string', 'number'].includes(typeof x_remove_amount) && !isNaN(x_remove_amount) ? x_remove_amount : ''}
+                                value={isNumber(x_remove_amount) ? x_remove_amount : ''}
                                 onChange={
                                   e => {
                                     const regex = /^[0-9.\b]+$/
@@ -1620,71 +1384,57 @@ export default ({ pool, userPoolsData, onFinish }) => {
                                       if (value.startsWith('.')) {
                                         value = `0${value}`
                                       }
-                                      value = numberToFixed(value, x_asset_data?.decimals || 18)
+                                      value = numberToFixed(value, x_decimals)
                                     }
                                     if (amount) {
                                       if (Number(value) > amount) {
-                                        value = numberToFixed(amount.toString(), x_asset_data?.decimals || 18)
+                                        value = numberToFixed(amount, x_decimals)
                                       }
                                     }
                                     else {
                                       value = '0'
                                     }
-                                    setRemoveAmounts([value, amount - Number(value)].map((a, i) => isNaN(a) ? '' : removeDecimal(numberToFixed(Number(a), (i === 0 ? x_asset_data : y_asset_data)?.decimals || 18))))
+                                    setRemoveAmounts([value, amount - Number(value)].map((v, i) => isNumber(v) ? removeDecimal(numberToFixed(Number(v), i === 0 ? x_decimals : y_decimals)) : ''))
                                   }
                                 }
                                 onWheel={e => e.target.blur()}
                                 onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                                 className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base 3xl:text-2xl font-medium text-right`}
                               /> :
-                              ['string', 'number'].includes(typeof x_remove_amount) && !isNaN(x_remove_amount) ?
-                                <DecimalsFormat
+                              isNumber(x_remove_amount) ?
+                                <NumberDisplay
                                   value={x_remove_amount}
                                   className="w-fit bg-transparent text-slate-500 dark:text-slate-500 text-base 3xl:text-2xl font-medium text-right"
                                 /> :
-                                selected && !no_pool && !error &&
-                                (position_loading && amount ?
-                                  <TailSpin
-                                    width="24"
-                                    height="24"
-                                    color={loaderColor(theme)}
-                                  /> :
-                                  null
-                                )
+                                position_loading && isNumber(amount) && <div><Spinner /></div>
                             }
                           </div>
                         </div>
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between space-x-2">
-                          <span className="text-slate-600 dark:text-slate-500 text-xs font-medium" />
-                          <div className="flex items-center justify-between space-x-2">
-                            <div className="flex items-center space-x-1">
-                              <div className="text-slate-400 dark:text-slate-500 text-xs 3xl:text-xl font-medium">
-                                Balance:
-                              </div>
-                              <button
-                                disabled={disabled}
-                                className="cursor-default"
-                              >
-                                <Balance
-                                  chainId={chain_id}
-                                  asset={asset}
-                                  contractAddress={y_asset_data.contract_address}
-                                  decimals={y_asset_data.decimals}
-                                  symbol={y_asset_data.symbol}
-                                  hideSymbol={false}
-                                  className="text-xs 3xl:text-xl"
-                                />
-                              </button>
+                          <span className="text-slate-600 dark:text-slate-500 text-xs 3xl:text-xl font-medium" />
+                          <div className="flex items-center space-x-1">
+                            <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs 3xl:text-xl font-medium">
+                              Balance:
                             </div>
+                            <button disabled={disabled} className="cursor-default">
+                              <Balance
+                                chainId={chain_id}
+                                asset={asset}
+                                contractAddress={y_asset_data.contract_address}
+                                decimals={y_asset_data.decimals}
+                                symbol={y_asset_data.symbol}
+                                className="text-xs 3xl:text-xl"
+                              />
+                            </button>
                           </div>
                         </div>
                         <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-800 space-y-0.5 py-2.5 px-3">
                           <div className="flex items-center justify-between space-x-2">
-                            {url && y_asset_data.contract_address ?
+                            {y_url ?
                               <a
-                                href={`${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}${address ? `?a=${address}` : ''}`}
+                                href={y_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="min-w-max flex items-center space-x-1.5"
@@ -1697,9 +1447,13 @@ export default ({ pool, userPoolsData, onFinish }) => {
                                     className="3xl:w-6 3xl:h-6 rounded-full"
                                   />
                                 )}
-                                <span className="text-base 3xl:text-2xl font-semibold">{y_asset_data.symbol}</span>
+                                <span className="text-base 3xl:text-2xl font-semibold">
+                                  {y_asset_data.symbol}
+                                </span>
                               </a> :
-                              <span className="text-base 3xl:text-2xl font-semibold">{y_asset_data.symbol}</span>
+                              <span className="text-base 3xl:text-2xl font-semibold">
+                                {y_asset_data.symbol}
+                              </span>
                             }
                             {withdrawOption === 'custom_amounts' ?
                               <DebounceInput
@@ -1708,7 +1462,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
                                 type="number"
                                 placeholder="0.00"
                                 disabled={disabled}
-                                value={['string', 'number'].includes(typeof y_remove_amount) && !isNaN(y_remove_amount) ? y_remove_amount : ''}
+                                value={isNumber(y_remove_amount) ? y_remove_amount : ''}
                                 onChange={
                                   e => {
                                     const regex = /^[0-9.\b]+$/
@@ -1720,37 +1474,29 @@ export default ({ pool, userPoolsData, onFinish }) => {
                                       if (value.startsWith('.')) {
                                         value = `0${value}`
                                       }
-                                      value = numberToFixed(value, y_asset_data?.decimals || 18)
+                                      value = numberToFixed(value, y_decimals)
                                     }
                                     if (amount) {
                                       if (Number(value) > amount) {
-                                        value = numberToFixed(amount.toString(), y_asset_data?.decimals || 18)
+                                        value = numberToFixed(amount, y_decimals)
                                       }
                                     }
                                     else {
                                       value = '0'
                                     }
-                                    setRemoveAmounts([amount - Number(value), value].map((a, i) => isNaN(a) ? '' : removeDecimal(numberToFixed(Number(a), (i === 0 ? x_asset_data : y_asset_data)?.decimals || 18))))
+                                    setRemoveAmounts([amount - Number(value), value].map((v, i) => isNumber(v) ? removeDecimal(numberToFixed(Number(a), i === 0 ? x_decimals : y_decimals)) : ''))
                                   }
                                 }
                                 onWheel={e => e.target.blur()}
                                 onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
                                 className={`w-full bg-transparent ${disabled ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 text-base 3xl:text-2xl font-medium text-right`}
                               /> :
-                              ['string', 'number'].includes(typeof y_remove_amount) && !isNaN(y_remove_amount) ?
-                                <DecimalsFormat
+                              isNumber(y_remove_amount) ?
+                                <NumberDisplay
                                   value={y_remove_amount}
-                                  className="w-fit bg-transparent text-slate-500 dark:text-slate-500 text-base font-medium text-right"
+                                  className="w-fit bg-transparent text-slate-500 dark:text-slate-500 text-base 3xl:text-2xl font-medium text-right"
                                 /> :
-                                selected && !no_pool && !error &&
-                                (position_loading && amount ?
-                                  <TailSpin
-                                    width="24"
-                                    height="24"
-                                    color={loaderColor(theme)}
-                                  /> :
-                                  null
-                                )
+                                position_loading && isNumber(amount) && <div><Spinner /></div>
                             }
                           </div>
                         </div>
@@ -1759,7 +1505,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
                         <Tooltip
                           placement="top"
                           content="The adjusted amount you are withdrawing for LP tokens above or below current market prices."
-                          className="w-80 z-50 bg-dark text-white text-xs"
+                          className="w-80"
                         >
                           <div className="flex items-center">
                             <div className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs 3xl:text-xl font-medium">
@@ -1768,22 +1514,19 @@ export default ({ pool, userPoolsData, onFinish }) => {
                             <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
                           </div>
                         </Tooltip>
-                        <div className="flex items-center text-xs 3xl:text-xl font-semibold space-x-1">
+                        <div className="flex items-center text-xs 3xl:text-xl font-semibold">
                           {priceImpactRemove === true && !priceImpactRemoveResponse ?
-                            <Oval
-                              width="10"
-                              height="10"
-                              color={loaderColor(theme)}
-                            /> :
-                            <span className={`${typeof priceImpactRemove === 'number' ? priceImpactRemove < 0 ? 'text-red-500 dark:text-red-500' : priceImpactRemove > 0 ? 'text-green-500 dark:text-green-500' : '' : ''}`}>
-                              {typeof priceImpactRemove === 'number' || priceImpactRemoveResponse ?
-                                <DecimalsFormat
+                            <Spinner width={10} height={10} /> :
+                            <span className={`${isNumber(priceImpactRemove) && !isZero(priceImpactRemove) ? priceImpactRemove < 0 ? 'text-red-600 dark:text-red-500' : 'text-green-600 dark:text-green-500' : ''}`}>
+                              {isNumber(priceImpactRemove) || priceImpactRemoveResponse ?
+                                <NumberDisplay
                                   value={priceImpactRemove}
-                                  className="whitespace-nowrap 3xl:text-xl"
+                                  suffix=" %"
+                                  noTooltip={true}
+                                  className="whitespace-nowrap"
                                 /> :
                                 <span>-</span>
                               }
-                              <span>%</span>
                             </span>
                           }
                         </div>
@@ -1794,18 +1537,15 @@ export default ({ pool, userPoolsData, onFinish }) => {
               </div>
               <div className="flex items-end">
                 {!valid_amount ?
-                  <button
-                    disabled={true}
-                    className="w-full bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500 rounded text-base 3xl:text-2xl text-center py-3 px-2 sm:px-3"
-                  >
-                    <span className="flex items-center justify-center space-x-1.5">
-                      <span>Enter amount</span>
+                  <button disabled={true} className="w-full bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed rounded flex items-center justify-center space-x-1.5 py-3 sm:py-4 px-2 sm:px-3">
+                    <span className="text-slate-400 dark:text-slate-500 text-base 3xl:text-2xl">
+                      Enter amount
                     </span>
                   </button> :
                   provider && wrong_chain ?
                     <Wallet
                       connectChainId={chain_id}
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base 3xl:text-2xl font-medium space-x-1.5 sm:space-x-2 py-3 px-2 sm:px-3"
+                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded flex items-center justify-center text-white text-base 3xl:text-2xl font-medium space-x-1.5 sm:space-x-2 py-3 sm:py-4 px-2 sm:px-3"
                     >
                       <span>{is_walletconnect ? 'Reconnect' : 'Switch'} to</span>
                       {image && (
@@ -1813,127 +1553,94 @@ export default ({ pool, userPoolsData, onFinish }) => {
                           src={image}
                           width={28}
                           height={28}
-                          className="rounded-full"
+                          className="3xl:w-8 3xl:h-8 rounded-full"
                         />
                       )}
                       <span className="font-medium">
                         {name}
                       </span>
                     </Wallet> :
-                    callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse ?
-                      toArray(callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse)
-                        .filter(r => !['success'].includes(r.status))
-                        .map((r, i) => {
-                          const { status, message, tx_hash } = { ...r }
-                          return (
-                            <Alert
-                              key={i}
-                              color={`${status === 'failed' ? 'bg-red-400 dark:bg-red-500' : status === 'success' ? 'bg-green-400 dark:bg-green-500' : 'bg-blue-400 dark:bg-blue-500'} text-white`}
-                              icon={
-                                status === 'failed' ?
-                                  <BiMessageError className="w-4 h-4 stroke-current mr-2.5" /> :
-                                  status === 'success' ?
-                                    <BiMessageCheck className="w-4 h-4 stroke-current mr-2.5" /> :
-                                    status === 'pending' ?
-                                      <div className="mr-2.5">
-                                        <Watch
-                                          color="white"
-                                          width="16"
-                                          height="16"
-                                        />
-                                      </div> :
-                                      <BiMessageDetail className="w-4 h-4 stroke-current mr-2.5" />
-                              }
-                              closeDisabled={true}
-                              rounded={true}
-                              className="rounded p-3"
-                            >
-                              <div className="flex items-center justify-between space-x-2">
-                                <span className={`leading-5 ${status === 'failed' ? 'break-words text-xs' : 'break-words'} text-sm 3xl:text-xl font-medium`}>
-                                  {ellipse(
-                                    split(message, 'normal', ' ')
-                                      .join(' ')
-                                      .substring(0, status === 'failed' && errorPatterns.findIndex(c => message?.indexOf(c) > -1) > -1 ? message.indexOf(errorPatterns.find(c => message.indexOf(c) > -1)) : undefined) ||
-                                    message,
-                                    128,
-                                  )}
-                                </span>
-                                <div className="flex items-center space-x-1">
-                                  {url && r.tx_hash && (
-                                    <a
-                                      href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <TiArrowRight size={20} className="transform -rotate-45" />
-                                    </a>
-                                  )}
-                                  {status === 'failed' ?
-                                    <>
-                                      <Copy
-                                        value={message}
-                                        className="cursor-pointer text-slate-200 hover:text-white"
-                                      />
-                                      <button
-                                        onClick={() => reset()}
-                                        className="bg-red-500 dark:bg-red-400 rounded-full flex items-center justify-center text-white p-1"
-                                      >
-                                        <MdClose size={14} />
-                                      </button>
-                                    </> :
-                                    status === 'success' ?
-                                      <button
-                                        onClick={() => reset()}
-                                        className="bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center text-white p-1"
-                                      >
-                                        <MdClose size={14} />
-                                      </button> :
-                                      null
-                                  }
-                                </div>
+                    response ?
+                      toArray(response).filter(d => d.status !== 'success').map((d, i) => {
+                        const { status, message, tx_hash } = { ...d }
+
+                        let color
+                        switch (status) {
+                          case 'success':
+                            color = 'bg-green-500 dark:bg-green-400'
+                            break
+                          case 'success':
+                            color = 'bg-red-500 dark:bg-red-400'
+                            break
+                          default:
+                            break
+                        }
+                        const closeButton = color && (
+                          <button onClick={() => reset()} className={`${color} rounded-full flex items-center justify-center text-white p-1`}>
+                            <MdClose size={14} />
+                          </button>
+                        )
+
+                        return (
+                          <Alert
+                            key={i}
+                            status={status}
+                            icon={status === 'pending' && (
+                              <div className="mr-2.5">
+                                <Spinner name="Watch" width={16} height={16} color="white" />
                               </div>
-                            </Alert>
-                          )
-                        }) :
-                        provider ?
-                          <button
-                            disabled={disabled || !valid_amount}
-                            onClick={() => call(pool_data)}
-                            className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base 3xl:text-2xl text-center py-3 px-2 sm:px-3`}
+                            )}
+                            closeDisabled={true}
+                            className="p-3"
                           >
-                            <span className="flex items-center justify-center space-x-1.5">
-                              {(calling || approving) && (
-                                <TailSpin
-                                  width="20"
-                                  height="20"
-                                  color="white"
-                                />
-                              )}
-                              <span>
-                                {calling ?
-                                  approving ?
-                                    approveProcessing ?
-                                      'Approving' :
-                                      'Please Approve' :
-                                    callProcessing ?
-                                      'Withdrawing' :
-                                      typeof approving === 'boolean' ?
-                                        'Please Confirm' :
-                                        'Checking Approval' :
-                                  !valid_amount ?
-                                    'Enter amount' :
-                                    'Withdraw'
-                                }
+                            <div className="flex items-center justify-between space-x-2">
+                              <span className="leading-5 break-words text-sm 3xl:text-xl font-medium">
+                                {ellipse(normalizeMessage(message, status), 128)}
                               </span>
+                              <div className="flex items-center space-x-1">
+                                {url && tx_hash && (
+                                  <a
+                                    href={`${url}${transaction_path?.replace('{tx}', tx_hash)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <TiArrowRight size={20} className="transform -rotate-45" />
+                                  </a>
+                                )}
+                                {status === 'failed' && message && <Copy value={message} className="cursor-pointer text-slate-200 hover:text-white" />}
+                                {closeButton}
+                              </div>
+                            </div>
+                          </Alert>
+                        )
+                      }) :
+                      provider ?
+                        <button
+                          disabled={disabled || !valid_amount}
+                          onClick={() => call(pool_data)}
+                          className={`w-full ${disabled || !valid_amount ? calling || approving ? 'bg-blue-400 dark:bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-500' : 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white'} rounded text-base 3xl:text-2xl text-center py-3 sm:py-4 px-2 sm:px-3`}
+                        >
+                          <span className="flex items-center justify-center space-x-1.5">
+                            {(calling || approving) && <div><Spinner width={20} height={20} color="white" /></div>}
+                            <span>
+                              {calling ?
+                                approving ?
+                                  approveProcessing ? 'Approving' : 'Please Approve' :
+                                  callProcessing ?
+                                    'Withdrawing' :
+                                    typeof approving === 'boolean' ? 'Please Confirm' : 'Checking Approval' :
+                                !valid_amount ? 'Enter amount' : 'Withdraw'
+                              }
                             </span>
-                          </button> :
-                          <Wallet
-                            connectChainId={chain_id}
-                            buttonConnectTitle="Connect Wallet"
-                            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base 3xl:text-2xl font-medium text-center py-3 px-2 sm:px-3"
-                          >
-                            <span>Connect Wallet</span>
-                          </Wallet>
+                          </span>
+                        </button> :
+                        <Wallet
+                          connectChainId={chain_id}
+                          buttonConnectTitle="Connect Wallet"
+                          className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base 3xl:text-2xl font-medium text-center py-3 sm:py-4 px-2 sm:px-3"
+                        >
+                          <span>Connect Wallet</span>
+                        </Wallet>
                 }
               </div>
             </>
@@ -1945,7 +1652,6 @@ export default ({ pool, userPoolsData, onFinish }) => {
                 return (
                   <AlertNotification
                     key={i}
-                    icon={null/*<HiOutlineCheckCircle size={20} className="mb-0.5" />*/}
                     animate={{ mount: { y: 0 }, unmount: { y: 32 } }}
                     dismissible={{ onClose: () => setResponses(responses.filter(d => d.tx_hash !== tx_hash)) }}
                     className="alert-box flex"
@@ -1971,7 +1677,7 @@ export default ({ pool, userPoolsData, onFinish }) => {
               })}
             </div>
           )}
-          {(_x_asset_data?.mintable || _x_asset_data?.wrapable || _x_asset_data?.wrapped) && (
+          {(mintable || wrappable || wrapped) && (
             <Faucet
               tokenId={asset}
               contractData={_x_asset_data}

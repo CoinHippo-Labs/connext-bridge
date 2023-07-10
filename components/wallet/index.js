@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
-import _ from 'lodash'
 import { useWeb3Modal } from '@web3modal/react'
 import { useProvider, useNetwork, useSwitchNetwork, useSigner, useAccount, useDisconnect } from 'wagmi'
 
@@ -19,16 +18,9 @@ export default (
   },
 ) => {
   const dispatch = useDispatch()
-  const {
-    wallet,
-  } = useSelector(state => ({ wallet: state.wallet }), shallowEqual)
-  const {
-    wallet_data,
-  } = { ...wallet }
-  const {
-    chain_id,
-    provider,
-  } = { ...wallet_data }
+  const { wallet } = useSelector(state => ({ wallet: state.wallet }), shallowEqual)
+  const { wallet_data } = { ...wallet }
+  const { chain_id, provider } = { ...wallet_data }
 
   const { open } = useWeb3Modal()
   const _provider = useProvider()
@@ -42,18 +34,16 @@ export default (
   useEffect(
     () => {
       if (chainId && signer && address && !find(address, blocked_addresses)) {
-        dispatch(
-          {
-            type: WALLET_DATA,
-            value: {
-              chain_id: chainId,
-              provider: _provider,
-              ethereum_provider: window?.ethereum,
-              signer,
-              address,
-            },
-          }
-        )
+        dispatch({
+          type: WALLET_DATA,
+          value: {
+            chain_id: chainId,
+            provider: _provider,
+            ethereum_provider: window?.ethereum,
+            signer,
+            address,
+          },
+        })
       }
       else {
         dispatch({ type: WALLET_RESET })
@@ -79,7 +69,7 @@ export default (
             className={className}
           >
             {children || (
-              <div className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded whitespace-nowrap py-1 px-2">
+              <div className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded whitespace-nowrap text-slate-600 dark:text-slate-200 py-1 px-2">
                 Switch Network
               </div>
             )}

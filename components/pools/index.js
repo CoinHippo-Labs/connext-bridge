@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { utils } from 'ethers'
 
 import Pools from './pools'
-import { getChain } from '../../lib/object/chain'
-import { getAsset } from '../../lib/object/asset'
+import { MIN_USER_DEPOSITED } from '../../lib/config'
+import { getChainData, getAssetData } from '../../lib/object'
+import { formatUnits } from '../../lib/number'
 import { split, toArray } from '../../lib/utils'
 
 const VIEWS = [
@@ -14,48 +14,22 @@ const VIEWS = [
 ]
 
 export default () => {
-  const {
-    chains,
-    pool_assets,
-    _pools,
-    user_pools,
-    dev,
-    wallet,
-  } = useSelector(
-    state => (
-      {
-        chains: state.chains,
-        pool_assets: state.pool_assets,
-        _pools: state.pools,
-        user_pools: state.user_pools,
-        dev: state.dev,
-        wallet: state.wallet,
-      }
-    ),
-    shallowEqual,
-  )
+  const { chains, pool_assets, user_pools, dev, wallet } = useSelector(state => ({ chains: state.chains, pool_assets: state.pool_assets, user_pools: state.user_pools, dev: state.dev, wallet: state.wallet }), shallowEqual)
   const { chains_data } = { ...chains }
   const { pool_assets_data } = { ...pool_assets }
-  const { pools_data } = { ..._pools }
   const { user_pools_data } = { ...user_pools }
   const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
   const { address } = { ...wallet_data }
 
   const [view, setView] = useState(_.head(VIEWS)?.id)
-  const [pools, setPools] = useState(null)
-  const [poolsTrigger, setPoolsTrigger] = useState(null)
+  const [userPools, setUserPools] = useState(null)
 
   // user pools
   useEffect(
     () => {
-      if (
-        chains_data && user_pools_data && (
-          getChain(null, chains_data, false, false, false, undefined, true).length <= Object.keys(user_pools_data).length ||
-          Object.values(user_pools_data).flatMap(d => d).filter(d => Number(d?.lpTokenBalance) > 0).length > 0
-        )
-      ) {
-        setPools(Object.values(user_pools_data).flatMap(d => d))
+      if (chains_data && user_pools_data && (getChainData(undefined, chains_data, { return_all: true }).length <= Object.keys(user_pools_data).length || Object.values(user_pools_data).flatMap(d => toArray(d)).filter(d => Number(d.lpTokenBalance) > 0).length > 0)) {
+        setUserPools(Object.values(user_pools_data).flatMap(d => toArray(d)))
       }
     },
     [chains_data, user_pools_data],
@@ -65,83 +39,93 @@ export default () => {
   useEffect(
     () => {
       const getData = async () => {
-        if (sdk && user_pools_data && ['my_positions'].includes(view)) {
+        if (user_pools_data && sdk && view === 'my_positions') {
           if (address) {
             let data
             for (const chain_data of chains_data) {
+              const { id, chain_id, domain_id } = { ...chain_data }
               try {
-                const { chain_id, domain_id } = { ...chain_data }
-                const response = toArray(_.cloneDeep(await sdk.sdkPool.getUserPools(domain_id, address)))
-                data = toArray(
-                  _.concat(
-                    data,
-                    response.map(p => {
-                      const { info, lpTokenBalance, poolTokenBalances } = { ...p }
-                      const { adopted, local, symbol } = { ...info }
+                console.log('[getUserPools]', { domain_id, address })
+                const response = _.cloneDeep(await sdk.sdkPool.getUserPools(domain_id, address))
+                console.log('[userPools]', { domain_id, address, response })
 
-                      if (adopted) {
-                        const { balance, decimals } = { ...adopted }
-                        adopted.balance = utils.formatUnits(BigInt(balance || '0'), decimals || 18)
-                        info.adopted = adopted
-                      }
-                      if (local) {
-                        const { balance, decimals } = { ...local }
-                        local.balance = utils.formatUnits(BigInt(balance || '0'), decimals || 18)
-                        info.local = local
-                      }
+                if (Array.isArray(response)) {
+                  data = toArray(
+                    _.concat(
+                      data,
+                      response.map(d => {
+                        const { info, lpTokenBalance, poolTokenBalances } = { ...d }
+                        const { adopted, local, symbol } = { ...info }
 
-                      const symbols = split(symbol, 'normal', '-')
-                      const asset_data = getAsset(null, pool_assets_data, chain_id, undefined, symbols)
-                      return {
-                        ...p,
-                        id: `${chain_data.id}_${asset_data?.id}`,
-                        chain_data,
-                        asset_data,
-                        ...info,
-                        symbols,
-                        lpTokenBalance: utils.formatEther(BigInt(lpTokenBalance || '0')),
-                        poolTokenBalances: toArray(poolTokenBalances).map((b, i) => Number(utils.formatUnits(BigInt(b || '0'), adopted?.index === i ? adopted.decimals : local?.index === i ? local.decimals : 18))),
-                      }
-                    }),
-                  )
-                ).filter(d => d.asset_data)
-              } catch (error) {}
+                        if (adopted) {
+                          const { balance, decimals } = { ...adopted }
+                          adopted.balance = formatUnits(balance, decimals)
+                          info.adopted = adopted
+                        }
+                        if (local) {
+                          const { balance, decimals } = { ...local }
+                          local.balance = formatUnits(balance, decimals)
+                          info.local = local
+                        }
+
+                        const symbols = split(symbol, 'normal', '-')
+                        const asset_data = getAssetData(undefined, pool_assets_data, { chain_id, symbols })
+                        return {
+                          ...d,
+                          id: [id, assets_data?.id].join('_'),
+                          chain_data,
+                          asset_data,
+                          ...info,
+                          symbols,
+                          lpTokenBalance: formatUnits(lpTokenBalance),
+                          poolTokenBalances: toArray(poolTokenBalances).map((b, i) => formatUnits(b, (adopted?.index === i ? adopted : local)?.decimals)),
+                        }
+                      }),
+                    )
+                  ).filter(d => d.asset_data && d.lpTokenBalance > MIN_USER_DEPOSITED)
+                }
+              } catch (error) {
+                console.log('[getUserPools error]', { domain_id, address }, error)
+              }
             }
-            setPools(toArray(data || pools))
+            if (data) {
+              setUserPools(data)
+            }
           }
           else {
-            setPools([])
+            setUserPools([])
           }
         }
       }
       getData()
     },
-    [sdk, address, view, poolsTrigger],
+    [sdk, address, view],
   )
 
   return (
-    <div className="w-full mb-4">
-      <div className="flex justify-center">
-        <div className="w-full flex flex-col space-y-4 sm:space-y-8 my-4 sm:my-12 mx-1 sm:mx-4">
-          <div className="grid sm:grid-cols-1 gap-4">
-            <div className="flex flex-col space-y-6 sm:space-y-12">
-              <h1 className="tracking-tighter text-xl sm:text-5xl 3xl:text-6xl font-semibold">
-                Add liquidity to earn rewards.
-              </h1>
-              <div className="border-0 dark:border-slate-800 flex items-center">
-                {VIEWS.map((v, i) => (
-                  <div
-                    key={i}
-                    onClick={() => setView(v.id)}
-                    className={`border-b-2 ${view === v.id ? 'border-slate-600 dark:border-white font-medium' : 'border-transparent text-slate-400 dark:text-slate-500 font-medium'} whitespace-nowrap cursor-pointer text-lg 3xl:text-2xl mr-2 p-2`}
-                  >
-                    {v.title}
-                  </div>
-                ))}
-              </div>
-            </div>
+    <div className="children max-w-6.5xl 3xl:max-w-screen-2xl flex justify-center mx-auto">
+      <div className="w-full space-y-4 sm:space-y-8 mt-4 sm:mt-12 mx-auto">
+        <div className="flex flex-col space-y-6 sm:space-y-12 px-3">
+          <h1 className="tracking-tighter text-xl sm:text-5xl 3xl:text-6xl font-semibold">
+            Add liquidity to earn rewards.
+          </h1>
+          <div className="flex items-center">
+            {VIEWS.map((d, i) => {
+              const { id, title } = { ...d }
+              return (
+                <div
+                  key={i}
+                  onClick={() => setView(id)}
+                  className={`cursor-pointer border-b-2 ${view === id ? 'border-slate-600 dark:border-white' : 'border-transparent text-slate-400 dark:text-slate-500'} whitespace-nowrap text-lg 3xl:text-2xl font-medium mr-2 p-2`}
+                >
+                  {title}
+                </div>
+              )
+            })}
           </div>
-          <Pools view={view} userPoolsData={pools} />
+        </div>
+        <div className="px-3">
+          <Pools view={view} userPools={userPools} />
         </div>
       </div>
     </div>

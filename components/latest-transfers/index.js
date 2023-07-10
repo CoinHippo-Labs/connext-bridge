@@ -19,17 +19,16 @@ export default ({ data, trigger, onUpdateSize }) => {
 
   const [transfers, setTransfers] = useState(null)
   const [collapse, setCollapse] = useState(null)
-  const [timer, setTimer] = useState(null)
 
   useEffect(
     () => {
       const getData = async () => {
         if (page_visible && sdk && address) {
           try {
-            if (!transfers || (data && toArray(data).findIndex(d => toArray(transfers).findIndex(t => t.transfer_id === d.transfer_id) < 0) > -1) || toArray(transfers).findIndex(t => ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(t.status)) > -1) {
+            if (!transfers || (data && toArray(data).findIndex(d => toArray(transfers).findIndex(_d => _d.transfer_id === d.transfer_id) < 0) > -1) || toArray(transfers).findIndex(d => ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(d.status)) > -1) {
               let response = toArray(await sdk.sdkUtils.getTransfers({ userAddress: address }))
               response = _.orderBy(_.uniqBy(toArray(_.concat(response, data)), 'xcall_transaction_hash'), ['xcall_timestamp'], ['desc'])
-              if (response.findIndex(t => toArray(transfers).findIndex(_t => _t?.transfer_id) < 0 && ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(t.status)) > -1) {
+              if (response.findIndex(d => toArray(transfers).findIndex(_d => _d.transfer_id) < 0 && ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(d.status)) > -1) {
                 setCollapse(false)
               }
               setTransfers(response)
@@ -60,15 +59,14 @@ export default ({ data, trigger, onUpdateSize }) => {
   )
 
   const transfersComponent = _.slice(
-    toArray(transfers).map((t, i) => {
+    toArray(transfers).map((d, i) => {
       return (
         <div key={i} className="w-70 3xl:w-96 mx-auto">
-          <TransferStatus data={t} />
+          <TransferStatus data={d} />
         </div>
       )
     }),
-    0,
-    NUM_TRANSFER_DISPLAY,
+    0, NUM_TRANSFER_DISPLAY,
   )
 
   return toArray(transfers).length > 0 && (
@@ -84,7 +82,7 @@ export default ({ data, trigger, onUpdateSize }) => {
       </button>
       {!collapse && (
         <>
-          <div className="max-w-xl grid sm:grid-cols-1 lg:grid-cols-1 gap-4 3xl:gap-8 mx-auto">
+          <div className="max-w-xl grid gap-4 3xl:gap-8 mx-auto">
             {transfersComponent}
           </div>
           {address && transfers.length > NUM_TRANSFER_DISPLAY && (
@@ -92,7 +90,7 @@ export default ({ data, trigger, onUpdateSize }) => {
               href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${address}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center text-blue-500 dark:text-slate-200 3xl:text-2xl mt-2.5"
+              className="flex items-center justify-center text-blue-400 dark:text-white 3xl:text-2xl mt-2.5"
             >
               <span className="font-medium">
                 See more
