@@ -41,7 +41,8 @@ export default ({ pool, userPools }) => {
   const { contract_address, next_asset } = { ...contract_data }
   const pool_loading = selected && !no_pool && !error && !pool_data
 
-  const { lpTokenBalance }  = { ...(pool_data && toArray(userPools).find(d => d.chain_data?.id === chain && d.asset_data?.id === asset)) }
+  let { lpTokenBalance }  = { ...(pool_data && toArray(userPools).find(d => d.chain_data?.id === chain && d.asset_data?.id === asset)) }
+  lpTokenBalance = lpTokenBalance || 0
   const share = isNumber(supply) ? parseFloat(numberToFixed(lpTokenBalance * 100 / supply)) : 0
   const position_loading = address && selected && !no_pool && !error && (!userPools || pool_loading)
 
@@ -69,7 +70,7 @@ export default ({ pool, userPools }) => {
   let { price } = { ...getAssetData(asset, assets_data) }
   price = price || 0
   const my_position_url = url && lpTokenAddress && `${url}${contract_path?.replace('{address}', lpTokenAddress)}${address ? `?a=${address}` : ''}`
-  const my_position_value = (lpTokenBalance || 0) * price
+  const my_position_value = lpTokenBalance * price
 
   const stats_data = pools_daily_stats_data?.[`${dailyMetric}s`]
   const chartData = !pool_loading && stats_data && {

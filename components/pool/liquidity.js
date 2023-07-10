@@ -793,7 +793,7 @@ export default ({ pool, userPools, onFinish }) => {
   const y_url = y_asset_data?.contract_address && url && `${url}${contract_path?.replace('{address}', y_asset_data.contract_address)}${address ? `?a=${address}` : ''}`
 
   const valid_amount = action === 'withdraw' ?
-    isNumber(amount) && !isZero(amount) && lpTokenBalance && BigInt(parseUnits(amount)) > 0 && BigInt(parseUnits(amount)) <= BigInt(parseUnits(lpTokenBalance)) :
+    isNumber(amount) && !isZero(amount) && isNumber(lpTokenBalance) && BigInt(parseUnits(amount)) > 0 && BigInt(parseUnits(amount)) <= BigInt(parseUnits(lpTokenBalance)) :
     isNumber(amountX) && isNumber(amountY) && !(isZero(amountX) && isZero(amountY)) && x_balance_amount && y_balance_amount && (BigInt(parseUnits(amountX, x_decimals)) > 0 || BigInt(parseUnits(amountY, y_decimals)) > 0) && BigInt(parseUnits(amountX, x_decimals)) <= BigInt(parseUnits(x_balance_amount, x_decimals)) && BigInt(parseUnits(amountY, y_decimals)) <= BigInt(parseUnits(y_balance_amount, y_decimals))
   const disabled = !pool_data || error || approving || calling
   const response = callResponse || approveResponse || priceImpactAddResponse || priceImpactRemoveResponse
