@@ -62,7 +62,7 @@
     "color": "#e8b30b",
     "unwrapper_contract": "0x2c7B8c1a13F2a7854B9299E4d22809A8B1E05De5",
     "group": "evm",
-    "disabled_bridge": true,
+    "disabled_bridge": false,
     "switch_to": "arbitrum"
   },
   {
