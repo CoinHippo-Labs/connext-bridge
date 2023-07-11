@@ -15,7 +15,6 @@ export default () => {
         if (hidden || buttonRef.current.contains(e.target) || dropdownRef.current.contains(e.target)) {
           return false
         }
-
         setHidden(!hidden)
       }
 
@@ -34,18 +33,14 @@ export default () => {
         onClick={onClick}
         className="w-10 sm:w-12 h-16 flex items-center justify-center"
       >
-        <FiMenu
-          size={24}
-        />
+        <FiMenu size={24} className="text-blue-400 dark:text-white" />
       </button>
       <div
         ref={dropdownRef}
         className={`dropdown ${hidden ? '' : 'open'} absolute top-0 left-3 mt-12`}
       >
         <div className="dropdown-content w-40 bottom-start">
-          <Items
-            onClick={onClick}
-          />
+          <Items onClick={onClick} />
         </div>
       </div>
     </div>

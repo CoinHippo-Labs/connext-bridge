@@ -4,10 +4,7 @@
 .dropdown {
   @apply hidden z-50;
   .dropdown-title {
-    @apply py-2 px-3 text-sm font-semibold font-sans uppercase;
-  }
-  .dropdown-title-trending {
-    @apply py-1 px-2.5;
+    @apply uppercase text-sm font-semibold py-2 px-3;
   }
   .dropdown-content {
     @apply rounded-md shadow-lg;
@@ -90,10 +87,10 @@
 [data-background="light"] {
   .dropdown {
     .dropdown-title {
-      @apply bg-white text-slate-900;
+      @apply bg-slate-50 text-slate-900;
     }
     .dropdown-content {
-      @apply bg-white;
+      @apply bg-slate-50;
       &.inside {
         @apply bg-slate-50;
         .dropdown-item {
@@ -104,9 +101,9 @@
         }
       }
       .dropdown-item {
-        @apply bg-white text-slate-900;
+        @apply bg-slate-50 text-slate-900;
         &:hover {
-          @apply bg-slate-50;
+          @apply bg-slate-100;
         }
       }
     }

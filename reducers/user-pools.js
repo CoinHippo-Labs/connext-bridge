@@ -11,30 +11,15 @@ export default (
 ) => {
   switch (action.type) {
     case USER_POOLS_DATA:
-      const [
-        key,
-        value,
-      ] = toArray(_.head(Object.entries({ ...action.value })))
-
+      const [key, value] = toArray(_.head(Object.entries({ ...action.value })))
       if (key && value) {
-        let values = state?.[USER_POOLS_DATA]?.[key]
-
+        let values = state[USER_POOLS_DATA]?.[key]
         values = _.uniqBy(toArray(_.concat(value, values)), 'id')
-
         action.value = { [key]: values }
       }
-
       return {
         ...state,
-        [USER_POOLS_DATA]:
-          action.value &&
-          (Object.keys(action.value).length < 1 ?
-            action.value :
-            {
-              ...state?.[USER_POOLS_DATA],
-              ...action.value,
-            }
-          ),
+        [USER_POOLS_DATA]: action.value && (Object.keys(action.value).length < 1 ? action.value : { ...state[USER_POOLS_DATA], ...action.value }),
       }
     default:
       return state

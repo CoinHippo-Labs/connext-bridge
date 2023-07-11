@@ -2,7 +2,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 
 import Image from '../../image'
-import { split, toArray, name, equalsIgnoreCase } from '../../../lib/utils'
+import { split, toArray, getTitle, equalsIgnoreCase } from '../../../lib/utils'
 
 export default (
   {
@@ -18,43 +18,37 @@ export default (
   const { chains_data } = { ...chains }
 
   const chains_data_sorted = _.orderBy(
-    toArray(chains_data)
-      .filter(c => (!isPool || !c.no_pool) && (!inputSearch || c) && (!c.disabled_bridge || isPool))
-      .map(c => {
-        return {
-          ...c,
-          scores: ['short_name', 'name', 'id'].map(f =>
-            split(c[f], 'lower', ' ').join(' ').startsWith(inputSearch.toLowerCase()) ?
-              inputSearch.length > 1 ?
-                inputSearch.length / c[f].length :
-                inputSearch.length > 0 ? .1 : .5 :
-              -1
-          ),
-        }
-      })
-      .map(c => {
-        const { scores } = { ...c }
-        return {
-          ...c,
-          max_score: _.max(scores),
-        }
-      })
-      .filter(c => c.max_score > 1 / 10),
-    ['group', 'max_score'],
-    ['asc', 'desc'],
+    toArray(chains_data).filter(d => (!isPool || !d.no_pool) && (!inputSearch || d) && (!d.disabled_bridge || isPool)).map(d => {
+      return {
+        ...d,
+        scores: ['short_name', 'name', 'id'].map(f =>
+          split(d[f], 'lower', ' ').join(' ').startsWith(inputSearch.toLowerCase()) ?
+            inputSearch.length > 1 ?
+              inputSearch.length / d[f].length :
+              inputSearch.length > 0 ? .1 : .5 :
+            -1
+        ),
+      }
+    })
+    .map(d => {
+      const { scores } = { ...d }
+      return { ...d, max_score: _.max(scores) }
+    })
+    .filter(d => d.max_score > 1 / 10),
+    ['group', 'max_score'], ['asc', 'desc'],
   )
 
   return (
     <div className="max-h-96 overflow-y-scroll disable-scrollbars">
-      {chains_data_sorted.map((c, i) => {
-        const { id, disabled_bridge, image, group } = { ...c }
-        let { disabled } = { ...c }
+      {chains_data_sorted.map((d, i) => {
+        const { id, name, image, group, disabled_bridge } = { ...d }
+        let { disabled } = { ...d }
         disabled = disabled || (disabled_bridge && !isPool)
 
         const selected = id === value
         const header = group && !equalsIgnoreCase(group, chains_data_sorted[i - 1]?.group) && (
           <div className={`text-slate-400 dark:text-slate-500 text-xs mt-${i === 0 ? 0.5 : 3} mb-2 ml-2`}>
-            {name(group)}
+            {getTitle(group)}
           </div>
         )
         const item = (
@@ -68,7 +62,7 @@ export default (
               />
             )}
             <span className={`whitespace-nowrap text-base ${selected ? 'font-bold' : 'font-medium'}`}>
-              {c.name}
+              {name}
             </span>
           </div>
         )

@@ -23,21 +23,12 @@ h5 {
 h6 {
   @apply text-lg;
 }
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  /*@apply font-sans;*/
-}
 
 code {
-  @apply font-mono p-1 inline rounded font-semibold;
+  @apply inline rounded font-semibold p-1;
 }
 pre {
-  @apply font-mono p-2 block rounded font-semibold;
-  @apply whitespace-pre-wrap;
+  @apply block rounded whitespace-pre-wrap font-semibold p-2;
 }
 
 ul {
@@ -56,13 +47,13 @@ button {
   }
 }
 
-/**
- * hide scrollbars
- */
-/*::-webkit-scrollbar {
+/*******************
+ * hide scrollbars *
+ *******************/
+::-webkit-scrollbar {
   display: none;
   width: 0 !important;
-}*/
+}
 .disable-scrollbars {
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE 10+ */
@@ -80,7 +71,7 @@ button {
 }
 
 body {
-  @apply /*font-sans */antialiased text-sm disable-scrollbars;
+  @apply antialiased text-sm disable-scrollbars;
 }
 
 [data-background="light"] {
@@ -99,7 +90,7 @@ body {
   }
 }
 .link {
-  @apply text-blue-500;
+  @apply text-blue-400 dark:text-blue-500;
 }
 
 .ring-red {
@@ -115,116 +106,27 @@ body {
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 1);
 }
 
-.react-switch {
-  vertical-align: middle;
-  margin-left: 4px;
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
-.react-icons {
-  vertical-align: middle;
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance:none;
 }
 
-.z-1 {
-  z-index: 1;
-}
-.z-2 {
-  z-index: 2;
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }
 
-.string-value {
-  @apply break-all;
-}
-
-.recharts-cartesian-axis-tick-value {
-  @apply fill-current text-slate-900 dark:text-white text-3xs sm:text-sm md:text-sm lg:text-sm xl:text-sm font-medium;
-}
-
-.mobile-hidden-x .recharts-cartesian-axis-tick-value {
-  @apply hidden sm:block;
-}
-
-.small-x .recharts-cartesian-axis-tick-value {
-  font-size: .65rem !important;
-}
-
-.recharts-label {
-  @apply font-mono text-2xs sm:text-xs md:text-sm lg:text-sm xl:text-sm font-semibold;
-}
-
-.font-default .recharts-label {
-  @apply font-sans;
-}
-
-.recharts-label-list text tspan {
-  @apply text-3xs sm:text-xs md:text-xs lg:text-xs xl:text-xs;
-}
-
-.w-68 {
-  width: 17rem;
-}
-
-.w-70 {
-  width: 17.5rem;
-}
-
-.\32xl\:w-96 {
-  width: 21rem !important;
-}
-
-.max-w-2md {
-  max-width: 466px;
-}
-
-.max-w-8xl {
-  max-width: 88rem;
-}
-
-.max-w-6\.5xl {
-  max-width: 76rem;
-}
-
-.h-0\.25 {
-  height: 0.08rem !important;
-}
-
-.h-84 {
-  height: 21rem !important;
-}
-
-.h-88 {
-  height: 23rem !important;
-}
-
-.h-92 {
-  height: 23.5rem !important;
-}
-
-.h-100 {
-  height: 24.5rem !important;
-}
-
-.h-104 {
-  height: 25rem !important;
-}
-
-.h-108 {
-  height: 25.5rem !important;
-}
-
-.h-128 {
-  height: 28rem !important;
-}
-
-.h-168 {
-  height: 32rem !important;
-}
-
-.h-188 {
-  height: 34rem !important;
-}
-
-.h-208 {
-  height: 36rem !important;
+.wrapper {
+  min-height: calc(100vh - 96px);
 }
 
 .text-2xs {
@@ -233,6 +135,46 @@ body {
 
 .text-3xs {
   font-size: .5rem;
+}
+
+.backdrop-blur-8 {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.backdrop-blur-16 {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.linkify a {
+  @apply text-blue-400 dark:text-white font-semibold;
+}
+
+.status-message a {
+  @apply underline font-extrabold;
+}
+
+a {
+  .underline {
+    text-decoration-line: underline;
+  }
+}
+
+.w-70 {
+  width: 17.5rem;
+}
+
+.\3xl\:w-96 {
+  width: 21rem !important;
+}
+
+.max-w-2md {
+  max-width: 466px;
+}
+
+.max-w-6\.5xl {
+  max-width: 76rem;
 }
 
 .mt-0\.25 {
@@ -251,22 +193,6 @@ body {
   padding: 1.125rem !important;
 }
 
-/* Chrome, Safari, Edge, Opera */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* Firefox */
-input[type=number] {
-  -moz-appearance: textfield;
-}
-
-.main {
-  @apply bg-white dark:bg-black;
-}
-
 #modal-chains,
 #modal-assets {
   .show {
@@ -274,62 +200,15 @@ input[type=number] {
   }
 }
 
-.min-h-screen {
-  min-height: calc(100vh - 0px) !important;
-}
-
-a {
-  .underline {
-    text-decoration-line: underline;
-  }
-}
-
-.dark .dark\:bg-slate-900,
-.dark .dark\:bg-slate-800,
-.dark .dark\:bg-slate-700 {
-/* --tw-bg-opacity: .66 !important; */
-}
-
-.modal {
-  div {
-    .dark\:bg-slate-900,
-    .dark\:bg-slate-800,
-    .dark\:bg-slate-700 {
-      --tw-bg-opacity: 1 !important;
-    }
-  }
-}
-
-.backdrop-blur-8 {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-.backdrop-blur-16 {
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
 .alert-box {
   .transition-all {
-    @apply relative right-0 ml-auto;
+    @apply right-0 ml-auto;
+    position: initial !important;
     [role=button] {
-      @apply -mr-1.5 pt-0.5 pb-0 px-0;
+      padding: 1px;
       svg {
         @apply w-5 h-5;
       }
     }
   }
-}
-
-.status-message a {
-  @apply underline font-extrabold;
-}
-
-.linkify a {
-  @apply text-blue-500 dark:text-blue-600 font-semibold;
-}
-
-.loadButton {
-  bottom: 2.5rem !important;
 }

@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
-import { Puff } from 'react-loader-spinner'
 import { BiChevronDown } from 'react-icons/bi'
 
 import Search from './search'
+import Spinner from '../../spinner'
 import Image from '../../image'
-import Modal from '../../modals'
-import { getChain, chainName } from '../../../lib/object/chain'
-import { loaderColor } from '../../../lib/utils'
+import Modal from '../../modal'
+import { chainName, getChainData } from '../../../lib/object'
 
 export default (
   {
@@ -36,14 +35,13 @@ export default (
     setHidden(!hidden)
   }
 
-  const chain_data = getChain(value, chains_data)
+  const chain_data = getChainData(value, chains_data)
   const { image, color } = { ...chain_data }
   const boxShadow = color && !noShadow && `${color}${theme === 'light' ? '44' : '33'} 0px 4px 16px 8px`
 
   return (
     <Modal
       id="modal-chains"
-      noButtons={true}
       hidden={hidden}
       disabled={disabled || fixed}
       onClick={open => setHidden(!open)}
@@ -77,11 +75,7 @@ export default (
             </div>
             {!fixed && <BiChevronDown size={18} className="3xl:w-6 3xl:h-6 text-slate-400 dark:text-slate-200" />}
           </div> :
-          <Puff
-            width="24"
-            height="24"
-            color={loaderColor(theme)}
-          />
+          <Spinner name="Puff" />
       }
       buttonClassName={className || `w-32 sm:w-40 min-w-max h-8 sm:h-10 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
       buttonStyle={{ boxShadow, WebkitBoxShadow: boxShadow, MozBoxShadow: boxShadow }}
@@ -104,6 +98,7 @@ export default (
           isPool={isPool}
         />
       }
+      noButtons={true}
     />
   )
 }

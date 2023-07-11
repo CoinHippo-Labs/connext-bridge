@@ -67,7 +67,7 @@
         "decimals": 18,
         "symbol": "WETH",
         "image": "/logos/assets/weth.png",
-        "wrapable": true,
+        "wrappable": true,
         "is_bridge": true
       },
       {
@@ -97,7 +97,7 @@
           "symbol": "nextWETH",
           "image": "/logos/assets/nextweth.png"
         },
-        "wrapable": true,
+        "wrappable": true,
         "is_pool": false,
         "is_bridge": true
       },
@@ -107,7 +107,7 @@
         "decimals": 18,
         "symbol": "WETH",
         "image": "/logos/assets/weth.png",
-        "wrapable": true,
+        "wrappable": true,
         "is_bridge": true
       },
       {
@@ -116,7 +116,7 @@
         "decimals": 18,
         "symbol": "WETH",
         "image": "/logos/assets/weth.png",
-        "wrapable": true,
+        "wrappable": true,
         "is_bridge": true
       }
     ],
@@ -137,7 +137,7 @@
         "decimals": 18,
         "symbol": "WMATIC",
         "image": "/logos/assets/wmatic.png",
-        "wrapable": true,
+        "wrappable": true,
         "is_bridge": true
       },
       {

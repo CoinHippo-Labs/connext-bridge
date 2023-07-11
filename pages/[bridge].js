@@ -3,55 +3,29 @@ import _ from 'lodash'
 
 import Bridge from '../components/bridge'
 import meta from '../lib/meta'
-import { getChains, getAssets } from '../lib/api/config'
+import { getChainsData, getAssetsData } from '../lib/config'
+import { toArray } from '../lib/utils'
 
 export async function getStaticPaths() {
-  const chains = getChains().map(c => c?.id)
-  const assets = _.concat(getAssets().map(a => a?.id), '')
-
+  const chains = toArray(getChainsData().map(c => c.id))
+  const assets = _.concat(toArray(getAssetsData().map(a => a.id)), '')
   return {
-    paths:
-      assets.flatMap(a =>
-        chains.flatMap(c =>
-          chains
-            .filter(_c => _c !== c)
-            .map(_c => `/${a ? `${a.toUpperCase()}-` : ''}from-${c}-to-${_c}`)
-        )
-      ),
+    paths: assets.flatMap(a => chains.flatMap(c => chains.filter(_c => _c !== c).map(_c => `/${a ? `${a.toUpperCase()}-` : ''}from-${c}-to-${_c}`))),
     fallback: false,
   }
 }
 
-export async function getStaticProps(
-  {
-    params,
-  },
-) {
-  const {
-    bridge,
-  } = { ...params }
-
-  const asPath = `/${bridge}`
-
+export async function getStaticProps({ params }) {
+  const { bridge } = { ...params }
   return {
     props: {
-      headMeta: meta(asPath, null, getChains(), getAssets()),
+      headMeta: meta(`/${bridge}`, undefined, getChainsData(), getAssetsData()),
     },
   }
 }
 
-export default (
-  {
-    headMeta,
-  },
-) => {
-  const {
-    title,
-    description,
-    image,
-    url,
-  } = { ...headMeta }
-
+export default ({ headMeta }) => {
+  const { title, description, image, url } = { ...headMeta }
   return (
     <>
       <Head>

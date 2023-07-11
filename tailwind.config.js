@@ -1,6 +1,7 @@
+const withMT = require('@material-tailwind/react/utils/withMT')
 const colors = require('tailwindcss/colors')
 
-module.exports = {
+module.exports = withMT({
   content: [
     './components/**/*.js',
     './pages/**/*.js',
@@ -37,4 +38,4 @@ module.exports = {
       },
     },
   },
-}
+})

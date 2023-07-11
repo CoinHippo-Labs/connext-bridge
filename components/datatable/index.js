@@ -6,26 +6,28 @@ import { BiChevronDown, BiChevronUp, BiLeftArrowAlt, BiRightArrowAlt } from 'rea
 import { PageWithText, Pagination } from '../paginations'
 import { toArray } from '../../lib/utils'
 
-const IndeterminateCheckbox = forwardRef(({ indeterminate, ...rest }, ref) => {
-  const defaultRef = useRef()
-  const resolvedRef = ref || defaultRef
+const IndeterminateCheckbox = forwardRef(
+  ({ indeterminate, ...rest }, ref) => {
+    const defaultRef = useRef()
+    const resolvedRef = ref || defaultRef
 
-  useEffect(
-    () => {
-      resolvedRef.current.indeterminate = indeterminate
-    },
-    [resolvedRef, indeterminate],
-  )
+    useEffect(
+      () => {
+        resolvedRef.current.indeterminate = indeterminate
+      },
+      [resolvedRef, indeterminate],
+    )
 
-  return (
-    <input
-      ref={resolvedRef}
-      type="checkbox"
-      { ...rest }
-      className="form-checkbox w-4 h-4"
-    />
-  )
-})
+    return (
+      <input
+        ref={resolvedRef}
+        type="checkbox"
+        { ...rest }
+        className="form-checkbox w-4 h-4"
+      />
+    )
+  }
+)
 
 export default (
   {
@@ -37,6 +39,7 @@ export default (
     pageSizes = [10, 25, 50, 100],
     noPagination = false,
     noRecordPerPage = false,
+    extra,
     className = '',
     style,
   },
@@ -66,10 +69,7 @@ export default (
     {
       columns,
       data,
-      initialState: {
-        pageIndex: 0,
-        pageSize: defaultPageSize,
-      },
+      initialState: { pageIndex: 0, pageSize: defaultPageSize },
       disableSortRemove: true,
       stateReducer: (newState, action, prevState) => action.type.startsWith('reset') ? prevState : newState,
     },
@@ -77,16 +77,16 @@ export default (
     usePagination,
     useRowSelect,
     hooks => {
-      hooks.visibleColumns.push(columns => toArray([
-        rowSelectEnable ?
-          {
+      hooks.visibleColumns.push(
+        columns => toArray([
+          rowSelectEnable && {
             id: 'selection',
             Header: ({ getToggleAllRowsSelectedProps }) => <IndeterminateCheckbox { ...getToggleAllRowsSelectedProps() } />,
             Cell: ({ row }) => <IndeterminateCheckbox { ...row.getToggleRowSelectedProps() } />,
-          } :
-          undefined,
-        ...columns,
-      ]))
+          },
+          ...columns,
+        ])
+      )
     }
   )
 
@@ -112,16 +112,16 @@ export default (
         <thead>
           {headerGroups.map(hg =>
             <tr { ...hg.getHeaderGroupProps() }>
-              {hg.headers.map((h, i) =>
+              {hg.headers.map((c, i) =>
                 <th
-                  { ...(h.getHeaderProps(h.getSortByToggleProps())) }
-                  className={`${i === 0 ? 'rounded-tl' : i === hg.headers.length - 1 ? 'rounded-tr' : ''} ${h.className || ''}`}
+                  { ...c.getHeaderProps(c.getSortByToggleProps()) }
+                  className={`${i === 0 ? 'rounded-tl' : i === hg.headers.length - 1 ? 'rounded-tr' : ''} ${c.className || ''}`}
                 >
-                  <div className={`flex flex-row items-center ${h.headerClassName?.includes('justify-') ? '' : 'justify-start'} ${h.headerClassName || ''}`}>
-                    <span>{h.render('Header')}</span>
-                    {h.isSorted && (
+                  <div className={`flex flex-row items-center ${c.headerClassName?.includes('justify-') ? '' : 'justify-start'} ${c.headerClassName || ''}`}>
+                    <span>{c.render('Header')}</span>
+                    {c.isSorted && (
                       <span className="ml-1.5">
-                        {h.isSortedDesc ? <BiChevronDown className="stroke-current" /> : <BiChevronUp className="stroke-current" />}
+                        {c.isSortedDesc ? <BiChevronDown className="stroke-current" /> : <BiChevronUp className="stroke-current" />}
                       </span>
                     )}
                   </div>
@@ -153,13 +153,13 @@ export default (
         </tbody>
       </table>
       {!noPagination && data?.length > 0 && (
-        <div className={`flex flex-col items-center ${noRecordPerPage || pageCount > 4 ? 'sm:flex-row justify-center' : 'sm:grid sm:grid-cols-3 justify-between'} gap-4 my-0.5`}>
+        <div className={`${noRecordPerPage || pageCount <= 3 ? 'grid' : 'flex flex-col'} sm:grid grid-cols-3 items-center justify-between ${size === 'small' ? 'text-xs' : 'text-sm'} gap-4 sm:my-2`}>
           {!noRecordPerPage && (
             <select
               disabled={loading}
               value={pageSize}
               onChange={e => setPageSize(Number(e.target.value))}
-              className="w-24 form-select bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 outline-none border-zinc-100 dark:border-zinc-900 appearance-none shadow rounded cursor-pointer text-center py-2 px-3"
+              className={`${size === 'small' ? 'w-fit py-0.5 px-1' : 'w-20 py-1 px-1.5'} form-select bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 outline-none border-zinc-100 dark:border-zinc-900 appearance-none shadow rounded cursor-pointer font-medium text-center`}
             >
               {pageSizes.map((s, i) =>
                 <option
@@ -172,7 +172,7 @@ export default (
               )}
             </select>
           )}
-          {pageCount > 1 && pageCount <= 4 && (
+          {pageCount > 1 && pageCount <= 1 && (
             <div className="space-x-1 my-2.5 sm:my-0 mx-auto">
               <span>Page</span>
               <span className="font-bold">
@@ -184,21 +184,17 @@ export default (
               </span>
             </div>
           )}
-          <div className="pagination flex flex-wrap items-center justify-end space-x-2">
-            {pageCount > 4 ?
-              <div className="flex flex-col sm:flex-row items-center justify-center mt-2.5 sm:mt-0">
+          <div className="pagination flex flex-wrap items-center justify-center space-x-2">
+            {pageCount > 1 ?
+              <div className="flex flex-col sm:flex-row items-center justify-center my-3 sm:my-0">
                 <Pagination
+                  size={size}
                   items={[...Array(pageCount).keys()]}
                   disabled={loading}
                   active={pageIndex + 1}
                   previous={<BiLeftArrowAlt size={16} />}
                   next={<BiRightArrowAlt size={16} />}
-                  onClick={
-                    p => {
-                      gotoPage(p - 1)
-                      // tableRef.current.scrollIntoView()
-                    }
-                  }
+                  onClick={p => gotoPage(p - 1)}
                   icons={true}
                   className="space-x-0.5"
                 />
@@ -215,7 +211,7 @@ export default (
                       }
                     }
                   >
-                    <span className="text-black dark:text-white font-bold">
+                    <span className={`${size === 'small' ? 'text-2xs' : ''}`}>
                       First
                     </span>
                   </PageWithText>
@@ -224,28 +220,22 @@ export default (
                   <PageWithText
                     size={size}
                     disabled={loading}
-                    onClick={
-                      () => {
-                        previousPage()
-                        // tableRef.current.scrollIntoView()
-                      }
-                    }
+                    onClick={() => previousPage()}
                   >
-                    Previous
+                    <span className={`${size === 'small' ? 'text-2xs' : ''}`}>
+                      Prev
+                    </span>
                   </PageWithText>
                 )}
                 {canNextPage && (
                   <PageWithText
                     size={size}
                     disabled={!canNextPage || loading}
-                    onClick={
-                      () => {
-                        nextPage()
-                        // tableRef.current.scrollIntoView()
-                      }
-                    }
+                    onClick={() => nextPage()}
                   >
-                    Next
+                    <span className={`${size === 'small' ? 'text-2xs' : ''}`}>
+                      Next
+                    </span>
                   </PageWithText>
                 )}
                 {pageIndex !== pageCount - 1 && (
@@ -259,7 +249,7 @@ export default (
                       }
                     }
                   >
-                    <span className="text-black dark:text-white font-bold">
+                    <span className={`${size === 'small' ? 'text-2xs' : ''}`}>
                       Last
                     </span>
                   </PageWithText>
@@ -267,6 +257,11 @@ export default (
               </>
             }
           </div>
+          {extra && (
+            <div className={`flex flex-col sm:flex-row items-center ${pageCount <= 3 ? 'justify-end' : ''} sm:justify-end sm:space-x-2`}>
+              {extra}
+            </div>
+          )}
         </div>
       )}
     </>

@@ -1,36 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
-import { Puff } from 'react-loader-spinner'
 import { RiRefreshFill } from 'react-icons/ri'
 
-import Image from '../../image'
 import Items from './items'
-import { getChain } from '../../../lib/object/chain'
-import { loaderColor } from '../../../lib/utils'
+import Spinner from '../../spinner'
+import Image from '../../image'
+import { getChainData } from '../../../lib/object'
 
-export default (
-  {
-    chain_id,
-  },
-) => {
-  const {
-    preferences,
-    chains,
-  } = useSelector(
-    state => (
-      {
-        preferences: state.preferences,
-        chains: state.chains,
-      }
-    ),
-    shallowEqual,
-  )
-  const {
-    theme,
-  } = { ...preferences }
-  const {
-    chains_data,
-  } = { ...chains }
+export default ({ chainId }) => {
+  const { chains } = useSelector(state => ({ chains: state.chains }), shallowEqual)
+  const { chains_data } = { ...chains }
 
   const [hidden, setHidden] = useState(true)
 
@@ -43,7 +22,6 @@ export default (
         if (hidden || buttonRef.current.contains(e.target) || dropdownRef.current.contains(e.target)) {
           return false
         }
-
         setHidden(!hidden)
       }
 
@@ -55,12 +33,8 @@ export default (
 
   const onClick = () => setHidden(!hidden)
 
-  const chain_data = getChain(chain_id, chains_data)
-
-  const {
-    short_name,
-    image,
-  } = { ...chain_data }
+  const chain_data = getChainData(chainId, chains_data)
+  const { short_name, image } = { ...chain_data }
 
   return (
     <div className="relative">
@@ -81,15 +55,8 @@ export default (
               {short_name}
             </span> :
           chains_data ?
-            <RiRefreshFill
-              size={20}
-              className="3xl:w-8 3xl:h-8 transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out"
-            /> :
-            <Puff
-              width="24"
-              height="24"
-              color={loaderColor(theme)}
-            />
+            <RiRefreshFill size={20} className="3xl:w-8 3xl:h-8 transform hover:-rotate-180 hover:animate-spin-one-time transition duration-300 ease-in-out" /> :
+            <Spinner name="Puff" />
         }
       </button>
       <div
@@ -97,9 +64,7 @@ export default (
         className={`dropdown ${hidden ? '' : 'open'} absolute top-0 left-3 mt-12`}
       >
         <div className="dropdown-content w-52 bottom-start">
-          <Items
-            onClick={onClick}
-          />
+          <Items onClick={onClick} />
         </div>
       </div>
     </div>

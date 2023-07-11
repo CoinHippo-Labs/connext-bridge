@@ -245,7 +245,7 @@
           "symbol": "nextDAI",
           "image": "/logos/assets/nextdai.png"
         },
-        "wrapable": true,
+        "wrappable": true,
         "is_pool": true
       }
     ],
@@ -264,7 +264,7 @@
         "decimals": 18,
         "symbol": "WETH",
         "image": "/logos/assets/weth.png",
-        "wrapable": true
+        "wrappable": true
       },
       {
         "contract_address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
@@ -306,7 +306,7 @@
           "symbol": "nextWETH",
           "image": "/logos/assets/nextweth.png"
         },
-        "wrapable": true,
+        "wrappable": true,
         "is_pool": true
       },
       {
@@ -321,7 +321,7 @@
           "symbol": "nextWETH",
           "image": "/logos/assets/nextweth.png"
         },
-        "wrapable": true,
+        "wrappable": true,
         "is_pool": true
       },
       {

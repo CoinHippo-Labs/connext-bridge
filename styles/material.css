@@ -1,0 +1,63 @@
+.custom-font {
+  font-family: 'Manrope', sans-serif !important;
+}
+
+.tabs {
+  nav {
+    @apply w-full;
+    ul {
+      @apply bg-slate-50 dark:bg-slate-900;
+      li {
+        @apply custom-font text-slate-600 dark:text-slate-400;
+        .absolute {
+          @apply dark:bg-slate-800;
+        }
+      }
+    }
+  }
+  div {
+    @apply custom-font;
+    [role=tabpanel] {
+      @apply pt-4 xl:pt-6 px-0.5;
+    }
+  }
+}
+
+.card {
+  @apply bg-light dark:bg-slate-900 rounded-sm shadow;
+  .title {
+    @apply whitespace-nowrap text-lg 3xl:text-2xl text-black dark:text-white font-extrabold mt-3;
+  }
+  .description {
+    @apply space-y-1 mt-2;
+  }
+  .card-footer {
+    @apply mt-auto pt-0;
+    div {
+      @apply select-auto;
+    }
+  }
+}
+
+.card-transparent {
+  @apply bg-transparent dark:bg-transparent shadow-none;
+}
+
+.alert-box {
+  .transition-all {
+    @apply relative ml-auto;
+    svg {
+      @apply w-5 h-5;
+    }
+  }
+}
+
+.stepper {
+  a {
+    @apply bg-transparent;
+  }
+}
+
+.chip {
+  @apply w-fit opacity-100 rounded normal-case custom-font !important;
+}

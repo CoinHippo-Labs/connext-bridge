@@ -2,9 +2,9 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useSelector, shallowEqual } from 'react-redux'
 
-import menus from '../menus'
-import { getChain } from '../../../../lib/object/chain'
-import { getAsset } from '../../../../lib/object/asset'
+import routes from '../routes'
+import { DEFAULT_DESTINATION_CHAIN } from '../../../../lib/config'
+import { getChainData, getAssetData } from '../../../../lib/object'
 import { toArray } from '../../../../lib/utils'
 
 export default ({ onClick }) => {
@@ -16,13 +16,13 @@ export default ({ onClick }) => {
 
   const router = useRouter()
   const { pathname, query } = { ...router }
-  const { bridge, swap, source } = { ...query }
+  const { bridge, swap } = { ...query }
 
   return (
-    <div className="flex flex-wrap">
-      {menus.filter(m => m.path && !['pool'].includes(source)) .map(m => {
-        const { id, disabled, others_paths, external, icon } = { ...m }
-        let { title, path } = { ...m }
+    <div className="flex flex-col">
+      {routes.map((d, i) => {
+        const { id, disabled, others_paths, group, icon } = { ...d }
+        let { title, path } = { ...d }
 
         switch (id) {
           case 'bridge':
@@ -30,23 +30,19 @@ export default ({ onClick }) => {
               path = pathname.replace('[bridge]', bridge)
             }
             else {
-              let source_chain
-              let destination_chain
+              let sourceChain
+              let destinationChain
               let asset
               if (chains_data && assets_data) {
-                const source_chain_data = getChain(chain_id, chains_data, true, false, true)
-                source_chain = source_chain_data?.id
-                const destination_chain_data = getChain(chain_id, chains_data, true, false, true, source_chain)
-                destination_chain = destination_chain_data?.id
-                const chain_ids = [source_chain_data?.chain_id, destination_chain_data?.chain_id]
-                const asset_data = getAsset(null, assets_data, chain_ids, undefined, undefined, true, true)
+                const source_chain_data = getChainData(chain_id, chains_data, { not_disabled: true, get_head: true })
+                sourceChain = source_chain_data?.id
+                const destination_chain_data = sourceChain !== DEFAULT_DESTINATION_CHAIN && getChainData(DEFAULT_DESTINATION_CHAIN, chains_data) ? DEFAULT_DESTINATION_CHAIN : getChainData(chain_id, chains_data, { not_disabled: true, get_head: true, except: sourceChain })
+                destinationChain = destination_chain_data?.id
+                const asset_data = getAssetData(undefined, assets_data, { chain_ids: [source_chain_data?.chain_id, destination_chain_data?.chain_id], not_disabled: true, get_head: true })
                 asset = asset_data?.id
               }
-              path = `/${source_chain && destination_chain ? `${asset ? `${asset.toUpperCase()}-` : ''}from-${source_chain}-to-${destination_chain}` : ''}`
+              path = `/${sourceChain && destinationChain ? `${asset ? `${asset.toUpperCase()}-` : ''}from-${sourceChain}-to-${destinationChain}` : ''}`
             }
-            break
-          case 'pools':
-            path = '/pools'
             break
           case 'swap':
             if (pathname === '/swap/[swap]' && swap) {
@@ -56,23 +52,20 @@ export default ({ onClick }) => {
               let chain
               let asset
               if (chains_data && assets_data) {
-                const _chains_data = getChain(chain_id, chains_data, false, true, false, undefined, true).filter(c => getAsset(null, assets_data, c?.chain_id, undefined, undefined, true, true, true))
+                const _chains_data = getChainData(chain_id, chains_data, { must_have_pools: true, return_all: true }).filter(c => getAssetData(undefined, assets_data, { chain_id: c.chain_id, not_disabled: true, get_head: true, only_pool_asset: true }))
                 const chain_data = _.head(_chains_data)
                 chain = chain_data?.id
-                const asset_data = getAsset(null, assets_data, chain_data?.chain_id, undefined, undefined, true, true, true)
+                const asset_data = getAssetData(undefined, assets_data, { chain_id: chain_data?.chain_id, not_disabled: true, get_head: true, only_pool_asset: true })
                 asset = asset_data?.id
               }
               path = `/swap/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}`
             }
             break
-          case 'explorer':
-            title = 'Explorer'
-            path = process.env.NEXT_PUBLIC_EXPLORER_URL
-            break
           default:
             break
         }
 
+        const external = !path?.startsWith('/')
         const selected = !external && (pathname === path || toArray(others_paths).includes(pathname))
         const item = (
           <>
@@ -82,11 +75,11 @@ export default ({ onClick }) => {
             </span>
           </>
         )
-        const className = `dropdown-item w-full bg-transparent hover:bg-blue-50 dark:hover:bg-slate-800 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} flex items-center uppercase ${selected ? 'text-blue-600 dark:text-white text-sm font-extrabold' : 'text-slate-600 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200 text-sm font-semibold hover:font-bold'} space-x-1.5 p-3`
+        const className = `w-full ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} flex items-center uppercase ${selected ? 'text-blue-600 dark:text-white text-sm font-extrabold' : 'text-slate-600 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200 text-sm font-medium'} space-x-1.5 py-2 px-3`
         return (
           external ?
             <a
-              key={id}
+              key={i}
               href={path}
               target="_blank"
               rel="noopener noreferrer"
@@ -95,8 +88,11 @@ export default ({ onClick }) => {
             >
               {item}
             </a> :
-            <Link key={id} href={path}>
-              <div onClick={onClick} className={className}>
+            <Link key={i} href={path}>
+              <div
+                onClick={onClick}
+                className={className}
+              >
                 {item}
               </div>
             </Link>

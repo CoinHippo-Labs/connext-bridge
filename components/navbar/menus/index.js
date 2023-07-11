@@ -15,7 +15,6 @@ export default () => {
         if (hidden || buttonRef.current.contains(e.target) || dropdownRef.current.contains(e.target)) {
           return false
         }
-
         setHidden(!hidden)
       }
 
@@ -32,25 +31,19 @@ export default () => {
       <button
         ref={buttonRef}
         onClick={onClick}
-        className="w-8 h-16 flex items-center justify-center sm:mr-2 3xl:w-10 3xl:h-20"
+        className="w-8 3xl:w-10 3xl:h-20 h-16 flex items-center justify-center sm:mr-2"
       >
-        <RxHamburgerMenu
-          size={20}
-          className="3xl:w-6 3xl:h-6"
-        />
+        <RxHamburgerMenu size={20} className="3xl:w-6 3xl:h-6" />
       </button>
       <div
         ref={dropdownRef}
         className={`dropdown ${hidden ? '' : 'open'} absolute top-0 right-4 mt-16`}
       >
-        {
-          !hidden &&
-          (
-            <div className="dropdown-content w-56 3xl:w-72 bottom-start">
-              <Items />
-            </div>
-          )
-        }
+        {!hidden && (
+          <div className="dropdown-content w-56 3xl:w-72 bottom-start">
+            <Items />
+          </div>
+        )}
       </div>
     </div>
   )
