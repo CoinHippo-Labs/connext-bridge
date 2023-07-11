@@ -74,7 +74,7 @@ export default ({ pool, userPools, onFinish }) => {
 
   useEffect(
     () => {
-      reset()
+      reset(action)
     },
     [action, pool],
   )
@@ -107,7 +107,7 @@ export default ({ pool, userPools, onFinish }) => {
             calculateAddLiquidityPriceImpact(domainId, contract_address, _amountX, _amountY)
           } catch (error) {
             const response = parseError(error)
-            console.log('[calculateAddLiquidityPriceImpact error]', { domainId, contract_address, _amountX, _amountY }, error)
+            console.log('[/pool]', '[calculateAddLiquidityPriceImpact error]', { domainId, contract_address, _amountX, _amountY }, error)
             setPriceImpactAdd(0)
             setPriceImpactAddResponse({ status: 'failed', ...response })
           }
@@ -189,7 +189,7 @@ export default ({ pool, userPools, onFinish }) => {
     setCallProcessing(null)
     setCallResponse(null)
 
-    if (onFinish) {
+    if (onFinish && !ACTIONS.includes(origin)) {
       onFinish()
     }
   }
@@ -333,14 +333,14 @@ export default ({ pool, userPools, onFinish }) => {
 
             if (!failed) {
               try {
-                console.log('[getPoolTokenIndex]', { domainId, contract_address, tokenAddress: contract_address })
+                console.log('[/pool]', '[getPoolTokenIndex]', { domainId, contract_address, tokenAddress: contract_address })
                 const tokenIndex = await sdk.sdkPool.getPoolTokenIndex(domainId, contract_address, contract_address)
-                console.log('[poolTokenIndex]', { domainId, contract_address, tokenAddress: contract_address, tokenIndex })
+                console.log('[/pool]', '[poolTokenIndex]', { domainId, contract_address, tokenAddress: contract_address, tokenIndex })
                 if (tokenIndex === 1) {
                   amounts = _.reverse(_.cloneDeep(amounts))
                 }
 
-                console.log('[addLiquidity]', { domainId, contract_address, amounts, minToMint, deadline })
+                console.log('[/pool]', '[addLiquidity]', { domainId, contract_address, amounts, minToMint, deadline })
                 const request = await sdk.sdkPool.addLiquidity(domainId, contract_address, amounts, minToMint, deadline)
                 if (request) {
                   try {
@@ -371,7 +371,7 @@ export default ({ pool, userPools, onFinish }) => {
                 }
               } catch (error) {
                 const response = parseError(error)
-                console.log('[addLiquidity error]', { domainId, contract_address, amounts, minToMint, deadline }, error)
+                console.log('[/pool]', '[addLiquidity error]', { domainId, contract_address, amounts, minToMint, deadline }, error)
                 const { code } = { ...response }
                 let { message } = { ...response }
                 if (message?.includes('eth_sendRawTransaction')) {
@@ -463,7 +463,7 @@ export default ({ pool, userPools, onFinish }) => {
             if (!failed) {
               const method = isOneToken ? 'removeLiquidityOneToken' : withdrawOption === 'custom_amounts' ? 'removeLiquidityImbalance' : 'removeLiquidity'
               try {
-                console.log(`[${method}]`, { domainId, contract_address, withdrawContractAddress, amount: _amount, minAmounts, minAmount, amounts, maxBurnAmount, deadline })
+                console.log('[/pool]', `[${method}]`, { domainId, contract_address, withdrawContractAddress, amount: _amount, minAmounts, minAmount, amounts, maxBurnAmount, deadline })
                 const request = isOneToken ?
                   await sdk.sdkPool.removeLiquidityOneToken(domainId, contract_address, withdrawContractAddress, _amount, minAmount, deadline) :
                   withdrawOption === 'custom_amounts' ?
@@ -498,7 +498,7 @@ export default ({ pool, userPools, onFinish }) => {
                 }
               } catch (error) {
                 const response = parseError(error)
-                console.log(`[${method} error]`, { domainId, contract_address, withdrawContractAddress, amount: _amount, minAmounts, minAmount, amounts, maxBurnAmount, deadline }, error)
+                console.log('[/pool]', `[${method} error]`, { domainId, contract_address, withdrawContractAddress, amount: _amount, minAmounts, minAmount, amounts, maxBurnAmount, deadline }, error)
                 const { code } = { ...response }
                 let { message } = { ...response }
                 if (message?.includes('exceed total supply')) {
@@ -575,7 +575,7 @@ export default ({ pool, userPools, onFinish }) => {
           let amounts
           if (withdrawOption?.endsWith('_only')) {
             const index = (withdrawOption === 'x_only' && adopted?.index === 1) || (withdrawOption === 'y_only' && local?.index === 1) ? 1 : 0
-            console.log('[calculateRemoveSwapLiquidityOneToken]', { domainId, contract_address, amount: _amount, index })
+            console.log('[/pool]', '[calculateRemoveSwapLiquidityOneToken]', { domainId, contract_address, amount: _amount, index })
             amounts = await sdk.sdkPool.calculateRemoveSwapLiquidityOneToken(domainId, contract_address, _amount, index)
             if (index === 1) {
               amounts = _.concat('0', amounts?.toString())
@@ -583,19 +583,19 @@ export default ({ pool, userPools, onFinish }) => {
             else {
               amounts = _.concat(amounts?.toString(), '0')
             }
-            console.log('[amountsRemoveSwapLiquidityOneToken]', { domainId, contract_address, amount: _amount, index, amounts })
+            console.log('[/pool]', '[amountsRemoveSwapLiquidityOneToken]', { domainId, contract_address, amount: _amount, index, amounts })
           }
           else {
-            console.log('[calculateRemoveSwapLiquidity]', { domainId, contract_address, amount: _amount })
+            console.log('[/pool]', '[calculateRemoveSwapLiquidity]', { domainId, contract_address, amount: _amount })
             amounts = await sdk.sdkPool.calculateRemoveSwapLiquidity(domainId, contract_address, _amount)
-            console.log('[amountsRemoveSwapLiquidity]', { domainId, contract_address, amount: _amount, amounts })
+            console.log('[/pool]', '[amountsRemoveSwapLiquidity]', { domainId, contract_address, amount: _amount, amounts })
           }
 
           let _amounts
           if (amounts?.length > 1) {
-            console.log('[getPoolTokenIndex]', { domainId, contract_address, tokenAddress: contract_address })
+            console.log('[/pool]', '[getPoolTokenIndex]', { domainId, contract_address, tokenAddress: contract_address })
             const tokenIndex = await sdk.sdkPool.getPoolTokenIndex(domainId, contract_address, contract_address)
-            console.log('[poolTokenIndex]', { domainId, contract_address, tokenAddress: contract_address, tokenIndex })
+            console.log('[/pool]', '[poolTokenIndex]', { domainId, contract_address, tokenAddress: contract_address, tokenIndex })
             if (tokenIndex === 1) {
               _amounts = _.reverse(_.cloneDeep(amounts))
             }
@@ -608,7 +608,7 @@ export default ({ pool, userPools, onFinish }) => {
           setCallResponse(null)
         } catch (error) {
           const response = parseError(error)
-          console.log('[calculateRemoveSwapLiquidity error]', { domainId, contract_address, amount: _amount }, error)
+          console.log('[/pool]', '[calculateRemoveSwapLiquidity error]', { domainId, contract_address, amount: _amount }, error)
           let { message } = { ...response }
           if (message?.includes('exceed total supply')) {
             message = 'Exceed Total Supply'
@@ -632,9 +632,9 @@ export default ({ pool, userPools, onFinish }) => {
       const { id } = { ...chain_data }
       const { tvl } = { ...pool_data }
       if (pool_data && pool_data.chain_data?.id === id && tvl) {
-        console.log('[calculateAddLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY })
+        console.log('[/pool]', '[calculateAddLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY })
         const priceImpact = await sdk.sdkPool.calculateAddLiquidityPriceImpact(domainId, contractAddress, amountX, amountY)
-        console.log('[addLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY, priceImpact })
+        console.log('[/pool]', '[addLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY, priceImpact })
         setPriceImpactAdd(formatUnits(priceImpact) * 100)
       }
       else {
@@ -642,7 +642,7 @@ export default ({ pool, userPools, onFinish }) => {
       }
     } catch (error) {
       const response = parseError(error)
-      console.log('[calculateAddLiquidityPriceImpact error]', { domainId, contractAddress, amountX, amountY }, error)
+      console.log('[/pool]', '[calculateAddLiquidityPriceImpact error]', { domainId, contractAddress, amountX, amountY }, error)
       const { message } = { ...response }
       if (message?.includes('reverted')) {
         failed = true
@@ -664,9 +664,9 @@ export default ({ pool, userPools, onFinish }) => {
       const { id } = { ...chain_data }
       const { tvl } = { ...pool_data }
       if (pool_data && pool_data.chain_data?.id === id && tvl) {
-        console.log('[calculateRemoveLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY })
+        console.log('[/pool]', '[calculateRemoveLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY })
         const priceImpact = await sdk.sdkPool.calculateRemoveLiquidityPriceImpact(domainId, contractAddress, amountX, amountY)
-        console.log('[removeLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY, priceImpact })
+        console.log('[/pool]', '[removeLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY, priceImpact })
         setPriceImpactRemove(formatUnits(priceImpact) * 100)
       }
       else {
@@ -674,7 +674,7 @@ export default ({ pool, userPools, onFinish }) => {
       }
     } catch (error) {
       const response = parseError(error)
-      console.log('[calculateRemoveLiquidityPriceImpact error]', { domainId, contractAddress, amountX, amountY }, error)
+      console.log('[/pool]', '[calculateRemoveLiquidityPriceImpact error]', { domainId, contractAddress, amountX, amountY }, error)
       const { message } = { ...response }
       if (message?.includes('reverted')) {
         failed = true

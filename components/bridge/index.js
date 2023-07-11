@@ -103,69 +103,73 @@ export default () => {
   // get bridge from path
   useEffect(
     () => {
-      let updated = false
-      const path = getPath(asPath)
-      const params = getQueryParams(asPath)
-      const { symbol, amount, receive_next } = { ...params }
-      const isNextAsset = equalsIgnoreCase(receive_next?.toString(), 'true') ? true : equalsIgnoreCase(receive_next?.toString(), 'false') ? false : undefined
-      if (path.includes('from-') && path.includes('to-')) {
-        const paths = split(path.replace('/', ''), 'normal', '-')
-        const sourceChain = paths[paths.indexOf('from') + 1]
-        const destinationChain = paths[paths.indexOf('to') + 1]
-        const asset = _.head(paths) !== 'from' ? _.head(paths) : NETWORK === 'testnet' ? [sourceChain, destinationChain].findIndex(c => ['linea'].includes(c)) > -1 ? 'matic' : 'test' : 'usdc'
-        const source_chain_data = getChainData(sourceChain, chains_data)
-        const destination_chain_data = getChainData(destinationChain, chains_data)
-        const asset_data = getAssetData(asset, assets_data)
+      if (assets_data) {
+        let updated = false
+        const path = getPath(asPath)
+        const params = getQueryParams(asPath)
+        const { symbol, amount, receive_next } = { ...params }
+        const isNextAsset = equalsIgnoreCase(receive_next?.toString(), 'true') ? true : equalsIgnoreCase(receive_next?.toString(), 'false') ? false : undefined
+        if (path.includes('from-') && path.includes('to-')) {
+          const paths = split(path.replace('/', ''), 'normal', '-')
+          const sourceChain = paths[paths.indexOf('from') + 1]
+          const destinationChain = paths[paths.indexOf('to') + 1]
+          const asset = _.head(paths) !== 'from' ? _.head(paths) : NETWORK === 'testnet' ? [sourceChain, destinationChain].findIndex(c => ['linea'].includes(c)) > -1 ? 'matic' : 'test' : 'usdc'
+          const source_chain_data = getChainData(sourceChain, chains_data)
+          const destination_chain_data = getChainData(destinationChain, chains_data)
+          const asset_data = getAssetData(asset, assets_data)
 
-        if (source_chain_data) {
-          bridge.source_chain = sourceChain
-          updated = true
-        }
-        if (destination_chain_data) {
-          bridge.destination_chain = destinationChain
-          updated = true
-        }
-        if (asset_data) {
-          bridge.asset = asset
-          updated = true
-        }
-        if (symbol) {
-          bridge.symbol = symbol
-          updated = true
-        }
-        if (bridge.source_chain && isNumber(amount) && !isZero(amount)) {
-          bridge.amount = amount
-          updated = true
-          if (sdk) {
-            calculateAmountReceived(amount)
-            if (isApproveNeeded === undefined) {
-              checkApprovedNeeded(amount)
+          if (source_chain_data && bridge.source_chain !== sourceChain) {
+            bridge.source_chain = sourceChain
+            updated = true
+          }
+          if (destination_chain_data && bridge.destination_chain !== destinationChain) {
+            bridge.destination_chain = destinationChain
+            updated = true
+          }
+          if (asset_data && bridge.asset !== asset) {
+            bridge.asset = asset
+            updated = true
+          }
+          if (symbol && bridge.symbol !== symbol) {
+            bridge.symbol = symbol
+            updated = true
+          }
+          if (bridge.source_chain && isNumber(amount) && !isZero(amount) && bridge.amount !== amount) {
+            bridge.amount = amount
+            updated = true
+            if (sdk) {
+              calculateAmountReceived(amount)
+              if (isApproveNeeded === undefined) {
+                checkApprovedNeeded(amount)
+              }
+            }
+          }
+          else if (estimatedValues) {
+            if (!isNumber(amount) || isZero(amount)) {
+              setEstimatedValues({ amountReceived: '0', routerFee: '0', isNextAsset: !!isNextAsset })
+            }
+            else {
+              setEstimatedValues(undefined)
             }
           }
         }
-        else if (estimatedValues) {
-          if (!isNumber(amount) || isZero(amount)) {
-            setEstimatedValues({ amountReceived: '0', routerFee: '0', isNextAsset: !!isNextAsset })
-          }
-          else {
-            setEstimatedValues(undefined)
-          }
+
+        switch (isNextAsset) {
+          case true:
+          case false:
+            if (bridge.receive_next !== isNextAsset) {
+              bridge.receive_next = isNextAsset
+              updated = true
+              setOptions({ ...options, receiveLocal: isNextAsset })
+            }
+            break
+          default:
+            break
         }
-      }
 
-      switch (isNextAsset) {
-        case true:
-        case false:
-          bridge.receive_next = isNextAsset
-          updated = true
-          setOptions({ ...options, receiveLocal: isNextAsset })
-          break
-        default:
-          break
-      }
-
-      if (updated) {
-        setBridge(bridge)
+        if (updated) {
+          setBridge(bridge)
+        }
       }
     },
     [chains_data, assets_data, sdk, asPath],
@@ -256,7 +260,7 @@ export default () => {
       setXcall(null)
       setCallResponse(null)
     },
-    [address, bridge, sdk],
+    [sdk, address, bridge],
   )
 
   // update balances
@@ -302,7 +306,9 @@ export default () => {
           destination_chain = getChainData(undefined, chains_data, { not_disabled: true, get_head: true, except: source_chain })?.id
         }
       }
-      setBridge({ ...bridge, source_chain, destination_chain })
+      if (Object.keys(bridge).length === 0) {
+        setBridge({ ...bridge, source_chain, destination_chain })
+      }
     },
     [chains_data, wallet_chain_id, asPath],
   )
@@ -599,7 +605,7 @@ export default () => {
         callData: callData || '0x',
         [relayerFeeField]: isNumber(relayerFee) && Number(relayerFee) > 0 ? parseUnits(numberToFixed(relayerFee, relayer_fee_decimals - 2), relayer_fee_decimals) : undefined,
       }
-      console.log('[xcall setup]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
+      console.log('[/]', '[xcall setup]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
       if (!xcallParams[relayerFeeField] && NETWORK !== 'testnet') {
         setCallResponse({
           status: 'failed',
@@ -613,7 +619,7 @@ export default () => {
         let amountToApprove
         try {
           amountToApprove = parseUnits(amount, source_decimals)
-          console.log('[approveIfNeeded before xcall]', { domain_id: xcallParams.origin, contract_address: xcallParams.asset, amount: xcallParams.amount, amountToApprove, infiniteApprove })
+          console.log('[/]', '[approveIfNeeded before xcall]', { domain_id: xcallParams.origin, contract_address: xcallParams.asset, amount: xcallParams.amount, amountToApprove, infiniteApprove })
 
           const request = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xcallParams.asset, amountToApprove, infiniteApprove)
           if (request) {
@@ -636,7 +642,7 @@ export default () => {
           setApproving(false)
         } catch (error) {
           const response = parseError(error)
-          console.log('[approveIfNeeded error before xcall]', { domain_id: xcallParams.origin, contract_address: xcallParams.asset, amount: xcallParams.amount, amountToApprove }, error, response)
+          console.log('[/]', '[approveIfNeeded error before xcall]', { domain_id: xcallParams.origin, contract_address: xcallParams.asset, amount: xcallParams.amount, amountToApprove }, error, response)
           setApproveResponse({ status: 'failed', ...response })
           setApproveProcessing(false)
           setApproving(false)
@@ -658,7 +664,7 @@ export default () => {
           if (CANONICAL_ASSET_SYMBOL && destination_chain_data?.native_token?.symbol?.endsWith(CANONICAL_ASSET_SYMBOL)) {
             xcallParams.unwrapNativeOnDestination = xcallParams.receiveLocal || receive_wrap ? false : true
           }
-          console.log('[xcall]', { xcallParams })
+          console.log('[/]', '[xcall]', { xcallParams })
           const request = await sdk.sdkBase.xcall(xcallParams)
           if (request) {
             try {
@@ -714,13 +720,13 @@ export default () => {
                 )
                 setOpenTransferStatus(true)
               } catch (error) {
-                console.log('[xcall setLatestTransfers error]', { xcallParams }, error)
+                console.log('[/]', '[xcall setLatestTransfers error]', { xcallParams }, error)
               }
             }
           }
         } catch (error) {
           const response = parseError(error)
-          console.log('[xcall error]', { xcallParams }, error)
+          console.log('[/]', '[xcall error]', { xcallParams }, error)
           const { code } = { ...response }
           let { message } = { ...response }
           if (message?.includes('insufficient funds for gas')) {
@@ -762,21 +768,21 @@ export default () => {
   }
 
   const checkApprovedNeeded = async amount => {
-    if (sdk && address && toArray(assets_data).filter(d => isNumber(d.price)).length > 0) {
+    if (sdk && address && assets_data) {
       if (isNumber(amount) && !isZero(amount)) {
         const { domain_id } = { ...source_chain_data }
         const { contract_address, decimals } = { ...source_contract_data }
         const amountToApprove = parseUnits(amount, decimals)
         try {
           setIsApproveNeeded(undefined)
-          console.log('[approveIfNeeded]', { domain_id, contract_address, amount, amountToApprove })
+          console.log('[/]', '[approveIfNeeded]', { domain_id, contract_address, amount, amountToApprove })
           const response = await sdk.sdkBase.approveIfNeeded(domain_id, contract_address, amountToApprove)
           const isApproveNeeded = !!response
-          console.log('[approveIfNeeded]', { domain_id, contract_address, amount, amountToApprove, isApproveNeeded, response })
+          console.log('[/]', '[approveIfNeeded]', { domain_id, contract_address, amount, amountToApprove, isApproveNeeded, response })
           setIsApproveNeeded(isApproveNeeded)
         } catch (error) {
           const response = parseError(error)
-          console.log('[approveIfNeeded error]', { domain_id, contract_address, amount, amountToApprove }, error, response)
+          console.log('[/]', '[approveIfNeeded error]', { domain_id, contract_address, amount, amountToApprove }, error, response)
         }
       }
       else {
@@ -819,16 +825,16 @@ export default () => {
             destinationGasPrice: gas_price,
           }
           try {
-            console.log('[estimateRelayerFee]', params)
+            console.log('[/]', '[estimateRelayerFee]', params)
             const response = await sdk.sdkBase.estimateRelayerFee(params)
             let relayerFee = formatUnits(response, decimals)
             if (isNumber(relayerFee)) {
               relayerFee = params.priceIn === 'usd' && price > 0 ? numberToFixed(relayerFee / price, decimals) : relayerFee.toString()
             }
-            console.log('[relayerFee]', { params, response, relayerFee })
+            console.log('[/]', '[relayerFee]', { params, response, relayerFee })
             setFees({ routerFee, relayerFee })
           } catch (error) {
-            console.log('[estimateRelayerFee error]', params, error)
+            console.log('[/]', '[estimateRelayerFee error]', params, error)
             setFees({ routerFee })
           }
         } catch (error) {}
@@ -864,9 +870,9 @@ export default () => {
             manual = true
           }
           else if (toArray([source_chain_data?.id, destination_chain_data?.id]).findIndex(c => toArray(pools_data).find(d => d.chain_data?.id === c && !d.tvl)) < 0) {
-            console.log('[calculateAmountReceived]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, checkFastLiquidity })
+            console.log('[/]', '[calculateAmountReceived]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, checkFastLiquidity })
             const response = await sdk.sdkBase.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount, isNextAsset, checkFastLiquidity)
-            console.log('[amountReceived]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, checkFastLiquidity, response })
+            console.log('[/]', '[amountReceived]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, checkFastLiquidity, response })
 
             const destination_contract_data = getContractData(destination_chain_data?.chain_id, destination_asset_data?.contracts)
             setEstimatedValues(
@@ -883,7 +889,7 @@ export default () => {
         }
       } catch (error) {
         const response = parseError(error)
-        console.log('[calculateAmountReceived error]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, checkFastLiquidity }, error)
+        console.log('[/]', '[calculateAmountReceived error]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, checkFastLiquidity }, error)
         const { message } = { ...response }
         if (includesStringList(message, ['reverted', 'invalid BigNumber value'])) {
           manual = true

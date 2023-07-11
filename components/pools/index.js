@@ -45,9 +45,9 @@ export default () => {
             for (const chain_data of chains_data) {
               const { id, chain_id, domain_id } = { ...chain_data }
               try {
-                console.log('[getUserPools]', { domain_id, address })
+                console.log('[/pools]', '[getUserPools]', { domain_id, address })
                 const response = _.cloneDeep(await sdk.sdkPool.getUserPools(domain_id, address))
-                console.log('[userPools]', { domain_id, address, response })
+                console.log('[/pools]', '[userPools]', { domain_id, address, response })
 
                 if (Array.isArray(response)) {
                   data = toArray(
@@ -85,7 +85,7 @@ export default () => {
                   ).filter(d => d.asset_data && d.lpTokenBalance > MIN_USER_DEPOSITED)
                 }
               } catch (error) {
-                console.log('[getUserPools error]', { domain_id, address }, error)
+                console.log('[/pools]', '[getUserPools error]', { domain_id, address }, error)
               }
             }
             if (data) {

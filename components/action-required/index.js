@@ -174,7 +174,7 @@ export default (
     formatUnits(relayer_fee || '0', source_gas_decimals)
   const relayerFeeToBump = relayer_fee && newRelayerFee ? numberToFixed(Number(newRelayerFee) - Number(relayer_fee), relayer_fee_decimals) : null
   if (error_status === XTransferErrorStatus.LowRelayerFee) {
-    console.log('[debug]', '[relayerFee]', { relayerFeeAssetType, relayer_fees, relayer_fee, newRelayerFee, relayerFeeToBump })
+    console.log('[action required]', '[debug]', '[relayerFee]', { relayerFeeAssetType, relayer_fees, relayer_fee, newRelayerFee, relayerFeeToBump })
   }
 
   const reset = () => {
@@ -313,7 +313,7 @@ export default (
               transferId: transfer_id,
               slippage: numberToFixed(newSlippage, 2) * 100,
             }
-            console.log('[updateSlippage]', { params })
+            console.log('[action required]', '[updateSlippage]', { params })
             const request = await sdk.sdkBase.updateSlippage(params)
             if (request) {
               try {
@@ -341,7 +341,7 @@ export default (
             }
           } catch (error) {
             const response = parseError(error)
-            console.log('[updateSlippage error]', params, error)
+            console.log('[action required]', '[updateSlippage error]', params, error)
             const { code } = { ...response }
             switch (code) {
               case 'user_rejected':
@@ -369,7 +369,7 @@ export default (
                 const amount = params.relayerFee
                 const infinite_approve = false
     
-                console.log('[approveIfNeeded before bumpTransfer]', { domain_id, contract_address, amount, infinite_approve })
+                console.log('[action required]', '[approveIfNeeded before bumpTransfer]', { domain_id, contract_address, amount, infinite_approve })
                 const request = await sdk.sdkBase.approveIfNeeded(domain_id, contract_address, amount, infinite_approve)
                 if (request) {
                   const response = await signer.sendTransaction(request)
@@ -385,7 +385,7 @@ export default (
             } catch (error) {}
 
             if (!failed) {
-              console.log('[bumpTransfer]', params)
+              console.log('[action required]', '[bumpTransfer]', params)
               const request = await sdk.sdkBase.bumpTransfer(params)
               if (request) {
                 try {
@@ -420,7 +420,7 @@ export default (
             }
           } catch (error) {
             const response = parseError(error)
-            console.log('[bumpTransfer error]', params, error)
+            console.log('[action required]', '[bumpTransfer error]', params, error)
             const { code } = { ...response }
             let { message } = { ...response }
             if (message?.includes('insufficient funds')) {

@@ -27,7 +27,8 @@ export default () => {
   const { rpcs } = { ...rpc_providers }
   const { sdk } = { ...dev }
   const { wallet_data } = { ...wallet }
-  const { chain_id, address } = { ...wallet_data }
+  const { address } = { ...wallet_data }
+  const wallet_chain_id = wallet_data?.chain_id
 
   const router = useRouter()
   const { asPath } = { ...router }
@@ -39,28 +40,32 @@ export default () => {
   // get pool from path
   useEffect(
     () => {
-      let updated = false
-      const path = getPath(asPath)
-      if (path.includes('on-')) {
-        const paths = split(path.replace('/pool/', ''), 'normal', '-')
-        const chain = paths[paths.indexOf('on') + 1]
-        const asset = _.head(paths) !== 'on' ? _.head(paths) : null
-        const chain_data = getChainData(chain, chains_data)
-        const asset_data = getAssetData(asset, pool_assets_data)
+      if (pool_assets_data) {
+        let updated = false
+        const path = getPath(asPath)
+        if (path.includes('on-')) {
+          const paths = split(path.replace('/pool/', ''), 'normal', '-')
+          const chain = paths[paths.indexOf('on') + 1]
+          const asset = _.head(paths) !== 'on' ? _.head(paths) : null
+          const chain_data = getChainData(chain, chains_data)
+          const asset_data = getAssetData(asset, pool_assets_data)
 
-        if (chain_data) {
-          pool.chain = chain
-          updated = true
+          if (chain_data && pool.chain !== chain) {
+            pool.chain = chain
+            updated = true
+          }
+          if (asset_data && pool.asset !== asset) {
+            pool.asset = asset
+            updated = true
+          }
         }
-        if (asset_data) {
-          pool.asset = asset
-          updated = true
-        }
-      }
 
-      if (updated) {
-        setPool(pool)
-        setPoolsTrigger(moment().valueOf())
+        if (updated) {
+          setPool(pool)
+          if (pool.chain && pool.asset) {
+            setPoolsTrigger(moment().valueOf())
+          }
+        }
       }
     },
     [chains_data, pool_assets_data, asPath],
@@ -80,10 +85,18 @@ export default () => {
             params.asset = asset
           }
         }
+        else if (!chain) {
+          params.chain = getChainData(wallet_chain_id, chains_data, { must_have_pools: true })?.id || getChainData(undefined, chains_data, { must_have_pools: true, get_head: true })?.id
+        }
+        if (params.chain && !params.asset && !asset) {
+          const { chain_id } = { ...getChainData(params.chain, chains_data) }
+          params.asset = getAssetData(undefined, pool_assets_data, { chain_id, get_head: true })?.id
+        }
       }
 
       if (!(params.chain && params.asset) && toArray(pool_assets_data).length > 0) {
-        const { id, contracts } = { ..._.head(pool_assets_data) }
+        const { chain_id } = { ...getChainData(params.chain, chains_data, { must_have_pools: true, get_head: true }) }
+        const { id, contracts } = { ...getAssetData(params.asset, pool_assets_data, { chain_id, get_head: true }) }
         params.chain = params.chain || getChainData(_.head(contracts)?.chain_id, chains_data)?.id
         params.asset = params.asset || id
       }
@@ -92,16 +105,18 @@ export default () => {
         const { chain, asset } = { ...params }
         delete params.chain
         delete params.asset
-        router.push(`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
+        if (chain && asset) {
+          router.push(`/pool/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
+        }
       }
     },
-    [address, pool],
+    [pool_assets_data, address, pool],
   )
 
   // update balances
   useEffect(
     () => {
-      const { id } = { ...getChainData(chain_id, chains_data) }
+      const { id } = { ...getChainData(wallet_chain_id, chains_data) }
       const path = getPath(asPath)
       if (id && !path.includes('on-')) {
         const { chain } = { ...getQueryParams(asPath) }
@@ -111,7 +126,7 @@ export default () => {
         getBalances(id)
       }
     },
-    [chains_data, chain_id, asPath],
+    [chains_data, wallet_chain_id, asPath],
   )
 
   // update balances
@@ -160,14 +175,14 @@ export default () => {
   useEffect(
     () => {
       const getData = async () => {
-        const { chain } = { ...pool }
-        if (sdk && address && chain && poolsTrigger) {
+        const { chain, asset } = { ...pool }
+        if (sdk && address && chain && asset && poolsTrigger) {
           const chain_data = getChainData(chain, chains_data)
           const { id, chain_id, domain_id } = { ...chain_data }
           try {
-            console.log('[getUserPools]', { domain_id, address })
+            console.log('[/pool]', '[getUserPools]', { domain_id, address })
             const response = _.cloneDeep(await sdk.sdkPool.getUserPools(domain_id, address))
-            console.log('[UserPools]', { domain_id, address, response })
+            console.log('[/pool]', '[UserPools]', { domain_id, address, response })
 
             if (Array.isArray(response)) {
               setUserPools(
@@ -205,7 +220,7 @@ export default () => {
               setUserPools(toArray(userPools))
             }
           } catch (error) {
-            console.log('[getUserPools error]', { domain_id, address }, error)
+            console.log('[/pool]', '[getUserPools error]', { domain_id, address }, error)
           }
         }
       }

@@ -73,43 +73,41 @@ export default () => {
   // get swap from path
   useEffect(
     () => {
-      let updated = false
-      const path = getPath(asPath)
-      if (path.includes('on-')) {
+      if (pool_assets_data) {
+        let updated = false
+        const path = getPath(asPath)
         const params = getQueryParams(asPath)
-        const { amount, from } = { ...params }
-        const paths = split(path.replace('/swap/', ''), 'normal', '-')
-        const chain = paths[paths.indexOf('on') + 1]
-        const asset = _.head(paths) !== 'on' ? _.head(paths) : NETWORK === 'testnet' ? 'eth' : 'usdc'
-        const chain_data = getChainData(chain, chains_data, { must_have_pools: true })
-        const asset_data = getAssetData(asset, pool_assets_data)
+        if (path.includes('on-')) {
+          const { amount, from } = { ...params }
+          const paths = split(path.replace('/swap/', ''), 'normal', '-')
+          const chain = paths[paths.indexOf('on') + 1]
+          const asset = _.head(paths) !== 'on' ? _.head(paths) : NETWORK === 'testnet' ? 'eth' : 'usdc'
+          const chain_data = getChainData(chain, chains_data, { must_have_pools: true })
+          const asset_data = getAssetData(asset, pool_assets_data)
 
-        if (chain_data) {
-          swap.chain = chain
-          updated = true
-        }
-        if (asset_data) {
-          swap.asset = asset
-          updated = true
-        }
-        if (swap.chain) {
-          if (isNumber(amount) && !isZero(amount)) {
-            swap.amount = amount
+          if (chain_data && swap.chain !== chain) {
+            swap.chain = chain
             updated = true
           }
-          if (from) {
-            swap.origin = 'y'
+          if (asset_data && swap.asset !== asset) {
+            swap.asset = asset
             updated = true
           }
+          if (swap.chain) {
+            if (isNumber(amount) && !isZero(amount) && swap.amount !== amount) {
+              swap.amount = amount
+              updated = true
+            }
+            if (from && swap.origin !== 'y') {
+              swap.origin = 'y'
+              updated = true
+            }
+          }
         }
-      }
 
-      if ((!path.includes('on-') || !swap.chain) && !path.includes('[swap]') && getChainData(undefined, chains_data, { must_have_pools: true, return_all: true })?.length > 0) {
-        const _chain = getChainData(undefined, chains_data, { must_have_pools: true, get_head: true })?.id
-        router.push(`/swap/on-${_chain}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
-      }
-      if (updated) {
-        setSwap(swap)
+        if (updated) {
+          setSwap(swap)
+        }
       }
     },
     [chains_data, pool_assets_data, asPath],
@@ -118,16 +116,19 @@ export default () => {
   // set swap to path
   useEffect(
     () => {
-      const params = {}
+      const params = { ...getQueryParams(asPath) }
       if (swap) {
         const { chain, asset, amount, origin } = { ...swap }
-        const chain_data = getChainData(chain, chains_data, { not_disabled: true, must_have_pools: true })
+        const chain_data = getChainData(chain, chains_data, { must_have_pools: true })
         const { chain_id } = { ...chain_data }
         if (chain_data) {
           params.chain = chain
           if (asset && getAssetData(asset, pool_assets_data, { chain_id })) {
             params.asset = asset
           }
+        }
+        else if (!chain) {
+          params.chain = getChainData(wallet_chain_id, chains_data, { must_have_pools: true })?.id || getChainData(undefined, chains_data, { must_have_pools: true, get_head: true })?.id
         }
         if (params.chain && params.asset) {
           if (isNumber(amount) && !isZero(amount)) {
@@ -137,37 +138,39 @@ export default () => {
             params.from = local.symbol
           }
         }
+        else if (params.chain && !asset) {
+          const { chain_id } = { ...getChainData(params.chain, chains_data) }
+          params.asset = getAssetData(undefined, pool_assets_data, { chain_id, get_head: true })?.id
+        }
       }
 
       if (Object.keys(params).length > 0) {
         const { chain, asset } = { ...params }
         delete params.chain
         delete params.asset
-        router.push(`/swap/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
-        setBalanceTrigger(moment().valueOf())
+        if (chain && asset) {
+          router.push(`/swap/${chain ? `${asset ? `${asset.toUpperCase()}-` : ''}on-${chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
+          setBalanceTrigger(moment().valueOf())
+        }
       }
       setApproveResponse(null)
       setCallResponse(null)
     },
-    [address, swap],
+    [pool_assets_data, address, swap],
   )
 
   // update balances
   useEffect(
     () => {
-      let { chain } = { ...swap }
       const { id } = { ...getChainData(wallet_chain_id, chains_data) }
-      if (id && asPath) {
-        const params = getQueryParams(asPath)
-        if (!chain && !params.chain && getChainData(id, chains_data, { not_disabled: true })) {
-          chain = id
+      const path = getPath(asPath)
+      if (id && !path.includes('on-')) {
+        const { chain } = { ...getQueryParams(asPath) }
+        if (!chain && getChainData(id, chains_data, { must_have_pools: true, get_head: true })) {
+          setSwap({ ...swap, chain: id })
         }
         getBalances(id)
       }
-      if (Object.keys(swap).length > 0) {
-        chain = chain || getChainData(undefined, chains_data, { not_disabled: true, must_have_pools: true, get_head: true })?.id
-      }
-      setSwap({ ...swap, chain })
     },
     [chains_data, wallet_chain_id, asPath],
   )
@@ -235,7 +238,7 @@ export default () => {
           if (chain_changed || asset_changed || !pair?.updated_at || moment().diff(moment(pair.updated_at), 'seconds') > 30) {
             try {
               if (pair === undefined || pair?.error || chain_changed || asset_changed) {
-                setPair(getPoolData([chain, asset].join('_'), pools_data))
+                setPair(getPoolData([chain, asset].join('_'), pools_data) || null)
               }
 
               const chain_data = getChainData(chain, chains_data)
@@ -244,7 +247,13 @@ export default () => {
               const { contracts } = { ...asset_data }
               const contract_data = getContractData(chain_id, contracts)
               const { contract_address, is_pool } = { ...contract_data }
+              if (is_pool) {
+                console.log('[/swap]', '[getPool]', { domain_id, contract_address })
+              }
               const pool = is_pool && _.cloneDeep(await sdk.sdkPool.getPool(domain_id, contract_address))
+              if (is_pool) {
+                console.log('[/swap]', '[pool]', { domain_id, contract_address, pool })
+              }
               const { lpTokenAddress, adopted, local } = { ...pool }
 
               if (adopted) {
@@ -261,23 +270,23 @@ export default () => {
               let supply
               let rate
               if (lpTokenAddress) {
-                console.log('[getTokenSupply]', { domain_id, lpTokenAddress })
+                console.log('[/swap]', '[getTokenSupply]', { domain_id, lpTokenAddress })
                 try {
                   supply = await sdk.sdkPool.getTokenSupply(domain_id, lpTokenAddress)
                   supply = formatUnits(supply)
-                  console.log('[LPTokenSupply]', { domain_id, lpTokenAddress, supply })
+                  console.log('[/swap]', '[LPTokenSupply]', { domain_id, lpTokenAddress, supply })
                 } catch (error) {
-                  console.log('[getTokenSupply error]', { domain_id, lpTokenAddress }, error)
+                  console.log('[/swap]', '[getTokenSupply error]', { domain_id, lpTokenAddress }, error)
                 }
               }
               if (pool) {
-                console.log('[getVirtualPrice]', { domain_id, contract_address })
+                console.log('[/swap]', '[getVirtualPrice]', { domain_id, contract_address })
                 try {
                   rate = await sdk.sdkPool.getVirtualPrice(domain_id, contract_address)
                   rate = formatUnits(rate)
-                  console.log('[virtualPrice]', { domain_id, contract_address, rate })
+                  console.log('[/swap]', '[virtualPrice]', { domain_id, contract_address, rate })
                 } catch (error) {
-                  console.log('[getVirtualPrice error]', { domain_id, contract_address }, error)
+                  console.log('[/swap]', '[getVirtualPrice error]', { domain_id, contract_address }, error)
                 }
               }
 
@@ -304,7 +313,7 @@ export default () => {
                 dispatch({ type: POOLS_DATA, value: _pair })
               }
             } catch (error) {
-              console.log('[getPair error]', swap, error)
+              console.log('[/swap]', '[getPair error]', swap, error)
               setPair({ error })
               calculateSwap(null)
               failed = true
@@ -437,7 +446,7 @@ export default () => {
 
       if (!failed) {
         try {
-          console.log('[swap]', { domainId, contract_address, from: (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address, to: (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address, amount, minDy, deadline })
+          console.log('[/swap]', '[swap]', { domainId, contract_address, from: (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address, to: (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address, amount, minDy, deadline })
           const request = await sdk.sdkPool.swap(domainId, contract_address, (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address, (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address, amount, minDy, deadline)
           if (request) {
             try {
@@ -542,18 +551,18 @@ export default () => {
           amount = parseUnits(amount, _decimals)
           calculateSwapPriceImpact(domainId, amount, (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address, (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address)
 
-          console.log('[getPoolTokenIndex]', { domainId, contract_address, tokenAddress: (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address })
+          console.log('[/swap]', '[getPoolTokenIndex]', { domainId, contract_address, tokenAddress: (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address })
           const tokenIndexFrom = await sdk.sdkPool.getPoolTokenIndex(domainId, contract_address, (origin === 'x' ? x_asset_data : y_asset_data)?.contract_address)
-          console.log('[getPoolTokenIndex]', { domainId, contract_address, tokenAddress: (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address })
+          console.log('[/swap]', '[getPoolTokenIndex]', { domainId, contract_address, tokenAddress: (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address })
           const tokenIndexTo = await sdk.sdkPool.getPoolTokenIndex(domainId, contract_address, (origin === 'x' ? y_asset_data : x_asset_data)?.contract_address)
 
-          console.log('[calculateSwap]', { domainId, contract_address, tokenIndexFrom, tokenIndexTo, amount })
+          console.log('[/swap]', '[calculateSwap]', { domainId, contract_address, tokenIndexFrom, tokenIndexTo, amount })
           const _amount = await sdk.sdkPool.calculateSwap(domainId, contract_address, tokenIndexFrom, tokenIndexTo, amount)
-          console.log('[amountToReceive]', { domainId, contract_address, tokenIndexFrom, tokenIndexTo, amount: _amount })
+          console.log('[/swap]', '[amountToReceive]', { domainId, contract_address, tokenIndexFrom, tokenIndexTo, amount: _amount })
           setSwapAmount(formatUnits(_amount, recv_decimals))
         } catch (error) {
           const response = parseError(error)
-          console.log('[calculateSwap]', error)
+          console.log('[/swap]', '[calculateSwap]', error)
           setCalculateSwapResponse({ status: 'failed', ...response })
           setSwapAmount(null)
         }
@@ -566,9 +575,9 @@ export default () => {
   }
 
   const calculateSwapPriceImpact = async (domainId, amount, x_contract_address, y_contract_address) => {
-    console.log('[calculateSwapPriceImpact]', { domainId, amount, x_contract_address, y_contract_address })
+    console.log('[/swap]', '[calculateSwapPriceImpact]', { domainId, amount, x_contract_address, y_contract_address })
     const priceImpact = await sdk.sdkPool.calculateSwapPriceImpact(domainId, amount, x_contract_address, y_contract_address)
-    console.log('[swapPriceImpact]', { domainId, amount, x_contract_address, y_contract_address, priceImpact })
+    console.log('[/swap]', '[swapPriceImpact]', { domainId, amount, x_contract_address, y_contract_address, priceImpact })
     setPriceImpact(formatUnits(priceImpact) * 100)
   }
 
@@ -658,7 +667,7 @@ export default () => {
                 Swap on
               </h1>
               <SelectChain
-                value={chain || getChainData(undefined, chains_data, { not_disabled: true, must_have_pools: true, get_head: true })?.id}
+                value={chain || getChainData(undefined, chains_data, { must_have_pools: true, get_head: true })?.id}
                 onSelect={c => setSwap({ ...swap, chain: c })}
                 isPool={true}
                 className="w-fit flex items-center justify-center space-x-1.5 sm:space-x-2 mt-0.25 3xl:mt-0"

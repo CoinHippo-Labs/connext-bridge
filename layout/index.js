@@ -116,12 +116,6 @@ export default ({ children, agreeToTermsUseModal = false }) => {
     () => {
       const getData = async is_interval => {
         let assets = getAssetsData()
-        if (!assets_data) {
-          dispatch({ type: ASSETS_DATA, value: assets })
-        }
-        if (!pool_assets_data) {
-          dispatch({ type: POOL_ASSETS_DATA, value: getAssetData(undefined, assets, { not_disabled: true, only_pool_asset: true, return_all: true }) })
-        }
         const response = toArray(await getTokensPrice({ assets: assets.map(a => a.id) }))
         if (response.length > 0) {
           response.forEach(d => {
@@ -241,7 +235,7 @@ export default ({ children, agreeToTermsUseModal = false }) => {
             logLevel: 'info',
             chains,
           }
-          console.log('[SDK config]', sdkConfig)
+          console.log('[General]', '[SDK config]', sdkConfig)
           dispatch({ type: SDK, value: await create(sdkConfig) })
         }
       }
@@ -265,7 +259,7 @@ export default ({ children, agreeToTermsUseModal = false }) => {
             await sdk.sdkPool.changeSignerAddress(address)
           }
           setCurrentAddress(address)
-          console.log('[SDK change signer address]', address)
+          console.log('[General]', '[SDK change signer address]', address)
           dispatch({ type: SDK, value: sdk })
         }
       }
@@ -278,7 +272,7 @@ export default ({ children, agreeToTermsUseModal = false }) => {
   useEffect(
     () => {
       const getData = async () => {
-        if (page_visible && chains_data && toArray(assets_data).filter(d => isNumber(d.price)).length > 0 && sdk) {
+        if (page_visible && chains_data && assets_data && sdk) {
           try {
             const response = toArray(await sdk.sdkUtils.getRoutersData())
             const data = _.groupBy(
@@ -340,9 +334,9 @@ export default ({ children, agreeToTermsUseModal = false }) => {
 
           let data
           try {
-            console.log('[getPool]', { domain_id, contract_address })
+            console.log('[General]', '[getPool]', { domain_id, contract_address })
             const pool = _.cloneDeep(await sdk.sdkPool.getPool(domain_id, contract_address))
-            console.log('[pool]', { domain_id, contract_address, pool })
+            console.log('[General]', '[pool]', { domain_id, contract_address, pool })
             const { lpTokenAddress, adopted, local, symbol } = { ...pool }
 
             let supply
@@ -362,13 +356,13 @@ export default ({ children, agreeToTermsUseModal = false }) => {
 
             if (lpTokenAddress) {
               await sleep(1.5 * 1000)
-              console.log('[getTokenSupply]', { domain_id, lpTokenAddress })
+              console.log('[General]', '[getTokenSupply]', { domain_id, lpTokenAddress })
               try {
                 supply = await sdk.sdkPool.getTokenSupply(domain_id, lpTokenAddress)
                 supply = formatUnits(supply)
-                console.log('[LPTokenSupply]', { domain_id, lpTokenAddress, supply })
+                console.log('[General]', '[LPTokenSupply]', { domain_id, lpTokenAddress, supply })
               } catch (error) {
-                console.log('[getTokenSupply error]', { domain_id, lpTokenAddress }, error)
+                console.log('[General]', '[getTokenSupply error]', { domain_id, lpTokenAddress }, error)
               }
             }
             supply = supply || pool?.supply
@@ -381,12 +375,12 @@ export default ({ children, agreeToTermsUseModal = false }) => {
             if (pool && (IS_STAGING || ENVIRONMENT === 'production')) {
               await sleep(1.5 * 1000)
               const number_of_days = 7
-              console.log('[getYieldData]', { domain_id, contract_address, number_of_days })
+              console.log('[General]', '[getYieldData]', { domain_id, contract_address, number_of_days })
               try {
                 stats = _.cloneDeep(await sdk.sdkPool.getYieldData(domain_id, contract_address, number_of_days))
-                console.log('[yieldData]', { domain_id, contract_address, number_of_days, stats })
+                console.log('[General]', '[yieldData]', { domain_id, contract_address, number_of_days, stats })
               } catch (error) {
-                console.log('[getYieldData error]', { domain_id, contract_address, number_of_days }, error)
+                console.log('[General]', '[getYieldData error]', { domain_id, contract_address, number_of_days }, error)
               }
             }
 
@@ -414,7 +408,7 @@ export default ({ children, agreeToTermsUseModal = false }) => {
               data = getPoolData(id, pools_data)
             }
           } catch (error) {
-            console.log('[getPool error]', { domain_id, contract_address }, error)
+            console.log('[General]', '[getPool error]', { domain_id, contract_address }, error)
             data = getPoolData(id, pools_data) || { id, chain_id, chain_data, asset_data, contract_data, error }
           }
           if (data) {
@@ -426,7 +420,7 @@ export default ({ children, agreeToTermsUseModal = false }) => {
       const getChainData = async chain_data => pool_assets_data.forEach(a => getPool(chain_data, a))
 
       const getData = async () => {
-        if (page_visible && chains_data && toArray(pool_assets_data).filter(d => isNumber(d.price)).length > 0 && sdk && pathname && !['/', '/[bridge]'].includes(pathname)) {
+        if (page_visible && chains_data && pool_assets_data && sdk && pathname && !['/', '/[bridge]'].includes(pathname)) {
           chains_data.filter(c => !pathname.includes('/[') || asPath?.includes(c.id)).forEach(c => getChainData(c))
         }
       }
@@ -447,9 +441,9 @@ export default ({ children, agreeToTermsUseModal = false }) => {
         if (id) {
           let data
           try {
-            console.log('[getUserPools]', { domain_id, address })
+            console.log('[General]', '[getUserPools]', { domain_id, address })
             const response = _.cloneDeep(await sdk.sdkPool.getUserPools(domain_id, address))
-            console.log('[userPools]', { domain_id, address, response })
+            console.log('[General]', '[userPools]', { domain_id, address, response })
 
             if (Array.isArray(response)) {
               data = toArray(
@@ -487,14 +481,14 @@ export default ({ children, agreeToTermsUseModal = false }) => {
               ).filter(d => d.asset_data && d.lpTokenBalance > MIN_USER_DEPOSITED)
             }
           } catch (error) {
-            console.log('[getUserPools error]', { domain_id, address }, error)
+            console.log('[General]', '[getUserPools error]', { domain_id, address }, error)
           }
           dispatch({ type: USER_POOLS_DATA, value: { [id]: data } })
         }
       }
 
       const getData = async () => {
-        if (page_visible && chains_data && toArray(pool_assets_data).filter(d => isNumber(d.price)).length > 0 && sdk && ['/pools'].includes(pathname)) {
+        if (page_visible && chains_data && pool_assets_data && sdk && ['/pools'].includes(pathname)) {
           if (address) {
             chains_data.filter(c => !pathname.includes('/[') || asPath?.includes(c.id)).forEach(c => getChainData(c))
           }
@@ -561,7 +555,7 @@ export default ({ children, agreeToTermsUseModal = false }) => {
       }
 
       const getData = async is_interval => {
-        if (page_visible && chains_data && toArray(assets_data).filter(d => isNumber(d.price)).length > 0 && rpcs && address) {
+        if (page_visible && chains_data && assets_data && rpcs && address) {
           const all_chains_data = getChainData(undefined, chains_data, { return_all: true })
           const data = get_balances_data && !is_interval && all_chains_data.findIndex(c => !balances_data?.[c.chain_id]) < 0 ? toArray(get_balances_data) : all_chains_data.map(c => { return { chain: c.id } })
           data.forEach(c => {
@@ -571,7 +565,7 @@ export default ({ children, agreeToTermsUseModal = false }) => {
               getMyBalance(chain_id, contract_data)
             }
             else {
-              getChainContractsData(chain_id, assets_data).forEach(c => getMyBalance(chain_id, c))
+              toArray(getChainContractsData(chain_id, assets_data)).forEach(c => getMyBalance(chain_id, c))
             }
           })
         }
