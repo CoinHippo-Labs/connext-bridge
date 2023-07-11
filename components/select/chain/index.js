@@ -77,7 +77,7 @@ export default (
           </div> :
           <Spinner name="Puff" />
       }
-      buttonClassName={className || `w-32 sm:w-40 min-w-max h-8 sm:h-10 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
+      buttonClassName={`${disabled ? 'cursor-not-allowed' : ''} ${className || 'w-32 sm:w-48 min-w-max h-10 sm:h-12 flex items-center justify-center'}`}
       buttonStyle={{ boxShadow, WebkitBoxShadow: boxShadow, MozBoxShadow: boxShadow }}
       title={
         <span className="flex items-center space-x-1 pt-1 pb-2">

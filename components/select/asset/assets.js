@@ -124,7 +124,7 @@ export default (
                 ),
                 c && (
                   inputSearch.startsWith('0x') && contract_address ?
-                    equalsIgnoreCase(contract_address, inputSearch) :
+                    equalsIgnoreCase(contract_address, inputSearch) ? 1 : 0 :
                     ['symbol', 'name'].map(f =>
                       split(c[f], 'lower', ' ').join(' ').startsWith(inputSearch.toLowerCase()) ?
                         inputSearch.length > 1 ?

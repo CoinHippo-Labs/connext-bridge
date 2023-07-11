@@ -103,7 +103,7 @@ export default (
       disabled={disabled || fixed}
       onClick={open => setHidden(!open)}
       buttonTitle={_assets_data ? buttonComponent : <Spinner name="Puff" />}
-      buttonClassName={className || `w-32 sm:w-48 min-w-max h-10 sm:h-12 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
+      buttonClassName={`${disabled ? 'cursor-not-allowed' : ''} ${className || 'w-32 sm:w-48 min-w-max h-10 sm:h-12 flex items-center justify-center'}`}
       title={
         <div className="flex items-center justify-between space-x-2 pt-1 pb-2">
           <span className="flex items-center space-x-1">
