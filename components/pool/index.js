@@ -50,13 +50,13 @@ export default () => {
           const chain_data = getChainData(chain, chains_data)
           const asset_data = getAssetData(asset, pool_assets_data)
 
-          if (chain_data && pool.chain !== chain) {
+          if (chain_data) {
+            updated = pool.chain !== chain
             pool.chain = chain
-            updated = true
           }
-          if (asset_data && pool.asset !== asset) {
+          if (asset_data) {
+            updated = pool.asset !== asset
             pool.asset = asset
-            updated = true
           }
         }
 

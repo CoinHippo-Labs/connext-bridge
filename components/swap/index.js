@@ -85,22 +85,22 @@ export default () => {
           const chain_data = getChainData(chain, chains_data, { must_have_pools: true })
           const asset_data = getAssetData(asset, pool_assets_data)
 
-          if (chain_data && swap.chain !== chain) {
+          if (chain_data) {
+            updated = swap.chain !== chain
             swap.chain = chain
-            updated = true
           }
-          if (asset_data && swap.asset !== asset) {
+          if (asset_data) {
+            updated = swap.asset !== asset
             swap.asset = asset
-            updated = true
           }
           if (swap.chain) {
-            if (isNumber(amount) && !isZero(amount) && swap.amount !== amount) {
+            if (isNumber(amount) && !isZero(amount)) {
+              updated = swap.amount !== amount
               swap.amount = amount
-              updated = true
             }
-            if (from && swap.origin !== 'y') {
+            if (from) {
+              updated = swap.origin !== 'y'
               swap.origin = 'y'
-              updated = true
             }
           }
         }

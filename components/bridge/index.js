@@ -118,25 +118,25 @@ export default () => {
           const destination_chain_data = getChainData(destinationChain, chains_data)
           const asset_data = getAssetData(asset, assets_data)
 
-          if (source_chain_data && bridge.source_chain !== sourceChain) {
+          if (source_chain_data) {
+            updated = bridge.source_chain !== sourceChain
             bridge.source_chain = sourceChain
-            updated = true
           }
-          if (destination_chain_data && bridge.destination_chain !== destinationChain) {
+          if (destination_chain_data) {
+            updated = bridge.destination_chain !== destinationChain
             bridge.destination_chain = destinationChain
-            updated = true
           }
-          if (asset_data && bridge.asset !== asset) {
+          if (asset_data) {
+            updated = bridge.asset !== asset
             bridge.asset = asset
-            updated = true
           }
-          if (symbol && bridge.symbol !== symbol) {
+          if (symbol) {
+            updated = bridge.symbol !== symbol
             bridge.symbol = symbol
-            updated = true
           }
-          if (bridge.source_chain && isNumber(amount) && !isZero(amount) && bridge.amount !== amount) {
+          if (bridge.source_chain && isNumber(amount) && !isZero(amount)) {
+            updated = bridge.amount !== amount
             bridge.amount = amount
-            updated = true
             if (sdk) {
               calculateAmountReceived(amount)
               if (isApproveNeeded === undefined) {
@@ -157,11 +157,9 @@ export default () => {
         switch (isNextAsset) {
           case true:
           case false:
-            if (bridge.receive_next !== isNextAsset) {
-              bridge.receive_next = isNextAsset
-              updated = true
-              setOptions({ ...options, receiveLocal: isNextAsset })
-            }
+            updated = bridge.receive_next !== isNextAsset
+            bridge.receive_next = isNextAsset
+            setOptions({ ...options, receiveLocal: isNextAsset })
             break
           default:
             break
@@ -782,7 +780,10 @@ export default () => {
           setIsApproveNeeded(isApproveNeeded)
         } catch (error) {
           const response = parseError(error)
-          console.log('[/]', '[approveIfNeeded error]', { domain_id, contract_address, amount, amountToApprove }, error, response)
+          const { message } = { ...response }
+          if (!message?.includes('Signer Address Missing')) {
+            console.log('[/]', '[approveIfNeeded error]', { domain_id, contract_address, amount, amountToApprove }, error, response)
+          }
         }
       }
       else {
