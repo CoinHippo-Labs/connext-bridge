@@ -729,7 +729,6 @@ export default () => {
                     chain={chain}
                     isPool={true}
                     data={origin === 'x' ? x_asset_data : y_asset_data}
-                    className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
                   />
                   <DebounceInput
                     debounceTimeout={750}
@@ -817,7 +816,6 @@ export default () => {
                     chain={chain}
                     isPool={true}
                     data={origin === 'x' ? y_asset_data : x_asset_data}
-                    className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
                   />
                   {swapAmount === true ?
                     <div className="w-36 sm:w-48 flex items-center justify-end py-1.5">

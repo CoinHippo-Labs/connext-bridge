@@ -31,6 +31,7 @@ import TimeSpent from '../time/timeSpent'
 import Wallet from '../wallet'
 import SelectChain from '../select/chain'
 import SelectAsset from '../select/asset'
+// import SelectAssetChain from '../select/asset-chain'
 import { NETWORK, WRAPPED_PREFIX, NATIVE_WRAPPABLE_SYMBOLS, RELAYER_FEE_ASSET_TYPES, PERCENT_ROUTER_FEE, GAS_LIMIT_ADJUSTMENT, DEFAULT_PERCENT_BRIDGE_SLIPPAGE, DEFAULT_DESTINATION_CHAIN } from '../../lib/config'
 import { getChainData, getAssetData, getContractData, getBalanceData } from '../../lib/object'
 import { split, toArray, includesStringList, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, getPath, getQueryParams, createMomentFromUnixtime, switchColor, sleep, normalizeMessage, parseError } from '../../lib/utils'
@@ -1371,7 +1372,6 @@ export default () => {
                             showNativeAssets={true}
                             fixed={source === 'pool'}
                             data={{ ...source_asset_data, ...source_contract_data }}
-                            className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
                           />
                           <div>
                             <DebounceInput
@@ -1470,7 +1470,6 @@ export default () => {
                                 showOnlyWrappable={isWrappableAsset}
                                 fixed={source === 'pool' || !isWrappableAsset}
                                 data={{ ...destination_asset_data, ...destination_contract_data }}
-                                className="flex items-center space-x-1.5 sm:space-x-2 sm:-ml-1"
                               />
                               {!isNumber(amount) || isNumber(estimatedValues?.amountReceived) || estimateResponse ?
                                 <span className="whitespace-nowrap text-lg 3xl:text-2xl font-semibold">
