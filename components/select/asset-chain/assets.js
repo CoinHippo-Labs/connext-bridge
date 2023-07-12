@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import { constants } from 'ethers'
 const { AddressZero: ZeroAddress } = { ...constants }
@@ -32,6 +33,8 @@ export default (
   const { pool_assets_data } = { ...pool_assets }
   const { pools_data } = { ...pools }
   const { balances_data } = { ...balances }
+
+  const [filterAsset, setFilterAsset] = useState(null)
 
   const _assets_data = (isPool ?
     toArray(
@@ -95,7 +98,7 @@ export default (
     })
   ).filter(d => !d.disabled && (!isDestination || (d.id === asset && d.chain_data?.id !== sourceChain)))
   const assets_data_sorted = _.orderBy(
-    toArray(_assets_data).filter(d => !inputSearch || d).flatMap(d => {
+    toArray(_assets_data).filter(d => (!inputSearch || d) && (!filterAsset || d.id === filterAsset)).flatMap(d => {
       const { chain_data, asset_data } = { ...d }
       d = asset_data ? { ...d, ...asset_data } : d
       const { symbol, image, contracts, price } = { ...d }
@@ -175,83 +178,109 @@ export default (
   )
 
   return (
-    <div className="max-h-96 overflow-y-scroll">
-      {assets_data_sorted.map((d, i) => {
-        const { id, name, contracts, disabled, chain_data, value } = { ...d }
-        const { chain_id } = { ...chain_data }
-        const contract_data = getContractData(chain_id, contracts)
-        const { contract_address } = { ...contract_data }
-        let { symbol, image } = { ...contract_data }
-        symbol = symbol || d.symbol || name
-        image = image || d.image
-
-        const selected = chain_data?.id === chain && id === asset && address && equalsIgnoreCase(contract_address, address)
-        const item = (
-          <div className="flex items-center space-x-2">
-            {image && (
-              <div className="flex items-end">
+    <div>
+      <div className="flex flex-wrap items-center mt-1 mb-2">
+        {_.uniqBy(_assets_data, 'id').map((d, i) => {
+          const { id, symbol, image } = { ...d }
+          return (
+            <div
+              key={i}
+              onClick={() => setFilterAsset(id)}
+              className="hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded cursor-pointer flex items-center hover:font-semibold space-x-1 mb-1.5 mr-1.5 py-1 px-1.5"
+            >
+              {image && (
                 <Image
                   src={image}
-                  width={32}
-                  height={32}
-                  className="rounded-full opacity-80"
+                  width={20}
+                  height={20}
+                  className="rounded-full"
                 />
-                {chain_data?.image && (
-                  <Image
-                    src={chain_data.image}
-                    width={18}
-                    height={18}
-                    className="rounded-full z-10 -ml-2.5"
-                  />
-                )}
-              </div>
-            )}
-            <div className="flex items-center space-x-2">
-              <span className={`whitespace-nowrap text-base ${selected ? 'font-bold' : 'font-medium'}`}>
-                {name}
-              </span>
-              <span className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-base font-medium">
+              )}
+              <span className={`whitespace-nowrap ${id === filterAsset ? 'font-bold' : 'text-slate-400 dark:text-slate-500'}`}>
                 {symbol}
               </span>
             </div>
-          </div>
-        )
-        let { amount } = { ...getBalanceData(chain_id, contract_address, balances_data) }
-        amount = isNumber(amount) ? amount : null
-        const balance = balances_data?.[chain_id] && (
-          <div className={`${chain_id && !amount ? 'text-slate-400 dark:text-slate-500' : ''} ${selected ? 'font-semibold' : 'font-medium'} ml-auto`}>
-            {isNumber(amount) ?
-              <div className="flex flex-col items-end">
-                <NumberDisplay value={amount} className="whitespace-nowrap" />
-                {value > 0 && (
-                  <NumberDisplay
-                    value={value}
-                    prefix="$"
-                    className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium"
-                  />
-                )}
-              </div> :
-              'n/a'
-            }
-          </div>
-        )
-        const className = `dropdown-item ${disabled || !contract_data ? 'cursor-not-allowed text-slate-400 dark:text-slate-600' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'} rounded flex items-center justify-between space-x-2 my-1 p-2`
+          )
+        })}
+      </div>
+      <div className="max-h-96 overflow-y-scroll">
+        {assets_data_sorted.map((d, i) => {
+          const { id, name, contracts, disabled, chain_data, value } = { ...d }
+          const { chain_id } = { ...chain_data }
+          const contract_data = getContractData(chain_id, contracts)
+          const { contract_address } = { ...contract_data }
+          let { symbol, image } = { ...contract_data }
+          symbol = symbol || d.symbol || name
+          image = image || d.image
 
-        return (
-          <div key={i}>
-            {disabled || !contract_data ?
-              <div title={contract_data ? 'Disabled' : 'Not Support'} className={className}>
-                {item}
-                {balance}
-              </div> :
-              <div onClick={() => onSelect(chain_data?.id, id, contract_address)} className={className}>
-                {item}
-                {balance}
+          const selected = chain_data?.id === chain && id === asset && address && equalsIgnoreCase(contract_address, address)
+          const item = (
+            <div className="flex items-center space-x-2">
+              {image && (
+                <div className="flex items-end">
+                  <Image
+                    src={image}
+                    width={32}
+                    height={32}
+                    className="rounded-full opacity-80"
+                  />
+                  {chain_data?.image && (
+                    <Image
+                      src={chain_data.image}
+                      width={18}
+                      height={18}
+                      className="rounded-full z-10 -ml-2.5"
+                    />
+                  )}
+                </div>
+              )}
+              <div className="flex items-center space-x-2">
+                <span className={`whitespace-nowrap text-base ${selected ? 'font-bold' : 'font-medium'}`}>
+                  {name}
+                </span>
+                <span className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-base font-medium">
+                  {symbol}
+                </span>
               </div>
-            }
-          </div>
-        )
-      })}
+            </div>
+          )
+          let { amount } = { ...getBalanceData(chain_id, contract_address, balances_data) }
+          amount = isNumber(amount) ? amount : null
+          const balance = balances_data?.[chain_id] && (
+            <div className={`${chain_id && !amount ? 'text-slate-400 dark:text-slate-500' : ''} ${selected ? 'font-semibold' : 'font-medium'} ml-auto`}>
+              {isNumber(amount) ?
+                <div className="flex flex-col items-end">
+                  <NumberDisplay value={amount} className="whitespace-nowrap" />
+                  {value > 0 && (
+                    <NumberDisplay
+                      value={value}
+                      prefix="$"
+                      className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium"
+                    />
+                  )}
+                </div> :
+                'n/a'
+              }
+            </div>
+          )
+          const className = `dropdown-item ${disabled || !contract_data ? 'cursor-not-allowed text-slate-400 dark:text-slate-600' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'} rounded flex items-center justify-between space-x-2 my-1 p-2`
+
+          return (
+            <div key={i}>
+              {disabled || !contract_data ?
+                <div title={contract_data ? 'Disabled' : 'Not Support'} className={className}>
+                  {item}
+                  {balance}
+                </div> :
+                <div onClick={() => onSelect(chain_data?.id, id, contract_address)} className={className}>
+                  {item}
+                  {balance}
+                </div>
+              }
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
