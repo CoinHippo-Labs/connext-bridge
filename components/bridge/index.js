@@ -250,7 +250,7 @@ export default () => {
       const { chain_id } = { ...destination_chain_data }
       const { contract_address, next_asset } = { ...destination_contract_data }
       const destination_decimals = destination_contract_data?.decimals || 18
-      const routersLiquidityAmount = _.sum(toArray(router_asset_balances_data?.[chain_id]).filter(d => toArray([contract_address, next_asset?.contract_address]).findIndex(a => equalsIgnoreCase(a, d.contract_address)) > -1).map(d => formatUnits(d.amount, next_asset && equalsIgnoreCase(d.contract_address, next_asset.contract_address) ? next_asset.decimals : destination_decimals) || 0))
+      const routersLiquidityAmount = _.sum(toArray(router_asset_balances_data?.[chain_id]).filter(d => toArray([contract_address, next_asset?.contract_address]).findIndex(a => equalsIgnoreCase(a, d.contract_address)) > -1).map(d => formatUnits(d.amount, next_asset && equalsIgnoreCase(d.contract_address, next_asset.contract_address) ? next_asset.decimals : destination_decimals)).map(d => Number(d) > 0 ? Number(d) : 0))
 
       setOptions({ ...options, slippage, forceSlow: destination_chain_data && router_asset_balances_data ? Number(amount) > routersLiquidityAmount : false, receiveLocal })
       setEstimateResponse(null)
@@ -965,7 +965,7 @@ export default () => {
   const estimatedReceived = estimatedValues?.amountReceived ? estimatedValues.amountReceived - relayerFeeToDeduct : Number(amount) > 0 && isNumber(routerFee) ? amount - routerFee - relayerFeeToDeduct : null
   const estimatedSlippage = estimatedValues?.destinationSlippage && estimatedValues.originSlippage ? (Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100 : null
 
-  const routersLiquidityAmount = _.sum(toArray(router_asset_balances_data?.[destination_chain_data?.chain_id]).filter(d => toArray([destination_contract_data?.contract_address, destination_contract_data?.next_asset?.contract_address]).findIndex(a => equalsIgnoreCase(a, d.contract_address)) > -1).map(d => formatUnits(d.amount, destination_contract_data?.next_asset && equalsIgnoreCase(d.contract_address, destination_contract_data.next_asset.contract_address) ? destination_contract_data.next_asset.decimals : destination_decimals) || 0))
+  const routersLiquidityAmount = _.sum(toArray(router_asset_balances_data?.[destination_chain_data?.chain_id]).filter(d => toArray([destination_contract_data?.contract_address, destination_contract_data?.next_asset?.contract_address]).findIndex(a => equalsIgnoreCase(a, d.contract_address)) > -1).map(d => formatUnits(d.amount, destination_contract_data?.next_asset && equalsIgnoreCase(d.contract_address, destination_contract_data.next_asset.contract_address) ? destination_contract_data.next_asset.decimals : destination_decimals)).map(d => Number(d) > 0 ? Number(d) : 0))
   const { adopted, local } = { ...toArray(pools_data).find(d => d.chain_data?.id === destination_chain && d.asset_data?.id === asset) }
   const next_asset_data = adopted?.symbol?.startsWith(WRAPPED_PREFIX) ? adopted : local?.symbol?.startsWith(WRAPPED_PREFIX) ? local : local
   const pool_amounts = toArray(_.concat(adopted, local)).filter(d => isNumber(d.balance)).map(d => Number(d.balance))
