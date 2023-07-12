@@ -35,6 +35,7 @@ export default (
   const { balances_data } = { ...balances }
 
   const [filterAsset, setFilterAsset] = useState(null)
+  const [filterChain, setFilterChain] = useState(null)
 
   const _assets_data = (isPool ?
     toArray(
@@ -98,7 +99,7 @@ export default (
     })
   ).filter(d => !d.disabled && (!isDestination || (d.id === asset && d.chain_data?.id !== sourceChain)))
   const assets_data_sorted = _.orderBy(
-    toArray(_assets_data).filter(d => (!inputSearch || d) && (!filterAsset || d.id === filterAsset)).flatMap(d => {
+    toArray(_assets_data).filter(d => (!inputSearch || d) && (!filterAsset || d.id === filterAsset) && (!filterChain || d.chain_data?.id === filterChain)).flatMap(d => {
       const { chain_data, asset_data } = { ...d }
       d = asset_data ? { ...d, ...asset_data } : d
       const { symbol, image, contracts, price } = { ...d }
@@ -179,7 +180,7 @@ export default (
 
   return (
     <div>
-      <div className="flex flex-wrap items-center mt-1 mb-2">
+      {/*<div className="flex flex-wrap items-center mt-1 mb-2">
         {_.uniqBy(_assets_data, 'id').map((d, i) => {
           const { id, symbol, image } = { ...d }
           const selected = id === filterAsset
@@ -199,6 +200,31 @@ export default (
               )}
               <span className={`whitespace-nowrap ${selected ? 'font-bold' : 'text-slate-400 dark:text-slate-500'}`}>
                 {symbol}
+              </span>
+            </div>
+          )
+        })}
+      </div>*/}
+      <div className="flex flex-wrap items-center mt-1 mb-2">
+        {toArray(chains_data).filter(d => !isBridge || !d.disabled_bridge).map((d, i) => {
+          const { id, name, image } = { ...d }
+          const selected = id === filterChain
+          return (
+            <div
+              key={i}
+              onClick={() => setFilterChain(selected ? null : id)}
+              className="hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded cursor-pointer flex items-center hover:font-semibold space-x-1 mb-1.5 mr-1.5 py-1 px-1.5"
+            >
+              {image && (
+                <Image
+                  src={image}
+                  width={20}
+                  height={20}
+                  className="rounded-full"
+                />
+              )}
+              <span className={`whitespace-nowrap ${selected ? 'font-bold' : 'text-slate-400 dark:text-slate-500'}`}>
+                {name}
               </span>
             </div>
           )
