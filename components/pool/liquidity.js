@@ -249,13 +249,13 @@ export default ({ pool, userPools, onFinish }) => {
             const x_decimals = x_asset_data?.decimals || 18
             const y_decimals = y_asset_data?.decimals || 18
             if (isNumber(amountX) && x_decimals === 18 && typeof amountX === 'string' && _.last(split(amountX, 'normal', '.')).length === x_decimals) {
-              _amountX = amountX.substring(0, amountX.length - 1)
+              _amountX = amountX//.substring(0, amountX.length - 1)
             }
             else {
               _amountX = amountX
             }
             if (isNumber(amountY) && y_decimals === 18 && typeof amountY === 'string' && _.last(split(amountY, 'normal', '.')).length === y_decimals) {
-              _amountY = amountY.substring(0, amountY.length - 1)
+              _amountY = amountY//.substring(0, amountY.length - 1)
             }
             else {
               _amountY = amountY
@@ -405,8 +405,8 @@ export default ({ pool, userPools, onFinish }) => {
 
             const isOneToken = withdrawOption?.endsWith('_only')
             let _amount
-            if (isNumber(amount) && typeof amount === 'string' && _.last(split(amount, 'normal', '.')).length === 18) {
-              _amount = amount.substring(0, amount.length - 1)
+            if (isNumber(amount) && typeof amount === 'string' && _.last(split(amount, 'normal', '.')).length >= 18 - 2) {
+              _amount = amount.substring(0, amount.length - 1 - 2)
             }
             else {
               _amount = amount
@@ -567,11 +567,11 @@ export default ({ pool, userPools, onFinish }) => {
         const pool_data = toArray(pools_data).find(d => d.chain_data?.id === chain && d.asset_data?.id === asset)
         const { contract_data, domainId, adopted, local } = { ...pool_data }
         const { contract_address } = { ...contract_data }
+        const _amount = parseUnits(amount)
 
         try {
           setPriceImpactRemove(true)
 
-          const _amount = parseUnits(amount)
           let amounts
           if (withdrawOption?.endsWith('_only')) {
             const index = (withdrawOption === 'x_only' && adopted?.index === 1) || (withdrawOption === 'y_only' && local?.index === 1) ? 1 : 0
