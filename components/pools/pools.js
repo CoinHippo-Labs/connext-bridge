@@ -551,7 +551,7 @@ export default ({ view, userPools }) => {
                 disableSortBy: true,
                 Cell: props => {
                   const { value, row } = { ...props }
-                  const { symbol, chain_data } = { ...row.original }
+                  const { symbol, chain_data, url } = { ...row.original }
                   const { disabled } = { ...chain_data }
 
                   const component = (
@@ -589,7 +589,7 @@ export default ({ view, userPools }) => {
                 disableSortBy: true,
                 Cell: props => {
                   const { row } = { ...props }
-                  const { chain_data, value } = { ...row.original }
+                  const { chain_data, value, url } = { ...row.original }
                   const { disabled } = { ...chain_data }
 
                   const component = (
@@ -627,7 +627,7 @@ export default ({ view, userPools }) => {
                 disableSortBy: true,
                 Cell: props => {
                   const { value, row } = { ...props }
-                  const { chain_data } = { ...row.original }
+                  const { chain_data, url } = { ...row.original }
                   const { disabled } = { ...chain_data }
 
                   const component = (
