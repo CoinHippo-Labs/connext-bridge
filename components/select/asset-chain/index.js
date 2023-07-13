@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import { constants } from 'ethers'
 const { AddressZero: ZeroAddress } = { ...constants }
-import { BiChevronDown } from 'react-icons/bi'
+import { BiX, BiChevronDown } from 'react-icons/bi'
 
 import Search from './search'
 import Spinner from '../../spinner'
@@ -122,6 +122,12 @@ export default (
       title={
         <div className="flex items-center justify-between space-x-2 pt-1 pb-2">
           <span>Select {isDestination ? 'destination ' : ''}token</span>
+          <div
+            onClick={() => setHidden(true)}
+            className="hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer rounded-full p-2"
+          >
+            <BiX size={18} />
+          </div>
         </div>
       }
       body={
