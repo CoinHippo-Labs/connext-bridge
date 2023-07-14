@@ -1008,7 +1008,7 @@ export default () => {
   const latestTransfer = _.head(latestTransfers)
   const { transfer_id, status, error_status, force_slow, transaction_hash, xcall_timestamp, execute_transaction_hash, routers } = { ...latestTransfer }
   const transferUrl = execute_transaction_hash && `${url}${transaction_path?.replace('{tx}', execute_transaction_hash)}`
-  const estimatedTimeSpent = routers?.length === 0 || force_slow ? 5400 : 240
+  const estimatedTimeSpent = (routers?.length === 0 || force_slow ? 120 : 4) * 60
   const timeSpent = moment().diff(createMomentFromUnixtime(xcall_timestamp), 'seconds')
   const errored = error_status && ![XTransferErrorStatus.NoBidsReceived].includes(error_status) && !execute_transaction_hash && [XTransferStatus.XCalled, XTransferStatus.Reconciled].includes(status)
   const bumped = [XTransferErrorStatus.LowRelayerFee, XTransferErrorStatus.ExecutionError].includes(error_status) && toArray(latest_bumped_transfers_data).findIndex(d => equalsIgnoreCase(d.transfer_id, transfer_id) && moment().diff(moment(d.updated), 'minutes', true) <= 5) > -1
@@ -1901,7 +1901,7 @@ export default () => {
                                     <span className="whitespace-nowrap text-sm 3xl:text-xl font-semibold">
                                       {Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false ?
                                         <span className="text-yellow-500 dark:text-yellow-400">
-                                          90 minutes
+                                          180 minutes
                                         </span> :
                                         <span className="text-green-600 dark:text-green-500">
                                           {'<4 minutes'}
