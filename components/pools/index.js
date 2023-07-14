@@ -82,7 +82,7 @@ export default () => {
                         }
                       }),
                     )
-                  ).filter(d => d.asset_data && d.lpTokenBalance > MIN_USER_DEPOSITED)
+                  ).filter(d => d.asset_data && Number(d.lpTokenBalance) > MIN_USER_DEPOSITED)
                 }
               } catch (error) {
                 console.log('[/pools]', '[getUserPools error]', { domain_id, address }, error)

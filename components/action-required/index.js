@@ -106,7 +106,7 @@ export default (
     [data, chains_data, assets_data],
   )
 
-  const { transfer_id, error_status, origin_domain, origin_transacting_asset, origin_transacting_amount, destination_domain, destination_transacting_asset, destination_transacting_amount, destination_local_asset, slippage, relayer_fees, receive_local } = { ...data }
+  const { transfer_id, error_status, origin_domain, origin_transacting_asset, origin_transacting_amount, destination_domain, destination_transacting_asset, destination_local_asset, slippage, relayer_fees, receive_local } = { ...data }
   let { relayer_fee } = { ...data }
 
   const source_chain_data = getChainData(origin_domain, chains_data)
@@ -153,7 +153,6 @@ export default (
   const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol
   const destination_decimals = destination_contract_data?.decimals || 18
   const destination_asset_image = destination_contract_data?.image || destination_asset_data?.image
-  const destination_amount = destination_transacting_amount ? formatUnits(destination_transacting_amount, destination_decimals) : source_amount * (1 - PERCENT_ROUTER_FEE / 100)
 
   const _slippage = slippage / 100
   const estimatedSlippage = estimatedValues?.destinationSlippage && estimatedValues.originSlippage ? Number(numberToFixed((Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100, 2)) : null
@@ -172,7 +171,7 @@ export default (
       relayer_fee_decimals,
     ) :
     formatUnits(relayer_fee || '0', source_gas_decimals)
-  const relayerFeeToBump = relayer_fee && newRelayerFee ? numberToFixed(Number(newRelayerFee) - Number(relayer_fee), relayer_fee_decimals) : null
+  const relayerFeeToBump = relayer_fee && newRelayerFee ? numberToFixed(toFixedNumber(newRelayerFee).subUnsafe(toFixedNumber(relayer_fee)).toString(), relayer_fee_decimals) : null
   if (error_status === XTransferErrorStatus.LowRelayerFee) {
     console.log('[action required]', '[debug]', '[relayerFee]', { relayerFeeAssetType, relayer_fees, relayer_fee, newRelayerFee, relayerFeeToBump })
   }
@@ -355,7 +354,7 @@ export default (
           break
         case XTransferErrorStatus.LowRelayerFee:
           try {
-            const relayerFeeToBump = relayer_fee && newRelayerFee ? numberToFixed(Number(newRelayerFee) - Number(relayer_fee), relayer_fee_decimals) : null
+            const relayerFeeToBump = relayer_fee && newRelayerFee ? numberToFixed(toFixedNumber(newRelayerFee).subUnsafe(toFixedNumber(relayer_fee)).toString(), relayer_fee_decimals) : null
             params = {
               domainId: origin_domain,
               transferId: transfer_id,
@@ -610,10 +609,7 @@ export default (
                         {Object.entries(relayer_fees).map(([k, v]) => {
                           return (
                             <span key={k} className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
-                              <NumberDisplay
-                                value={utils.formatUnits(v || '0', k === ZeroAddress ? source_gas_decimals : source_decimals)}
-                                className="text-sm"
-                              />
+                              <NumberDisplay value={formatUnits(v || '0', k === ZeroAddress ? source_gas_decimals : source_decimals)} className="text-sm" />
                               <span>{k === ZeroAddress ? source_gas?.symbol : source_symbol}</span>
                             </span>
                           )
@@ -636,7 +632,7 @@ export default (
                         color={loaderColor(theme)}
                       /> :
                       <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
-                        <NumberDisplay value={relayerFeeToBump && relayerFeeToBump > 0 ? relayerFeeToBump : 0} className="text-sm" />
+                        <NumberDisplay value={Number(relayerFeeToBump) > 0 ? relayerFeeToBump : 0} className="text-sm" />
                         <span>{relayerFeeAssetType === 'transacting' ? source_symbol : source_gas?.symbol}</span>
                       </span>
                     }
@@ -676,7 +672,7 @@ export default (
                   </span>
                 </Alert> :
                 !updateResponse && !estimateResponse ?
-                  error_status === XTransferErrorStatus.LowRelayerFee && relayer_fee && newRelayerFee && relayerFeeToBump <= 0 ?
+                  error_status === XTransferErrorStatus.LowRelayerFee && relayer_fee && newRelayerFee && Number(relayerFeeToBump) <= 0 ?
                     <Alert closeDisabled={true}>
                       <div className="flex items-center justify-center">
                         <span className="break-all text-sm font-medium text-center">
