@@ -213,7 +213,7 @@ export default () => {
                     lpTokenBalance: formatUnits(lpTokenBalance),
                     poolTokenBalances: toArray(poolTokenBalances).map((b, i) => formatUnits(b, (adopted?.index === i ? adopted : local)?.decimals)),
                   }
-                }).filter(d => d.asset_data && d.lpTokenBalance > MIN_USER_DEPOSITED)
+                }).filter(d => d.asset_data && Number(d.lpTokenBalance) > MIN_USER_DEPOSITED)
               )
             }
             else {
