@@ -630,11 +630,7 @@ export default (
                       Additional required relayer fee
                     </div>
                     {!newRelayerFee && !estimateResponse ?
-                      <Oval
-                        width="20"
-                        height="20"
-                        color={loaderColor(theme)}
-                      /> :
+                      <Spinner width={20} height={20} /> :
                       <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-semibold space-x-1.5">
                         <NumberDisplay value={relayerFeeToBump && relayerFeeToBump > 0 ? relayerFeeToBump : 0} className="text-sm" />
                         <span>{relayerFeeAssetType === 'transacting' ? source_symbol : source_gas?.symbol}</span>
