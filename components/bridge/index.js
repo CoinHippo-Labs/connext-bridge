@@ -882,10 +882,7 @@ export default () => {
                 try {
                   const decimals = ['amountReceived'].includes(k) ? (isNextAsset && next_asset ? next_asset?.decimals : destination_contract_data?.decimals) || 18 : source_decimals
                   v = formatUnits(v, decimals)
-                  console.log('[/]', '[amountReceived]', 'debug', k, v)
-                } catch (error) {
-                  console.log('[/]', '[amountReceived error]', k, v, error)
-                }
+                } catch (error) {}
                 return [k, v]
               }))
             )
