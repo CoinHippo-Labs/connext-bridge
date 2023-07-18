@@ -310,7 +310,7 @@ export default (
             params = {
               domainId: destination_domain,
               transferId: transfer_id,
-              slippage: numberToFixed(newSlippage, 2) * 100,
+              slippage: (numberToFixed(newSlippage, 2) * 100).toString(),
             }
             console.log('[action required]', '[updateSlippage]', { params })
             const request = await sdk.sdkBase.updateSlippage(params)
