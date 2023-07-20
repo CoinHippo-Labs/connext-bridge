@@ -113,7 +113,7 @@ export default () => {
         if (path.includes('from-') && path.includes('to-')) {
           const paths = split(path.replace('/', ''), 'normal', '-')
           const sourceChain = paths[paths.indexOf('from') + 1]
-          const destinationChain = paths[paths.indexOf('to') + 1]
+          let destinationChain = paths[paths.indexOf('to') + 1]
           const asset = _.head(paths) !== 'from' ? _.head(paths) : NETWORK === 'testnet' ? [sourceChain, destinationChain].findIndex(c => ['linea'].includes(c)) > -1 ? 'matic' : 'test' : 'usdc'
           const source_chain_data = getChainData(sourceChain, chains_data)
           const destination_chain_data = getChainData(destinationChain, chains_data)
@@ -124,8 +124,19 @@ export default () => {
             bridge.source_chain = sourceChain
           }
           if (destination_chain_data) {
-            updated = bridge.destination_chain !== destinationChain
-            bridge.destination_chain = destinationChain
+            const { contracts } = { ...asset_data }
+            if (getContractData(destination_chain_data.chain_id, contracts)) {
+              updated = bridge.destination_chain !== destinationChain
+              bridge.destination_chain = destinationChain
+            }
+            else {
+              destinationChain = getChainData(undefined, chains_data, { not_disabled: true, except: [sourceChain, destinationChain], return_all: true }).find(d => getContractData(d.chain_id, contracts))?.id
+              console.log('qqq',destinationChain)
+              if (destinationChain) {
+                updated = bridge.destination_chain !== destinationChain
+                bridge.destination_chain = destinationChain
+              }
+            }
           }
           if (asset_data) {
             updated = bridge.asset !== asset
