@@ -131,7 +131,6 @@ export default () => {
             }
             else {
               destinationChain = getChainData(undefined, chains_data, { not_disabled: true, except: [sourceChain, destinationChain], return_all: true }).find(d => getContractData(d.chain_id, contracts))?.id
-              console.log('qqq',destinationChain)
               if (destinationChain) {
                 updated = bridge.destination_chain !== destinationChain
                 bridge.destination_chain = destinationChain
