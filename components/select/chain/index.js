@@ -19,6 +19,7 @@ export default (
     isPool = false,
     noShadow = true,
     fixed = false,
+    include,
     className = '',
   },
 ) => {
@@ -96,6 +97,7 @@ export default (
           source={source}
           destination={destination}
           isPool={isPool}
+          include={include}
         />
       }
       noButtons={true}

@@ -10,6 +10,7 @@ export default (
     source,
     destination,
     isPool = false,
+    include,
   },
 ) => {
   const [inputSearch, setInputSearch] = useState('')
@@ -41,6 +42,7 @@ export default (
             source={source}
             destination={destination}
             isPool={isPool}
+            include={include}
           />
         </div>
       </div>
