@@ -49,6 +49,16 @@ const DEFAULT_OPTIONS = {
   showNextAssets: true,
 }
 
+// Maps domainID to Alchemix Gateway contract
+const ALCHEMIX_GATEWAYS = {
+  "1735356532": "0x038e55fbDAbBfc9F55C454c21b9EAbeCe00aEf31", // op-goerli
+  "1734439522": "0x449ac7DEc35E5Fb7d6C05475C2C31229DeD7a9CF", // arb-goerli
+  "1869640809": "0xb46eE2E4165F629b4aBCE04B7Eb4237f951AC66F", // op
+  "1634886255": "0xb77750E48C2B1E1657cC5Ad7F329133c64A8321F", // arb
+}
+
+const ALCHEMIX_ASSETS = ["aleth", "alusd"]
+
 export default () => {
   const dispatch = useDispatch()
   const { preferences, chains, assets, router_asset_balances, pools, rpc_providers, dev, wallet, balances, latest_bumped_transfers } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, router_asset_balances: state.router_asset_balances, pools: state.pools, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances, latest_bumped_transfers: state.latest_bumped_transfers }), shallowEqual)
@@ -605,6 +615,37 @@ export default () => {
         [relayerFeeField]: isNumber(relayerFee) && Number(relayerFee) > 0 ? parseUnits(numberToFixed(relayerFee, relayer_fee_decimals - 2), relayer_fee_decimals) : undefined,
       }
       console.log('[/]', '[xcall setup]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
+
+      if (asset in ALCHEMIX_ASSETS) {
+        console.log('[/]', '[setup for Alchemix asset]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
+
+        const gateway = ALCHEMIX_GATEWAYS[source_chain_data?.domain_id];
+
+        // Encode call to gateway's `bridgeAssets` function:
+        // function bridgeAssets (
+        //   address _target,
+        //   address _asset,
+        //   uint256 _amount,
+        //   uint32 _destinationDomain,
+        //   uint256 _relayerFee,
+        //   bool payRelayerFeeInTransactingAsset
+        // )
+        const payRelayerFeeInTransactingAsset = xcallParams.relayerFeeInTransactingAsset > 0
+        const gatewayInterface = new utils.Interface(gatewayABI); // TODO: import gateway abi
+        const callData = gatewayInterface.encodeFunctionData(
+          "bridgeAssets(address,address,uint256,uint32,uint256,bool)",
+          [to, asset, amount, destination_chain_data?.domain_id, relayerFee, payRelayerFeeInTransactingAsset])
+
+        const request = {
+          to: gateway,
+          value: payRelayerFeeInTransactingAsset ? 0 : relayerFee,
+          data: callData,
+          from: address,
+        };
+
+        // TODO: do signer.sendTransaction(request) steps, update states, and skip xcall
+      }
+
       if (!xcallParams[relayerFeeField] && NETWORK !== 'testnet') {
         setCallResponse({
           status: 'failed',
