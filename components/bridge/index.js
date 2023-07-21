@@ -1315,6 +1315,7 @@ export default () => {
                             destination={destination_chain}
                             origin="to"
                             fixed={source === 'pool'}
+                            include={getChainData(undefined, chains_data, { not_disabled: true, return_all: true }).filter(d => getContractData(d.chain_id, destination_asset_data?.contracts)).map(d => d.id)}
                           />
                         </div>
                       </div>*/}

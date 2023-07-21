@@ -12,13 +12,14 @@ export default (
     source,
     destination,
     isPool = false,
+    include,
   },
 ) => {
   const { chains } = useSelector(state => ({ chains: state.chains }), shallowEqual)
   const { chains_data } = { ...chains }
 
   const chains_data_sorted = _.orderBy(
-    toArray(chains_data).filter(d => (!isPool || !d.no_pool) && (!inputSearch || d) && (!d.disabled_bridge || isPool)).map(d => {
+    toArray(chains_data).filter(d => (!isPool || !d.no_pool) && (!inputSearch || d) && (!d.disabled_bridge || isPool) && (toArray(include).length < 1 || toArray(include).includes(d.id))).map(d => {
       return {
         ...d,
         scores: ['short_name', 'name', 'id'].map(f =>
