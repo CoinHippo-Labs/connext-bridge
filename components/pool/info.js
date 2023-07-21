@@ -14,6 +14,7 @@ import { isNumber } from '../../lib/number'
 import { toArray, numberToFixed, getTitle, equalsIgnoreCase } from '../../lib/utils'
 
 const DAILY_METRICS = ['tvl', 'volume']
+const TIMEFRAMES = [7, 30, 90]
 
 export default ({ pool, userPools }) => {
   const { preferences, chains, assets, pool_assets, pools, pools_daily_stats, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, pool_assets: state.pool_assets, pools: state.pools, pools_daily_stats: state.pools_daily_stats, wallet: state.wallet }), shallowEqual)
@@ -27,6 +28,7 @@ export default ({ pool, userPools }) => {
   const { address } = { ...wallet_data }
 
   const [dailyMetric, setDailyMetric] = useState(_.head(DAILY_METRICS))
+  const [timeframe, setTimeframe] = useState(TIMEFRAMES[1])
 
   const { chain, asset } = { ...pool }
   const chain_data = getChainData(chain, chains_data)
@@ -90,7 +92,7 @@ export default ({ pool, userPools }) => {
           break
       }
       return { ...d, timestamp: moment(time).valueOf(), value }
-    }),
+    }).filter(d => moment().diff(moment(d.timestamp), 'days') <= timeframe),
     chain_data,
     asset_data: getAssetData(asset, assets_data),
     pool_data,
@@ -111,16 +113,29 @@ export default ({ pool, userPools }) => {
             id={dailyMetric}
             data={chartData}
             header={
-              <div className="w-fit border-b dark:border-slate-800 flex items-center justify-between space-x-4">
-                {DAILY_METRICS.map((m, i) => (
-                  <div
-                    key={i}
-                    onClick={() => setDailyMetric(m)}
-                    className={`w-fit cursor-pointer border-b-2 ${dailyMetric === m ? 'border-slate-300 dark:border-slate-200' : 'border-transparent text-slate-400 dark:text-slate-500'} text-base 3xl:text-xl font-medium pt-0 pb-3 px-2`}
-                  >
-                    {getTitle(m)}
-                  </div>
-                ))}
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-8">
+                <div className="w-fit border-b dark:border-slate-800 flex items-center justify-between space-x-4">
+                  {DAILY_METRICS.map((m, i) => (
+                    <div
+                      key={i}
+                      onClick={() => setDailyMetric(m)}
+                      className={`w-fit cursor-pointer border-b-2 ${dailyMetric === m ? 'border-slate-300 dark:border-slate-200' : 'border-transparent text-slate-400 dark:text-slate-500'} text-base 3xl:text-xl font-medium pt-0 pb-3 px-2`}
+                    >
+                      {getTitle(m)}
+                    </div>
+                  ))}
+                </div>
+                <div className="w-fit border-b dark:border-slate-800 flex items-center justify-between space-x-4">
+                  {TIMEFRAMES.map((t, i) => (
+                    <div
+                      key={i}
+                      onClick={() => setTimeframe(t)}
+                      className={`w-fit cursor-pointer border-b-2 ${timeframe === t ? 'border-slate-300 dark:border-slate-200' : 'border-transparent text-slate-400 dark:text-slate-500'} text-base 3xl:text-xl font-medium pt-0 pb-3 px-2`}
+                    >
+                      {t}D
+                    </div>
+                  ))}
+                </div>
               </div>
             }
           />
