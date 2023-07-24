@@ -306,7 +306,7 @@ export default (
         setEstimatedValues(_estimatedValues)
       }
 
-      const _newSlippage = _estimatedValues?.destinationSlippage && _estimatedValues.originSlippage ? Number(numberToFixed((Number(_estimatedValues.destinationSlippage) + Number(_estimatedValues.originSlippage)) * 100, 2)) : null
+      const _newSlippage = _estimatedValues?.destinationSlippage && _estimatedValues.originSlippage ? Number(numberToFixed(Number(_estimatedValues.destinationSlippage) + Number(_estimatedValues.originSlippage), 2)) : null
       setNewSlippage(_newSlippage > 0 ? _newSlippage : DEFAULT_PERCENT_BRIDGE_SLIPPAGE)
     }
   }
