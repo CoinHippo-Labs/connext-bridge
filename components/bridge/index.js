@@ -685,7 +685,7 @@ export default () => {
               "function approve(address spender, uint256 amount)",
             ]);
 
-            // Source is Mainnet ETH
+            // Source is Ethereum
             if (source_domain === '6648936' || source_domain === '1735353714') { 
               // xcall the gateway on destination
               xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to]);
@@ -722,7 +722,7 @@ export default () => {
                 xcallParams.asset = nextAlAsset
 
                 // Destination is L2
-                if (source_domain in ALCHEMIX_GATEWAYS && destination_domain in ALCHEMIX_GATEWAYS) {
+                if (source_domain in ALCHEMIX_GATEWAYS && destination_domain in ALCHEMIX_GATEWAYS && !receiveLocal) {
                   // xcall the gateway on destination
                   xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to]);
                   xcallParams.to = gateway
