@@ -245,7 +245,7 @@ export default (
       if (isNextAsset) {
         destinationTokenAddress = _destination_contract_data?.next_asset?.contract_address || destinationTokenAddress
       }
-      const amount = parseUnits(_amount, source_decimals)
+      const amount = _amount
 
       let manual
       let _estimatedValues
