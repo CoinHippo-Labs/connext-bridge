@@ -255,7 +255,7 @@
         "contract_address": "0x42d3F5AfC4873d9ff82E1501Ae00d0c7aE1C0C13",
         "chain_id": 420,
         "decimals": 18,
-        "symbol": "nextAlETH",
+        "symbol": "alETH",
         "next_asset": {
           "contract_address": "0x40E4b6A2D89fF4206dB843B614bBe2694876D640",
           "decimals": 18,
@@ -267,7 +267,7 @@
         "contract_address": "0x0848B07D3a0b1d5A0b1eca22c2407075b24e948E",
         "chain_id": 421613,
         "decimals": 18,
-        "symbol": "nextAlETH",
+        "symbol": "alETH",
         "next_asset": {
           "contract_address": "0x1F563a8BE28acdCc5546543a227aFb9373586eD0",
           "decimals": 18,
