@@ -49,6 +49,16 @@ const DEFAULT_OPTIONS = {
   showNextAssets: true,
 }
 
+// Maps domainID to Alchemix Gateway contract
+const ALCHEMIX_GATEWAYS = {
+  "1735356532": "0x038e55fbDAbBfc9F55C454c21b9EAbeCe00aEf31", // op-goerli
+  "1734439522": "0x449ac7DEc35E5Fb7d6C05475C2C31229DeD7a9CF", // arb-goerli
+  "1869640809": "0xb46eE2E4165F629b4aBCE04B7Eb4237f951AC66F", // op
+  "1634886255": "0xb77750E48C2B1E1657cC5Ad7F329133c64A8321F", // arb
+}
+
+const ALCHEMIX_ASSETS = ['aleth', 'alusd']
+
 export default () => {
   const dispatch = useDispatch()
   const { preferences, chains, assets, router_asset_balances, pools, rpc_providers, dev, wallet, balances, latest_bumped_transfers } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, router_asset_balances: state.router_asset_balances, pools: state.pools, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances, latest_bumped_transfers: state.latest_bumped_transfers }), shallowEqual)
@@ -591,10 +601,12 @@ export default () => {
       const relayer_fee_decimals = relayerFeeAssetType === 'transacting' ? source_decimals : 18
       const relayerFeeField = `relayerFee${relayerFeeAssetType === 'transacting' ? 'InTransactingAsset' : ''}`
       const _amount = numberToFixed((amount || 0) - (relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? Number(numberToFixed(relayerFee, relayer_fee_decimals)) : 0), source_decimals - 2)
+      const source_domain = source_chain_data?.domain_id
+      const destination_domain = destination_chain_data?.domain_id
 
       const xcallParams = {
-        origin: source_chain_data?.domain_id,
-        destination: destination_chain_data?.domain_id,
+        origin: source_domain,
+        destination: destination_domain,
         asset: source_contract_data?.contract_address,
         to: to || address,
         delegate: to || address,
@@ -605,6 +617,7 @@ export default () => {
         [relayerFeeField]: isNumber(relayerFee) && Number(relayerFee) > 0 ? parseUnits(numberToFixed(relayerFee, relayer_fee_decimals - 2), relayer_fee_decimals) : undefined,
       }
       console.log('[/]', '[xcall setup]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
+
       if (!xcallParams[relayerFeeField] && NETWORK !== 'testnet') {
         setCallResponse({
           status: 'failed',
@@ -659,6 +672,74 @@ export default () => {
             xcallParams.relayerFee = xcallParams.relayerFeeInTransactingAsset
             xcallParams.relayerFeeInTransactingAsset = '0'
           }
+
+          // Alchemix assets are handled differently
+          if (ALCHEMIX_ASSETS.includes(asset)) {
+            console.log('[/]', '[setup for Alchemix asset]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
+            const gateway = ALCHEMIX_GATEWAYS[destination_domain];
+            const alAssetInterface = new utils.Interface([
+              "function exchangeOldForCanonical(address bridgeTokenAddress, uint256 tokenAmount)",
+              "function exchangeCanonicalForOld(address bridgeTokenAddress, uint256 tokenAmount)",
+            ]);
+
+            // ETH to L2
+            if (source_domain === '6648936' || source_domain === '1735353714') { 
+              // xcall the gateway on destination
+              xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to]);
+              xcallParams.to = gateway
+            // L2 to L2 
+            } else if (source_domain in ALCHEMIX_GATEWAYS && destination_domain in ALCHEMIX_GATEWAYS) {
+              // exchange AlAsset into nextAlAsset on origin
+              if (xcallParams.asset === source_asset_data?.contracts.find(c => c.chain_id === source_chain_data?.chain_id).contract_address) {
+                console.log('exchanging alAsset first')
+                const alAsset = xcallParams.asset
+                const nextAlAsset = source_contract_data?.next_asset?.contract_address
+                const exchangeData = alAssetInterface.encodeFunctionData(
+                  'exchangeCanonicalForOld',
+                  [nextAlAsset, xcallParams.amount])
+  
+                const txRequest = {
+                  to: alAsset,
+                  data: exchangeData,
+                  from: address,
+                  chainId: source_chain_data?.chain_id
+                }
+                const txReceipt = await signer.sendTransaction(txRequest)
+                await txReceipt.wait()
+
+                // set xcall asset to nextAlAsset
+                xcallParams.asset = nextAlAsset
+              }
+
+              // xcall the gateway on destination
+              xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to]);
+              xcallParams.to = gateway
+            // L2 to ETH
+            } else {
+              // exchange AlAsset into nextAlAsset on origin
+              if (xcallParams.asset === source_asset_data?.contracts.find(c => c.chain_id === source_chain_data?.chain_id).contract_address) {
+                console.log('exchanging alAsset first')
+                const alAsset = xcallParams.asset
+                const nextAlAsset = source_contract_data?.next_asset?.contract_address
+                const exchangeData = alAssetInterface.encodeFunctionData(
+                  'exchangeCanonicalForOld',
+                  [nextAlAsset, xcallParams.amount])
+  
+                const txRequest = {
+                  to: alAsset,
+                  data: exchangeData,
+                  from: address,
+                  chainId: source_chain_data?.chain_id
+                }
+                const txReceipt = await signer.sendTransaction(txRequest)
+                await txReceipt.wait()
+
+                // set xcall asset to nextAlAsset
+                xcallParams.asset = nextAlAsset
+              }
+            }
+          }
+
           const CANONICAL_ASSET_SYMBOL = NATIVE_WRAPPABLE_SYMBOLS.find(s => s === source_asset_data?.symbol)
           if (CANONICAL_ASSET_SYMBOL && destination_chain_data?.native_token?.symbol?.endsWith(CANONICAL_ASSET_SYMBOL)) {
             xcallParams.unwrapNativeOnDestination = xcallParams.receiveLocal || receive_wrap ? false : true
@@ -893,7 +974,10 @@ export default () => {
         const response = parseError(error)
         console.log('[/]', '[calculateAmountReceived error]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, checkFastLiquidity }, error)
         const { message } = { ...response }
-        if (includesStringList(message, ['reverted', 'invalid BigNumber value'])) {
+        if (
+          includesStringList(message, ['reverted', 'invalid BigNumber value']) || 
+          (ALCHEMIX_ASSETS.includes(asset) && includesStringList(message, ['Origin token cannot be bridged']))
+        ) {
           manual = true
         }
         else {
