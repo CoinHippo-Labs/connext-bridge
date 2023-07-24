@@ -259,7 +259,20 @@ export default (
           _estimatedValues = Object.fromEntries(
             Object.entries({ ...response }).map(([k, v]) => {
               try {
-                v = formatUnits(v, ['amountReceived'].includes(k) ? (isNextAsset && _destination_contract_data?.next_asset ? _destination_contract_data.next_asset : destination_contract_data)?.decimals || 18 : source_decimals)
+                switch (k) {
+                  case 'amountReceived':
+                    v = formatUnits(v, (isNextAsset && _destination_contract_data?.next_asset ? _destination_contract_data.next_asset : destination_contract_data)?.decimals || 18)
+                    break
+                  case 'originSlippage':
+                  case 'destinationSlippage':
+                    v = formatUnits(v, 2)
+                    break
+                  default:
+                    if (typeof v !== 'boolean') {
+                      v = formatUnits(v, source_decimals)
+                    }
+                    break
+                }
               } catch (error) {}
               return [k, v]
             })
