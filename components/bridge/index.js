@@ -704,10 +704,7 @@ export default () => {
                 console.log('exchanging alAsset first')
                 const alAsset = xcallParams.asset
                 const nextAlAsset = source_contract_data?.next_asset?.contract_address
-                const exchangeData = alAssetInterface.encodeFunctionData(
-                  'exchangeCanonicalForOld',
-                  [nextAlAsset, xcallParams.amount])
-
+                const exchangeData = alAssetInterface.encodeFunctionData('exchangeCanonicalForOld', [nextAlAsset, xcallParams.amount])
                 const txRequest = {
                   to: alAsset,
                   data: exchangeData,
@@ -731,10 +728,7 @@ export default () => {
                 console.log('exchanging alAsset first')
                 const alAsset = xcallParams.asset
                 const nextAlAsset = source_contract_data?.next_asset?.contract_address
-                const exchangeData = alAssetInterface.encodeFunctionData(
-                  'exchangeCanonicalForOld',
-                  [nextAlAsset, xcallParams.amount])
-
+                const exchangeData = alAssetInterface.encodeFunctionData('exchangeCanonicalForOld', [nextAlAsset, xcallParams.amount])
                 const txRequest = {
                   to: alAsset,
                   data: exchangeData,
