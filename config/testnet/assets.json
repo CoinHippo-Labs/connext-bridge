@@ -211,16 +211,28 @@
         "symbol": "alUSD"
       },
       {
-        "contract_address": "0xFDd72CB8477d3Ae2D00a6F9516324c529dfC395A",
+        "contract_address": "0xf41F4Bf77580B076BeBa1c0Efe2bB5CB1F7cF679",
         "chain_id": 420,
         "decimals": 18,
-        "symbol": "nextAlUSD"
+        "symbol": "alUSD",
+        "next_asset": {
+          "contract_address": "0xFDd72CB8477d3Ae2D00a6F9516324c529dfC395A",
+          "decimals": 18,
+          "symbol": "nextAlUSD",
+          "image": "/logos/assets/alusd.png"
+        }
       },
       {
-        "contract_address": "0xF87510F1E63E29BB69d9D35D0365E8CaCe609a8C",
+        "contract_address": "0x37cC61E79E6Ea720f4fBDCBAbb514Ec52043Eb4F",
         "chain_id": 421613,
         "decimals": 18,
-        "symbol": "nextAlUSD"
+        "symbol": "alUSD",
+        "next_asset": {
+          "contract_address": "0xF87510F1E63E29BB69d9D35D0365E8CaCe609a8C",
+          "decimals": 18,
+          "symbol": "nextAlUSD",
+          "image": "/logos/assets/alusd.png"
+        }
       }
     ],
     "color": "#000000",
@@ -240,16 +252,28 @@
         "symbol": "alETH"
       },
       {
-        "contract_address": "0x40E4b6A2D89fF4206dB843B614bBe2694876D640",
+        "contract_address": "0x42d3F5AfC4873d9ff82E1501Ae00d0c7aE1C0C13",
         "chain_id": 420,
         "decimals": 18,
-        "symbol": "nextAlETH"
+        "symbol": "nextAlETH",
+        "next_asset": {
+          "contract_address": "0x40E4b6A2D89fF4206dB843B614bBe2694876D640",
+          "decimals": 18,
+          "symbol": "nextAlETH",
+          "image": "/logos/assets/alusd.png"
+        }
       },
       {
-        "contract_address": "0x1F563a8BE28acdCc5546543a227aFb9373586eD0",
+        "contract_address": "0x0848B07D3a0b1d5A0b1eca22c2407075b24e948E",
         "chain_id": 421613,
         "decimals": 18,
-        "symbol": "nextAlETH"
+        "symbol": "nextAlETH",
+        "next_asset": {
+          "contract_address": "0x1F563a8BE28acdCc5546543a227aFb9373586eD0",
+          "decimals": 18,
+          "symbol": "nextAlETH",
+          "image": "/logos/assets/alusd.png"
+        }
       }
     ],
     "color": "#000000",
