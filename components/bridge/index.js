@@ -691,52 +691,40 @@ export default () => {
               "function exchangeOldForCanonical(address bridgeTokenAddress, uint256 tokenAmount)",
               "function exchangeCanonicalForOld(address bridgeTokenAddress, uint256 tokenAmount)",
             ]);
+            const erc20Interface = new utils.Interface([
+              "function approve(address spender, uint256 amount)",
+            ]);
 
-            // ETH to L2
+            // Source is Ethereum
             if (source_domain === '6648936' || source_domain === '1735353714') { 
               // xcall the gateway on destination
               xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to]);
               xcallParams.to = gateway
-            // L2 to L2 
-            } else if (source_domain in ALCHEMIX_GATEWAYS && destination_domain in ALCHEMIX_GATEWAYS) {
-              // exchange AlAsset into nextAlAsset on origin
-              if (xcallParams.asset === source_asset_data?.contracts.find(c => c.chain_id === source_chain_data?.chain_id).contract_address) {
-                console.log('exchanging alAsset first')
-                const alAsset = xcallParams.asset
-                const nextAlAsset = source_contract_data?.next_asset?.contract_address
-                const exchangeData = alAssetInterface.encodeFunctionData('exchangeCanonicalForOld', [nextAlAsset, xcallParams.amount])
-                const txRequest = {
-                  to: alAsset,
-                  data: exchangeData,
-                  from: address,
-                  chainId: source_chain_data?.chain_id
-                }
-                const txReceipt = await signer.sendTransaction(txRequest)
-                await txReceipt.wait()
-
-                // set xcall asset to nextAlAsset
-                xcallParams.asset = nextAlAsset
-              }
-
-              // xcall the gateway on destination
-              xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to]);
-              xcallParams.to = gateway
-            // L2 to ETH
+            // Source is L2
             } else {
               // exchange AlAsset into nextAlAsset on origin
               if (xcallParams.asset === source_asset_data?.contracts.find(c => c.chain_id === source_chain_data?.chain_id).contract_address) {
-                console.log('exchanging alAsset first')
                 const alAsset = xcallParams.asset
                 const nextAlAsset = source_contract_data?.next_asset?.contract_address
+
+                console.log('exchanging alAsset to nextAlAsset')
                 const exchangeData = alAssetInterface.encodeFunctionData('exchangeCanonicalForOld', [nextAlAsset, xcallParams.amount])
-                const txRequest = {
+                const exchangeTxRequest = {
                   to: alAsset,
                   data: exchangeData,
                   from: address,
                   chainId: source_chain_data?.chain_id
                 }
-                const txReceipt = await signer.sendTransaction(txRequest)
-                await txReceipt.wait()
+                const exchangeTxReceipt = await signer.sendTransaction(exchangeTxRequest)
+                await exchangeTxReceipt.wait()
+
+                // approve nextAlAsset
+                const approveTxRequest = await sdk.sdkBase.approveIfNeeded(source_domain, nextAlAsset, xcallParams.amount)
+                if (approveTxRequest) {
+                  console.log('approving nextAlAsset')
+                  const approveTxReceipt = await signer.sendTransaction(approveTxRequest)
+                  await approveTxReceipt.wait()
+                }
 
                 // set xcall asset to nextAlAsset
                 xcallParams.asset = nextAlAsset
