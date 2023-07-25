@@ -698,9 +698,7 @@ export default () => {
                 const nextAlAsset = source_contract_data?.next_asset?.contract_address
 
                 console.log('exchanging alAsset to nextAlAsset')
-                const exchangeData = alAssetInterface.encodeFunctionData(
-                  'exchangeCanonicalForOld',
-                  [nextAlAsset, xcallParams.amount])
+                const exchangeData = alAssetInterface.encodeFunctionData('exchangeCanonicalForOld', [nextAlAsset, xcallParams.amount])
                 const exchangeTxRequest = {
                   to: alAsset,
                   data: exchangeData,
@@ -952,8 +950,20 @@ export default () => {
             setEstimatedValues(
               Object.fromEntries(Object.entries({ ...response }).map(([k, v]) => {
                 try {
-                  const decimals = ['amountReceived'].includes(k) ? (isNextAsset && next_asset ? next_asset?.decimals : destination_contract_data?.decimals) || 18 : source_decimals
-                  v = formatUnits(v, decimals)
+                  switch (k) {
+                    case 'amountReceived':
+                      v = formatUnits(v, (isNextAsset && next_asset ? next_asset : destination_contract_data)?.decimals || 18)
+                      break
+                    case 'originSlippage':
+                    case 'destinationSlippage':
+                      v = formatUnits(v, 2)
+                      break
+                    default:
+                      if (typeof v !== 'boolean') {
+                        v = formatUnits(v, source_decimals)
+                      }
+                      break
+                  }
                 } catch (error) {}
                 return [k, v]
               }))

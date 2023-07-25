@@ -245,7 +245,7 @@ export default (
       if (isNextAsset) {
         destinationTokenAddress = _destination_contract_data?.next_asset?.contract_address || destinationTokenAddress
       }
-      const amount = parseUnits(_amount, source_decimals)
+      const amount = _amount
 
       let manual
       let _estimatedValues
@@ -259,7 +259,20 @@ export default (
           _estimatedValues = Object.fromEntries(
             Object.entries({ ...response }).map(([k, v]) => {
               try {
-                v = formatUnits(v, ['amountReceived'].includes(k) ? (isNextAsset && _destination_contract_data?.next_asset ? _destination_contract_data.next_asset : destination_contract_data)?.decimals || 18 : source_decimals)
+                switch (k) {
+                  case 'amountReceived':
+                    v = formatUnits(v, (isNextAsset && _destination_contract_data?.next_asset ? _destination_contract_data.next_asset : destination_contract_data)?.decimals || 18)
+                    break
+                  case 'originSlippage':
+                  case 'destinationSlippage':
+                    v = formatUnits(v, 2)
+                    break
+                  default:
+                    if (typeof v !== 'boolean') {
+                      v = formatUnits(v, source_decimals)
+                    }
+                    break
+                }
               } catch (error) {}
               return [k, v]
             })
@@ -293,7 +306,7 @@ export default (
         setEstimatedValues(_estimatedValues)
       }
 
-      const _newSlippage = _estimatedValues?.destinationSlippage && _estimatedValues.originSlippage ? Number(numberToFixed((Number(_estimatedValues.destinationSlippage) + Number(_estimatedValues.originSlippage)) * 100, 2)) : null
+      const _newSlippage = _estimatedValues?.destinationSlippage && _estimatedValues.originSlippage ? Number(numberToFixed(Number(_estimatedValues.destinationSlippage) + Number(_estimatedValues.originSlippage), 2)) : null
       setNewSlippage(_newSlippage > 0 ? _newSlippage : DEFAULT_PERCENT_BRIDGE_SLIPPAGE)
     }
   }
