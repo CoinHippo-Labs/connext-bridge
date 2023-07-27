@@ -681,9 +681,6 @@ export default () => {
               "function exchangeOldForCanonical(address bridgeTokenAddress, uint256 tokenAmount)",
               "function exchangeCanonicalForOld(address bridgeTokenAddress, uint256 tokenAmount)",
             ]);
-            const erc20Interface = new utils.Interface([
-              "function approve(address spender, uint256 amount)",
-            ]);
 
             // Source is Ethereum
             if (source_domain === '6648936' || source_domain === '1735353714') { 
