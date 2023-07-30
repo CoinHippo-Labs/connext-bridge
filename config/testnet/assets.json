@@ -297,7 +297,7 @@
         "chain_id": 420,
         "decimals": 18,
         "symbol": "RADAR"
-      },
+      }
     ],
     "color": "#000000",
     "group": "other_tokens"
