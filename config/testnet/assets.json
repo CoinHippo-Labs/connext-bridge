@@ -278,5 +278,28 @@
     ],
     "color": "#000000",
     "group": "other_tokens"
+  },
+  {
+    "id": "radar_test",
+    "symbol": "RADAR_TEST",
+    "name": "DappRadar TEST",
+    "image": "/logos/assets/radar.png",
+    "is_stablecoin": false,
+    "contracts": [
+      {
+        "contract_address": "0xb732f1feb3c5c3943e40bf49ee9ac2e656be2ff8",
+        "chain_id": 80001,
+        "decimals": 18,
+        "symbol": "RADAR"
+      },
+      {
+        "contract_address": "0xb6932c8363354df7620a7a7bF3a933A253015cA3",
+        "chain_id": 420,
+        "decimals": 18,
+        "symbol": "RADAR"
+      },
+    ],
+    "color": "#000000",
+    "group": "other_tokens"
   }
 ]
