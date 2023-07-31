@@ -591,7 +591,8 @@
       }
     ],
     "color": "#000000",
-    "group": "other_tokens"
+    "group": "other_tokens",
+    "disabled": true
   },
   {
     "id": "alchemix",
