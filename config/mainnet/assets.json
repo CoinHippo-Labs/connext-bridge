@@ -550,6 +550,48 @@
       }
     ],
     "color": "#000000",
+    "group": "other_tokens",
+    "disabled": true
+  },
+  {
+    "id": "alchemix",
+    "symbol": "ALCX",
+    "name": "Alchemix",
+    "image": "/logos/assets/alcx.png",
+    "is_stablecoin": false,
+    "contracts": [
+      {
+        "contract_address": "0xdbdb4d16eda451d0503b854cf79d55697f90c8df",
+        "chain_id": 1,
+        "decimals": 18,
+        "symbol": "ALCX"
+      },
+      {
+        "contract_address": "0x27b58D226fe8f792730a795764945Cf146815AA7",
+        "chain_id": 42161,
+        "decimals": 18,
+        "symbol": "ALCX",
+        "next_asset": {
+          "contract_address": "0x27b58D226fe8f792730a795764945Cf146815AA7",
+          "decimals": 18,
+          "symbol": "ALCX",
+          "image": "/logos/assets/alcx.png"
+        }  
+      },
+      {
+        "contract_address": "0xE974B9b31dBFf4369b94a1bAB5e228f35ed44125",
+        "chain_id": 10,
+        "decimals": 18,
+        "symbol": "ALCX",
+        "next_asset": {
+          "contract_address": "0xE974B9b31dBFf4369b94a1bAB5e228f35ed44125",
+          "decimals": 18,
+          "symbol": "ALCX",
+          "image": "/logos/assets/alcx.png"
+        }  
+      }
+    ],
+    "color": "#000000",
     "group": "other_tokens"
   }
 ]
