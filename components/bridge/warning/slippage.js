@@ -14,7 +14,9 @@ export default ({ value, estimatedValue }) => {
       <div className="text-yellow-500 dark:text-yellow-400 text-xs 3xl:text-xl">
         {(isNumber(estimatedValue) && _estimatedValue > _value) ?
           <>
-            Slippage tolerance is too low (estimated: {_estimatedValue}%)
+            Slippage tolerance is too low
+            <br />
+            (estimated: {estimatedValue}%)
             <br />
             (use a larger amount or set tolerance higher)
           </> :
