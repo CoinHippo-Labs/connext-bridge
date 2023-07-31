@@ -1048,7 +1048,7 @@ export default () => {
   const hasValue = isNumber(amount) && !isZero(amount) && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin
 
   const estimatedReceived = estimatedValues?.amountReceived ? estimatedValues.amountReceived - relayerFeeToDeduct : Number(amount) > 0 && isNumber(routerFee) ? amount - routerFee - relayerFeeToDeduct : null
-  const estimatedSlippage = estimatedValues?.destinationSlippage && estimatedValues.originSlippage ? (Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100 : null
+  const estimatedSlippage = estimatedValues?.destinationSlippage && estimatedValues.originSlippage ? Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage) : null
 
   const routersLiquidityAmount = _.sum(toArray(router_asset_balances_data?.[destination_chain_data?.chain_id]).filter(d => toArray([destination_contract_data?.contract_address, destination_contract_data?.next_asset?.contract_address]).findIndex(a => equalsIgnoreCase(a, d.contract_address)) > -1).map(d => formatUnits(d.amount, destination_contract_data?.next_asset && equalsIgnoreCase(d.contract_address, destination_contract_data.next_asset.contract_address) ? destination_contract_data.next_asset.decimals : destination_decimals)).map(d => Number(d) > 0 ? Number(d) : 0))
   const { adopted, local } = { ...toArray(pools_data).find(d => d.chain_data?.id === destination_chain && d.asset_data?.id === asset) }
