@@ -13,6 +13,7 @@ import Wallet from '../wallet'
 import SelectChain from '../select/chain'
 import { getChainData, getAssetData, getContractData, getBalanceData } from '../../lib/object'
 import { parseUnits, isNumber } from '../../lib/number'
+import { numberToFixed, parseError } from '../../lib/utils'
 import { GET_BALANCES_DATA } from '../../reducers/types'
 
 const GAS_LIMIT = 500000
@@ -293,7 +294,27 @@ export default (
                     disabled={disabled}
                     placeholder={placeholder}
                     value={data?.[name]}
-                    onChange={e => setData({ ...data, [f.name]: e.target.value })}
+                    onChange={
+                      e => {
+                        let value
+                        if (type === 'number') {
+                          const regex = /^[0-9.\b]+$/
+                          if (e.target.value === '' || regex.test(e.target.value)) {
+                            value = e.target.value
+                          }
+                          if (typeof value === 'string') {
+                            if (value.startsWith('.')) {
+                              value = `0${value}`
+                            }
+                            value = numberToFixed(value)
+                          }
+                        }
+                        else {
+                          value = e.target.value
+                        }
+                        setData({ ...data, [f.name]: value })
+                      }
+                    }
                     className="form-input rounded border-0 focus:ring-0 3xl:text-2xl"
                   />
                 }
