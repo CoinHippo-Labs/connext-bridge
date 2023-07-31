@@ -1,6 +1,7 @@
 import { IoWarning } from 'react-icons/io5'
 
 import { isNumber } from '../../../lib/number'
+import { numberToFixed } from '../../../lib/utils'
 
 const LOW_THRESHOLD = 0.2
 const HIGH_THRESHOLD = 5.0
@@ -16,7 +17,7 @@ export default ({ value, estimatedValue }) => {
           <>
             Slippage tolerance is too low
             <br />
-            (estimated: {estimatedValue}%)
+            Estimated: {numberToFixed(estimatedValue, 2)}%
             <br />
             (use a larger amount or set tolerance higher)
           </> :
