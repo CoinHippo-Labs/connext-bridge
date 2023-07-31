@@ -155,7 +155,7 @@ export default (
   const destination_asset_image = destination_contract_data?.image || destination_asset_data?.image
 
   const _slippage = slippage / 100
-  const estimatedSlippage = estimatedValues?.destinationSlippage && estimatedValues.originSlippage ? Number(numberToFixed((Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage)) * 100, 2)) : null
+  const estimatedSlippage = estimatedValues?.destinationSlippage && estimatedValues.originSlippage ? Number(numberToFixed(Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage), 2)) : null
 
   const gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, source_gas?.symbol))
   const relayer_fee_decimals = relayerFeeAssetType === 'transacting' ? source_decimals : source_gas_decimals
