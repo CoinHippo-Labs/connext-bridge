@@ -301,5 +301,22 @@
     ],
     "color": "#000000",
     "group": "other_tokens"
+  }, 
+  {
+    "id": "p8",
+    "symbol": "P8",
+    "name": "P8",
+    "image": "/logos/assets/p8.png",
+    "is_stablecoin": false,
+    "contracts": [
+      {
+        "contract_address": "0x772fCe4B8E88BD19e86dC92428d242704aC480a0",
+        "chain_id": 100,
+        "decimals": 18,
+        "symbol": "P8"
+      }
+    ],
+    "color": "#8200FF",
+    "group": "other_tokens"
   }
 ]
