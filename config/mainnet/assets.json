@@ -550,6 +550,47 @@
       }
     ],
     "color": "#000000",
+    "group": "other_tokens"
+  },
+  {
+    "id": "aleth",
+    "symbol": "alETH",
+    "name": "Alchemix ETH",
+    "image": "/logos/assets/aleth.png",
+    "is_stablecoin": false,
+    "contracts": [
+      {
+        "contract_address": "0x0100546F2cD4C9D97f798fFC9755E47865FF7Ee6",
+        "chain_id": 1,
+        "decimals": 18,
+        "symbol": "alETH"
+      },
+      {
+        "contract_address": "0x17573150d67d820542EFb24210371545a4868B03",
+        "chain_id": 42161,
+        "decimals": 18,
+        "symbol": "alETH",
+        "next_asset": {
+          "contract_address": "0x303241e2B3b4aeD0bb0F8623e7442368FED8Faf3",
+          "decimals": 18,
+          "symbol": "nextAlETH",
+          "image": "/logos/assets/aleth.png"
+        }  
+      },
+      {
+        "contract_address": "0x3E29D3A9316dAB217754d13b28646B76607c5f04",
+        "chain_id": 10,
+        "decimals": 18,
+        "symbol": "alETH",
+        "next_asset": {
+          "contract_address": "0x303241e2B3b4aeD0bb0F8623e7442368FED8Faf3",
+          "decimals": 18,
+          "symbol": "nextAlETH",
+          "image": "/logos/assets/aleth.png"
+        }  
+      }
+    ],
+    "color": "#000000",
     "group": "other_tokens",
     "disabled": true
   },
