@@ -280,15 +280,15 @@
     "group": "other_tokens"
   },
   {
-    "id": "radar_test",
-    "symbol": "RADAR_TEST",
-    "name": "DappRadar TEST",
+    "id": "radar",
+    "symbol": "RADAR",
+    "name": "DappRadar",
     "image": "/logos/assets/radar.png",
     "is_stablecoin": false,
     "contracts": [
       {
-        "contract_address": "0xb732f1feb3c5c3943e40bf49ee9ac2e656be2ff8",
-        "chain_id": 80001,
+        "contract_address": "0x369e5C58F6c09c1CE947CA313f03c0d558B77b3e",
+        "chain_id": 5,
         "decimals": 18,
         "symbol": "RADAR"
       },
