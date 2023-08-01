@@ -330,13 +330,13 @@
         "contract_address": "0x39e09359F5a7396937504Eb2766722e2bf4650e8",
         "chain_id": 5,
         "decimals": 18,
-        "symbol": "BTRST",
+        "symbol": "BTRST"
       },
       {
         "contract_address": "0xEc537a40dC272Dd8abCda95e2a8713E57A58f211",
         "chain_id": 80001,
         "decimals": 18,
-        "symbol": "BTRST",
+        "symbol": "BTRST"
       }
     ],
     "color": "#141414",
