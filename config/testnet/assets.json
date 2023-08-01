@@ -297,6 +297,12 @@
         "chain_id": 420,
         "decimals": 18,
         "symbol": "RADAR"
+      },
+      {
+        "contract_address": "0x4c82266B29F82525FD20560638C517D11219F5B5",
+        "chain_id": 80001,
+        "decimals": 18,
+        "symbol": "RADAR"
       }
     ],
     "color": "#000000",
