@@ -292,8 +292,9 @@
         "chain_id": 5,
         "decimals": 18,
         "symbol": "RADAR",
+        "xERC20": "0x369e5C58F6c09c1CE947CA313f03c0d558B77b3e",
         "lockbox": "0x768774aAd89430176428698447f8BefcC0B9599B",
-        "xERC20": "0x369e5C58F6c09c1CE947CA313f03c0d558B77b3e"
+        "lockbox_adapter": "0xB3aF18A5c4D513a89ad245e999E52c11a7EF2faE"
       },
       {
         "contract_address": "0xb6932c8363354df7620a7a7bF3a933A253015cA3",
