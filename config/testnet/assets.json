@@ -255,7 +255,7 @@
         "contract_address": "0x42d3F5AfC4873d9ff82E1501Ae00d0c7aE1C0C13",
         "chain_id": 420,
         "decimals": 18,
-        "symbol": "nextAlETH",
+        "symbol": "alETH",
         "next_asset": {
           "contract_address": "0x40E4b6A2D89fF4206dB843B614bBe2694876D640",
           "decimals": 18,
@@ -267,7 +267,7 @@
         "contract_address": "0x0848B07D3a0b1d5A0b1eca22c2407075b24e948E",
         "chain_id": 421613,
         "decimals": 18,
-        "symbol": "nextAlETH",
+        "symbol": "alETH",
         "next_asset": {
           "contract_address": "0x1F563a8BE28acdCc5546543a227aFb9373586eD0",
           "decimals": 18,
@@ -277,6 +277,75 @@
       }
     ],
     "color": "#000000",
+    "group": "other_tokens"
+  },
+  {
+    "id": "radar",
+    "symbol": "RADAR",
+    "name": "DappRadar",
+    "image": "/logos/assets/radar.png",
+    "is_stablecoin": false,
+    "contracts": [
+      {
+        "contract_address": "0x369e5C58F6c09c1CE947CA313f03c0d558B77b3e",
+        "chain_id": 5,
+        "decimals": 18,
+        "symbol": "RADAR"
+      },
+      {
+        "contract_address": "0xb6932c8363354df7620a7a7bF3a933A253015cA3",
+        "chain_id": 420,
+        "decimals": 18,
+        "symbol": "RADAR"
+      },
+      {
+        "contract_address": "0x3fC9473d9dF84887D483A93a8d207f90D9bE63C4",
+        "chain_id": 80001,
+        "decimals": 18,
+        "symbol": "RADAR"
+      }
+    ],
+    "color": "#000000",
+    "group": "other_tokens"
+  }, 
+  {
+    "id": "p8",
+    "symbol": "P8",
+    "name": "P8",
+    "image": "/logos/assets/p8.png",
+    "is_stablecoin": false,
+    "contracts": [
+      {
+        "contract_address": "0x772fCe4B8E88BD19e86dC92428d242704aC480a0",
+        "chain_id": 100,
+        "decimals": 18,
+        "symbol": "P8"
+      }
+    ],
+    "color": "#8200FF",
+    "group": "other_tokens"
+  },
+  {
+    "id": "btrst",
+    "symbol": "BTRST",
+    "name": "BTRST",
+    "image": "/logos/assets/btrst.png",
+    "is_stablecoin": false,
+    "contracts": [
+      {
+        "contract_address": "0x39e09359F5a7396937504Eb2766722e2bf4650e8",
+        "chain_id": 5,
+        "decimals": 18,
+        "symbol": "BTRST"
+      },
+      {
+        "contract_address": "0xEc537a40dC272Dd8abCda95e2a8713E57A58f211",
+        "chain_id": 80001,
+        "decimals": 18,
+        "symbol": "BTRST"
+      }
+    ],
+    "color": "#141414",
     "group": "other_tokens"
   }
 ]
