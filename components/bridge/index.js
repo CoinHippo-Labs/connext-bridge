@@ -725,6 +725,13 @@ export default () => {
 
                 // set xcall asset to nextAlAsset
                 xcallParams.asset = nextAlAsset
+
+                // Destination is L2
+                if (source_domain in ALCHEMIX_GATEWAYS && destination_domain in ALCHEMIX_GATEWAYS && !receiveLocal) {
+                  // xcall the gateway on destination
+                  xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to]);
+                  xcallParams.to = gateway
+                }
               }
             }
           }
