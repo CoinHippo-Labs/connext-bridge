@@ -665,9 +665,15 @@ export default ({ pool, userPools, onFinish }) => {
       const { tvl } = { ...pool_data }
       if (pool_data && pool_data.chain_data?.id === id && tvl) {
         console.log('[/pool]', '[calculateRemoveLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY })
-        const priceImpact = await sdk.sdkPool.calculateRemoveLiquidityPriceImpact(domainId, contractAddress, amountX, amountY)
+        let priceImpact = await sdk.sdkPool.calculateRemoveLiquidityPriceImpact(domainId, contractAddress, amountX, amountY)
         console.log('[/pool]', '[removeLiquidityPriceImpact]', { domainId, contractAddress, amountX, amountY, priceImpact })
-        setPriceImpactRemove(formatUnits(priceImpact) * 100)
+        if (priceImpact < 0) {
+          const overweightedAsset = adopted && local && (Number(amountX) + Number((equalsIgnoreCase(adopted.address, x_asset_data?.contract_address) ? adopted : local).balance)) > (Number(amountY) + Number((equalsIgnoreCase(adopted.address, y_asset_data?.contract_address) ? adopted : local).balance)) ? 'x' : 'y'
+          if (withdrawOption === `${overweightedAsset}_only`) {
+            priceImpact *= -1
+          }
+        }
+        setPriceImpactRemove(formatUnits(numberToFixed(priceImpact)) * 100)
       }
       else {
         failed = true
