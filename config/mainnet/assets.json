@@ -669,7 +669,7 @@
         "contract_address": "0x8C92DC2B9D6A8A567c7Bd80C5db7a1eDA4fA9A91",
         "chain_id": 137,
         "decimals": 18,
-        "symbol": "BTRST",
+        "symbol": "BTRST"
       }
     ],
     "color": "#141414",
