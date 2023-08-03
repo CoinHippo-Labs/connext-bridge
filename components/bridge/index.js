@@ -61,10 +61,11 @@ const ALCHEMIX_ASSETS = ['aleth', 'alusd']
 
 export default () => {
   const dispatch = useDispatch()
-  const { preferences, chains, assets, router_asset_balances, pools, rpc_providers, dev, wallet, balances, latest_bumped_transfers } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, router_asset_balances: state.router_asset_balances, pools: state.pools, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances, latest_bumped_transfers: state.latest_bumped_transfers }), shallowEqual)
+  const { preferences, chains, assets, gas_tokens_price, router_asset_balances, pools, rpc_providers, dev, wallet, balances, latest_bumped_transfers } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, gas_tokens_price: state.gas_tokens_price, router_asset_balances: state.router_asset_balances, pools: state.pools, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances, latest_bumped_transfers: state.latest_bumped_transfers }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
+  const { gas_tokens_price_data } = { ...gas_tokens_price }
   const { router_asset_balances_data } = { ...router_asset_balances }
   const { pools_data } = { ...pools }
   const { rpcs } = { ...rpc_providers }
@@ -895,6 +896,16 @@ export default () => {
             isHighPriority: !forceSlow,
             priceIn: relayerFeeAssetType === 'transacting' ? 'usd' : 'native',
             destinationGasPrice: gas_price,
+          }
+          if (NETWORK !== 'mainnet') {
+            const source_gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, native_token?.symbol))
+            const destination_gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, destination_chain_data?.native_token?.symbol))
+            if (source_gas_token_data?.price) {
+              params.originNativeTokenPrice = source_gas_token_data.price
+            }
+            if (destination_gas_token_data?.price) {
+              params.destinationNativeTokenPrice = destination_gas_token_data.price
+            }
           }
           try {
             console.log('[/]', '[estimateRelayerFee]', params)
