@@ -17,7 +17,7 @@ import NumberDisplay from '../number'
 import Copy from '../copy'
 import Modal from '../modal'
 import Wallet from '../wallet'
-import { RELAYER_FEE_ASSET_TYPES, PERCENT_ROUTER_FEE, GAS_LIMIT_ADJUSTMENT, DEFAULT_PERCENT_BRIDGE_SLIPPAGE } from '../../lib/config'
+import { NETWORK, RELAYER_FEE_ASSET_TYPES, PERCENT_ROUTER_FEE, GAS_LIMIT_ADJUSTMENT, DEFAULT_PERCENT_BRIDGE_SLIPPAGE } from '../../lib/config'
 import { getChainData, getAssetData, getContractData } from '../../lib/object'
 import { toBigNumber, toFixedNumber, formatUnits, parseUnits, isNumber } from '../../lib/number'
 import { toArray, includesStringList, numberToFixed, ellipse, equalsIgnoreCase, normalizeMessage, parseError } from '../../lib/utils'
@@ -210,6 +210,16 @@ export default (
               isHighPriority: true,
               priceIn: relayerFeeAssetType === 'transacting' ? 'usd' : 'native',
               destinationGasPrice: gas_price,
+            }
+            if (NETWORK !== 'mainnet') {
+              const source_gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, native_token?.symbol))
+              const destination_gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, destination_chain_data?.native_token?.symbol))
+              if (source_gas_token_data?.price) {
+                params.originNativeTokenPrice = source_gas_token_data.price
+              }
+              if (destination_gas_token_data?.price) {
+                params.destinationNativeTokenPrice = destination_gas_token_data.price
+              }
             }
             try {
               console.log('[action required]', '[estimateRelayerFee]', params)
