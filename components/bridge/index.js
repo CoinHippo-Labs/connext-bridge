@@ -737,8 +737,7 @@ export default () => {
                 "function withdraw(uint256 _amount)",
               ]);
 
-              const ERC20 = xcallParams.asset
-              const xERC20 = source_contract_data?.next_asset?.contract_address
+              const xERC20 = source_contract_data?.xERC20
 
               console.log('depositing into lockbox...')
               const depositData = lockboxInterface.encodeFunctionData('deposit', [xcallParams.amount])
@@ -762,9 +761,11 @@ export default () => {
               xcallParams.asset = xERC20
             } 
 
-            // Lockbox exists on destination domain, must withdraw
-            if (destination_contract_data?.lockbox) {
-              // TODO: set xcall calldata to target lockbox receiver
+            // Lockbox exists on destination domain, must withdraw through adapter
+            console.log(`destination_contract_data: `, destination_contract_data)
+            if (destination_contract_data?.lockbox && destination_contract_data?.lockbox_adapter) {
+              xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to]);
+              xcallParams.to = destination_contract_data?.lockbox_adapter
             }
           }
 
