@@ -38,7 +38,6 @@
     "short_name": "POLY",
     "rpcs": [
       "https://polygon-mumbai.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-      "https://matic-mumbai.chainstacklabs.com",
       "https://rpc.ankr.com/polygon_mumbai"
     ],
     "native_token": {
