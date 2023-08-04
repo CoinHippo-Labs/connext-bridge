@@ -61,10 +61,11 @@ const ALCHEMIX_ASSETS = ['aleth', 'alusd']
 
 export default () => {
   const dispatch = useDispatch()
-  const { preferences, chains, assets, router_asset_balances, pools, rpc_providers, dev, wallet, balances, latest_bumped_transfers } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, router_asset_balances: state.router_asset_balances, pools: state.pools, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances, latest_bumped_transfers: state.latest_bumped_transfers }), shallowEqual)
+  const { preferences, chains, assets, gas_tokens_price, router_asset_balances, pools, rpc_providers, dev, wallet, balances, latest_bumped_transfers } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, gas_tokens_price: state.gas_tokens_price, router_asset_balances: state.router_asset_balances, pools: state.pools, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances, latest_bumped_transfers: state.latest_bumped_transfers }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
+  const { gas_tokens_price_data } = { ...gas_tokens_price }
   const { router_asset_balances_data } = { ...router_asset_balances }
   const { pools_data } = { ...pools }
   const { rpcs } = { ...rpc_providers }
@@ -936,6 +937,16 @@ export default () => {
             priceIn: relayerFeeAssetType === 'transacting' ? 'usd' : 'native',
             destinationGasPrice: gas_price,
           }
+          if (NETWORK !== 'mainnet') {
+            const source_gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, native_token?.symbol))
+            const destination_gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, destination_chain_data?.native_token?.symbol))
+            if (source_gas_token_data?.price) {
+              params.originNativeTokenPrice = source_gas_token_data.price
+            }
+            if (destination_gas_token_data?.price) {
+              params.destinationNativeTokenPrice = destination_gas_token_data.price
+            }
+          }
           try {
             console.log('[/]', '[estimateRelayerFee]', params)
             const response = await sdk.sdkBase.estimateRelayerFee(params)
@@ -978,11 +989,7 @@ export default () => {
         setEstimateResponse(null)
 
         if (isNumber(_amount) && !isZero(_amount)) {
-          if (
-            ['linea'].includes(destination_chain_data?.id) || 
-            ALCHEMIX_ASSETS.includes(asset) ||
-            source_asset_data?.is_xERC20
-          ) {
+          if (['linea'].includes(destination_chain_data?.id) || ALCHEMIX_ASSETS.includes(asset) || source_asset_data?.is_xERC20) {
             manual = true
           }
           else if (toArray([source_chain_data?.id, destination_chain_data?.id]).findIndex(c => toArray(pools_data).find(d => d.chain_data?.id === c && !d.tvl)) < 0) {
@@ -1084,11 +1091,11 @@ export default () => {
   relayerFee = fees ? relayerFee || 0 : null
   const min_amount = 0
   const max_amount = source_amount && formatUnits(BigInt(parseUnits(source_amount, source_decimals)) - BigInt(parseUnits(relayerFee && source_contract_data?.contract_address === ZeroAddress ? relayerFee : '0', source_decimals)), source_decimals)
-  const relayerFeeToDeduct = relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? Number(relayerFee) : 0
+  const relayerFeeToDeduct = relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? Number(numberToFixed(relayerFee, source_decimals)) : 0
   const feeAmountRatio = relayerFeeToDeduct > 0 && Number(amount) > 0 ? (Number(routerFee) + relayerFeeToDeduct) / amount : null
   const hasValue = isNumber(amount) && !isZero(amount) && typeof source_asset_data?.price === 'number' && !source_asset_data.is_stablecoin
 
-  const estimatedReceived = estimatedValues?.amountReceived ? estimatedValues.amountReceived - relayerFeeToDeduct : Number(amount) > 0 && isNumber(routerFee) ? amount - routerFee - relayerFeeToDeduct : null
+  const estimatedReceived = estimatedValues?.amountReceived ? Number(numberToFixed(estimatedValues.amountReceived - relayerFeeToDeduct, destination_decimals)) : Number(amount) > 0 && isNumber(routerFee) ? Number(numberToFixed(amount - routerFee - relayerFeeToDeduct, destination_decimals)) : null
   const estimatedSlippage = estimatedValues?.destinationSlippage && estimatedValues.originSlippage ? Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage) : null
 
   const routersLiquidityAmount = _.sum(toArray(router_asset_balances_data?.[destination_chain_data?.chain_id]).filter(d => toArray([destination_contract_data?.contract_address, destination_contract_data?.next_asset?.contract_address]).findIndex(a => equalsIgnoreCase(a, d.contract_address)) > -1).map(d => formatUnits(d.amount, destination_contract_data?.next_asset && equalsIgnoreCase(d.contract_address, destination_contract_data.next_asset.contract_address) ? destination_contract_data.next_asset.decimals : destination_decimals)).map(d => Number(d) > 0 ? Number(d) : 0))
@@ -1601,10 +1608,13 @@ export default () => {
                               {!isNumber(amount) || isNumber(estimatedValues?.amountReceived) || estimateResponse ?
                                 <span className="whitespace-nowrap text-lg 3xl:text-2xl font-semibold">
                                   {isNumber(amount) && isNumber(estimatedReceived) && !estimateResponse ?
-                                    <NumberDisplay
-                                      value={estimatedReceived > 0 ? estimatedReceived : 0}
-                                      className={`w-36 sm:w-48 bg-transparent ${isNumber(estimatedReceived) && !isZero(estimatedReceived) ? '' : 'text-slate-500 dark:text-slate-500'} text-lg 3xl:text-2xl font-semibold text-right py-1.5`}
-                                    /> :
+                                    // <NumberDisplay
+                                    //   value={estimatedReceived > 0 ? estimatedReceived : 0}
+                                    //   className={`w-36 sm:w-48 bg-transparent ${isNumber(estimatedReceived) && !isZero(estimatedReceived) ? '' : 'text-slate-500 dark:text-slate-500'} text-lg 3xl:text-2xl font-semibold text-right py-1.5`}
+                                    // /> :
+                                    <span className={`w-36 sm:w-48 bg-transparent ${isNumber(estimatedReceived) && !isZero(estimatedReceived) ? '' : 'text-slate-500 dark:text-slate-500'} text-lg 3xl:text-2xl font-semibold text-right py-1.5`}>
+                                      {estimatedReceived > 0 ? estimatedReceived : 0}
+                                    </span> :
                                     <span>-</span>
                                   }
                                 </span> :
@@ -1628,7 +1638,7 @@ export default () => {
                                     <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
                                       {isNumber(amount) && isNumber(estimatedValues?.routerFee) && !estimateResponse ?
                                         <NumberDisplay
-                                          value={(Number(routerFee) > 0 ? Number(routerFee) : 0) + (relayerFeeAssetType === 'native' || Number(relayerFee) > 0 ? Number(relayerFee) : 0)}
+                                          value={numberToFixed((Number(routerFee) > 0 ? Number(routerFee) : 0) + (relayerFeeAssetType === 'native' || Number(relayerFee) > 0 ? Number(relayerFee) : 0), relayerFeeAssetType === 'native' ? native_token?.decimals || 18 : source_decimals)}
                                           className="text-sm 3xl:text-xl"
                                         /> :
                                         <span>-</span>
