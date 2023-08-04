@@ -71,7 +71,6 @@
     "short_name": "POLY",
     "rpcs": [
       "https://polygon-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-      "https://matic-mainnet.chainstacklabs.com",
       "https://poly-rpc.gateway.pokt.network",
       "https://polygon.blockpi.network/v1/rpc/public"
     ],
