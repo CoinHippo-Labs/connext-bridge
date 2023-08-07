@@ -106,7 +106,7 @@ export default (
     [data, chains_data, assets_data],
   )
 
-  const { transfer_id, error_status, origin_domain, origin_transacting_asset, origin_transacting_amount, destination_domain, destination_transacting_asset, destination_local_asset, slippage, relayer_fees, receive_local } = { ...data }
+  const { transfer_id, error_status, origin_domain, origin_transacting_asset, origin_transacting_amount, destination_domain, destination_transacting_asset, destination_local_asset, slippage, relayer_fees, receive_local, delegate } = { ...data }
   let { relayer_fee } = { ...data }
 
   const source_chain_data = getChainData(origin_domain, chains_data)
@@ -365,9 +365,16 @@ export default (
             const response = parseError(error)
             console.log('[action required]', '[updateSlippage error]', params, error)
             const { code } = { ...response }
+            let { message } = { ...response }
             switch (code) {
               case 'user_rejected':
                 break
+              case 'params_invalid':
+                if (!equalsIgnoreCase(delegate, address)) {
+                  message = 'Must update slippage with delegate'
+                  setUpdateResponse({ status: 'failed', ...response, message })
+                  break 
+                }
               default:
                 setUpdateResponse({ status: 'failed', ...response })
                 break
