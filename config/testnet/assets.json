@@ -311,7 +311,7 @@
     ],
     "color": "#000000",
     "group": "other_tokens"
-  }, 
+  },
   {
     "id": "p8",
     "symbol": "P8",
@@ -347,6 +347,35 @@
         "chain_id": 80001,
         "decimals": 18,
         "symbol": "BTRST"
+      }
+    ],
+    "color": "#141414",
+    "group": "other_tokens"
+  },
+  {
+    "id": "xEURe",
+    "symbol": "xEURe",
+    "name": "xTokenFrontend",
+    "image": "",
+    "is_stablecoin": false,
+    "contracts": [
+      {
+        "contract_address": "0x83B844180f66Bbc3BE2E97C6179035AF91c4Cce8",
+        "chain_id": 5,
+        "decimals": 18,
+        "symbol": "xEURe"
+      },
+      {
+        "contract_address": "0x7E9D498a970B7786ea923Fb8643FBbF62Efa5037",
+        "chain_id": 421613,
+        "decimals": 18,
+        "symbol": "xEURe"
+      },
+      {
+        "contract_address": "0xf5f1424dD3B78f64B18A085C8D7AEa5E124bf168",
+        "chain_id": 420,
+        "decimals": 18,
+        "symbol": "xEURe"
       }
     ],
     "color": "#141414",
