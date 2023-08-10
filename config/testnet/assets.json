@@ -360,7 +360,7 @@
     "is_stablecoin": false,
     "contracts": [
       {
-        "contract_address": "0x83B844180f66Bbc3BE2E97C6179035AF91c4Cce8",
+        "contract_address": "0x6984384D6abE16221769BD9400de72b8F4Aa572C",
         "chain_id": 5,
         "decimals": 18,
         "symbol": "xEURe"
