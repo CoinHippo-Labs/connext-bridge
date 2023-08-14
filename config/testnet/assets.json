@@ -211,7 +211,7 @@
         "symbol": "alUSD"
       },
       {
-        "contract_address": "0xf41F4Bf77580B076BeBa1c0Efe2bB5CB1F7cF679",
+        "contract_address": "0xF0B4E129D4c8c99dCA7BB17E80E194453A736439",
         "chain_id": 420,
         "decimals": 18,
         "symbol": "alUSD",
@@ -223,7 +223,7 @@
         }
       },
       {
-        "contract_address": "0x37cC61E79E6Ea720f4fBDCBAbb514Ec52043Eb4F",
+        "contract_address": "0x01788a38a76404fD02f5e2916501133eC1F2360D",
         "chain_id": 421613,
         "decimals": 18,
         "symbol": "alUSD",
@@ -252,7 +252,7 @@
         "symbol": "alETH"
       },
       {
-        "contract_address": "0x42d3F5AfC4873d9ff82E1501Ae00d0c7aE1C0C13",
+        "contract_address": "0xD481D69Ef4D8fd27cDF5191D879bdeCa7F4334b4",
         "chain_id": 420,
         "decimals": 18,
         "symbol": "alETH",
@@ -264,7 +264,7 @@
         }
       },
       {
-        "contract_address": "0x0848B07D3a0b1d5A0b1eca22c2407075b24e948E",
+        "contract_address": "0x1F523922367b2903a159ACC158a69D6b368754cF",
         "chain_id": 421613,
         "decimals": 18,
         "symbol": "alETH",
