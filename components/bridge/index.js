@@ -1302,6 +1302,9 @@ export default () => {
                             </div>
                           }
                           <span className="text-center">
+                            💡 Connext plugs into the chain native bridges for optimal security and trust minimization. No oracles or external validator sets are used.
+                          </span>
+                          <span className="text-center">
                             If you close this window, your transaction will still be processed.
                           </span>
                         </div>
