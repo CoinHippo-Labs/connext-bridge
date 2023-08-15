@@ -20,7 +20,7 @@ import { getProvider, getBalance } from '../lib/chain/evm'
 import { NETWORK, ENVIRONMENT, IS_STAGING, NUM_STATS_DAYS, MIN_USER_DEPOSITED, getChainsData, getAssetsData } from '../lib/config'
 import { getChainData, getAssetData, getChainContractsData, getContractData, getPoolData, getBalanceData } from '../lib/object'
 import { formatUnits, isNumber } from '../lib/number'
-import { split, toArray, equalsIgnoreCase, sleep } from '../lib/utils'
+import { split, toArray, equalsIgnoreCase, getPath, sleep } from '../lib/utils'
 import { THEME, PAGE_VISIBLE, TERMS_AGREED, CHAINS_DATA, ASSETS_DATA, POOL_ASSETS_DATA, GAS_TOKENS_PRICE_DATA, ENS_DATA, ROUTER_ASSET_BALANCES_DATA, POOLS_DATA, USER_POOLS_DATA, POOLS_DAILY_STATS_DATA, RPCS, SDK, BALANCES_DATA, LATEST_BUMPED_TRANSFERS_DATA } from '../reducers/types'
 
 export default ({ children, agreeToTermsUseModal = false }) => {
@@ -556,18 +556,55 @@ export default ({ children, agreeToTermsUseModal = false }) => {
 
       const getData = async is_interval => {
         if (page_visible && chains_data && assets_data && rpcs && address) {
-          const all_chains_data = getChainData(undefined, chains_data, { return_all: true })
-          const data = get_balances_data && !is_interval && all_chains_data.findIndex(c => !balances_data?.[c.chain_id]) < 0 ? toArray(get_balances_data) : all_chains_data.map(c => { return { chain: c.id } })
-          data.forEach(c => {
-            const { chain, contract_data } = { ...c }
-            const { chain_id } = { ...getChainData(chain, chains_data) }
-            if (contract_data) {
-              getMyBalance(chain_id, contract_data)
-            }
-            else {
-              toArray(getChainContractsData(chain_id, assets_data)).forEach(c => getMyBalance(chain_id, c))
-            }
-          })
+          const path = getPath(asPath)
+          let chain_ids
+          switch (pathname) {
+            case '/[bridge]':
+              try {
+                const paths = split(path.replace('/', ''), 'normal', '-')
+                const sourceChain = paths[paths.indexOf('from') + 1]
+                const destinationChain = paths[paths.indexOf('to') + 1]
+                if (sourceChain || destinationChain) {
+                  chain_ids = toArray([sourceChain, destinationChain])
+                }
+              } catch (error) {}
+              break
+            case '/pool/[pool]':
+              try {
+                const paths = split(path.replace('/pool/', ''), 'normal', '-')
+                const chain = paths[paths.indexOf('on') + 1]
+                if (chain) {
+                  chain_ids = toArray(chain)
+                }
+              } catch (error) {}
+              break
+            case '/swap/[swap]':
+              try {
+                const paths = split(path.replace('/swap/', ''), 'normal', '-')
+                const chain = paths[paths.indexOf('on') + 1]
+                if (chain) {
+                  chain_ids = toArray(chain)
+                }
+              } catch (error) {}
+              break
+            default:
+              break
+          }
+
+          if (chain_ids || get_balances_data) {
+            const all_chains_data = getChainData(undefined, chains_data, { return_all: true }).filter(c => !chain_ids || chain_ids.includes(c.id))
+            const data = get_balances_data && !is_interval && all_chains_data.findIndex(c => !balances_data?.[c.chain_id]) < 0 ? toArray(get_balances_data) : all_chains_data.map(c => { return { chain: c.id } })
+            data.forEach(c => {
+              const { chain, contract_data } = { ...c }
+              const { chain_id } = { ...getChainData(chain, chains_data) }
+              if (contract_data) {
+                getMyBalance(chain_id, contract_data)
+              }
+              else {
+                toArray(getChainContractsData(chain_id, assets_data)).forEach(c => getMyBalance(chain_id, c))
+              }
+            })
+          }
         }
       }
 
