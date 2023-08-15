@@ -7,8 +7,7 @@
     "short_name": "GOR",
     "rpcs": [
       "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-      "https://goerli.blockpi.network/v1/rpc/public",
-      "https://eth-goerli.public.blastapi.io"
+      "https://goerli.blockpi.network/v1/rpc/public"
     ],
     "native_token": {
       "name": "Ethereum",
@@ -69,8 +68,7 @@
     "short_name": "OP",
     "rpcs": [
       "https://optimism-goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-      "https://optimism-goerli.publicnode.com",
-      "https://optimism-goerli.public.blastapi.io"
+      "https://optimism-goerli.publicnode.com"
     ],
     "native_token": {
       "name": "Ethereum",
@@ -99,8 +97,8 @@
     "name": "Arbitrum",
     "short_name": "ARB",
     "rpcs": [
-      "https://arbitrum-goerli.publicnode.com",
-      "https://arbitrum-goerli.public.blastapi.io"
+      "https://arbitrum-goerli.blockpi.network/v1/rpc/public",
+      "https://arbitrum-goerli.publicnode.com"
     ],
     "native_token": {
       "name": "Ethereum",
