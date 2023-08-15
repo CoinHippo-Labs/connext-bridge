@@ -161,7 +161,7 @@ export default (
                 ),
               )
             ),
-            value: (isNumber(amount) ? amount : -1) * price,
+            value: (isNumber(amount) ? amount : -1) * (price || 0),
           }
         })
       )
