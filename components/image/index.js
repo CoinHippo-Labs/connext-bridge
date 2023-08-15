@@ -18,7 +18,7 @@ export default ({ src, srcEnd, duration = 2, alt = '', ...rest }) => {
 
   useEffect(
     () => {
-      if (src && (!srcEnd || timer === 1)) {
+      if (src && (!srcEnd || timer === 0)) {
         setImageSrc(src)
       }
     },
