@@ -7,7 +7,8 @@
     "short_name": "GOR",
     "rpcs": [
       "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-      "https://rpc.ankr.com/eth_goerli"
+      "https://goerli.blockpi.network/v1/rpc/public",
+      "https://eth-goerli.public.blastapi.io"
     ],
     "native_token": {
       "name": "Ethereum",
@@ -38,7 +39,7 @@
     "short_name": "POLY",
     "rpcs": [
       "https://polygon-mumbai.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-      "https://rpc.ankr.com/polygon_mumbai"
+      "https://polygon-mumbai-bor.publicnode.com"
     ],
     "native_token": {
       "name": "Polygon",
@@ -68,7 +69,8 @@
     "short_name": "OP",
     "rpcs": [
       "https://optimism-goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-      "https://rpc.ankr.com/optimism_testnet"
+      "https://optimism-goerli.publicnode.com",
+      "https://optimism-goerli.public.blastapi.io"
     ],
     "native_token": {
       "name": "Ethereum",
@@ -97,7 +99,8 @@
     "name": "Arbitrum",
     "short_name": "ARB",
     "rpcs": [
-      "https://goerli-rollup.arbitrum.io/rpc"
+      "https://arbitrum-goerli.publicnode.com",
+      "https://arbitrum-goerli.public.blastapi.io"
     ],
     "native_token": {
       "name": "Ethereum",
@@ -155,7 +158,8 @@
     "name": "zkSync",
     "short_name": "ZKSYNC",
     "rpcs": [
-      "https://zksync2-testnet.zksync.dev"
+      "https://testnet.era.zksync.dev",
+      "https://zksync-era-testnet.blockpi.network/v1/rpc/public"
     ],
     "native_token": {
       "name": "Ethereum",
