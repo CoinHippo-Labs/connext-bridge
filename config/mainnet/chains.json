@@ -40,8 +40,8 @@
     "name": "BNB Chain",
     "short_name": "BNB",
     "rpcs": [
-      "https://rpc.ankr.com/bsc",
-      "https://bscrpc.com"
+      "https://bsc-mainnet.public.blastapi.io",
+      "https://1rpc.io/bnb"
     ],
     "native_token": {
       "name": "BNB",
@@ -138,7 +138,7 @@
     "short_name": "ARB",
     "rpcs": [
       "https://arbitrum-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-      "https://arbitrum-one.publicnode.com"
+      "https://arbitrum-one.public.blastapi.io"
     ],
     "private_rpcs": [
       "https://arb-mainnet.g.alchemy.com/v2/TdexEsMvH_cEqRkAHKzDT6ssagS1_mc_"
@@ -171,7 +171,7 @@
     "short_name": "GNO",
     "rpcs": [
       "https://gnosis.blockpi.network/v1/rpc/public",
-      "https://rpc.ankr.com/gnosis",
+      "https://gnosis-mainnet.public.blastapi.io",
       "https://xdai-rpc.gateway.pokt.network",
       "https://gnosischain-rpc.gateway.pokt.network"
     ],
