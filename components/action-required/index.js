@@ -317,7 +317,7 @@ export default (
       }
 
       const _newSlippage = _estimatedValues?.destinationSlippage && _estimatedValues.originSlippage ? Number(numberToFixed(Number(_estimatedValues.destinationSlippage) + Number(_estimatedValues.originSlippage), 2)) : null
-      setNewSlippage(_newSlippage > 0 ? _newSlippage : DEFAULT_PERCENT_BRIDGE_SLIPPAGE)
+      setNewSlippage(_newSlippage > 0 ? _newSlippage > _slippage ? _newSlippage : _slippage + 0.1 : DEFAULT_PERCENT_BRIDGE_SLIPPAGE)
     }
   }
 
