@@ -30,7 +30,7 @@ export default (
           className="w-full h-10 bg-transparent appearance-none rounded border border-slate-200 dark:border-slate-800 text-sm pl-10 pr-5"
         />
         <div className="absolute top-0 left-0 mt-3 ml-4">
-          <FiSearch className="w-4 h-4 stroke-current" />
+          <FiSearch className="w-4 h-4" />
         </div>
         <div className="w-full mx-auto pt-4 pb-2">
           <Assets

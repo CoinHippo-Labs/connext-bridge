@@ -50,7 +50,7 @@ export default (
         chains_data ?
           <div className={fixed ? 'w-32 sm:w-40 min-w-max bg-slate-100 dark:bg-slate-900 cursor-default rounded border dark:border-slate-800 flex items-center justify-between space-x-0.5 sm:space-x-2 py-1.5 sm:py-2 px-2 sm:px-1.5' : className || 'w-32 sm:w-40 min-w-max bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded border dark:border-slate-700 flex items-center justify-between space-x-0.5 sm:space-x-2 py-1.5 sm:py-2 pl-2 pr-1 sm:px-1.5'}>
             <div className="flex items-center space-x-2 3xl:space-x-3">
-              {image && (
+              {image ?
                 <>
                   <div className="flex sm:hidden">
                     <Image
@@ -68,8 +68,9 @@ export default (
                       className="3xl:w-6 3xl:h-6 rounded-full"
                     />
                   </div>
-                </>
-              )}
+                </> :
+                <div />
+              }
               <span className="whitespace-nowrap sm:text-lg 3xl:text-2xl font-semibold">
                 {chainName(chain_data) || (origin ? 'Chain' : 'Select chain')}
               </span>
@@ -78,7 +79,7 @@ export default (
           </div> :
           <Spinner name="Puff" />
       }
-      buttonClassName={className || `w-32 sm:w-40 min-w-max h-8 sm:h-10 ${disabled ? 'cursor-not-allowed' : ''} flex items-center justify-center`}
+      buttonClassName={`${disabled ? 'cursor-not-allowed' : ''} ${className || 'w-32 min-w-max h-10 sm:h-12 flex items-center justify-center'}`}
       buttonStyle={{ boxShadow, WebkitBoxShadow: boxShadow, MozBoxShadow: boxShadow }}
       title={
         <span className="flex items-center space-x-1 pt-1 pb-2">

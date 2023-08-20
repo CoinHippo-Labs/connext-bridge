@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import { constants } from 'ethers'
 const { AddressZero: ZeroAddress } = { ...constants }
@@ -8,21 +9,22 @@ import Image from '../../image'
 import { WRAPPED_PREFIX } from '../../../lib/config'
 import { getChainData, getContractData, getBalanceData } from '../../../lib/object'
 import { isNumber } from '../../../lib/number'
-import { split, toArray, getTitle, equalsIgnoreCase } from '../../../lib/utils'
+import { split, toArray, equalsIgnoreCase } from '../../../lib/utils'
 
 export default (
   {
-    value,
+    chain,
+    asset,
+    address,
     inputSearch,
     onSelect,
-    chain,
-    destinationChain,
     isBridge = false,
     isPool = false,
-    showNextAssets = false,
-    showNativeAssets = false,
+    showNextAssets = true,
+    showNativeAssets = true,
     showOnlyWrappable = false,
-    data,
+    isDestination = false,
+    sourceChain,
   },
 ) => {
   const { chains, assets, pool_assets, pools, balances } = useSelector(state => ({ chains: state.chains, assets: state.assets, pool_assets: state.pool_assets, pools: state.pools, balances: state.balances }), shallowEqual)
@@ -32,15 +34,24 @@ export default (
   const { pools_data } = { ...pools }
   const { balances_data } = { ...balances }
 
-  const chain_data = getChainData(chain, chains_data)
-  const { chain_id, domain_id } = { ...chain_data }
+  const [filterAsset, setFilterAsset] = useState(null)
+  const [filterChain, setFilterChain] = useState(null)
 
   const _assets_data = (isPool ?
     toArray(
       _.concat(
-        pool_assets_data,
-        data && toArray(pools_data).filter(d => equalsIgnoreCase(d.domainId, domain_id)).map(d => {
-          const { asset_data, contract_data, adopted, local } = { ...d }
+        toArray(pool_assets_data).flatMap(d => {
+          const { contracts } = { ...d }
+          return toArray(contracts).map(c => {
+            const { chain_id } = { ...c }
+            const chain_data = getChainData(chain_id, chains_data)
+            return { ...d, ...c, chain_data, asset_data: d }
+          })
+        }),
+        toArray(pools_data).map(d => {
+          const { domainId, asset_data, contract_data, adopted, local } = { ...d }
+          const chain_data = getChainData(domainId, chains_data)
+          const { chain_id } = { ...chain_data }
           const { contracts } = { ...asset_data }
           const { contract_address, image } = { ...contract_data }
 
@@ -67,26 +78,34 @@ export default (
                           image :
                           image_paths.map((s, i) => i === image_paths.length - 1 ? s.substring(WRAPPED_PREFIX.length) : s).join('/') :
                     undefined,
+                  chain_data,
                 }
               }
             }
             return c
           })
 
-          return { ...asset_data, contracts: _contracts }
+          return { ...asset_data, contracts: _contracts, chain_data }
         }),
       )
     ) :
-    toArray(assets_data).filter(d => !isBridge || (
-      toArray(d.contracts).findIndex(c => c.chain_id === chain_id && c.is_bridge !== false) > -1 &&
-      (!destinationChain || (!toArray(d.exclude_destination_chains).includes(destinationChain) && !toArray(d.exclude_source_chains).includes(chain)))
-    ))
-  ).filter(d => !d.disabled)
+    toArray(assets_data).filter(d => !isBridge || !isDestination || (!toArray(d.exclude_destination_chains).includes(chain) && !toArray(d.exclude_source_chains).includes(sourceChain))).flatMap(d => {
+      const { contracts } = { ...d }
+      return toArray(contracts).filter(c => !isBridge || (c.is_bridge !== false && !getChainData(c.chain_id, chains_data)?.disabled_bridge)).map(c => {
+        const { chain_id } = { ...c }
+        const chain_data = getChainData(chain_id, chains_data)
+        return { ...d, ...c, chain_data, asset_data: d }
+      })
+    })
+  ).filter(d => !d.disabled && (!isDestination || (d.id === asset && d.chain_data?.id !== sourceChain)))
   const assets_data_sorted = _.orderBy(
-    toArray(_assets_data).filter(d => !inputSearch || d).flatMap(d => {
-      const { symbol, image, contracts } = { ...d }
+    toArray(_assets_data).filter(d => (!inputSearch || d) && (!filterAsset || d.id === filterAsset) && (!filterChain || d.chain_data?.id === filterChain)).flatMap(d => {
+      const { chain_data, asset_data } = { ...d }
+      d = asset_data ? { ...d, ...asset_data } : d
+      const { symbol, image, contracts, price } = { ...d }
+      const { chain_id } = { ...chain_data }
       const contract_data = getContractData(chain_id, contracts)
-      const { next_asset, wrappable } = { ...contract_data }
+      const { name, next_asset, wrappable } = { ...contract_data }
 
       const contracts_data = toArray(
         _.concat(
@@ -94,12 +113,17 @@ export default (
             ...contract_data,
             contract_address: ZeroAddress,
             symbol: symbol === 'DAI' ? `X${symbol}` : symbol,
+            name: d.name,
             image: image?.replace('/dai.', '/xdai.'),
           },
-          (!showOnlyWrappable || wrappable) && { ...contract_data },
+          (!showOnlyWrappable || wrappable) && {
+            ...contract_data,
+            name: equalsIgnoreCase(contract_data?.symbol, `W${symbol}`) ? `Wrapped ${d.name}` : name || d.name,
+          },
           next_asset && isBridge && showNextAssets && {
             ...contract_data,
             ...next_asset,
+            name: `Next ${d.name}`,
             is_next_asset: true,
           },
         )
@@ -109,8 +133,10 @@ export default (
         contracts_data.map(c => {
           const { contract_address, is_next_asset } = { ...c }
           const _contracts = _.cloneDeep(contracts).map(_c => getContractData(chain_id, contracts) ? c : _c)
+          const { amount } = { ...getBalanceData(chain_id, contract_address, balances_data) }
           return {
             ...d,
+            ...c,
             is_next_asset,
             contracts: _contracts,
             scores: toArray(
@@ -124,7 +150,7 @@ export default (
                 ),
                 c && (
                   inputSearch.startsWith('0x') && contract_address ?
-                    equalsIgnoreCase(contract_address, inputSearch) :
+                    equalsIgnoreCase(contract_address, inputSearch) ? 1 : 0 :
                     ['symbol', 'name'].map(f =>
                       split(c[f], 'lower', ' ').join(' ').startsWith(inputSearch.toLowerCase()) ?
                         inputSearch.length > 1 ?
@@ -135,6 +161,7 @@ export default (
                 ),
               )
             ),
+            value: (isNumber(amount) ? amount : -1) * (price || 0),
           }
         })
       )
@@ -148,75 +175,100 @@ export default (
       }
     })
     .filter(d => d.max_score > 1 / 10),
-    ['group', 'max_score'], ['asc', 'desc'],
+    ['value', 'group', 'max_score'], ['desc', 'asc', 'desc'],
   )
-  const preset_assets_data = _.uniqBy(toArray(_assets_data).filter(d => d.preset), 'id')
 
   return (
     <div>
-      {preset_assets_data.length > 0 && !showOnlyWrappable && (
-        <div className="flex flex-wrap items-center mt-1 mb-4">
-          {preset_assets_data.map((d, i) => {
-            const { id, symbol, name, image, contracts } = { ...d }
-            return (
-              <div
-                key={i}
-                onClick={
-                  () => {
-                    const contract_data = getContractData(chain_id, contracts, { chain_id, return_all: true }).find(d => d.wrappable || d.contract_address)
-                    const { wrappable } = { ...contract_data }
-                    let { contract_address, symbol } = { ...contract_data }
-                    contract_address = wrappable ? ZeroAddress : contract_address
-                    symbol = wrappable ? d.symbol : symbol
-                    onSelect(id, isBridge ? symbol : contract_address)
-                  }
-                }
-                className="hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded cursor-pointer flex items-center hover:font-semibold space-x-1 mr-1.5 py-1 px-1.5"
-              >
-                {image && (
-                  <Image
-                    src={image}
-                    width={20}
-                    height={20}
-                    className="rounded-full"
-                  />
-                )}
-                <span className={`whitespace-nowrap ${id === value ? 'font-bold' : ''}`}>
-                  {symbol || name}
-                </span>
-              </div>
-            )
-          })}
-        </div>
-      )}
+      {/*<div className="flex flex-wrap items-center mt-1 mb-2">
+        {_.uniqBy(_assets_data, 'id').map((d, i) => {
+          const { id, symbol, image } = { ...d }
+          const selected = id === filterAsset
+          return (
+            <div
+              key={i}
+              onClick={() => setFilterAsset(selected ? null : id)}
+              className="hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded cursor-pointer flex items-center hover:font-semibold space-x-1 mb-1.5 mr-1.5 py-1 px-1.5"
+            >
+              {image && (
+                <Image
+                  src={image}
+                  width={20}
+                  height={20}
+                  className="rounded-full"
+                />
+              )}
+              <span className={`whitespace-nowrap ${selected ? 'font-bold' : 'text-slate-400 dark:text-slate-500'}`}>
+                {symbol}
+              </span>
+            </div>
+          )
+        })}
+      </div>*/}
+      <div className="flex flex-wrap items-center mt-1 mb-2">
+        {toArray(chains_data).filter(d => !isBridge || !d.disabled_bridge).map((d, i) => {
+          const { id, name, image } = { ...d }
+          const selected = id === filterChain
+          return (
+            <div
+              key={i}
+              onClick={() => setFilterChain(selected ? null : id)}
+              className="hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded cursor-pointer flex items-center hover:font-semibold space-x-1 mb-1.5 mr-1.5 py-1 px-1.5"
+            >
+              {image && (
+                <Image
+                  src={image}
+                  width={20}
+                  height={20}
+                  className="rounded-full"
+                />
+              )}
+              <span className={`whitespace-nowrap ${selected ? 'font-bold' : 'text-slate-400 dark:text-slate-500'}`}>
+                {name}
+              </span>
+            </div>
+          )
+        })}
+      </div>
       <div className="max-h-96 overflow-y-scroll">
         {assets_data_sorted.map((d, i) => {
-          const { id, name, contracts, group, disabled } = { ...d }
+          const { id, name, contracts, disabled, chain_data, value } = { ...d }
+          const { chain_id } = { ...chain_data }
           const contract_data = getContractData(chain_id, contracts)
           const { contract_address } = { ...contract_data }
           let { symbol, image } = { ...contract_data }
           symbol = symbol || d.symbol || name
           image = image || d.image
 
-          const selected = data?.contract_address ? equalsIgnoreCase(contract_address, data.contract_address) : id === value
-          const header = group && !equalsIgnoreCase(group, assets_data_sorted[i - 1]?.group) && (
-            <div className={`text-slate-400 dark:text-slate-500 text-xs mt-${i === 0 ? 0.5 : 3} mb-2 ml-2`}>
-              {getTitle(group)}
-            </div>
-          )
+          const selected = chain_data?.id === chain && id === asset && address && equalsIgnoreCase(contract_address, address)
           const item = (
             <div className="flex items-center space-x-2">
               {image && (
-                <Image
-                  src={image}
-                  width={32}
-                  height={32}
-                  className="rounded-full"
-                />
+                <div className="flex items-end">
+                  <Image
+                    src={image}
+                    width={32}
+                    height={32}
+                    className="rounded-full opacity-80"
+                  />
+                  {chain_data?.image && (
+                    <Image
+                      src={chain_data.image}
+                      width={18}
+                      height={18}
+                      className="rounded-full z-10 -ml-2.5"
+                    />
+                  )}
+                </div>
               )}
-              <span className={`whitespace-nowrap text-base ${selected ? 'font-bold' : 'font-medium'}`}>
-                {symbol}
-              </span>
+              <div className="flex items-center space-x-2">
+                <span className={`whitespace-nowrap text-base ${selected ? 'font-bold' : 'font-medium'}`}>
+                  {name}
+                </span>
+                <span className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-base font-medium">
+                  {symbol}
+                </span>
+              </div>
             </div>
           )
           let { amount } = { ...getBalanceData(chain_id, contract_address, balances_data) }
@@ -224,7 +276,16 @@ export default (
           const balance = balances_data?.[chain_id] && (
             <div className={`${chain_id && !amount ? 'text-slate-400 dark:text-slate-500' : ''} ${selected ? 'font-semibold' : 'font-medium'} ml-auto`}>
               {isNumber(amount) ?
-                <NumberDisplay value={amount} className="whitespace-nowrap" /> :
+                <div className="flex flex-col items-end">
+                  <NumberDisplay value={amount} className="whitespace-nowrap" />
+                  {value > 0 && (
+                    <NumberDisplay
+                      value={value}
+                      prefix="$"
+                      className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs font-medium"
+                    />
+                  )}
+                </div> :
                 'n/a'
               }
             </div>
@@ -233,13 +294,12 @@ export default (
 
           return (
             <div key={i}>
-              {header}
               {disabled || !contract_data ?
                 <div title={contract_data ? 'Disabled' : 'Not Support'} className={className}>
                   {item}
                   {balance}
                 </div> :
-                <div onClick={() => onSelect(id, isBridge ? symbol : contract_address)} className={className}>
+                <div onClick={() => onSelect(chain_data?.id, id, contract_address)} className={className}>
                   {item}
                   {balance}
                 </div>
