@@ -59,7 +59,7 @@ const ALCHEMIX_GATEWAYS = {
 
 const ALCHEMIX_ASSETS = ['aleth', 'alusd']
 
-export default () => {
+export default ({ useAssetChain = false }) => {
   const dispatch = useDispatch()
   const { preferences, chains, assets, gas_tokens_price, router_asset_balances, pools, rpc_providers, dev, wallet, balances, latest_bumped_transfers } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, gas_tokens_price: state.gas_tokens_price, router_asset_balances: state.router_asset_balances, pools: state.pools, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances, latest_bumped_transfers: state.latest_bumped_transfers }), shallowEqual)
   const { theme } = { ...preferences }
@@ -1379,82 +1379,84 @@ export default () => {
                           />
                         )}
                       </div>
-                      {/*<div className="grid grid-cols-5 gap-3 sm:gap-6">
-                        <div className="col-span-2 flex flex-col items-center sm:items-start space-y-0.5 sm:space-y-2">
-                          <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
-                            <span className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium text-left">
-                              From
-                            </span>
-                          </div>
-                          <SelectChain
-                            disabled={disabled}
-                            value={source_chain}
-                            onSelect={
-                              c => {
-                                const _source_chain = c
-                                const _destination_chain = c === destination_chain ? source_chain : destination_chain
-                                const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(d => d.id !== asset))?.id : asset
-                                setBridge({ ...bridge, source_chain: _source_chain, destination_chain: _destination_chain, asset: _asset, symbol: equalsIgnoreCase(_source_chain, source_chain) && _asset === asset ? symbol : undefined })
-                                getBalances(_source_chain)
-                                getBalances(_destination_chain)
-                              }
-                            }
-                            source={source_chain}
-                            destination={destination_chain}
-                            origin="from"
-                            fixed={source === 'pool'}
-                          />
-                        </div>
-                        <div className="flex items-center justify-center mt-5.5 sm:mt-7">
-                          <button
-                            disabled={disabled}
-                            onClick={
-                              () => {
-                                if (!disabled) {
-                                  const _source_chain = destination_chain
-                                  const _destination_chain = source_chain
+                      {!useAssetChain && (
+                        <div className="grid grid-cols-5 gap-3 sm:gap-6">
+                          <div className="col-span-2 flex flex-col items-center sm:items-start space-y-0.5 sm:space-y-2">
+                            <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
+                              <span className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium text-left">
+                                From
+                              </span>
+                            </div>
+                            <SelectChain
+                              disabled={disabled}
+                              value={source_chain}
+                              onSelect={
+                                c => {
+                                  const _source_chain = c
+                                  const _destination_chain = c === destination_chain ? source_chain : destination_chain
                                   const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(d => d.id !== asset))?.id : asset
-                                  setBridge({ ...bridge, source_chain: _source_chain, destination_chain: _destination_chain, asset: _asset, amount: null })
-                                  getBalances(source_chain)
-                                  getBalances(destination_chain)
+                                  setBridge({ ...bridge, source_chain: _source_chain, destination_chain: _destination_chain, asset: _asset, symbol: equalsIgnoreCase(_source_chain, source_chain) && _asset === asset ? symbol : undefined })
+                                  getBalances(_source_chain)
+                                  getBalances(_destination_chain)
                                 }
                               }
-                            }
-                            className={`bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} ${source === 'pool' ? 'pointer-events-none dark:border-slate-800' : 'dark:border-slate-700'} rounded border flex items-center justify-center p-1 sm:p-1.5`}
-                          >
-                            <HiArrowRight size={18} className="3xl:w-6 3xl:h-6" />
-                          </button>
-                        </div>
-                        <div className="col-span-2 flex flex-col items-center sm:items-end space-y-0.5 sm:space-y-2">
-                          <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
-                            <span className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium text-left">
-                              To
-                            </span>
+                              source={source_chain}
+                              destination={destination_chain}
+                              origin="from"
+                              fixed={source === 'pool'}
+                            />
                           </div>
-                          <SelectChain
-                            disabled={disabled}
-                            value={destination_chain}
-                            onSelect={
-                              c => {
-                                const _source_chain = c === source_chain ? destination_chain : source_chain
-                                const _destination_chain = c
-                                const _destination_chain_data = getChainData(_destination_chain, chains_data)
-                                const source_asset_data = getAssetData(asset, assets_data)
-                                const destination_contract_data = getContractData(_destination_chain_data?.chain_id, source_asset_data?.contracts)
-                                const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(d => d.id !== asset))?.id : source_asset_data && !destination_contract_data && NETWORK === 'mainnet' ? 'eth' : asset
-                                setBridge({ ...bridge, source_chain: _source_chain, destination_chain: _destination_chain, asset: _asset })
-                                getBalances(_source_chain)
-                                getBalances(_destination_chain)
+                          <div className="flex items-center justify-center mt-5.5 sm:mt-7">
+                            <button
+                              disabled={disabled}
+                              onClick={
+                                () => {
+                                  if (!disabled) {
+                                    const _source_chain = destination_chain
+                                    const _destination_chain = source_chain
+                                    const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(d => d.id !== asset))?.id : asset
+                                    setBridge({ ...bridge, source_chain: _source_chain, destination_chain: _destination_chain, asset: _asset, amount: null })
+                                    getBalances(source_chain)
+                                    getBalances(destination_chain)
+                                  }
+                                }
                               }
-                            }
-                            source={source_chain}
-                            destination={destination_chain}
-                            origin="to"
-                            fixed={source === 'pool'}
-                            include={getChainData(undefined, chains_data, { not_disabled: true, return_all: true }).filter(d => getContractData(d.chain_id, destination_asset_data?.contracts)).map(d => d.id)}
-                          />
+                              className={`bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 ${disabled ? 'cursor-not-allowed' : ''} ${source === 'pool' ? 'pointer-events-none dark:border-slate-800' : 'dark:border-slate-700'} rounded border flex items-center justify-center p-1 sm:p-1.5`}
+                            >
+                              <HiArrowRight size={18} className="3xl:w-6 3xl:h-6" />
+                            </button>
+                          </div>
+                          <div className="col-span-2 flex flex-col items-center sm:items-end space-y-0.5 sm:space-y-2">
+                            <div className="w-32 sm:w-40 flex flex-col sm:flex-row sm:items-center justify-start space-x-1.5">
+                              <span className="text-slate-600 dark:text-slate-500 text-sm 3xl:text-xl font-medium text-left">
+                                To
+                              </span>
+                            </div>
+                            <SelectChain
+                              disabled={disabled}
+                              value={destination_chain}
+                              onSelect={
+                                c => {
+                                  const _source_chain = c === source_chain ? destination_chain : source_chain
+                                  const _destination_chain = c
+                                  const _destination_chain_data = getChainData(_destination_chain, chains_data)
+                                  const source_asset_data = getAssetData(asset, assets_data)
+                                  const destination_contract_data = getContractData(_destination_chain_data?.chain_id, source_asset_data?.contracts)
+                                  const _asset = source_asset_data?.exclude_source_chains?.includes(_source_chain) || source_asset_data?.exclude_destination_chains?.includes(_destination_chain) ? _.head(toArray(assets_data).filter(d => d.id !== asset))?.id : source_asset_data && !destination_contract_data && NETWORK === 'mainnet' ? 'eth' : asset
+                                  setBridge({ ...bridge, source_chain: _source_chain, destination_chain: _destination_chain, asset: _asset })
+                                  getBalances(_source_chain)
+                                  getBalances(_destination_chain)
+                                }
+                              }
+                              source={source_chain}
+                              destination={destination_chain}
+                              origin="to"
+                              fixed={source === 'pool'}
+                              include={getChainData(undefined, chains_data, { not_disabled: true, return_all: true }).filter(d => getContractData(d.chain_id, destination_asset_data?.contracts)).map(d => d.id)}
+                            />
+                          </div>
                         </div>
-                      </div>*/}
+                      )}
                     </div>
                     <div className="space-y-2.5">
                       <div className="flex items-center justify-between space-x-2">
@@ -1500,73 +1502,75 @@ export default () => {
                       </div>
                       <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-700 py-2.5 px-3">
                         <div className="flex items-center justify-between space-x-2">
-                          {/*<SelectAsset
-                            disabled={disabled}
-                            value={asset}
-                            onSelect={
-                              (a, s) => {
-                                const source_asset_data = getAssetData(a, assets_data)
-                                const destination_contract_data = getContractData(destination_chain_data?.chain_id, source_asset_data?.contracts)
-                                const _destination_chain = destination_chain ? destination_contract_data ? destination_chain : _.head(getChainData(undefined, chains_data, { not_disabled: true, except: source_chain, return_all: true }).filter(d => getContractData(d.chain_id, source_asset_data?.contracts)))?.id : destination_chain
-                                setBridge({ ...bridge, destination_chain: _destination_chain, asset: a, symbol: s, amount: a !== asset || !equalsIgnoreCase(s, symbol) ? null : amount })
-                                if (a !== asset) {
-                                  getBalances(source_chain)
-                                  getBalances(destination_chain)
+                          {!useAssetChain ?
+                            <SelectAsset
+                              disabled={disabled}
+                              value={asset}
+                              onSelect={
+                                (a, s) => {
+                                  const source_asset_data = getAssetData(a, assets_data)
+                                  const destination_contract_data = getContractData(destination_chain_data?.chain_id, source_asset_data?.contracts)
+                                  const _destination_chain = destination_chain ? destination_contract_data ? destination_chain : _.head(getChainData(undefined, chains_data, { not_disabled: true, except: source_chain, return_all: true }).filter(d => getContractData(d.chain_id, source_asset_data?.contracts)))?.id : destination_chain
+                                  setBridge({ ...bridge, destination_chain: _destination_chain, asset: a, symbol: s, amount: a !== asset || !equalsIgnoreCase(s, symbol) ? null : amount })
+                                  if (a !== asset) {
+                                    getBalances(source_chain)
+                                    getBalances(destination_chain)
+                                  }
                                 }
                               }
-                            }
-                            chain={source_chain}
-                            destinationChain={destination_chain}
-                            isBridge={true}
-                            showNextAssets={showNextAssets}
-                            showNativeAssets={true}
-                            fixed={source === 'pool'}
-                            data={{ ...source_asset_data, ...source_contract_data }}
-                          />*/}
-                          <SelectAssetChain
-                            disabled={disabled}
-                            chain={source_chain}
-                            asset={asset}
-                            address={source_contract_data?.contract_address}
-                            onSelect={
-                              (_chain, _asset, _address) => {
-                                const _source_chain = _chain
-                                const _destination_chain = _chain === destination_chain ? source_chain : destination_chain
-                                const source_chain_data = getChainData(_source_chain, chains_data)
-                                const source_asset_data = getAssetData(_asset, assets_data)
-                                const source_contract_data = getContractData(source_chain_data?.chain_id, source_asset_data?.contracts)
-                                const { next_asset } = { ...source_contract_data }
+                              chain={source_chain}
+                              destinationChain={destination_chain}
+                              isBridge={true}
+                              showNextAssets={showNextAssets}
+                              showNativeAssets={true}
+                              fixed={source === 'pool'}
+                              data={{ ...source_asset_data, ...source_contract_data }}
+                            /> :
+                            <SelectAssetChain
+                              disabled={disabled}
+                              chain={source_chain}
+                              asset={asset}
+                              address={source_contract_data?.contract_address}
+                              onSelect={
+                                (_chain, _asset, _address) => {
+                                  const _source_chain = _chain
+                                  const _destination_chain = _chain === destination_chain ? source_chain : destination_chain
+                                  const source_chain_data = getChainData(_source_chain, chains_data)
+                                  const source_asset_data = getAssetData(_asset, assets_data)
+                                  const source_contract_data = getContractData(source_chain_data?.chain_id, source_asset_data?.contracts)
+                                  const { next_asset } = { ...source_contract_data }
 
-                                let _symbol
-                                if (_address) {
-                                  if (equalsIgnoreCase(_address, source_contract_data?.contract_address)) {
-                                    _symbol = undefined
+                                  let _symbol
+                                  if (_address) {
+                                    if (equalsIgnoreCase(_address, source_contract_data?.contract_address)) {
+                                      _symbol = undefined
+                                    }
+                                    else if (equalsIgnoreCase(_address, next_asset?.contract_address)) {
+                                      _symbol = next_asset.symbol
+                                    }
+                                    else if (equalsIgnoreCase(_address, ZeroAddress)) {
+                                      _symbol = source_asset_data?.symbol
+                                    }
                                   }
-                                  else if (equalsIgnoreCase(_address, next_asset?.contract_address)) {
-                                    _symbol = next_asset.symbol
-                                  }
-                                  else if (equalsIgnoreCase(_address, ZeroAddress)) {
-                                    _symbol = source_asset_data?.symbol
-                                  }
-                                }
 
-                                setBridge({
-                                  ...bridge,
-                                  source_chain: _source_chain,
-                                  destination_chain: _destination_chain,
-                                  asset: _asset,
-                                  symbol: _symbol,
-                                  amount: _chain !== source_chain && _asset !== asset && _symbol !== symbol ? null : amount,
-                                })
-                                if (_chain !== source_chain && _asset !== asset && _symbol !== symbol) {
-                                  getBalances(_source_chain)
+                                  setBridge({
+                                    ...bridge,
+                                    source_chain: _source_chain,
+                                    destination_chain: _destination_chain,
+                                    asset: _asset,
+                                    symbol: _symbol,
+                                    amount: _chain !== source_chain && _asset !== asset && _symbol !== symbol ? null : amount,
+                                  })
+                                  if (_chain !== source_chain && _asset !== asset && _symbol !== symbol) {
+                                    getBalances(_source_chain)
+                                  }
                                 }
                               }
-                            }
-                            isBridge={true}
-                            showNextAssets={showNextAssets}
-                            fixed={source === 'pool'}
-                          />
+                              isBridge={true}
+                              showNextAssets={showNextAssets}
+                              fixed={source === 'pool'}
+                            />
+                          }
                           <div>
                             <DebounceInput
                               debounceTimeout={750}
@@ -1643,81 +1647,83 @@ export default () => {
                           </div>
                           <div className="bg-slate-100 dark:bg-slate-900 rounded border dark:border-slate-800 py-4 px-3">
                             <div className="flex items-center justify-between space-x-2">
-                              {/*<SelectAsset
-                                disabled={disabled}
-                                value={asset}
-                                onSelect={
-                                  (a, s) => {
-                                    if (!(source === 'pool' || !isWrappableAsset)) {
-                                      setBridge({ ...bridge, asset: a, receive_wrap: s?.startsWith('W') })
-                                      if (a !== asset) {
-                                        getBalances(source_chain)
-                                        getBalances(destination_chain)
-                                      }
-                                    }
-                                  }
-                                }
-                                chain={destination_chain}
-                                isBridge={true}
-                                showNextAssets={!isWrappableAsset}
-                                showNativeAssets={true}
-                                showOnlyWrappable={isWrappableAsset}
-                                fixed={source === 'pool' || !isWrappableAsset}
-                                data={{ ...destination_asset_data, ...destination_contract_data }}
-                              />*/}
-                              <SelectAssetChain
-                                disabled={disabled}
-                                chain={destination_chain}
-                                asset={asset}
-                                address={destination_contract_data?.contract_address}
-                                onSelect={
-                                  (_chain, _asset, _address) => {
-                                    if (source !== 'pool') {
-                                      const _source_chain = _chain === source_chain ? destination_chain : source_chain
-                                      const _destination_chain = _chain
-                                      const destination_chain_data = getChainData(_destination_chain, chains_data)
-                                      const destination_asset_data = getAssetData(_asset, assets_data)
-                                      const destination_contract_data = getContractData(destination_chain_data?.chain_id, destination_asset_data?.contracts)
-                                      const { next_asset, wrappable } = { ...destination_contract_data }
-
-                                      let receiveLocal = false
-                                      let receive_wrap = false
-                                      if (_address && equalsIgnoreCase(_address, next_asset?.contract_address)) {
-                                        receiveLocal = true
-                                      }
-                                      else if (wrappable && !equalsIgnoreCase(_address, ZeroAddress)) {
-                                        receive_wrap = true
-                                      }
-
-                                      if (equalsIgnoreCase(query?.receive_next?.toString(), 'true') && !receiveLocal) {
-                                        const params = { amount, receive_next: receiveLocal }
-                                        if (!isNumber(amount)) {
-                                          delete params.amount
+                              {!useAssetChain ?
+                                <SelectAsset
+                                  disabled={disabled}
+                                  value={asset}
+                                  onSelect={
+                                    (a, s) => {
+                                      if (!(source === 'pool' || !isWrappableAsset)) {
+                                        setBridge({ ...bridge, asset: a, receive_wrap: s?.startsWith('W') })
+                                        if (a !== asset) {
+                                          getBalances(source_chain)
+                                          getBalances(destination_chain)
                                         }
-                                        router.push(`/${_source_chain && _destination_chain ? `${asset ? `${asset.toUpperCase()}-` : ''}from-${_source_chain}-to-${_destination_chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
-                                      }
-                                      else {
-                                        setBridge({
-                                          ...bridge,
-                                          source_chain: _source_chain,
-                                          destination_chain: _destination_chain,
-                                          amount: _chain !== _destination_chain ? null : amount,
-                                          receive_wrap,
-                                        })
-                                        setOptions({ ...options, receiveLocal })
-                                      }
-                                      if (_chain !== _destination_chain) {
-                                        getBalances(_destination_chain)
                                       }
                                     }
                                   }
-                                }
-                                isBridge={true}
-                                showNextAssets={showNextAssets}
-                                isDestination={true}
-                                sourceChain={source_chain}
-                                fixed={source === 'pool'}
-                              />
+                                  chain={destination_chain}
+                                  isBridge={true}
+                                  showNextAssets={!isWrappableAsset}
+                                  showNativeAssets={true}
+                                  showOnlyWrappable={isWrappableAsset}
+                                  fixed={source === 'pool' || !isWrappableAsset}
+                                  data={{ ...destination_asset_data, ...destination_contract_data }}
+                                /> :
+                                <SelectAssetChain
+                                  disabled={disabled}
+                                  chain={destination_chain}
+                                  asset={asset}
+                                  address={destination_contract_data?.contract_address}
+                                  onSelect={
+                                    (_chain, _asset, _address) => {
+                                      if (source !== 'pool') {
+                                        const _source_chain = _chain === source_chain ? destination_chain : source_chain
+                                        const _destination_chain = _chain
+                                        const destination_chain_data = getChainData(_destination_chain, chains_data)
+                                        const destination_asset_data = getAssetData(_asset, assets_data)
+                                        const destination_contract_data = getContractData(destination_chain_data?.chain_id, destination_asset_data?.contracts)
+                                        const { next_asset, wrappable } = { ...destination_contract_data }
+
+                                        let receiveLocal = false
+                                        let receive_wrap = false
+                                        if (_address && equalsIgnoreCase(_address, next_asset?.contract_address)) {
+                                          receiveLocal = true
+                                        }
+                                        else if (wrappable && !equalsIgnoreCase(_address, ZeroAddress)) {
+                                          receive_wrap = true
+                                        }
+
+                                        if (equalsIgnoreCase(query?.receive_next?.toString(), 'true') && !receiveLocal) {
+                                          const params = { amount, receive_next: receiveLocal }
+                                          if (!isNumber(amount)) {
+                                            delete params.amount
+                                          }
+                                          router.push(`/${_source_chain && _destination_chain ? `${asset ? `${asset.toUpperCase()}-` : ''}from-${_source_chain}-to-${_destination_chain}` : ''}${Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : ''}`, undefined, { shallow: true })
+                                        }
+                                        else {
+                                          setBridge({
+                                            ...bridge,
+                                            source_chain: _source_chain,
+                                            destination_chain: _destination_chain,
+                                            amount: _chain !== _destination_chain ? null : amount,
+                                            receive_wrap,
+                                          })
+                                          setOptions({ ...options, receiveLocal })
+                                        }
+                                        if (_chain !== _destination_chain) {
+                                          getBalances(_destination_chain)
+                                        }
+                                      }
+                                    }
+                                  }
+                                  isBridge={true}
+                                  showNextAssets={showNextAssets}
+                                  isDestination={true}
+                                  sourceChain={source_chain}
+                                  fixed={source === 'pool'}
+                                />
+                              }
                               {!isNumber(amount) || isNumber(estimatedValues?.amountReceived) || estimateResponse ?
                                 <span className="whitespace-nowrap text-lg 3xl:text-2xl font-semibold">
                                   {isNumber(amount) && isNumber(estimatedReceived) && !estimateResponse ?
