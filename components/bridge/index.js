@@ -780,49 +780,6 @@ export default ({ useAssetChain = false }) => {
             }
           }
 
-          // Lockbox handling for xERC20s
-          if (source_asset_data?.is_xERC20) {
-            console.log('[/]', '[setup for an xERC20]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
-
-            // Lockbox exists on source domain, must deposit
-            if (source_contract_data?.lockbox) {
-              const lockboxInterface = new utils.Interface([
-                "function deposit(uint256 _amount)",
-                "function withdraw(uint256 _amount)",
-              ]);
-
-              const xERC20 = source_contract_data?.xERC20
-
-              console.log('depositing into lockbox...')
-              const depositData = lockboxInterface.encodeFunctionData('deposit', [xcallParams.amount])
-              const depositTxRequest = {
-                to: source_contract_data?.lockbox,
-                data: depositData,
-                from: address,
-                chainId: source_chain_data?.chain_id
-              }
-              const depositTxReceipt = await signer.sendTransaction(depositTxRequest)
-              await depositTxReceipt.wait()
-
-              console.log('approving xERC20 to Connext...')
-              const approveTxRequest = await sdk.sdkBase.approveIfNeeded(source_domain, xERC20, xcallParams.amount)
-              if (approveTxRequest) {
-                const approveTxReceipt = await signer.sendTransaction(approveTxRequest)
-                await approveTxReceipt.wait()
-              }
-
-              // set xcall asset to xERC20
-              xcallParams.asset = xERC20
-            } 
-
-            // Lockbox exists on destination domain, must withdraw through adapter
-            console.log(`destination_contract_data: `, destination_contract_data)
-            if (destination_contract_data?.lockbox && destination_contract_data?.lockbox_adapter) {
-              xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to]);
-              xcallParams.to = destination_contract_data?.lockbox_adapter
-            }
-          }
-
           const CANONICAL_ASSET_SYMBOL = NATIVE_WRAPPABLE_SYMBOLS.find(s => s === source_asset_data?.symbol)
           if (CANONICAL_ASSET_SYMBOL && destination_chain_data?.native_token?.symbol?.endsWith(CANONICAL_ASSET_SYMBOL)) {
             xcallParams.unwrapNativeOnDestination = xcallParams.receiveLocal || receive_wrap ? false : true
