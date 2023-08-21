@@ -11,8 +11,10 @@ import moment from 'moment'
 
 import Navbar from '../components/navbar'
 import Footer from '../components/footer'
+import Geoblock from '../components/geoblock'
 import AgreeToTerms from '../components/agree-to-terms'
 import meta from '../lib/meta'
+import { getIP, isBlock } from '../lib/api/ip'
 import { getTokensPrice } from '../lib/api/tokens'
 import { getENS } from '../lib/api/ens'
 import { getDailySwapTVL, getDailySwapVolume } from '../lib/api/metrics'
@@ -21,7 +23,7 @@ import { NETWORK, ENVIRONMENT, IS_STAGING, NUM_STATS_DAYS, MIN_USER_DEPOSITED, g
 import { getChainData, getAssetData, getChainContractsData, getContractData, getPoolData, getBalanceData } from '../lib/object'
 import { formatUnits, isNumber } from '../lib/number'
 import { split, toArray, equalsIgnoreCase, getPath, sleep } from '../lib/utils'
-import { THEME, PAGE_VISIBLE, TERMS_AGREED, CHAINS_DATA, ASSETS_DATA, POOL_ASSETS_DATA, GAS_TOKENS_PRICE_DATA, ENS_DATA, ROUTER_ASSET_BALANCES_DATA, POOLS_DATA, USER_POOLS_DATA, POOLS_DAILY_STATS_DATA, RPCS, SDK, BALANCES_DATA, LATEST_BUMPED_TRANSFERS_DATA } from '../reducers/types'
+import { THEME, PAGE_VISIBLE, TERMS_AGREED, IP_DATA, CHAINS_DATA, ASSETS_DATA, POOL_ASSETS_DATA, GAS_TOKENS_PRICE_DATA, ENS_DATA, ROUTER_ASSET_BALANCES_DATA, POOLS_DATA, USER_POOLS_DATA, POOLS_DAILY_STATS_DATA, RPCS, SDK, BALANCES_DATA, LATEST_BUMPED_TRANSFERS_DATA } from '../reducers/types'
 
 export default ({ children, agreeToTermsUseModal = false }) => {
   const dispatch = useDispatch()
@@ -59,7 +61,7 @@ export default ({ children, agreeToTermsUseModal = false }) => {
     ),
     shallowEqual,
   )
-  const { theme, page_visible, terms_agreed } = { ...preferences }
+  const { theme, page_visible, terms_agreed, ip_data } = { ...preferences }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { pool_assets_data } = { ...pool_assets }
@@ -98,6 +100,17 @@ export default ({ children, agreeToTermsUseModal = false }) => {
       }
     },
     [theme],
+  )
+
+  // ip
+  useEffect(
+    () => {
+      const getData = async () => {
+        dispatch({ type: IP_DATA, value: { ...await getIP() } })
+      }
+      getData()
+    },
+    [],
   )
 
   // chains
@@ -719,16 +732,20 @@ export default ({ children, agreeToTermsUseModal = false }) => {
             <div className="main w-full bg-white dark:bg-black" style={{ backgroundColor: theme === 'light' ? '#ececec' : '#1a1919' }}>
               <Navbar />
               <div className="w-full">
-                {agreeToTermsUseModal ?
-                  <>
-                    <AgreeToTerms useModal={agreeToTermsUseModal} />
-                    {children}
-                  </> :
-                  terms_agreed ?
-                    children :
-                    <div className="flex items-center" style={{ minHeight: 'calc(100vh - 220px)' }}>
+                {isBlock(ip_data) ?
+                  <div className="flex items-center" style={{ minHeight: 'calc(100vh - 220px)' }}>
+                    <Geoblock />
+                  </div> :
+                  agreeToTermsUseModal ?
+                    <>
                       <AgreeToTerms useModal={agreeToTermsUseModal} />
-                    </div>
+                      {children}
+                    </> :
+                    terms_agreed ?
+                      children :
+                      <div className="flex items-center" style={{ minHeight: 'calc(100vh - 220px)' }}>
+                        <AgreeToTerms useModal={agreeToTermsUseModal} />
+                      </div>
                 }
               </div>
             </div>
