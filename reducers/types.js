@@ -2,6 +2,7 @@
 export const THEME = 'theme'
 export const PAGE_VISIBLE = 'page_visible'
 export const TERMS_AGREED = 'terms_agreed'
+export const IP_DATA = 'ip_data'
 
 // chains
 export const CHAINS_DATA = 'chains_data'
