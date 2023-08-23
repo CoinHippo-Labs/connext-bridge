@@ -5,7 +5,6 @@
     "name": "Test",
     "image": "/logos/assets/test.png",
     "is_stablecoin": true,
-    "allow_paying_gas": true,
     "contracts": [
       {
         "contract_address": "0x7ea6eA49B0b0Ae9c5db7907d139D9Cd3439862a1",
@@ -129,7 +128,6 @@
     "symbol": "MATIC",
     "name": "Polygon",
     "image": "/logos/assets/matic.png",
-    "allow_paying_gas": true,
     "contracts": [
       {
         "contract_address": "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889",
