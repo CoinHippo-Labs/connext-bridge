@@ -138,7 +138,7 @@
     "short_name": "ARB",
     "rpcs": [
       "https://arbitrum-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-      "https://arb1.croswap.com/rpc"
+      "https://rpc.arb1.arbitrum.gateway.fm"
     ],
     "private_rpcs": [
       "https://arb-mainnet.g.alchemy.com/v2/TdexEsMvH_cEqRkAHKzDT6ssagS1_mc_"
