@@ -153,8 +153,8 @@ export default (
         </tbody>
       </table>
       {!noPagination && data?.length > 0 && (
-        <div className={`${noRecordPerPage || pageCount <= 3 ? 'grid' : 'flex flex-col'} sm:grid grid-cols-3 items-center justify-between ${size === 'small' ? 'text-xs' : 'text-sm'} gap-4 sm:my-2`}>
-          {!noRecordPerPage && (
+        <div className={`${noRecordPerPage || pageCount <= 3 ? 'grid' : 'flex flex-col'} sm:grid grid-cols-3 xl:grid-cols-5 items-center justify-between ${size === 'small' ? 'text-xs' : 'text-sm'} gap-4 sm:my-2`}>
+          {!noRecordPerPage ?
             <select
               disabled={loading}
               value={pageSize}
@@ -170,8 +170,11 @@ export default (
                   Show {s}
                 </option>
               )}
-            </select>
-          )}
+            </select> :
+            !noPagination ?
+              <div /> :
+              null
+          }
           {pageCount > 1 && pageCount <= 1 && (
             <div className="space-x-1 my-2.5 sm:my-0 mx-auto">
               <span>Page</span>
@@ -184,7 +187,7 @@ export default (
               </span>
             </div>
           )}
-          <div className="pagination flex flex-wrap items-center justify-center space-x-2">
+          <div className="xl:col-span-3 pagination flex flex-wrap items-center justify-center space-x-2">
             {pageCount > 1 ?
               <div className="flex flex-col sm:flex-row items-center justify-center my-3 sm:my-0">
                 <Pagination
