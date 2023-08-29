@@ -351,7 +351,7 @@
     "group": "other_tokens"
   },
   {
-    "id": "xEURe",
+    "id": "xeure",
     "symbol": "xEURe",
     "name": "xTokenFrontend",
     "image": "/logos/assets/eur.png",
@@ -401,5 +401,5 @@
     ],
     "color": "#000000",
     "group": "other_tokens"
-  },
+  }
 ]
