@@ -387,13 +387,13 @@
     "is_stablecoin": false,
     "contracts": [
       {
-        "contract_address": "0x1E6A05Dc5fc31A3F10E703e1369786C253E35Bb1",
+        "contract_address": "0x02E82fB078893EC64BC57e55Fe34f6669D8104BC",
         "chain_id": 5,
         "decimals": 18,
         "symbol": "WorkshopToken"
       },
       {
-        "contract_address": "0x1E6A05Dc5fc31A3F10E703e1369786C253E35Bb1",
+        "contract_address": "0x02E82fB078893EC64BC57e55Fe34f6669D8104BC",
         "chain_id": 420,
         "decimals": 18,
         "symbol": "WorkshopToken"
