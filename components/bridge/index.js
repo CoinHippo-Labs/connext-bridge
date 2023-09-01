@@ -877,15 +877,7 @@ export default ({ useAssetChain = false }) => {
           let request = await sdk.sdkBase.xcall(xcallParams)
           if (request) {
             if (txs && txs.length > 0) {    
-              console.log('added xcall txn to multisend:', request)
               txs.push(request)
-
-              console.log(`from:`, address)
-              console.log(`chainId:`, source_chain_data?.chain_id)
-              console.log(`encoding txns:`, txs)
-              console.log(`encoded multisend call data:`, encodeMultisendCall(txs))
-              console.log(`set request to multisend txn:`, request)
-
               request = {
                 to: multisendContract,
                 data: encodeMultisendCall(txs),
