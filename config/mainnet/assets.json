@@ -1,5 +1,39 @@
 [
   {
+    "id": "next",
+    "symbol": "NEXT",
+    "name": "Connext",
+    "image": "/logos/assets/next.png",
+    "contracts": [
+      {
+        "contract_address": "",
+        "chain_id": 1,
+        "decimals": 18
+      },
+      {
+        "contract_address": "",
+        "chain_id": 137,
+        "decimals": 18
+      },
+      {
+        "contract_address": "",
+        "chain_id": 10,
+        "decimals": 18
+      },
+      {
+        "contract_address": "",
+        "chain_id": 42161,
+        "decimals": 18
+      },
+      {
+        "contract_address": "",
+        "chain_id": 100,
+        "decimals": 18
+      }
+    ],
+    "color": "#4243d0"
+  },
+  {
     "id": "usdc",
     "symbol": "USDC",
     "name": "USD Coin",
