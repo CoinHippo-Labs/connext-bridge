@@ -739,6 +739,8 @@ export default ({ useAssetChain = false }) => {
           }
 
           // Lockbox handling for xERC20s
+          const txs = []
+          const multisendContract = await sdk.sdkBase.getDeploymentAddress(xcallParams.origin, "multisend");
           if (source_asset_data?.is_xERC20) {
             console.log('[/]', '[setup for an xERC20]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
 
