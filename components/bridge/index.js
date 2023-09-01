@@ -5,7 +5,7 @@ import { XTransferStatus, XTransferErrorStatus, encodeMultisendCall } from '@con
 import { PERMIT2_ADDRESS, AllowanceTransfer, MaxSigDeadline, MaxAllowanceExpiration } from '@uniswap/permit2-sdk'
 import Switch from 'react-switch'
 import { DebounceInput } from 'react-debounce-input'
-import { Contract, constants, utils } from 'ethers'
+import { BigNumber, Contract, constants, utils } from 'ethers'
 const { AddressZero: ZeroAddress } = { ...constants }
 const { getAddress } = { ...utils }
 import _ from 'lodash'
@@ -780,13 +780,13 @@ export default ({ useAssetChain = false }) => {
               ] = await Promise.all(allowances)
 
               // EOA approves ERC20 to permit2
-              if (erc20Allowance < xcallParams.amount) {
+              if (BigNumber.from(erc20Allowance).lt(BigNumber.from(xcallParams.amount))) {
                 const approvePermit2Erc20TxRequest = await erc20.approve(PERMIT2_ADDRESS, constants.MaxUint256);
                 await approvePermit2Erc20TxRequest.wait()
               }
 
               // EOA approves XERC20 to multisend
-              if (xerc20Allowance < xcallParams.amount) {
+              if (BigNumber.from(xerc20Allowance).lt(BigNumber.from(xcallParams.amount))) {
                 const approveMultisendXerc20TxRequest = await xerc20.approve(multisendContract, constants.MaxUint256);
                 await approveMultisendXerc20TxRequest.wait()
               }
