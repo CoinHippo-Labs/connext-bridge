@@ -12,7 +12,7 @@
         "symbol": "NEXT",
         "xERC20": "0xeA581cA64e4A384aE4dEA39bb083173CcBd2D817",
         "lockbox": "0xC84718b858021d19941DB52C6317F029F99f360D",
-        "lockbox_adapter": "TODO"
+        "lockbox_adapter": "0xE2c1aAa504322ff0BC42FCFb9A52A315A06d5Cc6"
       },
       {
         "contract_address": "0xeA581cA64e4A384aE4dEA39bb083173CcBd2D817",
