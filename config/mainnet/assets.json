@@ -9,7 +9,7 @@
         "contract_address": "0xFE67A4450907459c3e1FFf623aA927dD4e28c67a",
         "chain_id": 1,
         "decimals": 18,
-        "symbol": "RADAR",
+        "symbol": "NEXT",
         "xERC20": "0xeA581cA64e4A384aE4dEA39bb083173CcBd2D817",
         "lockbox": "0xC84718b858021d19941DB52C6317F029F99f360D",
         "lockbox_adapter": "TODO"
