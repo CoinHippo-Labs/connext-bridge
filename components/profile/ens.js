@@ -11,7 +11,7 @@ export default (
   {
     address,
     copySize = 18,
-    copyAddress = false,
+    copyAddress = true,
     width = 24,
     height = 24,
     noCopy = false,
