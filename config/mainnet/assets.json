@@ -4,6 +4,7 @@
     "symbol": "NEXT",
     "name": "Connext",
     "image": "/logos/assets/next.png",
+    "is_xERC20": true,
     "contracts": [
       {
         "contract_address": "0xFE67A4450907459c3e1FFf623aA927dD4e28c67a",
