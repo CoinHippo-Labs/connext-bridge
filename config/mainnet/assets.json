@@ -11,27 +11,27 @@
         "chain_id": 1,
         "decimals": 18,
         "symbol": "NEXT",
-        "xERC20": "0xeA581cA64e4A384aE4dEA39bb083173CcBd2D817",
-        "lockbox": "0xC84718b858021d19941DB52C6317F029F99f360D",
-        "lockbox_adapter": "0xE2c1aAa504322ff0BC42FCFb9A52A315A06d5Cc6"
+        "xERC20": "0x58b9cB810A68a7f3e1E4f8Cb45D1B9B3c79705E8",
+        "lockbox": "0x22f424Bca11FE154c403c277b5F8dAb54a4bA29b",
+        "lockbox_adapter": "0x222051df1632517e2008ca65cffcb0466cb3828d"
       },
       {
-        "contract_address": "0xeA581cA64e4A384aE4dEA39bb083173CcBd2D817",
+        "contract_address": "0x58b9cB810A68a7f3e1E4f8Cb45D1B9B3c79705E8",
         "chain_id": 137,
         "decimals": 18
       },
       {
-        "contract_address": "0xeA581cA64e4A384aE4dEA39bb083173CcBd2D817",
+        "contract_address": "0x58b9cB810A68a7f3e1E4f8Cb45D1B9B3c79705E8",
         "chain_id": 10,
         "decimals": 18
       },
       {
-        "contract_address": "0xeA581cA64e4A384aE4dEA39bb083173CcBd2D817",
+        "contract_address": "0x58b9cB810A68a7f3e1E4f8Cb45D1B9B3c79705E8",
         "chain_id": 42161,
         "decimals": 18
       },
       {
-        "contract_address": "0xeA581cA64e4A384aE4dEA39bb083173CcBd2D817",
+        "contract_address": "0x58b9cB810A68a7f3e1E4f8Cb45D1B9B3c79705E8",
         "chain_id": 100,
         "decimals": 18
       }
