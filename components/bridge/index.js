@@ -768,7 +768,7 @@ export default ({ useAssetChain = false }) => {
 
               const allowances = [
                 erc20.allowance(address, PERMIT2_ADDRESS),
-                xerc20.allowance(address, multisendContract),
+                xerc20.allowance(address, PERMIT2_ADDRESS),
                 permit2.allowance(address, erc20.address, source_contract_data?.lockbox),
                 permit2.allowance(address, xerc20.address, multisendContract)
               ]
@@ -779,19 +779,19 @@ export default ({ useAssetChain = false }) => {
                 [multisendPermitAmount, multisendPermitExpiration, multisendPermitNonce]
               ] = await Promise.all(allowances)
 
-              // EOA approves ERC20 to permit2
+              // EOA approves ERC20 to permit2 if needed
               if (BigNumber.from(erc20Allowance).lt(BigNumber.from(xcallParams.amount))) {
                 const approvePermit2Erc20TxRequest = await erc20.approve(PERMIT2_ADDRESS, constants.MaxUint256);
                 await approvePermit2Erc20TxRequest.wait()
               }
 
-              // EOA approves XERC20 to multisend
+              // EOA approves XERC20 to permit2 if needed
               if (BigNumber.from(xerc20Allowance).lt(BigNumber.from(xcallParams.amount))) {
-                const approveMultisendXerc20TxRequest = await xerc20.approve(multisendContract, constants.MaxUint256);
+                const approveMultisendXerc20TxRequest = await xerc20.approve(PERMIT2_ADDRESS, constants.MaxUint256);
                 await approveMultisendXerc20TxRequest.wait()
               }
 
-              // Create permit for Lockbox if needed
+              // Create permit for Lockbox
               if (lockboxPermitAmount < xcallParams.amount || lockboxPermitExpiration < MaxAllowanceExpiration) {
                 const permit = {
                   details: {
@@ -817,8 +817,8 @@ export default ({ useAssetChain = false }) => {
                 txs.push(depositWithPermitAllowanceTxRequest)
               }
               
-              // Create permit for Multisend if needed
-              if (multisendPermitAmount < xcallParams.amount) {
+              // Create permit for Multisend
+              if (multisendPermitAmount < xcallParams.amount || multisendPermitExpiration < MaxAllowanceExpiration) {
                 const permitMultisend = {
                   details: {
                     token: xerc20.address,
@@ -835,14 +835,13 @@ export default ({ useAssetChain = false }) => {
   
                 // Add transaction to call `permit` on Permit2
                 const permitMultisendData = permit2Interface.encodeFunctionData('permit', [address, permitMultisend, signatureForMultisend])
-                const permitMultisendDataTxRequest = {
+                const permitMultisendTxRequest = {
                   to: PERMIT2_ADDRESS,
                   data: permitMultisendData,
                   chainId: source_chain_data?.chain_id
                 }
-                txs.push(permitMultisendDataTxRequest)
+                txs.push(permitMultisendTxRequest)
               }
-
 
               // Add transaction to `transferFrom` from user to Multisend using Permit2
               const transferFromData = permit2Interface.encodeFunctionData('transferFrom', [address, multisendContract, xcallParams.amount, xerc20.address])
