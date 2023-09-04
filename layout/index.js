@@ -90,8 +90,8 @@ export default ({ children, agreeToTermsUseModal = false }) => {
           dispatch({ type: THEME, value: _theme })
         }
         const _terms_agreed = localStorage.getItem(TERMS_AGREED)
-        if (_terms_agreed !== terms_agreed?.toString()) {
-          dispatch({ type: TERMS_AGREED, value: _terms_agreed === 'true' })
+        if (_terms_agreed?.toString() !== terms_agreed?.toString()) {
+          dispatch({ type: TERMS_AGREED, value: !isNaN(_terms_agreed?.toString()) ? Number(_terms_agreed) : false })
         }
         const _latest_bumped_transfers_data = localStorage.getItem(LATEST_BUMPED_TRANSFERS_DATA)
         if (_latest_bumped_transfers_data) {
