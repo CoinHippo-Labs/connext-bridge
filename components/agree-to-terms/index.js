@@ -1,4 +1,5 @@
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
+import moment from 'moment'
 import { IoKeyOutline, IoDocumentTextOutline } from 'react-icons/io5'
 
 import Modal from '../modal'
@@ -68,7 +69,7 @@ export default ({ useModal = false }) => {
         </div>
       </div>
       <button
-        onClick={() => dispatch({ type: TERMS_AGREED, value: true })}
+        onClick={() => dispatch({ type: TERMS_AGREED, value: moment().valueOf() })}
         className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded text-white text-base 3xl:text-lg font-medium text-center mt-4.5 py-3.5 px-2 sm:px-3"
       >
         Agree to Terms
@@ -76,7 +77,7 @@ export default ({ useModal = false }) => {
     </div>
   )
 
-  return terms_agreed === false && (
+  return typeof terms_agreed !== 'number' && (
     useModal ?
       <Modal
         hidden={false}
