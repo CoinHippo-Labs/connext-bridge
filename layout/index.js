@@ -233,10 +233,10 @@ export default ({ children, agreeToTermsUseModal = false }) => {
                   const { contracts } = { ...a }
                   let { name, symbol } = { ...a }
                   const contract_data = getContractData(chain_id, contracts)
-                  const { contract_address } = { ...contract_data }
+                  const { contract_address, xERC20 } = { ...contract_data }
                   symbol = contract_data?.symbol || symbol
                   name = name || symbol
-                  return { name, symbol, address: contract_address }
+                  return { name, symbol, address: xERC20 || contract_address }
                 }),
               }
             }

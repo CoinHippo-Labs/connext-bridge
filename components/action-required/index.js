@@ -113,6 +113,11 @@ export default (
   const source_asset_data = getAssetData(undefined, assets_data, { chain_id: source_chain_data?.chain_id, contract_address: origin_transacting_asset })
   let source_contract_data = getContractData(source_chain_data?.chain_id, source_asset_data?.contracts)
   const _source_contract_data = _.cloneDeep(source_contract_data)
+  // xERC20 asset
+  if (source_contract_data?.xERC20 && equalsIgnoreCase(source_contract_data.xERC20, origin_transacting_asset)) {
+    source_contract_data = { ...source_contract_data, contract_address: source_contract_data.xERC20 }
+    delete source_contract_data.next_asset
+  }
   // next asset
   if (source_contract_data?.next_asset && equalsIgnoreCase(source_contract_data.next_asset.contract_address, origin_transacting_asset)) {
     source_contract_data = { ...source_contract_data, ...source_contract_data.next_asset }
@@ -138,6 +143,11 @@ export default (
   const destination_asset_data = getAssetData(undefined, assets_data, { chain_id: destination_chain_data?.chain_id, contract_addresses: [destination_transacting_asset, _asset_data ? (receive_local ? _contract_data?.next_asset : _contract_data)?.contract_address : destination_local_asset] })
   let destination_contract_data = getContractData(destination_chain_data?.chain_id, destination_asset_data?.contracts)
   const _destination_contract_data = _.cloneDeep(destination_contract_data)
+  // xERC20 asset
+  if (destination_contract_data?.xERC20 && equalsIgnoreCase(destination_contract_data.xERC20, destination_transacting_asset)) {
+    destination_contract_data = { ...destination_contract_data, contract_address: destination_contract_data.xERC20 }
+    delete destination_contract_data.next_asset
+  }
   // next asset
   if (destination_contract_data?.next_asset && (equalsIgnoreCase(destination_contract_data.next_asset.contract_address, destination_transacting_asset) || receive_local)) {
     destination_contract_data = { ...destination_contract_data, ...destination_contract_data.next_asset }
