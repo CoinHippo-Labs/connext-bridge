@@ -18,6 +18,7 @@ node_modules
 package-lock.json
 yarn.lock
 *.zip*
+/.yarn
 
 # misc
 .DS_Store
