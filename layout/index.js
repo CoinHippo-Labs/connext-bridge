@@ -741,7 +741,7 @@ export default ({ children, agreeToTermsUseModal = false }) => {
                       <AgreeToTerms useModal={agreeToTermsUseModal} />
                       {children}
                     </> :
-                    terms_agreed ?
+                    terms_agreed || terms_agreed === null ?
                       children :
                       <div className="flex items-center" style={{ minHeight: 'calc(100vh - 220px)' }}>
                         <AgreeToTerms useModal={agreeToTermsUseModal} />
