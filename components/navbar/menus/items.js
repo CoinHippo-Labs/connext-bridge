@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { HiCode } from 'react-icons/hi'
 import { CgFileDocument } from 'react-icons/cg'
 import { FaDiscord } from 'react-icons/fa'
-import { BsTwitter, BsTelegram, BsGithub } from 'react-icons/bs'
+import { FaXTwitter } from 'react-icons/fa6'
+import { BsTelegram, BsGithub } from 'react-icons/bs'
 import { BiChevronRight } from 'react-icons/bi'
 import { ImArrowLeft2 } from 'react-icons/im'
 
@@ -46,7 +47,7 @@ const menus = toArray([
   process.env.NEXT_PUBLIC_TWITTER_USERNAME && {
     title: 'Twitter',
     url: `https://twitter.com/${process.env.NEXT_PUBLIC_TWITTER_USERNAME}`,
-    icon: <BsTwitter size={20} className="3xl:w-6 3xl:h-6 text-blue-400 dark:text-white" />,
+    icon: <FaXTwitter size={20} className="3xl:w-6 3xl:h-6 text-black dark:text-white" />,
   },
   process.env.NEXT_PUBLIC_TELEGRAM_USERNAME && {
     title: 'Telegram',
