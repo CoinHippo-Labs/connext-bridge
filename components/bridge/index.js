@@ -1163,6 +1163,7 @@ export default ({ useAssetChain = false }) => {
   const { url, transaction_path } = { ...explorer }
 
   const source_asset_data = getAssetData(asset, assets_data)
+  const { is_xERC20 } = { ...source_asset_data }
   let source_contract_data = getContractData(source_chain_data?.chain_id, source_asset_data?.contracts)
   const _source_contract_data = _.cloneDeep(source_contract_data)
   // next asset
@@ -1850,7 +1851,7 @@ export default ({ useAssetChain = false }) => {
                               className="cursor-pointer flex items-center justify-between space-x-1"
                             >
                               <div className={`whitespace-nowrap ${collapse ? 'text-slate-500 dark:text-slate-500 font-medium' : 'font-semibold'} text-sm 3xl:text-xl`}>
-                                Estimated Fees
+                                {is_xERC20 ? 'Additional details' : 'Estimated Fees'}
                               </div>
                               <div className="flex items-center space-x-2">
                                 <div>
@@ -1859,16 +1860,19 @@ export default ({ useAssetChain = false }) => {
                                       {isNumber(amount) && isNumber(estimatedValues?.routerFee) && !estimateResponse ?
                                         <NumberDisplay
                                           value={numberToFixed((Number(routerFee) > 0 ? Number(routerFee) : 0) + (relayerFeeAssetType === 'native' || Number(relayerFee) > 0 ? Number(relayerFee) : 0), relayerFeeAssetType === 'native' ? native_token?.decimals || 18 : source_decimals)}
-                                          className="text-sm 3xl:text-xl"
+                                          suffix={` ${source_symbol}`}
+                                          className={`${relayerFeeAssetType === 'native' ? 'text-xs' : 'text-sm'} 3xl:text-xl`}
                                         /> :
-                                        <span>-</span>
+                                        <span>- {source_symbol}</span>
                                       }
-                                      <span>{source_symbol}</span>
                                       {relayerFeeAssetType === 'native' && (
                                         <>
                                           <span>+</span>
-                                          <NumberDisplay value={Number(relayerFee) > 0 ? relayerFee : 0} className="text-sm 3xl:text-xl" />
-                                          <span>{native_token?.symbol}</span>
+                                          <NumberDisplay
+                                            value={Number(relayerFee) > 0 ? relayerFee : 0}
+                                            suffix={native_token?.symbol && ` ${native_token.symbol}`}
+                                            className="text-xs 3xl:text-xl"
+                                          />
                                         </>
                                       )}
                                     </span> :
@@ -2029,123 +2033,127 @@ export default ({ useAssetChain = false }) => {
                                     </div>
                                   </div>
                                 )}
-                                {source !== 'pool' && (
-                                  <div className="flex flex-col space-y-0.5">
-                                    <div className="flex items-start justify-between space-x-1">
-                                      <Tooltip content="The maximum percentage you are willing to lose due to market changes.">
+                                {!is_xERC20 && (
+                                  <>
+                                    {source !== 'pool' && (
+                                      <div className="flex flex-col space-y-0.5">
+                                        <div className="flex items-start justify-between space-x-1">
+                                          <Tooltip content="The maximum percentage you are willing to lose due to market changes.">
+                                            <div className="flex items-center">
+                                              <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                                Slippage tolerance
+                                              </div>
+                                              <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
+                                            </div>
+                                          </Tooltip>
+                                          <div className="flex flex-col sm:items-end space-y-1.5">
+                                            {slippageEditing ?
+                                              <>
+                                                <div className="flex items-center justify-end space-x-1.5">
+                                                  <DebounceInput
+                                                    debounceTimeout={750}
+                                                    size="small"
+                                                    type="number"
+                                                    placeholder="0.00"
+                                                    value={isNumber(slippage) ? slippage : ''}
+                                                    onChange={
+                                                      e => {
+                                                        const regex = /^[0-9.\b]+$/
+                                                        let value
+                                                        if (e.target.value === '' || regex.test(e.target.value)) {
+                                                          value = e.target.value
+                                                        }
+                                                        if (typeof value === 'string') {
+                                                          if (value.startsWith('.')) {
+                                                            value = `0${value}`
+                                                          }
+                                                          if (isNumber(value)) {
+                                                            value = Number(value)
+                                                          }
+                                                        }
+                                                        value = value <= 0 ? 0.01 : value > 100 ? DEFAULT_PERCENT_BRIDGE_SLIPPAGE : value
+                                                        setOptions({ ...options, slippage: isNumber(value) ? parseFloat(numberToFixed(value, 2)) : value })
+                                                      }
+                                                    }
+                                                    onWheel={e => e.target.blur()}
+                                                    onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
+                                                    className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm 3xl:text-xl font-semibold text-right py-1 px-2`}
+                                                  />
+                                                  <button
+                                                    onClick={() => setSlippageEditing(false)}
+                                                    className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
+                                                  >
+                                                    <BiCheckCircle size={16} className="3xl:w-5 3xl:h-5" />
+                                                  </button>
+                                                </div>
+                                                <div className="flex items-center space-x-1.5 -mr-1.5">
+                                                  {[3.0, 1.0, 0.5].map((s, i) => (
+                                                    <div
+                                                      key={i}
+                                                      onClick={
+                                                        () => {
+                                                          setOptions({ ...options, slippage: s })
+                                                          setSlippageEditing(false)
+                                                        }
+                                                      }
+                                                      className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs 3xl:text-xl py-1 px-1.5`}
+                                                    >
+                                                      {s} %
+                                                    </div>
+                                                  ))}
+                                                </div>
+                                              </> :
+                                              <div className="flex items-center space-x-1.5">
+                                                <NumberDisplay
+                                                  value={slippage}
+                                                  suffix="%"
+                                                  className="whitespace-nowrap text-sm 3xl:text-xl font-semibold"
+                                                />
+                                                <button
+                                                  disabled={disabled}
+                                                  onClick={
+                                                    () => {
+                                                      if (!disabled) {
+                                                        setSlippageEditing(true)
+                                                      }
+                                                    }
+                                                  }
+                                                  className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
+                                                >
+                                                  <BiEditAlt size={16} className="3xl:w-5 3xl:h-5" />
+                                                </button>
+                                              </div>
+                                            }
+                                          </div>
+                                        </div>
+                                        <WarningSlippage value={slippage} estimatedValue={estimatedSlippage} />
+                                      </div>
+                                    )}
+                                    <div className="flex items-center justify-between space-x-1">
+                                      <Tooltip content={`Minimum amount received after slippage${typeof slippage === 'number' && slippage >= 0 ? ` ${slippage}%` : ''}`}>
                                         <div className="flex items-center">
-                                          <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                            Slippage tolerance
+                                          <div className="sm:whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
+                                            Minimum received after slippage
                                           </div>
                                           <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
                                         </div>
                                       </Tooltip>
-                                      <div className="flex flex-col sm:items-end space-y-1.5">
-                                        {slippageEditing ?
-                                          <>
-                                            <div className="flex items-center justify-end space-x-1.5">
-                                              <DebounceInput
-                                                debounceTimeout={750}
-                                                size="small"
-                                                type="number"
-                                                placeholder="0.00"
-                                                value={isNumber(slippage) ? slippage : ''}
-                                                onChange={
-                                                  e => {
-                                                    const regex = /^[0-9.\b]+$/
-                                                    let value
-                                                    if (e.target.value === '' || regex.test(e.target.value)) {
-                                                      value = e.target.value
-                                                    }
-                                                    if (typeof value === 'string') {
-                                                      if (value.startsWith('.')) {
-                                                        value = `0${value}`
-                                                      }
-                                                      if (isNumber(value)) {
-                                                        value = Number(value)
-                                                      }
-                                                    }
-                                                    value = value <= 0 ? 0.01 : value > 100 ? DEFAULT_PERCENT_BRIDGE_SLIPPAGE : value
-                                                    setOptions({ ...options, slippage: isNumber(value) ? parseFloat(numberToFixed(value, 2)) : value })
-                                                  }
-                                                }
-                                                onWheel={e => e.target.blur()}
-                                                onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
-                                                className={`w-20 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 rounded border-0 focus:ring-0 text-sm 3xl:text-xl font-semibold text-right py-1 px-2`}
-                                              />
-                                              <button
-                                                onClick={() => setSlippageEditing(false)}
-                                                className="bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white"
-                                              >
-                                                <BiCheckCircle size={16} className="3xl:w-5 3xl:h-5" />
-                                              </button>
-                                            </div>
-                                            <div className="flex items-center space-x-1.5 -mr-1.5">
-                                              {[3.0, 1.0, 0.5].map((s, i) => (
-                                                <div
-                                                  key={i}
-                                                  onClick={
-                                                    () => {
-                                                      setOptions({ ...options, slippage: s })
-                                                      setSlippageEditing(false)
-                                                    }
-                                                  }
-                                                  className={`${slippage === s ? 'bg-slate-200 dark:bg-slate-700 font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded cursor-pointer text-xs 3xl:text-xl py-1 px-1.5`}
-                                                >
-                                                  {s} %
-                                                </div>
-                                              ))}
-                                            </div>
-                                          </> :
-                                          <div className="flex items-center space-x-1.5">
+                                      {!isNumber(amount) || isNumber(estimatedValues?.amountReceived) || estimateResponse ?
+                                        <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
+                                          {isNumber(amount) && isNumber(estimatedReceived) && !estimateResponse ?
                                             <NumberDisplay
-                                              value={slippage}
-                                              suffix="%"
-                                              className="whitespace-nowrap text-sm 3xl:text-xl font-semibold"
-                                            />
-                                            <button
-                                              disabled={disabled}
-                                              onClick={
-                                                () => {
-                                                  if (!disabled) {
-                                                    setSlippageEditing(true)
-                                                  }
-                                                }
-                                              }
-                                              className="rounded-full flex items-center justify-center text-slate-400 hover:text-black dark:text-slate-200 dark:hover:text-white mt-0.5"
-                                            >
-                                              <BiEditAlt size={16} className="3xl:w-5 3xl:h-5" />
-                                            </button>
-                                          </div>
-                                        }
-                                      </div>
-                                    </div>
-                                    <WarningSlippage value={slippage} estimatedValue={estimatedSlippage} />
-                                  </div>
-                                )}
-                                <div className="flex items-center justify-between space-x-1">
-                                  <Tooltip content={`Minimum amount received after slippage${typeof slippage === 'number' && slippage >= 0 ? ` ${slippage}%` : ''}`}>
-                                    <div className="flex items-center">
-                                      <div className="sm:whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
-                                        Minimum received after slippage
-                                      </div>
-                                      <BiInfoCircle size={14} className="block sm:hidden text-slate-400 dark:text-slate-500 ml-1 sm:ml-0" />
-                                    </div>
-                                  </Tooltip>
-                                  {!isNumber(amount) || isNumber(estimatedValues?.amountReceived) || estimateResponse ?
-                                    <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                      {isNumber(amount) && isNumber(estimatedReceived) && !estimateResponse ?
-                                        <NumberDisplay
-                                          value={numberToFixed((estimatedReceived > 0 ? estimatedReceived : 0) * ((100 - (isNumber(slippage) && slippage >= 0 ? slippage : DEFAULT_PERCENT_BRIDGE_SLIPPAGE)) / 100), estimatedReceived > 0 ? destination_decimals : 0)}
-                                          className="text-sm 3xl:text-xl"
-                                        /> :
-                                        <span>-</span>
+                                              value={numberToFixed((estimatedReceived > 0 ? estimatedReceived : 0) * ((100 - (isNumber(slippage) && slippage >= 0 ? slippage : DEFAULT_PERCENT_BRIDGE_SLIPPAGE)) / 100), estimatedReceived > 0 ? destination_decimals : 0)}
+                                              className="text-sm 3xl:text-xl"
+                                            /> :
+                                            <span>-</span>
+                                          }
+                                          <span>{destination_symbol}</span>
+                                        </span> :
+                                        <Spinner width={14} height={14} />
                                       }
-                                      <span>{destination_symbol}</span>
-                                    </span> :
-                                    <Spinner width={14} height={14} />
-                                  }
-                                </div>
+                                    </div>
+                                  </>
+                                )}
                               </>
                             )}
                             {Number(amount) > 0 && isNumber(estimatedReceived) && estimatedReceived > 0 && (Number(amount) < routersLiquidityAmount || router_asset_balances_data) && (
