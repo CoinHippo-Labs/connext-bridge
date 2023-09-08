@@ -86,7 +86,7 @@ export default (
     toArray(_assets_data).filter(d => !inputSearch || d).flatMap(d => {
       const { symbol, image, contracts } = { ...d }
       const contract_data = getContractData(chain_id, contracts)
-      const { next_asset, wrappable } = { ...contract_data }
+      const { contract_address, xERC20, next_asset, wrappable } = { ...contract_data }
 
       const contracts_data = toArray(
         _.concat(
@@ -97,6 +97,7 @@ export default (
             image: image?.replace('/dai.', '/xdai.'),
           },
           (!showOnlyWrappable || wrappable) && { ...contract_data },
+          xERC20 && { ...contract_data, contract_address: xERC20 },
           next_asset && isBridge && showNextAssets && {
             ...contract_data,
             ...next_asset,
@@ -193,7 +194,7 @@ export default (
         {assets_data_sorted.map((d, i) => {
           const { id, name, contracts, group, disabled } = { ...d }
           const contract_data = getContractData(chain_id, contracts)
-          const { contract_address } = { ...contract_data }
+          const { contract_address, xERC20 } = { ...contract_data }
           let { symbol, image } = { ...contract_data }
           symbol = symbol || d.symbol || name
           image = image || d.image
@@ -217,6 +218,11 @@ export default (
               <span className={`whitespace-nowrap text-base ${selected ? 'font-bold' : 'font-medium'}`}>
                 {symbol}
               </span>
+              {xERC20 && equalsIgnoreCase(contract_address, xERC20) && (
+                <span className="whitespace-nowrap text-base font-medium">
+                  (xERC20)
+                </span>
+              )}
             </div>
           )
           let { amount } = { ...getBalanceData(chain_id, contract_address, balances_data) }
@@ -239,7 +245,7 @@ export default (
                   {item}
                   {balance}
                 </div> :
-                <div onClick={() => onSelect(id, isBridge ? symbol : contract_address)} className={className}>
+                <div onClick={() => onSelect(id, isBridge ? xERC20 && equalsIgnoreCase(contract_address, xERC20) ? `x${symbol}` : symbol : contract_address)} className={className}>
                   {item}
                   {balance}
                 </div>

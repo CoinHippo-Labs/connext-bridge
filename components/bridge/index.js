@@ -26,6 +26,7 @@ import NumberDisplay from '../number'
 import Alert from '../alert'
 import Balance from '../balance'
 import Faucet from '../faucet'
+import Wrapper from '../wrapper/xERC20'
 import Copy from '../copy'
 import Image from '../image'
 import TimeSpent from '../time/timeSpent'
@@ -586,8 +587,12 @@ export default ({ useAssetChain = false }) => {
       const source_asset_data = getAssetData(asset, assets_data)
       let source_contract_data = getContractData(source_chain_data?.chain_id, source_asset_data?.contracts)
       const _source_contract_data = _.cloneDeep(source_contract_data)
+       // xERC20 asset
+      if (symbol && equalsIgnoreCase(`x${source_asset_data?.symbol}`, symbol)) {
+        source_contract_data = { ...source_contract_data, contract_address: source_contract_data.xERC20, symbol: `x${source_asset_data.symbol}` }
+      }
       // next asset
-      if (symbol && equalsIgnoreCase(source_contract_data?.next_asset?.symbol, symbol)) {
+      else if (symbol && equalsIgnoreCase(source_contract_data?.next_asset?.symbol, symbol)) {
         source_contract_data = { ...source_contract_data, ...source_contract_data.next_asset }
       }
       // native asset
@@ -741,7 +746,7 @@ export default ({ useAssetChain = false }) => {
           // Lockbox handling for xERC20s
           const txs = []
           const multisendContract = await sdk.sdkBase.getDeploymentAddress(xcallParams.origin, "multisend");
-          if (source_asset_data?.is_xERC20) {
+          if (source_asset_data?.is_xERC20 && !(source_contract_data?.xERC20 && equalsIgnoreCase(source_contract_data.contract_address, source_contract_data.xERC20))) {
             console.log('[/]', '[setup for an xERC20]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
 
             // Lockbox exists on source domain, must deposit
@@ -1166,8 +1171,12 @@ export default ({ useAssetChain = false }) => {
   const { is_xERC20 } = { ...source_asset_data }
   let source_contract_data = getContractData(source_chain_data?.chain_id, source_asset_data?.contracts)
   const _source_contract_data = _.cloneDeep(source_contract_data)
+  // xERC20 asset
+  if (symbol && equalsIgnoreCase(`x${source_asset_data?.symbol}`, symbol)) {
+    source_contract_data = { ...source_contract_data, contract_address: source_contract_data.xERC20, symbol: `x${source_asset_data.symbol}` }
+  }
   // next asset
-  if (symbol && equalsIgnoreCase(source_contract_data?.next_asset?.symbol, symbol)) {
+  else if (symbol && equalsIgnoreCase(source_contract_data?.next_asset?.symbol, symbol)) {
     source_contract_data = { ...source_contract_data, ...source_contract_data.next_asset }
   }
   // native asset
@@ -2315,6 +2324,7 @@ export default ({ useAssetChain = false }) => {
             }
           </div>
           {!openTransferStatus && _source_contract_data?.mintable && <Faucet tokenId={asset} contractData={_source_contract_data} />}
+          {!openTransferStatus && _source_contract_data?.xERC20 && <Wrapper tokenId={asset} contractData={_source_contract_data} />}
         </div>
       </div>
       <div className={`col-span-1 ${hasLatestTransfers ? 'lg:col-span-3' : ''} xl:col-span-2 3xl:mt-8`}>
