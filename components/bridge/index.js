@@ -785,86 +785,110 @@ export default ({ useAssetChain = false }) => {
                   [multisendPermitAmount, multisendPermitExpiration, multisendPermitNonce]
                 ] = await Promise.all(allowances)
 
-                // EOA approves ERC20 to permit2 if needed
-                if (BigNumber.from(erc20Allowance).lt(BigNumber.from(xcallParams.amount))) {
-                  const approvePermit2Erc20TxRequest = await erc20.approve(PERMIT2_ADDRESS, constants.MaxUint256);
-                  await approvePermit2Erc20TxRequest.wait()
-                }
-
-                // EOA approves XERC20 to permit2 if needed
-                if (BigNumber.from(xerc20Allowance).lt(BigNumber.from(xcallParams.amount))) {
-                  const approveMultisendXerc20TxRequest = await xerc20.approve(PERMIT2_ADDRESS, constants.MaxUint256);
-                  await approveMultisendXerc20TxRequest.wait()
-                }
-
-                // Create permit for Lockbox
-                if (lockboxPermitAmount < xcallParams.amount || lockboxPermitExpiration < MaxAllowanceExpiration) {
-                  const permit = {
-                    details: {
-                      token: erc20.address,
-                      amount: xcallParams.amount,
-                      expiration: MaxAllowanceExpiration,
-                      nonce: lockboxPermitNonce
-                    },
-                    spender: source_contract_data?.lockbox,
-                    sigDeadline: MaxSigDeadline
+                if (source_contract_data?.permit_supported) {
+                  // EOA approves ERC20 to permit2 if needed
+                  if (BigNumber.from(erc20Allowance).lt(BigNumber.from(xcallParams.amount))) {
+                    const approvePermit2Erc20TxRequest = await erc20.approve(PERMIT2_ADDRESS, constants.MaxUint256);
+                    await approvePermit2Erc20TxRequest.wait()
                   }
-    
-                  const { domain, types, values } = AllowanceTransfer.getPermitData(permit, PERMIT2_ADDRESS, source_chain_data?.chain_id)
-                  const signature = await signer._signTypedData(domain, types, values)
-                
-                  // Add transaction to call `depositWithPermitAllowance` on Lockbox
-                  const depositWithPermitAllowanceData = lockboxInterface.encodeFunctionData('depositWithPermitAllowance', [xcallParams.amount, address, permit, signature])
-                  const depositWithPermitAllowanceTxRequest = {
-                    to: source_contract_data?.lockbox,
-                    data: depositWithPermitAllowanceData,
-                    chainId: source_chain_data?.chain_id
+  
+                  // EOA approves XERC20 to permit2 if needed
+                  if (BigNumber.from(xerc20Allowance).lt(BigNumber.from(xcallParams.amount))) {
+                    const approveMultisendXerc20TxRequest = await xerc20.approve(PERMIT2_ADDRESS, constants.MaxUint256);
+                    await approveMultisendXerc20TxRequest.wait()
                   }
-                  txs.push(depositWithPermitAllowanceTxRequest)
-                }
-                
-                // Create permit for Multisend
-                if (multisendPermitAmount < xcallParams.amount || multisendPermitExpiration < MaxAllowanceExpiration) {
-                  const permitMultisend = {
-                    details: {
-                      token: xerc20.address,
-                      amount: xcallParams.amount,
-                      expiration: MaxAllowanceExpiration,
-                      nonce: multisendPermitNonce
-                    },
-                    spender: multisendContract,
-                    sigDeadline: MaxSigDeadline
+  
+                  // Create permit for Lockbox
+                  if (lockboxPermitAmount < xcallParams.amount || lockboxPermitExpiration < MaxAllowanceExpiration) {
+                    const permit = {
+                      details: {
+                        token: erc20.address,
+                        amount: xcallParams.amount,
+                        expiration: MaxAllowanceExpiration,
+                        nonce: lockboxPermitNonce
+                      },
+                      spender: source_contract_data?.lockbox,
+                      sigDeadline: MaxSigDeadline
+                    }
+      
+                    const { domain, types, values } = AllowanceTransfer.getPermitData(permit, PERMIT2_ADDRESS, source_chain_data?.chain_id)
+                    const signature = await signer._signTypedData(domain, types, values)
+                  
+                    // Add transaction to call `depositWithPermitAllowance` on Lockbox
+                    const depositWithPermitAllowanceData = lockboxInterface.encodeFunctionData('depositWithPermitAllowance', [xcallParams.amount, address, permit, signature])
+                    const depositWithPermitAllowanceTxRequest = {
+                      to: source_contract_data?.lockbox,
+                      data: depositWithPermitAllowanceData,
+                      chainId: source_chain_data?.chain_id
+                    }
+                    txs.push(depositWithPermitAllowanceTxRequest)
                   }
-    
-                  const { domain: domain2, types: types2, values: values2 } = AllowanceTransfer.getPermitData(permitMultisend, PERMIT2_ADDRESS, source_chain_data?.chain_id)
-                  const signatureForMultisend = await signer._signTypedData(domain2, types2, values2)
-    
-                  // Add transaction to call `permit` on Permit2
-                  const permitMultisendData = permit2Interface.encodeFunctionData('permit', [address, permitMultisend, signatureForMultisend])
-                  const permitMultisendTxRequest = {
+                  
+                  // Create permit for Multisend
+                  if (multisendPermitAmount < xcallParams.amount || multisendPermitExpiration < MaxAllowanceExpiration) {
+                    const permitMultisend = {
+                      details: {
+                        token: xerc20.address,
+                        amount: xcallParams.amount,
+                        expiration: MaxAllowanceExpiration,
+                        nonce: multisendPermitNonce
+                      },
+                      spender: multisendContract,
+                      sigDeadline: MaxSigDeadline
+                    }
+      
+                    const { domain: domain2, types: types2, values: values2 } = AllowanceTransfer.getPermitData(permitMultisend, PERMIT2_ADDRESS, source_chain_data?.chain_id)
+                    const signatureForMultisend = await signer._signTypedData(domain2, types2, values2)
+      
+                    // Add transaction to call `permit` on Permit2
+                    const permitMultisendData = permit2Interface.encodeFunctionData('permit', [address, permitMultisend, signatureForMultisend])
+                    const permitMultisendTxRequest = {
+                      to: PERMIT2_ADDRESS,
+                      data: permitMultisendData,
+                      chainId: source_chain_data?.chain_id
+                    }
+                    txs.push(permitMultisendTxRequest)
+                  }
+  
+                  // Add transaction to `transferFrom` from user to Multisend using Permit2
+                  const transferFromData = permit2Interface.encodeFunctionData('transferFrom', [address, multisendContract, xcallParams.amount, xerc20.address])
+                  const transferFromTxRequest = {
                     to: PERMIT2_ADDRESS,
-                    data: permitMultisendData,
+                    data: transferFromData,
+                    chainId: source_chain_data?.chain_id,
+                  }
+                  txs.push(transferFromTxRequest)
+                  
+                  // Add transaction to approve xERC20 spend to Connext
+                  const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xerc20.address, xcallParams.amount, infiniteApprove, {signerAddress: multisendContract})
+                  if (approveXERC20TxRequest) {
+                    txs.push(approveXERC20TxRequest)
+                  }
+                } else {
+                  // Approve ERC20 spend to Lockbox
+                  const approveLockboxERC20TxRequest = await erc20.approve(source_contract_data?.lockbox, constants.MaxUint256);
+                  console.log('approving erc20 to lockbox')
+                  await approveLockboxERC20TxRequest.wait()
+
+                  // Deposit into Lockbox
+                  const depositData = lockboxInterface.encodeFunctionData('deposit', [xcallParams.amount])
+                  const depositTxRequest = {
+                    to: source_contract_data?.lockbox,
+                    data: depositData,
                     chainId: source_chain_data?.chain_id
                   }
-                  txs.push(permitMultisendTxRequest)
+                  console.log('depositing')
+                  await signer.sendTransaction(depositTxRequest)
+
+                  // Approve xERC20 spend to Connext
+                  const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xerc20.address, xcallParams.amount, infiniteApprove)
+                  if (approveXERC20TxRequest) {
+                    console.log('approving xerc20 to connext')
+                    await signer.sendTransaction(approveXERC20TxRequest)
+                  }
                 }
 
-                // Add transaction to `transferFrom` from user to Multisend using Permit2
-                const transferFromData = permit2Interface.encodeFunctionData('transferFrom', [address, multisendContract, xcallParams.amount, xerc20.address])
-                const transferFromTxRequest = {
-                  to: PERMIT2_ADDRESS,
-                  data: transferFromData,
-                  chainId: source_chain_data?.chain_id,
-                }
-                txs.push(transferFromTxRequest)
-                
-                // Add transaction to approve xERC20 spend to Connext
-                const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xerc20.address, xcallParams.amount, infiniteApprove, {signerAddress: multisendContract})
-                if (approveXERC20TxRequest) {
-                  txs.push(approveXERC20TxRequest)
-                }
-
-                // Finally, set xcall asset to xERC20
+                // Set xcall asset to xERC20
                 xcallParams.asset = xerc20.address
               }
             }
