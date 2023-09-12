@@ -1278,17 +1278,19 @@ export default ({ useAssetChain = false }) => {
                   <span className="text-lg font-semibold">
                     Transfer status
                   </span>
-                  <button
-                    onClick={
-                      () => {
-                        setXcall(null)
-                        setCallResponse(null)
-                        setOpenTransferStatus(false)
+                  <Tooltip content="If you close this window, your transaction will still be processed.">
+                    <button
+                      onClick={
+                        () => {
+                          setXcall(null)
+                          setCallResponse(null)
+                          setOpenTransferStatus(false)
+                        }
                       }
-                    }
-                  >
-                    <MdClose size={20} className="-mr-1" />
-                  </button>
+                    >
+                      <MdClose size={20} className="-mr-1" />
+                    </button>
+                  </Tooltip>
                 </div>
                 <div className="flex items-center justify-center">
                   <ActionRequired
@@ -1388,7 +1390,7 @@ export default ({ useAssetChain = false }) => {
                             )}.
                           </div>
                         </div> :
-                        <div className="flex flex-col items-center space-y-1">
+                        <div className="flex flex-col items-center space-y-3">
                           {timeSpent > estimatedTimeSpent ?
                             <span className="text-center">
                               Your assets are on the way! We will keep you informed.
@@ -1405,9 +1407,6 @@ export default ({ useAssetChain = false }) => {
                           }
                           <span className="text-center">
                             💡 Connext plugs into the chain native bridges for optimal security and trust minimization. No oracles or external validator sets are used.
-                          </span>
-                          <span className="text-center">
-                            If you close this window, your transaction will still be processed.
                           </span>
                         </div>
                     }
@@ -1851,11 +1850,11 @@ export default ({ useAssetChain = false }) => {
                               className="cursor-pointer flex items-center justify-between space-x-1"
                             >
                               <div className={`whitespace-nowrap ${collapse ? 'text-slate-500 dark:text-slate-500 font-medium' : 'font-semibold'} text-sm 3xl:text-xl`}>
-                                {is_xERC20 ? 'Additional details' : 'Estimated Fees'}
+                                {is_xERC20 ? 'Additional Details' : 'Estimated Fees'}
                               </div>
                               <div className="flex items-center space-x-2">
                                 <div>
-                                  {fees && (!isNumber(amount) || isNumber(estimatedValues?.routerFee) || estimateResponse) ?
+                                  {!is_xERC20 && fees && (!isNumber(amount) || isNumber(estimatedValues?.routerFee) || estimateResponse) ?
                                     <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
                                       {isNumber(amount) && isNumber(estimatedValues?.routerFee) && !estimateResponse ?
                                         <NumberDisplay
