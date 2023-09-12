@@ -1853,31 +1853,33 @@ export default ({ useAssetChain = false }) => {
                                 {is_xERC20 ? 'Additional Details' : 'Estimated Fees'}
                               </div>
                               <div className="flex items-center space-x-2">
-                                <div>
-                                  {!is_xERC20 && fees && (!isNumber(amount) || isNumber(estimatedValues?.routerFee) || estimateResponse) ?
-                                    <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
-                                      {isNumber(amount) && isNumber(estimatedValues?.routerFee) && !estimateResponse ?
-                                        <NumberDisplay
-                                          value={numberToFixed((Number(routerFee) > 0 ? Number(routerFee) : 0) + (relayerFeeAssetType === 'native' || Number(relayerFee) > 0 ? Number(relayerFee) : 0), relayerFeeAssetType === 'native' ? native_token?.decimals || 18 : source_decimals)}
-                                          suffix={` ${source_symbol}`}
-                                          className={`${relayerFeeAssetType === 'native' ? 'text-xs' : 'text-sm'} 3xl:text-xl`}
-                                        /> :
-                                        <span>- {source_symbol}</span>
-                                      }
-                                      {relayerFeeAssetType === 'native' && (
-                                        <>
-                                          <span>+</span>
+                                {!is_xERC20 && (
+                                  <div>
+                                    {fees && (!isNumber(amount) || isNumber(estimatedValues?.routerFee) || estimateResponse) ?
+                                      <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
+                                        {isNumber(amount) && isNumber(estimatedValues?.routerFee) && !estimateResponse ?
                                           <NumberDisplay
-                                            value={Number(relayerFee) > 0 ? relayerFee : 0}
-                                            suffix={native_token?.symbol && ` ${native_token.symbol}`}
-                                            className="text-xs 3xl:text-xl"
-                                          />
-                                        </>
-                                      )}
-                                    </span> :
-                                    <Spinner width={14} height={14} />
-                                  }
-                                </div>
+                                            value={numberToFixed((Number(routerFee) > 0 ? Number(routerFee) : 0) + (relayerFeeAssetType === 'native' || Number(relayerFee) > 0 ? Number(relayerFee) : 0), relayerFeeAssetType === 'native' ? native_token?.decimals || 18 : source_decimals)}
+                                            suffix={` ${source_symbol}`}
+                                            className={`${relayerFeeAssetType === 'native' ? 'text-xs' : 'text-sm'} 3xl:text-xl`}
+                                          /> :
+                                          <span>- {source_symbol}</span>
+                                        }
+                                        {relayerFeeAssetType === 'native' && (
+                                          <>
+                                            <span>+</span>
+                                            <NumberDisplay
+                                              value={Number(relayerFee) > 0 ? relayerFee : 0}
+                                              suffix={native_token?.symbol && ` ${native_token.symbol}`}
+                                              className="text-xs 3xl:text-xl"
+                                            />
+                                          </>
+                                        )}
+                                      </span> :
+                                      <Spinner width={14} height={14} />
+                                    }
+                                  </div>
+                                )}
                                 <div>{collapse ? <BiChevronDown size={20} className="3xl:w-5 3xl:h-5" /> : <BiChevronUp size={20} className="3xl:w-5 3xl:h-5" />}</div>
                               </div>
                             </div>
