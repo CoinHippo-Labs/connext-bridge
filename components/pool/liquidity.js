@@ -1102,7 +1102,7 @@ export default ({ pool, userPools, onFinish }) => {
                           case 'success':
                             color = 'bg-green-500 dark:bg-green-400'
                             break
-                          case 'success':
+                          case 'failed':
                             color = 'bg-red-500 dark:bg-red-400'
                             break
                           default:
@@ -1575,7 +1575,7 @@ export default ({ pool, userPools, onFinish }) => {
                           case 'success':
                             color = 'bg-green-500 dark:bg-green-400'
                             break
-                          case 'success':
+                          case 'failed':
                             color = 'bg-red-500 dark:bg-red-400'
                             break
                           default:

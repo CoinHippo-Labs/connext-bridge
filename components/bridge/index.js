@@ -788,14 +788,40 @@ export default ({ useAssetChain = false }) => {
                 if (source_contract_data?.permit_supported) {
                   // EOA approves ERC20 to permit2 if needed
                   if (BigNumber.from(erc20Allowance).lt(BigNumber.from(xcallParams.amount))) {
+                    setApproving(true)
+                    setApproveResponse({
+                      status: 'pending',
+                      message: 'Please approve ERC20 to permit2',
+                    })
                     const approvePermit2Erc20TxRequest = await erc20.approve(PERMIT2_ADDRESS, constants.MaxUint256);
+                    setApproveProcessing(true)
+                    setApproveResponse({
+                      status: 'pending',
+                      message: 'Waiting for ERC20 to permit2 approval',
+                    })
                     await approvePermit2Erc20TxRequest.wait()
+                    setApproveResponse(null)
+                    setApproveProcessing(false)
+                    setApproving(false)
                   }
   
                   // EOA approves XERC20 to permit2 if needed
                   if (BigNumber.from(xerc20Allowance).lt(BigNumber.from(xcallParams.amount))) {
+                    setApproving(true)
+                    setApproveResponse({
+                      status: 'pending',
+                      message: 'Please approve xERC20 to permit2',
+                    })
                     const approveMultisendXerc20TxRequest = await xerc20.approve(PERMIT2_ADDRESS, constants.MaxUint256);
+                    setApproveProcessing(true)
+                    setApproveResponse({
+                      status: 'pending',
+                      message: 'Waiting for xERC20 to permit2 approval',
+                    })
                     await approveMultisendXerc20TxRequest.wait()
+                    setApproveResponse(null)
+                    setApproveProcessing(false)
+                    setApproving(false)
                   }
   
                   // Create permit for Lockbox
@@ -865,9 +891,17 @@ export default ({ useAssetChain = false }) => {
                     txs.push(approveXERC20TxRequest)
                   }
                 } else {
+                  setCallResponse({
+                    status: 'pending',
+                    message: 'Please approve ERC20 to Lockbox',
+                  })
                   // Approve ERC20 spend to Lockbox
                   const approveLockboxERC20TxRequest = await erc20.approve(source_contract_data?.lockbox, constants.MaxUint256);
                   console.log('approving erc20 to lockbox')
+                  setCallResponse({
+                    status: 'pending',
+                    message: 'Approving ERC20 to Lockbox',
+                  })
                   await approveLockboxERC20TxRequest.wait()
 
                   // Deposit into Lockbox
@@ -878,13 +912,29 @@ export default ({ useAssetChain = false }) => {
                     chainId: source_chain_data?.chain_id
                   }
                   console.log('depositing')
+                  setCallResponse({
+                    status: 'pending',
+                    message: 'Please Deposit',
+                  })
                   await signer.sendTransaction(depositTxRequest)
+                  setCallResponse({
+                    status: 'pending',
+                    message: 'Depositing',
+                  })
 
                   // Approve xERC20 spend to Connext
                   const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xerc20.address, xcallParams.amount, infiniteApprove)
                   if (approveXERC20TxRequest) {
                     console.log('approving xerc20 to connext')
+                    setCallResponse({
+                      status: 'pending',
+                      message: 'Please approve xERC20 to Connext',
+                    })
                     await signer.sendTransaction(approveXERC20TxRequest)
+                    setCallResponse({
+                      status: 'pending',
+                      message: 'Approving xERC20 to Connext',
+                    })
                   }
                 }
 
@@ -2281,7 +2331,7 @@ export default ({ useAssetChain = false }) => {
                                 case 'success':
                                   color = callResponse ? 'bg-blue-600 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'
                                   break
-                                case 'success':
+                                case 'failed':
                                   color = 'bg-red-500 dark:bg-red-400'
                                   break
                                 default:
