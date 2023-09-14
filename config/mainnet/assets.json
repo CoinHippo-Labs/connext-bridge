@@ -733,7 +733,7 @@
         "symbol": "RADAR"
       }
     ],
-    "color": "#009DFF"
+    "color": "#009DFF",
     "group": "other_tokens"
   }
 ]
