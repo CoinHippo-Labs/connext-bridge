@@ -191,68 +191,70 @@ export default (
         </div>
       )}
       <div className="max-h-96 overflow-y-scroll">
-        {assets_data_sorted.map((d, i) => {
-          const { id, name, contracts, group, disabled } = { ...d }
-          const contract_data = getContractData(chain_id, contracts)
-          const { contract_address, xERC20 } = { ...contract_data }
-          let { symbol, image } = { ...contract_data }
-          symbol = symbol || d.symbol || name
-          image = image || d.image
+        {toArray(
+          assets_data_sorted.map((d, i) => {
+            const { id, name, contracts, group, disabled } = { ...d }
+            const contract_data = getContractData(chain_id, contracts)
+            const { contract_address, xERC20 } = { ...contract_data }
+            let { symbol, image } = { ...contract_data }
+            symbol = symbol || d.symbol || name
+            image = image || d.image
 
-          const selected = data?.contract_address ? equalsIgnoreCase(contract_address, data.contract_address) : id === value
-          const header = group && !equalsIgnoreCase(group, assets_data_sorted[i - 1]?.group) && (
-            <div className={`text-slate-400 dark:text-slate-500 text-xs mt-${i === 0 ? 0.5 : 3} mb-2 ml-2`}>
-              {getTitle(group)}
-            </div>
-          )
-          const item = (
-            <div className="flex items-center space-x-2">
-              {image && (
-                <Image
-                  src={image}
-                  width={32}
-                  height={32}
-                  className="rounded-full"
-                />
-              )}
-              <span className={`whitespace-nowrap text-base ${selected ? 'font-bold' : 'font-medium'}`}>
-                {symbol}
-              </span>
-              {xERC20 && equalsIgnoreCase(contract_address, xERC20) && (
-                <span className="whitespace-nowrap text-base font-medium">
-                  (xERC20)
+            const selected = data?.contract_address ? equalsIgnoreCase(contract_address, data.contract_address) : id === value
+            const header = group && !equalsIgnoreCase(group, assets_data_sorted[i - 1]?.group) && (
+              <div className={`text-slate-400 dark:text-slate-500 text-xs mt-${i === 0 ? 0.5 : 3} mb-2 ml-2`}>
+                {getTitle(group)}
+              </div>
+            )
+            const item = (
+              <div className="flex items-center space-x-2">
+                {image && (
+                  <Image
+                    src={image}
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                )}
+                <span className={`whitespace-nowrap text-base ${selected ? 'font-bold' : 'font-medium'}`}>
+                  {symbol}
                 </span>
-              )}
-            </div>
-          )
-          let { amount } = { ...getBalanceData(chain_id, contract_address, balances_data) }
-          amount = isNumber(amount) ? amount : null
-          const balance = balances_data?.[chain_id] && (
-            <div className={`${chain_id && !amount ? 'text-slate-400 dark:text-slate-500' : ''} ${selected ? 'font-semibold' : 'font-medium'} ml-auto`}>
-              {isNumber(amount) ?
-                <NumberDisplay value={amount} className="whitespace-nowrap" /> :
-                'n/a'
-              }
-            </div>
-          )
-          const className = `dropdown-item ${disabled || !contract_data ? 'cursor-not-allowed text-slate-400 dark:text-slate-600' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'} rounded flex items-center justify-between space-x-2 my-1 p-2`
+                {xERC20 && equalsIgnoreCase(contract_address, xERC20) && (
+                  <span className="whitespace-nowrap text-base font-medium">
+                    (xERC20)
+                  </span>
+                )}
+              </div>
+            )
+            let { amount } = { ...getBalanceData(chain_id, contract_address, balances_data) }
+            amount = isNumber(amount) ? amount : null
+            const balance = balances_data?.[chain_id] && (
+              <div className={`${chain_id && !amount ? 'text-slate-400 dark:text-slate-500' : ''} ${selected ? 'font-semibold' : 'font-medium'} ml-auto`}>
+                {isNumber(amount) ?
+                  <NumberDisplay value={amount} className="whitespace-nowrap" /> :
+                  'n/a'
+                }
+              </div>
+            )
+            const className = `dropdown-item ${disabled || !contract_data ? 'cursor-not-allowed text-slate-400 dark:text-slate-600' : selected ? 'bg-slate-100 dark:bg-slate-800 cursor-pointer' : 'hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'} rounded flex items-center justify-between space-x-2 my-1 p-2`
 
-          return (
-            <div key={i}>
-              {header}
-              {disabled || !contract_data ?
-                <div title={contract_data ? 'Disabled' : 'Not Support'} className={className}>
-                  {item}
-                  {balance}
-                </div> :
-                <div onClick={() => onSelect(id, isBridge ? xERC20 && equalsIgnoreCase(contract_address, xERC20) ? `x${symbol}` : symbol : contract_address)} className={className}>
-                  {item}
-                  {balance}
-                </div>
-              }
-            </div>
-          )
-        })}
+            return (!equalsIgnoreCase(contract_address, xERC20) || !isNumber(amount) || Number(amount) > 0) && (
+              <div key={i}>
+                {header}
+                {disabled || !contract_data ?
+                  <div title={contract_data ? 'Disabled' : 'Not Support'} className={className}>
+                    {item}
+                    {balance}
+                  </div> :
+                  <div onClick={() => onSelect(id, isBridge ? xERC20 && equalsIgnoreCase(contract_address, xERC20) ? `x${symbol}` : symbol : contract_address)} className={className}>
+                    {item}
+                    {balance}
+                  </div>
+                }
+              </div>
+            )
+          })
+        )}
       </div>
     </div>
   )

@@ -17,6 +17,7 @@ import { BiEditAlt, BiCheckCircle, BiInfoCircle, BiChevronUp, BiChevronDown } fr
 import { IoInformationCircleOutline } from 'react-icons/io5'
 
 import Options from './options'
+import WarningXERC20 from './warning/xERC20'
 import WarningSlippage from './warning/slippage'
 import WarningFeeRatio from './warning/fee-ratio'
 import LatestTransfers from '../latest-transfers'
@@ -36,8 +37,8 @@ import SelectAsset from '../select/asset'
 import SelectAssetChain from '../select/asset-chain'
 import { NETWORK, WRAPPED_PREFIX, NATIVE_WRAPPABLE_SYMBOLS, RELAYER_FEE_ASSET_TYPES, PERCENT_ROUTER_FEE, GAS_LIMIT_ADJUSTMENT, DEFAULT_PERCENT_BRIDGE_SLIPPAGE, DEFAULT_DESTINATION_CHAIN } from '../../lib/config'
 import { getChainData, getAssetData, getContractData, getBalanceData } from '../../lib/object'
-import { split, toArray, includesStringList, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, getPath, getQueryParams, createMomentFromUnixtime, switchColor, sleep, normalizeMessage, parseError } from '../../lib/utils'
 import { toBigNumber, toFixedNumber, formatUnits, parseUnits, isNumber, isZero } from '../../lib/number'
+import { split, toArray, includesStringList, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, getPath, getQueryParams, createMomentFromUnixtime, switchColor, sleep, normalizeMessage, parseError } from '../../lib/utils'
 import { BALANCES_DATA, GET_BALANCES_DATA } from '../../reducers/types'
 
 const DEFAULT_OPTIONS = {
@@ -1806,6 +1807,7 @@ export default ({ useAssetChain = false }) => {
                             )}
                           </div>
                         </div>
+                        <WarningXERC20 asset={source_asset_data} contract={source_contract_data} />
                       </div>
                     </div>
                     {supported || !(source_chain && destination_chain && asset) ?
@@ -2401,7 +2403,7 @@ export default ({ useAssetChain = false }) => {
             }
           </div>
           {!openTransferStatus && _source_contract_data?.mintable && <Faucet tokenId={asset} contractData={_source_contract_data} />}
-          {!openTransferStatus && _source_contract_data?.xERC20 && <Wrapper tokenId={asset} contractData={_source_contract_data} />}
+          {!openTransferStatus && _source_contract_data?.xERC20 && equalsIgnoreCase(source_contract_data.contract_address, source_contract_data.xERC20) && <Wrapper tokenId={asset} contractData={_source_contract_data} />}
         </div>
       </div>
       <div className={`col-span-1 ${hasLatestTransfers ? 'lg:col-span-3' : ''} xl:col-span-2 3xl:mt-8`}>
