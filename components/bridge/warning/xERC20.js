@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
-import { useSelector, shallowEqual } from 'react-redux'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { useSwitchNetwork } from 'wagmi'
 import { Contract } from 'ethers'
 import moment from 'moment'
@@ -21,6 +21,7 @@ const ABI = [
 ]
 
 export default ({ asset, contract }) => {
+  const dispatch = useDispatch()
   const { chains, balances, wallet } = useSelector(state => ({ chains: state.chains, balances: state.balances, wallet: state.wallet }), shallowEqual)
   const { chains_data } = { ...chains }
   const { balances_data } = { ...balances }
