@@ -691,6 +691,10 @@ export default ({ useAssetChain = false }) => {
             xcallParams.relayerFeeInTransactingAsset = '0'
           }
 
+          // Track current step and total steps the user will need to take
+          let currentStep = 1
+          let totalSteps = 0
+
           // Alchemix assets are handled differently
           if (ALCHEMIX_ASSETS.includes(asset)) {
             console.log('[/]', '[setup for Alchemix asset]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
@@ -773,35 +777,50 @@ export default ({ useAssetChain = false }) => {
                 const erc20 = new Contract(xcallParams.asset, erc20Interface, signer);
                 const xerc20 = new Contract(source_contract_data?.xERC20, erc20Interface, signer);
                 const permit2 = new Contract(PERMIT2_ADDRESS, permit2Interface, signer);
+                const connext = await sdk.sdkBase.getConnext(source_domain);
 
-                const permitFlowAllowances = [
+                const allowances = [
                   erc20.allowance(address, PERMIT2_ADDRESS),
+                  erc20.allowance(address, source_contract_data?.lockbox),
                   xerc20.allowance(address, PERMIT2_ADDRESS),
+                  xerc20.allowance(address, connext.address),
                   permit2.allowance(address, erc20.address, source_contract_data?.lockbox),
                   permit2.allowance(address, xerc20.address, multisendContract)
                 ]
                 const [
                   erc20AllowancePermit, 
+                  erc20AllowanceLockbox,
                   xerc20AllowancePermit, 
+                  xerc20AllowanceConnext,
                   [lockboxPermitAmount, lockboxPermitExpiration, lockboxPermitNonce], 
                   [multisendPermitAmount, multisendPermitExpiration, multisendPermitNonce]
-                ] = await Promise.all(permitFlowAllowances)
+                ] = await Promise.all(allowances)
 
                 if (source_contract_data?.permit_supported) {
+                  // Start with 2 permit steps and 1 step for final multcall
+                  totalSteps = 3
+                  if (BigNumber.from(erc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
+                    totalSteps += 1
+                  }
+                  if (BigNumber.from(xerc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
+                    totalSteps += 1
+                  }
+
                   // EOA approves ERC20 to permit2 if needed
                   if (BigNumber.from(erc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
                     setApproving(true)
                     setApproveResponse({
                       status: 'pending',
-                      message: 'Please approve ERC20 to permit2',
+                      message: `(${currentStep}/${totalSteps}) ` + 'Please approve ERC20 to permit2',
                     })
                     const approvePermit2Erc20TxRequest = await erc20.approve(PERMIT2_ADDRESS, constants.MaxUint256);
                     setApproveProcessing(true)
                     setApproveResponse({
                       status: 'pending',
-                      message: 'Waiting for ERC20 to permit2 approval',
+                      message: `(${currentStep}/${totalSteps}) ` + 'Waiting for ERC20 to permit2 approval',
                     })
                     await approvePermit2Erc20TxRequest.wait()
+                    currentStep += 1
                     setApproveResponse(null)
                     setApproveProcessing(false)
                     setApproving(false)
@@ -821,6 +840,7 @@ export default ({ useAssetChain = false }) => {
                       message: 'Waiting for xERC20 to permit2 approval',
                     })
                     await approveMultisendXerc20TxRequest.wait()
+                    currentStep += 1
                     setApproveResponse(null)
                     setApproveProcessing(false)
                     setApproving(false)
@@ -841,6 +861,7 @@ export default ({ useAssetChain = false }) => {
       
                     const { domain, types, values } = AllowanceTransfer.getPermitData(permit, PERMIT2_ADDRESS, source_chain_data?.chain_id)
                     const signature = await signer._signTypedData(domain, types, values)
+                    currentStep += 1
                   
                     // Add transaction to call `depositWithPermitAllowance` on Lockbox
                     const depositWithPermitAllowanceData = lockboxInterface.encodeFunctionData('depositWithPermitAllowance', [xcallParams.amount, address, permit, signature])
@@ -867,6 +888,7 @@ export default ({ useAssetChain = false }) => {
       
                     const { domain: domain2, types: types2, values: values2 } = AllowanceTransfer.getPermitData(permitMultisend, PERMIT2_ADDRESS, source_chain_data?.chain_id)
                     const signatureForMultisend = await signer._signTypedData(domain2, types2, values2)
+                    currentStep += 1
       
                     // Add transaction to call `permit` on Permit2
                     const permitMultisendData = permit2Interface.encodeFunctionData('permit', [address, permitMultisend, signatureForMultisend])
@@ -893,20 +915,29 @@ export default ({ useAssetChain = false }) => {
                     txs.push(approveXERC20TxRequest)
                   }
                 } else {
+                  // Start with 1 step for deposit and 1 step for final xcall
+                  totalSteps = 2
+                  if (BigNumber.from(erc20AllowanceLockbox).lt(BigNumber.from(xcallParams.amount))) {
+                    totalSteps += 1
+                  }
+                  if (BigNumber.from(xerc20AllowanceConnext).lt(BigNumber.from(xcallParams.amount))) {
+                    totalSteps += 1
+                  }
+
                   setCallResponse({
                     status: 'pending',
-                    message: 'Please approve ERC20 to Lockbox',
+                    message: `(${currentStep}/${totalSteps}) ` + 'Please approve ERC20 to Lockbox',
                   })
-                  const erc20AllowanceLockbox = await erc20.allowance(address, source_contract_data?.lockbox)
 
                   // Approve ERC20 spend to Lockbox
                   if (BigNumber.from(erc20AllowanceLockbox).lt(BigNumber.from(xcallParams.amount))) {
                     const approveLockboxERC20TxRequest = await erc20.approve(source_contract_data?.lockbox, infiniteApprove ? constants.MaxUint256 : xcallParams.amount);
                     setCallResponse({
                       status: 'pending',
-                      message: 'Approving ERC20 to Lockbox',
+                      message: `(${currentStep}/${totalSteps}) ` + 'Approving ERC20 to Lockbox',
                     })
                     await approveLockboxERC20TxRequest.wait()
+                    currentStep += 1
                   }
 
                   // Deposit into Lockbox
@@ -918,28 +949,30 @@ export default ({ useAssetChain = false }) => {
                   }
                   setCallResponse({
                     status: 'pending',
-                    message: 'Please deposit into Lockbox',
+                    message: `(${currentStep}/${totalSteps}) ` + 'Please deposit into Lockbox',
                   })
                   const depositTxReceipt = await signer.sendTransaction(depositTxRequest)
                   setCallResponse({
                     status: 'pending',
-                    message: 'Depositing into Lockbox',
+                    message: `(${currentStep}/${totalSteps}) ` + 'Depositing into Lockbox',
                   })
                   await depositTxReceipt.wait()
+                  currentStep += 1
                   
                   // Approve xERC20 spend to Connext
                   const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xerc20.address, xcallParams.amount, infiniteApprove)
                   if (approveXERC20TxRequest) {
                     setCallResponse({
                       status: 'pending',
-                      message: 'Please approve xERC20 to Connext',
+                      message: `(${currentStep}/${totalSteps}) ` + 'Please approve xERC20 to Connext',
                     })
                     const approveXERC20TxReceipt = await signer.sendTransaction(approveXERC20TxRequest)
                     setCallResponse({
                       status: 'pending',
-                      message: 'Approving xERC20 to Connext',
+                      message: `(${currentStep}/${totalSteps}) ` + 'Approving xERC20 to Connext',
                     })
                     await approveXERC20TxReceipt.wait()
+                    currentStep += 1
                   }
                 }
 
@@ -964,7 +997,7 @@ export default ({ useAssetChain = false }) => {
           let request = await sdk.sdkBase.xcall(xcallParams)
           setCallResponse({
             status: 'pending',
-            message: 'Please send the bridge transaction',
+            message: totalSteps ? `(${currentStep}/${totalSteps}) ` + 'Please send the bridge transaction' : 'Please send the bridge transaction',
           })
           if (request) {
             if (txs && txs.length > 0) {    
