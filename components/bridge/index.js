@@ -384,7 +384,7 @@ export default ({ useAssetChain = false }) => {
       const interval = setInterval(() => update(), 1 * 60 * 1000)
       return () => clearInterval(interval)
     },
-    [estimateFeesTrigger],
+    [estimateFeesTrigger, callResponse],
   )
 
   // update transfer status
