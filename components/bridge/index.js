@@ -748,6 +748,7 @@ export default ({ useAssetChain = false }) => {
           const txs = []
           const multisendContract = await sdk.sdkBase.getDeploymentAddress(xcallParams.origin, "multisend");
           if (source_asset_data?.is_xERC20) {
+
             if (!(source_contract_data?.xERC20 && equalsIgnoreCase(source_contract_data.contract_address, source_contract_data.xERC20))) {
               console.log('[/]', '[setup for an xERC20]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
 
@@ -773,22 +774,22 @@ export default ({ useAssetChain = false }) => {
                 const xerc20 = new Contract(source_contract_data?.xERC20, erc20Interface, signer);
                 const permit2 = new Contract(PERMIT2_ADDRESS, permit2Interface, signer);
 
-                const allowances = [
+                const permitFlowAllowances = [
                   erc20.allowance(address, PERMIT2_ADDRESS),
                   xerc20.allowance(address, PERMIT2_ADDRESS),
                   permit2.allowance(address, erc20.address, source_contract_data?.lockbox),
                   permit2.allowance(address, xerc20.address, multisendContract)
                 ]
                 const [
-                  erc20Allowance, 
-                  xerc20Allowance, 
+                  erc20AllowancePermit, 
+                  xerc20AllowancePermit, 
                   [lockboxPermitAmount, lockboxPermitExpiration, lockboxPermitNonce], 
                   [multisendPermitAmount, multisendPermitExpiration, multisendPermitNonce]
-                ] = await Promise.all(allowances)
+                ] = await Promise.all(permitFlowAllowances)
 
                 if (source_contract_data?.permit_supported) {
                   // EOA approves ERC20 to permit2 if needed
-                  if (BigNumber.from(erc20Allowance).lt(BigNumber.from(xcallParams.amount))) {
+                  if (BigNumber.from(erc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
                     setApproving(true)
                     setApproveResponse({
                       status: 'pending',
@@ -807,7 +808,7 @@ export default ({ useAssetChain = false }) => {
                   }
   
                   // EOA approves XERC20 to permit2 if needed
-                  if (BigNumber.from(xerc20Allowance).lt(BigNumber.from(xcallParams.amount))) {
+                  if (BigNumber.from(xerc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
                     setApproving(true)
                     setApproveResponse({
                       status: 'pending',
@@ -896,46 +897,49 @@ export default ({ useAssetChain = false }) => {
                     status: 'pending',
                     message: 'Please approve ERC20 to Lockbox',
                   })
+                  const erc20AllowanceLockbox = await erc20.allowance(address, source_contract_data?.lockbox)
+
                   // Approve ERC20 spend to Lockbox
-                  const approveLockboxERC20TxRequest = await erc20.approve(source_contract_data?.lockbox, constants.MaxUint256);
-                  console.log('approving erc20 to lockbox')
-                  setCallResponse({
-                    status: 'pending',
-                    message: 'Approving ERC20 to Lockbox',
-                  })
-                  await approveLockboxERC20TxRequest.wait()
+                  if (BigNumber.from(erc20AllowanceLockbox).lt(BigNumber.from(xcallParams.amount))) {
+                    const approveLockboxERC20TxRequest = await erc20.approve(source_contract_data?.lockbox, infiniteApprove ? constants.MaxUint256 : xcallParams.amount);
+                    setCallResponse({
+                      status: 'pending',
+                      message: 'Approving ERC20 to Lockbox',
+                    })
+                    await approveLockboxERC20TxRequest.wait()
+                  }
 
                   // Deposit into Lockbox
-                  const depositData = lockboxInterface.encodeFunctionData('deposit', [xcallParams.amount])
+                  const depositData = lockboxInterface.encodeFunctionData('deposit', [infiniteApprove ? constants.MaxUint256 : xcallParams.amount])
                   const depositTxRequest = {
                     to: source_contract_data?.lockbox,
                     data: depositData,
                     chainId: source_chain_data?.chain_id
                   }
-                  console.log('depositing')
                   setCallResponse({
                     status: 'pending',
-                    message: 'Please Deposit',
+                    message: 'Please deposit into Lockbox',
                   })
-                  await signer.sendTransaction(depositTxRequest)
+                  const depositTxReceipt = await signer.sendTransaction(depositTxRequest)
                   setCallResponse({
                     status: 'pending',
-                    message: 'Depositing',
+                    message: 'Depositing into Lockbox',
                   })
-
+                  await depositTxReceipt.wait()
+                  
                   // Approve xERC20 spend to Connext
                   const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xerc20.address, xcallParams.amount, infiniteApprove)
                   if (approveXERC20TxRequest) {
-                    console.log('approving xerc20 to connext')
                     setCallResponse({
                       status: 'pending',
                       message: 'Please approve xERC20 to Connext',
                     })
-                    await signer.sendTransaction(approveXERC20TxRequest)
+                    const approveXERC20TxReceipt = await signer.sendTransaction(approveXERC20TxRequest)
                     setCallResponse({
                       status: 'pending',
                       message: 'Approving xERC20 to Connext',
                     })
+                    await approveXERC20TxReceipt.wait()
                   }
                 }
 
@@ -958,6 +962,10 @@ export default ({ useAssetChain = false }) => {
 
           console.log('[/]', '[xcall]', { xcallParams })
           let request = await sdk.sdkBase.xcall(xcallParams)
+          setCallResponse({
+            status: 'pending',
+            message: 'Please send the bridge transaction',
+          })
           if (request) {
             if (txs && txs.length > 0) {    
               txs.push(request)
