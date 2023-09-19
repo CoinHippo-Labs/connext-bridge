@@ -2374,21 +2374,23 @@ export default ({ useAssetChain = false }) => {
                                         {closeButton}
                                       </div>
                                     </div>
-                                    <div className="text-sm 3xl:text-xl font-bold">
-                                      <span className="mr-1">
-                                        To file a support request, please create a ticket on our discord
-                                      </span>
-                                      {process.env.NEXT_PUBLIC_FEEDBACK_URL && (
-                                        <a
-                                          href={process.env.NEXT_PUBLIC_FEEDBACK_URL}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="underline"
-                                        >
-                                          here
-                                        </a>
-                                      )}.
-                                    </div>
+                                    {status === 'failed' && (
+                                      <div className="text-sm 3xl:text-xl font-bold">
+                                        <span className="mr-1">
+                                          To file a support request, please create a ticket on our discord
+                                        </span>
+                                        {process.env.NEXT_PUBLIC_FEEDBACK_URL && (
+                                          <a
+                                            href={process.env.NEXT_PUBLIC_FEEDBACK_URL}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="underline"
+                                          >
+                                            here
+                                          </a>
+                                        )}.
+                                      </div>
+                                    )}
                                   </div>
                                 </Alert>
                               )
