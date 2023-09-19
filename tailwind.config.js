@@ -22,7 +22,9 @@ module.exports = withMT({
         slate: {
           ...colors.slate,
           900: '#1d1c1c',
+          850: '#252525',
           800: '#292929',
+          750: '#313131',
           700: '#343434',
           600: '#4a4a4a',
           500: '#a5a5a5',
@@ -31,6 +33,10 @@ module.exports = withMT({
           200: '#d6d6d6',
           100: '#e1e1e1',
           50: '#f0f0f0',
+        },
+        indigo: {
+          ...colors.indigo,
+          950: '#2e488e',
         },
       },
       screens: {

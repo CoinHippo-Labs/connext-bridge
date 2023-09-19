@@ -15,7 +15,7 @@ import { parseUnits } from '../../../lib/number'
 import { equalsIgnoreCase, parseError } from '../../../lib/utils'
 import { GET_BALANCES_DATA } from '../../../reducers/types'
 
-const AMOUNT_THRESHOLD = 0
+const AMOUNT_THRESHOLD = -10
 const ABI = [
   'function withdraw(uint256 _amount)',
 ]
@@ -132,60 +132,74 @@ export default ({ asset, contract }) => {
         <Modal
           hidden={hidden}
           title={
-            <div className="flex items-center justify-between">
-              <span className="normal-case font-medium">
-                {`It looks like you did not complete a previous ${symbol} transfer, so you currently have bridgeable x${symbol} in your wallet. Would you like to finish transferring x${symbol}?`}
+            <div className="flex items-center">
+              <span className="normal-case text-slate-900 dark:text-slate-50 text-xl font-semibold">
+                Warning
               </span>
             </div>
           }
           body={
-            <div className="space-y-2">
-              <div className="grid grid-cols-2 gap-2 mt-2">
-                <Link href={`${pathname.replace('[bridge]', bridge)}?symbol=x${symbol}&amount=${amount}`} className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded ${disabled ? 'pointer-events-none' : ''} flex items-center justify-center text-white py-1.5 px-2`}>
-                  <span className="whitespace-nowrap text-xs">
-                    Yes, complete transfer
-                  </span>
-                </Link>
-                <button
-                  disabled={disabled}
-                  onClick={() => withdraw()}
-                  className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded ${disabled ? 'pointer-events-none' : ''} flex items-center justify-center text-white space-x-1.5 py-1.5 px-2`}
-                >
-                  {withdrawing && <div><Spinner width={14} height={14} color="white" /></div>}
-                  <span className="whitespace-nowrap text-xs">
-                    {withdrawing ? withdrawProcessing ? 'Unwrapping' : 'Please Confirm' : `No, unwrap back to ${symbol}`}
-                  </span>
-                </button>
+            <div className="space-y-5 mt-2.5 mb-6">
+              <div className="flex items-center">
+                <span className="normal-case text-slate-900 dark:text-slate-50 text-sm font-semibold">
+                  {`It looks like you have an incomplete transfer for ${symbol}.`}
+                  <br />
+                  {`You will find the pending balance as x${symbol} in your wallet.`}
+                </span>
               </div>
-              {withdrawResponse && (
-                <div className="w-full">
-                  <Alert status={status} className="text-white mt-1 mb-2 mx-0">
-                    <div className="flex flex-wrap items-center justify-between">
-                      <span className="break-all leading-5 text-sm font-medium mr-1">
-                        {message}
-                      </span>
-                      {status === 'success' && hash && url && (
-                        <a
-                          href={`${url}${transaction_path?.replace('{tx}', hash)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="pr-1.5"
-                        >
-                          <span className="whitespace-nowrap font-semibold">
-                            View on {explorer.name}
-                          </span>
-                        </a>
-                      )}
-                    </div>
-                  </Alert>
+              <div className="flex items-center">
+                <span className="normal-case text-slate-900 dark:text-slate-50 text-sm font-semibold">
+                  {`Would you like to complete the prior bridge transfer or switch back to ${symbol}?`}
+                </span>
+              </div>
+              <div className="space-y-2 pt-2">
+                <div className="grid grid-cols-2 gap-5">
+                  <Link href={`${pathname.replace('[bridge]', bridge)}?symbol=x${symbol}&amount=${amount}`} className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded ${disabled ? 'pointer-events-none' : ''} flex items-center justify-center text-white font-bold py-2.5 px-3`}>
+                    <span className="whitespace-nowrap text-sm">
+                      Complete transfer
+                    </span>
+                  </Link>
+                  <button
+                    disabled={disabled}
+                    onClick={() => withdraw()}
+                    className={`bg-slate-50 hover:bg-slate-100 dark:bg-slate-50 dark:hover:bg-slate-100 rounded ${disabled ? 'pointer-events-none' : ''} flex items-center justify-center text-indigo-950 font-bold space-x-1.5 py-2.5 px-3`}
+                  >
+                    {withdrawing && <div><Spinner width={16} height={16} color="white" /></div>}
+                    <span className="whitespace-nowrap text-sm">
+                      {withdrawing ? withdrawProcessing ? 'Unwrapping' : 'Please Confirm' : 'Switch Back'}
+                    </span>
+                  </button>
                 </div>
-              )}
+                {withdrawResponse && (
+                  <div className="w-full">
+                    <Alert status={status} className="text-white mt-1 mb-2 mx-0">
+                      <div className="flex flex-wrap items-center justify-between">
+                        <span className="break-all leading-5 text-sm font-medium mr-1">
+                          {message}
+                        </span>
+                        {status === 'success' && hash && url && (
+                          <a
+                            href={`${url}${transaction_path?.replace('{tx}', hash)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="pr-1.5"
+                          >
+                            <span className="whitespace-nowrap font-semibold">
+                              View on {explorer.name}
+                            </span>
+                          </a>
+                        )}
+                      </div>
+                    </Alert>
+                  </div>
+                )}
+              </div>
             </div>
           }
           noCancelOnClickOutside={true}
           noButtons={true}
           onClose={() => setHidden(true)}
-          modalClassName="max-w-md"
+          modalClassName="xerc20-warning-modal"
         />
       ) :
       Number(amount) > AMOUNT_THRESHOLD && (
