@@ -15,7 +15,7 @@ import { parseUnits } from '../../../lib/number'
 import { equalsIgnoreCase, parseError } from '../../../lib/utils'
 import { GET_BALANCES_DATA } from '../../../reducers/types'
 
-const AMOUNT_THRESHOLD = -10
+const AMOUNT_THRESHOLD = 0
 const ABI = [
   'function withdraw(uint256 _amount)',
 ]
