@@ -1324,6 +1324,15 @@ export default ({ useAssetChain = false }) => {
   const destination_amount = getBalanceData(destination_chain_data?.chain_id, destination_contract_data?.contract_address, balances_data)?.amount
   const gas_amount = getBalanceData(source_chain_data?.chain_id, ZeroAddress, balances_data)?.amount
 
+  useEffect(
+    () => {
+      if (source_contract_data?.xERC20 && equalsIgnoreCase(source_contract_data.contract_address, source_contract_data.xERC20) && Number(source_amount) === 0) {
+        setBridge({ ...bridge, symbol: null })
+      }                      
+    },
+    [source_contract_data, source_amount],
+  )
+
   let { routerFee, relayerFee } = { ...fees }
   routerFee = estimatedValues?.routerFee && !(forceSlow || estimatedValues?.isFastPath === false) ? estimatedValues.routerFee : fees ? forceSlow ? 0 : routerFee : null
   relayerFee = fees ? relayerFee || 0 : null
@@ -1847,8 +1856,8 @@ export default ({ useAssetChain = false }) => {
                             )}
                           </div>
                         </div>
-                        <WarningXERC20 asset={source_asset_data} contract={source_contract_data} />
                       </div>
+                      <WarningXERC20 asset={source_asset_data} contract={source_contract_data} />
                     </div>
                     {supported || !(source_chain && destination_chain && asset) ?
                       <div className="space-y-4">

@@ -203,10 +203,22 @@ export default ({ asset, contract }) => {
         />
       ) :
       Number(amount) > AMOUNT_THRESHOLD && (
-        <div className="flex items-start space-x-1.5 3xl:space-x-2.5 mb-1.5">
+        <div className="flex items-start space-x-1.5 3xl:space-x-2.5">
           <IoWarning size={16} className="min-w-max 3xl:w-5 3xl:h-5 text-yellow-500 dark:text-yellow-400" />
-          <div className="text-yellow-500 dark:text-yellow-400 text-xs 3xl:text-xl">
-            {`You have a x${symbol} balance (bridgeable ${symbol}) in your wallet because a previous ${symbol} transfer was incomplete. Please complete the transfer of x${symbol} or unwrap back to ${symbol}.`}
+          <div className="space-y-2">
+            <div className="text-yellow-500 dark:text-yellow-400 text-xs 3xl:text-xl">
+              {`You have a pending balance as x${symbol} in your wallet as a previous transfer did not complete. Please complete the transfer or switch back to ${symbol} here.`}
+            </div>
+            <button
+              disabled={disabled}
+              onClick={() => withdraw()}
+              className={`bg-slate-50 hover:bg-slate-100 dark:bg-slate-50 dark:hover:bg-slate-100 rounded ${disabled ? 'pointer-events-none' : ''} flex items-center justify-center text-indigo-950 font-bold space-x-1.5 py-1.5 px-2.5`}
+            >
+              {withdrawing && <div><Spinner width={14} height={14} color="white" /></div>}
+              <span className="whitespace-nowrap text-xs">
+                {withdrawing ? withdrawProcessing ? 'Unwrapping' : 'Please Confirm' : 'Switch Back'}
+              </span>
+            </button>
           </div>
         </div>
       )
