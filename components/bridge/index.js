@@ -27,7 +27,6 @@ import NumberDisplay from '../number'
 import Alert from '../alert'
 import Balance from '../balance'
 import Faucet from '../faucet'
-import Wrapper from '../wrapper/xERC20'
 import Copy from '../copy'
 import Image from '../image'
 import TimeSpent from '../time/timeSpent'
@@ -1857,7 +1856,6 @@ export default ({ useAssetChain = false }) => {
                           </div>
                         </div>
                       </div>
-                      <WarningXERC20 asset={source_asset_data} contract={source_contract_data} />
                     </div>
                     {supported || !(source_chain && destination_chain && asset) ?
                       <div className="space-y-4">
@@ -2454,7 +2452,11 @@ export default ({ useAssetChain = false }) => {
             }
           </div>
           {!openTransferStatus && _source_contract_data?.mintable && <Faucet tokenId={asset} contractData={_source_contract_data} />}
-          {!openTransferStatus && _source_contract_data?.xERC20 && equalsIgnoreCase(source_contract_data.contract_address, source_contract_data.xERC20) && <Wrapper tokenId={asset} contractData={_source_contract_data} />}
+          {!openTransferStatus && _source_contract_data?.xERC20 && (
+            <div className="max-w-md 3xl:max-w-xl">
+              <WarningXERC20 asset={source_asset_data} contract={source_contract_data} />
+            </div>
+          )}
         </div>
       </div>
       <div className={`col-span-1 ${hasLatestTransfers ? 'lg:col-span-3' : ''} xl:col-span-2 3xl:mt-8`}>
