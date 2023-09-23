@@ -1104,9 +1104,12 @@ export default ({ useAssetChain = false }) => {
             manual = true
           }
           else if (toArray([source_chain_data?.id, destination_chain_data?.id]).findIndex(c => toArray(pools_data).find(d => d.chain_data?.id === c && !d.tvl)) < 0) {
-            console.log('[/]', '[calculateAmountReceived]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, checkFastLiquidity })
+            const startTime = moment()
+            console.log('[/]', '[calculateAmountReceived]', { startTime: startTime.format(), originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, checkFastLiquidity })
             const response = await sdk.sdkBase.calculateAmountReceived(originDomain, destinationDomain, originTokenAddress, amount, isNextAsset, checkFastLiquidity)
-            console.log('[/]', '[amountReceived]', { originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, checkFastLiquidity, response })
+            const endTime = moment()
+            const timeSpentMilliseconds = endTime.diff(startTime, 'milliseconds')
+            console.log('[/]', '[amountReceived]', { startTime: startTime.format(), endTime: endTime.format(), timeSpentMilliseconds, originDomain, destinationDomain, originTokenAddress, destinationTokenAddress, amount, isNextAsset, checkFastLiquidity, response })
 
             const destination_contract_data = getContractData(destination_chain_data?.chain_id, destination_asset_data?.contracts)
             setEstimatedValues(
@@ -1577,7 +1580,7 @@ export default ({ useAssetChain = false }) => {
                                     setBridge({ ...bridge, amount: max_amount })
                                     if (isNumber(max_amount)) {
                                       if (!isZero(max_amount)) {
-                                        calculateAmountReceived(max_amount)
+                                        // calculateAmountReceived(max_amount)
                                         checkApprovedNeeded(max_amount)
                                       }
                                       else {
@@ -1696,7 +1699,7 @@ export default ({ useAssetChain = false }) => {
                                   setBridge({ ...bridge, amount: value })
                                   if (isNumber(value)) {
                                     if (!isZero(value)) {
-                                      calculateAmountReceived(value)
+                                      // calculateAmountReceived(value)
                                       checkApprovedNeeded(value)
                                     }
                                     else {
