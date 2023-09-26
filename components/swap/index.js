@@ -137,6 +137,9 @@ export default () => {
           if (origin === 'y' && local?.symbol && getAssetData(asset, pool_assets_data, { chain_id, symbol: local.symbol })) {
             params.from = local.symbol
           }
+          else if (!(origin === 'y' && !local?.symbol)) {
+            delete params.from
+          }
         }
         else if (params.chain && !asset) {
           const { chain_id } = { ...getChainData(params.chain, chains_data) }
