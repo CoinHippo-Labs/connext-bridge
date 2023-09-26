@@ -1987,10 +1987,10 @@ export default ({ useAssetChain = false }) => {
                               className="cursor-pointer flex items-center justify-between space-x-1"
                             >
                               <div className={`whitespace-nowrap ${collapse ? 'text-slate-500 dark:text-slate-500 font-medium' : 'font-semibold'} text-sm 3xl:text-xl`}>
-                                {is_xERC20 ? 'Additional Details' : 'Estimated Fees'}
+                                {true || is_xERC20 ? 'Additional Details' : 'Estimated Fees'}
                               </div>
                               <div className="flex items-center space-x-2">
-                                {!is_xERC20 && (
+                                {false && !is_xERC20 && (
                                   <div>
                                     {fees && (!isNumber(amount) || isNumber(estimatedValues?.routerFee) || estimateResponse) ?
                                       <span className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-semibold space-x-1.5">
