@@ -644,7 +644,8 @@ export default ({ useAssetChain = false }) => {
         failed = true
       }
 
-      if (!failed) {
+      // Approval to Connext is added to a multisend txn for xERC20s with Lockboxes, so skip those cases
+      if (!failed && (!source_contract_data?.xERC20 || source_contract_data.contract_address === source_contract_data.xERC20)) {
         let amountToApprove
         try {
           amountToApprove = parseUnits(amount, source_decimals)
