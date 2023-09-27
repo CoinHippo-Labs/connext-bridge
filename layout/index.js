@@ -539,12 +539,13 @@ export default ({ children, agreeToTermsUseModal = false }) => {
   useEffect(
     () => {
       const getMyBalance = async (chain_id, contract_data) => {
-        const { contract_address, next_asset, wrappable } = { ...contract_data }
+        const { contract_address, xERC20, next_asset, wrappable } = { ...contract_data }
         const provider = rpcs[chain_id]
         if (provider) {
           const contracts_data = toArray(
             _.concat(
               { ...contract_data },
+              xERC20 && { ...contract_data, contract_address: xERC20 },
               wrappable && { ...contract_data, contract_address: ZeroAddress },
               next_asset && { ...contract_data, ...next_asset },
             )

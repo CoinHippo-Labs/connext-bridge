@@ -17,6 +17,7 @@ import { BiEditAlt, BiCheckCircle, BiInfoCircle, BiChevronUp, BiChevronDown } fr
 import { IoInformationCircleOutline } from 'react-icons/io5'
 
 import Options from './options'
+import WarningXERC20 from './warning/xERC20'
 import WarningSlippage from './warning/slippage'
 import WarningFeeRatio from './warning/fee-ratio'
 import LatestTransfers from '../latest-transfers'
@@ -35,8 +36,8 @@ import SelectAsset from '../select/asset'
 import SelectAssetChain from '../select/asset-chain'
 import { NETWORK, WRAPPED_PREFIX, NATIVE_WRAPPABLE_SYMBOLS, RELAYER_FEE_ASSET_TYPES, PERCENT_ROUTER_FEE, GAS_LIMIT_ADJUSTMENT, DEFAULT_PERCENT_BRIDGE_SLIPPAGE, DEFAULT_DESTINATION_CHAIN } from '../../lib/config'
 import { getChainData, getAssetData, getContractData, getBalanceData } from '../../lib/object'
-import { split, toArray, includesStringList, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, getPath, getQueryParams, createMomentFromUnixtime, switchColor, sleep, normalizeMessage, parseError } from '../../lib/utils'
 import { toBigNumber, toFixedNumber, formatUnits, parseUnits, isNumber, isZero } from '../../lib/number'
+import { split, toArray, includesStringList, numberFormat, numberToFixed, ellipse, equalsIgnoreCase, getPath, getQueryParams, createMomentFromUnixtime, switchColor, sleep, normalizeMessage, parseError } from '../../lib/utils'
 import { BALANCES_DATA, GET_BALANCES_DATA } from '../../reducers/types'
 
 const DEFAULT_OPTIONS = {
@@ -382,7 +383,7 @@ export default ({ useAssetChain = false }) => {
       const interval = setInterval(() => update(), 1 * 60 * 1000)
       return () => clearInterval(interval)
     },
-    [estimateFeesTrigger],
+    [estimateFeesTrigger, callResponse],
   )
 
   // update transfer status
@@ -586,8 +587,12 @@ export default ({ useAssetChain = false }) => {
       const source_asset_data = getAssetData(asset, assets_data)
       let source_contract_data = getContractData(source_chain_data?.chain_id, source_asset_data?.contracts)
       const _source_contract_data = _.cloneDeep(source_contract_data)
+       // xERC20 asset
+      if (symbol && equalsIgnoreCase(`x${source_asset_data?.symbol}`, symbol)) {
+        source_contract_data = { ...source_contract_data, contract_address: source_contract_data.xERC20, symbol: `x${source_asset_data.symbol}` }
+      }
       // next asset
-      if (symbol && equalsIgnoreCase(source_contract_data?.next_asset?.symbol, symbol)) {
+      else if (symbol && equalsIgnoreCase(source_contract_data?.next_asset?.symbol, symbol)) {
         source_contract_data = { ...source_contract_data, ...source_contract_data.next_asset }
       }
       // native asset
@@ -685,6 +690,10 @@ export default ({ useAssetChain = false }) => {
             xcallParams.relayerFeeInTransactingAsset = '0'
           }
 
+          // Track current step and total steps the user will need to take
+          let currentStep = 1
+          let totalSteps = 0
+
           // Alchemix assets are handled differently
           if (ALCHEMIX_ASSETS.includes(asset)) {
             console.log('[/]', '[setup for Alchemix asset]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
@@ -742,124 +751,231 @@ export default ({ useAssetChain = false }) => {
           const txs = []
           const multisendContract = await sdk.sdkBase.getDeploymentAddress(xcallParams.origin, "multisend");
           if (source_asset_data?.is_xERC20) {
-            console.log('[/]', '[setup for an xERC20]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
+            if (!(source_contract_data?.xERC20 && equalsIgnoreCase(source_contract_data.contract_address, source_contract_data.xERC20))) {
+              console.log('[/]', '[setup for an xERC20]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
 
-            // Lockbox exists on source domain, must deposit
-            if (source_contract_data?.lockbox) {
-              const lockboxInterface = new utils.Interface([
-                "function deposit(uint256 _amount)",
-                "function depositWithPermitAllowance(uint256 _amount, address _owner, tuple(tuple(address token, uint160 amount, uint48 expiration, uint48 nonce) details, address spender, uint256 sigDeadline) permitSingle, bytes calldata signature)",
-                "function withdraw(uint256 _amount)",
-              ]);
-              const erc20Interface = new utils.Interface([
-                "function approve(address spender, uint256 amount)",
-                "function transferFrom(address from, address to, uint256 amount)",
-                "function allowance(address owner, address spender) view returns (uint256)",
-              ]);
-              const permit2Interface = new utils.Interface([
-                "function permit(address owner, tuple(tuple(address token, uint160 amount, uint48 expiration, uint48 nonce) details, address spender, uint256 sigDeadline) permitSingle, bytes calldata signature)",
-                "function transferFrom(address from, address to, uint160 amount, address token)",
-                "function allowance(address, address, address) view returns (uint160 amount, uint48 expiration, uint48 nonce)",
-              ]);
+              // Lockbox exists on source domain, must deposit
+              if (source_contract_data?.lockbox) {
+                const lockboxInterface = new utils.Interface([
+                  "function deposit(uint256 _amount)",
+                  "function depositWithPermitAllowance(uint256 _amount, address _owner, tuple(tuple(address token, uint160 amount, uint48 expiration, uint48 nonce) details, address spender, uint256 sigDeadline) permitSingle, bytes calldata signature)",
+                  "function withdraw(uint256 _amount)",
+                ]);
+                const erc20Interface = new utils.Interface([
+                  "function approve(address spender, uint256 amount)",
+                  "function transferFrom(address from, address to, uint256 amount)",
+                  "function allowance(address owner, address spender) view returns (uint256)",
+                ]);
+                const permit2Interface = new utils.Interface([
+                  "function permit(address owner, tuple(tuple(address token, uint160 amount, uint48 expiration, uint48 nonce) details, address spender, uint256 sigDeadline) permitSingle, bytes calldata signature)",
+                  "function transferFrom(address from, address to, uint160 amount, address token)",
+                  "function allowance(address, address, address) view returns (uint160 amount, uint48 expiration, uint48 nonce)",
+                ]);
 
-              const erc20 = new Contract(xcallParams.asset, erc20Interface, signer);
-              const xerc20 = new Contract(source_contract_data?.xERC20, erc20Interface, signer);
-              const permit2 = new Contract(PERMIT2_ADDRESS, permit2Interface, signer);
+                const erc20 = new Contract(xcallParams.asset, erc20Interface, signer);
+                const xerc20 = new Contract(source_contract_data?.xERC20, erc20Interface, signer);
+                const permit2 = new Contract(PERMIT2_ADDRESS, permit2Interface, signer);
+                const connext = await sdk.sdkBase.getConnext(source_domain);
 
-              const allowances = [
-                erc20.allowance(address, PERMIT2_ADDRESS),
-                xerc20.allowance(address, PERMIT2_ADDRESS),
-                permit2.allowance(address, erc20.address, source_contract_data?.lockbox),
-                permit2.allowance(address, xerc20.address, multisendContract)
-              ]
-              const [
-                erc20Allowance, 
-                xerc20Allowance, 
-                [lockboxPermitAmount, lockboxPermitExpiration, lockboxPermitNonce], 
-                [multisendPermitAmount, multisendPermitExpiration, multisendPermitNonce]
-              ] = await Promise.all(allowances)
+                const allowances = [
+                  erc20.allowance(address, PERMIT2_ADDRESS),
+                  erc20.allowance(address, source_contract_data?.lockbox),
+                  xerc20.allowance(address, PERMIT2_ADDRESS),
+                  xerc20.allowance(address, connext.address),
+                  permit2.allowance(address, erc20.address, source_contract_data?.lockbox),
+                  permit2.allowance(address, xerc20.address, multisendContract)
+                ]
+                const [
+                  erc20AllowancePermit,
+                  erc20AllowanceLockbox,
+                  xerc20AllowancePermit,
+                  xerc20AllowanceConnext,
+                  [lockboxPermitAmount, lockboxPermitExpiration, lockboxPermitNonce], 
+                  [multisendPermitAmount, multisendPermitExpiration, multisendPermitNonce]
+                ] = await Promise.all(allowances)
 
-              // EOA approves ERC20 to permit2 if needed
-              if (BigNumber.from(erc20Allowance).lt(BigNumber.from(xcallParams.amount))) {
-                const approvePermit2Erc20TxRequest = await erc20.approve(PERMIT2_ADDRESS, constants.MaxUint256);
-                await approvePermit2Erc20TxRequest.wait()
-              }
+                if (source_contract_data?.permit_supported) {
+                  // Start with 2 permit steps and 1 step for final multcall
+                  totalSteps = 3
+                  if (BigNumber.from(erc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
+                    totalSteps += 1
+                  }
+                  if (BigNumber.from(xerc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
+                    totalSteps += 1
+                  }
 
-              // EOA approves XERC20 to permit2 if needed
-              if (BigNumber.from(xerc20Allowance).lt(BigNumber.from(xcallParams.amount))) {
-                const approveMultisendXerc20TxRequest = await xerc20.approve(PERMIT2_ADDRESS, constants.MaxUint256);
-                await approveMultisendXerc20TxRequest.wait()
-              }
-
-              // Create permit for Lockbox
-              if (lockboxPermitAmount < xcallParams.amount || lockboxPermitExpiration < MaxAllowanceExpiration) {
-                const permit = {
-                  details: {
-                    token: erc20.address,
-                    amount: xcallParams.amount,
-                    expiration: MaxAllowanceExpiration,
-                    nonce: lockboxPermitNonce
-                  },
-                  spender: source_contract_data?.lockbox,
-                  sigDeadline: MaxSigDeadline
-                }
+                  // EOA approves ERC20 to permit2 if needed
+                  if (BigNumber.from(erc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
+                    setApproving(true)
+                    setApproveResponse({
+                      status: 'pending',
+                      message: `(${currentStep}/${totalSteps}) Please approve ERC20 to permit2`,
+                    })
+                    const approvePermit2Erc20TxRequest = await erc20.approve(PERMIT2_ADDRESS, constants.MaxUint256);
+                    setApproveProcessing(true)
+                    setApproveResponse({
+                      status: 'pending',
+                      message: `(${currentStep}/${totalSteps}) Waiting for ERC20 to permit2 approval`,
+                    })
+                    await approvePermit2Erc20TxRequest.wait()
+                    currentStep += 1
+                    setApproveResponse(null)
+                    setApproveProcessing(false)
+                    setApproving(false)
+                  }
   
-                const { domain, types, values } = AllowanceTransfer.getPermitData(permit, PERMIT2_ADDRESS, source_chain_data?.chain_id)
-                const signature = await signer._signTypedData(domain, types, values)
-              
-                // Add transaction to call `depositWithPermitAllowance` on Lockbox
-                const depositWithPermitAllowanceData = lockboxInterface.encodeFunctionData('depositWithPermitAllowance', [xcallParams.amount, address, permit, signature])
-                const depositWithPermitAllowanceTxRequest = {
-                  to: source_contract_data?.lockbox,
-                  data: depositWithPermitAllowanceData,
-                  chainId: source_chain_data?.chain_id
-                }
-                txs.push(depositWithPermitAllowanceTxRequest)
-              }
-              
-              // Create permit for Multisend
-              if (multisendPermitAmount < xcallParams.amount || multisendPermitExpiration < MaxAllowanceExpiration) {
-                const permitMultisend = {
-                  details: {
-                    token: xerc20.address,
-                    amount: xcallParams.amount,
-                    expiration: MaxAllowanceExpiration,
-                    nonce: multisendPermitNonce
-                  },
-                  spender: multisendContract,
-                  sigDeadline: MaxSigDeadline
-                }
+                  // EOA approves XERC20 to permit2 if needed
+                  if (BigNumber.from(xerc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
+                    setApproving(true)
+                    setApproveResponse({
+                      status: 'pending',
+                      message: 'Please approve xERC20 to permit2',
+                    })
+                    const approveMultisendXerc20TxRequest = await xerc20.approve(PERMIT2_ADDRESS, constants.MaxUint256);
+                    setApproveProcessing(true)
+                    setApproveResponse({
+                      status: 'pending',
+                      message: 'Waiting for xERC20 to permit2 approval',
+                    })
+                    await approveMultisendXerc20TxRequest.wait()
+                    currentStep += 1
+                    setApproveResponse(null)
+                    setApproveProcessing(false)
+                    setApproving(false)
+                  }
   
-                const { domain: domain2, types: types2, values: values2 } = AllowanceTransfer.getPermitData(permitMultisend, PERMIT2_ADDRESS, source_chain_data?.chain_id)
-                const signatureForMultisend = await signer._signTypedData(domain2, types2, values2)
+                  // Create permit for Lockbox
+                  if (lockboxPermitAmount < xcallParams.amount || lockboxPermitExpiration < MaxAllowanceExpiration) {
+                    const permit = {
+                      details: {
+                        token: erc20.address,
+                        amount: xcallParams.amount,
+                        expiration: MaxAllowanceExpiration,
+                        nonce: lockboxPermitNonce
+                      },
+                      spender: source_contract_data?.lockbox,
+                      sigDeadline: MaxSigDeadline
+                    }
+      
+                    const { domain, types, values } = AllowanceTransfer.getPermitData(permit, PERMIT2_ADDRESS, source_chain_data?.chain_id)
+                    const signature = await signer._signTypedData(domain, types, values)
+                    currentStep += 1
+                  
+                    // Add transaction to call `depositWithPermitAllowance` on Lockbox
+                    const depositWithPermitAllowanceData = lockboxInterface.encodeFunctionData('depositWithPermitAllowance', [xcallParams.amount, address, permit, signature])
+                    const depositWithPermitAllowanceTxRequest = {
+                      to: source_contract_data?.lockbox,
+                      data: depositWithPermitAllowanceData,
+                      chainId: source_chain_data?.chain_id
+                    }
+                    txs.push(depositWithPermitAllowanceTxRequest)
+                  }
+                  
+                  // Create permit for Multisend
+                  if (multisendPermitAmount < xcallParams.amount || multisendPermitExpiration < MaxAllowanceExpiration) {
+                    const permitMultisend = {
+                      details: {
+                        token: xerc20.address,
+                        amount: xcallParams.amount,
+                        expiration: MaxAllowanceExpiration,
+                        nonce: multisendPermitNonce
+                      },
+                      spender: multisendContract,
+                      sigDeadline: MaxSigDeadline
+                    }
+      
+                    const { domain: domain2, types: types2, values: values2 } = AllowanceTransfer.getPermitData(permitMultisend, PERMIT2_ADDRESS, source_chain_data?.chain_id)
+                    const signatureForMultisend = await signer._signTypedData(domain2, types2, values2)
+                    currentStep += 1
+      
+                    // Add transaction to call `permit` on Permit2
+                    const permitMultisendData = permit2Interface.encodeFunctionData('permit', [address, permitMultisend, signatureForMultisend])
+                    const permitMultisendTxRequest = {
+                      to: PERMIT2_ADDRESS,
+                      data: permitMultisendData,
+                      chainId: source_chain_data?.chain_id
+                    }
+                    txs.push(permitMultisendTxRequest)
+                  }
   
-                // Add transaction to call `permit` on Permit2
-                const permitMultisendData = permit2Interface.encodeFunctionData('permit', [address, permitMultisend, signatureForMultisend])
-                const permitMultisendTxRequest = {
-                  to: PERMIT2_ADDRESS,
-                  data: permitMultisendData,
-                  chainId: source_chain_data?.chain_id
+                  // Add transaction to `transferFrom` from user to Multisend using Permit2
+                  const transferFromData = permit2Interface.encodeFunctionData('transferFrom', [address, multisendContract, xcallParams.amount, xerc20.address])
+                  const transferFromTxRequest = {
+                    to: PERMIT2_ADDRESS,
+                    data: transferFromData,
+                    chainId: source_chain_data?.chain_id,
+                  }
+                  txs.push(transferFromTxRequest)
+                  
+                  // Add transaction to approve xERC20 spend to Connext
+                  const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xerc20.address, xcallParams.amount, infiniteApprove, {signerAddress: multisendContract})
+                  if (approveXERC20TxRequest) {
+                    txs.push(approveXERC20TxRequest)
+                  }
+                } else {
+                  // Start with 1 step for deposit and 1 step for final xcall
+                  totalSteps = 2
+                  if (BigNumber.from(erc20AllowanceLockbox).lt(BigNumber.from(xcallParams.amount))) {
+                    totalSteps += 1
+                  }
+                  if (BigNumber.from(xerc20AllowanceConnext).lt(BigNumber.from(xcallParams.amount))) {
+                    totalSteps += 1
+                  }
+
+                  // Approve ERC20 spend to Lockbox
+                  if (BigNumber.from(erc20AllowanceLockbox).lt(BigNumber.from(xcallParams.amount))) {
+                    setCallResponse({
+                      status: 'pending',
+                      message: `(${currentStep}/${totalSteps}) Please approve ERC20 to Lockbox`,
+                    })
+                    const approveLockboxERC20TxRequest = await erc20.approve(source_contract_data?.lockbox, infiniteApprove ? constants.MaxUint256 : xcallParams.amount);
+                    setCallResponse({
+                      status: 'pending',
+                      message: `(${currentStep}/${totalSteps}) Approving ERC20 to Lockbox`,
+                    })
+                    await approveLockboxERC20TxRequest.wait()
+                    currentStep += 1
+                  }
+
+                  // Deposit into Lockbox
+                  const depositData = lockboxInterface.encodeFunctionData('deposit', [infiniteApprove ? constants.MaxUint256 : xcallParams.amount])
+                  const depositTxRequest = {
+                    to: source_contract_data?.lockbox,
+                    data: depositData,
+                    chainId: source_chain_data?.chain_id
+                  }
+                  setCallResponse({
+                    status: 'pending',
+                    message: `(${currentStep}/${totalSteps}) Please deposit into Lockbox`,
+                  })
+                  const depositTxReceipt = await signer.sendTransaction(depositTxRequest)
+                  setCallResponse({
+                    status: 'pending',
+                    message: `(${currentStep}/${totalSteps}) Depositing into Lockbox`,
+                  })
+                  await depositTxReceipt.wait()
+                  currentStep += 1
+                  
+                  // Approve xERC20 spend to Connext
+                  const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xerc20.address, xcallParams.amount, infiniteApprove)
+                  if (approveXERC20TxRequest) {
+                    setCallResponse({
+                      status: 'pending',
+                      message: `(${currentStep}/${totalSteps}) Please approve xERC20 to Connext`,
+                    })
+                    const approveXERC20TxReceipt = await signer.sendTransaction(approveXERC20TxRequest)
+                    setCallResponse({
+                      status: 'pending',
+                      message: `(${currentStep}/${totalSteps}) Approving xERC20 to Connext`,
+                    })
+                    await approveXERC20TxReceipt.wait()
+                    currentStep += 1
+                  }
                 }
-                txs.push(permitMultisendTxRequest)
-              }
 
-              // Add transaction to `transferFrom` from user to Multisend using Permit2
-              const transferFromData = permit2Interface.encodeFunctionData('transferFrom', [address, multisendContract, xcallParams.amount, xerc20.address])
-              const transferFromTxRequest = {
-                to: PERMIT2_ADDRESS,
-                data: transferFromData,
-                chainId: source_chain_data?.chain_id,
+                // Set xcall asset to xERC20
+                xcallParams.asset = xerc20.address
               }
-              txs.push(transferFromTxRequest)
-              
-              // Add transaction to approve xERC20 spend to Connext
-              const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xerc20.address, xcallParams.amount, infiniteApprove, {signerAddress: multisendContract})
-              if (approveXERC20TxRequest) {
-                txs.push(approveXERC20TxRequest)
-              }
-
-              // Finally, set xcall asset to xERC20
-              xcallParams.asset = xerc20.address
             }
 
             // Lockbox exists on destination domain, must withdraw through adapter
@@ -876,6 +992,10 @@ export default ({ useAssetChain = false }) => {
 
           console.log('[/]', '[xcall]', { xcallParams })
           let request = await sdk.sdkBase.xcall(xcallParams)
+          setCallResponse({
+            status: 'pending',
+            message: `${totalSteps ? `(${currentStep}/${totalSteps}) ` : ''}Please send the bridge transaction`,
+          })
           if (request) {
             if (txs && txs.length > 0) {    
               txs.push(request)
@@ -898,6 +1018,7 @@ export default ({ useAssetChain = false }) => {
             const { hash } = { ...response }
 
             setCallProcessing(true)
+            setCallResponse(null)
             const receipt = await signer.provider.waitForTransaction(hash)
             const { transactionHash, status } = { ...receipt }
             failed = !status
@@ -1169,8 +1290,12 @@ export default ({ useAssetChain = false }) => {
   const { is_xERC20 } = { ...source_asset_data }
   let source_contract_data = getContractData(source_chain_data?.chain_id, source_asset_data?.contracts)
   const _source_contract_data = _.cloneDeep(source_contract_data)
+  // xERC20 asset
+  if (symbol && equalsIgnoreCase(`x${source_asset_data?.symbol}`, symbol)) {
+    source_contract_data = { ...source_contract_data, contract_address: source_contract_data.xERC20, symbol: `x${source_asset_data.symbol}` }
+  }
   // next asset
-  if (symbol && equalsIgnoreCase(source_contract_data?.next_asset?.symbol, symbol)) {
+  else if (symbol && equalsIgnoreCase(source_contract_data?.next_asset?.symbol, symbol)) {
     source_contract_data = { ...source_contract_data, ...source_contract_data.next_asset }
   }
   // native asset
@@ -1200,6 +1325,15 @@ export default ({ useAssetChain = false }) => {
   const source_amount = getBalanceData(source_chain_data?.chain_id, source_contract_data?.contract_address, balances_data)?.amount
   const destination_amount = getBalanceData(destination_chain_data?.chain_id, destination_contract_data?.contract_address, balances_data)?.amount
   const gas_amount = getBalanceData(source_chain_data?.chain_id, ZeroAddress, balances_data)?.amount
+
+  useEffect(
+    () => {
+      if (source_contract_data?.xERC20 && equalsIgnoreCase(source_contract_data.contract_address, source_contract_data.xERC20) && Number(source_amount) === 0) {
+        setBridge({ ...bridge, symbol: null })
+      }                      
+    },
+    [source_contract_data, source_amount],
+  )
 
   let { routerFee, relayerFee } = { ...fees }
   routerFee = estimatedValues?.routerFee && !(forceSlow || estimatedValues?.isFastPath === false) ? estimatedValues.routerFee : fees ? forceSlow ? 0 : routerFee : null
@@ -2215,7 +2349,7 @@ export default ({ useAssetChain = false }) => {
                           <Alert status="failed" closeDisabled={true}>
                             <span>{alertMessage}</span>
                           </Alert> :
-                          !xcall && !callResponse && !estimateResponse ?
+                          !xcall && !callResponse && !approveResponse && !estimateResponse ?
                             <button
                               disabled={disabled || isZero(amount) || estimatedReceived <= 0 || ((!isNumber(relayerFee) || Number(relayerFee) <= 0) && NETWORK !== 'testnet')}
                               onClick={
@@ -2235,7 +2369,7 @@ export default ({ useAssetChain = false }) => {
                                       approveProcessing ? 'Approving' : 'Please Approve' :
                                       callProcessing ?
                                         'Transfer in progress ...' :
-                                        typeof approving === 'boolean' ? 'Please Confirm' : 'Checking Approval' :
+                                        typeof approving === 'boolean' && !source_asset_data?.is_xERC20 ? 'Please Confirm' : 'Checking Approval' :
                                     'Send'
                                   }
                                 </span>
@@ -2249,7 +2383,7 @@ export default ({ useAssetChain = false }) => {
                                 case 'success':
                                   color = callResponse ? 'bg-blue-600 dark:bg-blue-400' : 'bg-green-500 dark:bg-green-400'
                                   break
-                                case 'success':
+                                case 'failed':
                                   color = 'bg-red-500 dark:bg-red-400'
                                   break
                                 default:
@@ -2282,21 +2416,23 @@ export default ({ useAssetChain = false }) => {
                                         {closeButton}
                                       </div>
                                     </div>
-                                    <div className="text-sm 3xl:text-xl font-bold">
-                                      <span className="mr-1">
-                                        To file a support request, please create a ticket on our discord
-                                      </span>
-                                      {process.env.NEXT_PUBLIC_FEEDBACK_URL && (
-                                        <a
-                                          href={process.env.NEXT_PUBLIC_FEEDBACK_URL}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="underline"
-                                        >
-                                          here
-                                        </a>
-                                      )}.
-                                    </div>
+                                    {status === 'failed' && (
+                                      <div className="text-sm 3xl:text-xl font-bold">
+                                        <span className="mr-1">
+                                          To file a support request, please create a ticket on our discord
+                                        </span>
+                                        {process.env.NEXT_PUBLIC_FEEDBACK_URL && (
+                                          <a
+                                            href={process.env.NEXT_PUBLIC_FEEDBACK_URL}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="underline"
+                                          >
+                                            here
+                                          </a>
+                                        )}.
+                                      </div>
+                                    )}
                                   </div>
                                 </Alert>
                               )
@@ -2319,6 +2455,11 @@ export default ({ useAssetChain = false }) => {
             }
           </div>
           {!openTransferStatus && _source_contract_data?.mintable && <Faucet tokenId={asset} contractData={_source_contract_data} />}
+          {!openTransferStatus && _source_contract_data?.xERC20 && (
+            <div className="max-w-md 3xl:max-w-xl">
+              <WarningXERC20 asset={source_asset_data} contract={source_contract_data} />
+            </div>
+          )}
         </div>
       </div>
       <div className={`col-span-1 ${hasLatestTransfers ? 'lg:col-span-3' : ''} xl:col-span-2 3xl:mt-8`}>

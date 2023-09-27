@@ -679,5 +679,33 @@
     ],
     "color": "#8200FF",
     "group": "other_tokens"
+  },
+  {
+    "id": "radar",
+    "symbol": "RADAR",
+    "name": "DappRadar",
+    "image": "/logos/assets/radar.png",
+    "is_xERC20": true,
+    "is_stablecoin": false,
+    "contracts": [
+      {
+        "contract_address": "0x44709a920fCcF795fbC57BAA433cc3dd53C44DbE",
+        "chain_id": 1,
+        "decimals": 18,
+        "symbol": "RADAR",
+        "xERC20": "0x202426c15a18a0e0fE3294415E66421891E2EB7C",
+        "lockbox": "0xFf6792A39F44FB67B4796906a5Cb77C677328858",
+        "lockbox_adapter": "0x6ea3dc2e17a0466b36dd3258574e0bd2e4685452"
+      },
+      {
+        "contract_address": "0x489580eB70a50515296eF31E8179fF3e77E24965",
+        "chain_id": 56,
+        "decimals": 18,
+        "symbol": "RADAR"
+      }
+    ],
+    "color": "#009DFF",
+    "group": "other_tokens",
+    "disabled": true
   }
 ]

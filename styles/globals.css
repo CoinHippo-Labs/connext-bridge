@@ -212,3 +212,13 @@ a {
     }
   }
 }
+
+.xerc20-warning-modal {
+  max-width: 466px !important;
+  .body {
+    @apply dark:bg-slate-850 border dark:border-slate-750 rounded-sm shadow-none;
+    .content {
+      @apply py-2.5 px-3;
+    }
+  }
+}
