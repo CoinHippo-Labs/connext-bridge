@@ -681,29 +681,6 @@
     "group": "other_tokens"
   },
   {
-    "id": "btrst",
-    "symbol": "BTRST",
-    "name": "Braintrust",
-    "image": "/logos/assets/btrst.png",
-    "is_stablecoin": false,
-    "contracts": [
-      {
-        "contract_address": "0x799ebfABE77a6E34311eeEe9825190B9ECe32824",
-        "chain_id": 1,
-        "decimals": 18,
-        "symbol": "BTRST"
-      },
-      {
-        "contract_address": "0x8C92DC2B9D6A8A567c7Bd80C5db7a1eDA4fA9A91",
-        "chain_id": 137,
-        "decimals": 18,
-        "symbol": "BTRST"
-      }
-    ],
-    "color": "#141414",
-    "group": "other_tokens"
-  },
-  {
     "id": "radar",
     "symbol": "RADAR",
     "name": "DappRadar",
