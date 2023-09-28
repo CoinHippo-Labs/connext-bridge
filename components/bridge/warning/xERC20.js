@@ -154,7 +154,7 @@ export default ({ asset, contract }) => {
               </div>
               <div className="space-y-2 pt-2">
                 <div className="grid grid-cols-2 gap-5">
-                  <Link href={`${pathname.replace('[bridge]', bridge)}?symbol=x${symbol}&amount=${amount}`} className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded ${disabled ? 'pointer-events-none' : ''} flex items-center justify-center text-white font-bold py-2.5 px-3`}>
+                  <Link href={`${pathname.replace('[bridge]', bridge)}?symbol=x${symbol}&amount=${amount}&send=true`} className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded ${disabled ? 'pointer-events-none' : ''} flex items-center justify-center text-white font-bold py-2.5 px-3`}>
                     <span className="whitespace-nowrap text-sm">
                       Complete transfer
                     </span>
