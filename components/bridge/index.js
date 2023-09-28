@@ -80,7 +80,7 @@ export default ({ useAssetChain = false }) => {
 
   const router = useRouter()
   const { asPath, query } = { ...router }
-  const { source } = { ...query }
+  const { source, send } = { ...query }
 
   const [bridge, setBridge] = useState({})
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
@@ -254,6 +254,9 @@ export default ({ useAssetChain = false }) => {
       if (source) {
         params.source = source
       }
+      if (send) {
+        call()
+      }
 
       if (Object.keys(params).length > 0) {
         const { source_chain, destination_chain, asset, symbol } = { ...params }
@@ -282,7 +285,7 @@ export default ({ useAssetChain = false }) => {
       setXcall(null)
       setCallResponse(null)
     },
-    [sdk, address, bridge],
+    [sdk, address, bridge, send],
   )
 
   // update balances
@@ -955,6 +958,7 @@ export default ({ useAssetChain = false }) => {
                     message: `(${currentStep}/${totalSteps}) Depositing into Lockbox`,
                   })
                   await depositTxReceipt.wait()
+                  getBalances(source_chain)
                   currentStep += 1
                   
                   // Approve xERC20 spend to Connext
@@ -1273,7 +1277,7 @@ export default ({ useAssetChain = false }) => {
 
       if (manual) {
         const routerFee = parseFloat(numberToFixed(_amount * PERCENT_ROUTER_FEE / 100, source_decimals))
-        setEstimatedValues({ amountReceived: _amount - routerFee, routerFee, isNextAsset: typeof _receiveLocal === 'boolean' ? _receiveLocal : receiveLocal })
+        setEstimatedValues({ amountReceived: toFixedNumber(_amount).subUnsafe(toFixedNumber(routerFee)).toString(), routerFee, isNextAsset: typeof _receiveLocal === 'boolean' ? _receiveLocal : receiveLocal })
       }
     }
   }
@@ -2456,7 +2460,7 @@ export default ({ useAssetChain = false }) => {
             }
           </div>
           {!openTransferStatus && _source_contract_data?.mintable && <Faucet tokenId={asset} contractData={_source_contract_data} />}
-          {!openTransferStatus && _source_contract_data?.xERC20 && (
+          {!openTransferStatus && _source_contract_data?.xERC20 && !calling && !callResponse && (
             <div className="max-w-md 3xl:max-w-xl">
               <WarningXERC20 asset={source_asset_data} contract={source_contract_data} />
             </div>
