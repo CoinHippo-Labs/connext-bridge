@@ -613,7 +613,7 @@
           "decimals": 18,
           "symbol": "nextAlETH",
           "image": "/logos/assets/aleth.png"
-        }  
+        }
       },
       {
         "contract_address": "0x3E29D3A9316dAB217754d13b28646B76607c5f04",
@@ -625,7 +625,7 @@
           "decimals": 18,
           "symbol": "nextAlETH",
           "image": "/logos/assets/aleth.png"
-        }  
+        }
       }
     ],
     "color": "#000000",
@@ -661,9 +661,8 @@
       }
     ],
     "color": "#000000",
-    "group": "other_tokens",
-    "disabled": true
-  }, 
+    "group": "other_tokens"
+  },
   {
     "id": "p8",
     "symbol": "P8",
