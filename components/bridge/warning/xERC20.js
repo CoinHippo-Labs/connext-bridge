@@ -6,6 +6,7 @@ import { useSwitchNetwork } from 'wagmi'
 import { Contract } from 'ethers'
 import moment from 'moment'
 import { IoWarning } from 'react-icons/io5'
+import { BiX } from 'react-icons/bi'
 
 import Spinner from '../../spinner'
 import Alert from '../../alert'
@@ -132,14 +133,20 @@ export default ({ asset, contract }) => {
         <Modal
           hidden={hidden}
           title={
-            <div className="flex items-center">
+            <div className="flex items-center justify-between space-x-2">
               <span className="normal-case text-slate-900 dark:text-slate-50 text-xl font-semibold">
                 Warning
               </span>
+              <div
+                onClick={() => setHidden(true)}
+                className="hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer rounded-full p-1.5"
+              >
+                <BiX size={18} />
+              </div>
             </div>
           }
           body={
-            <div className="space-y-5 mt-2.5 mb-6">
+            <div className="space-y-5 mt-2.5 mb-3">
               <div className="flex items-center">
                 <span className="normal-case text-slate-900 dark:text-slate-50 text-sm font-semibold">
                   {`It looks like you have an incomplete transfer for ${symbol}.`}
