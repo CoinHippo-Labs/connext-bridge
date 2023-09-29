@@ -620,7 +620,7 @@ export default ({ useAssetChain = false }) => {
       const source_decimals = source_contract_data?.decimals || 18
       const relayer_fee_decimals = relayerFeeAssetType === 'transacting' ? source_decimals : 18
       const relayerFeeField = `relayerFee${relayerFeeAssetType === 'transacting' ? 'InTransactingAsset' : ''}`
-      const _amount = numberToFixed((amount || 0) - (relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? Number(numberToFixed(relayerFee, relayer_fee_decimals)) : 0), source_decimals - 2)
+      const _amount = toFixedNumber(amount).subUnsafe(toFixedNumber(relayerFeeAssetType === 'transacting' && Number(relayerFee) > 0 ? numberToFixed(relayerFee, relayer_fee_decimals) : '0')).toString()
       const source_domain = source_chain_data?.domain_id
       const destination_domain = destination_chain_data?.domain_id
 
