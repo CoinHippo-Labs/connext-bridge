@@ -706,7 +706,6 @@
       }
     ],
     "color": "#009DFF",
-    "group": "other_tokens",
-    "disabled": true
+    "group": "other_tokens"
   }
 ]
