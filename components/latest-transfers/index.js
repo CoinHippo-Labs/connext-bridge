@@ -10,7 +10,7 @@ import { toArray } from '../../lib/utils'
 
 const NUM_TRANSFER_DISPLAY = 3
 
-export default ({ data, trigger, onUpdateSize }) => {
+export default ({ data, trigger, onUpdate }) => {
   const { preferences, dev, wallet } = useSelector(state => ({ preferences: state.preferences, dev: state.dev, wallet: state.wallet }), shallowEqual)
   const { page_visible } = { ...preferences }
   const { sdk } = { ...dev }
@@ -51,11 +51,11 @@ export default ({ data, trigger, onUpdateSize }) => {
 
   useEffect(
     () => {
-      if (onUpdateSize) {
-        onUpdateSize(toArray(transfers).length)
+      if (onUpdate) {
+        onUpdate(toArray(transfers))
       }
     },
-    [onUpdateSize, transfers],
+    [transfers],
   )
 
   const transfersComponent = _.slice(

@@ -1399,6 +1399,7 @@ export default ({ useAssetChain = false }) => {
   const timeSpent = moment().diff(createMomentFromUnixtime(xcall_timestamp), 'seconds')
   const errored = error_status && ![XTransferErrorStatus.NoBidsReceived].includes(error_status) && !execute_transaction_hash && [XTransferStatus.XCalled, XTransferStatus.Reconciled].includes(status)
   const bumped = [XTransferErrorStatus.LowRelayerFee, XTransferErrorStatus.ExecutionError].includes(error_status) && toArray(latest_bumped_transfers_data).findIndex(d => equalsIgnoreCase(d.transfer_id, transfer_id) && moment().diff(moment(d.updated), 'minutes', true) <= 5) > -1
+  const pendingTransfers = toArray(latestTransfers).filter(d => ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(d.status))
   const hasLatestTransfers = typeof latestTransfersSize === 'number' && latestTransfersSize > 0
 
   const supported = checkSupported()
@@ -2460,7 +2461,7 @@ export default ({ useAssetChain = false }) => {
             }
           </div>
           {!openTransferStatus && _source_contract_data?.mintable && <Faucet tokenId={asset} contractData={_source_contract_data} />}
-          {!openTransferStatus && _source_contract_data?.xERC20 && !calling && !callResponse && (
+          {!openTransferStatus && _source_contract_data?.xERC20 && !calling && !callResponse && pendingTransfers.findIndex(d => [d.origin_bridged_asset, d.origin_transacting_asset].findIndex(a => equalsIgnoreCase(a, _source_contract_data.xERC20)) > -1) < 0 && (
             <div className="max-w-md 3xl:max-w-xl">
               <WarningXERC20 asset={source_asset_data} contract={source_contract_data} />
             </div>
@@ -2471,7 +2472,12 @@ export default ({ useAssetChain = false }) => {
         <LatestTransfers
           data={latestTransfers}
           trigger={transfersTrigger}
-          onUpdateSize={size => setLatestTransfersSize(size)}
+          onUpdate={
+            data => {
+              setLatestTransfers(data)
+              setLatestTransfersSize(toArray(data).length)
+            }
+          }
         />
       </div>
     </div>
