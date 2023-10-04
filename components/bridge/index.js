@@ -278,7 +278,7 @@ export default ({ useAssetChain = false }) => {
       const destination_decimals = destination_contract_data?.decimals || 18
       const routersLiquidityAmount = _.sum(toArray(router_asset_balances_data?.[chain_id]).filter(d => toArray([contract_address, next_asset?.contract_address]).findIndex(a => equalsIgnoreCase(a, d.contract_address)) > -1).map(d => formatUnits(d.amount, next_asset && equalsIgnoreCase(d.contract_address, next_asset.contract_address) ? next_asset.decimals : destination_decimals)).map(d => Number(d) > 0 ? Number(d) : 0))
 
-      setOptions({ ...options, slippage, forceSlow: destination_chain_data && router_asset_balances_data ? Number(amount) > routersLiquidityAmount : false, receiveLocal })
+      setOptions({ ...options, slippage, forceSlow: destination_chain_data && router_asset_balances_data ? Number(amount) > routersLiquidityAmount && !is_xERC20 : false, receiveLocal })
       setEstimateResponse(null)
       setEstimateFeesTrigger(moment().valueOf())
       setApproveResponse(null)
@@ -2300,15 +2300,15 @@ export default ({ useAssetChain = false }) => {
                                 )}
                               </>
                             )}
-                            {Number(amount) > 0 && isNumber(estimatedReceived) && estimatedReceived > 0 && (Number(amount) < routersLiquidityAmount || router_asset_balances_data) && (
+                            {Number(amount) > 0 && isNumber(estimatedReceived) && estimatedReceived > 0 && (Number(amount) < routersLiquidityAmount || router_asset_balances_data || is_xERC20) && (
                               <div className="flex items-center justify-between space-x-1">
                                 <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                                   Estimated Time
                                 </div>
-                                <Tooltip content={Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false ? 'Unable to leverage fast liquidity. Your transfer will still complete.' : 'Fast transfer enabled by Connext router network.'}>
+                                <Tooltip content={(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) && !is_xERC20 ? 'Unable to leverage fast liquidity. Your transfer will still complete.' : 'Fast transfer enabled by Connext router network.'}>
                                   <div className="flex items-center">
                                     <span className="whitespace-nowrap text-sm 3xl:text-xl font-semibold">
-                                      {Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false ?
+                                      {(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) && !is_xERC20 ?
                                         <span className="text-yellow-500 dark:text-yellow-400">
                                           {'<180 minutes'}
                                         </span> :
