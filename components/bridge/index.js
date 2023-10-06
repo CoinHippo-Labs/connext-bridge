@@ -59,8 +59,6 @@ const ALCHEMIX_GATEWAYS = {
   "1634886255": "0xd031Bd586CAAcd11e846c35D1a61dc543d4ee55D", // arb
 }
 
-const ALCHEMIX_ASSETS = ['aleth', 'alusd']
-
 export default ({ useAssetChain = false }) => {
   const dispatch = useDispatch()
   const { preferences, chains, assets, gas_tokens_price, router_asset_balances, pools, rpc_providers, dev, wallet, balances, latest_bumped_transfers } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, gas_tokens_price: state.gas_tokens_price, router_asset_balances: state.router_asset_balances, pools: state.pools, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances, latest_bumped_transfers: state.latest_bumped_transfers }), shallowEqual)
@@ -699,7 +697,7 @@ export default ({ useAssetChain = false }) => {
           let totalSteps = 0
 
           // Alchemix assets are handled differently
-          if (ALCHEMIX_ASSETS.includes(asset)) {
+          if (source_asset_data?.is_alchemix) {
             console.log('[/]', '[setup for Alchemix asset]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
             const gateway = ALCHEMIX_GATEWAYS[destination_domain];
             const alAssetInterface = new utils.Interface([
@@ -1226,7 +1224,7 @@ export default ({ useAssetChain = false }) => {
         setEstimateResponse(null)
 
         if (isNumber(_amount) && !isZero(_amount)) {
-          if (['linea'].includes(destination_chain_data?.id) || ALCHEMIX_ASSETS.includes(asset) || source_asset_data?.is_xERC20) {
+          if (['linea'].includes(destination_chain_data?.id) || source_asset_data?.is_xERC20 || source_asset_data?.is_alchemix) {
             manual = true
           }
           else if (toArray([source_chain_data?.id, destination_chain_data?.id]).findIndex(c => toArray(pools_data).find(d => d.chain_data?.id === c && !d.tvl)) < 0) {
