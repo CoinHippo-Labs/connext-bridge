@@ -382,6 +382,142 @@
     "preset": true
   },
   {
+    "id": "radar",
+    "symbol": "RADAR",
+    "name": "DappRadar",
+    "image": "/logos/assets/radar.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0x44709a920fCcF795fbC57BAA433cc3dd53C44DbE",
+        "chain_id": 1,
+        "decimals": 18,
+        "symbol": "RADAR",
+        "xERC20": "0x202426c15a18a0e0fE3294415E66421891E2EB7C",
+        "lockbox": "0xFf6792A39F44FB67B4796906a5Cb77C677328858",
+        "lockbox_adapter": "0x6ea3dc2e17a0466b36dd3258574e0bd2e4685452"
+      },
+      {
+        "contract_address": "0x489580eB70a50515296eF31E8179fF3e77E24965",
+        "chain_id": 56,
+        "decimals": 18,
+        "symbol": "RADAR"
+      }
+    ],
+    "color": "#009DFF"
+  },
+  {
+    "id": "alchemix",
+    "symbol": "ALCX",
+    "name": "Alchemix",
+    "image": "/logos/assets/alcx.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0xdbdb4d16eda451d0503b854cf79d55697f90c8df",
+        "chain_id": 1,
+        "decimals": 18,
+        "symbol": "ALCX",
+        "xERC20": "0xbd18f9be5675a9658335e6b7e79d9d9b394ac043",
+        "lockbox": "0xd6048e96a1cfecb7b6983295bc53a76f71bc6562",
+        "lockbox_adapter": "0xcfe063a764ea04a9a1dc6cf8b8978955f779fc9f"
+      },
+      {
+        "contract_address": "0x27b58D226fe8f792730a795764945Cf146815AA7",
+        "chain_id": 42161,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0xE974B9b31dBFf4369b94a1bAB5e228f35ed44125",
+        "chain_id": 10,
+        "decimals": 18
+      }
+    ],
+    "color": "#000000"
+  },
+  {
+    "id": "alusd",
+    "symbol": "alUSD",
+    "name": "Alchemix USD",
+    "image": "/logos/assets/alusd.png",
+    "is_alchemix": true,
+    "is_stablecoin": true,
+    "contracts": [
+      {
+        "contract_address": "0xBC6DA0FE9aD5f3b0d58160288917AA56653660E9",
+        "chain_id": 1,
+        "decimals": 18,
+        "symbol": "alUSD"
+      },
+      {
+        "contract_address": "0xCB8FA9a76b8e203D8C3797bF438d8FB81Ea3326A",
+        "chain_id": 42161,
+        "decimals": 18,
+        "symbol": "alUSD",
+        "next_asset": {
+          "contract_address": "0x49000f5e208349D2fA678263418e21365208E498",
+          "decimals": 18,
+          "symbol": "nextAlUSD",
+          "image": "/logos/assets/alusd.png"
+        }
+      },
+      {
+        "contract_address": "0xCB8FA9a76b8e203D8C3797bF438d8FB81Ea3326A",
+        "chain_id": 10,
+        "decimals": 18,
+        "symbol": "alUSD",
+        "next_asset": {
+          "contract_address": "0x49000f5e208349D2fA678263418e21365208E498",
+          "decimals": 18,
+          "symbol": "nextAlUSD",
+          "image": "/logos/assets/alusd.png"
+        }
+      }
+    ],
+    "color": "#000000"
+  },
+  {
+    "id": "aleth",
+    "symbol": "alETH",
+    "name": "Alchemix ETH",
+    "image": "/logos/assets/aleth.png",
+    "is_alchemix": true,
+    "contracts": [
+      {
+        "contract_address": "0x0100546F2cD4C9D97f798fFC9755E47865FF7Ee6",
+        "chain_id": 1,
+        "decimals": 18,
+        "symbol": "alETH"
+      },
+      {
+        "contract_address": "0x17573150d67d820542EFb24210371545a4868B03",
+        "chain_id": 42161,
+        "decimals": 18,
+        "symbol": "alETH",
+        "next_asset": {
+          "contract_address": "0x303241e2B3b4aeD0bb0F8623e7442368FED8Faf3",
+          "decimals": 18,
+          "symbol": "nextAlETH",
+          "image": "/logos/assets/aleth.png"
+        }
+      },
+      {
+        "contract_address": "0x3E29D3A9316dAB217754d13b28646B76607c5f04",
+        "chain_id": 10,
+        "decimals": 18,
+        "symbol": "alETH",
+        "next_asset": {
+          "contract_address": "0x303241e2B3b4aeD0bb0F8623e7442368FED8Faf3",
+          "decimals": 18,
+          "symbol": "nextAlETH",
+          "image": "/logos/assets/aleth.png"
+        }
+      }
+    ],
+    "color": "#000000",
+    "disabled": true
+  },
+  {
     "id": "kp3r",
     "symbol": "KP3R",
     "name": "Keep3rV1",
@@ -550,120 +686,6 @@
     "group": "other_tokens"
   },
   {
-    "id": "alusd",
-    "symbol": "alUSD",
-    "name": "Alchemix USD",
-    "image": "/logos/assets/alusd.png",
-    "is_stablecoin": true,
-    "contracts": [
-      {
-        "contract_address": "0xBC6DA0FE9aD5f3b0d58160288917AA56653660E9",
-        "chain_id": 1,
-        "decimals": 18,
-        "symbol": "alUSD"
-      },
-      {
-        "contract_address": "0xCB8FA9a76b8e203D8C3797bF438d8FB81Ea3326A",
-        "chain_id": 42161,
-        "decimals": 18,
-        "symbol": "alUSD",
-        "next_asset": {
-          "contract_address": "0x49000f5e208349D2fA678263418e21365208E498",
-          "decimals": 18,
-          "symbol": "nextAlUSD",
-          "image": "/logos/assets/alusd.png"
-        }
-      },
-      {
-        "contract_address": "0xCB8FA9a76b8e203D8C3797bF438d8FB81Ea3326A",
-        "chain_id": 10,
-        "decimals": 18,
-        "symbol": "alUSD",
-        "next_asset": {
-          "contract_address": "0x49000f5e208349D2fA678263418e21365208E498",
-          "decimals": 18,
-          "symbol": "nextAlUSD",
-          "image": "/logos/assets/alusd.png"
-        }
-      }
-    ],
-    "color": "#000000",
-    "group": "other_tokens"
-  },
-  {
-    "id": "aleth",
-    "symbol": "alETH",
-    "name": "Alchemix ETH",
-    "image": "/logos/assets/aleth.png",
-    "is_stablecoin": false,
-    "contracts": [
-      {
-        "contract_address": "0x0100546F2cD4C9D97f798fFC9755E47865FF7Ee6",
-        "chain_id": 1,
-        "decimals": 18,
-        "symbol": "alETH"
-      },
-      {
-        "contract_address": "0x17573150d67d820542EFb24210371545a4868B03",
-        "chain_id": 42161,
-        "decimals": 18,
-        "symbol": "alETH",
-        "next_asset": {
-          "contract_address": "0x303241e2B3b4aeD0bb0F8623e7442368FED8Faf3",
-          "decimals": 18,
-          "symbol": "nextAlETH",
-          "image": "/logos/assets/aleth.png"
-        }
-      },
-      {
-        "contract_address": "0x3E29D3A9316dAB217754d13b28646B76607c5f04",
-        "chain_id": 10,
-        "decimals": 18,
-        "symbol": "alETH",
-        "next_asset": {
-          "contract_address": "0x303241e2B3b4aeD0bb0F8623e7442368FED8Faf3",
-          "decimals": 18,
-          "symbol": "nextAlETH",
-          "image": "/logos/assets/aleth.png"
-        }
-      }
-    ],
-    "color": "#000000",
-    "group": "other_tokens",
-    "disabled": true
-  },
-  {
-    "id": "alchemix",
-    "symbol": "ALCX",
-    "name": "Alchemix",
-    "image": "/logos/assets/alcx.png",
-    "is_xERC20": true,
-    "is_stablecoin": false,
-    "contracts": [
-      {
-        "contract_address": "0xdbdb4d16eda451d0503b854cf79d55697f90c8df",
-        "chain_id": 1,
-        "decimals": 18,
-        "symbol": "ALCX",
-        "xERC20": "0xbd18f9be5675a9658335e6b7e79d9d9b394ac043",
-        "lockbox": "0xd6048e96a1cfecb7b6983295bc53a76f71bc6562",
-        "lockbox_adapter": "0xcfe063a764ea04a9a1dc6cf8b8978955f779fc9f"
-      },
-      {
-        "contract_address": "0x27b58D226fe8f792730a795764945Cf146815AA7",
-        "chain_id": 42161,
-        "decimals": 18
-      },
-      {
-        "contract_address": "0xE974B9b31dBFf4369b94a1bAB5e228f35ed44125",
-        "chain_id": 10,
-        "decimals": 18
-      }
-    ],
-    "color": "#000000",
-    "group": "other_tokens"
-  },
-  {
     "id": "p8",
     "symbol": "P8",
     "name": "P8",
@@ -678,33 +700,6 @@
       }
     ],
     "color": "#8200FF",
-    "group": "other_tokens"
-  },
-  {
-    "id": "radar",
-    "symbol": "RADAR",
-    "name": "DappRadar",
-    "image": "/logos/assets/radar.png",
-    "is_xERC20": true,
-    "is_stablecoin": false,
-    "contracts": [
-      {
-        "contract_address": "0x44709a920fCcF795fbC57BAA433cc3dd53C44DbE",
-        "chain_id": 1,
-        "decimals": 18,
-        "symbol": "RADAR",
-        "xERC20": "0x202426c15a18a0e0fE3294415E66421891E2EB7C",
-        "lockbox": "0xFf6792A39F44FB67B4796906a5Cb77C677328858",
-        "lockbox_adapter": "0x6ea3dc2e17a0466b36dd3258574e0bd2e4685452"
-      },
-      {
-        "contract_address": "0x489580eB70a50515296eF31E8179fF3e77E24965",
-        "chain_id": 56,
-        "decimals": 18,
-        "symbol": "RADAR"
-      }
-    ],
-    "color": "#009DFF",
     "group": "other_tokens"
   }
 ]
