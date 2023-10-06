@@ -165,7 +165,7 @@ export default (
           group_index = 100
           break
         default:
-          group_index = 99
+          group_index = typeof group_index === 'number' ? group_index : 99
           break
       }
       return { ...d, group_index }
