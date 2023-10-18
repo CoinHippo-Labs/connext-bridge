@@ -702,5 +702,44 @@
     ],
     "color": "#8200FF",
     "group": "other_tokens"
+  },
+  {
+    "id": "fraction",
+    "symbol": "FRACTION",
+    "name": "Fraction",
+    "image": "/logos/assets/fraction.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0x2bF2ba13735160624a0fEaE98f6aC8F70885eA61",
+        "chain_id": 100,
+        "decimals": 18,
+        "symbol": "FRACTION",
+        "xERC20": "0x4602e7CFE18d8b16ED13538603B00073F5c28bc8",
+        "lockbox": "0x535948cad8f8696166abc16fac676677be118996",
+        "lockbox_adapter": "0x9bA95982A52574CeBaBD3fcad6AA355a3034A58F"
+      },
+      {
+        "contract_address": "0xbD80CFA9d93A87D1bb895f810ea348E496611cD4",
+        "chain_id": 137,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0xbD80CFA9d93A87D1bb895f810ea348E496611cD4",
+        "chain_id": 10,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0x2bF2ba13735160624a0fEaE98f6aC8F70885eA61",
+        "chain_id": 42161,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0xbD80CFA9d93A87D1bb895f810ea348E496611cD4",
+        "chain_id": 56,
+        "decimals": 18
+      }
+    ],
+    "color": "#000000"
   }
 ]
