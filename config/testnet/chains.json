@@ -119,5 +119,33 @@
     "color": "#28a0f0",
     "unwrapper_contract": "0x18BBF96BC8014aA93cbf1A5Bce005a485b5C2C4a",
     "group": "optimistic_rollups"
+  },
+  {
+    "id": "linea",
+    "chain_id": 59140,
+    "domain_id": "1668247156",
+    "name": "Linea",
+    "short_name": "LINEA",
+    "rpcs": [
+      "https://rpc.goerli.linea.build"
+    ],
+    "native_token": {
+      "name": "Ethereum",
+      "symbol": "ETH",
+      "decimals": 18
+    },
+    "explorer": {
+      "name": "Linea",
+      "url": "https://goerli.lineascan.build",
+      "icon": "/logos/explorers/linea.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/linea.png",
+    "color": "#1d1d1d",
+    "unwrapper_contract": "0x2Eee7cB087c0430e40991f7E37De44Ec248a9F45"
   }
 ]
