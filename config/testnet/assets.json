@@ -221,6 +221,26 @@
     "color": "#000000"
   },
   {
+    "id": "gastly-lp-geth",
+    "symbol": "glpgEth",
+    "name": "gastly-lp-geth",
+    "image": "/logos/assets/test.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0xA34488C6C27542cdCDD381D41eb359755B232dc5",
+        "chain_id": 5,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0xA34488C6C27542cdCDD381D41eb359755B232dc5",
+        "chain_id": 80001,
+        "decimals": 18
+      }
+    ],
+    "color": "#000000"
+  },
+  {
     "id": "alusd",
     "symbol": "alUSD",
     "name": "Alchemix USD",
