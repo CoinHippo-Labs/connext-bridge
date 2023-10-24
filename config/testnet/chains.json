@@ -146,6 +146,7 @@
     },
     "image": "/logos/chains/linea.png",
     "color": "#1d1d1d",
-    "unwrapper_contract": "0x2Eee7cB087c0430e40991f7E37De44Ec248a9F45"
+    "unwrapper_contract": "0x2Eee7cB087c0430e40991f7E37De44Ec248a9F45",
+    "no_staging": true
   }
 ]
