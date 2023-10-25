@@ -741,5 +741,44 @@
       }
     ],
     "color": "#000000"
+  },
+  {
+    "id": "grumpycat",
+    "symbol": "GRUMPYCAT",
+    "name": "Grumpy Cat",
+    "image": "/logos/assets/grumpycat.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0xd8e2d95c8614f28169757cd6445a71c291dec5bf",
+        "chain_id": 1,
+        "decimals": 18,
+        "symbol": "GRUMPYCAT",
+        "xERC20": "0x3B350F202473932411772C8Cb76DB7975f42397E",
+        "lockbox": "0x713F8CE92B4369f2206AFEE90bD13464Bbfb28bE",
+        "lockbox_adapter": "0x6e7Ab4b68f1B184F677ED5e8e6e8f9348c3957a4"
+      },
+      {
+        "contract_address": "0x3B350F202473932411772C8Cb76DB7975f42397E",
+        "chain_id": 137,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0x3B350F202473932411772C8Cb76DB7975f42397E",
+        "chain_id": 10,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0x3B350F202473932411772C8Cb76DB7975f42397E",
+        "chain_id": 42161,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0x3B350F202473932411772C8Cb76DB7975f42397E",
+        "chain_id": 56,
+        "decimals": 18
+      }
+    ],
+    "color": "#000000"
   }
 ]
