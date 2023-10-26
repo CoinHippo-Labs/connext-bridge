@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSelector, useDispatch, shallowEqual } from 'react-redux'
+import { useSelector, shallowEqual } from 'react-redux'
 import { Contract, constants } from 'ethers'
 const { MaxUint256 } = { ...constants }
 import moment from 'moment'
@@ -13,7 +13,6 @@ import Wallet from '../wallet'
 import { getChainData, getAssetData, getContractData, getBalanceData } from '../../lib/object'
 import { parseUnits, isNumber } from '../../lib/number'
 import { numberToFixed, parseError } from '../../lib/utils'
-import { GET_BALANCES_DATA } from '../../reducers/types'
 
 const ABI = [
   'function allowance(address owner, address spender) view returns (uint256)',
@@ -39,7 +38,6 @@ export default (
     className = '',
   },
 ) => {
-  const dispatch = useDispatch()
   const { chains, assets, wallet, balances } = useSelector(state => ({ chains: state.chains, assets: state.assets, wallet: state.wallet, balances: state.balances }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
@@ -93,7 +91,7 @@ export default (
 
     try {
       const contract_data = contractData || getContractData(chain_id, contracts)
-      const { contract_address, xERC20, lockbox, decimals } = { ...contract_data }
+      const { contract_address, lockbox, decimals } = { ...contract_data }
       const _amount = parseUnits(data?.amount, decimals)
       const token = new Contract(contract_address, ABI, signer)
       let failed

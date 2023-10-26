@@ -141,15 +141,37 @@ export default (
       )
     })
     .map(d => {
-      const { is_next_asset, group, scores } = { ...d }
+      const { is_next_asset, is_xERC20, is_alchemix, group, scores } = { ...d }
       return {
         ...d,
-        group: group || (is_next_asset ? 'NextAssets' : ''),
+        group: group || (is_next_asset ? 'next_assets' : is_xERC20 ? 'xerc20' : is_alchemix ? 'alchemix' : ''),
         max_score: _.max(scores),
       }
     })
+    .map(d => {
+      const { group } = { ...d }
+      let group_index = !group ? -1 : null
+      switch (group) {
+        case 'next_assets':
+          group_index = 0
+          break
+        case 'xerc20':
+          group_index = 1
+          break
+        case 'alchemix':
+          group_index = 2
+          break
+        case 'other_tokens':
+          group_index = 100
+          break
+        default:
+          group_index = typeof group_index === 'number' ? group_index : 99
+          break
+      }
+      return { ...d, group_index }
+    })
     .filter(d => d.max_score > 1 / 10),
-    ['group', 'max_score'], ['asc', 'desc'],
+    ['group_index', 'group', 'max_score'], ['asc', 'asc', 'desc'],
   )
   const preset_assets_data = _.uniqBy(toArray(_assets_data).filter(d => d.preset), 'id')
 

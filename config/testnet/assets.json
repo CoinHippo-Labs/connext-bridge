@@ -150,56 +150,102 @@
     "color": "#7f43df"
   },
   {
-    "id": "tkn",
-    "symbol": "TKN",
-    "name": "TKN",
-    "image": "/logos/assets/tkn.png",
-    "is_stablecoin": true,
+    "id": "radar",
+    "symbol": "RADAR",
+    "name": "DappRadar",
+    "image": "/logos/assets/radar.png",
+    "is_xERC20": true,
     "contracts": [
       {
-        "contract_address": "0x16F63C5036d3F48A239358656a8f123eCE85789C",
+        "contract_address": "0x718BAD5717932fd30Bf37804332c4db69c840A8E",
         "chain_id": 5,
         "decimals": 18,
-        "symbol": "TKN"
+        "symbol": "RADAR",
+        "xERC20": "0x4c781E4D22cfaAdA520cAe4aF9097C5ecf9C3A71",
+        "lockbox": "0x025253a41d1460889CD7421071c54dD6D68FA21d",
+        "lockbox_adapter": "0x29547e813bA01569735ff828Bc57AB7F10c83823",
+        "permit_supported": false
       },
       {
-        "contract_address": "0x3Db593146464816F10d4eBA4743C76A5A4D08425",
+        "contract_address": "0xb6932c8363354df7620a7a7bF3a933A253015cA3",
         "chain_id": 420,
         "decimals": 18,
-        "symbol": "TKN"
-      }
-    ],
-    "color": "#000000",
-    "group": "other_tokens"
-  },
-  {
-    "id": "ixt",
-    "symbol": "IXT",
-    "name": "IXT",
-    "image": "/logos/assets/tkn.png",
-    "is_stablecoin": false,
-    "contracts": [
-      {
-        "contract_address": "0x9B11e38299F2E2094793640B67b5e29678792ab4",
-        "chain_id": 5,
-        "decimals": 18,
-        "symbol": "IXT"
+        "symbol": "RADAR"
       },
       {
-        "contract_address": "0xA24E850BB444586897226b7Bc4A3C338C995252f",
+        "contract_address": "0x3fC9473d9dF84887D483A93a8d207f90D9bE63C4",
         "chain_id": 80001,
         "decimals": 18,
-        "symbol": "IXT"
+        "symbol": "RADAR"
       }
     ],
-    "color": "#ff6647",
-    "group": "other_tokens"
+    "color": "#000000"
+  },
+  {
+    "id": "alchemix",
+    "symbol": "ALCX",
+    "name": "Alchemix",
+    "image": "/logos/assets/alcx.png",
+    "contracts": [
+      {
+        "contract_address": "0xb46eE2E4165F629b4aBCE04B7Eb4237f951AC66F",
+        "chain_id": 5,
+        "decimals": 18,
+        "symbol": "ALCX"
+      },
+      {
+        "contract_address": "0x49000f5e208349D2fA678263418e21365208E498",
+        "chain_id": 420,
+        "decimals": 18,
+        "symbol": "ALCX",
+        "next_asset": {
+          "contract_address": "0x49000f5e208349D2fA678263418e21365208E498",
+          "decimals": 18,
+          "symbol": "ALCX",
+          "image": "/logos/assets/alcx.png"
+        }  
+      },
+      {
+        "contract_address": "0x49000f5e208349D2fA678263418e21365208E498",
+        "chain_id": 421613,
+        "decimals": 18,
+        "symbol": "ALCX",
+        "next_asset": {
+          "contract_address": "0x49000f5e208349D2fA678263418e21365208E498",
+          "decimals": 18,
+          "symbol": "ALCX",
+          "image": "/logos/assets/alcx.png"
+        }  
+      }
+    ],
+    "color": "#000000"
+  },
+  {
+    "id": "gastly-lp-geth",
+    "symbol": "glpgEth",
+    "name": "gastly-lp-geth",
+    "image": "/logos/assets/test.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0xA34488C6C27542cdCDD381D41eb359755B232dc5",
+        "chain_id": 5,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0xA34488C6C27542cdCDD381D41eb359755B232dc5",
+        "chain_id": 80001,
+        "decimals": 18
+      }
+    ],
+    "color": "#000000"
   },
   {
     "id": "alusd",
     "symbol": "alUSD",
     "name": "Alchemix USD",
     "image": "/logos/assets/alusd.png",
+    "is_alchemix": true,
     "is_stablecoin": true,
     "contracts": [
       {
@@ -233,15 +279,14 @@
         }
       }
     ],
-    "color": "#000000",
-    "group": "other_tokens"
+    "color": "#000000"
   },
   {
     "id": "aleth",
     "symbol": "alETH",
     "name": "Alchemix ETH",
     "image": "/logos/assets/aleth.png",
-    "is_stablecoin": false,
+    "is_alchemix": true,
     "contracts": [
       {
         "contract_address": "0xF6DD52cdF1614Cd649077Aa283840657617faa07",
@@ -274,82 +319,51 @@
         }
       }
     ],
-    "color": "#000000",
-    "group": "other_tokens"
+    "color": "#000000"
   },
   {
-    "id": "alchemix",
-    "symbol": "ALCX",
-    "name": "Alchemix",
-    "image": "/logos/assets/alcx.png",
-    "is_stablecoin": false,
+    "id": "tkn",
+    "symbol": "TKN",
+    "name": "TKN",
+    "image": "/logos/assets/tkn.png",
+    "is_stablecoin": true,
     "contracts": [
       {
-        "contract_address": "0xb46eE2E4165F629b4aBCE04B7Eb4237f951AC66F",
+        "contract_address": "0x16F63C5036d3F48A239358656a8f123eCE85789C",
         "chain_id": 5,
         "decimals": 18,
-        "symbol": "ALCX"
+        "symbol": "TKN"
       },
       {
-        "contract_address": "0x49000f5e208349D2fA678263418e21365208E498",
+        "contract_address": "0x3Db593146464816F10d4eBA4743C76A5A4D08425",
         "chain_id": 420,
         "decimals": 18,
-        "symbol": "ALCX",
-        "next_asset": {
-          "contract_address": "0x49000f5e208349D2fA678263418e21365208E498",
-          "decimals": 18,
-          "symbol": "ALCX",
-          "image": "/logos/assets/alcx.png"
-        }  
-      },
-      {
-        "contract_address": "0x49000f5e208349D2fA678263418e21365208E498",
-        "chain_id": 421613,
-        "decimals": 18,
-        "symbol": "ALCX",
-        "next_asset": {
-          "contract_address": "0x49000f5e208349D2fA678263418e21365208E498",
-          "decimals": 18,
-          "symbol": "ALCX",
-          "image": "/logos/assets/alcx.png"
-        }  
+        "symbol": "TKN"
       }
     ],
     "color": "#000000",
     "group": "other_tokens"
   },
   {
-    "id": "radar",
-    "symbol": "RADAR",
-    "name": "DappRadar",
-    "image": "/logos/assets/radar.png",
-    "is_stablecoin": false,
-    "is_xERC20": true,
+    "id": "ixt",
+    "symbol": "IXT",
+    "name": "IXT",
+    "image": "/logos/assets/tkn.png",
     "contracts": [
       {
-        "contract_address": "0x718BAD5717932fd30Bf37804332c4db69c840A8E",
+        "contract_address": "0x9B11e38299F2E2094793640B67b5e29678792ab4",
         "chain_id": 5,
         "decimals": 18,
-        "symbol": "RADAR",
-        "xERC20": "0x4c781E4D22cfaAdA520cAe4aF9097C5ecf9C3A71",
-        "lockbox": "0x025253a41d1460889CD7421071c54dD6D68FA21d",
-        "lockbox_adapter": "0x29547e813bA01569735ff828Bc57AB7F10c83823",
-        "permit_supported": false
+        "symbol": "IXT"
       },
       {
-        "contract_address": "0xb6932c8363354df7620a7a7bF3a933A253015cA3",
-        "chain_id": 420,
-        "decimals": 18,
-        "symbol": "RADAR"
-      },
-      {
-        "contract_address": "0x3fC9473d9dF84887D483A93a8d207f90D9bE63C4",
+        "contract_address": "0xA24E850BB444586897226b7Bc4A3C338C995252f",
         "chain_id": 80001,
         "decimals": 18,
-        "symbol": "RADAR"
+        "symbol": "IXT"
       }
     ],
-    "color": "#000000",
+    "color": "#ff6647",
     "group": "other_tokens"
   },
   {
@@ -357,7 +371,6 @@
     "symbol": "P8",
     "name": "P8",
     "image": "/logos/assets/p8.png",
-    "is_stablecoin": false,
     "contracts": [
       {
         "contract_address": "0x772fCe4B8E88BD19e86dC92428d242704aC480a0",
@@ -374,7 +387,6 @@
     "symbol": "BTRST",
     "name": "Braintrust",
     "image": "/logos/assets/btrst.png",
-    "is_stablecoin": false,
     "contracts": [
       {
         "contract_address": "0x39e09359F5a7396937504Eb2766722e2bf4650e8",
@@ -397,7 +409,6 @@
     "symbol": "xEURe",
     "name": "xTokenFrontend",
     "image": "/logos/assets/eur.png",
-    "is_stablecoin": false,
     "contracts": [
       {
         "contract_address": "0x6984384D6abE16221769BD9400de72b8F4Aa572C",
@@ -426,7 +437,6 @@
     "symbol": "WorkshopToken",
     "name": "WorkshopToken",
     "image": "/logos/assets/tkn.png",
-    "is_stablecoin": false,
     "contracts": [
       {
         "contract_address": "0x02E82fB078893EC64BC57e55Fe34f6669D8104BC",

@@ -59,8 +59,6 @@ const ALCHEMIX_GATEWAYS = {
   "1634886255": "0xd031Bd586CAAcd11e846c35D1a61dc543d4ee55D", // arb
 }
 
-const ALCHEMIX_ASSETS = ['aleth', 'alusd']
-
 export default ({ useAssetChain = false }) => {
   const dispatch = useDispatch()
   const { preferences, chains, assets, gas_tokens_price, router_asset_balances, pools, rpc_providers, dev, wallet, balances, latest_bumped_transfers } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, gas_tokens_price: state.gas_tokens_price, router_asset_balances: state.router_asset_balances, pools: state.pools, rpc_providers: state.rpc_providers, dev: state.dev, wallet: state.wallet, balances: state.balances, latest_bumped_transfers: state.latest_bumped_transfers }), shallowEqual)
@@ -278,7 +276,7 @@ export default ({ useAssetChain = false }) => {
       const destination_decimals = destination_contract_data?.decimals || 18
       const routersLiquidityAmount = _.sum(toArray(router_asset_balances_data?.[chain_id]).filter(d => toArray([contract_address, next_asset?.contract_address]).findIndex(a => equalsIgnoreCase(a, d.contract_address)) > -1).map(d => formatUnits(d.amount, next_asset && equalsIgnoreCase(d.contract_address, next_asset.contract_address) ? next_asset.decimals : destination_decimals)).map(d => Number(d) > 0 ? Number(d) : 0))
 
-      setOptions({ ...options, slippage, forceSlow: destination_chain_data && router_asset_balances_data ? Number(amount) > routersLiquidityAmount : false, receiveLocal })
+      setOptions({ ...options, slippage, forceSlow: destination_chain_data && router_asset_balances_data ? Number(amount) > routersLiquidityAmount && !is_xERC20 : false, receiveLocal })
       setEstimateResponse(null)
       setEstimateFeesTrigger(moment().valueOf())
       setApproveResponse(null)
@@ -699,7 +697,7 @@ export default ({ useAssetChain = false }) => {
           let totalSteps = 0
 
           // Alchemix assets are handled differently
-          if (ALCHEMIX_ASSETS.includes(asset)) {
+          if (source_asset_data?.is_alchemix) {
             console.log('[/]', '[setup for Alchemix asset]', { relayerFeeAssetType, relayerFee, fees, xcallParams })
             const gateway = ALCHEMIX_GATEWAYS[destination_domain];
             const alAssetInterface = new utils.Interface([
@@ -1226,7 +1224,7 @@ export default ({ useAssetChain = false }) => {
         setEstimateResponse(null)
 
         if (isNumber(_amount) && !isZero(_amount)) {
-          if (['linea'].includes(destination_chain_data?.id) || ALCHEMIX_ASSETS.includes(asset) || source_asset_data?.is_xERC20) {
+          if (['linea'].includes(destination_chain_data?.id) || source_asset_data?.is_xERC20 || source_asset_data?.is_alchemix) {
             manual = true
           }
           else if (toArray([source_chain_data?.id, destination_chain_data?.id]).findIndex(c => toArray(pools_data).find(d => d.chain_data?.id === c && !d.tvl)) < 0) {
@@ -1399,6 +1397,7 @@ export default ({ useAssetChain = false }) => {
   const timeSpent = moment().diff(createMomentFromUnixtime(xcall_timestamp), 'seconds')
   const errored = error_status && ![XTransferErrorStatus.NoBidsReceived].includes(error_status) && !execute_transaction_hash && [XTransferStatus.XCalled, XTransferStatus.Reconciled].includes(status)
   const bumped = [XTransferErrorStatus.LowRelayerFee, XTransferErrorStatus.ExecutionError].includes(error_status) && toArray(latest_bumped_transfers_data).findIndex(d => equalsIgnoreCase(d.transfer_id, transfer_id) && moment().diff(moment(d.updated), 'minutes', true) <= 5) > -1
+  const pendingTransfers = toArray(latestTransfers).filter(d => ![XTransferStatus.Executed, XTransferStatus.CompletedFast, XTransferStatus.CompletedSlow].includes(d.status))
   const hasLatestTransfers = typeof latestTransfersSize === 'number' && latestTransfersSize > 0
 
   const supported = checkSupported()
@@ -2299,15 +2298,15 @@ export default ({ useAssetChain = false }) => {
                                 )}
                               </>
                             )}
-                            {Number(amount) > 0 && isNumber(estimatedReceived) && estimatedReceived > 0 && (Number(amount) < routersLiquidityAmount || router_asset_balances_data) && (
+                            {Number(amount) > 0 && isNumber(estimatedReceived) && estimatedReceived > 0 && (Number(amount) < routersLiquidityAmount || router_asset_balances_data || is_xERC20) && (
                               <div className="flex items-center justify-between space-x-1">
                                 <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                                   Estimated Time
                                 </div>
-                                <Tooltip content={Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false ? 'Unable to leverage fast liquidity. Your transfer will still complete.' : 'Fast transfer enabled by Connext router network.'}>
+                                <Tooltip content={(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) && !is_xERC20 ? 'Unable to leverage fast liquidity. Your transfer will still complete.' : 'Fast transfer enabled by Connext router network.'}>
                                   <div className="flex items-center">
                                     <span className="whitespace-nowrap text-sm 3xl:text-xl font-semibold">
-                                      {Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false ?
+                                      {(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) && !is_xERC20 ?
                                         <span className="text-yellow-500 dark:text-yellow-400">
                                           {'<180 minutes'}
                                         </span> :
@@ -2460,7 +2459,7 @@ export default ({ useAssetChain = false }) => {
             }
           </div>
           {!openTransferStatus && _source_contract_data?.mintable && <Faucet tokenId={asset} contractData={_source_contract_data} />}
-          {!openTransferStatus && _source_contract_data?.xERC20 && !calling && !callResponse && (
+          {!openTransferStatus && _source_contract_data?.xERC20 && !calling && !callResponse && pendingTransfers.findIndex(d => [d.origin_bridged_asset, d.origin_transacting_asset].findIndex(a => equalsIgnoreCase(a, _source_contract_data.xERC20)) > -1) < 0 && (
             <div className="max-w-md 3xl:max-w-xl">
               <WarningXERC20 asset={source_asset_data} contract={source_contract_data} />
             </div>
@@ -2471,7 +2470,12 @@ export default ({ useAssetChain = false }) => {
         <LatestTransfers
           data={latestTransfers}
           trigger={transfersTrigger}
-          onUpdateSize={size => setLatestTransfersSize(size)}
+          onUpdate={
+            data => {
+              setLatestTransfers(data)
+              setLatestTransfersSize(toArray(data).length)
+            }
+          }
         />
       </div>
     </div>

@@ -147,36 +147,6 @@
     "image": "/logos/chains/linea.png",
     "color": "#1d1d1d",
     "unwrapper_contract": "0x2Eee7cB087c0430e40991f7E37De44Ec248a9F45",
-    "group": "zk_rollups"
-  },
-  {
-    "id": "zksync",
-    "chain_id": 280,
-    "domain_id": "2053862260",
-    "name": "zkSync",
-    "short_name": "ZKSYNC",
-    "rpcs": [
-      "https://testnet.era.zksync.dev",
-      "https://zksync-era-testnet.blockpi.network/v1/rpc/public"
-    ],
-    "native_token": {
-      "name": "Ethereum",
-      "symbol": "ETH",
-      "decimals": 18
-    },
-    "explorer": {
-      "name": "zkSync",
-      "url": "https://goerli.explorer.zksync.io",
-      "icon": "/logos/explorers/zksync.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/address/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/zksync.png",
-    "color": "#12142b",
-    "unwrapper_contract": "",
-    "group": "zk_rollups"
+    "no_staging": true
   }
 ]
