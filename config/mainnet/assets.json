@@ -683,8 +683,7 @@
       }
     ],
     "color": "#000000",
-    "group": "other_tokens",
-    "disabled": true
+    "group": "other_tokens"
   },
   {
     "id": "p8",
