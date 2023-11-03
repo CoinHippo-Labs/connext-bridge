@@ -40,7 +40,7 @@
     "name": "BNB Chain",
     "short_name": "BNB",
     "rpcs": [
-      "https://bsc-rpc.gateway.pokt.network",
+      "https://binance.llamarpc.com",
       "https://bsc.blockpi.network/v1/rpc/public"
     ],
     "native_token": {
