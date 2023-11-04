@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
-import { useWeb3Modal } from '@web3modal/react'
-import { useProvider, useNetwork, useSwitchNetwork, useSigner, useAccount, useDisconnect } from 'wagmi'
+import { useWeb3Modal } from '@web3modal/wagmi/react'
+import { usePublicClient, useNetwork, useSwitchNetwork, useWalletClient, useAccount, useDisconnect } from 'wagmi'
 
 import blocked_addresses from '../../config/blocked_addresses.json'
 import { find } from '../../lib/utils'
@@ -23,10 +23,10 @@ export default (
   const { chain_id, provider } = { ...wallet_data }
 
   const { open } = useWeb3Modal()
-  const _provider = useProvider()
+  const _provider = usePublicClient()
   const { chain } = useNetwork()
   const { switchNetwork } = useSwitchNetwork()
-  const { data: signer } = useSigner()
+  const { data: signer } = useWalletClient()
   const { address } = useAccount()
   const { disconnect } = useDisconnect()
   const chainId = chain?.id
