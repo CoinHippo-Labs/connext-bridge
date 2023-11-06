@@ -407,7 +407,7 @@ export default (
                 const contract_address = (equalsIgnoreCase(source_contract_data?.contract_address, ZeroAddress) ? _source_contract_data : source_contract_data)?.contract_address
                 const amount = params.relayerFee
                 const infinite_approve = false
-    
+
                 console.log('[action required]', '[approveIfNeeded before bumpTransfer]', { domain_id, contract_address, amount, infinite_approve })
                 const request = await sdk.sdkBase.approveIfNeeded(domain_id, contract_address, amount, infinite_approve)
                 if (request) {

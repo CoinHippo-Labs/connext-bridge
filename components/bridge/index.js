@@ -833,7 +833,7 @@ export default ({ useAssetChain = false }) => {
                     setApproveProcessing(false)
                     setApproving(false)
                   }
-  
+
                   // EOA approves XERC20 to permit2 if needed
                   if (BigNumber.from(xerc20AllowancePermit).lt(BigNumber.from(xcallParams.amount))) {
                     setApproving(true)
@@ -853,7 +853,7 @@ export default ({ useAssetChain = false }) => {
                     setApproveProcessing(false)
                     setApproving(false)
                   }
-  
+
                   // Create permit for Lockbox
                   if (lockboxPermitAmount < xcallParams.amount || lockboxPermitExpiration < MaxAllowanceExpiration) {
                     const permit = {
@@ -866,11 +866,11 @@ export default ({ useAssetChain = false }) => {
                       spender: source_contract_data?.lockbox,
                       sigDeadline: MaxSigDeadline
                     }
-      
+
                     const { domain, types, values } = AllowanceTransfer.getPermitData(permit, PERMIT2_ADDRESS, source_chain_data?.chain_id)
                     const signature = await signer._signTypedData(domain, types, values)
                     currentStep += 1
-                  
+
                     // Add transaction to call `depositWithPermitAllowance` on Lockbox
                     const depositWithPermitAllowanceData = lockboxInterface.encodeFunctionData('depositWithPermitAllowance', [xcallParams.amount, address, permit, signature])
                     const depositWithPermitAllowanceTxRequest = {
@@ -880,7 +880,7 @@ export default ({ useAssetChain = false }) => {
                     }
                     txs.push(depositWithPermitAllowanceTxRequest)
                   }
-                  
+
                   // Create permit for Multisend
                   if (multisendPermitAmount < xcallParams.amount || multisendPermitExpiration < MaxAllowanceExpiration) {
                     const permitMultisend = {
@@ -893,11 +893,11 @@ export default ({ useAssetChain = false }) => {
                       spender: multisendContract,
                       sigDeadline: MaxSigDeadline
                     }
-      
+
                     const { domain: domain2, types: types2, values: values2 } = AllowanceTransfer.getPermitData(permitMultisend, PERMIT2_ADDRESS, source_chain_data?.chain_id)
                     const signatureForMultisend = await signer._signTypedData(domain2, types2, values2)
                     currentStep += 1
-      
+
                     // Add transaction to call `permit` on Permit2
                     const permitMultisendData = permit2Interface.encodeFunctionData('permit', [address, permitMultisend, signatureForMultisend])
                     const permitMultisendTxRequest = {
@@ -907,7 +907,7 @@ export default ({ useAssetChain = false }) => {
                     }
                     txs.push(permitMultisendTxRequest)
                   }
-  
+
                   // Add transaction to `transferFrom` from user to Multisend using Permit2
                   const transferFromData = permit2Interface.encodeFunctionData('transferFrom', [address, multisendContract, xcallParams.amount, xerc20.address])
                   const transferFromTxRequest = {
@@ -916,7 +916,7 @@ export default ({ useAssetChain = false }) => {
                     chainId: source_chain_data?.chain_id,
                   }
                   txs.push(transferFromTxRequest)
-                  
+
                   // Add transaction to approve xERC20 spend to Connext
                   const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xerc20.address, xcallParams.amount, infiniteApprove, {signerAddress: multisendContract})
                   if (approveXERC20TxRequest) {
@@ -966,7 +966,7 @@ export default ({ useAssetChain = false }) => {
                   await depositTxReceipt.wait()
                   getBalances(source_chain)
                   currentStep += 1
-                  
+
                   // Approve xERC20 spend to Connext
                   const approveXERC20TxRequest = await sdk.sdkBase.approveIfNeeded(xcallParams.origin, xerc20.address, xcallParams.amount, infiniteApprove)
                   if (approveXERC20TxRequest) {
@@ -1008,7 +1008,7 @@ export default ({ useAssetChain = false }) => {
             message: `${totalSteps ? `(${currentStep}/${totalSteps}) ` : ''}Please send the bridge transaction`,
           })
           if (request) {
-            if (txs && txs.length > 0) {    
+            if (txs && txs.length > 0) {
               txs.push(request)
               request = {
                 to: multisendContract,
@@ -1224,7 +1224,7 @@ export default ({ useAssetChain = false }) => {
 
       const source_decimals = source_contract_data?.decimals || 18
       const amount = parseUnits(_amount, source_decimals)
-      const checkFastLiquidity = true    
+      const checkFastLiquidity = true
 
       let manual = true
       try {
@@ -1341,7 +1341,7 @@ export default ({ useAssetChain = false }) => {
     () => {
       if (source_contract_data?.xERC20 && equalsIgnoreCase(source_contract_data.contract_address, source_contract_data.xERC20) && Number(source_amount) === 0) {
         setBridge({ ...bridge, symbol: null })
-      }                      
+      }
     },
     [source_contract_data, source_amount],
   )
