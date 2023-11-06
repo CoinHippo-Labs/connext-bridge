@@ -832,5 +832,39 @@
       }
     ],
     "color": "#000000"
+  },
+  {
+    "id": "planetix",
+    "symbol": "IXT",
+    "name": "PlanetIX",
+    "image": "/logos/assets/planetix.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0xE06Bd4F5aAc8D0aA337D13eC88dB6defC6eAEefE",
+        "chain_id": 137,
+        "decimals": 18,
+        "symbol": "IXT",
+        "xERC20": "0x8b04bf3358B88e3630aa64C1c76FF3B6C699C6a7",
+        "lockbox": "0x6aA6AB7d61EF293AC445e173bf8A32Cb446d18F0",
+        "lockbox_adapter": "0x"
+      },
+      {
+        "contract_address": "0x8b04bf3358B88e3630aa64C1c76FF3B6C699C6a7",
+        "chain_id": 1,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0x8b04bf3358B88e3630aa64C1c76FF3B6C699C6a7",
+        "chain_id": 42161,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0x8b04bf3358B88e3630aa64C1c76FF3B6C699C6a7",
+        "chain_id": 56,
+        "decimals": 18
+      }
+    ],
+    "color": "#000000"
   }
 ]

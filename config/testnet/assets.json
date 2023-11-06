@@ -203,7 +203,7 @@
           "decimals": 18,
           "symbol": "ALCX",
           "image": "/logos/assets/alcx.png"
-        }  
+        }
       },
       {
         "contract_address": "0x49000f5e208349D2fA678263418e21365208E498",
@@ -215,7 +215,7 @@
           "decimals": 18,
           "symbol": "ALCX",
           "image": "/logos/assets/alcx.png"
-        }  
+        }
       }
     ],
     "color": "#000000"
