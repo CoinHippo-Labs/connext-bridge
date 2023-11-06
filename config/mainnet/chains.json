@@ -128,8 +128,7 @@
     "image": "/logos/chains/optimism.png",
     "color": "#dc2626",
     "unwrapper_contract": "0x7Fe09d217d646a6213e51b237670Bc326188cB93",
-    "group": "optimistic_rollups",
-    "disabled": true
+    "group": "optimistic_rollups"
   },
   {
     "id": "arbitrum",
