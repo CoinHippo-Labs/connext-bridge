@@ -674,7 +674,15 @@ export default ({ useAssetChain = false }) => {
         } catch (error) {
           const response = parseError(error)
           console.log('[/]', '[approveIfNeeded error before xcall]', { domain_id: xcallParams.origin, contract_address: xcallParams.asset, amount: xcallParams.amount, amountToApprove }, error, response)
-          setApproveResponse({ status: 'failed', ...response })
+          const { code } = { ...response }
+          switch (code) {
+            case 'user_rejected':
+              reset(code)
+              break
+            default:
+              setApproveResponse({ status: 'failed', ...response })
+              break
+          }
           setApproveProcessing(false)
           setApproving(false)
           failed = !success
