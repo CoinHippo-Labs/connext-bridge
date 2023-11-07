@@ -847,7 +847,7 @@
         "symbol": "IXT",
         "xERC20": "0x8b04bf3358B88e3630aa64C1c76FF3B6C699C6a7",
         "lockbox": "0x6aA6AB7d61EF293AC445e173bf8A32Cb446d18F0",
-        "lockbox_adapter": "0x"
+        "lockbox_adapter": "0x3bee41753779E18A2D459a84C612aC6Ef903c5c2"
       },
       {
         "contract_address": "0x8b04bf3358B88e3630aa64C1c76FF3B6C699C6a7",
