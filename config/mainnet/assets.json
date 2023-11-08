@@ -866,5 +866,33 @@
       }
     ],
     "color": "#000000"
+  },
+  {
+    "id": "aurox",
+    "symbol": "URUS",
+    "name": "Aurox Token",
+    "image": "/logos/assets/aurox.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0xc6DdDB5bc6E61e0841C54f3e723Ae1f3A807260b",
+        "chain_id": 1,
+        "decimals": 18,
+        "symbol": "URUS",
+        "xERC20": "0x21d3a2faA153168C46Ac1428A84BdD859490505F",
+        "lockbox": "0x502f23A530FE2Eaf943ad6a6930eA5b9d36984E8",
+        "lockbox_adapter": "0x0c18d44cfd5e98ff4fecfe8398cb102979b3a6c8"
+      },
+      {
+        "contract_address": "0xc6DdDB5bc6E61e0841C54f3e723Ae1f3A807260b",
+        "chain_id": 56,
+        "decimals": 18,
+        "symbol": "URUS",
+        "xERC20": "0x21d3a2faA153168C46Ac1428A84BdD859490505F",
+        "lockbox": "0x502f23A530FE2Eaf943ad6a6930eA5b9d36984E8",
+        "lockbox_adapter": "0xC65F7B26a7bBa778efD39641C46599bBDBEcCCf7"
+      }
+    ],
+    "color": "#1F3660"
   }
 ]
