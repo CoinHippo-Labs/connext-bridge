@@ -838,7 +838,7 @@
         "xERC20": "0x21d3a2faA153168C46Ac1428A84BdD859490505F",
         "lockbox": "0x502f23A530FE2Eaf943ad6a6930eA5b9d36984E8",
         "lockbox_adapter": "0xC65F7B26a7bBa778efD39641C46599bBDBEcCCf7"
-      },
+      }
     ],
     "color": "#1F3660"
   }
