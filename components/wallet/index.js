@@ -63,7 +63,7 @@ export default (
   const { chain } = useNetwork()
   const { switchNetwork } = useSwitchNetwork()
   const { data: signer } = useWalletClient()
-  const { isConnected, address } = useAccount()
+  const { address } = useAccount()
   const { disconnect } = useDisconnect()
   const chainId = chain?.id
   const message = process.env.NEXT_PUBLIC_APP_NAME
