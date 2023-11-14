@@ -4,6 +4,7 @@ import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { usePublicClient, useNetwork, useSwitchNetwork, useWalletClient, useAccount, useDisconnect, useSignMessage } from 'wagmi'
 // import { BrowserProvider, FallbackProvider, JsonRpcProvider, JsonRpcSigner } from 'ethers'
 import { providers } from 'ethers'
+import { hashMessage, parseAbiItem, verifyMessage } from 'viem'
 
 import blocked_addresses from '../../config/blocked_addresses.json'
 import { find } from '../../lib/utils'
@@ -70,7 +71,24 @@ export default (
 
   const [signatureValid, setSignatureValid] = useState()
 
-  const validateSignature = async () => setSignatureValid(await _provider.verifyMessage({ address, message, signature }))
+  const validateSignature = async () => {
+    const isContract = !!(await _provider.getBytecode({ address }))
+    if (isContract) {
+      const response = await _provider.readContract({
+        address,
+        abi: [parseAbiItem('function isValidSignature(bytes32 hash, bytes signature) view returns (bytes4)')],
+        functionName: 'isValidSignature',
+        args: [hashMessage(message), signature],
+      })
+      // https://eips.ethereum.org/EIPS/eip-1271
+      const isValid = response === '0x1626ba7e'
+      setSignatureValid(isValid)
+    }
+    else {
+      const isValid = await verifyMessage({ address, message, signature })
+      setSignatureValid(isValid)
+    }
+  }
 
   useEffect(
     () => {
