@@ -1,7 +1,7 @@
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { useWeb3Modal } from '@web3modal/wagmi/react'
-import { usePublicClient, useNetwork, useSwitchNetwork, useWalletClient, useAccount, useDisconnect } from 'wagmi'
+import { usePublicClient, useNetwork, useSwitchNetwork, useWalletClient, useAccount, useDisconnect, useSignMessage } from 'wagmi'
 // import { BrowserProvider, FallbackProvider, JsonRpcProvider, JsonRpcSigner } from 'ethers'
 import { providers } from 'ethers'
 
@@ -62,9 +62,15 @@ export default (
   const { chain } = useNetwork()
   const { switchNetwork } = useSwitchNetwork()
   const { data: signer } = useWalletClient()
-  const { address } = useAccount()
+  const { isConnected, address } = useAccount()
   const { disconnect } = useDisconnect()
   const chainId = chain?.id
+  const message = process.env.NEXT_PUBLIC_APP_NAME
+  const { data: signature, signMessage } = useSignMessage({ message })
+
+  const [signatureValid, setSignatureValid] = useState()
+
+  const validateSignature = async () => setSignatureValid(await _provider.verifyMessage({ address, message, signature }))
 
   useEffect(
     () => {
@@ -85,6 +91,15 @@ export default (
       }
     },
     [chainId, signer, address],
+  )
+
+  useEffect(
+    () => {
+      if (_provider) {
+        validateSignature()
+      }
+    },
+    [_provider],
   )
 
   return !hidden && (
