@@ -1232,7 +1232,7 @@ export default ({ useAssetChain = false }) => {
         setEstimateResponse(null)
 
         if (isNumber(_amount) && !isZero(_amount)) {
-          if (['linea'].includes(destination_chain_data?.id) || source_asset_data?.is_xERC20 || source_asset_data?.is_alchemix) {
+          if ((NETWORK === 'testnet' && ['linea'].includes(destination_chain_data?.id)) || source_asset_data?.is_xERC20 || source_asset_data?.is_alchemix) {
             manual = true
           }
           else if (toArray([source_chain_data?.id, destination_chain_data?.id]).findIndex(c => toArray(pools_data).find(d => d.chain_data?.id === c && !d.tvl)) < 0) {

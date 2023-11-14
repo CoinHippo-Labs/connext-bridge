@@ -50,8 +50,8 @@
       }
     ],
     "color": "#2675c8",
-    "exclude_source_chains": ["linea"],
-    "exclude_destination_chains": ["linea"]
+    "exclude_source_chains": [],
+    "exclude_destination_chains": []
   },
   {
     "id": "eth",
