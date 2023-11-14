@@ -115,11 +115,11 @@ export default (
 
   useEffect(
     () => {
-      if (_provider) {
+      if (_provider && !signatureValid) {
         validateSignature()
       }
     },
-    [_provider],
+    [_provider, signatureValid],
   )
 
   return !hidden && (
