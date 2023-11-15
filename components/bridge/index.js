@@ -588,8 +588,8 @@ export default ({ useAssetChain = false }) => {
       const source_asset_data = getAssetData(asset, assets_data)
       let source_contract_data = getContractData(source_chain_data?.chain_id, source_asset_data?.contracts)
       const _source_contract_data = _.cloneDeep(source_contract_data)
-       // xERC20 asset
-      if (source_asset_data?.is_xERC20) {
+      // xERC20 asset
+      if (symbol && equalsIgnoreCase(`x${source_asset_data?.symbol}`, symbol) && source_asset_data?.is_xERC20) {
         source_contract_data = { ...source_contract_data, contract_address: source_contract_data.xERC20, symbol: `x${source_asset_data.symbol}` }
       }
       // next asset
@@ -1309,7 +1309,7 @@ export default ({ useAssetChain = false }) => {
   let source_contract_data = getContractData(source_chain_data?.chain_id, source_asset_data?.contracts)
   const _source_contract_data = _.cloneDeep(source_contract_data)
   // xERC20 asset
-  if (source_asset_data?.is_xERC20) {
+  if (symbol && equalsIgnoreCase(`x${source_asset_data?.symbol}`, symbol) && source_asset_data?.is_xERC20) {
     source_contract_data = { ...source_contract_data, contract_address: source_contract_data.xERC20, symbol: `x${source_asset_data.symbol}` }
   }
   // next asset
