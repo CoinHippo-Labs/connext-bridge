@@ -614,6 +614,7 @@ export default ({ useAssetChain = false }) => {
         }
       }
       symbol = source_contract_data?.symbol || source_asset_data?.symbol
+      relayerFee = isNumber(relayerFee) && Number(relayerFee) > 0 ? relayerFee : (await _estimateFees())?.relayerFee
 
       const source_decimals = source_contract_data?.decimals || 18
       const relayer_fee_decimals = relayerFeeAssetType === 'transacting' ? source_decimals : 18
@@ -1147,6 +1148,60 @@ export default ({ useAssetChain = false }) => {
     }
   }
 
+  const _estimateFees = async () => {
+    if (sdk && checkSupported()) {
+      try {
+        const { source_chain, destination_chain, asset, amount } = { ...bridge }
+        const { relayerFeeAssetType, forceSlow } = { ...options }
+
+        const source_chain_data = getChainData(source_chain, chains_data)
+        const destination_chain_data = getChainData(destination_chain, chains_data)
+        const { native_token } = { ...source_chain_data }
+        const { gas_price } = { ...destination_chain_data }
+        let { decimals } = { ...native_token }
+        decimals = decimals || 18
+
+        const source_asset_data = getAssetData(asset, assets_data)
+        const { contracts, price } = { ...source_asset_data }
+        const source_contract_data = getContractData(source_chain_data.chain_id, contracts)
+        const source_decimals = source_contract_data.decimals || 18
+
+        const routerFee = forceSlow ? 0 : parseFloat(numberToFixed(amount * PERCENT_ROUTER_FEE / 100, source_decimals))
+        const params = {
+          originDomain: source_chain_data.domain_id,
+          destinationDomain: destination_chain_data.domain_id,
+          isHighPriority: !forceSlow,
+          priceIn: relayerFeeAssetType === 'transacting' ? 'usd' : 'native',
+          destinationGasPrice: gas_price,
+        }
+        if (NETWORK !== 'mainnet') {
+          const source_gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, native_token?.symbol))
+          const destination_gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, destination_chain_data?.native_token?.symbol))
+          if (source_gas_token_data?.price) {
+            params.originNativeTokenPrice = source_gas_token_data.price
+          }
+          if (destination_gas_token_data?.price) {
+            params.destinationNativeTokenPrice = destination_gas_token_data.price
+          }
+        }
+        try {
+          console.log('[/]', '[estimateRelayerFee]', params)
+          const response = await sdk.sdkBase.estimateRelayerFee(params)
+          let relayerFee = formatUnits(response, decimals)
+          if (isNumber(relayerFee)) {
+            relayerFee = params.priceIn === 'usd' && price > 0 ? numberToFixed(relayerFee / price, decimals) : relayerFee.toString()
+          }
+          console.log('[/]', '[relayerFee]', { params, response, relayerFee })
+          return { routerFee, relayerFee }
+        } catch (error) {
+          console.log('[/]', '[estimateRelayerFee error]', params, error)
+          return { routerFee }
+        }
+      } catch (error) {}
+    }
+    return null
+  }
+
   const estimateFees = async () => {
     if (sdk && !xcall && !callResponse) {
       if (checkSupported()) {
@@ -1155,55 +1210,7 @@ export default ({ useAssetChain = false }) => {
         setCallProcessing(false)
         setCalling(false)
         setCallResponse(null)
-
-        try {
-          const { source_chain, destination_chain, asset, amount } = { ...bridge }
-          const { relayerFeeAssetType, forceSlow } = { ...options }
-
-          const source_chain_data = getChainData(source_chain, chains_data)
-          const destination_chain_data = getChainData(destination_chain, chains_data)
-          const { native_token } = { ...source_chain_data }
-          const { gas_price } = { ...destination_chain_data }
-          let { decimals } = { ...native_token }
-          decimals = decimals || 18
-
-          const source_asset_data = getAssetData(asset, assets_data)
-          const { contracts, price } = { ...source_asset_data }
-          const source_contract_data = getContractData(source_chain_data.chain_id, contracts)
-          const source_decimals = source_contract_data.decimals || 18
-
-          const routerFee = forceSlow ? 0 : parseFloat(numberToFixed(amount * PERCENT_ROUTER_FEE / 100, source_decimals))
-          const params = {
-            originDomain: source_chain_data.domain_id,
-            destinationDomain: destination_chain_data.domain_id,
-            isHighPriority: !forceSlow,
-            priceIn: relayerFeeAssetType === 'transacting' ? 'usd' : 'native',
-            destinationGasPrice: gas_price,
-          }
-          if (NETWORK !== 'mainnet') {
-            const source_gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, native_token?.symbol))
-            const destination_gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, destination_chain_data?.native_token?.symbol))
-            if (source_gas_token_data?.price) {
-              params.originNativeTokenPrice = source_gas_token_data.price
-            }
-            if (destination_gas_token_data?.price) {
-              params.destinationNativeTokenPrice = destination_gas_token_data.price
-            }
-          }
-          try {
-            console.log('[/]', '[estimateRelayerFee]', params)
-            const response = await sdk.sdkBase.estimateRelayerFee(params)
-            let relayerFee = formatUnits(response, decimals)
-            if (isNumber(relayerFee)) {
-              relayerFee = params.priceIn === 'usd' && price > 0 ? numberToFixed(relayerFee / price, decimals) : relayerFee.toString()
-            }
-            console.log('[/]', '[relayerFee]', { params, response, relayerFee })
-            setFees({ routerFee, relayerFee })
-          } catch (error) {
-            console.log('[/]', '[estimateRelayerFee error]', params, error)
-            setFees({ routerFee })
-          }
-        } catch (error) {}
+        setFees(await _estimateFees())
       }
       else {
         setFees(null)
