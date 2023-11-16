@@ -1335,6 +1335,7 @@ export default ({ useAssetChain = false }) => {
       destination_contract_data = { ...destination_contract_data, contract_address: ZeroAddress, symbol: destination_asset_data.symbol, image: destination_asset_data.image }
     }
   }
+  const isNextAssetOnSource = equalsIgnoreCase(source_contract_data?.contract_address, _source_contract_data?.next_asset?.contract_address)
   const isNextAssetOnDestination = equalsIgnoreCase(destination_contract_data?.contract_address, _destination_contract_data?.next_asset?.contract_address)
 
   const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
@@ -2191,7 +2192,7 @@ export default ({ useAssetChain = false }) => {
                                     </div>
                                   </div>
                                 )}
-                                {!is_xERC20 && !isNextAssetOnDestination && (
+                                {!is_xERC20 && !isNextAssetOnDestination && !(isNextAssetOnSource && !_destination_contract_data?.next_asset) && (
                                   <>
                                     {source !== 'pool' && (
                                       <div className="flex flex-col space-y-0.5">
