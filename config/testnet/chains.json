@@ -91,36 +91,6 @@
     "group": "optimistic_rollups"
   },
   {
-    "id": "arbitrum",
-    "chain_id": 421613,
-    "domain_id": "1734439522",
-    "name": "Arbitrum",
-    "short_name": "ARB",
-    "rpcs": [
-      "https://arbitrum-goerli.blockpi.network/v1/rpc/public",
-      "https://arbitrum-goerli.publicnode.com"
-    ],
-    "native_token": {
-      "name": "Ethereum",
-      "symbol": "aETH",
-      "decimals": 18
-    },
-    "explorer": {
-      "name": "Arbiscan",
-      "url": "https://goerli.arbiscan.io",
-      "icon": "/logos/explorers/arbiscan.png",
-      "block_path": "/block/{block}",
-      "address_path": "/address/{address}",
-      "contract_path": "/token/{address}",
-      "contract_0_path": "/address/{address}",
-      "transaction_path": "/tx/{tx}"
-    },
-    "image": "/logos/chains/arbitrum.png",
-    "color": "#28a0f0",
-    "unwrapper_contract": "0x18BBF96BC8014aA93cbf1A5Bce005a485b5C2C4a",
-    "group": "optimistic_rollups"
-  },
-  {
     "id": "linea",
     "chain_id": 59140,
     "domain_id": "1668247156",
