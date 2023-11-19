@@ -2192,7 +2192,7 @@ export default ({ useAssetChain = false }) => {
                                     </div>
                                   </div>
                                 )}
-                                {!is_xERC20 && !isNextAssetOnDestination && !(isNextAssetOnSource && !_destination_contract_data?.next_asset) && (
+                                {!is_xERC20 && !(isNextAssetOnDestination && destination_chain_data?.is_layer_2) && !(isNextAssetOnSource && !_destination_contract_data?.next_asset && destination_chain_data?.id === 'ethereum') && (
                                   <>
                                     {source !== 'pool' && (
                                       <div className="flex flex-col space-y-0.5">
