@@ -99,6 +99,7 @@
   },
   {
     "id": "optimism",
+    "is_layer_2": true,
     "chain_id": 10,
     "domain_id": "1869640809",
     "name": "Optimism",
@@ -132,6 +133,7 @@
   },
   {
     "id": "arbitrum",
+    "is_layer_2": true,
     "chain_id": 42161,
     "domain_id": "1634886255",
     "name": "Arbitrum",
