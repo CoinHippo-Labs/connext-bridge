@@ -815,10 +815,10 @@
     "color": "#000000"
   },
   {
-    "id": "spacetoken",
+    "id": "space",
     "symbol": "SPACE",
     "name": "Space Token",
-    "image": "/logos/assets/spacetoken.png",
+    "image": "/logos/assets/space.png",
     "is_xERC20": true,
     "contracts": [
       {
