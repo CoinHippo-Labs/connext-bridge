@@ -894,5 +894,49 @@
       }
     ],
     "color": "#1F3660"
+  },
+  {
+    "id": "space",
+    "symbol": "SPACE",
+    "name": "Space Token",
+    "image": "/logos/assets/space.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0x9e1170c12fddd3b00fec42ddf4c942565d9be577",
+        "chain_id": 56,
+        "decimals": 18,
+        "symbol": "SPACE",
+        "xERC20": "0x1D1498166DDCEeE616a6d99868e1E0677300056f",
+        "lockbox": "0xb3A7b5c4e5Dbc69d5898F4189989AC609D04a03C",
+        "lockbox_adapter": "0xa3A8901Ea3db2Ab4712AdCfa5BD91035324e73CE"
+      },
+      {
+        "contract_address": "0x1D1498166DDCEeE616a6d99868e1E0677300056f",
+        "chain_id": 1,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0x1D1498166DDCEeE616a6d99868e1E0677300056f",
+        "chain_id": 137,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0x1D1498166DDCEeE616a6d99868e1E0677300056f",
+        "chain_id": 10,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0x1D1498166DDCEeE616a6d99868e1E0677300056f",
+        "chain_id": 42161,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0x1D1498166DDCEeE616a6d99868e1E0677300056f",
+        "chain_id": 100,
+        "decimals": 18
+      }
+    ],
+    "color": "#000000"
   }
 ]
