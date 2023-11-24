@@ -2320,10 +2320,10 @@ export default ({ useAssetChain = false }) => {
                                 <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                                   Estimated Time
                                 </div>
-                                <Tooltip content={(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) && !is_xERC20 ? 'Unable to leverage fast liquidity. Your transfer will still complete.' : 'Fast transfer enabled by Connext router network.'}>
+                                <Tooltip content={(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false)/* && !is_xERC20*/ ? 'Unable to leverage fast liquidity. Your transfer will still complete.' : 'Fast transfer enabled by Connext router network.'}>
                                   <div className="flex items-center">
                                     <span className="whitespace-nowrap text-sm 3xl:text-xl font-semibold">
-                                      {(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) && !is_xERC20 ?
+                                      {(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false)/* && !is_xERC20*/ ?
                                         <span className="text-yellow-500 dark:text-yellow-400">
                                           {'<180 minutes'}
                                         </span> :
