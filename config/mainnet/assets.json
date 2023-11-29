@@ -118,6 +118,19 @@
           "image": "/logos/assets/nextusdc.png"
         },
         "is_pool": true
+      },
+      {
+        "contract_address": "0x176211869cA2b568f2A7D4EE941E073a821EE1ff",
+        "chain_id": 59144,
+        "decimals": 6,
+        "image": "/logos/assets/usdc.png",
+        "next_asset": {
+          "contract_address": "0x331152ca43b50b39f3a9f203685b98dbb9b42342",
+          "decimals": 6,
+          "symbol": "nextUSDC",
+          "image": "/logos/assets/nextusdc.png"
+        },
+        "is_pool": true
       }
     ],
     "color": "#2675c8",
@@ -196,6 +209,19 @@
         "image": "/logos/assets/usdt.png",
         "next_asset": {
           "contract_address": "0xF4d944883D6FddC56d3534986feF82105CaDbfA1",
+          "decimals": 6,
+          "symbol": "nextUSDT",
+          "image": "/logos/assets/nextusdt.png"
+        },
+        "is_pool": true
+      },
+      {
+        "contract_address": "0xA219439258ca9da29E9Cc4cE5596924745e12B93",
+        "chain_id": 59144,
+        "decimals": 6,
+        "image": "/logos/assets/usdt.png",
+        "next_asset": {
+          "contract_address": "0xbd7eaed30936670c931b718f5d9014aff82fc767",
           "decimals": 6,
           "symbol": "nextUSDT",
           "image": "/logos/assets/nextusdt.png"
@@ -285,6 +311,19 @@
         },
         "wrappable": true,
         "is_pool": true
+      },
+      {
+        "contract_address": "0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5",
+        "chain_id": 59144,
+        "decimals": 18,
+        "image": "/logos/assets/dai.png",
+        "next_asset": {
+          "contract_address": "0x7360a597290612787833ee924c449c61cc0689e4",
+          "decimals": 18,
+          "symbol": "nextDAI",
+          "image": "/logos/assets/nextdai.png"
+        },
+        "is_pool": true
       }
     ],
     "color": "#f4b333",
@@ -371,6 +410,20 @@
         "image": "/logos/assets/weth.png",
         "next_asset": {
           "contract_address": "0x538E2dDbfDf476D24cCb1477A518A82C9EA81326",
+          "decimals": 18,
+          "symbol": "nextWETH",
+          "image": "/logos/assets/nextweth.png"
+        },
+        "is_pool": true
+      },
+      {
+        "contract_address": "0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f",
+        "chain_id": 59144,
+        "decimals": 18,
+        "symbol": "WETH",
+        "image": "/logos/assets/weth.png",
+        "next_asset": {
+          "contract_address": "0x0573ad07ca4f74757e5b2417bf225bebebcf66d9",
           "decimals": 18,
           "symbol": "nextWETH",
           "image": "/logos/assets/nextweth.png"
@@ -841,5 +894,49 @@
       }
     ],
     "color": "#1F3660"
+  },
+  {
+    "id": "space",
+    "symbol": "SPACE",
+    "name": "Space Token",
+    "image": "/logos/assets/space.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0x9e1170c12fddd3b00fec42ddf4c942565d9be577",
+        "chain_id": 56,
+        "decimals": 18,
+        "symbol": "SPACE",
+        "xERC20": "0x1D1498166DDCEeE616a6d99868e1E0677300056f",
+        "lockbox": "0xb3A7b5c4e5Dbc69d5898F4189989AC609D04a03C",
+        "lockbox_adapter": "0xa3A8901Ea3db2Ab4712AdCfa5BD91035324e73CE"
+      },
+      {
+        "contract_address": "0x1D1498166DDCEeE616a6d99868e1E0677300056f",
+        "chain_id": 1,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0x1D1498166DDCEeE616a6d99868e1E0677300056f",
+        "chain_id": 137,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0x1D1498166DDCEeE616a6d99868e1E0677300056f",
+        "chain_id": 10,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0x1D1498166DDCEeE616a6d99868e1E0677300056f",
+        "chain_id": 42161,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0x1D1498166DDCEeE616a6d99868e1E0677300056f",
+        "chain_id": 100,
+        "decimals": 18
+      }
+    ],
+    "color": "#000000"
   }
 ]

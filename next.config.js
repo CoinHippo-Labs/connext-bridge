@@ -8,6 +8,7 @@ module.exports = {
       assert: false,
       fs: false,
       querystring: false,
+      child_process: false,
       crypto: require.resolve('crypto-browserify'),
       http: require.resolve('stream-http'),
       https: require.resolve('https-browserify'),

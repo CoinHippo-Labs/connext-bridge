@@ -99,6 +99,7 @@
   },
   {
     "id": "optimism",
+    "is_layer_2": true,
     "chain_id": 10,
     "domain_id": "1869640809",
     "name": "Optimism",
@@ -132,6 +133,7 @@
   },
   {
     "id": "arbitrum",
+    "is_layer_2": true,
     "chain_id": 42161,
     "domain_id": "1634886255",
     "name": "Arbitrum",
@@ -191,6 +193,38 @@
     "image": "/logos/chains/gnosis.png",
     "color": "#48a9a6",
     "unwrapper_contract": "0x642c27a96dFFB6f21443A89b789a3194Ff8399fa",
+    "group": "evm"
+  },
+  {
+    "id": "linea",
+    "chain_id": 59144,
+    "domain_id": "1818848877",
+    "name": "Linea",
+    "short_name": "LINEA",
+    "rpcs": [
+      "https://linea.blockpi.network/v1/rpc/public",
+      "https://linea.drpc.org",
+      "https://1rpc.io/linea",
+      "https://rpc.linea.build"
+    ],
+    "native_token": {
+      "name": "Ethereum",
+      "symbol": "ETH",
+      "decimals": 18
+    },
+    "explorer": {
+      "name": "Linea",
+      "url": "https://lineascan.build",
+      "icon": "/logos/explorers/linea.png",
+      "block_path": "/block/{block}",
+      "address_path": "/address/{address}",
+      "contract_path": "/token/{address}",
+      "contract_0_path": "/address/{address}",
+      "transaction_path": "/tx/{tx}"
+    },
+    "image": "/logos/chains/linea.png",
+    "color": "#62dfff",
+    "unwrapper_contract": "0xCeB49aEa4fAeC437Bf1B82EA4a76940Df9323273",
     "group": "evm"
   }
 ]

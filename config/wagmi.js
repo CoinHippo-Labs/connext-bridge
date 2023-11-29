@@ -58,7 +58,6 @@ export const WEB3MODAL = createWeb3Modal({
     '--w3m-color-fg-3': '#6e7777',
     '--w3m-logo-image-url': `${process.env.NEXT_PUBLIC_APP_URL}/logos/logo_with_name_white.png`,
   },
-  defaultChain: EVM_CHAIN_CONFIGS[0],
   termsConditionsUrl: process.env.NEXT_PUBLIC_TERMS_URL,
   privacyPolicyUrl: process.env.NEXT_PUBLIC_PRIVACY_POLICY_URL,
   featuredWalletIds: [

@@ -588,8 +588,8 @@ export default ({ useAssetChain = false }) => {
       const source_asset_data = getAssetData(asset, assets_data)
       let source_contract_data = getContractData(source_chain_data?.chain_id, source_asset_data?.contracts)
       const _source_contract_data = _.cloneDeep(source_contract_data)
-       // xERC20 asset
-      if (symbol && equalsIgnoreCase(`x${source_asset_data?.symbol}`, symbol)) {
+      // xERC20 asset
+      if (symbol && equalsIgnoreCase(`x${source_asset_data?.symbol}`, symbol) && source_asset_data?.is_xERC20) {
         source_contract_data = { ...source_contract_data, contract_address: source_contract_data.xERC20, symbol: `x${source_asset_data.symbol}` }
       }
       // next asset
@@ -614,6 +614,7 @@ export default ({ useAssetChain = false }) => {
         }
       }
       symbol = source_contract_data?.symbol || source_asset_data?.symbol
+      relayerFee = isNumber(relayerFee) && Number(relayerFee) > 0 ? relayerFee : (await _estimateFees())?.relayerFee
 
       const source_decimals = source_contract_data?.decimals || 18
       const relayer_fee_decimals = relayerFeeAssetType === 'transacting' ? source_decimals : 18
@@ -1147,6 +1148,60 @@ export default ({ useAssetChain = false }) => {
     }
   }
 
+  const _estimateFees = async () => {
+    if (sdk && checkSupported()) {
+      try {
+        const { source_chain, destination_chain, asset, amount } = { ...bridge }
+        const { relayerFeeAssetType, forceSlow } = { ...options }
+
+        const source_chain_data = getChainData(source_chain, chains_data)
+        const destination_chain_data = getChainData(destination_chain, chains_data)
+        const { native_token } = { ...source_chain_data }
+        const { gas_price } = { ...destination_chain_data }
+        let { decimals } = { ...native_token }
+        decimals = decimals || 18
+
+        const source_asset_data = getAssetData(asset, assets_data)
+        const { contracts, price } = { ...source_asset_data }
+        const source_contract_data = getContractData(source_chain_data.chain_id, contracts)
+        const source_decimals = source_contract_data.decimals || 18
+
+        const routerFee = forceSlow ? 0 : parseFloat(numberToFixed(amount * PERCENT_ROUTER_FEE / 100, source_decimals))
+        const params = {
+          originDomain: source_chain_data.domain_id,
+          destinationDomain: destination_chain_data.domain_id,
+          isHighPriority: !forceSlow,
+          priceIn: relayerFeeAssetType === 'transacting' ? 'usd' : 'native',
+          destinationGasPrice: gas_price,
+        }
+        if (NETWORK !== 'mainnet') {
+          const source_gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, native_token?.symbol))
+          const destination_gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, destination_chain_data?.native_token?.symbol))
+          if (source_gas_token_data?.price) {
+            params.originNativeTokenPrice = source_gas_token_data.price
+          }
+          if (destination_gas_token_data?.price) {
+            params.destinationNativeTokenPrice = destination_gas_token_data.price
+          }
+        }
+        try {
+          console.log('[/]', '[estimateRelayerFee]', params)
+          const response = await sdk.sdkBase.estimateRelayerFee(params)
+          let relayerFee = formatUnits(response, decimals)
+          if (isNumber(relayerFee)) {
+            relayerFee = params.priceIn === 'usd' && price > 0 ? numberToFixed(relayerFee / price, decimals) : relayerFee.toString()
+          }
+          console.log('[/]', '[relayerFee]', { params, response, relayerFee })
+          return { routerFee, relayerFee }
+        } catch (error) {
+          console.log('[/]', '[estimateRelayerFee error]', params, error)
+          return { routerFee }
+        }
+      } catch (error) {}
+    }
+    return null
+  }
+
   const estimateFees = async () => {
     if (sdk && !xcall && !callResponse) {
       if (checkSupported()) {
@@ -1155,55 +1210,7 @@ export default ({ useAssetChain = false }) => {
         setCallProcessing(false)
         setCalling(false)
         setCallResponse(null)
-
-        try {
-          const { source_chain, destination_chain, asset, amount } = { ...bridge }
-          const { relayerFeeAssetType, forceSlow } = { ...options }
-
-          const source_chain_data = getChainData(source_chain, chains_data)
-          const destination_chain_data = getChainData(destination_chain, chains_data)
-          const { native_token } = { ...source_chain_data }
-          const { gas_price } = { ...destination_chain_data }
-          let { decimals } = { ...native_token }
-          decimals = decimals || 18
-
-          const source_asset_data = getAssetData(asset, assets_data)
-          const { contracts, price } = { ...source_asset_data }
-          const source_contract_data = getContractData(source_chain_data.chain_id, contracts)
-          const source_decimals = source_contract_data.decimals || 18
-
-          const routerFee = forceSlow ? 0 : parseFloat(numberToFixed(amount * PERCENT_ROUTER_FEE / 100, source_decimals))
-          const params = {
-            originDomain: source_chain_data.domain_id,
-            destinationDomain: destination_chain_data.domain_id,
-            isHighPriority: !forceSlow,
-            priceIn: relayerFeeAssetType === 'transacting' ? 'usd' : 'native',
-            destinationGasPrice: gas_price,
-          }
-          if (NETWORK !== 'mainnet') {
-            const source_gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, native_token?.symbol))
-            const destination_gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, destination_chain_data?.native_token?.symbol))
-            if (source_gas_token_data?.price) {
-              params.originNativeTokenPrice = source_gas_token_data.price
-            }
-            if (destination_gas_token_data?.price) {
-              params.destinationNativeTokenPrice = destination_gas_token_data.price
-            }
-          }
-          try {
-            console.log('[/]', '[estimateRelayerFee]', params)
-            const response = await sdk.sdkBase.estimateRelayerFee(params)
-            let relayerFee = formatUnits(response, decimals)
-            if (isNumber(relayerFee)) {
-              relayerFee = params.priceIn === 'usd' && price > 0 ? numberToFixed(relayerFee / price, decimals) : relayerFee.toString()
-            }
-            console.log('[/]', '[relayerFee]', { params, response, relayerFee })
-            setFees({ routerFee, relayerFee })
-          } catch (error) {
-            console.log('[/]', '[estimateRelayerFee error]', params, error)
-            setFees({ routerFee })
-          }
-        } catch (error) {}
+        setFees(await _estimateFees())
       }
       else {
         setFees(null)
@@ -1232,7 +1239,7 @@ export default ({ useAssetChain = false }) => {
         setEstimateResponse(null)
 
         if (isNumber(_amount) && !isZero(_amount)) {
-          if (['linea'].includes(destination_chain_data?.id) || source_asset_data?.is_xERC20 || source_asset_data?.is_alchemix) {
+          if ((NETWORK === 'testnet' && ['linea'].includes(destination_chain_data?.id)) || source_asset_data?.is_xERC20 || source_asset_data?.is_alchemix) {
             manual = true
           }
           else if (toArray([source_chain_data?.id, destination_chain_data?.id]).findIndex(c => toArray(pools_data).find(d => d.chain_data?.id === c && !d.tvl)) < 0) {
@@ -1302,7 +1309,7 @@ export default ({ useAssetChain = false }) => {
   let source_contract_data = getContractData(source_chain_data?.chain_id, source_asset_data?.contracts)
   const _source_contract_data = _.cloneDeep(source_contract_data)
   // xERC20 asset
-  if (symbol && equalsIgnoreCase(`x${source_asset_data?.symbol}`, symbol)) {
+  if (symbol && equalsIgnoreCase(`x${source_asset_data?.symbol}`, symbol) && source_asset_data?.is_xERC20) {
     source_contract_data = { ...source_contract_data, contract_address: source_contract_data.xERC20, symbol: `x${source_asset_data.symbol}` }
   }
   // next asset
@@ -1328,6 +1335,8 @@ export default ({ useAssetChain = false }) => {
       destination_contract_data = { ...destination_contract_data, contract_address: ZeroAddress, symbol: destination_asset_data.symbol, image: destination_asset_data.image }
     }
   }
+  const isNextAssetOnSource = equalsIgnoreCase(source_contract_data?.contract_address, _source_contract_data?.next_asset?.contract_address)
+  const isNextAssetOnDestination = equalsIgnoreCase(destination_contract_data?.contract_address, _destination_contract_data?.next_asset?.contract_address)
 
   const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
   const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol
@@ -2183,7 +2192,7 @@ export default ({ useAssetChain = false }) => {
                                     </div>
                                   </div>
                                 )}
-                                {!is_xERC20 && (
+                                {!is_xERC20 && !(isNextAssetOnDestination && destination_chain_data?.is_layer_2) && !(isNextAssetOnSource && !_destination_contract_data?.next_asset && destination_chain_data?.id === 'ethereum') && (
                                   <>
                                     {source !== 'pool' && (
                                       <div className="flex flex-col space-y-0.5">
@@ -2311,10 +2320,10 @@ export default ({ useAssetChain = false }) => {
                                 <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                                   Estimated Time
                                 </div>
-                                <Tooltip content={(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) && !is_xERC20 ? 'Unable to leverage fast liquidity. Your transfer will still complete.' : 'Fast transfer enabled by Connext router network.'}>
+                                <Tooltip content={(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false)/* && !is_xERC20*/ ? 'Unable to leverage fast liquidity. Your transfer will still complete.' : 'Fast transfer enabled by Connext router network.'}>
                                   <div className="flex items-center">
                                     <span className="whitespace-nowrap text-sm 3xl:text-xl font-semibold">
-                                      {(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) && !is_xERC20 ?
+                                      {(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false)/* && !is_xERC20*/ ?
                                         <span className="text-yellow-500 dark:text-yellow-400">
                                           {'<180 minutes'}
                                         </span> :
