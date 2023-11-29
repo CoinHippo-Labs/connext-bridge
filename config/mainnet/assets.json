@@ -17,6 +17,11 @@
       },
       {
         "contract_address": "0x58b9cB810A68a7f3e1E4f8Cb45D1B9B3c79705E8",
+        "chain_id": 56,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0x58b9cB810A68a7f3e1E4f8Cb45D1B9B3c79705E8",
         "chain_id": 137,
         "decimals": 18
       },
