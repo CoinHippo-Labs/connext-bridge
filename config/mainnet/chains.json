@@ -194,7 +194,7 @@
     "color": "#48a9a6",
     "unwrapper_contract": "0x642c27a96dFFB6f21443A89b789a3194Ff8399fa",
     "group": "evm"
-  },
+  }/*,
   {
     "id": "linea",
     "is_layer_2": true,
@@ -226,6 +226,6 @@
     "image": "/logos/chains/linea.png",
     "color": "#62dfff",
     "unwrapper_contract": "0xCeB49aEa4fAeC437Bf1B82EA4a76940Df9323273",
-    "group": "evm"
-  }
+    "group": "evm",
+  }*/
 ]
