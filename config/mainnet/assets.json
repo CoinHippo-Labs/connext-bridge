@@ -328,7 +328,7 @@
           "symbol": "nextDAI",
           "image": "/logos/assets/nextdai.png"
         },
-        "is_pool": true
+        "is_pool": false
       }
     ],
     "color": "#f4b333",
