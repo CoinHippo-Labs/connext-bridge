@@ -226,6 +226,7 @@
     "image": "/logos/chains/linea.png",
     "color": "#62dfff",
     "unwrapper_contract": "0xCeB49aEa4fAeC437Bf1B82EA4a76940Df9323273",
-    "group": "evm"
+    "group": "evm",
+    "relayer_fee_adjustment": 3.0
   }
 ]
