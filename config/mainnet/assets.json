@@ -328,7 +328,7 @@
           "symbol": "nextDAI",
           "image": "/logos/assets/nextdai.png"
         },
-        "is_pool": true
+        "is_pool": false
       }
     ],
     "color": "#f4b333",
@@ -433,6 +433,7 @@
           "symbol": "nextWETH",
           "image": "/logos/assets/nextweth.png"
         },
+        "wrappable": true,
         "is_pool": true
       }
     ],
