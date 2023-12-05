@@ -1157,7 +1157,7 @@ export default ({ useAssetChain = false }) => {
         const source_chain_data = getChainData(source_chain, chains_data)
         const destination_chain_data = getChainData(destination_chain, chains_data)
         const { native_token } = { ...source_chain_data }
-        const { gas_price } = { ...destination_chain_data }
+        const { gas_price, relayer_fee_adjustment } = { ...destination_chain_data }
         let { decimals } = { ...native_token }
         decimals = decimals || 18
 
@@ -1190,6 +1190,9 @@ export default ({ useAssetChain = false }) => {
           let relayerFee = formatUnits(response, decimals)
           if (isNumber(relayerFee)) {
             relayerFee = params.priceIn === 'usd' && price > 0 ? numberToFixed(relayerFee / price, decimals) : relayerFee.toString()
+            if (relayer_fee_adjustment > 1) {
+              relayerFee = numberToFixed(relayerFee * relayer_fee_adjustment, decimals)
+            }
           }
           console.log('[/]', '[relayerFee]', { params, response, relayerFee })
           return { routerFee, relayerFee }
