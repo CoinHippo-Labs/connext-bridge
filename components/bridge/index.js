@@ -721,11 +721,11 @@ export default ({ useAssetChain = false }) => {
               xcallParams.to = gateway
             // Source is L2
             } else {
+              const alAsset = xcallParams.asset
+              const nextAlAsset = source_contract_data?.next_asset?.contract_address
+
               // exchange AlAsset into nextAlAsset on origin
               if (xcallParams.asset === source_asset_data?.contracts.find(c => c.chain_id === source_chain_data?.chain_id).contract_address) {
-                const alAsset = xcallParams.asset
-                const nextAlAsset = source_contract_data?.next_asset?.contract_address
-
                 console.log('exchanging alAsset to nextAlAsset')
                 const exchangeData = alAssetInterface.encodeFunctionData('exchangeCanonicalForOld', [nextAlAsset, xcallParams.amount])
                 const exchangeTxRequest = {
@@ -736,24 +736,26 @@ export default ({ useAssetChain = false }) => {
                 }
                 const exchangeTxReceipt = await signer.sendTransaction(exchangeTxRequest)
                 await exchangeTxReceipt.wait()
+              }
 
-                // approve nextAlAsset
-                const approveTxRequest = await sdk.sdkBase.approveIfNeeded(source_domain, nextAlAsset, xcallParams.amount)
-                if (approveTxRequest) {
-                  console.log('approving nextAlAsset')
-                  const approveTxReceipt = await signer.sendTransaction(approveTxRequest)
-                  await approveTxReceipt.wait()
-                }
+              // approve nextAlAsset
+              console.log('checking approve nextAlAsset')
+              const approveTxRequest = await sdk.sdkBase.approveIfNeeded(source_domain, nextAlAsset, xcallParams.amount)
+              if (approveTxRequest) {
+                console.log('approving nextAlAsset')
+                const approveTxReceipt = await signer.sendTransaction(approveTxRequest)
+                await approveTxReceipt.wait()
+              }
 
-                // set xcall asset to nextAlAsset
-                xcallParams.asset = nextAlAsset
+              // set xcall asset to nextAlAsset
+              xcallParams.asset = nextAlAsset
 
-                // Destination is L2
-                if (source_domain in ALCHEMIX_GATEWAYS && destination_domain in ALCHEMIX_GATEWAYS && !receiveLocal) {
-                  // xcall the gateway on destination
-                  xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to]);
-                  xcallParams.to = gateway
-                }
+              // Destination is L2
+              console.log(`receive local: ${receiveLocal}`)
+              if (source_domain in ALCHEMIX_GATEWAYS && destination_domain in ALCHEMIX_GATEWAYS && !receiveLocal) {
+                // xcall the gateway on destination
+                xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to]);
+                xcallParams.to = gateway
               }
             }
           }
