@@ -106,7 +106,7 @@ export default (
     [data, chains_data, assets_data],
   )
 
-  const { transfer_id, error_status, origin_domain, origin_transacting_asset, origin_transacting_amount, destination_domain, destination_transacting_asset, destination_local_asset, slippage, relayer_fees, receive_local, delegate } = { ...data }
+  const { transfer_id, error_status, origin_domain, origin_transacting_asset, origin_transacting_amount, destination_domain, destination_transacting_asset, destination_local_asset, slippage, updated_slippage, relayer_fees, receive_local, delegate } = { ...data }
   let { relayer_fee } = { ...data }
 
   const source_chain_data = getChainData(origin_domain, chains_data)
@@ -164,7 +164,7 @@ export default (
   const destination_decimals = destination_contract_data?.decimals || 18
   const destination_asset_image = destination_contract_data?.image || destination_asset_data?.image
 
-  const _slippage = slippage / 100
+  const _slippage = updated_slippage ? updated_slippage / 100 : slippage / 100
   const estimatedSlippage = estimatedValues?.destinationSlippage && estimatedValues.originSlippage ? Number(numberToFixed(Number(estimatedValues.destinationSlippage) + Number(estimatedValues.originSlippage), 2)) : null
 
   const gas_token_data = toArray(gas_tokens_price_data).find(d => equalsIgnoreCase(d.asset_id, source_gas?.symbol))
@@ -326,7 +326,7 @@ export default (
         setEstimatedValues(_estimatedValues)
       }
 
-      const _newSlippage = _estimatedValues?.destinationSlippage && _estimatedValues.originSlippage ? Number(numberToFixed(Number(_estimatedValues.destinationSlippage) + Number(_estimatedValues.originSlippage), 2)) : null
+      const _newSlippage = _estimatedValues?.destinationSlippage ? Number(numberToFixed(Number(_estimatedValues.destinationSlippage), 2)) : null
       setNewSlippage(_newSlippage > 0 ? _newSlippage > _slippage ? _newSlippage : _slippage + 0.1 : DEFAULT_PERCENT_BRIDGE_SLIPPAGE)
     }
   }
