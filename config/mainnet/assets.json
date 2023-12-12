@@ -17,6 +17,11 @@
       },
       {
         "contract_address": "0x58b9cB810A68a7f3e1E4f8Cb45D1B9B3c79705E8",
+        "chain_id": 56,
+        "decimals": 18
+      },
+      {
+        "contract_address": "0x58b9cB810A68a7f3e1E4f8Cb45D1B9B3c79705E8",
         "chain_id": 137,
         "decimals": 18
       },
@@ -118,6 +123,19 @@
           "image": "/logos/assets/nextusdc.png"
         },
         "is_pool": true
+      },
+      {
+        "contract_address": "0x176211869cA2b568f2A7D4EE941E073a821EE1ff",
+        "chain_id": 59144,
+        "decimals": 6,
+        "image": "/logos/assets/usdc.png",
+        "next_asset": {
+          "contract_address": "0x331152ca43b50b39f3a9f203685b98dbb9b42342",
+          "decimals": 6,
+          "symbol": "nextUSDC",
+          "image": "/logos/assets/nextusdc.png"
+        },
+        "is_pool": true
       }
     ],
     "color": "#2675c8",
@@ -196,6 +214,19 @@
         "image": "/logos/assets/usdt.png",
         "next_asset": {
           "contract_address": "0xF4d944883D6FddC56d3534986feF82105CaDbfA1",
+          "decimals": 6,
+          "symbol": "nextUSDT",
+          "image": "/logos/assets/nextusdt.png"
+        },
+        "is_pool": true
+      },
+      {
+        "contract_address": "0xA219439258ca9da29E9Cc4cE5596924745e12B93",
+        "chain_id": 59144,
+        "decimals": 6,
+        "image": "/logos/assets/usdt.png",
+        "next_asset": {
+          "contract_address": "0xbd7eaed30936670c931b718f5d9014aff82fc767",
           "decimals": 6,
           "symbol": "nextUSDT",
           "image": "/logos/assets/nextusdt.png"
@@ -285,6 +316,19 @@
         },
         "wrappable": true,
         "is_pool": true
+      },
+      {
+        "contract_address": "0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5",
+        "chain_id": 59144,
+        "decimals": 18,
+        "image": "/logos/assets/dai.png",
+        "next_asset": {
+          "contract_address": "0x7360a597290612787833ee924c449c61cc0689e4",
+          "decimals": 18,
+          "symbol": "nextDAI",
+          "image": "/logos/assets/nextdai.png"
+        },
+        "is_pool": false
       }
     ],
     "color": "#f4b333",
@@ -376,6 +420,21 @@
           "image": "/logos/assets/nextweth.png"
         },
         "is_pool": true
+      },
+      {
+        "contract_address": "0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f",
+        "chain_id": 59144,
+        "decimals": 18,
+        "symbol": "WETH",
+        "image": "/logos/assets/weth.png",
+        "next_asset": {
+          "contract_address": "0x0573ad07ca4f74757e5b2417bf225bebebcf66d9",
+          "decimals": 18,
+          "symbol": "nextWETH",
+          "image": "/logos/assets/nextweth.png"
+        },
+        "wrappable": true,
+        "is_pool": true
       }
     ],
     "color": "#636890",
@@ -400,6 +459,12 @@
       {
         "contract_address": "0x489580eB70a50515296eF31E8179fF3e77E24965",
         "chain_id": 56,
+        "decimals": 18,
+        "symbol": "RADAR"
+      },
+      {
+        "contract_address": "0xdCb72AE4d5dc6Ae274461d57E65dB8D50d0a33AD",
+        "chain_id": 137,
         "decimals": 18,
         "symbol": "RADAR"
       }
@@ -813,6 +878,34 @@
       }
     ],
     "color": "#000000"
+  },
+  {
+    "id": "aurox",
+    "symbol": "URUS",
+    "name": "Aurox Token",
+    "image": "/logos/assets/aurox.png",
+    "is_xERC20": true,
+    "contracts": [
+      {
+        "contract_address": "0xc6DdDB5bc6E61e0841C54f3e723Ae1f3A807260b",
+        "chain_id": 1,
+        "decimals": 18,
+        "symbol": "URUS",
+        "xERC20": "0x21d3a2faA153168C46Ac1428A84BdD859490505F",
+        "lockbox": "0x502f23A530FE2Eaf943ad6a6930eA5b9d36984E8",
+        "lockbox_adapter": "0x0c18d44cfd5e98ff4fecfe8398cb102979b3a6c8"
+      },
+      {
+        "contract_address": "0xc6DdDB5bc6E61e0841C54f3e723Ae1f3A807260b",
+        "chain_id": 56,
+        "decimals": 18,
+        "symbol": "URUS",
+        "xERC20": "0x21d3a2faA153168C46Ac1428A84BdD859490505F",
+        "lockbox": "0x502f23A530FE2Eaf943ad6a6930eA5b9d36984E8",
+        "lockbox_adapter": "0xC65F7B26a7bBa778efD39641C46599bBDBEcCCf7"
+      }
+    ],
+    "color": "#1F3660"
   },
   {
     "id": "space",

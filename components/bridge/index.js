@@ -721,11 +721,11 @@ export default ({ useAssetChain = false }) => {
               xcallParams.to = gateway
             // Source is L2
             } else {
+              const alAsset = xcallParams.asset
+              const nextAlAsset = source_contract_data?.next_asset?.contract_address
+
               // exchange AlAsset into nextAlAsset on origin
               if (xcallParams.asset === source_asset_data?.contracts.find(c => c.chain_id === source_chain_data?.chain_id).contract_address) {
-                const alAsset = xcallParams.asset
-                const nextAlAsset = source_contract_data?.next_asset?.contract_address
-
                 console.log('exchanging alAsset to nextAlAsset')
                 const exchangeData = alAssetInterface.encodeFunctionData('exchangeCanonicalForOld', [nextAlAsset, xcallParams.amount])
                 const exchangeTxRequest = {
@@ -736,24 +736,26 @@ export default ({ useAssetChain = false }) => {
                 }
                 const exchangeTxReceipt = await signer.sendTransaction(exchangeTxRequest)
                 await exchangeTxReceipt.wait()
+              }
 
-                // approve nextAlAsset
-                const approveTxRequest = await sdk.sdkBase.approveIfNeeded(source_domain, nextAlAsset, xcallParams.amount)
-                if (approveTxRequest) {
-                  console.log('approving nextAlAsset')
-                  const approveTxReceipt = await signer.sendTransaction(approveTxRequest)
-                  await approveTxReceipt.wait()
-                }
+              // approve nextAlAsset
+              console.log('checking approve nextAlAsset')
+              const approveTxRequest = await sdk.sdkBase.approveIfNeeded(source_domain, nextAlAsset, xcallParams.amount)
+              if (approveTxRequest) {
+                console.log('approving nextAlAsset')
+                const approveTxReceipt = await signer.sendTransaction(approveTxRequest)
+                await approveTxReceipt.wait()
+              }
 
-                // set xcall asset to nextAlAsset
-                xcallParams.asset = nextAlAsset
+              // set xcall asset to nextAlAsset
+              xcallParams.asset = nextAlAsset
 
-                // Destination is L2
-                if (source_domain in ALCHEMIX_GATEWAYS && destination_domain in ALCHEMIX_GATEWAYS && !receiveLocal) {
-                  // xcall the gateway on destination
-                  xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to]);
-                  xcallParams.to = gateway
-                }
+              // Destination is L2
+              console.log(`receive local: ${receiveLocal}`)
+              if (source_domain in ALCHEMIX_GATEWAYS && destination_domain in ALCHEMIX_GATEWAYS && !receiveLocal) {
+                // xcall the gateway on destination
+                xcallParams.callData = utils.defaultAbiCoder.encode(['address'], [xcallParams.to]);
+                xcallParams.to = gateway
               }
             }
           }
@@ -1157,7 +1159,7 @@ export default ({ useAssetChain = false }) => {
         const source_chain_data = getChainData(source_chain, chains_data)
         const destination_chain_data = getChainData(destination_chain, chains_data)
         const { native_token } = { ...source_chain_data }
-        const { gas_price } = { ...destination_chain_data }
+        const { gas_price, relayer_fee_adjustment } = { ...destination_chain_data }
         let { decimals } = { ...native_token }
         decimals = decimals || 18
 
@@ -1190,6 +1192,9 @@ export default ({ useAssetChain = false }) => {
           let relayerFee = formatUnits(response, decimals)
           if (isNumber(relayerFee)) {
             relayerFee = params.priceIn === 'usd' && price > 0 ? numberToFixed(relayerFee / price, decimals) : relayerFee.toString()
+            if (relayer_fee_adjustment > 1) {
+              relayerFee = numberToFixed(relayerFee * relayer_fee_adjustment, decimals)
+            }
           }
           console.log('[/]', '[relayerFee]', { params, response, relayerFee })
           return { routerFee, relayerFee }
@@ -1335,6 +1340,8 @@ export default ({ useAssetChain = false }) => {
       destination_contract_data = { ...destination_contract_data, contract_address: ZeroAddress, symbol: destination_asset_data.symbol, image: destination_asset_data.image }
     }
   }
+  const isNextAssetOnSource = equalsIgnoreCase(source_contract_data?.contract_address, _source_contract_data?.next_asset?.contract_address)
+  const isNextAssetOnDestination = equalsIgnoreCase(destination_contract_data?.contract_address, _destination_contract_data?.next_asset?.contract_address)
 
   const source_symbol = source_contract_data?.symbol || source_asset_data?.symbol
   const destination_symbol = destination_contract_data?.symbol || destination_asset_data?.symbol
@@ -2190,7 +2197,7 @@ export default ({ useAssetChain = false }) => {
                                     </div>
                                   </div>
                                 )}
-                                {!is_xERC20 && (
+                                {!is_xERC20 && !(isNextAssetOnDestination && destination_chain_data?.is_layer_2 && source_chain_data?.id === 'ethereum') && !(isNextAssetOnSource && !_destination_contract_data?.next_asset && destination_chain_data?.id === 'ethereum') && (
                                   <>
                                     {source !== 'pool' && (
                                       <div className="flex flex-col space-y-0.5">
@@ -2318,10 +2325,10 @@ export default ({ useAssetChain = false }) => {
                                 <div className="whitespace-nowrap text-slate-500 dark:text-slate-500 text-sm 3xl:text-xl font-medium">
                                   Estimated Time
                                 </div>
-                                <Tooltip content={(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) && !is_xERC20 ? 'Unable to leverage fast liquidity. Your transfer will still complete.' : 'Fast transfer enabled by Connext router network.'}>
+                                <Tooltip content={(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false)/* && !is_xERC20*/ ? 'Unable to leverage fast liquidity. Your transfer will still complete.' : 'Fast transfer enabled by Connext router network.'}>
                                   <div className="flex items-center">
                                     <span className="whitespace-nowrap text-sm 3xl:text-xl font-semibold">
-                                      {(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false) && !is_xERC20 ?
+                                      {(Number(amount) > routersLiquidityAmount || forceSlow || estimatedValues?.isFastPath === false)/* && !is_xERC20*/ ?
                                         <span className="text-yellow-500 dark:text-yellow-400">
                                           {'<180 minutes'}
                                         </span> :
